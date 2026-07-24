@@ -753,6 +753,7 @@ defmodule GameServer.Tournaments do
 
         GameServer.Async.run(fn ->
           GameServer.Hooks.internal_call(:after_tournament_match_resolved, [payload])
+          report_winner_quest_event(payload)
         end)
       end
 
@@ -1256,6 +1257,20 @@ defmodule GameServer.Tournaments do
   def match_payload(tournament, match) do
     %{match | tournament: tournament}
     |> Repo.preload([:a_entry, :b_entry])
+  end
+
+  defp report_winner_quest_event(%Match{winner_entry_id: nil}), do: :ok
+
+  defp report_winner_quest_event(%Match{} = match) do
+    winner = Enum.find([match.a_entry, match.b_entry], &(&1 && &1.id == match.winner_entry_id))
+
+    if winner do
+      GameServer.Quests.report_event(winner.leader_id, "match_won", 1, %{
+        "tournament_id" => match.tournament_id
+      })
+    end
+
+    :ok
   end
 
   defp broadcast_tournament(tournament, event) do

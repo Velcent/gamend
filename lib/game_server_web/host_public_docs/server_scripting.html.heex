@@ -190,26 +190,35 @@ GameServer.Realtime.push_to_user(user.id, "quest_progress", %{id: 7, step: 2})</
       </div>
 
       <div class="step">
-        <h4 class="font-semibold">{doc_text("Reacting to achievement unlocks")}</h4>
+        <h4 class="font-semibold">{doc_text("Quest hooks")}</h4>
         <div class="ml-6 mt-2 space-y-2">
           <p>
             {doc_text(
-              "The after_achievement_unlocked/2 hook fires asynchronously whenever a user unlocks an achievement. Use it to reward players with in-game currency, items, or trigger other game logic:"
+              "before_quest_claim/3 can veto a player's claim (return an error tuple to reject; anything else allows — it never rewrites its args, and auto_claim quests skip it). after_quest_completed/1 and after_quest_claimed/1 observe the progress row asynchronously — chain the next quest, feed analytics, or push a custom notification. Report custom gameplay events from any hook with GameServer.Quests.report_event/4:"
             )}
           </p>
           <div class="bg-base-300 p-4 rounded-lg font-mono text-sm">
             <pre><code class="language-elixir" phx-no-curly-interpolation>@impl true
-def after_achievement_unlocked(user_id, achievement) do
-<span class="code-comment"># Grant coins based on achievement metadata</span>
-  user = GameServer.Accounts.get_user(user_id)
-  coins = get_in(user.metadata, ["coins"]) || 0
-  reward = get_in(achievement.metadata, ["coin_reward"]) || 50
+def before_quest_claim(_user_id, quest, _progress) do
+<span class="code-comment"># Example: event quests only claimable while the event runs</span>
+  if quest.kind == "event" and quest.ends_at &&
+       DateTime.compare(DateTime.utc_now(), quest.ends_at) == :gt do
+    {:error, :event_over}
+  else
+    :ok
+  end
+end
 
-  GameServer.Accounts.update_user(user, %{
-    metadata: Map.put(user.metadata || %{}, "coins", coins + reward)
-  })
-
+@impl true
+def after_quest_completed(progress) do
+<span class="code-comment"># Advance your own systems when a quest completes</span>
+  MyGame.Story.on_quest_completed(progress.user_id, progress.quest_key)
   :ok
+end
+
+<span class="code-comment"># From any hook: count a custom event toward matching quests</span>
+def on_enemy_killed(user_id, map) do
+  GameServer.Quests.report_event(user_id, "enemy_killed", 1, %{"map" => map})
 end</code></pre>
           </div>
         </div>

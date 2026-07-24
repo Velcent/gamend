@@ -2779,13 +2779,15 @@ defmodule GameServerWeb.AdminLive.Config do
     "Hooks" => ~w(max_hook_args_size max_hook_args_count)a,
     "KV" => ~w(max_kv_key max_kv_value_size max_kv_entries_per_user)a,
     "Leaderboards" => ~w(max_leaderboard_title max_leaderboard_description max_leaderboard_slug)a,
+    "Quests" =>
+      ~w(max_quests max_quest_key max_quest_title max_quest_description max_objectives_per_quest max_quest_reward_entries max_active_quests_per_user max_quest_period_history)a,
     "Tournaments" =>
       ~w(max_tournament_title max_tournament_description max_tournament_slug max_tournament_entries max_tournament_bracket_size)a,
     "Matchmaking" =>
       ~w(max_matchmaking_players max_matchmaking_params_size matchmaking_timeout_ms matchmaking_tick_ms)a
   }
 
-  @category_order ~w(Global User Groups Lobbies Parties Chat Notifications Friends Hooks KV Leaderboards Tournaments Matchmaking)
+  @category_order ~w(Global User Groups Lobbies Parties Chat Notifications Friends Hooks KV Leaderboards Quests Tournaments Matchmaking)
 
   defp limits_grouped do
     defaults = GameServer.Limits.defaults()

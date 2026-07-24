@@ -301,7 +301,7 @@ current codebase, and the CONTRIBUTING checklist.
 **Phase 1**
 - [Push — server delivery + token storage](docs/specs/push.md) — `push_tokens` +
   `GameServer.Push` fan-out on the Oban `push` queue; FCM + APNs-direct behind
-  one behaviour, routed per token, **no push library**.
+  one behaviour, routed per token, delivered via **Pigeon 2**.
 - [Push — Godot client](docs/specs/push-godot-client.md) — Android (FCM) then iOS
   (native APNs) behind one `GamendPush.gd`, registering to `/me/push-tokens`.
 - [Chat moderation](docs/specs/chat-moderation.md) — word filter + report queue +

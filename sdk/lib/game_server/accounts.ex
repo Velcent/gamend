@@ -1263,6 +1263,27 @@ defmodule GameServer.Accounts do
 
 
   @doc ~S"""
+    Delete a user's stored avatar objects except `keep_key`.
+    
+    Each new avatar gets a fresh random key (`avatars/<user_id>/<rand><ext>`), so
+    without this the previous upload or mirror copy lingers in storage forever.
+    Best-effort: a failed cleanup leaves the old object rather than failing the
+    update that already succeeded.
+    
+  """
+  @spec prune_user_avatars(Ecto.UUID.t(), String.t()) :: :ok
+  def prune_user_avatars(_user_id, _keep_key) do
+    case Application.get_env(:game_server_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        :ok
+
+      _ ->
+        raise "GameServer.Accounts.prune_user_avatars/2 is a stub - only available at runtime on GameServer"
+    end
+  end
+
+
+  @doc ~S"""
     Registers a user.
     
     ## Attributes

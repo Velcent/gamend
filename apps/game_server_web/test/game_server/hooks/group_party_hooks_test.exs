@@ -174,7 +174,6 @@ defmodule GameServer.Hooks.GroupPartyHooksTest do
     @impl true
     def before_kv_get(_key, _opts), do: :public
     @impl true
-    def after_achievement_unlocked(_user_id, _achievement), do: :ok
   end
 
   # ---------------------------------------------------------------------------

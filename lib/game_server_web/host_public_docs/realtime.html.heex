@@ -232,7 +232,9 @@ GamendProto.register_meta_schema("user", MyGamePb.UserMeta)</pre>
                                         chat_message_created,
                                         chat_message_updated,
                                         chat_message_deleted,
-                                        achievement_unlocked,
+                                        quest_progress,
+                                        quest_completed,
+                                        quest_claimed,
                                         group_invite_accepted,
                                         group_invite_cancelled,
                                         group_join_request_approved,
@@ -367,10 +369,10 @@ GamendProto.register_meta_schema("user", MyGamePb.UserMeta)</pre>
               <td class="font-mono" phx-no-curly-interpolation>{id}</td>
             </tr>
             <tr>
-              <td class="font-mono">achievement_unlocked</td>
-              <td>{doc_text("Achievement fully unlocked")}</td>
+              <td class="font-mono">quest_progress / quest_completed / quest_claimed</td>
+              <td>{doc_text("A quest objective advanced / completed / rewards claimed")}</td>
               <td class="font-mono" phx-no-curly-interpolation>
-                {id, user_id, achievement_id, progress, unlocked_at, metadata, inserted_at, updated_at}
+                {id, user_id, quest_key, period_key, objective_progress, status, completed_at, claimed_at, metadata, inserted_at, updated_at}
               </td>
             </tr>
             <tr>
@@ -918,29 +920,27 @@ GamendProto.register_meta_schema("user", MyGamePb.UserMeta)</pre>
         )}
       </p>
 
-      <h3 class="font-semibold mt-3">{doc_text("Achievement Notifications")}</h3>
+      <h3 class="font-semibold mt-3">{doc_text("Quest Completion Notifications")}</h3>
       <p class="text-sm text-base-content/80">
-        {doc_text("When a user unlocks an achievement, a notification is automatically created:")}
+        {doc_text("When a user completes a quest, a notification is automatically created:")}
       </p>
       <ul class="list-disc pl-6 text-sm space-y-1 text-base-content/80">
         <li>
           <strong>{doc_text("Title:")}</strong>
-          {doc_text("\"Achievement Unlocked\"")}
-        </li>
-        <li>
-          <strong>{doc_text("Content:")}</strong>
-          {doc_text("The achievement's title")}
+          {doc_text(
+            "\"Quest completed: <title>\" (\"Achievement unlocked: <title>\" for achievement-kind quests)"
+          )}
         </li>
         <li>
           <strong>{doc_text("Metadata:")}</strong>
           <code class="font-mono text-xs" phx-no-curly-interpolation>
-            {type: "achievement_unlocked", achievement_id, achievement_slug}
+            {type: "quest_completed", quest_key, kind, quest_title}
           </code>
         </li>
       </ul>
       <p class="text-sm text-base-content/80">
         {doc_text(
-          "Progress increments do not generate notifications — only the final unlock does. The notification is a self-notification (sender = recipient) since it is system-generated."
+          "Progress increments do not generate notifications — only completion does. The notification is a self-notification (sender = recipient) since it is system-generated."
         )}
       </p>
     </div>

@@ -18,7 +18,7 @@ defmodule GameServerWeb.Api.V1.PublicListingGatesTest do
     "LIST_LOBBIES_ENABLED",
     "LIST_GROUPS_ENABLED",
     "LIST_LEADERBOARDS_ENABLED",
-    "LIST_ACHIEVEMENTS_ENABLED",
+    "LIST_QUESTS_ENABLED",
     "LIST_MATCHMAKING_ENABLED"
   ]
 
@@ -104,30 +104,30 @@ defmodule GameServerWeb.Api.V1.PublicListingGatesTest do
     end
   end
 
-  describe "LIST_ACHIEVEMENTS_ENABLED=false" do
-    test "public achievement endpoints return 404", %{conn: conn} do
-      disable("LIST_ACHIEVEMENTS_ENABLED")
+  describe "LIST_QUESTS_ENABLED=false" do
+    test "public quest endpoints return 404", %{conn: conn} do
+      disable("LIST_QUESTS_ENABLED")
 
-      assert conn |> get("/api/v1/achievements") |> response(404)
-      assert conn |> get("/api/v1/achievements/some-slug") |> response(404)
+      assert conn |> get("/api/v1/quests") |> response(404)
+      assert conn |> get("/api/v1/quests/user/#{Ecto.UUID.generate()}") |> response(404)
     end
   end
 
   describe "browser list pages honor the same flags" do
-    test "/groups, /leaderboards, /achievements 404 when disabled", %{conn: conn} do
+    test "/groups, /leaderboards, /quests 404 when disabled", %{conn: conn} do
       disable("LIST_GROUPS_ENABLED")
       disable("LIST_LEADERBOARDS_ENABLED")
-      disable("LIST_ACHIEVEMENTS_ENABLED")
+      disable("LIST_QUESTS_ENABLED")
 
       assert_error_sent 404, fn -> get(conn, "/groups") end
       assert_error_sent 404, fn -> get(conn, "/leaderboards") end
-      assert_error_sent 404, fn -> get(conn, "/achievements") end
+      assert_error_sent 404, fn -> get(conn, "/quests") end
     end
 
     test "pages render when flags are unset", %{conn: conn} do
       assert conn |> get("/groups") |> html_response(200)
       assert conn |> get("/leaderboards") |> html_response(200)
-      assert conn |> get("/achievements") |> html_response(200)
+      assert conn |> get("/quests") |> html_response(200)
     end
   end
 

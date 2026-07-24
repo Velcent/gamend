@@ -448,13 +448,20 @@ defmodule GameServerWeb.UserChannel do
   end
 
   @impl true
-  def handle_info({:achievement_unlocked, user_achievement}, socket) do
-    push_event(
-      socket,
-      "achievement_unlocked",
-      Serializers.serialize_user_achievement(user_achievement)
-    )
+  def handle_info({:quest_progress, progress}, socket) do
+    push_event(socket, "quest_progress", Serializers.serialize_quest_progress(progress))
+    {:noreply, socket}
+  end
 
+  @impl true
+  def handle_info({:quest_completed, progress}, socket) do
+    push_event(socket, "quest_completed", Serializers.serialize_quest_progress(progress))
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info({:quest_claimed, progress}, socket) do
+    push_event(socket, "quest_claimed", Serializers.serialize_quest_progress(progress))
     {:noreply, socket}
   end
 

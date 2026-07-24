@@ -493,8 +493,8 @@ defmodule GameServerWeb.HostLayouts do
             "icon" => "hero-chart-bar-solid"
           },
           %{
-            "label" => translate("Achievements"),
-            "href" => "/achievements",
+            "label" => translate("Quests"),
+            "href" => "/quests",
             "icon" => "hero-trophy-solid"
           },
           %{

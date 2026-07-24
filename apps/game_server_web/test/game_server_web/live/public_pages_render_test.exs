@@ -12,9 +12,9 @@ defmodule GameServerWeb.PublicPagesRenderTest do
       assert html =~ "Leaderboards"
     end
 
-    test "GET /achievements renders", %{conn: conn} do
-      {:ok, _view, html} = live(conn, ~p"/achievements")
-      assert html =~ "Achievements"
+    test "GET /quests renders", %{conn: conn} do
+      {:ok, _view, html} = live(conn, ~p"/quests")
+      assert html =~ "Quests"
     end
 
     test "GET /groups renders", %{conn: conn} do
@@ -46,9 +46,9 @@ defmodule GameServerWeb.PublicPagesRenderTest do
       assert html =~ "Leaderboards"
     end
 
-    test "GET /achievements renders when logged in", %{conn: conn} do
-      {:ok, _view, html} = live(conn, ~p"/achievements")
-      assert html =~ "Achievements"
+    test "GET /quests renders when logged in", %{conn: conn} do
+      {:ok, _view, html} = live(conn, ~p"/quests")
+      assert html =~ "Quests"
     end
 
     test "GET /groups renders when logged in", %{conn: conn} do

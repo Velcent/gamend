@@ -58,17 +58,20 @@ defmodule GameServerWeb.Serializers do
     )
   end
 
-  @spec serialize_user_achievement(term()) :: map()
-  def serialize_user_achievement(user_achievement) do
+  @spec serialize_quest_progress(term()) :: map()
+  def serialize_quest_progress(progress) do
     %{
-      id: user_achievement.id,
-      user_id: user_achievement.user_id,
-      achievement_id: user_achievement.achievement_id,
-      progress: user_achievement.progress,
-      unlocked_at: user_achievement.unlocked_at,
-      metadata: user_achievement.metadata || %{},
-      inserted_at: user_achievement.inserted_at,
-      updated_at: user_achievement.updated_at
+      id: progress.id,
+      user_id: progress.user_id,
+      quest_key: progress.quest_key,
+      period_key: progress.period_key,
+      objective_progress: progress.objective_progress,
+      status: progress.status,
+      completed_at: progress.completed_at,
+      claimed_at: progress.claimed_at,
+      metadata: progress.metadata || %{},
+      inserted_at: progress.inserted_at,
+      updated_at: progress.updated_at
     }
   end
 

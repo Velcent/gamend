@@ -1795,6 +1795,7 @@ defmodule GameServer.Accounts do
 
         GameServer.Async.run(fn ->
           GameServer.Hooks.internal_call(:after_user_logged_in, [user])
+          GameServer.Quests.report_event(user.id, "login")
         end)
 
         {:ok, {user, []}}
@@ -1814,6 +1815,7 @@ defmodule GameServer.Accounts do
       {:ok, {user, _tokens}} = ok ->
         GameServer.Async.run(fn ->
           GameServer.Hooks.internal_call(:after_user_logged_in, [user])
+          GameServer.Quests.report_event(user.id, "login")
         end)
 
         ok

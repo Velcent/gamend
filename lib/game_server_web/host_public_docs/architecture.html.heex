@@ -73,8 +73,8 @@
   │  │                                                        │ │
   │  │  Accounts  │  Lobbies       │  Parties  │  Friends     │ │
   │  │  Groups    │  Leaderboards  │  Notifications           │ │
-  │  │  Achievements │ Chat        │  Hooks (server scripting)│ │
-  │  │  KV Storage                                            │ │
+  │  │  Quests (incl. achievements)  │ Chat  │  Economy       │ │
+  │  │  KV Storage │ Hooks (server scripting)                 │ │
   │  │                                                        │ │
   │  └──────────┬─────────────────────┬───────────────────────┘ │
   │             │                     │                         │
@@ -137,8 +137,9 @@
   Chat module      ──────►  "chat:party:{id}"            ──►  PartyChannel
   Chat module      ──────►  "chat:friend:{lo}:{hi}"      ──►  UserChannel
                             + "user:{id}" (friend DMs)
-  Achievements     ──────►  "user:{id}"                  ──►  UserChannel, LiveViews
-  Achievements     ──────►  "achievements"               ──►  Admin LiveViews
+  Quests module    ──────►  "user:{id}"                  ──►  UserChannel, LiveViews
+                            (quest_progress/completed/claimed)
+  Quests module    ──────►  "quests"                     ──►  Admin LiveViews
   KV module        ──────►  "kv:{scope}:{key}"           ──►  UserChannel (kv:subscribe)
   Tournaments      ──────►  "tournaments:user:{id}"      ──►  UserChannel
   Payments module  ──────►  "user:{id}"                  ──►  LiveViews (purchases/entitlements)</pre>
@@ -181,8 +182,9 @@
              │
              ├──── chat_read_cursors (unread tracking)
              │
-             ├──── user_achievements ──► achievements
-             │       (progress, unlocked_at)
+             ├──── quest_progress ──────► quests
+             │       (per period_key; achievements are
+             │        kind "achievement" quests)
              │
              ├──── tournament_entries ──► tournaments
              │       (leader_id, seed,        ├── tournament_brackets

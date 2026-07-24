@@ -205,8 +205,8 @@ defmodule GameServerWeb.NotificationsLive do
   defp action_for_type("friend_request", _n),
     do: {gettext("View"), ~p"/users/settings?#{[tab: "friends"]}"}
 
-  defp action_for_type("achievement_unlocked", _n),
-    do: {gettext("View"), ~p"/achievements"}
+  defp action_for_type("quest_completed", _n),
+    do: {gettext("View"), ~p"/quests"}
 
   defp action_for_type("chat_group", n) do
     group_id = n.metadata["group_id"]
@@ -280,9 +280,14 @@ defmodule GameServerWeb.NotificationsLive do
 
   defp title_for_type("chat_party", _n), do: dgettext("notifications", "New message in party")
 
-  defp title_for_type("achievement_unlocked", n) do
-    name = n.metadata["achievement_title"] || ""
-    dgettext("notifications", "Achievement Unlocked: %{name}", name: name)
+  defp title_for_type("quest_completed", n) do
+    name = n.metadata["quest_title"] || ""
+
+    if n.metadata["kind"] == "achievement" do
+      dgettext("notifications", "Achievement Unlocked: %{name}", name: name)
+    else
+      dgettext("notifications", "Quest completed: %{name}", name: name)
+    end
   end
 
   defp title_for_type("chat_group", n) do

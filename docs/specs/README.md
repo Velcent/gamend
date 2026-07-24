@@ -11,7 +11,7 @@ has shipped.
 
 - [push.md](push.md) — **Push: server delivery + token storage.** `push_tokens`
   table + `GameServer.Push` fan-out on the Oban `push` queue. FCM + APNs-direct
-  behind one behaviour, routed per token, **no push library**.
+  behind one behaviour, routed per token, delivered via **Pigeon 2**.
 - [push-godot-client.md](push-godot-client.md) — **Push: Godot client.** The
   client half — Android (FCM plugin) then iOS (native APNs plugin) behind one
   `GamendPush.gd` API; registers against the server's `/me/push-tokens`.
@@ -33,7 +33,7 @@ has shipped.
 
 - [quests-progression.md](quests-progression.md) — **Quests / progression.** One
   event-driven engine; achievements fold in as a quest kind; rewards pay into the
-  economy exactly-once.
+  economy exactly-once. **Shipped July 2026.**
 - [webhooks-remote-config.md](webhooks-remote-config.md) — **Webhooks + remote
   config.** Signed, retried outbound webhooks on the Oban `webhooks` queue;
   client-read-only live remote config.

@@ -71,7 +71,9 @@ defmodule GameServer.Retention do
       oauth_sessions: prune_older_than(GameServer.OAuthSession, @oauth_session_ttl_days),
       expired_ip_bans: prune_expired_ip_bans(),
       lobby_snapshots: prune_lobby_snapshots(),
-      lobby_snapshot_blobs: prune_lobby_snapshot_blobs()
+      lobby_snapshot_blobs: prune_lobby_snapshot_blobs(),
+      quest_periods: GameServer.Quests.prune_old_periods(),
+      quest_reward_recoveries: GameServer.Quests.recover_pending_rewards()
     }
 
     pruned = results |> Map.values() |> Enum.sum()

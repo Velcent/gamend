@@ -85,7 +85,7 @@ defmodule GameServerWeb.Api.V1.ApiPermissionsTest do
       {:post, "/api/v1/chat/read"},
       {:get, "/api/v1/chat/unread"},
       # Achievements (auth)
-      {:get, "/api/v1/achievements/me"},
+      {:get, "/api/v1/me/quests"},
       # Provider
       {:delete, "/api/v1/me/providers/google"},
       {:post, "/api/v1/me/device"},
@@ -130,8 +130,8 @@ defmodule GameServerWeb.Api.V1.ApiPermissionsTest do
       # Chat Admin
       {:get, "/api/v1/admin/chat"},
       # Achievements Admin
-      {:get, "/api/v1/admin/achievements"},
-      {:post, "/api/v1/admin/achievements"}
+      {:get, "/api/v1/admin/quests"},
+      {:post, "/api/v1/admin/quests"}
     ]
 
     for {method, path} <- @admin_endpoints do
@@ -173,7 +173,7 @@ defmodule GameServerWeb.Api.V1.ApiPermissionsTest do
       {:get, "/api/v1/lobbies"},
       {:get, "/api/v1/leaderboards"},
       {:get, "/api/v1/groups"},
-      {:get, "/api/v1/achievements"}
+      {:get, "/api/v1/quests"}
     ]
 
     for {method, path} <- @public_endpoints do

@@ -19,7 +19,6 @@ defmodule GameServer.Modules.ExampleHook do
   require Logger
 
   alias GameServer.Accounts
-  alias GameServer.Achievements
   alias GameServer.Groups
   alias GameServer.Hooks
   alias GameServer.KV
@@ -32,7 +31,7 @@ defmodule GameServer.Modules.ExampleHook do
   # ignore leaderboards/tournaments belonging to the rest of the game.
   @login_leaderboard "example_login_count"
   @tournament_slug "example-weekly-cup"
-  @achievement_slug "example_first_login"
+  @first_login_quest "example_first_login"
   @group_title "Example Guild"
   @welcome_kv_key "example_welcome"
 
@@ -45,7 +44,7 @@ defmodule GameServer.Modules.ExampleHook do
     # groups need a creator and there may be no users yet at boot.
     ensure_login_leaderboard()
     ensure_weekly_cup()
-    ensure_achievement()
+    ensure_first_login_quest()
     ensure_welcome_kv()
 
     [
@@ -92,21 +91,22 @@ defmodule GameServer.Modules.ExampleHook do
       board -> Leaderboards.submit_score(board.id, user.id, 1)
     end
 
-    # Unlocking is idempotent, so re-logins keep the original unlock time.
-    Achievements.unlock_achievement(user.id, @achievement_slug)
-
     :ok
   end
 
-  # ── Sample achievement: unlocked the first time a player logs in ──────────
+  # ── Sample quest: an achievement earned on first login ────────────────────
+  # The core wires the "login" event into the quest engine, so no unlock
+  # call is needed anywhere — defining the quest is enough.
 
-  defp ensure_achievement do
-    if is_nil(Achievements.get_achievement_by_slug(@achievement_slug)) do
-      Achievements.create_achievement(%{
-        slug: @achievement_slug,
+  defp ensure_first_login_quest do
+    if is_nil(GameServer.Quests.get_quest_by_key(@first_login_quest)) do
+      GameServer.Quests.create_quest(%{
+        key: @first_login_quest,
         title: "Welcome aboard",
         description: "Log in for the first time.",
-        progress_target: 1
+        kind: "achievement",
+        auto_claim: true,
+        objectives: [%{event: "login", target: 1}]
       })
     end
 

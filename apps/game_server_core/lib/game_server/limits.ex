@@ -99,6 +99,19 @@ defmodule GameServer.Limits do
     max_tournament_entries: 10_000,
     max_tournament_bracket_size: 256,
 
+    # ── Quests ──────────────────────────────────────────────
+    max_quests: 500,
+    max_quest_key: 100,
+    max_quest_title: 255,
+    max_quest_description: 1_000,
+    max_objectives_per_quest: 10,
+    max_quest_reward_entries: 10,
+    # Progress rows a single user may hold in the current periods; excess
+    # events are ignored rather than erroring.
+    max_active_quests_per_user: 200,
+    # Days of daily/weekly period history kept before the retention prune.
+    max_quest_period_history: 90,
+
     # ── Matchmaking ─────────────────────────────────────────
     # Hard cap on a ticket's own max_players setting.
     max_matchmaking_players: 64,

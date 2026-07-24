@@ -2,7 +2,7 @@
 
 # Gamend
 
-**Open source Elixir game server with authentication, users, lobbies, groups, parties, friends, chat, notifications, achievements, leaderboards, tournaments, payments, server scripting and an admin portal with HTTP, WebSocket, and WebRTC support and SDK for JS and Godot.**
+**Open source Elixir game server with authentication, users, lobbies, groups, parties, friends, chat, notifications, quests, leaderboards, tournaments, payments, server scripting and an admin portal with HTTP, WebSocket, and WebRTC support and SDK for JS and Godot.**
 
 Game + Backend = Gamend
 
@@ -18,11 +18,11 @@ Game + Backend = Gamend
 - **Friends** — Requests, accept/reject, blocking
 - **Chat** — Lobby, group, party, and friend DMs with read cursors and unread counts
 - **Notifications** — Typed notifications for all social events, read/unread, real-time delivery
-- **Achievements** — Progress tracking, hidden achievements, unlock percentage (rarity), admin management
+- **Quests / Progression** — One event-driven engine: achievements (permanent quests), daily/weekly quests, event windows, chains; exactly-once rewards into the economy
 - **Leaderboards** — Global and per-user rankings
 - **Payments** — Stripe Checkout, Google Play, App Store, and Steam provider flows with receipt validation, webhooks, entitlements, refunds, and admin tools
 - **Key-Value Store** — Server-side key-value storage with access control hooks
-- **Server Scripting** — Elixir hooks on server events (login, lobby created, achievement unlocked, etc.)
+- **Server Scripting** — Elixir hooks on server events (login, lobby created, quest completed, etc.)
 - **Background Jobs** — Durable, retryable background and scheduled (cron) jobs from server hooks, on Postgres or SQLite
 - **Economy & Inventory** — Virtual-currency wallets (`gold`, `gems`, …) with an atomic, auditable ledger, plus item stacks (`health_potion`, …); server-authoritative grant/spend/consume with live balance updates
 - **Object Storage** — Avatar/UGC uploads with a pluggable backend: local disk or any S3-compatible service (AWS S3, Cloudflare R2, MinIO, …)

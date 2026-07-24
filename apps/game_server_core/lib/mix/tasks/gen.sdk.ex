@@ -17,7 +17,7 @@ defmodule Mix.Tasks.Gen.Sdk do
 
   @sdk_modules [
     {GameServer.Accounts, "accounts.ex"},
-    {GameServer.Achievements, "achievements.ex"},
+    {GameServer.Quests, "quests.ex"},
     {GameServer.Lobbies, "lobbies.ex"},
     {GameServer.Leaderboards, "leaderboards.ex"},
     {GameServer.Friends, "friends.ex"},
@@ -287,6 +287,14 @@ defmodule Mix.Tasks.Gen.Sdk do
        "{:ok, #{tournament_entry_placeholder_expr()}}"},
       {fn rt -> String.contains?(rt, "{:ok, GameServer.Tournaments.Match.t()}") end,
        "{:ok, #{tournament_match_placeholder_expr()}}"},
+      {fn rt -> String.contains?(rt, "{:ok, GameServer.Quests.Quest.t()}") end,
+       "{:ok, #{quest_placeholder_expr()}}"},
+      {fn rt -> String.contains?(rt, "{:ok, GameServer.Quests.QuestProgress.t()}") end,
+       "{:ok, #{quest_progress_placeholder_expr()}}"},
+      {fn rt -> String.contains?(rt, "{:ok, [GameServer.Quests.QuestProgress.t()]}") end,
+       "{:ok, []}"},
+      {fn rt -> String.contains?(rt, "%{progress: GameServer.Quests.QuestProgress.t()") end,
+       "{:ok, %{progress: #{quest_progress_placeholder_expr()}, rewards: []}}"},
 
       # For unions like `T | nil`, prefer a non-nil placeholder when we recognize T.
       # This keeps stub bodies type-friendly for external type checkers that infer from code.
@@ -330,6 +338,14 @@ defmodule Mix.Tasks.Gen.Sdk do
            String.contains?(rt, "| nil")
        end,
        "if :erlang.phash2(make_ref(), 2) == 0, do: nil, else: #{tournament_bracket_placeholder_expr()}"},
+      {fn rt ->
+         String.contains?(rt, "GameServer.Quests.Quest.t()") and String.contains?(rt, "| nil")
+       end, "if :erlang.phash2(make_ref(), 2) == 0, do: nil, else: #{quest_placeholder_expr()}"},
+      {fn rt ->
+         String.contains?(rt, "GameServer.Quests.QuestProgress.t()") and
+           String.contains?(rt, "| nil")
+       end,
+       "if :erlang.phash2(make_ref(), 2) == 0, do: nil, else: #{quest_progress_placeholder_expr()}"},
       {fn rt -> friendship_struct_return?(rt) end, friendship_placeholder_expr()},
 
       # Fallback: if the return type allows nil and we can't infer a better placeholder, use nil.
@@ -463,6 +479,18 @@ defmodule Mix.Tasks.Gen.Sdk do
     dt = dt_placeholder_expr()
 
     "%GameServer.Tournaments.Bracket{id: \"\", tournament_id: \"\", index: 0, size: 8, inserted_at: #{dt}}"
+  end
+
+  defp quest_placeholder_expr do
+    dt = dt_placeholder_expr()
+
+    "%GameServer.Quests.Quest{id: \"\", key: \"\", title: \"\", description: \"\", icon_url: nil, sort_order: 0, hidden: false, kind: \"achievement\", objectives: [], rewards: [], auto_claim: false, prerequisite_quest_key: nil, starts_at: nil, ends_at: nil, active: true, metadata: %{}, inserted_at: #{dt}, updated_at: #{dt}}"
+  end
+
+  defp quest_progress_placeholder_expr do
+    dt = dt_placeholder_expr()
+
+    "%GameServer.Quests.QuestProgress{id: \"\", user_id: \"\", quest_key: \"\", period_key: \"static\", objective_progress: %{}, status: \"active\", completed_at: nil, claimed_at: nil, rewards_granted_at: nil, metadata: %{}, inserted_at: #{dt}, updated_at: #{dt}}"
   end
 
   defp record_placeholder_expr do

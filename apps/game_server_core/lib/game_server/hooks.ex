@@ -13,7 +13,6 @@ defmodule GameServer.Hooks do
   """
 
   alias GameServer.Accounts.User
-  alias GameServer.Achievements.Achievement
   alias GameServer.Chat.Message
   alias GameServer.Groups.Group
   alias GameServer.Hooks.Default, as: Default
@@ -148,8 +147,21 @@ defmodule GameServer.Hooks do
   @callback before_party_kick(User.t(), User.t(), Party.t()) ::
               hook_result({User.t(), User.t(), Party.t()})
 
-  # Achievement lifecycle hooks
-  @callback after_achievement_unlocked(String.t(), Achievement.t()) :: any()
+  # Quest lifecycle hooks. `before_quest_claim` is veto-only: return
+  # `{:error, reason}` to reject the claim, anything else allows — the return
+  # never rewrites the args. Auto-claim quests skip it (there is no player
+  # request to veto). Achievements are quests of `kind: "achievement"`;
+  # branch on `progress.quest_key` / the quest's kind in these hooks.
+  @callback before_quest_claim(
+              String.t(),
+              GameServer.Quests.Quest.t(),
+              GameServer.Quests.QuestProgress.t()
+            ) :: hook_result(term())
+  @callback after_quest_completed(GameServer.Quests.QuestProgress.t()) :: any()
+  @callback after_quest_claimed(GameServer.Quests.QuestProgress.t()) :: any()
+  @optional_callbacks before_quest_claim: 3,
+                      after_quest_completed: 1,
+                      after_quest_claimed: 1
 
   # Leaderboard lifecycle hooks
   @callback after_score_submitted(GameServer.Leaderboards.Record.t()) :: any()
@@ -484,7 +496,9 @@ defmodule GameServer.Hooks do
       :before_lobby_kick,
       :after_lobby_kick,
       :after_lobby_host_change,
-      :after_achievement_unlocked,
+      :before_quest_claim,
+      :after_quest_completed,
+      :after_quest_claimed,
       :after_score_submitted,
       :before_matchmaking_join,
       :after_matchmaking_join,
@@ -557,7 +571,8 @@ defmodule GameServer.Hooks do
       :before_matchmaking_join,
       :before_tournament_register,
       :before_tournament_leave,
-      :before_tournament_result
+      :before_tournament_result,
+      :before_quest_claim
     ] and arity > 0
   end
 
@@ -699,13 +714,14 @@ defmodule GameServer.Hooks do
     end
   end
 
-  # Veto-only tournament pipelines: the hook allows or rejects; whatever it
+  # Veto-only pipelines: the hook allows or rejects; whatever it
   # returns never rewrites the pipeline args.
   defp normalize_pipeline_args(name, _value, current_args)
        when name in [
               :before_tournament_register,
               :before_tournament_leave,
-              :before_tournament_result
+              :before_tournament_result,
+              :before_quest_claim
             ] and is_list(current_args) do
     {:ok, current_args}
   end
@@ -1400,7 +1416,13 @@ defmodule GameServer.Hooks.Default do
   def before_kv_get(_key, _opts), do: :public
 
   @impl true
-  def after_achievement_unlocked(_user_id, _achievement), do: :ok
+  def before_quest_claim(_user_id, _quest, _progress), do: :ok
+
+  @impl true
+  def after_quest_completed(_progress), do: :ok
+
+  @impl true
+  def after_quest_claimed(_progress), do: :ok
 
   @impl true
   def after_score_submitted(_record), do: :ok

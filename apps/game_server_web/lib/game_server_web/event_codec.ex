@@ -54,7 +54,9 @@ defmodule GameServerWeb.EventCodec do
   defp message_for(_, "chat_message_created", p), do: chat_message(p)
   defp message_for(_, "chat_message_updated", p), do: chat_message(p)
   defp message_for(_, "chat_message_deleted", p), do: %PB.EntityId{id: get(p, :id)}
-  defp message_for(_, "achievement_unlocked", p), do: user_achievement(p)
+  defp message_for(_, "quest_progress", p), do: quest_progress(p)
+  defp message_for(_, "quest_completed", p), do: quest_progress(p)
+  defp message_for(_, "quest_claimed", p), do: quest_progress(p)
 
   defp message_for("lobby", "updated", p), do: lobby(p)
 
@@ -230,13 +232,16 @@ defmodule GameServerWeb.EventCodec do
     }
   end
 
-  defp user_achievement(p) do
-    %PB.UserAchievement{
+  defp quest_progress(p) do
+    %PB.QuestProgress{
       id: get(p, :id),
       user_id: get(p, :user_id),
-      achievement_id: get(p, :achievement_id),
-      progress: get(p, :progress) || 0,
-      unlocked_at_ms: ms(p, :unlocked_at),
+      quest_key: get(p, :quest_key),
+      period_key: get(p, :period_key),
+      objective_progress: get(p, :objective_progress) || %{},
+      status: get(p, :status),
+      completed_at_ms: ms(p, :completed_at),
+      claimed_at_ms: ms(p, :claimed_at),
       metadata_json: json_bytes(p, :metadata) || "",
       inserted_at_ms: ms(p, :inserted_at) || 0,
       updated_at_ms: ms(p, :updated_at) || 0

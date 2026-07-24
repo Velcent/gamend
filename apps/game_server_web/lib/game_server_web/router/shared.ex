@@ -125,8 +125,8 @@ defmodule GameServerWeb.Router.Shared do
         plug GameServerWeb.Plugs.FeatureGate, env: "LIST_LEADERBOARDS_ENABLED", default: true
       end
 
-      pipeline :list_achievements_gate do
-        plug GameServerWeb.Plugs.FeatureGate, env: "LIST_ACHIEVEMENTS_ENABLED", default: true
+      pipeline :list_quests_gate do
+        plug GameServerWeb.Plugs.FeatureGate, env: "LIST_QUESTS_ENABLED", default: true
       end
 
       pipeline :list_matchmaking_gate do
@@ -164,7 +164,7 @@ defmodule GameServerWeb.Router.Shared do
     quote do
       game_server_api_docs_routes()
       game_server_public_api_routes()
-      game_server_achievement_api_routes()
+      game_server_quest_api_routes()
       game_server_group_api_routes()
       game_server_kv_api_routes()
       game_server_account_lobby_api_routes()
@@ -289,20 +289,20 @@ defmodule GameServerWeb.Router.Shared do
     end
   end
 
-  defmacro game_server_achievement_api_routes do
+  defmacro game_server_quest_api_routes do
     quote do
       scope "/api/v1", GameServerWeb.Api.V1, as: :api_v1 do
         pipe_through [:api, :api_auth]
 
-        get "/achievements/me", AchievementController, :me
+        get "/me/quests", QuestController, :me
+        post "/me/quests/:key/claim", QuestController, :claim
       end
 
       scope "/api/v1", GameServerWeb.Api.V1, as: :api_v1 do
-        pipe_through [:api, :api_optional_auth, :list_achievements_gate]
+        pipe_through [:api, :api_optional_auth, :list_quests_gate]
 
-        get "/achievements", AchievementController, :index
-        get "/achievements/user/:user_id", AchievementController, :user_achievements
-        get "/achievements/:slug", AchievementController, :show
+        get "/quests", QuestController, :index
+        get "/quests/user/:user_id", QuestController, :user_quests
       end
     end
   end
@@ -465,7 +465,7 @@ defmodule GameServerWeb.Router.Shared do
     quote do
       game_server_admin_kv_leaderboard_api_routes()
       game_server_admin_management_api_routes()
-      game_server_admin_chat_achievement_api_routes()
+      game_server_admin_chat_quest_api_routes()
     end
   end
 
@@ -542,7 +542,7 @@ defmodule GameServerWeb.Router.Shared do
     end
   end
 
-  defmacro game_server_admin_chat_achievement_api_routes do
+  defmacro game_server_admin_chat_quest_api_routes do
     quote do
       scope "/api/v1/admin", GameServerWeb.Api.V1.Admin, as: :api_v1_admin do
         pipe_through [:api, :api_auth, :api_admin]
@@ -550,14 +550,15 @@ defmodule GameServerWeb.Router.Shared do
         get "/chat", ChatController, :index
         delete "/chat/:id", ChatController, :delete
         delete "/chat/conversation", ChatController, :delete_conversation
-        get "/achievements", AchievementController, :index
-        post "/achievements", AchievementController, :create
-        patch "/achievements/:id", AchievementController, :update
-        delete "/achievements/:id", AchievementController, :delete
-        post "/achievements/grant", AchievementController, :grant
-        post "/achievements/revoke", AchievementController, :revoke
-        post "/achievements/unlock", AchievementController, :unlock
-        post "/achievements/increment", AchievementController, :increment
+        get "/quests", QuestController, :index
+        post "/quests", QuestController, :create
+        patch "/quests/:id", QuestController, :update
+        delete "/quests/:id", QuestController, :delete
+        get "/quests/progress", QuestController, :progress
+        post "/quests/grant", QuestController, :grant
+        post "/quests/reset", QuestController, :reset
+        post "/quests/claim", QuestController, :claim
+        get "/quests/:key/funnel", QuestController, :funnel
       end
     end
   end
@@ -648,7 +649,7 @@ defmodule GameServerWeb.Router.Shared do
           live "/admin/parties", AdminLive.Parties, :index
           live "/admin/blacklist", AdminLive.Blacklist, :index
           live "/admin/chat", AdminLive.Chat, :index
-          live "/admin/achievements", AdminLive.Achievements, :index
+          live "/admin/quests", AdminLive.Quests, :index
           live "/admin/payments", AdminLive.Payments, :index
           live "/admin/translations", AdminLive.Translations, :index
           live "/admin/connections", AdminLive.Connections, :index
@@ -709,7 +710,7 @@ defmodule GameServerWeb.Router.Shared do
           live "/users/register", UserLive.Registration, :new
           live "/groups", GroupsLive, :index
           live "/groups/:id", GroupsLive, :show
-          live "/achievements", AchievementsLive, :index
+          live "/quests", QuestsLive, :index
           live "/tournaments", TournamentsLive, :index
           # Slug-first for SEO; older editions get a stable 1-based number.
           # A UUID still resolves in the :slug position, so old links keep working.

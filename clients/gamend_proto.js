@@ -241,11 +241,16 @@ const anyTopic = {
   chat_message_created: (bin) => decodeChat(bin),
   chat_message_updated: (bin) => decodeChat(bin),
   chat_message_deleted: (bin) => PB.EntityId.toObject(PB.EntityId.decode(bin)),
-  achievement_unlocked: (bin) =>
-    withParsedJson(
-      PB.UserAchievement.toObject(PB.UserAchievement.decode(bin), { defaults: true, longs: Number }),
-      [['metadata_json', 'metadata']]
-    ),
+  quest_progress: (bin) => decodeQuestProgress(bin),
+  quest_completed: (bin) => decodeQuestProgress(bin),
+  quest_claimed: (bin) => decodeQuestProgress(bin),
+}
+
+function decodeQuestProgress(bin) {
+  return withParsedJson(
+    PB.QuestProgress.toObject(PB.QuestProgress.decode(bin), { defaults: true, longs: Number }),
+    [['metadata_json', 'metadata']]
+  )
 }
 
 function decodeKv(bin) {

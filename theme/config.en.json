@@ -254,8 +254,8 @@
             "icon": "hero-chart-bar-solid"
           },
           {
-            "label": "Achievements",
-            "href": "/achievements",
+            "label": "Quests",
+            "href": "/quests",
             "icon": "hero-trophy-solid"
           },
           {

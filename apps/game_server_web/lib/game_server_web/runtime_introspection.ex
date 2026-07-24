@@ -65,7 +65,7 @@ defmodule GameServerWeb.RuntimeIntrospection do
 
   # Order categories appear in, grouped views included. A hook maps to the first
   # match, so specific keywords come before generic ones.
-  @hook_group_order ~w(Lifecycle User Lobby Group Party Chat Achievement Leaderboard Tournament Matchmaking Payments Economy KV Other)
+  @hook_group_order ~w(Lifecycle User Lobby Group Party Chat Quest Leaderboard Tournament Matchmaking Payments Economy KV Other)
 
   @doc "Category a hook belongs to, derived from its name (not source position)."
   @spec hook_group(String.t()) :: String.t()
@@ -74,7 +74,7 @@ defmodule GameServerWeb.RuntimeIntrospection do
       name in ~w(after_startup before_stop on_custom_hook) -> "Lifecycle"
       String.contains?(name, "kv") -> "KV"
       String.contains?(name, "chat") -> "Chat"
-      String.contains?(name, "achievement") -> "Achievement"
+      String.contains?(name, "quest") -> "Quest"
       String.contains?(name, "score") -> "Leaderboard"
       String.contains?(name, "matchmaking") -> "Matchmaking"
       String.contains?(name, "tournament") -> "Tournament"

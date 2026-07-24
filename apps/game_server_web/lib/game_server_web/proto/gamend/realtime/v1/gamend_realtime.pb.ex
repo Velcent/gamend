@@ -123,22 +123,44 @@ defmodule Gamend.Realtime.V1.ChatMessage do
   field :sender_email, 10, proto3_optional: true, type: :string, json_name: "senderEmail"
 end
 
-defmodule Gamend.Realtime.V1.UserAchievement do
+defmodule Gamend.Realtime.V1.QuestProgress.ObjectiveProgressEntry do
   @moduledoc false
 
   use Protobuf,
-    full_name: "gamend.realtime.v1.UserAchievement",
+    full_name: "gamend.realtime.v1.QuestProgress.ObjectiveProgressEntry",
+    map: true,
+    protoc_gen_elixir_version: "0.17.0",
+    syntax: :proto3
+
+  field :key, 1, type: :string
+  field :value, 2, type: :int64
+end
+
+defmodule Gamend.Realtime.V1.QuestProgress do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "gamend.realtime.v1.QuestProgress",
     protoc_gen_elixir_version: "0.17.0",
     syntax: :proto3
 
   field :id, 1, type: :string
   field :user_id, 2, type: :string, json_name: "userId"
-  field :achievement_id, 3, type: :string, json_name: "achievementId"
-  field :progress, 4, type: :int32
-  field :unlocked_at_ms, 5, proto3_optional: true, type: :int64, json_name: "unlockedAtMs"
-  field :metadata_json, 6, type: :bytes, json_name: "metadataJson"
-  field :inserted_at_ms, 7, type: :int64, json_name: "insertedAtMs"
-  field :updated_at_ms, 8, type: :int64, json_name: "updatedAtMs"
+  field :quest_key, 3, type: :string, json_name: "questKey"
+  field :period_key, 4, type: :string, json_name: "periodKey"
+
+  field :objective_progress, 5,
+    repeated: true,
+    type: Gamend.Realtime.V1.QuestProgress.ObjectiveProgressEntry,
+    json_name: "objectiveProgress",
+    map: true
+
+  field :status, 6, type: :string
+  field :completed_at_ms, 7, proto3_optional: true, type: :int64, json_name: "completedAtMs"
+  field :claimed_at_ms, 8, proto3_optional: true, type: :int64, json_name: "claimedAtMs"
+  field :metadata_json, 9, type: :bytes, json_name: "metadataJson"
+  field :inserted_at_ms, 10, type: :int64, json_name: "insertedAtMs"
+  field :updated_at_ms, 11, type: :int64, json_name: "updatedAtMs"
 end
 
 defmodule Gamend.Realtime.V1.Lobby do

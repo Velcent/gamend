@@ -113,7 +113,7 @@ defmodule GameServerWeb.PageControllerTest do
               },
               %{
                 "label" => "Achievements",
-                "href" => "/achievements",
+                "href" => "/quests",
                 "icon" => "hero-trophy-solid"
               },
               %{"label" => "Groups", "href" => "/groups", "icon" => "hero-user-group-solid"},
@@ -152,7 +152,7 @@ defmodule GameServerWeb.PageControllerTest do
                 },
                 %{
                   "label" => "Realizări",
-                  "href" => "/achievements",
+                  "href" => "/quests",
                   "icon" => "hero-trophy-solid"
                 },
                 %{

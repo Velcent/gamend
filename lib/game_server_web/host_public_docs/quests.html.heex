@@ -1,0 +1,169 @@
+<!-- Quests / Progression -->
+<div class="card bg-base-100 shadow-sm collapsed" data-card-key="quests">
+  <div class="card-body">
+    <h2 class="card-title text-2xl mb-4 flex items-center gap-3">
+      <svg class="w-12 h-8 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+        />
+      </svg>
+      {doc_text("Quests / Progression")}
+      <button
+        type="button"
+        data-action="toggle-card"
+        data-card-key="quests"
+        aria-expanded="false"
+        class="btn btn-ghost btn-sm ml-auto"
+        title={doc_text("Collapse/Expand")}
+      >
+        <svg class="w-4 h-4" viewBox="0 0 20 20" fill="none" stroke="currentColor">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 8l4 4 4-4"
+          />
+        </svg>
+      </button>
+    </h2>
+
+    <div class="space-y-4">
+      <p class="text-sm text-base-content/80">
+        {doc_text(
+          "One event-driven progression engine covers achievements (permanent one-shots), daily/weekly quests (repeat per UTC period), event quests (time-boxed) and chains (prerequisite-gated) — each able to pay rewards into the economy exactly once. Achievements are simply quests of kind \"achievement\"."
+        )}
+      </p>
+
+      <h3 class="font-semibold">{doc_text("Key Concepts")}</h3>
+      <ul class="list-disc list-inside text-sm text-base-content/80 space-y-1">
+        <li>
+          <strong>{doc_text("Kind:")}</strong>
+          <code class="font-mono">achievement</code>{doc_text(",")}
+          <code class="font-mono">daily</code>{doc_text(",")}
+          <code class="font-mono">weekly</code>{doc_text(",")}
+          <code class="font-mono">event</code> {doc_text("or")}
+          <code class="font-mono">chain</code>
+          {doc_text(
+            "— the kind determines the reset cycle (daily = UTC date bucket, weekly = ISO week, others = permanent)"
+          )}
+        </li>
+        <li>
+          <strong>{doc_text("Objectives:")}</strong>
+          {doc_text(
+            "a list of event/target pairs; a quest completes when every objective reaches its target. Optional params narrow matching (all params must match the event meta)"
+          )}
+        </li>
+        <li>
+          <strong>{doc_text("Rewards:")}</strong>
+          {doc_text(
+            "currency entries grant via Economy, item entries via Inventory — each with its own idempotency key, so a retried claim can never double-pay"
+          )}
+        </li>
+        <li>
+          <strong>{doc_text("Claiming:")}</strong>
+          {doc_text(
+            "an atomic completed → claimed transition gates rewards; auto_claim quests pay out on completion without a claim step"
+          )}
+        </li>
+        <li>
+          <strong>{doc_text("Prerequisites (chains):")}</strong>
+          {doc_text(
+            "any quest may set prerequisite_quest_key — it stays hidden and frozen until that quest completes. Use it for tiered lines (Novice -> Veteran -> Master): give each tier the count remaining since the previous tier, since a locked tier accrues nothing"
+          )}
+        </li>
+        <li>
+          <strong>{doc_text("Periods:")}</strong>
+          {doc_text(
+            "progress rows are bucketed per period_key; a new period simply means a fresh row on the next event — nothing has to fire at midnight"
+          )}
+        </li>
+      </ul>
+
+      <h3 class="font-semibold">{doc_text("Server-authoritative progress")}</h3>
+      <p class="text-sm text-base-content/80">
+        {doc_text(
+          "There is no public endpoint to advance a quest — clients cannot report their own progress. The server core wires common events (login, chat_message, score_submitted, lobby_joined, match_won), and your game reports custom events from hooks:"
+        )}
+      </p>
+      <div
+        class="bg-base-200 font-mono text-sm p-4 rounded-lg overflow-auto"
+        phx-no-curly-interpolation
+      >
+        <pre>
+    # From any hook or server-side plugin code:
+    GameServer.Quests.report_event(user_id, "enemy_killed", 1, %{"map" => "desert"})
+
+    # Every active quest with an objective on "enemy_killed" (and matching
+    # params) advances; completion fires hooks and pays auto_claim rewards.</pre>
+      </div>
+
+      <h3 class="font-semibold">{doc_text("Built-in events")}</h3>
+      <ul class="list-disc list-inside text-sm text-base-content/80 space-y-1">
+        <li><code class="font-mono">login</code> {doc_text("— user logged in")}</li>
+        <li><code class="font-mono">chat_message</code> {doc_text("— chat message sent")}</li>
+        <li>
+          <code class="font-mono">score_submitted</code>
+          {doc_text("— leaderboard score submitted (meta: leaderboard_id)")}
+        </li>
+        <li>
+          <code class="font-mono">lobby_joined</code> {doc_text("— lobby joined (meta: lobby_id)")}
+        </li>
+        <li>
+          <code class="font-mono">match_won</code>
+          {doc_text("— tournament match won (meta: tournament_id)")}
+        </li>
+      </ul>
+
+      <h3 class="font-semibold">{doc_text("API Endpoints")}</h3>
+      <div class="bg-base-200 font-mono text-sm p-4 rounded-lg overflow-auto">
+        <pre>
+    GET  /api/v1/me/quests            {doc_text("# my quests + progress + claimable flag")}
+    POST /api/v1/me/quests/:key/claim {doc_text("# claim a completed quest's rewards")}
+    GET  /api/v1/quests               {doc_text("# public catalog (LIST_QUESTS_ENABLED)")}
+    GET  /api/v1/quests/user/:user_id {doc_text("# a user's completed quests (default kind: achievement)")}</pre>
+      </div>
+
+      <h3 class="font-semibold">{doc_text("Realtime events (user channel)")}</h3>
+      <ul class="list-disc list-inside text-sm text-base-content/80 space-y-1">
+        <li>
+          <code class="font-mono">quest_progress</code>
+          {doc_text("— an objective advanced (payload: the progress row)")}
+        </li>
+        <li>
+          <code class="font-mono">quest_completed</code>
+          {doc_text("— every objective met; claim or auto-claim next")}
+        </li>
+        <li>
+          <code class="font-mono">quest_claimed</code>
+          {doc_text("— rewards granted (wallet_updated / inventory_updated follow)")}
+        </li>
+      </ul>
+
+      <h3 class="font-semibold">{doc_text("Hooks")}</h3>
+      <ul class="list-disc list-inside text-sm text-base-content/80 space-y-1">
+        <li>
+          <code class="font-mono">before_quest_claim(user_id, quest, progress)</code>
+          {doc_text("— veto a claim (anti-cheat, eligibility); skipped for auto_claim quests")}
+        </li>
+        <li>
+          <code class="font-mono">after_quest_completed(progress)</code>
+          {doc_text("— observe completions (chain the next quest, analytics)")}
+        </li>
+        <li>
+          <code class="font-mono">after_quest_claimed(progress)</code>
+          {doc_text("— observe claims")}
+        </li>
+      </ul>
+
+      <h3 class="font-semibold">{doc_text("Admin")}</h3>
+      <p class="text-sm text-base-content/80">
+        {doc_text(
+          "The /admin/quests page manages definitions (objectives and rewards as JSON), shows per-quest completion funnels, and offers per-user grant / reset / force-claim. The same actions are available under /api/v1/admin/quests."
+        )}
+      </p>
+    </div>
+  </div>
+</div>

@@ -1,4 +1,4 @@
-## Open source Elixir game server with authentication, users, lobbies, groups, parties, friends, chat, notifications, achievements, leaderboards, tournaments, server scripting and an admin portal with HTTP, WebSocket, and WebRTC support and SDK for JS and Godot.
+## Open source Elixir game server with authentication, users, lobbies, groups, parties, friends, chat, notifications, quests, leaderboards, tournaments, server scripting and an admin portal with HTTP, WebSocket, and WebRTC support and SDK for JS and Godot.
 ##
 ## Game + Backend = Gamend
 class_name GamendApi
@@ -81,9 +81,10 @@ signal group_chat_message(message: Dictionary)
 signal group_chat_message_updated(message: Dictionary)
 signal group_chat_message_deleted(payload: Dictionary)
 
-## Achievement events
-signal achievement_unlocked(user_achievement: Dictionary)  ## achievement fully unlocked
-signal achievement_progress(user_achievement: Dictionary)  ## progress incremented toward an achievement
+## Quest events (achievements are quests of kind "achievement")
+signal quest_progress(progress: Dictionary)   ## a quest objective advanced
+signal quest_completed(progress: Dictionary)  ## every objective met — claim or auto-claim next
+signal quest_claimed(progress: Dictionary)    ## the quest's rewards were granted
 
 ## Groups collection events (group browser)
 signal group_created(group: Dictionary)   ## new group created (excludes hidden)
@@ -706,10 +707,12 @@ func _handle_user_event(event: String, payload: Dictionary):
 			friend_unblocked.emit(payload)
 		"friend_rejected":
 			friend_rejected.emit(payload)
-		"achievement_unlocked":
-			achievement_unlocked.emit(payload)
-		"achievement_progress":
-			achievement_progress.emit(payload)
+		"quest_progress":
+			quest_progress.emit(payload)
+		"quest_completed":
+			quest_completed.emit(payload)
+		"quest_claimed":
+			quest_claimed.emit(payload)
 
 func _handle_lobby_event(event: String, payload: Dictionary):
 	match event:
@@ -1086,23 +1089,23 @@ func _kv_subscription_request_ws(event: String, key: String, user_id = null, lob
 			network_request_failed.emit(result.error.message)
 	return result
 
-### ACHIEVEMENTS
+### QUESTS
 
-## List all achievements (public, includes user progress if authenticated)
-func achievements_list_achievements(page = 1, page_size = 25) -> GamendResult:
-	return await _call_api(AchievementsApi.new(_config), "list_achievements", [page, page_size])
+## List my quests with progress and claimable flag (auth required)
+func quests_my_quests(kind = "", page = 1, page_size = 25) -> GamendResult:
+	return await _call_api(QuestsApi.new(_config), "my_quests", [kind, page, page_size])
 
-## Get achievement details by slug
-func achievements_get_achievement(slug: String) -> GamendResult:
-	return await _call_api(AchievementsApi.new(_config), "get_achievement", [slug])
+## Claim a completed quest's rewards (auth required)
+func quests_claim_quest(key: String) -> GamendResult:
+	return await _call_api(QuestsApi.new(_config), "claim_quest", [key])
 
-## List my achievements (auth required). Returns achievements with progress.
-func achievements_my_achievements(page = 1, page_size = 25) -> GamendResult:
-	return await _call_api(AchievementsApi.new(_config), "my_achievements", [page, page_size])
+## List the public quest catalog (includes user progress if authenticated)
+func quests_list_quests(kind = "", page = 1, page_size = 25) -> GamendResult:
+	return await _call_api(QuestsApi.new(_config), "list_quests", [kind, page, page_size])
 
-## List achievements for a specific user
-func achievements_user_achievements(user_id: String, page = 1, page_size = 25) -> GamendResult:
-	return await _call_api(AchievementsApi.new(_config), "user_achievements", [user_id, page, page_size])
+## List a user's completed quests (defaults to kind "achievement")
+func quests_user_quests(user_id: String, kind = "achievement", page = 1, page_size = 25) -> GamendResult:
+	return await _call_api(QuestsApi.new(_config), "user_quests", [user_id, kind, page, page_size])
 
 ## CHAT
 
@@ -1588,39 +1591,43 @@ func admin_chat_admin_delete_chat_message(id: String) -> GamendResult:
 func admin_chat_admin_delete_chat_conversation(chat_type: String, chat_ref_id: String) -> GamendResult:
 	return await _call_api(AdminChatApi.new(_config), "admin_delete_chat_conversation", [chat_type, chat_ref_id])
 
-## ADMIN ACHIEVEMENTS
+## ADMIN QUESTS
 
-## List all achievements (admin)
-func admin_achievements_admin_list_achievements(page = 1, pageSize = 25) -> GamendResult:
-	return await _call_api(AdminAchievementsApi.new(_config), "admin_list_achievements", [page, pageSize])
+## List all quest definitions (admin)
+func admin_quests_admin_list_quests(page = 1, pageSize = 25) -> GamendResult:
+	return await _call_api(AdminQuestsApi.new(_config), "admin_list_quests", [page, pageSize])
 
-## Create an achievement (admin)
-func admin_achievements_admin_create_achievement(request: AdminCreateAchievementRequest) -> GamendResult:
-	return await _call_api(AdminAchievementsApi.new(_config), "admin_create_achievement", [request])
+## Create a quest (admin)
+func admin_quests_admin_create_quest(request: AdminCreateQuestRequest) -> GamendResult:
+	return await _call_api(AdminQuestsApi.new(_config), "admin_create_quest", [request])
 
-## Update an achievement (admin)
-func admin_achievements_admin_update_achievement(id: String, request: AdminUpdateAchievementRequest) -> GamendResult:
-	return await _call_api(AdminAchievementsApi.new(_config), "admin_update_achievement", [id, request])
+## Update a quest (admin)
+func admin_quests_admin_update_quest(id: String, request: AdminUpdateQuestRequest) -> GamendResult:
+	return await _call_api(AdminQuestsApi.new(_config), "admin_update_quest", [id, request])
 
-## Delete an achievement (admin)
-func admin_achievements_admin_delete_achievement(id: String) -> GamendResult:
-	return await _call_api(AdminAchievementsApi.new(_config), "admin_delete_achievement", [id])
+## Delete a quest and all user progress (admin)
+func admin_quests_admin_delete_quest(id: String) -> GamendResult:
+	return await _call_api(AdminQuestsApi.new(_config), "admin_delete_quest", [id])
 
-## Grant an achievement to a user (admin)
-func admin_achievements_admin_grant_achievement(request: AdminGrantAchievementRequest) -> GamendResult:
-	return await _call_api(AdminAchievementsApi.new(_config), "admin_grant_achievement", [request])
+## List quest progress rows (admin)
+func admin_quests_admin_list_quest_progress(page = 1, pageSize = 25) -> GamendResult:
+	return await _call_api(AdminQuestsApi.new(_config), "admin_list_quest_progress", [page, pageSize])
 
-## Revoke an achievement from a user (admin)
-func admin_achievements_admin_revoke_achievement(request: AdminRevokeAchievementRequest) -> GamendResult:
-	return await _call_api(AdminAchievementsApi.new(_config), "admin_revoke_achievement", [request])
+## Force-complete a quest for a user (admin)
+func admin_quests_admin_grant_quest(request: AdminGrantQuestRequest) -> GamendResult:
+	return await _call_api(AdminQuestsApi.new(_config), "admin_grant_quest", [request])
 
-## Immediately unlock an achievement for a user (admin)
-func admin_achievements_admin_unlock_achievement(request: AdminGrantAchievementRequest) -> GamendResult:
-	return await _call_api(AdminAchievementsApi.new(_config), "admin_unlock_achievement", [request])
+## Reset a user's current-period quest progress (admin)
+func admin_quests_admin_reset_quest(request: AdminResetQuestRequest) -> GamendResult:
+	return await _call_api(AdminQuestsApi.new(_config), "admin_reset_quest", [request])
 
-## Increment achievement progress for a user (admin)
-func admin_achievements_admin_increment_achievement(request: AdminIncrementAchievementRequest) -> GamendResult:
-	return await _call_api(AdminAchievementsApi.new(_config), "admin_increment_achievement", [request])
+## Claim a completed quest on a user's behalf (admin)
+func admin_quests_admin_claim_quest(request: AdminClaimQuestRequest) -> GamendResult:
+	return await _call_api(AdminQuestsApi.new(_config), "admin_claim_quest", [request])
+
+## Per-status progress counts for one quest (admin)
+func admin_quests_admin_quest_funnel(key: String) -> GamendResult:
+	return await _call_api(AdminQuestsApi.new(_config), "admin_quest_funnel", [key])
 
 # --- Matchmaking ---------------------------------------------------------------
 

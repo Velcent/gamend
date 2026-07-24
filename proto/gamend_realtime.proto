@@ -70,7 +70,7 @@ message UserBrief {
   optional string username = 9;
 }
 
-// ── Notifications / chat / achievements ─────────────────────────────────
+// ── Notifications / chat / quests ────────────────────────────────────────
 
 message Notification {
   string id = 1;
@@ -96,15 +96,20 @@ message ChatMessage {
   optional string sender_email = 10;
 }
 
-message UserAchievement {
+// quest_progress / quest_completed / quest_claimed events.
+message QuestProgress {
   string id = 1;
   string user_id = 2;
-  string achievement_id = 3;
-  int32 progress = 4;
-  optional int64 unlocked_at_ms = 5;
-  bytes metadata_json = 6;
-  int64 inserted_at_ms = 7;
-  int64 updated_at_ms = 8;
+  string quest_key = 3;
+  string period_key = 4;
+  // objective index (string) -> current count
+  map<string, int64> objective_progress = 5;
+  string status = 6;
+  optional int64 completed_at_ms = 7;
+  optional int64 claimed_at_ms = 8;
+  bytes metadata_json = 9;
+  int64 inserted_at_ms = 10;
+  int64 updated_at_ms = 11;
 }
 
 // ── Lobbies / groups / parties ───────────────────────────────────────────

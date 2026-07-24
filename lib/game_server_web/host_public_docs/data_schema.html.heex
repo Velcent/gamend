@@ -189,33 +189,48 @@
     )</pre>
       </div>
 
-      <h4 class="font-semibold mt-3">{doc_text("Achievements")}</h4>
+      <h4 class="font-semibold mt-3">{doc_text("Quests (includes achievements)")}</h4>
+      <p class="text-sm text-base-content/80">
+        {doc_text(
+          "Achievements folded into the quest engine: each old achievement is now a quests row with kind \"achievement\" (single objective whose event is the old slug), and user_achievements rows migrated into quest_progress with period_key \"static\". The /achievements API is a read view over these tables."
+        )}
+      </p>
       <div class="bg-base-200 font-mono text-sm p-4 rounded-lg overflow-auto">
         <pre>
-    achievements (
-      id              : uuid (UUIDv7 string primary key)
-      slug            : string (unique identifier, e.g. "first_lobby")
-      title           : string (display name)
-      description     : string (condition to unlock)
-      icon_url        : string (optional)
-      sort_order      : integer (display order, default: 0)
-      hidden          : boolean (only shown after unlock, default: false)
-      progress_target : integer (1 = one-shot, >1 = multi-step)
-      metadata        : jsonb (optional custom data)
-      inserted_at     : utc_datetime
-      updated_at      : utc_datetime
+    quests (
+      id                     : uuid (UUIDv7 string primary key)
+      key                    : string (unique slug, e.g. "daily_win_3")
+      title                  : string (display name)
+      description            : string
+      icon_url               : string (optional)
+      sort_order             : integer (display order, default: 0)
+      hidden                 : boolean (only shown after completion)
+      kind                   : string ("achievement" | "daily" | "weekly" | "event" | "chain")
+      objectives             : jsonb (list of &lbrace;event, target, params&rbrace;)
+      rewards                : jsonb (list of &lbrace;type, code, amount&rbrace;)
+      auto_claim             : boolean (grant rewards on completion)
+      prerequisite_quest_key : string (chains; nullable)
+      starts_at / ends_at    : utc_datetime (event window; nullable)
+      active                 : boolean
+      metadata               : jsonb (optional custom data)
+      inserted_at            : utc_datetime
+      updated_at             : utc_datetime
     )
 
-    user_achievements (
-      id             : uuid (UUIDv7 string primary key)
-      user_id        : uuid (FK to users)
-      achievement_id : uuid (FK to achievements)
-      progress       : integer (current progress, default: 0)
-      unlocked_at    : utc_datetime (nil until unlocked)
-      metadata       : jsonb (optional)
-      inserted_at    : utc_datetime
-      updated_at     : utc_datetime
-      -- unique index on (user_id, achievement_id)
+    quest_progress (
+      id                 : uuid (UUIDv7 string primary key)
+      user_id            : uuid (FK to users)
+      quest_key          : string (FK to quests.key)
+      period_key         : string (reset bucket: "static", "2026-07-22", "2026-W30")
+      objective_progress : jsonb (objective index -> count)
+      status             : string ("active" | "completed" | "claimed")
+      completed_at       : utc_datetime (nil until every objective met)
+      claimed_at         : utc_datetime (nil until rewards claimed)
+      rewards_granted_at : utc_datetime (nil until every reward applied)
+      metadata           : jsonb (optional)
+      inserted_at        : utc_datetime
+      updated_at         : utc_datetime
+      -- unique index on (user_id, quest_key, period_key)
     )</pre>
       </div>
 
@@ -249,7 +264,7 @@
       "party_kicked"
       "chat_lobby" / "chat_group" / "chat_party" / "chat_friend"
           — unread-messages notifications, metadata carries the chat ref
-      "achievement_unlocked" — metadata: { achievement_id, achievement_slug }</pre>
+      "quest_completed" — metadata: { quest_key, kind, quest_title }</pre>
       </div>
 
       <h4 class="font-semibold mt-3">{doc_text("Groups")}</h4>
@@ -604,6 +619,18 @@
       inserted_at : datetime
       updated_at  : datetime
       unique (user_id, item)
+    )
+
+    inventory_ledger (          # append-only audit of every item-stack change
+      id              : uuid
+      user_id         : uuid     (FK → users.id)
+      item            : string
+      delta           : integer  (+grant / -consume)
+      quantity_after  : integer
+      reason          : string
+      idempotency_key : string   (nullable, unique when set)
+      metadata        : map/json
+      inserted_at     : datetime
     )</pre>
         </div>
         <p class="pl-4 mt-1">

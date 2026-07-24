@@ -17,7 +17,7 @@ defmodule GameServerWeb.ApiSpec do
         title: "Game Server API",
         version: api_version(),
         description: """
-        API for the Gamend Game Server. Provides HTTP REST API, real-time WebSocket channels, and WebRTC DataChannels for low-latency game data. Features authentication, users, lobbies, groups, parties, friends, chat, notifications, achievements, leaderboards, tournaments, matchmaking, payments, server scripting, and admin portal.
+        API for the Gamend Game Server. Provides HTTP REST API, real-time WebSocket channels, and WebRTC DataChannels for low-latency game data. Features authentication, users, lobbies, groups, parties, friends, chat, notifications, quests, leaderboards, tournaments, matchmaking, payments, server scripting, and admin portal.
 
         ## **1. Authentication**
 
@@ -126,15 +126,15 @@ defmodule GameServerWeb.ApiSpec do
         - **List keys** with optional prefix filtering
         - **Metadata support**: values can include arbitrary JSON metadata
 
-        ## **11. Achievements**
-        Track player accomplishments with progress-based or instant-unlock achievements:
+        ## **11. Quests / Progression**
+        One event-driven progression engine covering achievements, daily/weekly quests, time-boxed event quests, and chains:
 
-        - **Achievement definitions**: admin-created with slug, title, description, icon, sort order, and optional progress target
-        - **Progress tracking**: increment progress toward a target; auto-unlocks when progress reaches the target
-        - **Instant unlock**: directly unlock achievements without progress tracking
-        - **Hidden achievements**: details obscured ("???") until unlocked by the user
-        - **Public listings**: paginated, optionally filtered; authenticated users see their own progress
-        - **Admin management**: create, update, delete, grant, revoke, unlock, and increment achievements
+        - **Kinds**: `achievement` (permanent one-shot — the replacement for the old achievements system), `daily`/`weekly` (reset per UTC period), `event` (starts_at/ends_at window), `chain` (requires a prerequisite quest)
+        - **Objectives**: each quest lists objectives `{event, target, params}`; server-side `report_event` advances every matching active quest — there is **no public endpoint to advance progress** (server-authoritative)
+        - **Rewards**: currencies (Economy) and items (Inventory), paid **exactly once** per period via idempotent grants; `auto_claim` quests pay on completion, others via `POST /me/quests/:key/claim`
+        - **My quests**: `GET /me/quests` returns active quests, per-period progress, and a claimable flag; hidden quests appear once completed
+        - **Catalog**: `GET /quests` and per-user completions `GET /quests/user/:user_id` (gated by `LIST_QUESTS_ENABLED`)
+        - **Admin management**: definitions CRUD plus per-user grant/reset/force-claim under `/api/v1/admin/quests`
 
         ## **12. Tournaments**
         Single-elimination bracket tournaments, server-structured and game-judged:
@@ -165,7 +165,7 @@ defmodule GameServerWeb.ApiSpec do
         ```
 
         ### **14.2 Available Channels**
-        - **User channel** (`user:<user_id>`): notifications, friend events, achievement unlocks, party/group invites, tournament events, KV subscriptions
+        - **User channel** (`user:<user_id>`): notifications, friend events, quest progress/completions/claims, party/group invites, tournament events, KV subscriptions
         - **Lobby channel** (`lobby:<lobby_id>`): lobby member joins/leaves, lobby updates, lobby chat
         - **Lobbies channel** (`lobbies`): global lobby list changes (created, updated, deleted)
         - **Group channel** (`group:<group_id>`): group member changes, group updates, group chat
@@ -240,8 +240,8 @@ defmodule GameServerWeb.ApiSpec do
           description: "Ticket queue — join, cancel, your ticket, queue stats"
         },
         %Tag{
-          name: "Achievements",
-          description: "Player achievements, progress tracking, and unlocks"
+          name: "Quests",
+          description: "Quests/progression — objectives, periods, claims, rewards"
         },
         %Tag{
           name: "Payments",
@@ -260,7 +260,7 @@ defmodule GameServerWeb.ApiSpec do
         %Tag{name: "Admin – Lobbies", description: "Admin lobby management"},
         %Tag{name: "Admin – Groups", description: "Admin group management"},
         %Tag{name: "Admin – Chat", description: "Admin chat management"},
-        %Tag{name: "Admin – Achievements", description: "Admin achievement management"},
+        %Tag{name: "Admin – Quests", description: "Admin quest management"},
         %Tag{name: "Admin – Notifications", description: "Admin notification management"},
         %Tag{name: "Admin – Leaderboards", description: "Admin leaderboard management"},
         %Tag{name: "Admin – Tournaments", description: "Admin tournament management"},

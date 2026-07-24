@@ -1,0 +1,442 @@
+defmodule GameServerWeb.Api.V1.Admin.QuestController do
+  use GameServerWeb, :controller
+  use OpenApiSpex.ControllerSpecs
+
+  alias GameServer.Quests
+  alias OpenApiSpex.Schema
+
+  tags(["Admin – Quests"])
+
+  @error_schema %Schema{type: :object, properties: %{error: %Schema{type: :string}}}
+
+  @quest_schema %Schema{
+    type: :object,
+    properties: %{
+      id: %Schema{type: :string, format: :uuid},
+      key: %Schema{type: :string},
+      title: %Schema{type: :string},
+      description: %Schema{type: :string},
+      icon_url: %Schema{type: :string},
+      sort_order: %Schema{type: :integer},
+      hidden: %Schema{type: :boolean},
+      kind: %Schema{type: :string, enum: ["achievement", "daily", "weekly", "event", "chain"]},
+      objectives: %Schema{type: :array, items: %Schema{type: :object}},
+      rewards: %Schema{type: :array, items: %Schema{type: :object}},
+      auto_claim: %Schema{type: :boolean},
+      prerequisite_quest_key: %Schema{type: :string, nullable: true},
+      starts_at: %Schema{type: :string, format: "date-time", nullable: true},
+      ends_at: %Schema{type: :string, format: "date-time", nullable: true},
+      active: %Schema{type: :boolean},
+      metadata: %Schema{type: :object},
+      inserted_at: %Schema{type: :string, format: "date-time"},
+      updated_at: %Schema{type: :string, format: "date-time"}
+    }
+  }
+
+  @progress_schema %Schema{
+    type: :object,
+    properties: %{
+      id: %Schema{type: :string, format: :uuid},
+      user_id: %Schema{type: :string, format: :uuid},
+      quest_key: %Schema{type: :string},
+      period_key: %Schema{type: :string},
+      objective_progress: %Schema{type: :object},
+      status: %Schema{type: :string, enum: ["active", "completed", "claimed"]},
+      completed_at: %Schema{type: :string, format: "date-time", nullable: true},
+      claimed_at: %Schema{type: :string, format: "date-time", nullable: true},
+      metadata: %Schema{type: :object},
+      inserted_at: %Schema{type: :string, format: "date-time"},
+      updated_at: %Schema{type: :string, format: "date-time"}
+    }
+  }
+
+  @quest_body_schema %Schema{
+    type: :object,
+    properties: %{
+      key: %Schema{type: :string},
+      title: %Schema{type: :string},
+      description: %Schema{type: :string},
+      icon_url: %Schema{type: :string},
+      sort_order: %Schema{type: :integer},
+      hidden: %Schema{type: :boolean},
+      kind: %Schema{type: :string, enum: ["achievement", "daily", "weekly", "event", "chain"]},
+      objectives: %Schema{
+        type: :array,
+        items: %Schema{
+          type: :object,
+          properties: %{
+            event: %Schema{type: :string},
+            target: %Schema{type: :integer},
+            params: %Schema{type: :object}
+          },
+          required: [:event]
+        }
+      },
+      rewards: %Schema{
+        type: :array,
+        items: %Schema{
+          type: :object,
+          properties: %{
+            type: %Schema{type: :string, enum: ["currency", "item"]},
+            code: %Schema{type: :string},
+            amount: %Schema{type: :integer}
+          },
+          required: [:type, :code]
+        }
+      },
+      auto_claim: %Schema{type: :boolean},
+      prerequisite_quest_key: %Schema{type: :string, nullable: true},
+      starts_at: %Schema{type: :string, format: "date-time", nullable: true},
+      ends_at: %Schema{type: :string, format: "date-time", nullable: true},
+      active: %Schema{type: :boolean},
+      metadata: %Schema{type: :object}
+    }
+  }
+
+  @user_quest_body %Schema{
+    type: :object,
+    properties: %{
+      user_id: %Schema{type: :string, format: :uuid},
+      key: %Schema{type: :string, description: "Quest key"}
+    },
+    required: [:user_id, :key]
+  }
+
+  # ---------------------------------------------------------------------------
+  # INDEX
+  # ---------------------------------------------------------------------------
+
+  operation(:index,
+    operation_id: "admin_list_quests",
+    summary: "List all quest definitions (admin, includes inactive/hidden)",
+    security: [%{"authorization" => []}],
+    parameters: [
+      kind: [in: :query, schema: %Schema{type: :string}, required: false],
+      search: [in: :query, schema: %Schema{type: :string}, required: false],
+      page: [in: :query, schema: %Schema{type: :integer}, required: false],
+      page_size: [in: :query, schema: %Schema{type: :integer}, required: false]
+    ],
+    responses: %{
+      200 =>
+        {"Quest list", "application/json",
+         %Schema{
+           type: :object,
+           properties: %{
+             data: %Schema{type: :array, items: @quest_schema},
+             meta: %Schema{type: :object}
+           }
+         }}
+    }
+  )
+
+  def index(conn, params) do
+    page = parse_int(params["page"], 1)
+    page_size = parse_int(params["page_size"], 25)
+    opts = [page: page, page_size: page_size, kind: params["kind"], search: params["search"]]
+
+    quests = Quests.list_quests(opts)
+    total_count = Quests.count_quests(kind: params["kind"], search: params["search"])
+    total_pages = max(ceil(total_count / page_size), 1)
+
+    json(conn, %{
+      data: quests,
+      meta: %{
+        page: page,
+        page_size: page_size,
+        count: length(quests),
+        total_count: total_count,
+        total_pages: total_pages,
+        has_more: page < total_pages
+      }
+    })
+  end
+
+  # ---------------------------------------------------------------------------
+  # CREATE / UPDATE / DELETE
+  # ---------------------------------------------------------------------------
+
+  operation(:create,
+    operation_id: "admin_create_quest",
+    summary: "Create quest (admin)",
+    security: [%{"authorization" => []}],
+    request_body: {"Quest", "application/json", @quest_body_schema},
+    responses: %{
+      201 => {"Created", "application/json", @quest_schema},
+      422 => {"Validation error", "application/json", @error_schema}
+    }
+  )
+
+  def create(conn, params) do
+    case Quests.create_quest(params) do
+      {:ok, quest} ->
+        conn |> put_status(:created) |> json(%{data: quest})
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        conn
+        |> put_status(:unprocessable_entity)
+        |> json(%{errors: changeset_errors(changeset)})
+
+      {:error, reason} ->
+        conn |> put_status(:unprocessable_entity) |> json(%{error: to_string(reason)})
+    end
+  end
+
+  operation(:update,
+    operation_id: "admin_update_quest",
+    summary: "Update quest (admin)",
+    security: [%{"authorization" => []}],
+    parameters: [
+      id: [in: :path, schema: %Schema{type: :string, format: :uuid}, required: true]
+    ],
+    request_body: {"Quest", "application/json", @quest_body_schema},
+    responses: %{
+      200 => {"Updated", "application/json", @quest_schema},
+      404 => {"Not found", "application/json", @error_schema},
+      422 => {"Validation error", "application/json", @error_schema}
+    }
+  )
+
+  def update(conn, %{"id" => id} = params) do
+    case Quests.get_quest(id) do
+      nil ->
+        conn |> put_status(:not_found) |> json(%{error: "not_found"})
+
+      quest ->
+        case Quests.update_quest(quest, Map.delete(params, "id")) do
+          {:ok, updated} ->
+            json(conn, %{data: updated})
+
+          {:error, %Ecto.Changeset{} = changeset} ->
+            conn
+            |> put_status(:unprocessable_entity)
+            |> json(%{errors: changeset_errors(changeset)})
+        end
+    end
+  end
+
+  operation(:delete,
+    operation_id: "admin_delete_quest",
+    summary: "Delete quest and all user progress (admin)",
+    security: [%{"authorization" => []}],
+    parameters: [
+      id: [in: :path, schema: %Schema{type: :string, format: :uuid}, required: true]
+    ],
+    responses: %{
+      200 => {"Deleted", "application/json", %Schema{type: :object}},
+      404 => {"Not found", "application/json", @error_schema}
+    }
+  )
+
+  def delete(conn, %{"id" => id}) do
+    case Quests.get_quest(id) do
+      nil ->
+        conn |> put_status(:not_found) |> json(%{error: "not_found"})
+
+      quest ->
+        case Quests.delete_quest(quest) do
+          {:ok, _} ->
+            json(conn, %{data: %{deleted: true}})
+
+          {:error, _} ->
+            conn |> put_status(:unprocessable_entity) |> json(%{error: "delete_failed"})
+        end
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # PROGRESS (list / grant / reset / force-claim)
+  # ---------------------------------------------------------------------------
+
+  operation(:progress,
+    operation_id: "admin_list_quest_progress",
+    summary: "List quest progress rows (admin)",
+    security: [%{"authorization" => []}],
+    parameters: [
+      user_id: [
+        in: :query,
+        schema: %Schema{type: :string},
+        required: false,
+        description: "User UUID or username/display-name substring"
+      ],
+      quest_key: [in: :query, schema: %Schema{type: :string}, required: false],
+      status: [in: :query, schema: %Schema{type: :string}, required: false],
+      page: [in: :query, schema: %Schema{type: :integer}, required: false],
+      page_size: [in: :query, schema: %Schema{type: :integer}, required: false]
+    ],
+    responses: %{
+      200 =>
+        {"Progress list", "application/json",
+         %Schema{
+           type: :object,
+           properties: %{
+             data: %Schema{type: :array, items: @progress_schema},
+             meta: %Schema{type: :object}
+           }
+         }}
+    }
+  )
+
+  def progress(conn, params) do
+    page = parse_int(params["page"], 1)
+    page_size = parse_int(params["page_size"], 25)
+
+    opts = [
+      page: page,
+      page_size: page_size,
+      user_id: params["user_id"],
+      quest_key: params["quest_key"],
+      status: params["status"]
+    ]
+
+    rows = Quests.list_progress(opts)
+    total_count = Quests.count_progress(opts)
+    total_pages = max(ceil(total_count / page_size), 1)
+
+    json(conn, %{
+      data: rows,
+      meta: %{
+        page: page,
+        page_size: page_size,
+        count: length(rows),
+        total_count: total_count,
+        total_pages: total_pages,
+        has_more: page < total_pages
+      }
+    })
+  end
+
+  operation(:grant,
+    operation_id: "admin_grant_quest",
+    summary: "Force-complete a quest for a user (admin)",
+    description:
+      "Every objective jumps to its target for the current period; completion hooks " <>
+        "fire and auto-claim quests pay out immediately.",
+    security: [%{"authorization" => []}],
+    request_body: {"Grant", "application/json", @user_quest_body},
+    responses: %{
+      200 => {"Granted", "application/json", @progress_schema},
+      404 => {"Not found", "application/json", @error_schema},
+      409 => {"Already completed", "application/json", @error_schema}
+    }
+  )
+
+  def grant(conn, %{"user_id" => user_id, "key" => key}) do
+    case Quests.admin_complete(user_id, key) do
+      {:ok, progress} ->
+        json(conn, %{data: progress})
+
+      {:error, :quest_not_found} ->
+        conn |> put_status(:not_found) |> json(%{error: "quest_not_found"})
+
+      {:error, :already_completed} ->
+        conn |> put_status(:conflict) |> json(%{error: "already_completed"})
+
+      {:error, reason} ->
+        conn |> put_status(:unprocessable_entity) |> json(%{error: inspect(reason)})
+    end
+  end
+
+  def grant(conn, _params) do
+    conn |> put_status(:bad_request) |> json(%{error: "user_id and key required"})
+  end
+
+  operation(:reset,
+    operation_id: "admin_reset_quest",
+    summary: "Reset a user's current-period quest progress (admin)",
+    security: [%{"authorization" => []}],
+    request_body: {"Reset", "application/json", @user_quest_body},
+    responses: %{
+      200 => {"Reset", "application/json", %Schema{type: :object}},
+      404 => {"Not found", "application/json", @error_schema}
+    }
+  )
+
+  def reset(conn, %{"user_id" => user_id, "key" => key}) do
+    case Quests.admin_reset(user_id, key) do
+      {:ok, :not_found} ->
+        conn |> put_status(:not_found) |> json(%{error: "no_progress"})
+
+      {:ok, _} ->
+        json(conn, %{data: %{reset: true}})
+
+      {:error, reason} ->
+        conn |> put_status(:unprocessable_entity) |> json(%{error: inspect(reason)})
+    end
+  end
+
+  def reset(conn, _params) do
+    conn |> put_status(:bad_request) |> json(%{error: "user_id and key required"})
+  end
+
+  operation(:claim,
+    operation_id: "admin_claim_quest",
+    summary: "Claim a completed quest on a user's behalf (admin)",
+    description: "Skips the before_quest_claim veto. Reward grants stay exactly-once.",
+    security: [%{"authorization" => []}],
+    request_body: {"Claim", "application/json", @user_quest_body},
+    responses: %{
+      200 => {"Claimed", "application/json", %Schema{type: :object}},
+      404 => {"Not found", "application/json", @error_schema},
+      409 => {"Not claimable", "application/json", @error_schema}
+    }
+  )
+
+  def claim(conn, %{"user_id" => user_id, "key" => key}) do
+    case Quests.admin_claim(user_id, key) do
+      {:ok, %{progress: progress, rewards: rewards}} ->
+        json(conn, %{data: %{progress: progress, rewards: rewards}})
+
+      {:error, :quest_not_found} ->
+        conn |> put_status(:not_found) |> json(%{error: "quest_not_found"})
+
+      {:error, :not_completed} ->
+        conn |> put_status(:conflict) |> json(%{error: "not_completed"})
+
+      {:error, :already_claimed} ->
+        conn |> put_status(:conflict) |> json(%{error: "already_claimed"})
+
+      {:error, reason} ->
+        conn |> put_status(:unprocessable_entity) |> json(%{error: inspect(reason)})
+    end
+  end
+
+  def claim(conn, _params) do
+    conn |> put_status(:bad_request) |> json(%{error: "user_id and key required"})
+  end
+
+  # ---------------------------------------------------------------------------
+  # FUNNEL
+  # ---------------------------------------------------------------------------
+
+  operation(:funnel,
+    operation_id: "admin_quest_funnel",
+    summary: "Per-status progress counts for one quest (admin)",
+    security: [%{"authorization" => []}],
+    parameters: [
+      key: [in: :path, schema: %Schema{type: :string}, required: true]
+    ],
+    responses: %{
+      200 => {"Funnel", "application/json", %Schema{type: :object}}
+    }
+  )
+
+  def funnel(conn, %{"key" => key}) do
+    json(conn, %{data: Quests.funnel(key)})
+  end
+
+  defp changeset_errors(changeset) do
+    Ecto.Changeset.traverse_errors(changeset, fn {msg, _opts} -> msg end)
+  end
+
+  defp parse_int(nil, default), do: default
+
+  defp parse_int(val, default) when is_binary(val) do
+    case Integer.parse(val) do
+      {int, ""} -> max(int, 1)
+      _ -> default
+    end
+  end
+
+  defp parse_int(val, _default) when is_integer(val), do: max(val, 1)
+  defp parse_int(_, default), do: default
+end

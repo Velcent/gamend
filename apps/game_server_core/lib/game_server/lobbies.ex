@@ -985,6 +985,7 @@ defmodule GameServer.Lobbies do
 
             GameServer.Async.run(fn ->
               GameServer.Hooks.internal_call(:after_lobby_join, [updated_user, lobby])
+              report_join_quest_event(updated_user.id, lobby)
             end)
 
             {:ok, updated_user}
@@ -993,6 +994,12 @@ defmodule GameServer.Lobbies do
             result
         end
     end
+  end
+
+  defp report_join_quest_event(_user_id, nil), do: :ok
+
+  defp report_join_quest_event(user_id, lobby) do
+    GameServer.Quests.report_event(user_id, "lobby_joined", 1, %{"lobby_id" => lobby.id})
   end
 
   @spec delete_membership(User.t()) :: {:ok, User.t()} | {:error, Ecto.Changeset.t()}

@@ -24,6 +24,8 @@ defmodule Mix.Tasks.Demo.Seed do
     * `lobby_snapshot` — recorded runs for `/admin/lobby-snapshots`, capped at 12
       regardless of `--count` (this set is about having something to read, not
       volume)
+    * `quest` — a daily, an auto-claim achievement and a chain quest, with
+      per-user progress in every state (including claimable completed rows)
 
   The `lobby_snapshot` set goes through the real `capture_lobby/3` path rather
   than inserting rows, so what you see is shaped exactly like production data —
@@ -57,6 +59,8 @@ defmodule Mix.Tasks.Demo.Seed do
   alias GameServer.LobbySnapshots.Event, as: SnapshotEvent
   alias GameServer.LobbySnapshots.Snapshot
   alias GameServer.LobbySnapshots.Writer
+  alias GameServer.Quests.Quest
+  alias GameServer.Quests.QuestProgress
   alias GameServer.Repo
   alias GameServer.Tournaments.Entry
   alias GameServer.Tournaments.Tournament
@@ -66,9 +70,10 @@ defmodule Mix.Tasks.Demo.Seed do
   @leaderboard_slug "demo_seed_scores"
   @group_title "Demo Seed Group"
   @tournament_slug "demo-seed-cup"
+  @quest_key_prefix "demo-seed-"
   @default_count 1000
   @batch 500
-  @all_sets ~w(leaderboard group tournament lobby_snapshot)
+  @all_sets ~w(leaderboard group tournament lobby_snapshot quest)
   @lobby_title_prefix "Demo Seed Run"
   @max_runs 12
 
@@ -93,6 +98,7 @@ defmodule Mix.Tasks.Demo.Seed do
         "group" -> seed_group(users)
         "tournament" -> seed_tournament(users)
         "lobby_snapshot" -> seed_lobby_snapshots(users)
+        "quest" -> seed_quests(users)
       end)
 
       GameServer.Cache.delete_all()
@@ -273,6 +279,150 @@ defmodule Mix.Tasks.Demo.Seed do
 
   # ── Clean ─────────────────────────────────────────────────────────────────
 
+  # A daily, an auto-claim achievement, and a chain gated on it — with per-user
+  # progress in every state, including claimable completed rows.
+  defp seed_quests(user_ids) do
+    daily =
+      upsert_quest(%{
+        key: @quest_key_prefix <> "daily-login",
+        title: "Demo Daily Login",
+        description: "Log in 3 times today.",
+        kind: "daily",
+        objectives: [%{event: "login", target: 3, params: %{}}],
+        rewards: [%{type: "currency", code: "gold", amount: 100}],
+        auto_claim: false,
+        active: true,
+        metadata: %{}
+      })
+
+    achievement =
+      upsert_quest(%{
+        key: @quest_key_prefix <> "first-win",
+        title: "Demo First Win",
+        description: "Win your first demo match.",
+        kind: "achievement",
+        objectives: [%{event: "demo_win", target: 1, params: %{}}],
+        rewards: [],
+        auto_claim: true,
+        active: true,
+        metadata: %{}
+      })
+
+    chain =
+      upsert_quest(%{
+        key: @quest_key_prefix <> "veteran",
+        title: "Demo Veteran",
+        description: "Win 10 demo matches (after your first win).",
+        kind: "chain",
+        objectives: [%{event: "demo_win", target: 10, params: %{}}],
+        rewards: [%{type: "item", code: "loot_crate", amount: 1}],
+        auto_claim: false,
+        prerequisite_quest_key: achievement.key,
+        active: true,
+        metadata: %{}
+      })
+
+    now = DateTime.utc_now(:second)
+    today = GameServer.Quests.current_period_key("daily", now)
+
+    Repo.delete_all(from(p in QuestProgress, where: like(p.quest_key, ^"#{@quest_key_prefix}%")))
+
+    daily_rows =
+      user_ids
+      |> Enum.with_index()
+      |> Enum.map(fn {user_id, i} ->
+        completed? = rem(i, 3) == 0
+        claimed? = rem(i, 6) == 0
+
+        status =
+          cond do
+            claimed? -> "claimed"
+            completed? -> "completed"
+            true -> "active"
+          end
+
+        %{
+          id: UUIDv7.generate(),
+          user_id: user_id,
+          quest_key: daily.key,
+          period_key: today,
+          objective_progress: %{"0" => if(completed?, do: 3, else: rem(i, 3))},
+          status: status,
+          completed_at: if(completed?, do: now),
+          claimed_at: if(claimed?, do: now),
+          rewards_granted_at: if(claimed?, do: now),
+          metadata: %{},
+          inserted_at: now,
+          updated_at: now
+        }
+      end)
+
+    achievement_rows =
+      user_ids
+      |> Enum.with_index()
+      |> Enum.filter(fn {_id, i} -> rem(i, 2) == 0 end)
+      |> Enum.map(fn {user_id, _i} ->
+        %{
+          id: UUIDv7.generate(),
+          user_id: user_id,
+          quest_key: achievement.key,
+          period_key: "static",
+          objective_progress: %{"0" => 1},
+          status: "claimed",
+          completed_at: now,
+          claimed_at: now,
+          rewards_granted_at: now,
+          metadata: %{},
+          inserted_at: now,
+          updated_at: now
+        }
+      end)
+
+    chain_rows =
+      user_ids
+      |> Enum.with_index()
+      |> Enum.filter(fn {_id, i} -> rem(i, 4) == 0 end)
+      |> Enum.map(fn {user_id, i} ->
+        %{
+          id: UUIDv7.generate(),
+          user_id: user_id,
+          quest_key: chain.key,
+          period_key: "static",
+          objective_progress: %{"0" => rem(i, 10)},
+          status: "active",
+          completed_at: nil,
+          claimed_at: nil,
+          rewards_granted_at: nil,
+          metadata: %{},
+          inserted_at: now,
+          updated_at: now
+        }
+      end)
+
+    insert_batches(daily_rows ++ achievement_rows ++ chain_rows, QuestProgress)
+
+    info(
+      "quests: 3 definitions, #{length(daily_rows) + length(achievement_rows) + length(chain_rows)} progress rows -> /admin/quests"
+    )
+  end
+
+  # Definitions go through the context (embeds can't be bulk-inserted).
+  defp upsert_quest(attrs) do
+    case Repo.get_by(Quest, key: attrs.key) do
+      nil ->
+        {:ok, quest} = GameServer.Quests.create_quest(attrs)
+        quest
+
+      quest ->
+        quest
+    end
+  end
+
+  defp clean_quests do
+    Repo.delete_all(from(p in QuestProgress, where: like(p.quest_key, ^"#{@quest_key_prefix}%")))
+    Repo.delete_all(from(q in Quest, where: like(q.key, ^"#{@quest_key_prefix}%")))
+  end
+
   defp clean do
     lb = Repo.get_by(Leaderboard, slug: @leaderboard_slug)
     group = Repo.get_by(Group, title: @group_title)
@@ -288,6 +438,7 @@ defmodule Mix.Tasks.Demo.Seed do
 
     # Before the players go: seeded lobbies reference them as host.
     clean_lobby_snapshots()
+    clean_quests()
 
     {users, _} = Repo.delete_all(from(u in User, where: like(u.device_id, ^"#{@prefix}-%")))
 

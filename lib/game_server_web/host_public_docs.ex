@@ -47,7 +47,7 @@ defmodule GameServerWeb.HostPublicDocs do
         {GameServerWeb.HostPublicDocsTemplates.leaderboards(assigns)}
         {GameServerWeb.HostPublicDocsTemplates.tournaments(assigns)}
         {GameServerWeb.HostPublicDocsTemplates.matchmaking(assigns)}
-        {GameServerWeb.HostPublicDocsTemplates.achievements(assigns)}
+        {GameServerWeb.HostPublicDocsTemplates.quests(assigns)}
         {GameServerWeb.HostPublicDocsTemplates.friends(assigns)}
         {GameServerWeb.HostPublicDocsTemplates.chat(assigns)}
         {GameServerWeb.HostPublicDocsTemplates.notifications(assigns)}
