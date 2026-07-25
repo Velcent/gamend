@@ -152,8 +152,8 @@ defmodule GameServerWeb.CoreComponents do
 
   attr :type, :string,
     default: "text",
-    values: ~w(checkbox color date datetime-local email file month number password
-               search select tel text textarea time url week)
+    values: ~w(checkbox color date datetime-local utc-datetime-local email file month number
+               password search select tel text textarea time url week)
 
   attr :field, Phoenix.HTML.FormField,
     doc: "a form field struct retrieved from the form, for example: @form[:email]"
@@ -249,6 +249,35 @@ defmodule GameServerWeb.CoreComponents do
     """
   end
 
+  # A datetime the server stores in UTC but a human enters in their own clock.
+  # The named field the form casts always carries UTC; the visible input is a
+  # nameless local-time mirror the LocalDatetimeInput hook keeps in sync both
+  # ways. Conversion happens in the browser against the *entered* date, so DST
+  # is right for a value months out, which a fixed offset sent from the client
+  # would get wrong. LiveView needs JS to run at all, so there is no non-JS
+  # path to degrade to here.
+  def input(%{type: "utc-datetime-local"} = assigns) do
+    ~H"""
+    <div class="fieldset mb-2" phx-hook="LocalDatetimeInput" id={"#{@id}-local-wrap"}>
+      <label>
+        <span :if={@label} class="label mb-1">{@label}</span>
+        <input type="hidden" name={@name} id={@id} value={utc_input_value(@value)} />
+        <input
+          type="datetime-local"
+          data-local-mirror-for={@id}
+          class={[
+            @class || "w-full input",
+            @errors != [] && (@error_class || "input-error")
+          ]}
+          {@rest}
+        />
+      </label>
+      <p class="text-xs text-base-content/50 mt-1" data-local-zone-note></p>
+      <.error :for={msg <- @errors}>{msg}</.error>
+    </div>
+    """
+  end
+
   # All other inputs text, datetime-local, url, password, etc. are handled here...
   def input(assigns) do
     ~H"""
@@ -271,6 +300,12 @@ defmodule GameServerWeb.CoreComponents do
     </div>
     """
   end
+
+  # Strict ISO8601 with the offset, because `Date` in the browser parses that
+  # everywhere; `DateTime`'s own to_string uses a space and Safari rejects it.
+  defp utc_input_value(%DateTime{} = at), do: DateTime.to_iso8601(at)
+  defp utc_input_value(value) when is_binary(value), do: value
+  defp utc_input_value(_value), do: ""
 
   # Helper used by inputs to generate form errors
   defp error(assigns) do
@@ -464,6 +499,51 @@ defmodule GameServerWeb.CoreComponents do
   def translate_errors(errors, field) when is_list(errors) do
     for {^field, {msg, opts}} <- errors, do: translate_error({msg, opts})
   end
+
+  @doc """
+  Renders a stored-UTC timestamp for a human reader.
+
+  The server has no timezone database and no idea where the reader is, so it
+  emits the instant in UTC and marks it; `local_time.js` rewrites the text in
+  the viewer's own zone and locale once it runs. Without JS the UTC text stands,
+  which is why it is labelled rather than left to look local.
+
+  `format` is `"datetime"` (default), `"date"`, `"time"` or `"full"`.
+
+      <.timestamp at={@user.inserted_at} />
+      <.timestamp at={@message.inserted_at} format="time" class="text-xs" />
+  """
+  attr :at, :any, required: true, doc: "a DateTime, or nil to render the dash"
+  attr :format, :string, default: "datetime", values: ~w(datetime date time full)
+  attr :class, :string, default: nil
+  attr :empty, :string, default: "-", doc: "text shown when `at` is nil"
+
+  # Everything this app stores is UTC, so a naive value from a plugin schema is
+  # a UTC instant that merely lost its zone on the way here.
+  def timestamp(%{at: %NaiveDateTime{} = at} = assigns) do
+    assigns |> Map.put(:at, DateTime.from_naive!(at, "Etc/UTC")) |> timestamp()
+  end
+
+  def timestamp(%{at: nil} = assigns) do
+    ~H"{@empty}"
+  end
+
+  def timestamp(assigns) do
+    ~H"""
+    <time datetime={DateTime.to_iso8601(@at)} data-local-time={@format} class={@class}>
+      {utc_text(@at, @format)}
+    </time>
+    """
+  end
+
+  # Matches what `dateStyle: "medium"` produces in English, so the page does not
+  # visibly reflow when the localizer runs. No UTC marker on a date alone: it is
+  # an hour shown in the wrong zone that misleads, and the localizer corrects
+  # the date across a midnight boundary anyway.
+  defp utc_text(at, "date"), do: Calendar.strftime(at, "%b %d, %Y")
+  defp utc_text(at, "time"), do: Calendar.strftime(at, "%H:%M UTC")
+  defp utc_text(at, "full"), do: Calendar.strftime(at, "%Y-%m-%d %H:%M:%S UTC")
+  defp utc_text(at, _datetime), do: Calendar.strftime(at, "%Y-%m-%d %H:%M UTC")
 
   # ---------------------------------------------------------------------------
   # Pagination

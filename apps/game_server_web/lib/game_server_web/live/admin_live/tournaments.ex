@@ -116,17 +116,17 @@ defmodule GameServerWeb.AdminLive.Tournaments do
               <.input field={@form[:description]} label="Description" />
               <.input
                 field={@form[:registration_opens_at]}
-                type="datetime-local"
+                type="utc-datetime-local"
                 label="Registration opens (optional; empty = immediately)"
               />
               <.input
                 field={@form[:starts_at]}
-                type="datetime-local"
+                type="utc-datetime-local"
                 label="Starts at (draw; empty = start manually via Draw now)"
               />
               <.input
                 field={@form[:ends_at]}
-                type="datetime-local"
+                type="utc-datetime-local"
                 label="Ends at (optional hard stop)"
               />
               <.input
@@ -393,8 +393,6 @@ defmodule GameServerWeb.AdminLive.Tournaments do
   end
 
   def handle_event("save_tournament", %{"tournament" => params}, socket) do
-    params = normalize_datetimes(params)
-
     result =
       case socket.assigns.selected do
         nil -> Tournaments.create_tournament(params)
@@ -627,16 +625,5 @@ defmodule GameServerWeb.AdminLive.Tournaments do
         "cancelled" -> "badge-error"
         _ -> "badge-ghost"
       end
-  end
-
-  # datetime-local inputs omit seconds; :utc_datetime cast wants them.
-  defp normalize_datetimes(params) do
-    Map.new(params, fn {key, value} ->
-      if is_binary(value) and Regex.match?(~r/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/, value) do
-        {key, value <> ":00"}
-      else
-        {key, value}
-      end
-    end)
   end
 end

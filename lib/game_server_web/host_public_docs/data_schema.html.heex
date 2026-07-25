@@ -594,6 +594,40 @@
           )}
         </p>
 
+        <h4 class="font-semibold">{doc_text("Ready checks")}</h4>
+        <div class="bg-base-200 font-mono text-sm p-4 rounded-lg overflow-auto">
+          <pre>
+    ready_checks (
+      id           : uuid (UUIDv7 string primary key)
+      kind         : string ("ready" = lobby ready-up | "accept" = match confirmation)
+      status       : string ("pending" | "passed" | "failed" | "cancelled")
+      lobby_id     : uuid (FK to lobbies, nullable; null for a matchmaking check,
+                           which has no lobby yet — cascade delete)
+      deadline     : utc_datetime (nullable; required for kind "accept")
+      opened_by    : uuid (FK to users, nullable; null when the server opened it)
+      reason       : string (nullable: "declined" | "timeout" | "cancelled")
+      resolved_at  : utc_datetime (nullable)
+      metadata     : jsonb/map
+      -- unique index (lobby_id) where status = 'pending'
+      -- index (deadline) where status = 'pending'
+    )
+
+    ready_check_participants (
+      id            : uuid (UUIDv7 string primary key)
+      ready_check_id: uuid (FK to ready_checks; cascade delete)
+      user_id       : uuid (FK to users; cascade delete)
+      ticket_id     : uuid (FK to matchmaking_tickets, nullable)
+      state         : string ("pending" | "ready" | "declined" | "timed_out")
+      responded_at  : utc_datetime (nullable)
+      -- unique index (ready_check_id, user_id)
+    )</pre>
+        </div>
+        <p class="pl-4 mt-1">
+          {doc_text(
+            "One row per participant rather than a map on the check, so answering is a single-row write and two players answering at once cannot overwrite each other. Ready state lives here and nowhere else: no column is added to users, and nothing is written to lobbies.metadata. A participant row belongs to the check, so it dies with it — leaving or being kicked removes the row and re-evaluates the check."
+          )}
+        </p>
+
         <h4 class="font-semibold">{doc_text("Key-Value store (kv_entries)")}</h4>
         <div class="bg-base-200 font-mono text-sm p-4 rounded-lg overflow-auto">
           <pre>

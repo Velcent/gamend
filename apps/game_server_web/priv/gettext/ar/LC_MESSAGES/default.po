@@ -132,6 +132,7 @@ msgstr "رجوع"
 msgid "Block"
 msgstr "حظر"
 
+#: lib/game_server_web/live/admin_live/matchmaking.ex:241
 #: lib/game_server_web/live/chat_live.ex:255
 #: lib/game_server_web/live/lobby_live/index.ex:760
 #: lib/game_server_web/live/user_live/settings/friends_tab.ex:109
@@ -452,6 +453,7 @@ msgstr "جارٍ الحفظ..."
 msgid "Send"
 msgstr "إرسال"
 
+#: lib/game_server_web/live/admin_live/matchmaking.ex:220
 #: lib/game_server_web/live/groups_live.ex:439
 #: lib/game_server_web/live/quests_live.ex:576
 #: lib/game_server_web/live/store_live/index.ex:130
@@ -734,6 +736,7 @@ msgstr "مفتوحة"
 #: lib/game_server_web/controllers/user_session_controller.ex:56
 #: lib/game_server_web/controllers/user_session_controller.ex:76
 #: lib/game_server_web/controllers/user_session_controller.ex:104
+#: lib/game_server_web/live/admin_live/matchmaking.ex:210
 #: lib/game_server_web/live/auth_success_live.ex:72
 #: lib/game_server_web/live/auth_success_live.ex:74
 #: lib/game_server_web/live/auth_success_live.ex:137
@@ -807,6 +810,7 @@ msgstr "حسابك في انتظار التفعيل."
 msgid "In Progress"
 msgstr "قيد التقدم"
 
+#: lib/game_server_web/live/admin_live/matchmaking.ex:212
 #: lib/game_server_web/live/groups_live.ex:199
 #: lib/game_server_web/live/groups_live.ex:524
 #: lib/game_server_web/live/groups_live.ex:691
@@ -1021,6 +1025,7 @@ msgstr "الطلبات الواردة"
 msgid "Invalid payment state"
 msgstr "حالة دفع غير صالحة"
 
+#: lib/game_server_web/live/admin_live/matchmaking.ex:219
 #: lib/game_server_web/live/user_live/settings/payments_tab.ex:122
 #, elixir-autogen, elixir-format
 msgid "Kind"
@@ -1225,6 +1230,7 @@ msgstr "حجم الجدول"
 msgid "Brackets"
 msgstr "جداول المباريات"
 
+#: lib/game_server_web/live/admin_live/matchmaking.ex:211
 #: lib/game_server_web/live/tournaments_live.ex:954
 #, elixir-autogen, elixir-format
 msgid "Cancelled"
@@ -1456,6 +1462,7 @@ msgstr "يرجى اختيار صورة أولاً."
 msgid "Quantity"
 msgstr "الكمية"
 
+#: lib/game_server_web/live/admin_live/matchmaking.ex:221
 #: lib/game_server_web/live/user_live/settings/wallet_tab.ex:65
 #, elixir-autogen, elixir-format
 msgid "Reason"
@@ -1580,3 +1587,28 @@ msgstr "لا توجد أجهزة مسجلة."
 #, elixir-autogen, elixir-format
 msgid "Platform"
 msgstr "المنصة"
+
+#: lib/game_server_web/live/admin_live/matchmaking.ex:209
+#, elixir-autogen, elixir-format
+msgid "Passed"
+msgstr "تم الاجتياز"
+
+#: lib/game_server_web/live/admin_live/matchmaking.ex:222
+#, elixir-autogen, elixir-format
+msgid "Ready"
+msgstr "جاهز"
+
+#: lib/game_server_web/live/admin_live/matchmaking.ex:205
+#, elixir-autogen, elixir-format
+msgid "Ready checks"
+msgstr "فحوص الجاهزية"
+
+#: lib/game_server_web/live/admin_live/matchmaking.ex:206
+#, elixir-autogen, elixir-format
+msgid "last 24h"
+msgstr "آخر 24 ساعة"
+
+#: lib/game_server_web/live/admin_live/matchmaking.ex:223
+#, elixir-autogen, elixir-format
+msgid "Created"
+msgstr "تاريخ الإنشاء"

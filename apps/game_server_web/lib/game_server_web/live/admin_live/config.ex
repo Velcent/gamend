@@ -2785,10 +2785,29 @@ defmodule GameServerWeb.AdminLive.Config do
     "Tournaments" =>
       ~w(max_tournament_title max_tournament_description max_tournament_slug max_tournament_entries max_tournament_bracket_size)a,
     "Matchmaking" =>
-      ~w(max_matchmaking_players max_matchmaking_params_size matchmaking_timeout_ms matchmaking_tick_ms)a
+      ~w(max_matchmaking_players max_matchmaking_params_size matchmaking_timeout_ms matchmaking_tick_ms)a,
+    "Ready checks" => ~w(ready_check_timeout_ms max_ready_check_participants)a
   }
 
-  @category_order ~w(Global User Groups Lobbies Parties Chat Notifications Push Friends Hooks KV Leaderboards Quests Tournaments Matchmaking)
+  # Not a ~w sigil: "Ready checks" has a space in it.
+  @category_order [
+    "Global",
+    "User",
+    "Groups",
+    "Lobbies",
+    "Parties",
+    "Chat",
+    "Notifications",
+    "Push",
+    "Friends",
+    "Hooks",
+    "KV",
+    "Leaderboards",
+    "Quests",
+    "Tournaments",
+    "Matchmaking",
+    "Ready checks"
+  ]
 
   defp limits_grouped do
     defaults = GameServer.Limits.defaults()

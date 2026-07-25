@@ -210,7 +210,7 @@ defmodule GameServerWeb.AdminLive.Quests do
                       <span class={["badge badge-sm", status_badge(p.status)]}>{p.status}</span>
                     </td>
                     <td class="text-sm">
-                      {Calendar.strftime(p.updated_at, "%Y-%m-%d %H:%M")}
+                      <.timestamp at={p.updated_at} />
                     </td>
                     <td class="text-sm">
                       <div class="flex flex-wrap gap-1">
@@ -339,10 +339,14 @@ defmodule GameServerWeb.AdminLive.Quests do
               />
               <.input
                 field={@form[:starts_at]}
-                type="datetime-local"
+                type="utc-datetime-local"
                 label="Starts at (event window)"
               />
-              <.input field={@form[:ends_at]} type="datetime-local" label="Ends at (event window)" />
+              <.input
+                field={@form[:ends_at]}
+                type="utc-datetime-local"
+                label="Ends at (event window)"
+              />
               <.input field={@form[:sort_order]} type="number" label="Sort Order" />
               <.input
                 field={@form[:hidden]}
@@ -512,7 +516,6 @@ defmodule GameServerWeb.AdminLive.Quests do
       params
       |> parse_metadata()
       |> TranslationMetadata.merge(Map.get(all_params, "translations", %{}))
-      |> normalize_datetimes()
       |> put_json_list(all_params, "objectives_json", "objectives")
       |> put_json_list(all_params, "rewards_json", "rewards")
 
@@ -826,16 +829,5 @@ defmodule GameServerWeb.AdminLive.Quests do
       {:ok, list} when is_list(list) -> Map.put(params, target_key, list)
       _ -> params
     end
-  end
-
-  # datetime-local inputs omit seconds; :utc_datetime cast wants them.
-  defp normalize_datetimes(params) do
-    Map.new(params, fn {key, value} ->
-      if is_binary(value) and Regex.match?(~r/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/, value) do
-        {key, value <> ":00"}
-      else
-        {key, value}
-      end
-    end)
   end
 end

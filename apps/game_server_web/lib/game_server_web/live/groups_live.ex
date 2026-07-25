@@ -564,7 +564,7 @@ defmodule GameServerWeb.GroupsLive do
               <span class="badge badge-warning">{gettext("Private")}</span>
             <% end %>
             <span class="text-sm text-base-content/60">
-              {Calendar.strftime(@selected_group.inserted_at, "%b %d, %Y")}
+              <.timestamp at={@selected_group.inserted_at} format="date" />
             </span>
           </div>
         </div>

@@ -32,7 +32,8 @@ defmodule Mix.Tasks.Gen.Sdk do
     {GameServer.Inventory, "inventory.ex"},
     {GameServer.KV, "kv.ex"},
     {GameServer.Lock, "lock.ex"},
-    {GameServer.Tournaments, "tournaments.ex"}
+    {GameServer.Tournaments, "tournaments.ex"},
+    {GameServer.ReadyChecks, "ready_checks.ex"}
   ]
 
   @impl Mix.Task
@@ -290,6 +291,8 @@ defmodule Mix.Tasks.Gen.Sdk do
        "{:ok, #{tournament_match_placeholder_expr()}}"},
       {fn rt -> String.contains?(rt, "{:ok, GameServer.Push.PushToken.t()}") end,
        "{:ok, #{push_token_placeholder_expr()}}"},
+      {fn rt -> String.contains?(rt, "{:ok, GameServer.ReadyChecks.Check.t()}") end,
+       "{:ok, #{ready_check_placeholder_expr()}}"},
       {fn rt -> String.contains?(rt, "{:ok, GameServer.Quests.Quest.t()}") end,
        "{:ok, #{quest_placeholder_expr()}}"},
       {fn rt -> String.contains?(rt, "{:ok, GameServer.Quests.QuestProgress.t()}") end,
@@ -341,6 +344,11 @@ defmodule Mix.Tasks.Gen.Sdk do
            String.contains?(rt, "| nil")
        end,
        "if :erlang.phash2(make_ref(), 2) == 0, do: nil, else: #{tournament_bracket_placeholder_expr()}"},
+      {fn rt ->
+         String.contains?(rt, "GameServer.ReadyChecks.Check.t()") and
+           String.contains?(rt, "| nil")
+       end,
+       "if :erlang.phash2(make_ref(), 2) == 0, do: nil, else: #{ready_check_placeholder_expr()}"},
       {fn rt ->
          String.contains?(rt, "GameServer.Quests.Quest.t()") and String.contains?(rt, "| nil")
        end, "if :erlang.phash2(make_ref(), 2) == 0, do: nil, else: #{quest_placeholder_expr()}"},
@@ -476,6 +484,12 @@ defmodule Mix.Tasks.Gen.Sdk do
     dt = dt_placeholder_expr()
 
     "%GameServer.Tournaments.Match{id: \"\", tournament_id: \"\", bracket_index: 0, round: 1, slot: 0, a_entry_id: nil, b_entry_id: nil, winner_entry_id: nil, ready_at: nil, expired_at: nil, resolved_at: nil, deadline: #{dt}, metadata: %{}, inserted_at: #{dt}, updated_at: #{dt}}"
+  end
+
+  defp ready_check_placeholder_expr do
+    dt = dt_placeholder_expr()
+
+    "%GameServer.ReadyChecks.Check{id: \"\", kind: \"ready\", status: \"pending\", lobby_id: nil, deadline: nil, opened_by: nil, reason: nil, resolved_at: nil, metadata: %{}, participants: [], inserted_at: #{dt}, updated_at: #{dt}}"
   end
 
   defp tournament_bracket_placeholder_expr do

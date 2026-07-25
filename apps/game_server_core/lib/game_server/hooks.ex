@@ -275,6 +275,19 @@ defmodule GameServer.Hooks do
               hook_result({User.t(), User.t(), Lobby.t()})
   @callback after_lobby_kick(User.t(), User.t(), Lobby.t()) :: any()
 
+  # Ready checks (see GameServer.ReadyChecks). `after_ready_check_passed` is the
+  # "everyone answered yes" callback — where a game starts its match.
+  # `after_ready_check_failed` receives the participants who did not answer
+  # ready; core kicks nobody, so acting on them is the game's call.
+  @callback before_ready_check_open(GameServer.Lobbies.Lobby.t() | :matchmaking, [String.t()]) ::
+              hook_result(term())
+  @callback after_ready_check_passed(GameServer.ReadyChecks.Check.t()) :: any()
+  @callback after_ready_check_failed(GameServer.ReadyChecks.Check.t(), String.t(), [map()]) ::
+              any()
+  @optional_callbacks before_ready_check_open: 2,
+                      after_ready_check_passed: 1,
+                      after_ready_check_failed: 3
+
   @doc """
   Called before a KV `get/2` is performed. Implementations should return
   one of these client KV API access decisions:
@@ -519,6 +532,9 @@ defmodule GameServer.Hooks do
       :before_lobby_kick,
       :after_lobby_kick,
       :after_lobby_host_change,
+      :before_ready_check_open,
+      :after_ready_check_passed,
+      :after_ready_check_failed,
       :before_quest_claim,
       :after_quest_completed,
       :after_quest_claimed,
@@ -597,7 +613,8 @@ defmodule GameServer.Hooks do
       :before_tournament_leave,
       :before_tournament_result,
       :before_quest_claim,
-      :before_lobby_state_change
+      :before_lobby_state_change,
+      :before_ready_check_open
     ] and arity > 0
   end
 
@@ -755,7 +772,8 @@ defmodule GameServer.Hooks do
               :before_tournament_leave,
               :before_tournament_result,
               :before_quest_claim,
-              :before_lobby_state_change
+              :before_lobby_state_change,
+              :before_ready_check_open
             ] and is_list(current_args) do
     {:ok, current_args}
   end
@@ -1459,6 +1477,15 @@ defmodule GameServer.Hooks.Default do
 
   @impl true
   def after_lobby_host_change(_lobby, _new_host_id), do: :ok
+
+  @impl true
+  def before_ready_check_open(_subject, _user_ids), do: :ok
+
+  @impl true
+  def after_ready_check_passed(_check), do: :ok
+
+  @impl true
+  def after_ready_check_failed(_check, _reason, _not_ready), do: :ok
 
   @impl true
   @doc """

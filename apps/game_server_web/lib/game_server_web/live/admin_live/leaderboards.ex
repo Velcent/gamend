@@ -145,7 +145,7 @@ defmodule GameServerWeb.AdminLive.Leaderboards do
                       </span>
                     </td>
                     <td class="text-sm">
-                      {Calendar.strftime(lb.inserted_at, "%Y-%m-%d %H:%M")}
+                      <.timestamp at={lb.inserted_at} />
                     </td>
                     <td class="text-sm">
                       <div class="flex flex-wrap gap-1">
@@ -318,8 +318,12 @@ defmodule GameServerWeb.AdminLive.Leaderboards do
                 </div>
               <% end %>
 
-              <.input field={@form[:starts_at]} type="datetime-local" label="Starts at (optional)" />
-              <.input field={@form[:ends_at]} type="datetime-local" label="Ends at (optional)" />
+              <.input
+                field={@form[:starts_at]}
+                type="utc-datetime-local"
+                label="Starts at (optional)"
+              />
+              <.input field={@form[:ends_at]} type="utc-datetime-local" label="Ends at (optional)" />
 
               <div class="form-control">
                 <label class="label"><span class="label-text">Metadata (JSON)</span></label>
@@ -381,7 +385,7 @@ defmodule GameServerWeb.AdminLive.Leaderboards do
                     </td>
                     <td class="font-mono">{record.score}</td>
                     <td class="text-sm">
-                      {Calendar.strftime(record.updated_at, "%Y-%m-%d %H:%M")}
+                      <.timestamp at={record.updated_at} />
                     </td>
                     <td class="flex gap-1">
                       <button

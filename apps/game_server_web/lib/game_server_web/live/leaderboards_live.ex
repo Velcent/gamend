@@ -210,14 +210,12 @@ defmodule GameServerWeb.LeaderboardsLive do
               <span class="text-sm text-base-content/60">
                 <%= cond do %>
                   <% @leaderboard.starts_at && @leaderboard.ends_at -> %>
-                    {Calendar.strftime(@leaderboard.starts_at, "%b %d, %Y")} — {Calendar.strftime(
-                      @leaderboard.ends_at,
-                      "%b %d, %Y"
-                    )}
+                    <.timestamp at={@leaderboard.starts_at} format="date" /> —
+                    <.timestamp at={@leaderboard.ends_at} format="date" />
                   <% @leaderboard.ends_at -> %>
-                    {Calendar.strftime(@leaderboard.ends_at, "%b %d, %Y")}
+                    <.timestamp at={@leaderboard.ends_at} format="date" />
                   <% @leaderboard.starts_at -> %>
-                    {Calendar.strftime(@leaderboard.starts_at, "%b %d, %Y")}
+                    <.timestamp at={@leaderboard.starts_at} format="date" />
                   <% true -> %>
                 <% end %>
               </span>

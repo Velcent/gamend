@@ -164,17 +164,27 @@ defmodule GameServerWeb.ApiSpec do
         - **Inspect**: `GET /matchmaking/tickets/me` for your ticket, `GET /matchmaking/stats` for queue depths
         - **Admin management** over HTTP: list/filter tickets, force-cancel, and stats under `/api/v1/admin/matchmaking`
 
-        ## **14. Real-time: WebSocket Channels**
+        ## **14. Ready checks**
+        One primitive for "everyone must answer before this proceeds", with one client-facing surface:
+
+        - **A player is in at most one check**, so answering needs no id: `GET /me/ready_check` returns the open one (or null) and `POST /me/ready_check` with `{"ready": true|false}` answers it
+        - **Two kinds.** `ready` (lobby ready-up) is a toggle — a "no" just leaves the check open, and it lists every participant. `accept` (match confirmation) is final — one decline fails it for everyone — and returns counts plus your own state, so a pending match does not reveal who you were paired with
+        - **Hosts open one** with `POST /lobbies/ready_check` (host-managed lobbies only; hostless matchmaking lobbies belong to the server), call it off with `DELETE /lobbies/ready_check`, and are pre-marked ready — clicking the button is their answer
+        - **Failure does nothing on its own**: a declined or timed-out check kicks nobody, starts nothing, and moves no lobby state. It reports who did not answer, and the game (or the host, with the kick they already have) decides
+        - **Live**: `ready_check_started` / `ready_check_updated` / `ready_check_passed` / `ready_check_failed` on the lobby channel — or the user channel for an accept check
+        - **Admin management** over HTTP: list/filter checks, force-cancel, and 24h outcome stats under `/api/v1/admin/ready_checks`
+
+        ## **15. Real-time: WebSocket Channels**
         The server provides real-time communication via Phoenix WebSocket channels. Connect to the WebSocket endpoint and join topic-based channels for live updates.
 
-        ### **14.1 Connection**
+        ### **15.1 Connection**
         Connect to `wss://your-server.com/socket` with your JWT token as a parameter:
         ```
         const socket = new Socket("wss://your-server.com/socket", { params: { token: "<access_token>" } })
         socket.connect()
         ```
 
-        ### **14.2 Available Channels**
+        ### **15.2 Available Channels**
         - **User channel** (`user:<user_id>`): notifications, friend events, quest progress/completions/claims, party/group invites, tournament events, KV subscriptions
         - **Lobby channel** (`lobby:<lobby_id>`): lobby member joins/leaves, lobby updates, lobby chat
         - **Lobbies channel** (`lobbies`): global lobby list changes (created, updated, deleted)
@@ -182,7 +192,7 @@ defmodule GameServerWeb.ApiSpec do
         - **Groups channel** (`groups`): global group list changes
         - **Party channel** (`party:<party_id>`): party member changes, party updates, party chat
 
-        ### **14.3 JS SDK Helper**
+        ### **15.3 JS SDK Helper**
         The `GameRealtime` class (included in this SDK) wraps Phoenix.Socket with convenient channel helpers:
         ```javascript
         import { GameRealtime } from '@ughuuu/game_server'
@@ -192,21 +202,21 @@ defmodule GameServerWeb.ApiSpec do
         ```
         Requires the `phoenix` npm package as a peer dependency: `npm install phoenix`
 
-        ## **15. Real-time: WebRTC DataChannels**
+        ## **16. Real-time: WebRTC DataChannels**
         For low-latency game data, the server supports WebRTC DataChannels alongside WebSocket. The server acts as a WebRTC peer (not P2P between clients).
 
-        ### **15.1 How It Works**
+        ### **16.1 How It Works**
         1. Client connects via WebSocket and joins the **User channel**
         2. Client sends an SDP offer over the channel (`webrtc:offer` event)
         3. Server responds with an SDP answer (`webrtc:answer` event)
         4. ICE candidates are exchanged (`webrtc:ice` events)
         5. Once connected, named DataChannels carry game data at low latency
 
-        ### **15.2 Default DataChannels**
+        ### **16.2 Default DataChannels**
         - **`events`** (reliable, ordered): important game events (player actions, state changes)
         - **`state`** (unreliable, unordered): high-frequency position/state sync
 
-        ### **15.3 JS SDK Helper**
+        ### **16.3 JS SDK Helper**
         The `GameWebRTC` class (included in this SDK, browser-only) handles signaling automatically:
         ```javascript
         import { GameRealtime, GameWebRTC } from '@ughuuu/game_server'
@@ -251,6 +261,10 @@ defmodule GameServerWeb.ApiSpec do
           description: "Ticket queue — join, cancel, your ticket, queue stats"
         },
         %Tag{
+          name: "Ready checks",
+          description: "Ready up / accept — read and answer the caller's open check"
+        },
+        %Tag{
           name: "Quests",
           description: "Quests/progression — objectives, periods, claims, rewards"
         },
@@ -277,6 +291,10 @@ defmodule GameServerWeb.ApiSpec do
         %Tag{name: "Admin – Leaderboards", description: "Admin leaderboard management"},
         %Tag{name: "Admin – Tournaments", description: "Admin tournament management"},
         %Tag{name: "Admin – Matchmaking", description: "Admin matchmaking queue management"},
+        %Tag{
+          name: "Admin – Ready checks",
+          description: "Admin ready-check inspection and force-cancel"
+        },
         %Tag{name: "Admin – KV", description: "Admin key-value storage management"},
         %Tag{
           name: "Admin – Economy",

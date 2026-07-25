@@ -1,12 +1,15 @@
 # July 2026
 
-- [breaking] **Hostless lobbies are server-owned** — `PATCH /lobbies` (and `Lobbies.update_lobby_by_host/3`) now returns `403 not_host` for every player in a hostless (matchmaking) lobby, where any member could previously rewrite `metadata`, `max_users`, `password_hash`, `title` and the visibility flags. Server-side code uses `Lobbies.update_lobby/2`; the admin API and console are unchanged.
-- [added] **Retention for every unbounded table** — lobbies nobody in them has been seen in for `RETENTION_ABANDONED_LOBBY_MINUTES` (never around a reconnect; ending a match is the game's job to clean up, not retention's), expired auth tokens, resolved invites, matchmaking tickets, plus opt-in tournaments and ledgers. Batched and failure-isolated per class, with a Data Retention card and "Run now" under Admin -> System and `GET`/`POST /api/v1/admin/retention`. Every window's default now applies in all environments; previously the whole config block was prod-only, so dev pruned nothing.
-- [added] **Push notifications** — FCM + APNs-direct via Pigeon, routed per token; offline notification delivery.
-- [added] **Push-token registry** — `/me/push-tokens`, admin page, retention pruning.
-- [added] **Lobby state** — server-owned `state` + `state_changed_at`, a game-defined vocabulary via the `lobby_states/0` declaration (a state is a word and a description; core attaches no lifecycle meaning to any of them), `POST /lobbies/state` for hosts (hostless lobbies stay server-only), `state` filter, `state_changed` event and `before_lobby_state_change` / `after_lobby_state_changed` hooks.
+- [changed] **Times are shown in the reader's timezone.** Storage and the API are unchanged (UTC everywhere, ISO8601 with `Z`); every rendered timestamp is now a `<time datetime="…Z">` that the browser rewrites in the viewer's own zone and locale, falling back to UTC-labelled text without JS. Use `<.timestamp at={...} />` rather than `Calendar.strftime` for anything a person reads.
+- [fixed] **Admin datetime fields no longer store local time as UTC.** A `datetime-local` input submits the browser's wall clock with no offset, so scheduling a tournament, leaderboard window or quest event for 14:30 previously stored 14:30 UTC — three hours off for an admin in UTC+3. The new `utc-datetime-local` input keeps a hidden UTC field the form casts and converts in the browser against the entered date, so DST is right for a value months out.
+- [fixed] `friendships` and `oauth_sessions` used a bare `timestamps()` (naive) while every other schema stores `:utc_datetime`; both are now `:utc_datetime`. Same column type, so no migration.
+
+- [added] Retention for every unbounded table
+- [added] **Ready checks**
+- [added] **Push notifications**
+- [added] **Lobby state**
 - [added] **Quests / progression**.
-- [breaking] **Achievements removed** — replaced by permanent quests categorised "achievement"; `/quests` supersedes the `/achievements` API, page and hooks.
+- [breaking] **Achievements removed** — replaced by permanent quests
 - [added] **Economy**.
 - [added] **Inventory**.
 - [added] **Object storage** — with local-disk and S3/R2 backends; presigned avatar uploads.

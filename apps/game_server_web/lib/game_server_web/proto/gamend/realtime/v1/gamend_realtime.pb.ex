@@ -368,6 +368,39 @@ defmodule Gamend.Realtime.V1.MatchmakingFound do
     map: true
 end
 
+defmodule Gamend.Realtime.V1.ReadyCheckParticipant do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "gamend.realtime.v1.ReadyCheckParticipant",
+    protoc_gen_elixir_version: "0.17.0",
+    syntax: :proto3
+
+  field :user_id, 1, type: :string, json_name: "userId"
+  field :display_name, 2, type: :string, json_name: "displayName"
+  field :state, 3, type: :string
+end
+
+defmodule Gamend.Realtime.V1.ReadyCheckState do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "gamend.realtime.v1.ReadyCheckState",
+    protoc_gen_elixir_version: "0.17.0",
+    syntax: :proto3
+
+  field :id, 1, type: :string
+  field :kind, 2, type: :string
+  field :status, 3, type: :string
+  field :lobby_id, 4, type: :string, json_name: "lobbyId"
+  field :deadline_ms, 5, type: :int64, json_name: "deadlineMs"
+  field :total, 6, type: :int32
+  field :ready_count, 7, type: :int32, json_name: "readyCount"
+  field :your_state, 8, type: :string, json_name: "yourState"
+  field :reason, 9, type: :string
+  field :participants, 10, repeated: true, type: Gamend.Realtime.V1.ReadyCheckParticipant
+end
+
 defmodule Gamend.Realtime.V1.KvEntry do
   @moduledoc false
 

@@ -262,6 +262,13 @@ defmodule GameServerWeb.AdminLive.Index do
                     Matched: {@matchmaking_stats.matched} · Cancelled: {@matchmaking_stats.cancelled}
                   </div>
                   <div>Active queues: {length(@matchmaking_stats.queues)}</div>
+                  <div>
+                    Ready checks 24h: {Map.get(@ready_check_stats, "passed", 0)} passed · {Map.get(
+                      @ready_check_stats,
+                      "failed",
+                      0
+                    )} failed
+                  </div>
                 </div>
               </div>
 
@@ -682,6 +689,7 @@ defmodule GameServerWeb.AdminLive.Index do
         Task.async(fn -> Repo.aggregate(GameServer.Tournaments.Tournament, :count) end),
       tournament_stats: Task.async(fn -> GameServer.Tournaments.stats() end),
       matchmaking_stats: Task.async(fn -> GameServer.Matchmaking.stats() end),
+      ready_check_stats: Task.async(fn -> GameServer.ReadyChecks.stats() end),
       kv_count: Task.async(fn -> KV.count_entries() end),
       kv_global: Task.async(fn -> KV.count_entries(global_only: true) end),
       users_google: Task.async(fn -> Accounts.count_users_with_provider(:google_id) end),

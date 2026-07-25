@@ -26,6 +26,8 @@ defmodule Mix.Tasks.Demo.Seed do
       volume)
     * `quest` — a daily, an auto-claim achievement and a chained follow-up,
       with per-user progress in every state (including claimable rows)
+    * `ready_check` — one check per seeded lobby in every outcome (open,
+      passed, timed out, declined), also capped at 12
 
   The `lobby_snapshot` set goes through the real `capture_lobby/3` path rather
   than inserting rows, so what you see is shaped exactly like production data —
@@ -62,6 +64,8 @@ defmodule Mix.Tasks.Demo.Seed do
   alias GameServer.Push.PushToken
   alias GameServer.Quests.Quest
   alias GameServer.Quests.QuestProgress
+  alias GameServer.ReadyChecks.Check, as: ReadyCheck
+  alias GameServer.ReadyChecks.Participant, as: ReadyCheckParticipant
   alias GameServer.Repo
   alias GameServer.Tournaments.Entry
   alias GameServer.Tournaments.Tournament
@@ -74,7 +78,7 @@ defmodule Mix.Tasks.Demo.Seed do
   @quest_key_prefix "demo-seed-"
   @default_count 1000
   @batch 500
-  @all_sets ~w(leaderboard group tournament lobby_snapshot quest push)
+  @all_sets ~w(leaderboard group tournament lobby_snapshot quest push ready_check)
   @lobby_title_prefix "Demo Seed Run"
   @max_runs 12
 
@@ -101,6 +105,7 @@ defmodule Mix.Tasks.Demo.Seed do
         "lobby_snapshot" -> seed_lobby_snapshots(users)
         "quest" -> seed_quests(users)
         "push" -> seed_push_tokens(users)
+        "ready_check" -> seed_ready_checks(users)
       end)
 
       GameServer.Cache.delete_all()
@@ -463,6 +468,83 @@ defmodule Mix.Tasks.Demo.Seed do
 
     info("push: #{length(user_ids)} device tokens -> /admin/push")
   end
+
+  # Lobbies are hosted by seeded players and cascade on --clean, so the checks
+  # attached to them go too. Each run gets one open check plus a spread of
+  # resolved ones, which is what the admin page's 24h counters read.
+  defp seed_ready_checks(user_ids) do
+    hosts = Enum.take(user_ids, min(@max_runs, length(user_ids)))
+    now = DateTime.utc_now(:second)
+
+    checks =
+      hosts
+      |> Enum.with_index()
+      |> Enum.map(fn {host_id, i} ->
+        {status, reason} =
+          case rem(i, 4) do
+            0 -> {"pending", nil}
+            1 -> {"passed", nil}
+            2 -> {"failed", "timeout"}
+            3 -> {"failed", "declined"}
+          end
+
+        lobby =
+          upsert(Lobby, [title: "#{@lobby_title_prefix} Ready #{pad(i)}"], %{
+            title: "#{@lobby_title_prefix} Ready #{pad(i)}",
+            host_id: host_id,
+            max_users: 4,
+            metadata: %{},
+            state: "created",
+            state_changed_at: now
+          })
+
+        %{
+          id: UUIDv7.generate(),
+          kind: if(rem(i, 3) == 0, do: "accept", else: "ready"),
+          status: status,
+          lobby_id: lobby.id,
+          deadline: DateTime.add(now, 15, :second),
+          opened_by: host_id,
+          reason: reason,
+          resolved_at: if(status != "pending", do: now),
+          metadata: %{},
+          inserted_at: now,
+          updated_at: now
+        }
+      end)
+
+    insert_batches(checks, ReadyCheck)
+
+    participants =
+      checks
+      |> Enum.with_index()
+      |> Enum.flat_map(fn {check, i} ->
+        user_ids
+        |> Enum.slice(i, 3)
+        |> Enum.with_index()
+        |> Enum.map(fn {user_id, j} ->
+          %{
+            id: UUIDv7.generate(),
+            ready_check_id: check.id,
+            user_id: user_id,
+            state: participant_state(check, j),
+            responded_at: now,
+            inserted_at: now,
+            updated_at: now
+          }
+        end)
+      end)
+
+    insert_batches(participants, ReadyCheckParticipant)
+
+    info("ready checks: #{length(checks)} (this set ignores --count) -> /admin/matchmaking")
+  end
+
+  defp participant_state(%{status: "passed"}, _index), do: "ready"
+  defp participant_state(%{status: "failed", reason: "declined"}, 0), do: "declined"
+  defp participant_state(%{status: "failed", reason: "timeout"}, 0), do: "timed_out"
+  defp participant_state(%{status: "pending"}, 0), do: "pending"
+  defp participant_state(_check, _index), do: "ready"
 
   defp clean do
     lb = Repo.get_by(Leaderboard, slug: @leaderboard_slug)

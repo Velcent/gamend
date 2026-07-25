@@ -54,12 +54,10 @@ defmodule GameServerWeb.UserLive.Settings.DevicesTab do
                 <td class="text-sm">{device.platform}</td>
                 <td class="text-sm">{device.provider}</td>
                 <td class="text-sm whitespace-nowrap">
-                  {Calendar.strftime(device.inserted_at, "%Y-%m-%d %H:%M")}
+                  <.timestamp at={device.inserted_at} />
                 </td>
                 <td class="text-sm whitespace-nowrap">
-                  {if device.last_used_at,
-                    do: Calendar.strftime(device.last_used_at, "%Y-%m-%d %H:%M"),
-                    else: "-"}
+                  <.timestamp at={device.last_used_at} />
                 </td>
                 <td class="text-sm">
                   <span :if={is_nil(device.disabled_at)} class="badge badge-success badge-sm">

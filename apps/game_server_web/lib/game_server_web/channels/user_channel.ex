@@ -331,6 +331,13 @@ defmodule GameServerWeb.UserChannel do
     {:noreply, socket}
   end
 
+  # A matchmaking ready check has no lobby topic yet, so it fans out per user.
+  def handle_info({:ready_check_event, event, check}, socket) do
+    user_id = socket.assigns.current_scope.user_id
+    push_event(socket, event, Serializers.serialize_ready_check(check, viewer_id: user_id))
+    {:noreply, socket}
+  end
+
   def handle_info({:wallet_updated, payload}, socket) do
     push_event(socket, "wallet_updated", payload)
     {:noreply, socket}

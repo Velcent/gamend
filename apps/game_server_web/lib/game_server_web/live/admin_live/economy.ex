@@ -321,7 +321,7 @@ defmodule GameServerWeb.AdminLive.Economy do
               <tbody>
                 <tr :for={e <- @ledger} id={"ledger-#{e.id}"}>
                   <td class="text-xs whitespace-nowrap">
-                    {Calendar.strftime(e.inserted_at, "%Y-%m-%d %H:%M:%S")}
+                    <.timestamp at={e.inserted_at} format="full" />
                   </td>
                   <td class="text-xs" title={e.user_id}>{user_display(e.user)}</td>
                   <td class="font-mono text-xs">{e.currency}</td>

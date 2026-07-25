@@ -519,7 +519,7 @@ defmodule GameServerWeb.TournamentsLive do
           <div class="flex items-center gap-2 mt-1">
             <.state_badge state={@tournament.state} />
             <span :if={@tournament.starts_at} class="text-sm text-base-content/60">
-              {Calendar.strftime(@tournament.starts_at, "%b %d, %Y")}
+              <.timestamp at={@tournament.starts_at} format="date" />
             </span>
             <span :if={is_nil(@tournament.starts_at)} class="text-sm text-base-content/60">
               {gettext("Starts manually")}
@@ -787,7 +787,7 @@ defmodule GameServerWeb.TournamentsLive do
             {gettext("Slots")}: {@bracket.size}
           </span>
           <span :if={@tournament.starts_at} class="text-sm text-base-content/60">
-            {Calendar.strftime(@tournament.starts_at, "%b %d, %Y")}
+            <.timestamp at={@tournament.starts_at} format="date" />
           </span>
           <span :if={is_nil(@tournament.starts_at)} class="text-sm text-base-content/60">
             {gettext("Starts manually")}

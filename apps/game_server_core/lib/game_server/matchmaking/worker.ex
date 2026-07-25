@@ -59,6 +59,10 @@ defmodule GameServer.Matchmaking.Worker do
   """
   @spec sweep() :: non_neg_integer()
   def sweep do
+    # Backstop for a ready check whose durable expiry job was lost. Outside the
+    # lock: expiring fires hooks and broadcasts. One indexed query per tick.
+    _ = GameServer.ReadyChecks.expire_due()
+
     claimed =
       case GameServer.Lock.serialize(:matchmaking_sweep, "global", &claim_phase/0) do
         {:ok, matches} -> matches

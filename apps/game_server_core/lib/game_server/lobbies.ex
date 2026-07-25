@@ -541,6 +541,9 @@ defmodule GameServer.Lobbies do
             # Post-commit: write the correct value to cache so stale
             # concurrent @decorate cacheable puts are overwritten.
             Accounts.cache_user(updated_user)
+            # Also post-commit: adding a late arrival to an open ready check
+            # broadcasts, which must never happen inside the join transaction.
+            _ = GameServer.ReadyChecks.add_member(lobby.id, user_id)
             {:ok, updated_user}
 
           error ->
@@ -1167,6 +1170,9 @@ defmodule GameServer.Lobbies do
     if match?({:ok, _}, result), do: run_before_lobby_leave(user_id, lobby)
 
     _ = clear_lobby_scoped_kv(user_id, lobby_id)
+    # The check is about who is present; a leaver stops being part of it, and
+    # the remaining members may now all be ready.
+    _ = GameServer.ReadyChecks.remove_member(lobby_id, user_id)
 
     result
     |> broadcast_leave_result(lobby_id, user_id)
@@ -1352,6 +1358,7 @@ defmodule GameServer.Lobbies do
           {:ok, updated} ->
             _ = invalidate_accounts_user_cache(membership.id)
             _ = clear_lobby_scoped_kv(membership.id, lobby.id)
+            _ = GameServer.ReadyChecks.remove_member(lobby.id, membership.id)
             _ = Accounts.broadcast_user_update(updated)
             _ = Accounts.broadcast_member_update(updated)
 

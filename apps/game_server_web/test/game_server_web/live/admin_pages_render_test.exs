@@ -122,8 +122,13 @@ defmodule GameServerWeb.AdminPagesRenderTest do
     other = AccountsFixtures.user_fixture()
 
     # Lobby with a member
-    {:ok, _lobby} =
+    {:ok, lobby} =
       GameServer.Lobbies.create_lobby(%{title: "Seeded Lobby", hostless: true, max_users: 10})
+
+    # Ready check, so /admin/matchmaking renders its table rather than the empty
+    # state. Opened over the hostless lobby: seating a member would fire the
+    # join hooks asynchronously, and this file is async.
+    {:ok, _check} = GameServer.ReadyChecks.open(lobby, [admin.id], opened_by: admin.id)
 
     # Group with a member
     {:ok, _group} =

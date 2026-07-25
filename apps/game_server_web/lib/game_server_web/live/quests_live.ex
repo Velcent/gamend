@@ -561,7 +561,7 @@ defmodule GameServerWeb.QuestsLive do
                   <span class="text-xs font-medium">
                     {gettext("Claimed")}
                     <span :if={@progress.completed_at} class="text-base-content/40 ml-1">
-                      {Calendar.strftime(@progress.completed_at, "%b %d, %Y")}
+                      <.timestamp at={@progress.completed_at} format="date" />
                     </span>
                   </span>
                 </div>

@@ -248,6 +248,40 @@ message MatchmakingFound {
   map<string, string> match_params = 2;
 }
 
+// ── Ready checks ─────────────────────────────────────────────────────────
+
+// One participant's answer inside a ready check.
+message ReadyCheckParticipant {
+  string user_id = 1;
+  string display_name = 2;
+  // "pending" | "ready" | "declined" | "timed_out"
+  string state = 3;
+}
+
+// "ready_check_started", "ready_check_updated", "ready_check_passed" and
+// "ready_check_failed" on lobby:<id> channels (and on user:<id> for a
+// matchmaking accept check, which has no lobby yet).
+//
+// `participants` is populated only for kind "ready": an accept check that may
+// still dissolve does not reveal who the player was paired with, so it carries
+// `total`, `ready_count` and `your_state` alone.
+message ReadyCheckState {
+  string id = 1;
+  // "ready" | "accept"
+  string kind = 2;
+  // "pending" | "passed" | "failed" | "cancelled"
+  string status = 3;
+  string lobby_id = 4;
+  // Unix ms; 0 when the check has no deadline.
+  int64 deadline_ms = 5;
+  int32 total = 6;
+  int32 ready_count = 7;
+  string your_state = 8;
+  // Set on "ready_check_failed": "declined" | "timeout" | "cancelled".
+  string reason = 9;
+  repeated ReadyCheckParticipant participants = 10;
+}
+
 // ── Key/value store events ───────────────────────────────────────────────
 
 // "kv_updated" (with data) and "kv_deleted" (without). When the host

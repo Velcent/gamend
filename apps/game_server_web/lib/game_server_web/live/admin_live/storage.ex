@@ -152,9 +152,6 @@ defmodule GameServerWeb.AdminLive.Storage do
   defp format_bytes(bytes) when bytes >= 1024, do: "#{Float.round(bytes / 1024, 1)} KB"
   defp format_bytes(bytes), do: "#{bytes} B"
 
-  defp modified(nil), do: "—"
-  defp modified(%DateTime{} = dt), do: Calendar.strftime(dt, "%Y-%m-%d %H:%M:%S")
-
   defp image?(key),
     do: (key |> Path.extname() |> String.downcase()) in ~w(.png .jpg .jpeg .webp .gif)
 
@@ -276,7 +273,9 @@ defmodule GameServerWeb.AdminLive.Storage do
                   </td>
                   <td class="font-mono text-xs break-all">{obj.key}</td>
                   <td class="text-xs whitespace-nowrap">{format_bytes(obj.size)}</td>
-                  <td class="text-xs whitespace-nowrap">{modified(obj.last_modified)}</td>
+                  <td class="text-xs whitespace-nowrap">
+                    <.timestamp at={obj.last_modified} format="full" empty="—" />
+                  </td>
                   <td class="text-right whitespace-nowrap">
                     <a href={Storage.url(obj.key)} download class="btn btn-outline btn-xs">
                       Download

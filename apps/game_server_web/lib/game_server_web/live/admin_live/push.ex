@@ -167,12 +167,10 @@ defmodule GameServerWeb.AdminLive.Push do
                         <span :if={t.disabled_at} class="badge badge-ghost badge-sm">disabled</span>
                       </td>
                       <td class="text-sm whitespace-nowrap">
-                        {if t.last_used_at,
-                          do: Calendar.strftime(t.last_used_at, "%Y-%m-%d %H:%M"),
-                          else: "-"}
+                        <.timestamp at={t.last_used_at} />
                       </td>
                       <td class="text-sm whitespace-nowrap">
-                        {Calendar.strftime(t.inserted_at, "%Y-%m-%d %H:%M")}
+                        <.timestamp at={t.inserted_at} />
                       </td>
                       <td class="text-sm">
                         <button

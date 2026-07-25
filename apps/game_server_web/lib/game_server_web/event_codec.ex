@@ -128,6 +128,10 @@ defmodule GameServerWeb.EventCodec do
          winner_entry_id: get(p, :winner_entry_id) || ""
        }
 
+  defp message_for(_kind, event, p)
+       when event in ~w(ready_check_started ready_check_updated ready_check_passed ready_check_failed),
+       do: ready_check(p)
+
   defp message_for("user", "match_found", p),
     do: %PB.MatchmakingFound{
       lobby_id: get(p, :lobby_id),
@@ -229,6 +233,31 @@ defmodule GameServerWeb.EventCodec do
       inserted_at_ms: ms(p, :inserted_at) || 0,
       updated_at_ms: ms(p, :updated_at),
       sender_email: get(p, :sender_email)
+    }
+  end
+
+  # `participants` is absent on an accept check by design — the serializer only
+  # includes it for kind "ready", so a pending match keeps its roster private.
+  defp ready_check(p) do
+    %PB.ReadyCheckState{
+      id: get(p, :id),
+      kind: get(p, :kind),
+      status: get(p, :status),
+      lobby_id: get(p, :lobby_id) || "",
+      deadline_ms: ms(p, :deadline) || 0,
+      total: get(p, :total) || 0,
+      ready_count: get(p, :ready_count) || 0,
+      your_state: get(p, :your_state) || "",
+      reason: get(p, :reason) || "",
+      participants: Enum.map(get(p, :participants) || [], &ready_check_participant/1)
+    }
+  end
+
+  defp ready_check_participant(p) do
+    %PB.ReadyCheckParticipant{
+      user_id: get(p, :user_id),
+      display_name: get(p, :display_name) || "",
+      state: get(p, :state)
     }
   end
 

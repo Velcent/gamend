@@ -154,7 +154,7 @@ defmodule GameServerWeb.AdminLive.Chat do
                         {Jason.encode!(m.metadata || %{})}
                       </td>
                       <td class="text-sm whitespace-nowrap">
-                        {Calendar.strftime(m.inserted_at, "%Y-%m-%d %H:%M")}
+                        <.timestamp at={m.inserted_at} />
                       </td>
                       <td class="text-sm">
                         <button

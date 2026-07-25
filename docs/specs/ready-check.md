@@ -7,6 +7,10 @@ Goal: one core primitive — *"these players must each answer before this thing
 proceeds"* — bound in two places core already owns: **matchmaking** (accept the
 match you were paired into) and **lobbies** (ready up before the host starts).
 
+**Status:** Phase 1 shipped — the primitive and the lobby `ready` binding. The
+`accept` kind exists and is exercised by tests, but nothing opens one yet:
+Phase 2 (matchmaking accept) is the remaining unchecked item at the bottom.
+
 ## Two features hiding under one name
 
 | | Matchmaking **accept** | Lobby **ready** |
@@ -79,8 +83,13 @@ ready_check_participants
   ticket_id (FK matchmaking_tickets, null for lobby checks),
   state ("pending" | "ready" | "declined" | "timed_out"), responded_at, timestamps
   unique index [ready_check_id, user_id]
-  unique index [user_id] where state = 'pending'     -- one open check per player
+  index [user_id]                                    -- see below
 ```
+
+"One open check per player" is **not** an index: it depends on the *check's*
+status, not the participant's state, and a player who has already answered still
+belongs to the open check. `open/3` enforces it with a join instead, which the
+`user_id` index serves along with `for_user/1`.
 
 A real `lobby_id` FK rather than a polymorphic `subject_type`/`subject_id` pair:
 a matchmaking check has no subject row to point at (the group only exists as its
@@ -89,12 +98,13 @@ leave an orphaned check behind. A third subject later (a tournament match) adds
 a second nullable FK; that is cheaper than losing the cascade on the two that
 exist now.
 
-`matchmaking_tickets` gains `ready_check_id` and one status,
+In Phase 2, `matchmaking_tickets` gains `ready_check_id` and one status,
 `awaiting_accept`, so the queue's own invariants (`ensure_none_queued/1`,
 `prune_offline/0`, `cancel/1`) stay honest while a check is open. The
 **answers** live only in the participants table — the ticket says "this ticket
 is inside a pending check", the participant row says what its owner answered.
-No duplicated state.
+No duplicated state. (Participants already carry the `ticket_id` side of that
+link; only the ticket column and status are deferred.)
 
 Caps in `GameServer.Limits`: `ready_check_timeout_ms` (15 000),
 `max_ready_check_participants` (mirrors `max_matchmaking_players`),
@@ -139,7 +149,7 @@ Row lifecycle:
   the two players answering it are usually on **different nodes**, so a
   per-node ETS table would need distribution anyway. The DB already is that.
 - **No Nebulex cache**, unlike lobbies and users. Reads are a single indexed row
-  (`for_user/1` on the partial `user_id` index) or a `count` grouped by state.
+  (`for_user/1` on the `user_id` index) or a `count` grouped by state.
   Caching a value that changes on every click means invalidating on every click.
 
 So the app layer is just `GameServer.ReadyChecks` (context) plus
@@ -440,36 +450,41 @@ Polyglot then deletes `metadata["ready"]`, `set_ready/1`,
 
 ## Definition of done (CONTRIBUTING)
 
-- [ ] Migration adds both tables, `matchmaking_tickets.ready_check_id` and the
-      partial indexes; applies on SQLite **and** `DATABASE_ADAPTER=postgres`.
-- [ ] No column added to `users`; no key added to `lobbies.metadata`; deleting a
+- [x] Migration adds both tables and the partial indexes; applies on SQLite
+      **and** `DATABASE_ADAPTER=postgres`. (`matchmaking_tickets.ready_check_id`
+      lands with Phase 2, which is what needs it.)
+- [x] No column added to `users`; no key added to `lobbies.metadata`; deleting a
       lobby cascades its checks and participants.
-- [ ] `serialize_lobby/2` is unchanged; `ready_check_updated` rides
+- [x] `serialize_lobby/2` is unchanged; `ready_check_updated` rides
       `ChannelUpdates`, `passed`/`failed` do not.
-- [ ] `ready_check: 11` registered in `AdvisoryLock` `@namespaces`;
+- [x] `ready_check: 11` registered in `AdvisoryLock` `@namespaces`;
       `respond/2` serializes write-then-evaluate.
-- [ ] `accept` fails fast and irrevocably; `ready` toggles and holds; join /
+- [x] `accept` fails fast and irrevocably; `ready` toggles and holds; join /
       leave / kick keep the participant set correct.
-- [ ] Expiry job is idempotent and survives a restart; the sweep backstop runs
+- [x] Simultaneous answers pass the check exactly once (the write-skew case).
+- [x] Expiry job is idempotent and survives a restart; the sweep backstop runs
       outside the cluster lock.
 - [ ] Matchmaking: accepters requeue with `queued_at` intact, decliners and
       timeouts are discarded, a party dissolves as a unit,
       `matchmaking_accept_enabled: false` reproduces today's behaviour exactly.
-- [ ] `POST /lobbies/ready_check` allows the host, rejects a non-host and
+- [x] `POST /lobbies/ready_check` allows the host, rejects a non-host and
       **any** caller on a hostless lobby; the host cannot answer for a member,
       and `answer_for/3` is RPC-blocked.
-- [ ] A timed-out lobby check kicks nobody and moves no lobby state; kicking the
+- [x] A timed-out lobby check kicks nobody and moves no lobby state; kicking the
       straggler re-evaluates and can pass the check.
-- [ ] `/me/ready_check` hides co-players for `kind: "accept"`.
-- [ ] Three hooks in all six places, RPC-blocked, SDK-mirrored.
-- [ ] Four events registered in `RealtimeEvents`, with protobuf messages,
+- [x] `/me/ready_check` hides co-players for `kind: "accept"`.
+- [x] Three hooks in all six places, RPC-blocked, SDK-mirrored.
+- [x] Four events registered in `RealtimeEvents`, with protobuf messages,
       `EventCodec` clauses and Godot addon handling.
-- [ ] Limits in `@limit_categories`; `RETENTION_READY_CHECKS_DAYS` in
-      `.env.example`; retention sweep prunes resolved checks.
-- [ ] Admin section + force-cancel + API parity + `admin_pages_render_test`.
-- [ ] Tests both adapters, including **concurrent** responses (the write-skew
-      case), deadline expiry, decline-dissolves-party, and a booted run through
+- [x] Limits in `@limit_categories` and `.env.example`.
+- [ ] `RETENTION_READY_CHECKS_DAYS` + retention sweep pruning resolved checks
+      (folds into the in-flight Retention pass; checks cascade with their lobby
+      today, so nothing is orphaned meanwhile).
+- [x] Admin section + force-cancel + API parity + `admin_pages_render_test`.
+- [x] Tests both adapters: concurrent responses, deadline expiry, kick-to-pass,
+      and a booted run through open → toggle → pass and open → timeout.
+- [ ] Phase 2 tests: decline-dissolves-party and a booted run through
       queue → accept → `match_found`.
-- [ ] Docs (Lobbies, Matchmaking, Data Schema), `api_spec.ex`, CHANGELOG, i18n.
-- [ ] `mix format`, `mix credo --strict`, full `mix test` green; `mix gen.sdk`
+- [x] Docs (Lobbies, Matchmaking, Data Schema), `api_spec.ex`, CHANGELOG, i18n.
+- [x] `mix format`, `mix credo --strict`, full `mix test` green; `mix gen.sdk`
       clean; example plugin warning-free.

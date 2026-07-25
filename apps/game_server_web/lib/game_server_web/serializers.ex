@@ -20,6 +20,69 @@ defmodule GameServerWeb.Serializers do
     end
   end
 
+  @doc """
+  Serializes a ready check for its participants.
+
+  A `"ready"` check lists every participant and their state — lobby members
+  already see each other. An `"accept"` check returns counts and the viewer's
+  own state only: a match that may still dissolve should not reveal who the
+  player was paired with.
+  """
+  @spec serialize_ready_check(term(), keyword()) :: map() | nil
+  def serialize_ready_check(check, opts \\ [])
+
+  def serialize_ready_check(nil, _opts), do: nil
+
+  def serialize_ready_check(check, opts) do
+    participants = ready_check_participants(check)
+    viewer_id = Keyword.get(opts, :viewer_id)
+
+    base = %{
+      id: check.id,
+      kind: check.kind,
+      status: check.status,
+      lobby_id: check.lobby_id || "",
+      deadline: check.deadline,
+      opened_by: check.opened_by || "",
+      reason: check.reason || "",
+      metadata: check.metadata || %{},
+      total: length(participants),
+      ready_count: Enum.count(participants, &(&1.state == "ready")),
+      your_state: viewer_state(participants, viewer_id)
+    }
+
+    if check.kind == "ready" do
+      Map.put(base, :participants, Enum.map(participants, &serialize_ready_participant/1))
+    else
+      base
+    end
+  end
+
+  defp serialize_ready_participant(participant) do
+    %{
+      user_id: participant.user_id,
+      display_name: display_name(participant.user_id),
+      state: participant.state,
+      responded_at: participant.responded_at
+    }
+  end
+
+  defp ready_check_participants(check) do
+    case loaded_assoc(check, :participants) do
+      nil -> []
+      participants -> participants
+    end
+  end
+
+  defp viewer_state(_participants, nil), do: ""
+
+  defp viewer_state(participants, viewer_id) do
+    case Enum.find(participants, &(&1.user_id == viewer_id)) do
+      nil -> ""
+      participant -> participant.state
+    end
+  end
+
   @spec serialize_notification(term()) :: map()
   def serialize_notification(notification) do
     sender = loaded_assoc(notification, :sender)

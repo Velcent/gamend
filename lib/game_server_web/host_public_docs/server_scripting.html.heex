@@ -256,6 +256,34 @@ end</code></pre>
       </div>
 
       <div class="step">
+        <h4 class="font-semibold">{doc_text("Ready check hooks")}</h4>
+        <div class="ml-6 mt-2 space-y-2">
+          <p>
+            {doc_text(
+              "before_ready_check_open/2 can veto a check before it opens (veto-only: it never rewrites its args). after_ready_check_passed/1 is the \"everyone answered ready\" callback — the natural place to start the match. after_ready_check_failed/3 receives (check, reason, not_ready) where reason is \"declined\", \"timeout\" or \"cancelled\". Core deliberately does nothing on failure: it kicks nobody, deletes no lobby and moves no lobby state, so whether a slow player is removed is your decision. Note that ready state gates nothing by itself — wire it to your own start in before_lobby_state_change:"
+            )}
+          </p>
+          <div class="bg-base-300 p-4 rounded-lg font-mono text-sm">
+            <pre><code class="language-elixir" phx-no-curly-interpolation>@impl true
+def after_ready_check_passed(%{lobby_id: lobby_id}) when is_binary(lobby_id) do
+  GameServer.Lobbies.transition_state(GameServer.Lobbies.get_lobby(lobby_id), "starting")
+end
+
+<span class="code-comment"># Refuse to start until the last check passed</span>
+@impl true
+def before_lobby_state_change(lobby, _from, "playing") do
+  if GameServer.ReadyChecks.passed?(lobby), do: :ok, else: {:error, :not_ready}
+end
+
+<span class="code-comment"># Bots cannot press a button — answer for them</span>
+def ready_up_bots(check, bot_ids) do
+  Enum.each(bot_ids, &GameServer.ReadyChecks.answer_for(check, &1, true))
+end</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
         <h4 class="font-semibold">{doc_text("Exposing an RPC function")}</h4>
         <div class="ml-6 mt-2 space-y-2">
           <p>

@@ -134,7 +134,13 @@ defmodule GameServer.Limits do
     matchmaking_tick_ms: 3_000,
     # Grace period before an offline player's ticket is pruned. Long enough
     # that a brief disconnect does not cost a queue position.
-    matchmaking_offline_grace_ms: 300_000
+    matchmaking_offline_grace_ms: 300_000,
+
+    # ── Ready checks ────────────────────────────────────────
+    # Default answering window. Overridable per check by the caller.
+    ready_check_timeout_ms: 15_000,
+    # Hard cap on participants in one check.
+    max_ready_check_participants: 64
   }
 
   @doc """

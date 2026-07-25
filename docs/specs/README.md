@@ -43,6 +43,10 @@ has shipped.
 
 ## Unscheduled
 
+- [settings.md](settings.md) — **Settings: one declared config surface.** One
+  provider macro core, hosts and plugins register into; env var names derived
+  from the declaration; required/optional enforced at boot; every variable we
+  own renamed onto one convention.
 - [retention.md](retention.md) — **Retention for every unbounded table.**
   Extends the existing sweep to lobbies, expired tokens, resolved invites,
   stale tickets and the ledgers, batched and configurable via `RETENTION_*`.

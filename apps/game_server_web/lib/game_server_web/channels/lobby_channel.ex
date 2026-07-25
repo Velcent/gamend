@@ -151,6 +151,20 @@ defmodule GameServerWeb.LobbyChannel do
     {:noreply, socket}
   end
 
+  # A burst of members readying at once coalesces into one frame; a resolution
+  # is not a state refresh, so it is never held in the debounce timer.
+  @impl true
+  def handle_info({:ready_check_event, "ready_check_updated" = event, check}, socket) do
+    payload = serialize_ready_check(check, socket)
+    {:noreply, ChannelUpdates.push(socket, event, check.id, payload)}
+  end
+
+  @impl true
+  def handle_info({:ready_check_event, event, check}, socket) do
+    push_event(socket, event, serialize_ready_check(check, socket))
+    {:noreply, socket}
+  end
+
   @impl true
   def handle_info({:host_changed, _lobby_id, new_host_id}, socket) do
     push_event(socket, "host_changed", %{
@@ -228,6 +242,11 @@ defmodule GameServerWeb.LobbyChannel do
   @impl true
   def handle_info(_msg, socket) do
     {:noreply, socket}
+  end
+
+  defp serialize_ready_check(check, socket) do
+    viewer_id = get_in(socket.assigns, [:current_scope, Access.key(:user_id)])
+    Serializers.serialize_ready_check(check, viewer_id: viewer_id)
   end
 
   @impl true

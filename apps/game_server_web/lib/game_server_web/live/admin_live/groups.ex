@@ -177,10 +177,10 @@ defmodule GameServerWeb.AdminLive.Groups do
                       </td>
                       <td class="font-mono text-sm">{g.creator_id}</td>
                       <td class="text-sm">
-                        {Calendar.strftime(g.inserted_at, "%Y-%m-%d %H:%M")}
+                        <.timestamp at={g.inserted_at} />
                       </td>
                       <td class="text-sm">
-                        {Calendar.strftime(g.updated_at, "%Y-%m-%d %H:%M")}
+                        <.timestamp at={g.updated_at} />
                       </td>
                       <td class="text-sm">
                         <div class="flex flex-wrap gap-1">
@@ -262,13 +262,13 @@ defmodule GameServerWeb.AdminLive.Groups do
               <div>
                 Created:
                 <span class="font-mono">
-                  {Calendar.strftime(@selected_group.inserted_at, "%Y-%m-%d %H:%M:%S")}
+                  <.timestamp at={@selected_group.inserted_at} format="full" />
                 </span>
               </div>
               <div>
                 Updated:
                 <span class="font-mono">
-                  {Calendar.strftime(@selected_group.updated_at, "%Y-%m-%d %H:%M:%S")}
+                  <.timestamp at={@selected_group.updated_at} format="full" />
                 </span>
               </div>
             </div>
@@ -313,7 +313,7 @@ defmodule GameServerWeb.AdminLive.Groups do
                     <% end %>
                   </td>
                   <td class="text-sm">
-                    {Calendar.strftime(m.inserted_at, "%Y-%m-%d %H:%M")}
+                    <.timestamp at={m.inserted_at} />
                   </td>
                   <td class="text-sm">
                     <div class="flex flex-wrap gap-1">

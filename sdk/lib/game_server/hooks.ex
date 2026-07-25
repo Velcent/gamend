@@ -125,6 +125,15 @@ defmodule GameServer.Hooks do
         @impl true
         def after_lobby_host_change(_lobby, _new_host_id), do: :ok
 
+        @impl true
+        def before_ready_check_open(_subject, _user_ids), do: :ok
+
+        @impl true
+        def after_ready_check_passed(_check), do: :ok
+
+        @impl true
+        def after_ready_check_failed(_check, _reason, _not_ready), do: :ok
+
         # Custom RPC handlers - define your own functions!
         # These are called from game clients via the RPC channel.
         #
@@ -187,6 +196,9 @@ defmodule GameServer.Hooks do
   - `before_lobby_kick/3` - Before user is kicked from lobby
   - `after_lobby_kick/3` - After user is kicked from lobby
   - `after_lobby_host_change/2` - After lobby host changes
+  - `before_ready_check_open/2` - Before a ready check opens, receives `(lobby | :matchmaking, user_ids)`. Veto-only: return `{:error, reason}` to reject
+  - `after_ready_check_passed/1` - Everyone answered ready (fire-and-forget), receives the check. Where you start the match: `Lobbies.transition_state(lobby, "starting")`
+  - `after_ready_check_failed/3` - A check was declined, timed out or cancelled, receives `(check, reason, not_ready_participants)`. Core kicks nobody — decide here
   - `before_kv_get/2` - Called before a client KV `get` to return a KV access decision such as `:public`, `:owner_only`, or `:server_only`
 
     ## Custom RPC Functions
@@ -441,6 +453,14 @@ defmodule GameServer.Hooks do
               hook_result({user(), user(), lobby()})
   @callback after_lobby_kick(host :: user(), target :: user(), lobby()) :: any()
 
+  # Ready checks. `after_ready_check_passed` is the "everyone answered yes"
+  # callback; `after_ready_check_failed` gets the participants who did not —
+  # core kicks nobody, so what that costs them is the game's call.
+  @callback before_ready_check_open(lobby() | :matchmaking, [String.t()]) ::
+              {:ok, term()} | {:error, term()} | any()
+  @callback after_ready_check_passed(map()) :: any()
+  @callback after_ready_check_failed(map(), String.t(), [map()]) :: any()
+
   @optional_callbacks before_group_create: 2,
                       after_group_create: 1,
                       before_group_join: 3,
@@ -465,7 +485,10 @@ defmodule GameServer.Hooks do
                       before_chat_message: 2,
                       after_chat_message: 1,
                       before_push_send: 2,
-                      after_push_sent: 3
+                      after_push_sent: 3,
+                      before_ready_check_open: 2,
+                      after_ready_check_passed: 1,
+                      after_ready_check_failed: 3
 
   @doc """
   Called before a KV `get/2` is performed. Implementations should return
@@ -663,6 +686,15 @@ defmodule GameServer.Hooks do
       def after_lobby_host_change(_lobby, _new_host_id), do: :ok
 
       @impl true
+      def before_ready_check_open(_subject, _user_ids), do: :ok
+
+      @impl true
+      def after_ready_check_passed(_check), do: :ok
+
+      @impl true
+      def after_ready_check_failed(_check, _reason, _not_ready), do: :ok
+
+      @impl true
       def before_kv_get(_key, _opts), do: :public
 
       @impl true
@@ -755,6 +787,9 @@ defmodule GameServer.Hooks do
                      before_lobby_kick: 3,
                      after_lobby_kick: 3,
                      after_lobby_host_change: 2,
+                     before_ready_check_open: 2,
+                     after_ready_check_passed: 1,
+                     after_ready_check_failed: 3,
                      before_kv_get: 2,
                      before_matchmaking_join: 2,
                      after_matchmaking_join: 2,

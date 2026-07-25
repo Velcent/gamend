@@ -354,6 +354,10 @@ defmodule GameServerWeb.Router.Shared do
         post "/lobbies/:id/join", LobbyController, :join
         post "/lobbies/leave", LobbyController, :leave
         post "/lobbies/kick", LobbyController, :kick
+        post "/lobbies/ready_check", ReadyCheckController, :open
+        delete "/lobbies/ready_check", ReadyCheckController, :cancel
+        get "/me/ready_check", ReadyCheckController, :show
+        post "/me/ready_check", ReadyCheckController, :respond
         patch "/me/password", MeController, :update_password
         patch "/me/display_name", MeController, :update_display_name
         patch "/me/username", MeController, :update_username
@@ -508,6 +512,9 @@ defmodule GameServerWeb.Router.Shared do
         get "/matchmaking/tickets", MatchmakingController, :index
         delete "/matchmaking/tickets/:id", MatchmakingController, :delete
         get "/matchmaking/stats", MatchmakingController, :stats
+        get "/ready_checks", ReadyCheckController, :index
+        delete "/ready_checks/:id", ReadyCheckController, :delete
+        get "/ready_checks/stats", ReadyCheckController, :stats
       end
     end
   end

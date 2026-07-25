@@ -132,6 +132,7 @@ msgstr "Retour"
 msgid "Block"
 msgstr "Bloquer"
 
+#: lib/game_server_web/live/admin_live/matchmaking.ex:241
 #: lib/game_server_web/live/chat_live.ex:255
 #: lib/game_server_web/live/lobby_live/index.ex:760
 #: lib/game_server_web/live/user_live/settings/friends_tab.ex:109
@@ -452,6 +453,7 @@ msgstr "Enregistrement..."
 msgid "Send"
 msgstr "Envoyer"
 
+#: lib/game_server_web/live/admin_live/matchmaking.ex:220
 #: lib/game_server_web/live/groups_live.ex:439
 #: lib/game_server_web/live/quests_live.ex:576
 #: lib/game_server_web/live/store_live/index.ex:130
@@ -734,6 +736,7 @@ msgstr "Ouvrir"
 #: lib/game_server_web/controllers/user_session_controller.ex:56
 #: lib/game_server_web/controllers/user_session_controller.ex:76
 #: lib/game_server_web/controllers/user_session_controller.ex:104
+#: lib/game_server_web/live/admin_live/matchmaking.ex:210
 #: lib/game_server_web/live/auth_success_live.ex:72
 #: lib/game_server_web/live/auth_success_live.ex:74
 #: lib/game_server_web/live/auth_success_live.ex:137
@@ -807,6 +810,7 @@ msgstr "Votre compte est en attente d'activation."
 msgid "In Progress"
 msgstr "En cours"
 
+#: lib/game_server_web/live/admin_live/matchmaking.ex:212
 #: lib/game_server_web/live/groups_live.ex:199
 #: lib/game_server_web/live/groups_live.ex:524
 #: lib/game_server_web/live/groups_live.ex:691
@@ -1021,6 +1025,7 @@ msgstr "Demandes reçues"
 msgid "Invalid payment state"
 msgstr "État de paiement invalide"
 
+#: lib/game_server_web/live/admin_live/matchmaking.ex:219
 #: lib/game_server_web/live/user_live/settings/payments_tab.ex:122
 #, elixir-autogen, elixir-format
 msgid "Kind"
@@ -1227,6 +1232,7 @@ msgstr "Taille du tableau"
 msgid "Brackets"
 msgstr "Tableaux"
 
+#: lib/game_server_web/live/admin_live/matchmaking.ex:211
 #: lib/game_server_web/live/tournaments_live.ex:954
 #, elixir-autogen, elixir-format
 msgid "Cancelled"
@@ -1458,6 +1464,7 @@ msgstr "Veuillez d'abord choisir une image."
 msgid "Quantity"
 msgstr "Quantité"
 
+#: lib/game_server_web/live/admin_live/matchmaking.ex:221
 #: lib/game_server_web/live/user_live/settings/wallet_tab.ex:65
 #, elixir-autogen, elixir-format
 msgid "Reason"
@@ -1582,3 +1589,28 @@ msgstr "Aucun appareil enregistré."
 #, elixir-autogen, elixir-format
 msgid "Platform"
 msgstr "Plateforme"
+
+#: lib/game_server_web/live/admin_live/matchmaking.ex:209
+#, elixir-autogen, elixir-format
+msgid "Passed"
+msgstr "Réussi"
+
+#: lib/game_server_web/live/admin_live/matchmaking.ex:222
+#, elixir-autogen, elixir-format
+msgid "Ready"
+msgstr "Prêt"
+
+#: lib/game_server_web/live/admin_live/matchmaking.ex:205
+#, elixir-autogen, elixir-format
+msgid "Ready checks"
+msgstr "Vérifications de préparation"
+
+#: lib/game_server_web/live/admin_live/matchmaking.ex:206
+#, elixir-autogen, elixir-format
+msgid "last 24h"
+msgstr "dernières 24 h"
+
+#: lib/game_server_web/live/admin_live/matchmaking.ex:223
+#, elixir-autogen, elixir-format
+msgid "Created"
+msgstr "Créé"

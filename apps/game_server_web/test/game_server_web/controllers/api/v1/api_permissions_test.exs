@@ -31,6 +31,11 @@ defmodule GameServerWeb.Api.V1.ApiPermissionsTest do
       {:patch, "/api/v1/lobbies"},
       {:post, "/api/v1/lobbies/leave"},
       {:post, "/api/v1/lobbies/kick"},
+      # Ready checks
+      {:post, "/api/v1/lobbies/ready_check"},
+      {:delete, "/api/v1/lobbies/ready_check"},
+      {:get, "/api/v1/me/ready_check"},
+      {:post, "/api/v1/me/ready_check"},
       # Friends
       {:post, "/api/v1/friends"},
       {:get, "/api/v1/me/friends"},
@@ -129,6 +134,10 @@ defmodule GameServerWeb.Api.V1.ApiPermissionsTest do
       {:get, "/api/v1/admin/sessions"},
       # Chat Admin
       {:get, "/api/v1/admin/chat"},
+      # Ready checks Admin
+      {:get, "/api/v1/admin/ready_checks"},
+      {:get, "/api/v1/admin/ready_checks/stats"},
+      {:delete, "/api/v1/admin/ready_checks/1"},
       # Achievements Admin
       {:get, "/api/v1/admin/quests"},
       {:post, "/api/v1/admin/quests"}

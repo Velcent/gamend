@@ -57,7 +57,7 @@ defmodule GameServerWeb.AdminLive.LobbySnapshots do
               >
                 {gap.lobby_id}
               </.link>
-              <span class="opacity-60">{format_time(gap.inserted_at)}</span>
+              <span class="opacity-60"><.timestamp at={gap.inserted_at} format="full" empty="—" /></span>
             </div>
           </div>
         </div>
@@ -106,8 +106,10 @@ defmodule GameServerWeb.AdminLive.LobbySnapshots do
                     <span :if={run.flagged} class="badge badge-error badge-xs ml-1">flagged</span>
                   </td>
                   <td>{run.snapshots}</td>
-                  <td class="text-xs">{format_time(run.started_at)}</td>
-                  <td class="text-xs">{format_time(run.ended_at)}</td>
+                  <td class="text-xs">
+                    <.timestamp at={run.started_at} format="full" empty="—" />
+                  </td>
+                  <td class="text-xs"><.timestamp at={run.ended_at} format="full" empty="—" /></td>
                   <td>
                     <.link
                       patch={~p"/admin/lobby-snapshots?lobby_id=#{run.lobby_id}"}
@@ -173,7 +175,7 @@ defmodule GameServerWeb.AdminLive.LobbySnapshots do
                   </span>
                 </div>
                 <span class="text-xs text-base-content/50">
-                  {format_time(interval.snapshot.inserted_at)}
+                  <.timestamp at={interval.snapshot.inserted_at} format="full" empty="—" />
                 </span>
               </button>
 
@@ -488,9 +490,6 @@ defmodule GameServerWeb.AdminLive.LobbySnapshots do
   # Shown in full rather than truncated: ids are UUIDv7, so the leading hex is a
   # millisecond timestamp and every lobby from the same ~65s window shares it.
   # The full id is also what correlates a run with the client's own records.
-
-  defp format_time(nil), do: "—"
-  defp format_time(at), do: Calendar.strftime(at, "%Y-%m-%d %H:%M:%S")
 
   # Strings render bare so a value reads as `boost` not `"boost"`, and floats keep
   # full precision — 8423.199939727783 vs 8423.2 is exactly the kind of drift

@@ -95,6 +95,8 @@ static func decode_event(topic: String, event: String, data: PackedByteArray) ->
 			return _decode(PB.EntityId.new(), data, func(m): return {"id": m.get_id()})
 		"quest_progress", "quest_completed", "quest_claimed":
 			return _quest_progress(data)
+		"ready_check_started", "ready_check_updated", "ready_check_passed", "ready_check_failed":
+			return _ready_check(data)
 
 	match kind:
 		"user":
@@ -330,6 +332,31 @@ static func _quest_progress(data: PackedByteArray) -> Variant:
 		if m.has_completed_at_ms(): d["completed_at_ms"] = m.get_completed_at_ms()
 		if m.has_claimed_at_ms(): d["claimed_at_ms"] = m.get_claimed_at_ms()
 		return d)
+
+
+static func _ready_check(data: PackedByteArray) -> Variant:
+	return _decode(PB.ReadyCheckState.new(), data, func(m):
+		var participants := []
+		for p in m.get_participants():
+			participants.append({
+				"user_id": p.get_user_id(),
+				"display_name": p.get_display_name(),
+				"state": p.get_state(),
+			})
+		# `participants` stays empty for kind "accept": that check reports counts
+		# only, so a match that may still dissolve keeps its roster private.
+		return {
+			"id": m.get_id(),
+			"kind": m.get_kind(),
+			"status": m.get_status(),
+			"lobby_id": m.get_lobby_id(),
+			"deadline_ms": m.get_deadline_ms(),
+			"total": m.get_total(),
+			"ready_count": m.get_ready_count(),
+			"your_state": m.get_your_state(),
+			"reason": m.get_reason(),
+			"participants": participants,
+		})
 
 
 static func _lobby_to_dict(l) -> Dictionary:

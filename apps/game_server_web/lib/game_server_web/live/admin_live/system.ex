@@ -274,9 +274,7 @@ defmodule GameServerWeb.AdminLive.System do
                 <div class="text-right">
                   <div class="text-xs text-base-content/60">Last run</div>
                   <div class="text-sm font-mono">
-                    {if @retention.last_run_at,
-                      do: Calendar.strftime(@retention.last_run_at, "%Y-%m-%d %H:%M:%S UTC"),
-                      else: "never"}
+                    <.timestamp at={@retention.last_run_at} format="full" empty="never" />
                   </div>
                 </div>
                 <button phx-click="prune_now" class="btn btn-primary" disabled={@retention_running}>

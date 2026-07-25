@@ -26,10 +26,13 @@ import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"
 import {hooks as colocatedHooks} from "phoenix-colocated/game_server_web"
 import "./lobbies"
+import {LocalDatetimeInput, startLocalTime} from "./local_time"
 import topbar from "../vendor/topbar"
 
 // Custom hooks
 const Hooks = {
+  LocalDatetimeInput,
+
   /**
    * MermaidDiagram — renders the mermaid source in `data-diagram` into the
    * element. The 2.7MB mermaid bundle is lazy-loaded on first use so it never
@@ -504,6 +507,10 @@ function createLiveSocket(extraHooks) {
 topbar.config({barColors: {0: "#29d"}, shadowColor: "rgba(0, 0, 0, .3)"})
 window.addEventListener("phx:page-loading-start", _info => topbar.show(300))
 window.addEventListener("phx:page-loading-stop", _info => topbar.hide())
+
+// Timestamps render as UTC server-side and are rewritten in the viewer's zone.
+// Started before the socket so static (non-LiveView) pages are covered too.
+startLocalTime()
 
 loadExtraHooks().then((extraHooks) => {
   const liveSocket = createLiveSocket(extraHooks)

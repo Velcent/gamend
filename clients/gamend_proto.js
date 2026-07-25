@@ -244,6 +244,21 @@ const anyTopic = {
   quest_progress: (bin) => decodeQuestProgress(bin),
   quest_completed: (bin) => decodeQuestProgress(bin),
   quest_claimed: (bin) => decodeQuestProgress(bin),
+  // Ready checks arrive on lobby:<id> and, for an accept check, on user:<id>.
+  ready_check_started: (bin) => decodeReadyCheck(bin),
+  ready_check_updated: (bin) => decodeReadyCheck(bin),
+  ready_check_passed: (bin) => decodeReadyCheck(bin),
+  ready_check_failed: (bin) => decodeReadyCheck(bin),
+}
+
+// `participants` is absent on an accept check: it carries counts only, so a
+// pending match does not reveal who you were paired with.
+function decodeReadyCheck(bin) {
+  return PB.ReadyCheckState.toObject(PB.ReadyCheckState.decode(bin), {
+    defaults: true,
+    longs: Number,
+    arrays: true,
+  })
 }
 
 function decodeQuestProgress(bin) {

@@ -180,7 +180,7 @@ defmodule GameServerWeb.AdminLive.Notifications do
                         {Jason.encode!(n.metadata || %{})}
                       </td>
                       <td class="text-sm whitespace-nowrap">
-                        {Calendar.strftime(n.inserted_at, "%Y-%m-%d %H:%M")}
+                        <.timestamp at={n.inserted_at} />
                       </td>
                       <td class="text-sm">
                         <button

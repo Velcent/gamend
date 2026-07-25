@@ -66,7 +66,7 @@ defmodule GameServerWeb.NotificationsLive do
                       <% end %>
                     </td>
                     <td class="text-sm whitespace-nowrap">
-                      {Calendar.strftime(n.inserted_at, "%Y-%m-%d %H:%M")}
+                      <.timestamp at={n.inserted_at} />
                     </td>
                     <td class="flex gap-1 flex-wrap">
                       <%= if action = notification_action(n) do %>

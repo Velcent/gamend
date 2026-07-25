@@ -153,7 +153,9 @@ defmodule GameServerWeb.AdminLive.Payments do
                     <td>
                       <pre class="text-xs font-mono whitespace-pre-wrap max-h-24 overflow-auto bg-base-100/60 rounded p-2">{json_preview(product.grant_config)}</pre>
                     </td>
-                    <td class="font-mono text-xs">{format_dt(product.inserted_at)}</td>
+                    <td class="font-mono text-xs">
+                      <.timestamp at={product.inserted_at} format="full" />
+                    </td>
                     <td>
                       <button
                         type="button"
@@ -271,8 +273,10 @@ defmodule GameServerWeb.AdminLive.Payments do
                     <td><span class={["badge", status_badge_class(p.status)]}>{p.status}</span></td>
                     <td class="font-mono text-xs">{format_amount(p.amount, p.currency)}</td>
                     <td class="font-mono text-xs break-all">{p.provider_transaction_id}</td>
-                    <td class="font-mono text-xs">{format_dt(p.purchased_at || p.inserted_at)}</td>
-                    <td class="font-mono text-xs">{format_dt(p.revoked_at)}</td>
+                    <td class="font-mono text-xs">
+                      <.timestamp at={p.purchased_at || p.inserted_at} format="full" />
+                    </td>
+                    <td class="font-mono text-xs"><.timestamp at={p.revoked_at} format="full" /></td>
                     <td>
                       <button
                         :if={stripe_reconcile_available?(p)}
@@ -325,9 +329,9 @@ defmodule GameServerWeb.AdminLive.Payments do
                     </td>
                     <td class="font-mono text-xs">{e.product && e.product.sku}</td>
                     <td class="font-mono text-xs">{e.source_purchase_id}</td>
-                    <td class="font-mono text-xs">{format_dt(e.starts_at)}</td>
-                    <td class="font-mono text-xs">{format_dt(e.expires_at)}</td>
-                    <td class="font-mono text-xs">{format_dt(e.revoked_at)}</td>
+                    <td class="font-mono text-xs"><.timestamp at={e.starts_at} format="full" /></td>
+                    <td class="font-mono text-xs"><.timestamp at={e.expires_at} format="full" /></td>
+                    <td class="font-mono text-xs"><.timestamp at={e.revoked_at} format="full" /></td>
                   </tr>
                 </tbody>
               </table>
@@ -366,7 +370,9 @@ defmodule GameServerWeb.AdminLive.Payments do
                       </td>
                       <td class="font-mono text-xs break-all">{event.event_id}</td>
                       <td class="font-mono text-xs break-all">{event.event_type}</td>
-                      <td class="font-mono text-xs">{format_dt(event.processed_at)}</td>
+                      <td class="font-mono text-xs">
+                        <.timestamp at={event.processed_at} format="full" />
+                      </td>
                     </tr>
                   </tbody>
                 </table>
@@ -410,7 +416,9 @@ defmodule GameServerWeb.AdminLive.Payments do
                     <td>
                       <pre class="text-xs font-mono whitespace-pre-wrap max-h-24 overflow-auto bg-base-100/60 rounded p-2">{json_preview(cursor.cursor)}</pre>
                     </td>
-                    <td class="font-mono text-xs">{format_dt(cursor.updated_at)}</td>
+                    <td class="font-mono text-xs">
+                      <.timestamp at={cursor.updated_at} format="full" />
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -945,10 +953,6 @@ defmodule GameServerWeb.AdminLive.Payments do
     do: value |> Jason.encode!() |> String.slice(0, 2048)
 
   defp json_preview(_value), do: ""
-
-  defp format_dt(nil), do: "-"
-  defp format_dt(%DateTime{} = dt), do: Calendar.strftime(dt, "%Y-%m-%d %H:%M:%S")
-  defp format_dt(value), do: to_string(value)
 
   defp format_amount(nil, currency), do: "- #{currency || ""}"
   defp format_amount(amount, nil), do: to_string(amount)
