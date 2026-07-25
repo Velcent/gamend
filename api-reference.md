@@ -1,230 +1,269 @@
-# game_server_core v1.0.1070 - API Reference
+# game_server_core v1.0.1074 - API Reference
 
 ## Modules
 
 - [GameServer](GameServer.md): GameServer keeps the contexts that define your domain
 and business logic.
-- [GameServer.Accounts](GameServer.Accounts.md): The Accounts context.
-- [GameServer.Accounts.AvatarMirror](GameServer.Accounts.AvatarMirror.md): Oban worker that mirrors a user's external (OAuth provider) avatar into our
+- [GameServer.Cluster](GameServer.Cluster.md): Erlang distribution, needed for multi-node deployments and the partitioned
+L2 cache.
+- [GameServer.Database](GameServer.Database.md): Connection and tuning settings for `GameServer.Repo`.
+- [GameServer.Mail](GameServer.Mail.md): Outbound email transport.
+
+- Accounts
+  - [GameServer.Accounts](GameServer.Accounts.md): The Accounts context.
+  - [GameServer.Accounts.AvatarMirror](GameServer.Accounts.AvatarMirror.md): Oban worker that mirrors a user's external (OAuth provider) avatar into our
 own object storage, so avatars render from our storage/CDN instead of
 hotlinking the provider.
-- [GameServer.Accounts.Scope](GameServer.Accounts.Scope.md): Defines the scope of the caller to be used throughout the app.
-- [GameServer.Accounts.StalePresenceSweeper](GameServer.Accounts.StalePresenceSweeper.md): Periodically sweeps users whose `is_online` flag is `true` but whose
+  - [GameServer.Accounts.Scope](GameServer.Accounts.Scope.md): Defines the scope of the caller to be used throughout the app.
+  - [GameServer.Accounts.StalePresenceSweeper](GameServer.Accounts.StalePresenceSweeper.md): Periodically sweeps users whose `is_online` flag is `true` but whose
 `last_seen_at` timestamp is older than a configurable threshold.
-- [GameServer.Accounts.User](GameServer.Accounts.User.md): The User schema and associated changeset functions used across the
+  - [GameServer.Accounts.User](GameServer.Accounts.User.md): The User schema and associated changeset functions used across the
 application (registration, OAuth, and admin changes).
-- [GameServer.Accounts.UserNotifier](GameServer.Accounts.UserNotifier.md): Small helpers used to deliver transactional emails for the Accounts flow
+  - [GameServer.Accounts.UserNotifier](GameServer.Accounts.UserNotifier.md): Small helpers used to deliver transactional emails for the Accounts flow
 (confirmation, magic link, and email change instructions).
-- [GameServer.Accounts.UserToken](GameServer.Accounts.UserToken.md): Functions and schema for persistent user tokens used by sessions, magic links,
+  - [GameServer.Accounts.UserToken](GameServer.Accounts.UserToken.md): Functions and schema for persistent user tokens used by sessions, magic links,
 and email-change workflows.
-- [GameServer.Accounts.UsernameGenerator](GameServer.Accounts.UsernameGenerator.md): Generates default usernames for new users.
-- [GameServer.Apple](GameServer.Apple.md): Apple OAuth client secret generation for Ueberauth.
-- [GameServer.Async](GameServer.Async.md): Utilities for running best-effort background work.
-- [GameServer.Cache](GameServer.Cache.md): Application cache backed by Nebulex.
-- [GameServer.Cache.L1](GameServer.Cache.L1.md): L1 cache (local, in-memory).
-- [GameServer.Cache.L2.Partitioned](GameServer.Cache.L2.Partitioned.md): L2 cache (partitioned topology).
-- [GameServer.Cache.L2.Partitioned.Primary](GameServer.Cache.L2.Partitioned.Primary.md): This is the cache for the primary storage.
+  - [GameServer.Accounts.UsernameGenerator](GameServer.Accounts.UsernameGenerator.md): Generates default usernames for new users.
+  - [GameServer.Apple](GameServer.Apple.md): Apple OAuth client secret generation for Ueberauth.
+  - [GameServer.OAuth.Exchanger](GameServer.OAuth.Exchanger.md): Default implementation for exchanging OAuth codes with providers.
+  - [GameServer.OAuth.GoogleIDToken](GameServer.OAuth.GoogleIDToken.md): Verifies Google OpenID Connect `id_token`s for native/mobile sign-in flows.
+  - [GameServer.OAuth.Providers](GameServer.OAuth.Providers.md): Credentials for the social sign-in providers.
+  - [GameServer.OAuthSession](GameServer.OAuthSession.md): Simple Ecto schema for OAuth session polling used by client SDKs.
+  - [GameServer.OAuthSessions](GameServer.OAuthSessions.md): Helpers for creating and retrieving short-lived OAuth sessions.
 
-- [GameServer.Cache.L2.Redis](GameServer.Cache.L2.Redis.md): L2 cache backed by Redis.
-- [GameServer.Cache.Stats](GameServer.Cache.Stats.md): Lightweight in-memory counters for cache effectiveness and overload signals,
-aggregated from telemetry events
-- [GameServer.Cache.Sync](GameServer.Cache.Sync.md): Applies cache invalidations broadcast by other app instances.
-- [GameServer.Chat](GameServer.Chat.md): Context for chat messaging across lobbies, groups, and friend DMs.
-- [GameServer.Chat.Message](GameServer.Chat.Message.md): Ecto schema for the `chat_messages` table.
-- [GameServer.Chat.ReadCursor](GameServer.Chat.ReadCursor.md): Ecto schema for the `chat_read_cursors` table.
-- [GameServer.Config](GameServer.Config.md): Typed reads of environment variables a plugin declared via `env_vars/0`.
-- [GameServer.Content](GameServer.Content.md): Reads and renders Markdown content from project files and directories.
-- [GameServer.Economy](GameServer.Economy.md): Virtual-currency wallets with an append-only ledger.
-- [GameServer.Economy.LedgerEntry](GameServer.Economy.LedgerEntry.md): Append-only record of a single wallet change (grant, spend, transfer, admin
+- Lobbies
+  - [GameServer.Lobbies](GameServer.Lobbies.md): Context module for lobby management: creating, updating, listing and searching lobbies.
+  - [GameServer.Lobbies.Lobby](GameServer.Lobbies.Lobby.md): Ecto schema for the `lobbies` table and changeset helpers.
+  - [GameServer.Lobbies.SpectatorTracker](GameServer.Lobbies.SpectatorTracker.md): Lightweight ETS-based tracker for lobby spectators.
+  - [GameServer.Lobbies.States](GameServer.Lobbies.States.md): The vocabulary a lobby's `state` commonly uses.
+  - [GameServer.LobbySnapshots](GameServer.LobbySnapshots.md): Durable record of how a lobby's state evolved during a run.
+  - [GameServer.LobbySnapshots.Blob](GameServer.LobbySnapshots.Blob.md): Content-addressed storage for one snapshot section.
+  - [GameServer.LobbySnapshots.Event](GameServer.LobbySnapshots.Event.md): A decision worth explaining, recorded between two snapshots.
+  - [GameServer.LobbySnapshots.Snapshot](GameServer.LobbySnapshots.Snapshot.md): One capture of a lobby's state at a mutation entry point.
+  - [GameServer.LobbySnapshots.Writer](GameServer.LobbySnapshots.Writer.md): Buffers snapshots and events and bulk-inserts them.
+
+- Matchmaking
+  - [GameServer.Matchmaking](GameServer.Matchmaking.md): Public API for the built-in matchmaking system.
+  - [GameServer.Matchmaking.Broadcast](GameServer.Matchmaking.Broadcast.md): Broadcasts matchmaking events to users.
+  - [GameServer.Matchmaking.Constants](GameServer.Matchmaking.Constants.md): Constants for the matchmaking system.
+
+  - [GameServer.Matchmaking.Match](GameServer.Matchmaking.Match.md): Creates the lobby for a claimed match and notifies the players.
+  - [GameServer.Matchmaking.Matcher](GameServer.Matchmaking.Matcher.md): Match-forming logic for a group of tickets that share the same
+`match_params`.
+  - [GameServer.Matchmaking.Ticket](GameServer.Matchmaking.Ticket.md): Ecto schema for a matchmaking ticket.
+  - [GameServer.Matchmaking.Worker](GameServer.Matchmaking.Worker.md): Periodic driver for the matchmaking sweep.
+  - [GameServer.ReadyChecks](GameServer.ReadyChecks.md): Ready checks: *these players must each answer before this proceeds*.
+  - [GameServer.ReadyChecks.Check](GameServer.ReadyChecks.Check.md): Ecto schema for one ready check — a *moment* at which a set of players must
+each answer before something proceeds.
+  - [GameServer.ReadyChecks.Participant](GameServer.ReadyChecks.Participant.md): Ecto schema for one player's answer inside a ready check.
+
+- Social
+  - [GameServer.Chat](GameServer.Chat.md): Context for chat messaging across lobbies, groups, and friend DMs.
+  - [GameServer.Chat.Message](GameServer.Chat.Message.md): Ecto schema for the `chat_messages` table.
+  - [GameServer.Chat.ReadCursor](GameServer.Chat.ReadCursor.md): Ecto schema for the `chat_read_cursors` table.
+  - [GameServer.Friends](GameServer.Friends.md): Friends context - handles friend requests and relationships.
+  - [GameServer.Friends.Friendship](GameServer.Friends.Friendship.md): Ecto schema representing a friendship/request between two users.
+  - [GameServer.Groups](GameServer.Groups.md): Context module for group management: creating, updating, listing, joining,
+leaving, kicking, promoting/demoting members, and handling join requests.
+  - [GameServer.Groups.Group](GameServer.Groups.Group.md): Ecto schema for the `groups` table.
+  - [GameServer.Groups.GroupInvite](GameServer.Groups.GroupInvite.md): Ecto schema for the `group_invites` table.
+  - [GameServer.Groups.GroupJoinRequest](GameServer.Groups.GroupJoinRequest.md): Ecto schema for the `group_join_requests` table.
+  - [GameServer.Groups.GroupMember](GameServer.Groups.GroupMember.md): Ecto schema for the `group_members` join table.
+  - [GameServer.Groups.Invites](GameServer.Groups.Invites.md): Group invitations: creating, accepting, declining, cancelling, and
+listing/counting pending invites.
+  - [GameServer.Groups.JoinRequests](GameServer.Groups.JoinRequests.md): Join requests for private groups: requesting, listing, approving,
+rejecting, and cancelling.
+  - [GameServer.Parties](GameServer.Parties.md): Context module for party management.
+  - [GameServer.Parties.Party](GameServer.Parties.Party.md): Ecto schema for the `parties` table.
+  - [GameServer.Parties.PartyInvite](GameServer.Parties.PartyInvite.md): Ecto schema for the `party_invites` table.
+
+- Progression
+  - [GameServer.Leaderboards](GameServer.Leaderboards.md): The Leaderboards context.
+  - [GameServer.Leaderboards.Leaderboard](GameServer.Leaderboards.Leaderboard.md): Ecto schema for the `leaderboards` table.
+  - [GameServer.Leaderboards.Record](GameServer.Leaderboards.Record.md): Ecto schema for the `leaderboard_records` table.
+  - [GameServer.Quests](GameServer.Quests.md): Event-driven quest/progression engine.
+  - [GameServer.Quests.Objective](GameServer.Quests.Objective.md): One objective inside a quest definition: reach `target` occurrences of
+`event` (as reported through `GameServer.Quests.report_event/4`).
+  - [GameServer.Quests.Quest](GameServer.Quests.Quest.md): Ecto schema for the `quests` table.
+  - [GameServer.Quests.QuestProgress](GameServer.Quests.QuestProgress.md): Ecto schema for the `quest_progress` table — one row per user, quest and
+reset period.
+  - [GameServer.Quests.Reward](GameServer.Quests.Reward.md): One reward entry on a quest definition: `amount` of a currency
+(via `GameServer.Economy.grant/4`) or an item
+(via `GameServer.Inventory.grant_item/4`).
+
+  - [GameServer.Tournaments](GameServer.Tournaments.md): Bracket tournaments: registration → seeded single-elimination draw → timed
+rounds → champions. See TOURNAMENT_DESIGN.md.
+  - [GameServer.Tournaments.Entry](GameServer.Tournaments.Entry.md): One side of the bracket: a leader and their tournament progress.
+  - [GameServer.Tournaments.Match](GameServer.Tournaments.Match.md): A pairing plus a verdict: two entries that must produce a winner by
+`deadline`. Never a lobby — how the pairing is played is game policy;
+`metadata` is game scratch space (runs, lobby id, ...).
+
+  - [GameServer.Tournaments.Ticker](GameServer.Tournaments.Ticker.md): Periodic driver for tournament lifecycles: state transitions, match-ready
+firing, deadline sweeps and recurrence spawns (`GameServer.Tournaments.tick/0`).
+  - [GameServer.Tournaments.Tournament](GameServer.Tournaments.Tournament.md): A bracket tournament occurrence.
+
+- Economy
+  - [GameServer.Economy](GameServer.Economy.md): Virtual-currency wallets with an append-only ledger.
+  - [GameServer.Economy.LedgerEntry](GameServer.Economy.LedgerEntry.md): Append-only record of a single wallet change (grant, spend, transfer, admin
 adjustment). One row per balance mutation, keeping an auditable history.
 
-- [GameServer.Economy.Wallet](GameServer.Economy.Wallet.md): A user's balance of one currency. Currencies are free-form string codes
+  - [GameServer.Economy.Wallet](GameServer.Economy.Wallet.md): A user's balance of one currency. Currencies are free-form string codes
 (`"gold"`, `"gems"`, `"energy"`) — the game decides which exist.
 
-- [GameServer.Env](GameServer.Env.md): Helpers for reading and parsing environment variables.
-- [GameServer.Friends](GameServer.Friends.md): Friends context - handles friend requests and relationships.
-- [GameServer.Friends.Friendship](GameServer.Friends.Friendship.md): Ecto schema representing a friendship/request between two users.
-- [GameServer.Groups](GameServer.Groups.md): Context module for group management: creating, updating, listing, joining,
-leaving, kicking, promoting/demoting members, and handling join requests.
-- [GameServer.Groups.Group](GameServer.Groups.Group.md): Ecto schema for the `groups` table.
-- [GameServer.Groups.GroupInvite](GameServer.Groups.GroupInvite.md): Ecto schema for the `group_invites` table.
-- [GameServer.Groups.GroupJoinRequest](GameServer.Groups.GroupJoinRequest.md): Ecto schema for the `group_join_requests` table.
-- [GameServer.Groups.GroupMember](GameServer.Groups.GroupMember.md): Ecto schema for the `group_members` join table.
-- [GameServer.Groups.Invites](GameServer.Groups.Invites.md): Group invitations: creating, accepting, declining, cancelling, and
-listing/counting pending invites.
-- [GameServer.Groups.JoinRequests](GameServer.Groups.JoinRequests.md): Join requests for private groups: requesting, listing, approving,
-rejecting, and cancelling.
-- [GameServer.Hooks](GameServer.Hooks.md): Behaviour for application-level hooks / callbacks.
-- [GameServer.Hooks.Declarations](GameServer.Hooks.Declarations.md): Registry of what a plugin *declares* it contributes, for observability and
-validation.
-- [GameServer.Hooks.Default](GameServer.Hooks.Default.md): Default no-op implementation for GameServer.Hooks
-- [GameServer.Hooks.DynamicRpcs](GameServer.Hooks.DynamicRpcs.md): Runtime registry for *dynamic* RPC function names exported by hook plugins.
-- [GameServer.Hooks.HookSchemas](GameServer.Hooks.HookSchemas.md): Registry of game-defined protobuf schemas for typed hooks, plus the
-argument/result conversion that makes typed hooks callable from every
-transport and payload format.
-- [GameServer.Hooks.KvSchemas](GameServer.Hooks.KvSchemas.md): Registry of game-defined protobuf schemas for KV entry data.
-- [GameServer.Hooks.MetadataSchemas](GameServer.Hooks.MetadataSchemas.md): Registry of game-defined protobuf schemas for entity metadata.
-- [GameServer.Hooks.PluginBuilder](GameServer.Hooks.PluginBuilder.md): Builds an OTP plugin bundle from plugin source code on disk.
-- [GameServer.Hooks.PluginManager](GameServer.Hooks.PluginManager.md): Loads and manages hook plugins shipped as OTP applications under `modules/plugins/*`.
-- [GameServer.Hooks.PluginManager.Plugin](GameServer.Hooks.PluginManager.Plugin.md): A loaded plugin descriptor.
-- [GameServer.Inventory](GameServer.Inventory.md): Player item stacks — the non-fungible companion to `GameServer.Economy`.
-- [GameServer.Inventory.Item](GameServer.Inventory.Item.md): A user's stack of one item. Items are free-form string codes
+  - [GameServer.Inventory](GameServer.Inventory.md): Player item stacks — the non-fungible companion to `GameServer.Economy`.
+  - [GameServer.Inventory.Item](GameServer.Inventory.Item.md): A user's stack of one item. Items are free-form string codes
 (`"health_potion"`, `"sword"`, `"card_374"`) — the game decides which exist.
 `metadata` holds per-stack properties.
 
-- [GameServer.Inventory.LedgerEntry](GameServer.Inventory.LedgerEntry.md): Append-only record of a single item-stack change (grant, consume, admin
+  - [GameServer.Inventory.LedgerEntry](GameServer.Inventory.LedgerEntry.md): Append-only record of a single item-stack change (grant, consume, admin
 adjustment) — the inventory counterpart of `GameServer.Economy.LedgerEntry`.
 Carries the `idempotency_key` that makes item grants safe to retry.
 
-- [GameServer.IpBans](GameServer.IpBans.md): Persistence for IP bans.
-- [GameServer.IpBans.IpBan](GameServer.IpBans.IpBan.md): A persisted IP ban. `expires_at` is `nil` for permanent bans.
+  - [GameServer.Payments](GameServer.Payments.md): Payment catalog, purchase ledger, and entitlements.
+  - [GameServer.Payments.Entitlement](GameServer.Payments.Entitlement.md): User access grant derived from a purchase or admin/server action.
 
-- [GameServer.Jobs](GameServer.Jobs.md): Durable background jobs, backed by Oban.
-- [GameServer.KV](GameServer.KV.md): Generic key/value storage.
-- [GameServer.Leaderboards](GameServer.Leaderboards.md): The Leaderboards context.
-- [GameServer.Leaderboards.Leaderboard](GameServer.Leaderboards.Leaderboard.md): Ecto schema for the `leaderboards` table.
-- [GameServer.Leaderboards.Record](GameServer.Leaderboards.Record.md): Ecto schema for the `leaderboard_records` table.
-- [GameServer.Limits](GameServer.Limits.md): Central module for configurable validation limits.
-- [GameServer.Lobbies](GameServer.Lobbies.md): Context module for lobby management: creating, updating, listing and searching lobbies.
-- [GameServer.Lobbies.Lobby](GameServer.Lobbies.Lobby.md): Ecto schema for the `lobbies` table and changeset helpers.
-- [GameServer.Lobbies.SpectatorTracker](GameServer.Lobbies.SpectatorTracker.md): Lightweight ETS-based tracker for lobby spectators.
-- [GameServer.Lobbies.States](GameServer.Lobbies.States.md): The vocabulary a lobby's `state` commonly uses.
-- [GameServer.LobbySnapshots](GameServer.LobbySnapshots.md): Durable record of how a lobby's state evolved during a run.
-- [GameServer.LobbySnapshots.Blob](GameServer.LobbySnapshots.Blob.md): Content-addressed storage for one snapshot section.
-- [GameServer.LobbySnapshots.Event](GameServer.LobbySnapshots.Event.md): A decision worth explaining, recorded between two snapshots.
-- [GameServer.LobbySnapshots.Snapshot](GameServer.LobbySnapshots.Snapshot.md): One capture of a lobby's state at a mutation entry point.
-- [GameServer.LobbySnapshots.Writer](GameServer.LobbySnapshots.Writer.md): Buffers snapshots and events and bulk-inserts them.
-- [GameServer.Lock](GameServer.Lock.md): Serialized execution using database-level advisory locks.
-- [GameServer.Mailer](GameServer.Mailer.md)
-- [GameServer.Matchmaking](GameServer.Matchmaking.md): Public API for the built-in matchmaking system.
-- [GameServer.Matchmaking.Broadcast](GameServer.Matchmaking.Broadcast.md): Broadcasts matchmaking events to users.
-- [GameServer.Matchmaking.Constants](GameServer.Matchmaking.Constants.md): Constants for the matchmaking system.
+  - [GameServer.Payments.Product](GameServer.Payments.Product.md): Internal product sold by one or more payment providers.
 
-- [GameServer.Matchmaking.Match](GameServer.Matchmaking.Match.md): Creates the lobby for a claimed match and notifies the players.
-- [GameServer.Matchmaking.Matcher](GameServer.Matchmaking.Matcher.md): Match-forming logic for a group of tickets that share the same
-`match_params`.
-- [GameServer.Matchmaking.Ticket](GameServer.Matchmaking.Ticket.md): Ecto schema for a matchmaking ticket.
-- [GameServer.Matchmaking.Worker](GameServer.Matchmaking.Worker.md): Periodic driver for the matchmaking sweep.
-- [GameServer.Notifications](GameServer.Notifications.md): Notifications context – create, list, and delete persisted user-to-user
-notifications.
-- [GameServer.Notifications.Notification](GameServer.Notifications.Notification.md): Ecto schema representing a notification sent from one user to another.
-- [GameServer.Notifications.Types](GameServer.Notifications.Types.md): The `metadata["type"]` codes a notification may carry.
-- [GameServer.OAuth.Exchanger](GameServer.OAuth.Exchanger.md): Default implementation for exchanging OAuth codes with providers.
-- [GameServer.OAuth.GoogleIDToken](GameServer.OAuth.GoogleIDToken.md): Verifies Google OpenID Connect `id_token`s for native/mobile sign-in flows.
-- [GameServer.OAuthSession](GameServer.OAuthSession.md): Simple Ecto schema for OAuth session polling used by client SDKs.
-- [GameServer.OAuthSessions](GameServer.OAuthSessions.md): Helpers for creating and retrieving short-lived OAuth sessions.
+  - [GameServer.Payments.ProviderConfig](GameServer.Payments.ProviderConfig.md): Runtime payment-provider configuration helpers.
+  - [GameServer.Payments.ProviderEvent](GameServer.Payments.ProviderEvent.md): Dedupe record for webhook and store notification events.
 
-- [GameServer.Parties](GameServer.Parties.md): Context module for party management.
-- [GameServer.Parties.Party](GameServer.Parties.Party.md): Ecto schema for the `parties` table.
-- [GameServer.Parties.PartyInvite](GameServer.Parties.PartyInvite.md): Ecto schema for the `party_invites` table.
-- [GameServer.Payments](GameServer.Payments.md): Payment catalog, purchase ledger, and entitlements.
-- [GameServer.Payments.Entitlement](GameServer.Payments.Entitlement.md): User access grant derived from a purchase or admin/server action.
+  - [GameServer.Payments.ProviderProduct](GameServer.Payments.ProviderProduct.md): Maps an internal product to a provider-specific SKU or price id.
 
-- [GameServer.Payments.Product](GameServer.Payments.Product.md): Internal product sold by one or more payment providers.
-
-- [GameServer.Payments.ProviderConfig](GameServer.Payments.ProviderConfig.md): Runtime payment-provider configuration helpers.
-- [GameServer.Payments.ProviderEvent](GameServer.Payments.ProviderEvent.md): Dedupe record for webhook and store notification events.
-
-- [GameServer.Payments.ProviderProduct](GameServer.Payments.ProviderProduct.md): Maps an internal product to a provider-specific SKU or price id.
-
-- [GameServer.Payments.Providers.Apple](GameServer.Payments.Providers.Apple.md): App Store Server API and StoreKit 2 adapter.
-- [GameServer.Payments.Providers.Apple.JWS](GameServer.Payments.Providers.Apple.JWS.md): Verifies App Store JWS payloads (StoreKit signed transactions and App Store
+  - [GameServer.Payments.Providers.Apple](GameServer.Payments.Providers.Apple.md): App Store Server API and StoreKit 2 adapter.
+  - [GameServer.Payments.Providers.Apple.JWS](GameServer.Payments.Providers.Apple.JWS.md): Verifies App Store JWS payloads (StoreKit signed transactions and App Store
 Server Notifications V2).
-- [GameServer.Payments.Providers.Google](GameServer.Payments.Providers.Google.md): Google Play Billing adapter.
-- [GameServer.Payments.Providers.Steam](GameServer.Payments.Providers.Steam.md): Steam MicroTxn adapter.
-- [GameServer.Payments.Providers.Stripe](GameServer.Payments.Providers.Stripe.md): Minimal Stripe Checkout and webhook adapter.
+  - [GameServer.Payments.Providers.Google](GameServer.Payments.Providers.Google.md): Google Play Billing adapter.
+  - [GameServer.Payments.Providers.Steam](GameServer.Payments.Providers.Steam.md): Steam MicroTxn adapter.
+  - [GameServer.Payments.Providers.Stripe](GameServer.Payments.Providers.Stripe.md): Minimal Stripe Checkout and webhook adapter.
 
-- [GameServer.Payments.Purchase](GameServer.Payments.Purchase.md): Provider transaction record.
+  - [GameServer.Payments.Purchase](GameServer.Payments.Purchase.md): Provider transaction record.
 
-- [GameServer.Payments.ReconciliationCursor](GameServer.Payments.ReconciliationCursor.md): Provider reconciliation checkpoint.
+  - [GameServer.Payments.ReconciliationCursor](GameServer.Payments.ReconciliationCursor.md): Provider reconciliation checkpoint.
 
-- [GameServer.Proto.GodobufPresence](GameServer.Proto.GodobufPresence.md): Fixes proto3-optional presence checks in godobuf-generated GDScript.
-- [GameServer.Push](GameServer.Push.md): Push context – device push-token registry and (see `send_to_user/3`)
+  - [GameServer.Payments.Settings](GameServer.Payments.Settings.md): Store credentials, per provider.
+
+- Storage &amp; content
+  - [GameServer.Content](GameServer.Content.md): Reads and renders Markdown content from project files and directories.
+  - [GameServer.ContentSettings](GameServer.ContentSettings.md): Where the server finds host-supplied content: the theme config, hook plugins,
+and the GeoIP database.
+
+  - [GameServer.KV](GameServer.KV.md): Generic key/value storage.
+  - [GameServer.Settings](GameServer.Settings.md): The declared configuration surface: every setting core, the host and its
+plugins expose, with its type, default, group, env var name and required
+level.
+  - [GameServer.Settings.Provider](GameServer.Settings.Provider.md): Declares a group of settings on a module.
+  - [GameServer.Storage](GameServer.Storage.md): Object storage for user uploads (avatars, and future user-generated content).
+  - [GameServer.Storage.Adapter](GameServer.Storage.Adapter.md): Behaviour for object-storage backends.
+  - [GameServer.Storage.Local](GameServer.Storage.Local.md): Disk-backed storage — the default backend.
+  - [GameServer.Storage.S3](GameServer.Storage.S3.md): S3-compatible storage via ExAws.
+  - [GameServer.Theme](GameServer.Theme.md): Behaviour for pluggable site theming providers.
+  - [GameServer.Theme.JSONConfig](GameServer.Theme.JSONConfig.md): JSON-backed Theme provider. Reads a locale-specific JSON file from either the
+GAMEND_CONTENT_THEME_CONFIG environment variable override or the host-owned default path
+configured by the runnable host application.
+
+- Delivery
+  - [GameServer.Notifications](GameServer.Notifications.md): Notifications context – create, list, and delete persisted user-to-user
+notifications.
+  - [GameServer.Notifications.Notification](GameServer.Notifications.Notification.md): Ecto schema representing a notification sent from one user to another.
+  - [GameServer.Notifications.Types](GameServer.Notifications.Types.md): The `metadata["type"]` codes a notification may carry.
+  - [GameServer.Push](GameServer.Push.md): Push context – device push-token registry and (see `send_to_user/3`)
 server-authoritative delivery of push notifications.
-- [GameServer.Push.APNSDispatcher](GameServer.Push.APNSDispatcher.md): Pigeon dispatcher for APNs. Configured by `host_runtime.exs` from the
+  - [GameServer.Push.APNSDispatcher](GameServer.Push.APNSDispatcher.md): Pigeon dispatcher for APNs. Configured by `host_runtime.exs` from the
 `APNS_*` env vars; started by `GameServer.Push.Supervisor` only when that
 config exists.
 
-- [GameServer.Push.DeliveryWorker](GameServer.Push.DeliveryWorker.md): Delivers one push message to one token. One job per token is deliberate:
+  - [GameServer.Push.DeliveryWorker](GameServer.Push.DeliveryWorker.md): Delivers one push message to one token. One job per token is deliberate:
 FCM v1 and APNs are one-request-per-token anyway, and it buys exact
 per-token Oban retry/backoff — a half-delivered batch job would re-push
 duplicates on retry.
-- [GameServer.Push.FCMDispatcher](GameServer.Push.FCMDispatcher.md): Pigeon dispatcher for FCM. Configured by `host_runtime.exs` from the
+  - [GameServer.Push.FCMDispatcher](GameServer.Push.FCMDispatcher.md): Pigeon dispatcher for FCM. Configured by `host_runtime.exs` from the
 `PUSH_FCM_*` env vars; started by `GameServer.Push.Supervisor` only when
 that config exists.
 
-- [GameServer.Push.FanoutWorker](GameServer.Push.FanoutWorker.md): Expands a multi-user send into per-token `DeliveryWorker` jobs, in chunks,
+  - [GameServer.Push.FanoutWorker](GameServer.Push.FanoutWorker.md): Expands a multi-user send into per-token `DeliveryWorker` jobs, in chunks,
 off the caller's request path. `GameServer.Push.send_to_users/3` enqueues
 this above its inline threshold so a large broadcast never holds a long
 transaction (SQLite is single-writer) and survives restarts. Identical args
 within a minute dedupe via Oban uniqueness (double-broadcast guard).
 
-- [GameServer.Push.Message](GameServer.Push.Message.md): A validated push message: what `GameServer.Push.send_to_user/3` accepts and
+  - [GameServer.Push.Message](GameServer.Push.Message.md): A validated push message: what `GameServer.Push.send_to_user/3` accepts and
 what the delivery workers carry through job args.
-- [GameServer.Push.Provider](GameServer.Push.Provider.md): Behaviour for push delivery providers.
-- [GameServer.Push.Providers.APNs](GameServer.Push.Providers.APNs.md): APNs-direct provider for iOS, delivered through the
+  - [GameServer.Push.Provider](GameServer.Push.Provider.md): Behaviour for push delivery providers.
+  - [GameServer.Push.Providers.APNs](GameServer.Push.Providers.APNs.md): APNs-direct provider for iOS, delivered through the
 `GameServer.Push.APNSDispatcher` Pigeon dispatcher (token-auth `.p8`,
 HTTP/2 over Mint). The `apns-topic` comes from `APNS_TOPIC`.
 
-- [GameServer.Push.Providers.FCM](GameServer.Push.Providers.FCM.md): Firebase Cloud Messaging (HTTP v1) provider for Android and Web — and iOS
+  - [GameServer.Push.Providers.FCM](GameServer.Push.Providers.FCM.md): Firebase Cloud Messaging (HTTP v1) provider for Android and Web — and iOS
 relay, if a game prefers Firebase over APNs-direct — delivered through the
 `GameServer.Push.FCMDispatcher` Pigeon dispatcher, authenticated by the
 `GameServer.Push.Goth` worker.
 
-- [GameServer.Push.Providers.Log](GameServer.Push.Providers.Log.md): Zero-config default provider: logs each delivery instead of calling out —
+  - [GameServer.Push.Providers.Log](GameServer.Push.Providers.Log.md): Zero-config default provider: logs each delivery instead of calling out —
 the `Storage.Local` of push. Every token routed here (nothing configured,
 `PUSH_ADAPTER=log`, or a provider whose dispatcher is down) reports success,
 so the whole flow is exercisable with no credentials.
 
-- [GameServer.Push.PushToken](GameServer.Push.PushToken.md): Ecto schema for a registered device push token.
-- [GameServer.Push.Supervisor](GameServer.Push.Supervisor.md): Supervises the push delivery processes: the Goth worker (FCM OAuth) and the
+  - [GameServer.Push.PushToken](GameServer.Push.PushToken.md): Ecto schema for a registered device push token.
+  - [GameServer.Push.Supervisor](GameServer.Push.Supervisor.md): Supervises the push delivery processes: the Goth worker (FCM OAuth) and the
 two Pigeon dispatchers.
-- [GameServer.Quests](GameServer.Quests.md): Event-driven quest/progression engine.
-- [GameServer.Quests.Objective](GameServer.Quests.Objective.md): One objective inside a quest definition: reach `target` occurrences of
-`event` (as reported through `GameServer.Quests.report_event/4`).
-- [GameServer.Quests.Quest](GameServer.Quests.Quest.md): Ecto schema for the `quests` table.
-- [GameServer.Quests.QuestProgress](GameServer.Quests.QuestProgress.md): Ecto schema for the `quest_progress` table — one row per user, quest and
-reset period.
-- [GameServer.Quests.Reward](GameServer.Quests.Reward.md): One reward entry on a quest definition: `amount` of a currency
-(via `GameServer.Economy.grant/4`) or an item
-(via `GameServer.Inventory.grant_item/4`).
+  - [GameServer.Realtime](GameServer.Realtime.md): Pushing game-defined realtime events to a player's socket.
 
-- [GameServer.ReadyChecks](GameServer.ReadyChecks.md): Ready checks: *these players must each answer before this proceeds*.
-- [GameServer.ReadyChecks.Check](GameServer.ReadyChecks.Check.md): Ecto schema for one ready check — a *moment* at which a set of players must
-each answer before something proceeds.
-- [GameServer.ReadyChecks.Participant](GameServer.ReadyChecks.Participant.md): Ecto schema for one player's answer inside a ready check.
-- [GameServer.Realtime](GameServer.Realtime.md): Pushing game-defined realtime events to a player's socket.
-- [GameServer.Repo](GameServer.Repo.md)
-- [GameServer.Repo.AdvisoryLock](GameServer.Repo.AdvisoryLock.md): Advisory locking for protecting TOCTOU (Time-of-Check-Time-of-Use) patterns.
-- [GameServer.Repo.MigrationPaths](GameServer.Repo.MigrationPaths.md): Resolves every migration directory that belongs to a gamend deployment.
-- [GameServer.Retention](GameServer.Retention.md): Periodically prunes old rows from unbounded tables.
-- [GameServer.Schedule](GameServer.Schedule.md): Dynamic cron-like job scheduling for hooks.
-- [GameServer.Schema](GameServer.Schema.md): Shared schema base: `use GameServer.Schema` instead of `use Ecto.Schema`.
-- [GameServer.Storage](GameServer.Storage.md): Object storage for user uploads (avatars, and future user-generated content).
-- [GameServer.Storage.Adapter](GameServer.Storage.Adapter.md): Behaviour for object-storage backends.
-- [GameServer.Storage.Local](GameServer.Storage.Local.md): Disk-backed storage — the default backend.
-- [GameServer.Storage.S3](GameServer.Storage.S3.md): S3-compatible storage via ExAws.
-- [GameServer.Theme](GameServer.Theme.md): Behaviour for pluggable site theming providers.
-- [GameServer.Theme.JSONConfig](GameServer.Theme.JSONConfig.md): JSON-backed Theme provider. Reads a locale-specific JSON file from either the
-THEME_CONFIG environment variable override or the host-owned default path
-configured by the runnable host application.
-- [GameServer.Tournaments](GameServer.Tournaments.md): Bracket tournaments: registration → seeded single-elimination draw → timed
-rounds → champions. See TOURNAMENT_DESIGN.md.
-- [GameServer.Tournaments.Entry](GameServer.Tournaments.Entry.md): One side of the bracket: a leader and their tournament progress.
-- [GameServer.Tournaments.Match](GameServer.Tournaments.Match.md): A pairing plus a verdict: two entries that must produce a winner by
-`deadline`. Never a lobby — how the pairing is played is game policy;
-`metadata` is game scratch space (runs, lobby id, ...).
+- Plugins
+  - [GameServer.Hooks](GameServer.Hooks.md): Behaviour for application-level hooks / callbacks.
+  - [GameServer.Hooks.Declarations](GameServer.Hooks.Declarations.md): Registry of what a plugin *declares* it contributes, for observability and
+validation.
+  - [GameServer.Hooks.Default](GameServer.Hooks.Default.md): Default no-op implementation for GameServer.Hooks
+  - [GameServer.Hooks.DynamicRpcs](GameServer.Hooks.DynamicRpcs.md): Runtime registry for *dynamic* RPC function names exported by hook plugins.
+  - [GameServer.Hooks.HookSchemas](GameServer.Hooks.HookSchemas.md): Registry of game-defined protobuf schemas for typed hooks, plus the
+argument/result conversion that makes typed hooks callable from every
+transport and payload format.
+  - [GameServer.Hooks.KvSchemas](GameServer.Hooks.KvSchemas.md): Registry of game-defined protobuf schemas for KV entry data.
+  - [GameServer.Hooks.MetadataSchemas](GameServer.Hooks.MetadataSchemas.md): Registry of game-defined protobuf schemas for entity metadata.
+  - [GameServer.Hooks.PluginBuilder](GameServer.Hooks.PluginBuilder.md): Builds an OTP plugin bundle from plugin source code on disk.
+  - [GameServer.Hooks.PluginManager](GameServer.Hooks.PluginManager.md): Loads and manages hook plugins shipped as OTP applications under `modules/plugins/*`.
+  - [GameServer.Hooks.PluginManager.Plugin](GameServer.Hooks.PluginManager.Plugin.md): A loaded plugin descriptor.
 
-- [GameServer.Tournaments.Ticker](GameServer.Tournaments.Ticker.md): Periodic driver for tournament lifecycles: state transitions, match-ready
-firing, deadline sweeps and recurrence spawns (`GameServer.Tournaments.tick/0`).
-- [GameServer.Tournaments.Tournament](GameServer.Tournaments.Tournament.md): A bracket tournament occurrence.
-- [GameServer.Types](GameServer.Types.md): Shared types used across GameServer contexts.
-- [GameServer.UUIDv7](GameServer.UUIDv7.md): UUIDv7 Ecto type used for all primary and foreign keys.
+- Operations
+  - [GameServer.Async](GameServer.Async.md): Utilities for running best-effort background work.
+  - [GameServer.Cache](GameServer.Cache.md): Application cache backed by Nebulex.
+  - [GameServer.Cache.L1](GameServer.Cache.L1.md): L1 cache (local, in-memory).
+  - [GameServer.Cache.L2.Partitioned](GameServer.Cache.L2.Partitioned.md): L2 cache (partitioned topology).
+  - [GameServer.Cache.L2.Partitioned.Primary](GameServer.Cache.L2.Partitioned.Primary.md): This is the cache for the primary storage.
+
+  - [GameServer.Cache.L2.Redis](GameServer.Cache.L2.Redis.md): L2 cache backed by Redis.
+  - [GameServer.Cache.Settings](GameServer.Cache.Settings.md): Cache topology. The resolved levels are built from these in the host's
+runtime config; `GameServer.Cache` itself holds the assembled structure.
+
+  - [GameServer.Cache.Stats](GameServer.Cache.Stats.md): Lightweight in-memory counters for cache effectiveness and overload signals,
+aggregated from telemetry events
+  - [GameServer.Cache.Sync](GameServer.Cache.Sync.md): Applies cache invalidations broadcast by other app instances.
+  - [GameServer.Config](GameServer.Config.md): Typed reads of environment variables a plugin declared via `env_vars/0`.
+  - [GameServer.IpBans](GameServer.IpBans.md): Persistence for IP bans.
+  - [GameServer.IpBans.IpBan](GameServer.IpBans.IpBan.md): A persisted IP ban. `expires_at` is `nil` for permanent bans.
+
+  - [GameServer.Jobs](GameServer.Jobs.md): Durable background jobs, backed by Oban.
+  - [GameServer.Limits](GameServer.Limits.md): Central module for configurable validation limits.
+  - [GameServer.Lock](GameServer.Lock.md): Serialized execution using database-level advisory locks.
+  - [GameServer.Mailer](GameServer.Mailer.md)
+  - [GameServer.Repo](GameServer.Repo.md)
+  - [GameServer.Repo.AdvisoryLock](GameServer.Repo.AdvisoryLock.md): Advisory locking for protecting TOCTOU (Time-of-Check-Time-of-Use) patterns.
+  - [GameServer.Repo.MigrationPaths](GameServer.Repo.MigrationPaths.md): Resolves every migration directory that belongs to a gamend deployment.
+  - [GameServer.Retention](GameServer.Retention.md): Periodically prunes old rows from unbounded tables.
+  - [GameServer.Schedule](GameServer.Schedule.md): Dynamic cron-like job scheduling for hooks.
+
+- Internals
+  - [GameServer.Proto.GodobufPresence](GameServer.Proto.GodobufPresence.md): Fixes proto3-optional presence checks in godobuf-generated GDScript.
+  - [GameServer.Schema](GameServer.Schema.md): Shared schema base: `use GameServer.Schema` instead of `use Ecto.Schema`.
+  - [GameServer.Types](GameServer.Types.md): Shared types used across GameServer contexts.
+  - [GameServer.UUIDv7](GameServer.UUIDv7.md): UUIDv7 Ecto type used for all primary and foreign keys.
 
 ## Mix Tasks
 
 - [mix demo.seed](Mix.Tasks.Demo.Seed.md): Fills the database with enough demo data to exercise pagination and the
 list/detail pages at realistic sizes.
+- [mix gamend.settings.env_example](Mix.Tasks.Gamend.Settings.EnvExample.md): Writes `.env.example` from `GameServer.Settings.all/0`, grouped and
+commented from each setting's declaration.
+- [mix gamend.settings.guide](Mix.Tasks.Gamend.Settings.Guide.md): Writes the public Settings guide from `GameServer.Settings.all/0`.
 - [mix gen.sdk](Mix.Tasks.Gen.Sdk.md): Generates SDK stub modules from the real GameServer modules.
 - [mix host.proto.gen](Mix.Tasks.Host.Proto.Gen.md): Generates protobuf bindings for every target from a `.proto` file.
 

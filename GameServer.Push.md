@@ -77,6 +77,14 @@ Soft-disable a token the provider reported dead. The row is kept —
 re-registration re-enables it — so a token bouncing between valid and
 invalid never loses its device association.
 
+# `force_log?`
+
+```elixir
+@spec force_log?() :: boolean()
+```
+
+Whether every delivery is forced to the Log provider (`PUSH_ADAPTER=log`).
+
 # `list_all_tokens`
 
 ```elixir
@@ -131,8 +139,7 @@ Bump `last_used_at` after a successful delivery.
 
 Resolve the delivery provider for a token: its `provider` column's module
 when that module's `configured?/0` says it can deliver, else the zero-config
-`Log` provider. `force_log: true` (`PUSH_ADAPTER=log`) short-circuits
-everything to `Log`.
+`Log` provider. `PUSH_ADAPTER=log` short-circuits everything to `Log`.
 
 # `register_token`
 

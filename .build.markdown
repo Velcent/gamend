@@ -12,18 +12,21 @@ GameServer.Cache.L1.md
 GameServer.Cache.L2.Partitioned.Primary.md
 GameServer.Cache.L2.Partitioned.md
 GameServer.Cache.L2.Redis.md
+GameServer.Cache.Settings.md
 GameServer.Cache.Stats.md
 GameServer.Cache.Sync.md
 GameServer.Cache.md
 GameServer.Chat.Message.md
 GameServer.Chat.ReadCursor.md
 GameServer.Chat.md
+GameServer.Cluster.md
 GameServer.Config.md
 GameServer.Content.md
+GameServer.ContentSettings.md
+GameServer.Database.md
 GameServer.Economy.LedgerEntry.md
 GameServer.Economy.Wallet.md
 GameServer.Economy.md
-GameServer.Env.md
 GameServer.Friends.Friendship.md
 GameServer.Friends.md
 GameServer.Groups.Group.md
@@ -64,6 +67,7 @@ GameServer.LobbySnapshots.Snapshot.md
 GameServer.LobbySnapshots.Writer.md
 GameServer.LobbySnapshots.md
 GameServer.Lock.md
+GameServer.Mail.md
 GameServer.Mailer.md
 GameServer.Matchmaking.Broadcast.md
 GameServer.Matchmaking.Constants.md
@@ -77,6 +81,7 @@ GameServer.Notifications.Types.md
 GameServer.Notifications.md
 GameServer.OAuth.Exchanger.md
 GameServer.OAuth.GoogleIDToken.md
+GameServer.OAuth.Providers.md
 GameServer.OAuthSession.md
 GameServer.OAuthSessions.md
 GameServer.Parties.Party.md
@@ -94,6 +99,7 @@ GameServer.Payments.Providers.Steam.md
 GameServer.Payments.Providers.Stripe.md
 GameServer.Payments.Purchase.md
 GameServer.Payments.ReconciliationCursor.md
+GameServer.Payments.Settings.md
 GameServer.Payments.md
 GameServer.Proto.GodobufPresence.md
 GameServer.Push.APNSDispatcher.md
@@ -123,6 +129,8 @@ GameServer.Repo.md
 GameServer.Retention.md
 GameServer.Schedule.md
 GameServer.Schema.md
+GameServer.Settings.Provider.md
+GameServer.Settings.md
 GameServer.Storage.Adapter.md
 GameServer.Storage.Local.md
 GameServer.Storage.S3.md
@@ -138,8 +146,11 @@ GameServer.Types.md
 GameServer.UUIDv7.md
 GameServer.md
 Mix.Tasks.Demo.Seed.md
+Mix.Tasks.Gamend.Settings.EnvExample.md
+Mix.Tasks.Gamend.Settings.Guide.md
 Mix.Tasks.Gen.Sdk.md
 Mix.Tasks.Host.Proto.Gen.md
 api-reference.md
+changelog.md
 llms.txt
 readme.md

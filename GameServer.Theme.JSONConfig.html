@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.1">
-    <meta name="project" content="game_server_core v1.0.1070">
+    <meta name="project" content="game_server_core v1.0.1074">
 
 
-    <title>GameServer.Theme.JSONConfig — game_server_core v1.0.1070</title>
+    <title>GameServer.Theme.JSONConfig — game_server_core v1.0.1074</title>
 
     <link rel="stylesheet" href="dist/html-elixir-YJO4MOOW.css" />
 
-    <script defer src="dist/sidebar_items-10BFFEEA.js"></script>
+    <script defer src="dist/sidebar_items-C3112319.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-YU4BZFVS.js"></script>
 
@@ -37,7 +37,7 @@
 game_server_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1070
+          v1.0.1074
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ game_server_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">GameServer.<wbr>Theme.<wbr>JSONConfig</span> 
-      <small class="app-vsn" translate="no">(game_server_core v1.0.1070)</small>
+      <small class="app-vsn" translate="no">(game_server_core v1.0.1074)</small>
 
     </h1>
 
@@ -115,11 +115,11 @@ game_server_core
 
     <section id="moduledoc">
 <p>JSON-backed Theme provider. Reads a locale-specific JSON file from either the
-THEME_CONFIG environment variable override or the host-owned default path
+GAMEND_CONTENT_THEME_CONFIG environment variable override or the host-owned default path
 configured by the runnable host application.</p><p>Only locale-suffixed files are loaded (e.g. <code class="inline">example_config.en.json</code>,
 <code class="inline">example_config.es.json</code>). The base path itself (without a locale suffix) is
 never loaded directly — it serves only as a naming template to derive
-locale-specific paths.</p><p>When THEME_CONFIG is not set, the provider falls back to the host-owned
+locale-specific paths.</p><p>When GAMEND_CONTENT_THEME_CONFIG is not set, the provider falls back to the host-owned
 default path configured under <a href="GameServer.Theme.JSONConfig.html"><code class="inline">GameServer.Theme.JSONConfig</code></a>.</p><p>Theme configs are cached in <code class="inline">:persistent_term</code> after the first read so
 subsequent requests never hit the filesystem. Call <code class="inline">reload/0</code> to clear the
 cache (e.g. after editing the JSON file at runtime).</p>
@@ -145,7 +145,7 @@ cache (e.g. after editing the JSON file at runtime).</p>
 
       </div>
 
-        <div class="summary-synopsis"><p>Returns the effective theme config path, preferring THEME_CONFIG when set and
+        <div class="summary-synopsis"><p>Returns the effective theme config path, preferring GAMEND_CONTENT_THEME_CONFIG when set and
 otherwise falling back to the host-owned default path.</p></div>
 
     </div>
@@ -156,7 +156,7 @@ otherwise falling back to the host-owned default path.</p></div>
 
       </div>
 
-        <div class="summary-synopsis"><p>Variant of <code class="inline">get_theme/0</code> that prefers a locale-specific THEME_CONFIG file when present.</p></div>
+        <div class="summary-synopsis"><p>Variant of <code class="inline">get_theme/0</code> that prefers a locale-specific GAMEND_CONTENT_THEME_CONFIG file when present.</p></div>
 
     </div>
 
@@ -166,7 +166,7 @@ otherwise falling back to the host-owned default path.</p></div>
 
       </div>
 
-        <div class="summary-synopsis"><p>Returns the runtime THEME_CONFIG override if present and non-blank,
+        <div class="summary-synopsis"><p>Returns the runtime GAMEND_CONTENT_THEME_CONFIG override if present and non-blank,
 otherwise nil. This intentionally excludes the host default path so admin
 diagnostics can distinguish explicit overrides from host defaults.</p></div>
 
@@ -205,7 +205,7 @@ diagnostics can distinguish explicit overrides from host defaults.</p></div>
 
   <section class="docstring">
 
-<p>Returns the effective theme config path, preferring THEME_CONFIG when set and
+<p>Returns the effective theme config path, preferring GAMEND_CONTENT_THEME_CONFIG when set and
 otherwise falling back to the host-owned default path.</p>
   </section>
 </section>
@@ -234,7 +234,7 @@ otherwise falling back to the host-owned default path.</p>
 
       </div>
 
-<p>Variant of <code class="inline">get_theme/0</code> that prefers a locale-specific THEME_CONFIG file when present.</p><p>Given a base config like <code class="inline">modules/example_config.json</code> and locale <code class="inline">&quot;es&quot;</code>, we will
+<p>Variant of <code class="inline">get_theme/0</code> that prefers a locale-specific GAMEND_CONTENT_THEME_CONFIG file when present.</p><p>Given a base config like <code class="inline">modules/example_config.json</code> and locale <code class="inline">&quot;es&quot;</code>, we will
 try <code class="inline">modules/example_config.es.json</code> first, then fall back to <code class="inline">.en.json</code>.
 The base file itself is never loaded.</p>
   </section>
@@ -258,7 +258,7 @@ The base file itself is never loaded.</p>
 
   <section class="docstring">
 
-<p>Returns the runtime THEME_CONFIG override if present and non-blank,
+<p>Returns the runtime GAMEND_CONTENT_THEME_CONFIG override if present and non-blank,
 otherwise nil. This intentionally excludes the host default path so admin
 diagnostics can distinguish explicit overrides from host defaults.</p>
   </section>
@@ -272,9 +272,9 @@ diagnostics can distinguish explicit overrides from host defaults.</p>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/game_server_core/1.0.1070">Hex Package</a>
+              <a href="https://hex.pm/packages/game_server_core/1.0.1074">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/game_server_core/1.0.1070">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/game_server_core/1.0.1074">Hex Preview</a>
 
             </span>
 

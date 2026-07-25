@@ -125,8 +125,7 @@ Returns `last_seen_at` when present, otherwise a stable fallback timestamp.
 @spec min_password_length() :: pos_integer()
 ```
 
-Returns the minimum password length, configurable via the `MIN_PASSWORD_LENGTH`
-environment variable. Defaults to 8 if not set.
+The minimum password length enforced at registration and change.
 
 # `password_changeset`
 

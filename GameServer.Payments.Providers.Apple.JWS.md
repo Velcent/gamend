@@ -1,5 +1,5 @@
 # `GameServer.Payments.Providers.Apple.JWS`
-[🔗](https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/payments/providers/apple.ex#L300)
+[🔗](https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/payments/providers/apple.ex#L302)
 
 Verifies App Store JWS payloads (StoreKit signed transactions and App Store
 Server Notifications V2).

@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.40.1">
+    <meta name="project" content="game_server_core v1.0.1074">
+
+
+    <title>GameServer.Settings.Provider — game_server_core v1.0.1074</title>
+
+    <link rel="stylesheet" href="dist/html-elixir-YJO4MOOW.css" />
+
+    <script defer src="dist/sidebar_items-C3112319.js"></script>
+    <script defer src="docs_config.js"></script>
+    <script defer src="dist/html-YU4BZFVS.js"></script>
+
+  </head>
+  <body>
+    <script>(()=>{var t="ex_doc:settings",e="dark";var o="dark",s="light";var E="sidebar_state",n="closed";var r="sidebar_width";var a="sidebar-open";var i=new URLSearchParams(window.location.search),S=i.get("theme")||JSON.parse(localStorage.getItem(t)||"{}").theme;(S===o||S!==s&&window.matchMedia("(prefers-color-scheme: dark)").matches)&&document.body.classList.add(e);var d=sessionStorage.getItem(E),A=d!==n&&!window.matchMedia(`screen and (max-width: ${768}px)`).matches;document.body.classList.toggle(a,A);var c=sessionStorage.getItem(r);c&&document.body.style.setProperty("--sidebarWidth",`${c}px`);var p=/(Macintosh|iPhone|iPad|iPod)/.test(window.navigator.userAgent);document.documentElement.classList.toggle("apple-os",p);})();
+</script>
+
+<div class="body-wrapper">
+
+<button id="sidebar-menu" class="sidebar-button sidebar-toggle" aria-label="toggle sidebar" aria-controls="sidebar">
+  <i class="ri-menu-line ri-lg" title="Collapse/expand sidebar"></i>
+</button>
+
+<nav id="sidebar" class="sidebar">
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectInfo">
+
+      <div>
+        <a href="readme.html" class="sidebar-projectName" translate="no">
+game_server_core
+        </a>
+        <div class="sidebar-projectVersion" translate="no">
+          v1.0.1074
+        </div>
+      </div>
+    </div>
+    <ul id="sidebar-list-nav" class="sidebar-list-nav" role="tablist" data-extras="Pages"></ul>
+  </div>
+</nav>
+
+<output role="status" id="toast"></output>
+
+<main class="content page-module" id="main" data-type="modules">
+  <div id="content" class="content-inner">
+    <div class="top-search">
+      <div class="search-settings">
+        <form class="search-bar" action="search.html">
+          <label class="search-label">
+            <span class="sr-only">Search documentation of game_server_core</span>
+            <div class="search-input-wrapper">
+              <input name="q" type="text" class="search-input" placeholder="Press / to search" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+              <button type="button" tabindex="-1" class="search-close-button" aria-hidden="true">
+                <i class="ri-close-line ri-lg" title="Cancel search"></i>
+              </button>
+            </div>
+          </label>
+        </form>
+        <div class="autocomplete">
+        </div>
+        <div class="engine-selector" data-multiple="false">
+          <button type="button" class="engine-button" aria-label="Select search engine" aria-haspopup="true" aria-expanded="false">
+            <i class="ri-search-2-line" aria-hidden="true"></i>
+            <span class="engine-name">Default</span>
+            <i class="ri-arrow-down-s-line" aria-hidden="true"></i>
+          </button>
+          <div class="engine-dropdown" hidden role="menu">
+
+              <button type="button"
+                      class="engine-option"
+                      data-engine-url="search.html?q="
+                      role="menuitemradio"
+                      aria-checked="true">
+                <span class="name">Default</span>
+                <span class="help">In-browser search</span>
+              </button>
+
+          </div>
+        </div>
+        <button class="icon-settings display-settings">
+          <i class="ri-settings-3-line"></i>
+          <span class="sr-only">Settings</span>
+        </button>
+      </div>
+    </div>
+
+<div id="top-content">
+  <div class="heading-with-actions top-heading">
+    <h1>
+      <span translate="no">GameServer.<wbr>Settings.<wbr>Provider</span> 
+      <small class="app-vsn" translate="no">(game_server_core v1.0.1074)</small>
+
+    </h1>
+
+<a href="GameServer.Settings.Provider.md" title="Copy Markdown (hold Ctrl/Cmd and click it to open as Markdown)" class="copy-markdown icon-action" rel="help">
+  <i class="ri-markdown-line" aria-hidden="true"></i>
+  <span class="sr-only">Copy Markdown</span>
+</a>
+
+
+
+      <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/settings/provider.ex#L1" title="View Source" class="icon-action" rel="help">
+        <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        <span class="sr-only">View Source</span>
+      </a>
+
+  </div>
+
+
+    <section id="moduledoc">
+<p>Declares a group of settings on a module.</p><pre><code class="makeup elixir" translate="no"><span class="kd">defmodule</span><span class="w"> </span><span class="nc">GameServer.Retention</span><span class="w"> </span><span class="k" data-group-id="2367569180-1">do</span><span class="w">
+  </span><span class="kn">use</span><span class="w"> </span><span class="nc">GameServer.Settings.Provider</span><span class="p">,</span><span class="w">
+    </span><span class="ss">app</span><span class="p">:</span><span class="w"> </span><span class="ss">:game_server_core</span><span class="p">,</span><span class="w">
+    </span><span class="ss">group</span><span class="p">:</span><span class="w"> </span><span class="ss">:retention</span><span class="p">,</span><span class="w">
+    </span><span class="ss">label</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Retention&quot;</span><span class="w">
+
+  </span><span class="n">setting</span><span class="w"> </span><span class="ss">:chat_messages_days</span><span class="p">,</span><span class="w"> </span><span class="ss">:integer</span><span class="p">,</span><span class="w">
+    </span><span class="ss">default</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
+    </span><span class="ss">doc</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Delete chat messages older than N days. 0 keeps forever.&quot;</span><span class="w">
+</span><span class="k" data-group-id="2367569180-1">end</span></code></pre><p>The declaration is the only place a setting is written down. Its environment
+variable name is <strong>derived</strong> — <code class="inline">&lt;ROOT&gt;_&lt;GROUP&gt;_&lt;KEY&gt;</code>, e.g.
+<code class="inline">GAMEND_RETENTION_CHAT_MESSAGES_DAYS</code> — so the key and its env var can never
+disagree. Pass <code class="inline">env:</code> only for the handful of names other software owns
+(<code class="inline">PORT</code>, <code class="inline">DATABASE_URL</code>), which should also carry <code class="inline">external: true</code>.</p><p>Values are read back with <a href="GameServer.Settings.html#get/2"><code class="inline">GameServer.Settings.get/2</code></a>, which checks
+<code class="inline">Application.get_env(app, module)</code> and falls back to the compiled default. A
+host configures them the ordinary Elixir way and never needs an env var:</p><pre><code class="makeup elixir" translate="no"><span class="n">config</span><span class="w"> </span><span class="ss">:game_server_core</span><span class="p">,</span><span class="w"> </span><span class="nc">GameServer.Retention</span><span class="p">,</span><span class="w"> </span><span class="ss">chat_messages_days</span><span class="p">:</span><span class="w"> </span><span class="mi">90</span></code></pre><h2 id="module-options-for-use" class="section-heading"><a href="#module-options-for-use" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Options for <code class="inline">use</code></span></h2><ul><li><code class="inline">:app</code> (required) — the OTP app the values live under.</li><li><code class="inline">:group</code> (required) — the middle segment of the env name, and the grouping
+the admin viewer renders. One word.</li><li><code class="inline">:root</code> — first segment of the env name. Defaults to <code class="inline">&quot;GAMEND&quot;</code>; a plugin
+passes its own (<code class="inline">root: &quot;POLYGLOT&quot;</code>).</li><li><code class="inline">:label</code> — display name for the group. Defaults to a capitalised <code class="inline">:group</code>.</li><li><code class="inline">:env_prefix</code> — replaces the derived <code class="inline">&lt;ROOT&gt;_&lt;GROUP&gt;_</code> prefix for every
+setting in the provider, so <code class="inline">LIMIT_MAX_PAGE_SIZE</code> can keep its name while
+the group is <code class="inline">:limits</code>. A transitional escape hatch for names that predate
+the convention; a per-setting <code class="inline">env:</code> still wins over it.</li></ul><h2 id="module-options-for-setting-3" class="section-heading"><a href="#module-options-for-setting-3" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Options for <a href="#setting/3"><code class="inline">setting/3</code></a></span></h2><ul><li><code class="inline">:default</code> — the compiled default. Defaults to <code class="inline">nil</code>.</li><li><code class="inline">:doc</code> — one-line description, shown in the admin viewer and generated docs.</li><li><code class="inline">:secret</code> — mask the value everywhere it is displayed.</li><li><code class="inline">:required</code> — <code class="inline">:prod</code> (boot fails in prod, warns in dev) or <code class="inline">:warn</code> (logs in
+prod). Omit for optional. Never enforced in test.</li><li><code class="inline">:when</code> — <code class="inline">{path, value}</code> gating the requirement on another setting, e.g.
+<code class="inline">when: {[:storage, :adapter], :s3}</code>. A list of such tuples requires all of
+them to hold.</li><li><code class="inline">:with</code> — sibling keys forming a complete-or-empty group. All unset is
+silent; a partial set trips <code class="inline">:required</code>.</li><li><code class="inline">:env</code> — override the derived env var name. For inherited names only.</li><li><code class="inline">:external</code> — this name belongs to other software; the viewer files it
+under &quot;Inherited&quot; rather than implying we own it.</li></ul>
+    </section>
+
+</div>
+
+  <section id="summary" class="details-list">
+    <h2 class="section-heading">
+      <a class="hover-link" href="#summary">
+        <i class="ri-link-m" aria-hidden="true"></i>
+      </a>
+      <span class="text">Summary</span>
+    </h2>
+<div class="summary-functions summary">
+  <h3>
+    <a href="#functions">Functions</a>
+  </h3>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#derive_env/4" data-no-tooltip="" translate="no">derive_env(root, group, key, env_prefix \\ nil)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>The environment variable name for a group and key: <code class="inline">&lt;ROOT&gt;_&lt;GROUP&gt;_&lt;KEY&gt;</code>.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#setting/3" data-no-tooltip="" translate="no">setting(key, type, opts \\ [])</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Declares one setting. See the module doc for the accepted options.</p></div>
+
+    </div>
+
+</div>
+
+  </section>
+
+
+  <section id="functions" class="details-list">
+    <h2 class="section-heading">
+      <a class="hover-link" href="#functions">
+        <i class="ri-link-m" aria-hidden="true"></i>
+      </a>
+      <span class="text">Functions</span>
+    </h2>
+
+    <div class="functions-list">
+<section class="detail" id="derive_env/4">
+
+    <span id="derive_env/3"></span>
+
+  <div class="detail-header">
+    <a href="#derive_env/4" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">derive_env(root, group, key, env_prefix \\ nil)</h1>
+
+
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/settings/provider.ex#L174" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> derive_env(<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>(), <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>() | nil) :: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()</pre>
+
+      </div>
+
+<p>The environment variable name for a group and key: <code class="inline">&lt;ROOT&gt;_&lt;GROUP&gt;_&lt;KEY&gt;</code>.</p><p>A provider-level <code class="inline">env_prefix</code> replaces the <code class="inline">&lt;ROOT&gt;_&lt;GROUP&gt;_</code> part.</p>
+  </section>
+</section>
+<section class="detail" id="setting/3">
+
+    <span id="setting/2"></span>
+
+  <div class="detail-header">
+    <a href="#setting/3" class="detail-link" data-no-tooltip="" aria-label="Link to this macro">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">setting(key, type, opts \\ [])</h1>
+
+        <span class="note">(macro)</span>
+
+
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/settings/provider.ex#L88" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+<p>Declares one setting. See the module doc for the accepted options.</p>
+  </section>
+</section>
+
+    </div>
+  </section>
+
+    <footer class="footer">
+
+        <p>
+
+            <span class="line">
+              <a href="https://hex.pm/packages/game_server_core/1.0.1074">Hex Package</a>
+
+              <a href="https://preview.hex.pm/preview/game_server_core/1.0.1074">Hex Preview</a>
+
+            </span>
+
+          <span class="line">
+            <button class="a-main footer-button display-quick-switch" title="Go to package docs">
+              Go to package docs
+            </button>
+
+              <a href="llms.txt" target="_blank">
+                View llms.txt
+              </a>
+
+
+              <a href="game_server_core.epub">
+                Download ePub version
+              </a>
+
+          </span>
+        </p>
+
+        <p class="built-using">
+          Built using
+          <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener" translate="no">ExDoc</a> (v0.40.1) for the
+
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank" translate="no">Elixir programming language</a>
+
+        </p>
+
+
+    </footer>
+  </div>
+</main>
+</div>
+
+  </body>
+</html>

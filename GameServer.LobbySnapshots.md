@@ -187,8 +187,8 @@ Record a decision that happened within the current snapshot interval.
 
 The resolved value of a config key, for tests and diagnostics.
 
-Exposed so the resolution order (app env, then environment) can be asserted
-against the real code path rather than a copy of it.
+Exposed so resolution can be asserted against the real code path rather than
+a copy of it.
 
 # `state_at`
 

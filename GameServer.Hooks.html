@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.1">
-    <meta name="project" content="game_server_core v1.0.1070">
+    <meta name="project" content="game_server_core v1.0.1074">
 
 
-    <title>GameServer.Hooks — game_server_core v1.0.1070</title>
+    <title>GameServer.Hooks — game_server_core v1.0.1074</title>
 
     <link rel="stylesheet" href="dist/html-elixir-YJO4MOOW.css" />
 
-    <script defer src="dist/sidebar_items-10BFFEEA.js"></script>
+    <script defer src="dist/sidebar_items-C3112319.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-YU4BZFVS.js"></script>
 
@@ -37,7 +37,7 @@
 game_server_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1070
+          v1.0.1074
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ game_server_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">GameServer.<wbr>Hooks</span> <small>behaviour</small>
-      <small class="app-vsn" translate="no">(game_server_core v1.0.1070)</small>
+      <small class="app-vsn" translate="no">(game_server_core v1.0.1074)</small>
 
     </h1>
 
@@ -560,6 +560,36 @@ email, device, and all OAuth providers (which register mid-login).</p></div>
     </div>
 
 </div>
+<div class="summary-quest-hooks summary">
+  <h3>
+    <a href="#quest-hooks">Quest hooks</a>
+  </h3>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#c:after_quest_claimed/1" data-no-tooltip="" translate="no">after_quest_claimed(t)</a>
+
+      </div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#c:after_quest_completed/1" data-no-tooltip="" translate="no">after_quest_completed(t)</a>
+
+      </div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#c:before_quest_claim/3" data-no-tooltip="" translate="no">before_quest_claim(t, t, t)</a>
+
+      </div>
+
+    </div>
+
+</div>
 <div class="summary-leaderboard-hooks summary">
   <h3>
     <a href="#leaderboard-hooks">Leaderboard hooks</a>
@@ -690,6 +720,36 @@ email, device, and all OAuth providers (which register mid-login).</p></div>
     </div>
 
 </div>
+<div class="summary-readycheck-hooks summary">
+  <h3>
+    <a href="#readycheck-hooks">ReadyCheck hooks</a>
+  </h3>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#c:after_ready_check_failed/3" data-no-tooltip="" translate="no">after_ready_check_failed(t, t, list)</a>
+
+      </div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#c:after_ready_check_passed/1" data-no-tooltip="" translate="no">after_ready_check_passed(t)</a>
+
+      </div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#c:before_ready_check_open/2" data-no-tooltip="" translate="no">before_ready_check_open(arg1, list)</a>
+
+      </div>
+
+    </div>
+
+</div>
 <div class="summary-payments-hooks summary">
   <h3>
     <a href="#payments-hooks">Payments hooks</a>
@@ -736,6 +796,28 @@ email, device, and all OAuth providers (which register mid-login).</p></div>
     <div class="summary-row">
       <div class="summary-signature">
         <a href="#c:after_wallet_changed/1" data-no-tooltip="" translate="no">after_wallet_changed(map)</a>
+
+      </div>
+
+    </div>
+
+</div>
+<div class="summary-push-hooks summary">
+  <h3>
+    <a href="#push-hooks">Push hooks</a>
+  </h3>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#c:after_push_sent/3" data-no-tooltip="" translate="no">after_push_sent(t, map, map)</a>
+
+      </div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#c:before_push_send/2" data-no-tooltip="" translate="no">before_push_send(t, map)</a>
 
       </div>
 
@@ -795,76 +877,6 @@ one of these client KV API access decisions</p></div>
       </div>
 
         <div class="summary-synopsis"><p>Options passed to hooks that accept an options map/keyword list.</p></div>
-
-    </div>
-
-</div>
-<div class="summary-callbacks summary">
-  <h3>
-    <a href="#callbacks">Callbacks</a>
-  </h3>
-
-    <div class="summary-row">
-      <div class="summary-signature">
-        <a href="#c:after_push_sent/3" data-no-tooltip="" translate="no">after_push_sent(t, map, map)</a>
-
-      </div>
-
-    </div>
-
-    <div class="summary-row">
-      <div class="summary-signature">
-        <a href="#c:after_quest_claimed/1" data-no-tooltip="" translate="no">after_quest_claimed(t)</a>
-
-      </div>
-
-    </div>
-
-    <div class="summary-row">
-      <div class="summary-signature">
-        <a href="#c:after_quest_completed/1" data-no-tooltip="" translate="no">after_quest_completed(t)</a>
-
-      </div>
-
-    </div>
-
-    <div class="summary-row">
-      <div class="summary-signature">
-        <a href="#c:after_ready_check_failed/3" data-no-tooltip="" translate="no">after_ready_check_failed(t, t, list)</a>
-
-      </div>
-
-    </div>
-
-    <div class="summary-row">
-      <div class="summary-signature">
-        <a href="#c:after_ready_check_passed/1" data-no-tooltip="" translate="no">after_ready_check_passed(t)</a>
-
-      </div>
-
-    </div>
-
-    <div class="summary-row">
-      <div class="summary-signature">
-        <a href="#c:before_push_send/2" data-no-tooltip="" translate="no">before_push_send(t, map)</a>
-
-      </div>
-
-    </div>
-
-    <div class="summary-row">
-      <div class="summary-signature">
-        <a href="#c:before_quest_claim/3" data-no-tooltip="" translate="no">before_quest_claim(t, t, t)</a>
-
-      </div>
-
-    </div>
-
-    <div class="summary-row">
-      <div class="summary-signature">
-        <a href="#c:before_ready_check_open/2" data-no-tooltip="" translate="no">before_ready_check_open(arg1, list)</a>
-
-      </div>
 
     </div>
 
@@ -1301,13 +1313,13 @@ overridable. A hook-supplied username that is invalid or already taken is
 replaced with a generated one (a plugin bug must never lock a player out
 of login). For strict policy on player-initiated changes — profanity or
 reserved names — use <a href="#c:before_user_update/2"><code class="inline">before_user_update/2</code></a>, where errors are returned
-to the player:</p><pre><code class="makeup elixir" translate="no"><span class="kd">def</span><span class="w"> </span><span class="nf">before_user_update</span><span class="p" data-group-id="4126168343-1">(</span><span class="c">_user</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="4126168343-2">%{</span><span class="s">&quot;username&quot;</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="n">name</span><span class="p" data-group-id="4126168343-2">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">attrs</span><span class="p" data-group-id="4126168343-1">)</span><span class="w"> </span><span class="k" data-group-id="4126168343-3">do</span><span class="w">
-  </span><span class="k">if</span><span class="w"> </span><span class="nc">MyGame.Profanity</span><span class="o">.</span><span class="n">allowed?</span><span class="p" data-group-id="4126168343-4">(</span><span class="n">name</span><span class="p" data-group-id="4126168343-4">)</span><span class="p">,</span><span class="w">
-    </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="4126168343-5">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">attrs</span><span class="p" data-group-id="4126168343-5">}</span><span class="p">,</span><span class="w">
-    </span><span class="ss">else</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="4126168343-6">{</span><span class="ss">:error</span><span class="p">,</span><span class="w"> </span><span class="ss">:invalid_username</span><span class="p" data-group-id="4126168343-6">}</span><span class="w">
-</span><span class="k" data-group-id="4126168343-3">end</span><span class="w">
+to the player:</p><pre><code class="makeup elixir" translate="no"><span class="kd">def</span><span class="w"> </span><span class="nf">before_user_update</span><span class="p" data-group-id="9010501224-1">(</span><span class="c">_user</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="9010501224-2">%{</span><span class="s">&quot;username&quot;</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="n">name</span><span class="p" data-group-id="9010501224-2">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">attrs</span><span class="p" data-group-id="9010501224-1">)</span><span class="w"> </span><span class="k" data-group-id="9010501224-3">do</span><span class="w">
+  </span><span class="k">if</span><span class="w"> </span><span class="nc">MyGame.Profanity</span><span class="o">.</span><span class="n">allowed?</span><span class="p" data-group-id="9010501224-4">(</span><span class="n">name</span><span class="p" data-group-id="9010501224-4">)</span><span class="p">,</span><span class="w">
+    </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="9010501224-5">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">attrs</span><span class="p" data-group-id="9010501224-5">}</span><span class="p">,</span><span class="w">
+    </span><span class="ss">else</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="9010501224-6">{</span><span class="ss">:error</span><span class="p">,</span><span class="w"> </span><span class="ss">:invalid_username</span><span class="p" data-group-id="9010501224-6">}</span><span class="w">
+</span><span class="k" data-group-id="9010501224-3">end</span><span class="w">
 
-</span><span class="kd">def</span><span class="w"> </span><span class="nf">before_user_update</span><span class="p" data-group-id="4126168343-7">(</span><span class="c">_user</span><span class="p">,</span><span class="w"> </span><span class="n">attrs</span><span class="p" data-group-id="4126168343-7">)</span><span class="p">,</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="4126168343-8">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">attrs</span><span class="p" data-group-id="4126168343-8">}</span></code></pre>
+</span><span class="kd">def</span><span class="w"> </span><span class="nf">before_user_update</span><span class="p" data-group-id="9010501224-7">(</span><span class="c">_user</span><span class="p">,</span><span class="w"> </span><span class="n">attrs</span><span class="p" data-group-id="9010501224-7">)</span><span class="p">,</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="9010501224-8">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">attrs</span><span class="p" data-group-id="9010501224-8">}</span></code></pre>
   </section>
 </section>
 <section class="detail" id="c:before_user_update/2">
@@ -2512,6 +2524,113 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
     </div>
   </section>
 
+  <section id="quest-hooks" class="details-list">
+    <h2 class="section-heading">
+      <a class="hover-link" href="#quest-hooks">
+        <i class="ri-link-m" aria-hidden="true"></i>
+      </a>
+      <span class="text">Quest hooks</span>
+    </h2>
+
+    <div class="quest-hooks-list">
+<section class="detail" id="c:after_quest_claimed/1">
+
+  <div class="detail-header">
+    <a href="#c:after_quest_claimed/1" class="detail-link" data-no-tooltip="" aria-label="Link to this callback">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">after_quest_claimed(t)</h1>
+
+        <span class="note">(optional)</span>
+
+
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L161" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@callback</span> after_quest_claimed(<a href="GameServer.Quests.QuestProgress.html#t:t/0">GameServer.Quests.QuestProgress.t</a>()) :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>()</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="c:after_quest_completed/1">
+
+  <div class="detail-header">
+    <a href="#c:after_quest_completed/1" class="detail-link" data-no-tooltip="" aria-label="Link to this callback">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">after_quest_completed(t)</h1>
+
+        <span class="note">(optional)</span>
+
+
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L160" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@callback</span> after_quest_completed(<a href="GameServer.Quests.QuestProgress.html#t:t/0">GameServer.Quests.QuestProgress.t</a>()) :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>()</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="c:before_quest_claim/3">
+
+  <div class="detail-header">
+    <a href="#c:before_quest_claim/3" class="detail-link" data-no-tooltip="" aria-label="Link to this callback">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">before_quest_claim(t, t, t)</h1>
+
+        <span class="note">(optional)</span>
+
+
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L155" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@callback</span> before_quest_claim(
+  <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(),
+  <a href="GameServer.Quests.Quest.html#t:t/0">GameServer.Quests.Quest.t</a>(),
+  <a href="GameServer.Quests.QuestProgress.html#t:t/0">GameServer.Quests.QuestProgress.t</a>()
+) :: <a href="#t:hook_result/1">hook_result</a>(<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>())</pre>
+
+      </div>
+
+
+  </section>
+</section>
+
+    </div>
+  </section>
+
   <section id="leaderboard-hooks" class="details-list">
     <h2 class="section-heading">
       <a class="hover-link" href="#leaderboard-hooks">
@@ -2988,6 +3107,113 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
     </div>
   </section>
 
+  <section id="readycheck-hooks" class="details-list">
+    <h2 class="section-heading">
+      <a class="hover-link" href="#readycheck-hooks">
+        <i class="ri-link-m" aria-hidden="true"></i>
+      </a>
+      <span class="text">ReadyCheck hooks</span>
+    </h2>
+
+    <div class="readycheck-hooks-list">
+<section class="detail" id="c:after_ready_check_failed/3">
+
+  <div class="detail-header">
+    <a href="#c:after_ready_check_failed/3" class="detail-link" data-no-tooltip="" aria-label="Link to this callback">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">after_ready_check_failed(t, t, list)</h1>
+
+        <span class="note">(optional)</span>
+
+
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L288" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@callback</span> after_ready_check_failed(<a href="GameServer.ReadyChecks.Check.html#t:t/0">GameServer.ReadyChecks.Check.t</a>(), <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(), [<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()]) ::
+  <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>()</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="c:after_ready_check_passed/1">
+
+  <div class="detail-header">
+    <a href="#c:after_ready_check_passed/1" class="detail-link" data-no-tooltip="" aria-label="Link to this callback">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">after_ready_check_passed(t)</h1>
+
+        <span class="note">(optional)</span>
+
+
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L287" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@callback</span> after_ready_check_passed(<a href="GameServer.ReadyChecks.Check.html#t:t/0">GameServer.ReadyChecks.Check.t</a>()) :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>()</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="c:before_ready_check_open/2">
+
+  <div class="detail-header">
+    <a href="#c:before_ready_check_open/2" class="detail-link" data-no-tooltip="" aria-label="Link to this callback">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">before_ready_check_open(arg1, list)</h1>
+
+        <span class="note">(optional)</span>
+
+
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L282" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@callback</span> before_ready_check_open(
+  <a href="GameServer.Lobbies.Lobby.html#t:t/0">GameServer.Lobbies.Lobby.t</a>() | <a href="GameServer.Parties.Party.html#t:t/0">GameServer.Parties.Party.t</a>() | :matchmaking,
+  [<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()]
+) :: <a href="#t:hook_result/1">hook_result</a>(<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>())</pre>
+
+      </div>
+
+
+  </section>
+</section>
+
+    </div>
+  </section>
+
   <section id="payments-hooks" class="details-list">
     <h2 class="section-heading">
       <a class="hover-link" href="#payments-hooks">
@@ -3154,6 +3380,79 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
       <div class="specs">
 
           <pre translate="no"><span class="attribute">@callback</span> after_wallet_changed(<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()) :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>()</pre>
+
+      </div>
+
+
+  </section>
+</section>
+
+    </div>
+  </section>
+
+  <section id="push-hooks" class="details-list">
+    <h2 class="section-heading">
+      <a class="hover-link" href="#push-hooks">
+        <i class="ri-link-m" aria-hidden="true"></i>
+      </a>
+      <span class="text">Push hooks</span>
+    </h2>
+
+    <div class="push-hooks-list">
+<section class="detail" id="c:after_push_sent/3">
+
+  <div class="detail-header">
+    <a href="#c:after_push_sent/3" class="detail-link" data-no-tooltip="" aria-label="Link to this callback">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">after_push_sent(t, map, map)</h1>
+
+        <span class="note">(optional)</span>
+
+
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L246" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@callback</span> after_push_sent(<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()) :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>()</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="c:before_push_send/2">
+
+  <div class="detail-header">
+    <a href="#c:before_push_send/2" class="detail-link" data-no-tooltip="" aria-label="Link to this callback">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">before_push_send(t, map)</h1>
+
+        <span class="note">(optional)</span>
+
+
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L245" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@callback</span> before_push_send(<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()) :: <a href="#t:hook_result/1">hook_result</a>(<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>())</pre>
 
       </div>
 
@@ -3334,267 +3633,6 @@ to block the read.</p>
 
 <p>Options passed to hooks that accept an options map/keyword list.</p><p>Common keys include <code class="inline">:user_id</code>, <code class="inline">:lobby_id</code>, and other domain-specific options.
 Hooks may accept either a map or keyword list for convenience.</p>
-  </section>
-</section>
-
-    </div>
-  </section>
-
-  <section id="callbacks" class="details-list">
-    <h2 class="section-heading">
-      <a class="hover-link" href="#callbacks">
-        <i class="ri-link-m" aria-hidden="true"></i>
-      </a>
-      <span class="text">Callbacks</span>
-    </h2>
-
-    <div class="callbacks-list">
-<section class="detail" id="c:after_push_sent/3">
-
-  <div class="detail-header">
-    <a href="#c:after_push_sent/3" class="detail-link" data-no-tooltip="" aria-label="Link to this callback">
-      <i class="ri-link-m" aria-hidden="true"></i>
-    </a>
-    <div class="heading-with-actions">
-      <h1 class="signature" translate="no">after_push_sent(t, map, map)</h1>
-
-        <span class="note">(optional)</span>
-
-
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L246" class="icon-action" rel="help" aria-label="View Source">
-          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
-        </a>
-
-    </div>
-  </div>
-
-  <section class="docstring">
-
-      <div class="specs">
-
-          <pre translate="no"><span class="attribute">@callback</span> after_push_sent(<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()) :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>()</pre>
-
-      </div>
-
-
-  </section>
-</section>
-<section class="detail" id="c:after_quest_claimed/1">
-
-  <div class="detail-header">
-    <a href="#c:after_quest_claimed/1" class="detail-link" data-no-tooltip="" aria-label="Link to this callback">
-      <i class="ri-link-m" aria-hidden="true"></i>
-    </a>
-    <div class="heading-with-actions">
-      <h1 class="signature" translate="no">after_quest_claimed(t)</h1>
-
-        <span class="note">(optional)</span>
-
-
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L161" class="icon-action" rel="help" aria-label="View Source">
-          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
-        </a>
-
-    </div>
-  </div>
-
-  <section class="docstring">
-
-      <div class="specs">
-
-          <pre translate="no"><span class="attribute">@callback</span> after_quest_claimed(<a href="GameServer.Quests.QuestProgress.html#t:t/0">GameServer.Quests.QuestProgress.t</a>()) :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>()</pre>
-
-      </div>
-
-
-  </section>
-</section>
-<section class="detail" id="c:after_quest_completed/1">
-
-  <div class="detail-header">
-    <a href="#c:after_quest_completed/1" class="detail-link" data-no-tooltip="" aria-label="Link to this callback">
-      <i class="ri-link-m" aria-hidden="true"></i>
-    </a>
-    <div class="heading-with-actions">
-      <h1 class="signature" translate="no">after_quest_completed(t)</h1>
-
-        <span class="note">(optional)</span>
-
-
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L160" class="icon-action" rel="help" aria-label="View Source">
-          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
-        </a>
-
-    </div>
-  </div>
-
-  <section class="docstring">
-
-      <div class="specs">
-
-          <pre translate="no"><span class="attribute">@callback</span> after_quest_completed(<a href="GameServer.Quests.QuestProgress.html#t:t/0">GameServer.Quests.QuestProgress.t</a>()) :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>()</pre>
-
-      </div>
-
-
-  </section>
-</section>
-<section class="detail" id="c:after_ready_check_failed/3">
-
-  <div class="detail-header">
-    <a href="#c:after_ready_check_failed/3" class="detail-link" data-no-tooltip="" aria-label="Link to this callback">
-      <i class="ri-link-m" aria-hidden="true"></i>
-    </a>
-    <div class="heading-with-actions">
-      <h1 class="signature" translate="no">after_ready_check_failed(t, t, list)</h1>
-
-        <span class="note">(optional)</span>
-
-
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L288" class="icon-action" rel="help" aria-label="View Source">
-          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
-        </a>
-
-    </div>
-  </div>
-
-  <section class="docstring">
-
-      <div class="specs">
-
-          <pre translate="no"><span class="attribute">@callback</span> after_ready_check_failed(<a href="GameServer.ReadyChecks.Check.html#t:t/0">GameServer.ReadyChecks.Check.t</a>(), <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(), [<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()]) ::
-  <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>()</pre>
-
-      </div>
-
-
-  </section>
-</section>
-<section class="detail" id="c:after_ready_check_passed/1">
-
-  <div class="detail-header">
-    <a href="#c:after_ready_check_passed/1" class="detail-link" data-no-tooltip="" aria-label="Link to this callback">
-      <i class="ri-link-m" aria-hidden="true"></i>
-    </a>
-    <div class="heading-with-actions">
-      <h1 class="signature" translate="no">after_ready_check_passed(t)</h1>
-
-        <span class="note">(optional)</span>
-
-
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L287" class="icon-action" rel="help" aria-label="View Source">
-          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
-        </a>
-
-    </div>
-  </div>
-
-  <section class="docstring">
-
-      <div class="specs">
-
-          <pre translate="no"><span class="attribute">@callback</span> after_ready_check_passed(<a href="GameServer.ReadyChecks.Check.html#t:t/0">GameServer.ReadyChecks.Check.t</a>()) :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>()</pre>
-
-      </div>
-
-
-  </section>
-</section>
-<section class="detail" id="c:before_push_send/2">
-
-  <div class="detail-header">
-    <a href="#c:before_push_send/2" class="detail-link" data-no-tooltip="" aria-label="Link to this callback">
-      <i class="ri-link-m" aria-hidden="true"></i>
-    </a>
-    <div class="heading-with-actions">
-      <h1 class="signature" translate="no">before_push_send(t, map)</h1>
-
-        <span class="note">(optional)</span>
-
-
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L245" class="icon-action" rel="help" aria-label="View Source">
-          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
-        </a>
-
-    </div>
-  </div>
-
-  <section class="docstring">
-
-      <div class="specs">
-
-          <pre translate="no"><span class="attribute">@callback</span> before_push_send(<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()) :: <a href="#t:hook_result/1">hook_result</a>(<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>())</pre>
-
-      </div>
-
-
-  </section>
-</section>
-<section class="detail" id="c:before_quest_claim/3">
-
-  <div class="detail-header">
-    <a href="#c:before_quest_claim/3" class="detail-link" data-no-tooltip="" aria-label="Link to this callback">
-      <i class="ri-link-m" aria-hidden="true"></i>
-    </a>
-    <div class="heading-with-actions">
-      <h1 class="signature" translate="no">before_quest_claim(t, t, t)</h1>
-
-        <span class="note">(optional)</span>
-
-
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L155" class="icon-action" rel="help" aria-label="View Source">
-          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
-        </a>
-
-    </div>
-  </div>
-
-  <section class="docstring">
-
-      <div class="specs">
-
-          <pre translate="no"><span class="attribute">@callback</span> before_quest_claim(
-  <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(),
-  <a href="GameServer.Quests.Quest.html#t:t/0">GameServer.Quests.Quest.t</a>(),
-  <a href="GameServer.Quests.QuestProgress.html#t:t/0">GameServer.Quests.QuestProgress.t</a>()
-) :: <a href="#t:hook_result/1">hook_result</a>(<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>())</pre>
-
-      </div>
-
-
-  </section>
-</section>
-<section class="detail" id="c:before_ready_check_open/2">
-
-  <div class="detail-header">
-    <a href="#c:before_ready_check_open/2" class="detail-link" data-no-tooltip="" aria-label="Link to this callback">
-      <i class="ri-link-m" aria-hidden="true"></i>
-    </a>
-    <div class="heading-with-actions">
-      <h1 class="signature" translate="no">before_ready_check_open(arg1, list)</h1>
-
-        <span class="note">(optional)</span>
-
-
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L282" class="icon-action" rel="help" aria-label="View Source">
-          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
-        </a>
-
-    </div>
-  </div>
-
-  <section class="docstring">
-
-      <div class="specs">
-
-          <pre translate="no"><span class="attribute">@callback</span> before_ready_check_open(
-  <a href="GameServer.Lobbies.Lobby.html#t:t/0">GameServer.Lobbies.Lobby.t</a>() | <a href="GameServer.Parties.Party.html#t:t/0">GameServer.Parties.Party.t</a>() | :matchmaking,
-  [<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()]
-) :: <a href="#t:hook_result/1">hook_result</a>(<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>())</pre>
-
-      </div>
-
-
   </section>
 </section>
 
@@ -3892,9 +3930,9 @@ than fanning out notifications. Exposed for the admin runtime page.</p>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/game_server_core/1.0.1070">Hex Package</a>
+              <a href="https://hex.pm/packages/game_server_core/1.0.1074">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/game_server_core/1.0.1070">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/game_server_core/1.0.1074">Hex Preview</a>
 
             </span>
 

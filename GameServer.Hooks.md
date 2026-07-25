@@ -391,6 +391,31 @@ to the player:
 @callback before_chat_message(GameServer.Accounts.User.t(), map()) :: hook_result(map())
 ```
 
+# `after_quest_claimed`
+*optional* 
+
+```elixir
+@callback after_quest_claimed(GameServer.Quests.QuestProgress.t()) :: any()
+```
+
+# `after_quest_completed`
+*optional* 
+
+```elixir
+@callback after_quest_completed(GameServer.Quests.QuestProgress.t()) :: any()
+```
+
+# `before_quest_claim`
+*optional* 
+
+```elixir
+@callback before_quest_claim(
+  String.t(),
+  GameServer.Quests.Quest.t(),
+  GameServer.Quests.QuestProgress.t()
+) :: hook_result(term())
+```
+
 # `after_score_submitted`
 
 ```elixir
@@ -507,6 +532,31 @@ to the player:
   [[GameServer.Matchmaking.Ticket.t()]] | :default
 ```
 
+# `after_ready_check_failed`
+*optional* 
+
+```elixir
+@callback after_ready_check_failed(GameServer.ReadyChecks.Check.t(), String.t(), [map()]) ::
+  any()
+```
+
+# `after_ready_check_passed`
+*optional* 
+
+```elixir
+@callback after_ready_check_passed(GameServer.ReadyChecks.Check.t()) :: any()
+```
+
+# `before_ready_check_open`
+*optional* 
+
+```elixir
+@callback before_ready_check_open(
+  GameServer.Lobbies.Lobby.t() | GameServer.Parties.Party.t() | :matchmaking,
+  [String.t()]
+) :: hook_result(term())
+```
+
 # `after_entitlement_changed`
 *optional* 
 
@@ -540,6 +590,20 @@ to the player:
 
 ```elixir
 @callback after_wallet_changed(map()) :: any()
+```
+
+# `after_push_sent`
+*optional* 
+
+```elixir
+@callback after_push_sent(String.t(), map(), map()) :: any()
+```
+
+# `before_push_send`
+*optional* 
+
+```elixir
+@callback before_push_send(String.t(), map()) :: hook_result(map())
 ```
 
 # `before_kv_get`
@@ -598,70 +662,6 @@ Options passed to hooks that accept an options map/keyword list.
 
 Common keys include `:user_id`, `:lobby_id`, and other domain-specific options.
 Hooks may accept either a map or keyword list for convenience.
-
-# `after_push_sent`
-*optional* 
-
-```elixir
-@callback after_push_sent(String.t(), map(), map()) :: any()
-```
-
-# `after_quest_claimed`
-*optional* 
-
-```elixir
-@callback after_quest_claimed(GameServer.Quests.QuestProgress.t()) :: any()
-```
-
-# `after_quest_completed`
-*optional* 
-
-```elixir
-@callback after_quest_completed(GameServer.Quests.QuestProgress.t()) :: any()
-```
-
-# `after_ready_check_failed`
-*optional* 
-
-```elixir
-@callback after_ready_check_failed(GameServer.ReadyChecks.Check.t(), String.t(), [map()]) ::
-  any()
-```
-
-# `after_ready_check_passed`
-*optional* 
-
-```elixir
-@callback after_ready_check_passed(GameServer.ReadyChecks.Check.t()) :: any()
-```
-
-# `before_push_send`
-*optional* 
-
-```elixir
-@callback before_push_send(String.t(), map()) :: hook_result(map())
-```
-
-# `before_quest_claim`
-*optional* 
-
-```elixir
-@callback before_quest_claim(
-  String.t(),
-  GameServer.Quests.Quest.t(),
-  GameServer.Quests.QuestProgress.t()
-) :: hook_result(term())
-```
-
-# `before_ready_check_open`
-*optional* 
-
-```elixir
-@callback before_ready_check_open(
-  GameServer.Lobbies.Lobby.t() | GameServer.Parties.Party.t() | :matchmaking,
-  [String.t()]
-) :: hook_result(term())
-```
 
 # `call`
 

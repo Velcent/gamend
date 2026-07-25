@@ -299,10 +299,7 @@ Delivers the update email instructions to the given user.
 @spec device_auth_enabled?() :: boolean()
 ```
 
-Returns true when device-based auth is enabled. This checks the
-application config `:game_server, :device_auth_enabled` and falls back
-to the environment variable `DEVICE_AUTH_ENABLED`. If neither
-is set, device auth is enabled by default.
+Whether device-based auth is enabled. Defaults to on.
 
 # `find_or_create_from_apple`
 
@@ -722,11 +719,7 @@ If sending the confirmation email fails the transaction is rolled back and
 @spec require_account_activation?() :: boolean()
 ```
 
-Returns true when new accounts require manual admin activation before
-they can log in. Reads from application config
-`:game_server_core, :require_account_activation` which is set at boot
-from the `REQUIRE_ACCOUNT_ACTIVATION` environment variable in `runtime.exs`.
-Defaults to `false` when not configured.
+Whether new accounts require manual admin activation before they can log in.
 
 # `revoke_all_tokens`
 

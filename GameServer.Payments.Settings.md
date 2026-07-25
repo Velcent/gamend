@@ -1,0 +1,16 @@
+# `GameServer.Payments.Settings`
+[🔗](https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/payments/settings.ex#L1)
+
+Store credentials, per provider.
+
+`environment` is the global switch between sandbox and real money; each
+provider's keys are selected from it, so a sandbox key in production (or the
+reverse) is a configuration error rather than a silent test transaction.
+
+These are namespaced away from `GameServer.OAuth.Providers` deliberately:
+Apple issues *different* keys for Sign in with Apple and the App Store Server
+API, from different portals, and the two used to collide on one name.
+
+---
+
+*Consult [api-reference.md](api-reference.md) for complete listing*
