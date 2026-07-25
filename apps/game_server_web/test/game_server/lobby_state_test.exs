@@ -51,11 +51,6 @@ defmodule GameServer.LobbyStateTest do
       refute States.known?("Playing")
       refute States.known?(nil)
     end
-
-    test "ended is terminal, the rest are not" do
-      assert Map.has_key?(States.terminal(), "ended")
-      refute Map.has_key?(States.terminal(), "playing")
-    end
   end
 
   describe "create_lobby/1" do

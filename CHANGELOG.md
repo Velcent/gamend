@@ -1,9 +1,10 @@
 # July 2026
 
 - [breaking] **Hostless lobbies are server-owned** — `PATCH /lobbies` (and `Lobbies.update_lobby_by_host/3`) now returns `403 not_host` for every player in a hostless (matchmaking) lobby, where any member could previously rewrite `metadata`, `max_users`, `password_hash`, `title` and the visibility flags. Server-side code uses `Lobbies.update_lobby/2`; the admin API and console are unchanged.
+- [added] **Retention for every unbounded table** — lobbies nobody in them has been seen in for `RETENTION_ABANDONED_LOBBY_MINUTES` (never around a reconnect; ending a match is the game's job to clean up, not retention's), expired auth tokens, resolved invites, matchmaking tickets, plus opt-in tournaments and ledgers. Batched and failure-isolated per class, with a Data Retention card and "Run now" under Admin -> System and `GET`/`POST /api/v1/admin/retention`. Every window's default now applies in all environments; previously the whole config block was prod-only, so dev pruned nothing.
 - [added] **Push notifications** — FCM + APNs-direct via Pigeon, routed per token; offline notification delivery.
 - [added] **Push-token registry** — `/me/push-tokens`, admin page, retention pruning.
-- [added] **Lobby state** — server-owned `state` + `state_changed_at`, a game-defined vocabulary via the `lobby_states/0` declaration, `POST /lobbies/state` for hosts (hostless lobbies stay server-only), `state` filter, `state_changed` event and `before_lobby_state_change` / `after_lobby_state_changed` hooks.
+- [added] **Lobby state** — server-owned `state` + `state_changed_at`, a game-defined vocabulary via the `lobby_states/0` declaration (a state is a word and a description; core attaches no lifecycle meaning to any of them), `POST /lobbies/state` for hosts (hostless lobbies stay server-only), `state` filter, `state_changed` event and `before_lobby_state_change` / `after_lobby_state_changed` hooks.
 - [added] **Quests / progression**.
 - [breaking] **Achievements removed** — replaced by permanent quests categorised "achievement"; `/quests` supersedes the `/achievements` API, page and hooks.
 - [added] **Economy**.

@@ -500,7 +500,17 @@ if config_env() == :prod do
     # Defaults to Google's stale-token guidance rather than "keep forever":
     # rows untouched this long are dead installs, and pruning them is what
     # keeps push_tokens tracking live devices.
-    push_tokens_days: GameServer.Env.integer("RETENTION_PUSH_TOKENS_DAYS", 270)
+    push_tokens_days: GameServer.Env.integer("RETENTION_PUSH_TOKENS_DAYS", 270),
+    # Lobbies are reaped in minutes, not days, and only when nobody in one has
+    # been seen for the window - so a reconnect always wins, and a game that
+    # ends a match deletes its own lobby rather than waiting for this.
+    abandoned_lobby_minutes: GameServer.Env.integer("RETENTION_ABANDONED_LOBBY_MINUTES", 15),
+    invites_days: GameServer.Env.integer("RETENTION_INVITES_DAYS", 30),
+    matchmaking_tickets_hours: GameServer.Env.integer("RETENTION_MATCHMAKING_TICKETS_HOURS", 24),
+    # Opt-in: both hold history an operator may be required to keep. Ledgers
+    # are the audit trail behind every wallet balance.
+    tournaments_days: GameServer.Env.integer("RETENTION_TOURNAMENTS_DAYS", 0),
+    ledger_days: GameServer.Env.integer("RETENTION_LEDGER_DAYS", 0)
 
   # Durable per-run record of lobby state changes, for debugging bad runs.
   # Off by default: it stores user metadata and KV, so switching it on is a

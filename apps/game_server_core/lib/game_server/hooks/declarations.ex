@@ -41,7 +41,7 @@ defmodule GameServer.Hooks.Declarations do
           notification_types: %{String.t() => String.t()},
           realtime_events: %{String.t() => String.t()},
           env_vars: [map()],
-          lobby_states: %{String.t() => map()}
+          lobby_states: %{String.t() => String.t()}
         }
   def all, do: :persistent_term.get(@pt_key, @empty)
 
@@ -62,7 +62,7 @@ defmodule GameServer.Hooks.Declarations do
   `%{description:, terminal:, prune_after_minutes:}`. See
   `GameServer.Lobbies.States`.
   """
-  @spec lobby_states() :: %{String.t() => map()}
+  @spec lobby_states() :: %{String.t() => String.t()}
   def lobby_states, do: all().lobby_states
 
   @doc "Rebuilds the registry from the loaded plugin list."
@@ -74,7 +74,7 @@ defmodule GameServer.Hooks.Declarations do
       notification_types: collect_map(loaded, :notification_types),
       realtime_events: collect_map(loaded, :realtime_events),
       env_vars: collect_env_vars(loaded),
-      lobby_states: collect_lobby_states(loaded)
+      lobby_states: collect_map(loaded, :lobby_states)
     }
 
     :persistent_term.put(@pt_key, registry)
@@ -98,48 +98,6 @@ defmodule GameServer.Hooks.Declarations do
         end
       end)
     end)
-  end
-
-  # Unlike the description-only maps above, a lobby state carries metadata the
-  # retention pass reads, so values may be a map — or a plain description
-  # string as shorthand.
-  defp collect_lobby_states(plugins) do
-    Enum.reduce(plugins, %{}, fn plugin, acc ->
-      plugin
-      |> call(:lobby_states, %{})
-      |> normalize_state_map(plugin)
-      |> Enum.reduce(acc, fn {state, meta}, acc ->
-        if Map.has_key?(acc, state) do
-          Logger.warning("plugin=#{plugin.name} lobby_states: #{state} already declared; ignored")
-          acc
-        else
-          Map.put(acc, state, Map.put(meta, :plugin, plugin.name))
-        end
-      end)
-    end)
-  end
-
-  defp normalize_state_map(value, plugin) when is_map(value) do
-    Enum.reduce(value, %{}, fn
-      {state, description}, acc when is_binary(state) and is_binary(description) ->
-        Map.put(acc, state, %{description: description})
-
-      {state, meta}, acc when is_binary(state) and is_map(meta) ->
-        Map.put(acc, state, %{
-          description: Map.get(meta, :description, ""),
-          terminal: Map.get(meta, :terminal, false),
-          prune_after_minutes: Map.get(meta, :prune_after_minutes)
-        })
-
-      other, acc ->
-        Logger.warning("plugin=#{plugin.name} lobby_states: ignoring #{inspect(other)}")
-        acc
-    end)
-  end
-
-  defp normalize_state_map(other, plugin) do
-    Logger.warning("plugin=#{plugin.name} lobby_states must return a map, got #{inspect(other)}")
-    %{}
   end
 
   defp collect_env_vars(plugins) do

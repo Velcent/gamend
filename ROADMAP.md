@@ -23,6 +23,7 @@ spine**, designed together rather than bolted on.
 | **2** | Economy/inventory — generic currencies, atomic wallet, ledger | High | L | — |
 | **2** | Cloud saves — versioned save-slots | Med | M | Object storage |
 | **2** | Skill matchmaking — rating + widening bands + hook override | Med–High | M | matchmaker |
+| **2** | Ready check — one primitive, bound to matchmaking accept + lobby ready | Med–High | M | matchmaker, lobby state |
 | **3** | Quests/progression — generalizes achievements, pays into economy | High | L | Economy + Jobs |
 | **3** | Webhooks (signed, retried) + remote config | Med | S–M | Jobs |
 | **3** | Event-tracking API → Postgres `events` table | Med | S | — |
@@ -315,6 +316,8 @@ current codebase, and the CONTRIBUTING checklist.
   storage with lock-free optimistic conflict detection.
 - [Skill matchmaking](docs/specs/skill-matchmaking.md) — rating + wait-widening
   bands in the existing pure matcher; override hook intact.
+- [Ready check](docs/specs/ready-check.md) — one `ready_checks` primitive with
+  two bindings: matchmaking accept (opt-in) and lobby ready-up.
 
 **Phase 3**
 - [Quests / progression](docs/specs/quests-progression.md) — one event-driven

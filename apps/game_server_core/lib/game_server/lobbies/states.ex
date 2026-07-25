@@ -12,15 +12,13 @@ defmodule GameServer.Lobbies.States do
   `GameServer.Hooks.Declarations`), which merge with the core defaults:
 
       def lobby_states do
-        %{
-          "drafting" => %{description: "Picking teams"},
-          "post_game" => %{description: "Scoreboard", terminal: true, prune_after_minutes: 10}
-        }
+        %{"drafting" => "Picking teams", "post_game" => "Scoreboard"}
       end
 
   Declaring is optional — a game that says nothing simply uses the defaults.
-  `terminal`/`prune_after_minutes` are read by lobby retention (see
-  docs/specs/lobby-state.md); they have no other effect.
+  A state is a word, not a lifecycle: core attaches no meaning to any of them,
+  including whether one ends the lobby. A game that finishes a match deletes
+  the lobby itself; retention only reaps lobbies everyone has gone quiet in.
   """
 
   alias GameServer.Hooks.Declarations
@@ -28,35 +26,26 @@ defmodule GameServer.Lobbies.States do
   @initial "created"
 
   @core %{
-    "created" => %{description: "Lobby exists; core sets this on creation"},
-    "starting" => %{description: "Match is being set up (countdown, loading)"},
-    "playing" => %{description: "Match is running"},
-    "ended" => %{description: "Match finished", terminal: true}
+    "created" => "Lobby exists; core sets this on creation",
+    "starting" => "Match is being set up (countdown, loading)",
+    "playing" => "Match is running",
+    "ended" => "Match finished"
   }
 
   @doc "The state core assigns when a lobby is created."
   @spec initial() :: String.t()
   def initial, do: @initial
 
-  @doc "Core's default vocabulary, mapped to its metadata."
-  @spec core() :: %{String.t() => map()}
+  @doc "Core's default vocabulary, mapped to each state's description."
+  @spec core() :: %{String.t() => String.t()}
   def core, do: @core
 
   @doc "Core defaults plus every plugin-declared state."
-  @spec all() :: %{String.t() => map()}
+  @spec all() :: %{String.t() => String.t()}
   def all, do: Map.merge(@core, Declarations.lobby_states())
 
   @doc "True when `state` is a core default or declared by a loaded plugin."
   @spec known?(term()) :: boolean()
   def known?(state) when is_binary(state), do: Map.has_key?(all(), state)
   def known?(_state), do: false
-
-  @doc """
-  States that end a lobby's life, mapped to their metadata. Lobby retention
-  consumes this; nothing else in core reads it.
-  """
-  @spec terminal() :: %{String.t() => map()}
-  def terminal do
-    all() |> Enum.filter(fn {_state, meta} -> meta[:terminal] end) |> Map.new()
-  end
 end

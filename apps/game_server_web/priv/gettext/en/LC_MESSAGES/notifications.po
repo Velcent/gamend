@@ -35,4 +35,4 @@ msgstr "New messages from friends"
 #: lib/game_server_web/live/notifications_live.ex:289
 #, elixir-autogen, elixir-format
 msgid "Quest completed: %{name}"
-msgstr ""
+msgstr "Quest completed: %{name}"

@@ -295,6 +295,112 @@ docker compose logs -f app</pre>
         </div>
       </div>
 
+      <%!-- Data retention --%>
+      <div class="step">
+        <h3 class="text-lg font-semibold mb-3">
+          {doc_text("Data retention")}
+        </h3>
+        <div class="ml-8 space-y-3">
+          <p class="text-sm text-base-content/80">
+            {doc_text(
+              "A sweep runs every 6 hours and prunes tables that would otherwise grow forever. Each window is one env var; 0 keeps that class forever. See the last run and its per-class counts under Admin -> System, where you can also run a sweep on demand."
+            )}
+          </p>
+          <div class="overflow-x-auto">
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>{doc_text("Variable")}</th>
+                  <th>{doc_text("Default")}</th>
+                  <th>{doc_text("Prunes")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="font-mono text-xs">RETENTION_ABANDONED_LOBBY_MINUTES</td>
+                  <td class="text-xs">15</td>
+                  <td class="text-xs">
+                    {doc_text(
+                      "Lobbies nobody in them has been seen in for the window, so a reconnect always saves one. Ending a match is not a reason to delete: a game that ends one deletes its own lobby. Raise this if your game keeps rooms open between sessions."
+                    )}
+                  </td>
+                </tr>
+                <tr>
+                  <td class="font-mono text-xs">RETENTION_INVITES_DAYS</td>
+                  <td class="text-xs">30</td>
+                  <td class="text-xs">
+                    {doc_text(
+                      "Resolved group/party invites and join requests. Pending ones are never pruned."
+                    )}
+                  </td>
+                </tr>
+                <tr>
+                  <td class="font-mono text-xs">RETENTION_MATCHMAKING_TICKETS_HOURS</td>
+                  <td class="text-xs">24</td>
+                  <td class="text-xs">{doc_text("Matchmaking tickets, in any status.")}</td>
+                </tr>
+                <tr>
+                  <td class="font-mono text-xs">RETENTION_CHAT_DAYS</td>
+                  <td class="text-xs">0</td>
+                  <td class="text-xs">{doc_text("Chat messages.")}</td>
+                </tr>
+                <tr>
+                  <td class="font-mono text-xs">RETENTION_NOTIFICATIONS_DAYS</td>
+                  <td class="text-xs">0</td>
+                  <td class="text-xs">{doc_text("Notifications.")}</td>
+                </tr>
+                <tr>
+                  <td class="font-mono text-xs">RETENTION_PAYMENT_EVENTS_DAYS</td>
+                  <td class="text-xs">0</td>
+                  <td class="text-xs">
+                    {doc_text(
+                      "Provider webhook events. Purchases and entitlements are never pruned."
+                    )}
+                  </td>
+                </tr>
+                <tr>
+                  <td class="font-mono text-xs">RETENTION_LOBBY_SNAPSHOTS_DAYS</td>
+                  <td class="text-xs">30</td>
+                  <td class="text-xs">
+                    {doc_text(
+                      "Lobby snapshots, events and blobs. Runs flagged anomalous keep RETENTION_LOBBY_SNAPSHOTS_FLAGGED_DAYS (90) instead."
+                    )}
+                  </td>
+                </tr>
+                <tr>
+                  <td class="font-mono text-xs">RETENTION_PUSH_TOKENS_DAYS</td>
+                  <td class="text-xs">270</td>
+                  <td class="text-xs">
+                    {doc_text("Push tokens untouched this long: dead installs.")}
+                  </td>
+                </tr>
+                <tr>
+                  <td class="font-mono text-xs">RETENTION_TOURNAMENTS_DAYS</td>
+                  <td class="text-xs">0</td>
+                  <td class="text-xs">
+                    {doc_text("Finished tournaments and their bracket rows. Opt-in.")}
+                  </td>
+                </tr>
+                <tr>
+                  <td class="font-mono text-xs">RETENTION_LEDGER_DAYS</td>
+                  <td class="text-xs">0</td>
+                  <td class="text-xs">
+                    {doc_text(
+                      "Wallet and inventory ledgers. Opt-in: this is the audit trail behind every balance."
+                    )}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="text-xs text-base-content/60">
+            {doc_text(
+              "Expired sessions and magic-link tokens are always pruned on their own validity, and are not configurable."
+            )}
+          </p>
+        </div>
+      </div>
+
       <%!-- HTTPS / TLS --%>
       <div class="step">
         <h3 class="text-lg font-semibold mb-3 flex items-center gap-2">

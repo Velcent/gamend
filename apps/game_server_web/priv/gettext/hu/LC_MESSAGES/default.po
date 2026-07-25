@@ -61,7 +61,7 @@ msgstr "Ranglisták"
 msgid "Log in"
 msgstr "Bejelentkezés"
 
-#: lib/game_server_web/live/lobby_live/index.ex:752
+#: lib/game_server_web/live/lobby_live/index.ex:753
 #: lib/game_server_web/live/user_live/login.ex:81
 #: lib/game_server_web/live/user_live/settings/account_tab.ex:141
 #: lib/game_server_web/live/user_live/settings/account_tab.ex:162
@@ -133,7 +133,7 @@ msgid "Block"
 msgstr "Letiltás"
 
 #: lib/game_server_web/live/chat_live.ex:255
-#: lib/game_server_web/live/lobby_live/index.ex:759
+#: lib/game_server_web/live/lobby_live/index.ex:760
 #: lib/game_server_web/live/user_live/settings/friends_tab.ex:109
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:75
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:170
@@ -143,7 +143,7 @@ msgstr "Letiltás"
 msgid "Cancel"
 msgstr "Mégse"
 
-#: lib/game_server_web/live/lobby_live/index.ex:804
+#: lib/game_server_web/live/lobby_live/index.ex:805
 #: lib/game_server_web/live/user_live/settings/data_tab.ex:53
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:609
 #, elixir-autogen, elixir-format
@@ -151,13 +151,13 @@ msgid "Clear"
 msgstr "Törlés"
 
 #: lib/game_server_web/components/core_components.ex:77
-#: lib/game_server_web/live/lobby_live/index.ex:815
-#: lib/game_server_web/live/lobby_live/index.ex:885
+#: lib/game_server_web/live/lobby_live/index.ex:816
+#: lib/game_server_web/live/lobby_live/index.ex:886
 #, elixir-autogen, elixir-format
 msgid "Close"
 msgstr "Bezárás"
 
-#: lib/game_server_web/live/lobby_live/index.ex:756
+#: lib/game_server_web/live/lobby_live/index.ex:757
 #: lib/game_server_web/live/user_live/confirmation.ex:37
 #: lib/game_server_web/live/user_live/confirmation.ex:90
 #: lib/game_server_web/live/user_live/login.ex:17
@@ -172,8 +172,8 @@ msgstr "Megerősítés"
 msgid "Content"
 msgstr "Tartalom"
 
-#: lib/game_server_web/live/lobby_live/index.ex:640
-#: lib/game_server_web/live/lobby_live/index.ex:660
+#: lib/game_server_web/live/lobby_live/index.ex:641
+#: lib/game_server_web/live/lobby_live/index.ex:661
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:77
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:86
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:123
@@ -240,7 +240,7 @@ msgstr "Csoport"
 msgid "Groups"
 msgstr "Csoportok"
 
-#: lib/game_server_web/live/lobby_live/index.ex:799
+#: lib/game_server_web/live/lobby_live/index.ex:800
 #: lib/game_server_web/live/quests_live.ex:442
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:112
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:155
@@ -265,8 +265,8 @@ msgstr "Meghívás"
 
 #: lib/game_server_web/live/groups_live.ex:531
 #: lib/game_server_web/live/groups_live.ex:699
-#: lib/game_server_web/live/lobby_live/index.ex:725
-#: lib/game_server_web/live/lobby_live/index.ex:737
+#: lib/game_server_web/live/lobby_live/index.ex:726
+#: lib/game_server_web/live/lobby_live/index.ex:738
 #: lib/game_server_web/live/tournaments_live.ex:743
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:662
 #, elixir-autogen, elixir-format
@@ -275,8 +275,8 @@ msgstr "Csatlakozás"
 
 #: lib/game_server_web/live/groups_live.ex:169
 #: lib/game_server_web/live/groups_live.ex:196
-#: lib/game_server_web/live/lobby_live/index.ex:424
-#: lib/game_server_web/live/lobby_live/index.ex:663
+#: lib/game_server_web/live/lobby_live/index.ex:425
+#: lib/game_server_web/live/lobby_live/index.ex:664
 #: lib/game_server_web/live/tournaments_live.ex:115
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:246
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:650
@@ -284,15 +284,15 @@ msgstr "Csatlakozás"
 msgid "Joined"
 msgstr "Csatlakozott"
 
-#: lib/game_server_web/live/lobby_live/index.ex:851
+#: lib/game_server_web/live/lobby_live/index.ex:852
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:307
 #, elixir-autogen, elixir-format
 msgid "Kick"
 msgstr "Kirúgás"
 
 #: lib/game_server_web/live/groups_live.ex:688
-#: lib/game_server_web/live/lobby_live/index.ex:840
-#: lib/game_server_web/live/lobby_live/index.ex:876
+#: lib/game_server_web/live/lobby_live/index.ex:841
+#: lib/game_server_web/live/lobby_live/index.ex:877
 #: lib/game_server_web/live/tournaments_live.ex:737
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:229
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:567
@@ -300,9 +300,9 @@ msgstr "Kirúgás"
 msgid "Leave"
 msgstr "Kilépés"
 
-#: lib/game_server_web/live/lobby_live/index.ex:718
-#: lib/game_server_web/live/lobby_live/index.ex:730
-#: lib/game_server_web/live/lobby_live/index.ex:790
+#: lib/game_server_web/live/lobby_live/index.ex:719
+#: lib/game_server_web/live/lobby_live/index.ex:731
+#: lib/game_server_web/live/lobby_live/index.ex:791
 #, elixir-autogen, elixir-format
 msgid "Locked"
 msgstr "Zárolva"
@@ -317,8 +317,8 @@ msgstr "Tag"
 #: lib/game_server_web/live/groups_live.ex:490
 #: lib/game_server_web/live/groups_live.ex:583
 #: lib/game_server_web/live/groups_live.ex:597
-#: lib/game_server_web/live/lobby_live/index.ex:822
-#: lib/game_server_web/live/lobby_live/index.ex:860
+#: lib/game_server_web/live/lobby_live/index.ex:823
+#: lib/game_server_web/live/lobby_live/index.ex:861
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:118
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:160
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:196
@@ -350,13 +350,13 @@ msgid "Newest"
 msgstr "Legújabb"
 
 #: lib/game_server_web/components/core_components.ex:527
-#: lib/game_server_web/live/lobby_live/index.ex:653
+#: lib/game_server_web/live/lobby_live/index.ex:654
 #, elixir-autogen, elixir-format
 msgid "Next"
 msgstr "Következő"
 
 #: lib/game_server_web/components/core_components.ex:513
-#: lib/game_server_web/live/lobby_live/index.ex:643
+#: lib/game_server_web/live/lobby_live/index.ex:644
 #, elixir-autogen, elixir-format
 msgid "Prev"
 msgstr "Előző"
@@ -427,7 +427,7 @@ msgid "Role"
 msgstr "Szerep"
 
 #: lib/game_server_web/live/chat_live.ex:252
-#: lib/game_server_web/live/lobby_live/index.ex:808
+#: lib/game_server_web/live/lobby_live/index.ex:809
 #: lib/game_server_web/live/user_live/settings/account_tab.ex:99
 #: lib/game_server_web/live/user_live/settings/account_tab.ex:116
 #: lib/game_server_web/live/user_live/settings/account_tab.ex:134
@@ -462,7 +462,7 @@ msgstr "Küldés"
 msgid "Status"
 msgstr "Állapot"
 
-#: lib/game_server_web/live/lobby_live/index.ex:658
+#: lib/game_server_web/live/lobby_live/index.ex:659
 #: lib/game_server_web/live/notifications_live.ex:42
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:97
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:511
@@ -487,8 +487,8 @@ msgstr "Típus"
 msgid "Unblock"
 msgstr "Tiltás feloldása"
 
-#: lib/game_server_web/live/lobby_live/index.ex:706
-#: lib/game_server_web/live/lobby_live/index.ex:715
+#: lib/game_server_web/live/lobby_live/index.ex:707
+#: lib/game_server_web/live/lobby_live/index.ex:716
 #: lib/game_server_web/live/notifications_live.ex:197
 #: lib/game_server_web/live/notifications_live.ex:198
 #: lib/game_server_web/live/notifications_live.ex:201
@@ -551,7 +551,7 @@ msgstr "Elutasítás"
 
 #: lib/game_server_web/live/chat_live.ex:272
 #: lib/game_server_web/live/chat_live.ex:274
-#: lib/game_server_web/live/lobby_live/index.ex:697
+#: lib/game_server_web/live/lobby_live/index.ex:698
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:221
 #, elixir-autogen, elixir-format
 msgid "Edit"
@@ -640,7 +640,7 @@ msgstr "Nem található"
 #: lib/game_server_web/live/auth_success_live.ex:98
 #: lib/game_server_web/live/auth_success_live.ex:102
 #: lib/game_server_web/live/groups_live.ex:294
-#: lib/game_server_web/live/lobby_live/index.ex:265
+#: lib/game_server_web/live/lobby_live/index.ex:266
 #: lib/game_server_web/live/notifications_live.ex:159
 #: lib/game_server_web/live/notifications_live.ex:174
 #: lib/game_server_web/live/user_live/login.ex:207
@@ -750,11 +750,11 @@ msgstr "Nyitott"
 #: lib/game_server_web/live/lobby_live/index.ex:76
 #: lib/game_server_web/live/lobby_live/index.ex:119
 #: lib/game_server_web/live/lobby_live/index.ex:162
-#: lib/game_server_web/live/lobby_live/index.ex:278
-#: lib/game_server_web/live/lobby_live/index.ex:313
-#: lib/game_server_web/live/lobby_live/index.ex:364
-#: lib/game_server_web/live/lobby_live/index.ex:408
-#: lib/game_server_web/live/lobby_live/index.ex:456
+#: lib/game_server_web/live/lobby_live/index.ex:279
+#: lib/game_server_web/live/lobby_live/index.ex:314
+#: lib/game_server_web/live/lobby_live/index.ex:365
+#: lib/game_server_web/live/lobby_live/index.ex:409
+#: lib/game_server_web/live/lobby_live/index.ex:457
 #: lib/game_server_web/live/tournaments_live.ex:173
 #: lib/game_server_web/live/user_live/confirmation.ex:95
 #: lib/game_server_web/live/user_live/registration.ex:211
@@ -829,8 +829,8 @@ msgstr "Aktív"
 msgid "Ended"
 msgstr "Befejeződött"
 
-#: lib/game_server_web/live/lobby_live/index.ex:833
-#: lib/game_server_web/live/lobby_live/index.ex:871
+#: lib/game_server_web/live/lobby_live/index.ex:834
+#: lib/game_server_web/live/lobby_live/index.ex:872
 #, elixir-autogen, elixir-format
 msgid "Host"
 msgstr "Házigazda"
@@ -847,7 +847,7 @@ msgid "Leave?"
 msgstr "Kilépsz?"
 
 #: lib/game_server_web/live/lobby_live/index.ex:44
-#: lib/game_server_web/live/lobby_live/index.ex:671
+#: lib/game_server_web/live/lobby_live/index.ex:672
 #, elixir-autogen, elixir-format
 msgid "Lobbies"
 msgstr "Lobbik"
@@ -863,7 +863,7 @@ msgstr "Adatvédelem"
 msgid "Rank"
 msgstr "Helyezés"
 
-#: lib/game_server_web/live/lobby_live/index.ex:515
+#: lib/game_server_web/live/lobby_live/index.ex:516
 #, elixir-autogen, elixir-format
 msgid "Removed"
 msgstr "Eltávolítva"

@@ -61,7 +61,7 @@ msgstr "Leaderboards"
 msgid "Log in"
 msgstr "Log in"
 
-#: lib/game_server_web/live/lobby_live/index.ex:752
+#: lib/game_server_web/live/lobby_live/index.ex:753
 #: lib/game_server_web/live/user_live/login.ex:81
 #: lib/game_server_web/live/user_live/settings/account_tab.ex:141
 #: lib/game_server_web/live/user_live/settings/account_tab.ex:162
@@ -133,7 +133,7 @@ msgid "Block"
 msgstr "Block"
 
 #: lib/game_server_web/live/chat_live.ex:255
-#: lib/game_server_web/live/lobby_live/index.ex:759
+#: lib/game_server_web/live/lobby_live/index.ex:760
 #: lib/game_server_web/live/user_live/settings/friends_tab.ex:109
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:75
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:170
@@ -143,7 +143,7 @@ msgstr "Block"
 msgid "Cancel"
 msgstr "Cancel"
 
-#: lib/game_server_web/live/lobby_live/index.ex:804
+#: lib/game_server_web/live/lobby_live/index.ex:805
 #: lib/game_server_web/live/user_live/settings/data_tab.ex:53
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:609
 #, elixir-autogen, elixir-format
@@ -151,13 +151,13 @@ msgid "Clear"
 msgstr "Clear"
 
 #: lib/game_server_web/components/core_components.ex:77
-#: lib/game_server_web/live/lobby_live/index.ex:815
-#: lib/game_server_web/live/lobby_live/index.ex:885
+#: lib/game_server_web/live/lobby_live/index.ex:816
+#: lib/game_server_web/live/lobby_live/index.ex:886
 #, elixir-autogen, elixir-format
 msgid "Close"
 msgstr "Close"
 
-#: lib/game_server_web/live/lobby_live/index.ex:756
+#: lib/game_server_web/live/lobby_live/index.ex:757
 #: lib/game_server_web/live/user_live/confirmation.ex:37
 #: lib/game_server_web/live/user_live/confirmation.ex:90
 #: lib/game_server_web/live/user_live/login.ex:17
@@ -172,8 +172,8 @@ msgstr "Confirm"
 msgid "Content"
 msgstr "Content"
 
-#: lib/game_server_web/live/lobby_live/index.ex:640
-#: lib/game_server_web/live/lobby_live/index.ex:660
+#: lib/game_server_web/live/lobby_live/index.ex:641
+#: lib/game_server_web/live/lobby_live/index.ex:661
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:77
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:86
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:123
@@ -240,7 +240,7 @@ msgstr "Group"
 msgid "Groups"
 msgstr "Groups"
 
-#: lib/game_server_web/live/lobby_live/index.ex:799
+#: lib/game_server_web/live/lobby_live/index.ex:800
 #: lib/game_server_web/live/quests_live.ex:442
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:112
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:155
@@ -265,8 +265,8 @@ msgstr "Invite"
 
 #: lib/game_server_web/live/groups_live.ex:531
 #: lib/game_server_web/live/groups_live.ex:699
-#: lib/game_server_web/live/lobby_live/index.ex:725
-#: lib/game_server_web/live/lobby_live/index.ex:737
+#: lib/game_server_web/live/lobby_live/index.ex:726
+#: lib/game_server_web/live/lobby_live/index.ex:738
 #: lib/game_server_web/live/tournaments_live.ex:743
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:662
 #, elixir-autogen, elixir-format
@@ -275,8 +275,8 @@ msgstr "Join"
 
 #: lib/game_server_web/live/groups_live.ex:169
 #: lib/game_server_web/live/groups_live.ex:196
-#: lib/game_server_web/live/lobby_live/index.ex:424
-#: lib/game_server_web/live/lobby_live/index.ex:663
+#: lib/game_server_web/live/lobby_live/index.ex:425
+#: lib/game_server_web/live/lobby_live/index.ex:664
 #: lib/game_server_web/live/tournaments_live.ex:115
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:246
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:650
@@ -284,15 +284,15 @@ msgstr "Join"
 msgid "Joined"
 msgstr "Joined"
 
-#: lib/game_server_web/live/lobby_live/index.ex:851
+#: lib/game_server_web/live/lobby_live/index.ex:852
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:307
 #, elixir-autogen, elixir-format
 msgid "Kick"
 msgstr "Kick"
 
 #: lib/game_server_web/live/groups_live.ex:688
-#: lib/game_server_web/live/lobby_live/index.ex:840
-#: lib/game_server_web/live/lobby_live/index.ex:876
+#: lib/game_server_web/live/lobby_live/index.ex:841
+#: lib/game_server_web/live/lobby_live/index.ex:877
 #: lib/game_server_web/live/tournaments_live.ex:737
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:229
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:567
@@ -300,9 +300,9 @@ msgstr "Kick"
 msgid "Leave"
 msgstr "Leave"
 
-#: lib/game_server_web/live/lobby_live/index.ex:718
-#: lib/game_server_web/live/lobby_live/index.ex:730
-#: lib/game_server_web/live/lobby_live/index.ex:790
+#: lib/game_server_web/live/lobby_live/index.ex:719
+#: lib/game_server_web/live/lobby_live/index.ex:731
+#: lib/game_server_web/live/lobby_live/index.ex:791
 #, elixir-autogen, elixir-format
 msgid "Locked"
 msgstr "Locked"
@@ -317,8 +317,8 @@ msgstr "Member"
 #: lib/game_server_web/live/groups_live.ex:490
 #: lib/game_server_web/live/groups_live.ex:583
 #: lib/game_server_web/live/groups_live.ex:597
-#: lib/game_server_web/live/lobby_live/index.ex:822
-#: lib/game_server_web/live/lobby_live/index.ex:860
+#: lib/game_server_web/live/lobby_live/index.ex:823
+#: lib/game_server_web/live/lobby_live/index.ex:861
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:118
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:160
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:196
@@ -350,13 +350,13 @@ msgid "Newest"
 msgstr "Newest"
 
 #: lib/game_server_web/components/core_components.ex:527
-#: lib/game_server_web/live/lobby_live/index.ex:653
+#: lib/game_server_web/live/lobby_live/index.ex:654
 #, elixir-autogen, elixir-format
 msgid "Next"
 msgstr "Next"
 
 #: lib/game_server_web/components/core_components.ex:513
-#: lib/game_server_web/live/lobby_live/index.ex:643
+#: lib/game_server_web/live/lobby_live/index.ex:644
 #, elixir-autogen, elixir-format
 msgid "Prev"
 msgstr "Prev"
@@ -427,7 +427,7 @@ msgid "Role"
 msgstr "Role"
 
 #: lib/game_server_web/live/chat_live.ex:252
-#: lib/game_server_web/live/lobby_live/index.ex:808
+#: lib/game_server_web/live/lobby_live/index.ex:809
 #: lib/game_server_web/live/user_live/settings/account_tab.ex:99
 #: lib/game_server_web/live/user_live/settings/account_tab.ex:116
 #: lib/game_server_web/live/user_live/settings/account_tab.ex:134
@@ -462,7 +462,7 @@ msgstr "Send"
 msgid "Status"
 msgstr "Status"
 
-#: lib/game_server_web/live/lobby_live/index.ex:658
+#: lib/game_server_web/live/lobby_live/index.ex:659
 #: lib/game_server_web/live/notifications_live.ex:42
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:97
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:511
@@ -487,8 +487,8 @@ msgstr "Type"
 msgid "Unblock"
 msgstr "Unblock"
 
-#: lib/game_server_web/live/lobby_live/index.ex:706
-#: lib/game_server_web/live/lobby_live/index.ex:715
+#: lib/game_server_web/live/lobby_live/index.ex:707
+#: lib/game_server_web/live/lobby_live/index.ex:716
 #: lib/game_server_web/live/notifications_live.ex:197
 #: lib/game_server_web/live/notifications_live.ex:198
 #: lib/game_server_web/live/notifications_live.ex:201
@@ -551,7 +551,7 @@ msgstr "Decline"
 
 #: lib/game_server_web/live/chat_live.ex:272
 #: lib/game_server_web/live/chat_live.ex:274
-#: lib/game_server_web/live/lobby_live/index.ex:697
+#: lib/game_server_web/live/lobby_live/index.ex:698
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:221
 #, elixir-autogen, elixir-format
 msgid "Edit"
@@ -640,7 +640,7 @@ msgstr "Not found"
 #: lib/game_server_web/live/auth_success_live.ex:98
 #: lib/game_server_web/live/auth_success_live.ex:102
 #: lib/game_server_web/live/groups_live.ex:294
-#: lib/game_server_web/live/lobby_live/index.ex:265
+#: lib/game_server_web/live/lobby_live/index.ex:266
 #: lib/game_server_web/live/notifications_live.ex:159
 #: lib/game_server_web/live/notifications_live.ex:174
 #: lib/game_server_web/live/user_live/login.ex:207
@@ -750,11 +750,11 @@ msgstr "Open"
 #: lib/game_server_web/live/lobby_live/index.ex:76
 #: lib/game_server_web/live/lobby_live/index.ex:119
 #: lib/game_server_web/live/lobby_live/index.ex:162
-#: lib/game_server_web/live/lobby_live/index.ex:278
-#: lib/game_server_web/live/lobby_live/index.ex:313
-#: lib/game_server_web/live/lobby_live/index.ex:364
-#: lib/game_server_web/live/lobby_live/index.ex:408
-#: lib/game_server_web/live/lobby_live/index.ex:456
+#: lib/game_server_web/live/lobby_live/index.ex:279
+#: lib/game_server_web/live/lobby_live/index.ex:314
+#: lib/game_server_web/live/lobby_live/index.ex:365
+#: lib/game_server_web/live/lobby_live/index.ex:409
+#: lib/game_server_web/live/lobby_live/index.ex:457
 #: lib/game_server_web/live/tournaments_live.ex:173
 #: lib/game_server_web/live/user_live/confirmation.ex:95
 #: lib/game_server_web/live/user_live/registration.ex:211
@@ -829,8 +829,8 @@ msgstr "Active"
 msgid "Ended"
 msgstr "Ended"
 
-#: lib/game_server_web/live/lobby_live/index.ex:833
-#: lib/game_server_web/live/lobby_live/index.ex:871
+#: lib/game_server_web/live/lobby_live/index.ex:834
+#: lib/game_server_web/live/lobby_live/index.ex:872
 #, elixir-autogen, elixir-format
 msgid "Host"
 msgstr "Host"
@@ -847,7 +847,7 @@ msgid "Leave?"
 msgstr "Leave?"
 
 #: lib/game_server_web/live/lobby_live/index.ex:44
-#: lib/game_server_web/live/lobby_live/index.ex:671
+#: lib/game_server_web/live/lobby_live/index.ex:672
 #, elixir-autogen, elixir-format
 msgid "Lobbies"
 msgstr "Lobbies"
@@ -863,7 +863,7 @@ msgstr "Privacy"
 msgid "Rank"
 msgstr "Rank"
 
-#: lib/game_server_web/live/lobby_live/index.ex:515
+#: lib/game_server_web/live/lobby_live/index.ex:516
 #, elixir-autogen, elixir-format
 msgid "Removed"
 msgstr "Removed"
@@ -1395,167 +1395,167 @@ msgstr "You are not registered."
 #: lib/game_server_web/live/tournaments_live.ex:622
 #, elixir-autogen, elixir-format
 msgid "All results"
-msgstr ""
+msgstr "All results"
 
 #: lib/game_server_web/live/user_live/settings/account_tab.ex:504
 #, elixir-autogen, elixir-format
 msgid "Avatar updated."
-msgstr ""
+msgstr "Avatar updated."
 
 #: lib/game_server_web/live/user_live/settings/wallet_tab.ex:64
 #, elixir-autogen, elixir-format
 msgid "Balance"
-msgstr ""
+msgstr "Balance"
 
 #: lib/game_server_web/live/user_live/settings/wallet_tab.ex:63
 #, elixir-autogen, elixir-format
 msgid "Change"
-msgstr ""
+msgstr "Change"
 
 #: lib/game_server_web/live/user_live/settings/account_tab.ex:77
 #, elixir-autogen, elixir-format
 msgid "Change avatar"
-msgstr ""
+msgstr "Change avatar"
 
 #: lib/game_server_web/live/user_live/settings/account_tab.ex:508
 #, elixir-autogen, elixir-format
 msgid "Could not update avatar."
-msgstr ""
+msgstr "Could not update avatar."
 
 #: lib/game_server_web/live/user_live/settings/wallet_tab.ex:62
 #, elixir-autogen, elixir-format
 msgid "Currency"
-msgstr ""
+msgstr "Currency"
 
 #: lib/game_server_web/live/user_live/settings/account_tab.ex:69
 #, elixir-autogen, elixir-format
 msgid "File is too large or not a supported image."
-msgstr ""
+msgstr "File is too large or not a supported image."
 
 #: lib/game_server_web/live/user_live/settings/items_tab.ex:39
 #, elixir-autogen, elixir-format
 msgid "Item"
-msgstr ""
+msgstr "Item"
 
 #: lib/game_server_web/live/user_live/settings.ex:94
 #: lib/game_server_web/live/user_live/settings/items_tab.ex:28
 #, elixir-autogen, elixir-format
 msgid "Items"
-msgstr ""
+msgstr "Items"
 
 #: lib/game_server_web/live/groups_live.ex:680
 #, elixir-autogen, elixir-format
 msgid "Open chat"
-msgstr ""
+msgstr "Open chat"
 
 #: lib/game_server_web/live/user_live/settings/account_tab.ex:512
 #, elixir-autogen, elixir-format
 msgid "Please choose an image first."
-msgstr ""
+msgstr "Please choose an image first."
 
 #: lib/game_server_web/live/user_live/settings/items_tab.ex:40
 #, elixir-autogen, elixir-format
 msgid "Quantity"
-msgstr ""
+msgstr "Quantity"
 
 #: lib/game_server_web/live/user_live/settings/wallet_tab.ex:65
 #, elixir-autogen, elixir-format
 msgid "Reason"
-msgstr ""
+msgstr "Reason"
 
 #: lib/game_server_web/live/user_live/settings/account_tab.ex:64
 #, elixir-autogen, elixir-format
 msgid "Remove selected file"
-msgstr ""
+msgstr "Remove selected file"
 
 #: lib/game_server_web/live/user_live/settings/wallet_tab.ex:48
 #, elixir-autogen, elixir-format
 msgid "Transactions"
-msgstr ""
+msgstr "Transactions"
 
 #: lib/game_server_web/live/user_live/settings.ex:93
 #: lib/game_server_web/live/user_live/settings/wallet_tab.ex:29
 #, elixir-autogen, elixir-format
 msgid "Wallet"
-msgstr ""
+msgstr "Wallet"
 
 #: lib/game_server_web/live/quests_live.ex:86
 #, elixir-autogen, elixir-format
 msgid "Already claimed."
-msgstr ""
+msgstr "Already claimed."
 
 #: lib/game_server_web/live/quests_live.ex:556
 #, elixir-autogen, elixir-format
 msgid "Claim"
-msgstr ""
+msgstr "Claim"
 
 #: lib/game_server_web/live/quests_live.ex:253
 #, elixir-autogen, elixir-format
 msgid "Claimable"
-msgstr ""
+msgstr "Claimable"
 
 #: lib/game_server_web/live/quests_live.ex:562
 #, elixir-autogen, elixir-format
 msgid "Claimed"
-msgstr ""
+msgstr "Claimed"
 
 #: lib/game_server_web/live/quests_live.ex:254
 #: lib/game_server_web/live/quests_live.ex:571
 #, elixir-autogen, elixir-format
 msgid "Completed"
-msgstr ""
+msgstr "Completed"
 
 #: lib/game_server_web/live/quests_live.ex:89
 #, elixir-autogen, elixir-format
 msgid "Could not claim this quest."
-msgstr ""
+msgstr "Could not claim this quest."
 
 #: lib/game_server_web/live/quests_live.ex:242
 #, elixir-autogen, elixir-format
 msgid "Daily"
-msgstr ""
+msgstr "Daily"
 
 #: lib/game_server_web/live/quests_live.ex:537
 #, elixir-autogen, elixir-format
 msgid "Ends in %{time}"
-msgstr ""
+msgstr "Ends in %{time}"
 
 #: lib/game_server_web/live/quests_live.ex:36
 #: lib/game_server_web/live/quests_live.ex:326
 #: lib/game_server_web/live/quests_live.ex:501
 #, elixir-autogen, elixir-format
 msgid "Quests"
-msgstr ""
+msgstr "Quests"
 
 #: lib/game_server_web/live/quests_live.ex:539
 #, elixir-autogen, elixir-format
 msgid "Resets in %{time}"
-msgstr ""
+msgstr "Resets in %{time}"
 
 #: lib/game_server_web/live/quests_live.ex:82
 #, elixir-autogen, elixir-format
 msgid "Rewards claimed!"
-msgstr ""
+msgstr "Rewards claimed!"
 
 #: lib/game_server_web/live/quests_live.ex:243
 #, elixir-autogen, elixir-format
 msgid "Weekly"
-msgstr ""
+msgstr "Weekly"
 
 #: lib/game_server_web/live/quests_live.ex:368
 #, elixir-autogen, elixir-format
 msgid "You have %{count} quest(s) ready to claim!"
-msgstr ""
+msgstr "You have %{count} quest(s) ready to claim!"
 
 #: lib/game_server_web/live/quests_live.ex:247
 #, elixir-autogen, elixir-format
 msgid "Every %{count}d"
-msgstr ""
+msgstr "Every %{count}d"
 
 #: lib/game_server_web/live/quests_live.ex:244
 #, elixir-autogen, elixir-format
 msgid "Monthly"
-msgstr ""
+msgstr "Monthly"
 
 #: lib/game_server_web/live/user_live/settings.ex:97
 #: lib/game_server_web/live/user_live/settings/devices_tab.ex:29

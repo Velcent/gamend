@@ -99,6 +99,7 @@ defmodule GameServerHost.MixProject do
       lint:
         ["format --check-formatted", "credo --strict"] ++
           local_web_commands([web_cmd("format --check-formatted"), web_cmd("credo --strict")]),
+      "deps.audit": [&prune_vendored_lockfiles/1, "deps.audit"],
       precommit:
         [
           "compile --warning-as-errors",
@@ -121,6 +122,16 @@ defmodule GameServerHost.MixProject do
         "phx.digest"
       ]
     ]
+  end
+
+  # mix_audit's `apps/**/mix.lock` glob also matches lockfiles vendored inside
+  # git dependencies (pigeon ships one). A dependency's own lock never drives our
+  # resolution — ours does — so scanning it only reports false positives.
+  defp prune_vendored_lockfiles(_args) do
+    "apps/**/mix.lock"
+    |> Path.wildcard()
+    |> Enum.filter(&(&1 =~ ~r{(^|/)deps/}))
+    |> Enum.each(&File.rm/1)
   end
 
   defp web_cmd(task), do: "cmd --cd #{web_app_path()} mix #{task}"

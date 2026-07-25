@@ -56,17 +56,17 @@ same way (`Notifications.Types.known?/1` merges core's codes with
 # in the plugin's hooks module
 def lobby_states do
   %{
-    "drafting" => %{description: "Picking teams"},
-    "playing" => %{description: "Match running"},
-    "post_game" => %{description: "Scoreboard", terminal: true, prune_after_minutes: 10}
+    "drafting" => "Picking teams",
+    "playing" => "Match running",
+    "post_game" => "Scoreboard"
   }
 end
 ```
 
 - `GameServer.Lobbies.States.known?/1` = core defaults ∪ declarations.
 - Declare nothing and the core defaults apply — batteries included, no ceremony.
-- `terminal` + `prune_after_minutes` are what a future generic reaper consumes;
-  see "Retention" below.
+- A state is a word and a description, nothing more: core attaches no meaning
+  to any of them. See "Retention" below.
 
 Core ships a default vocabulary — `created`, `starting`, `playing`, `ended` —
 as *documented strings*, not a machine. Any state may follow any other; a game
@@ -140,14 +140,16 @@ Dispatched after commit via `defer/1`, never inside the lock.
 - Admin: state column + filter on `/admin/lobbies`, force-state action, API
   parity; declared states listed on the runtime page next to notification types.
 
-## Retention (deferred to the Retention pass)
+## Retention
 
-This spec deliberately stops at the signal. The generic reaper — delete
-terminal-state lobbies after `prune_after_minutes`, and abandoned ones with no
-members — lands with the broader "Retention handles all classes" work. Note for
-that pass: polyglot keeps a paused match alive **while any member is online or
-recently disconnected**, so the reaper must consider presence, not just
-membership, or it will delete live games.
+Shipped in the Retention pass, and deliberately **not** keyed on state: a lobby
+is reaped only when nobody in it has been seen for
+`RETENTION_ABANDONED_LOBBY_MINUTES`. A game that ends a match deletes its own
+lobby; core does not decide that `ended` means "delete this", because core
+assigns no meaning to any state but `created`. Presence, not membership, is
+what protects a live game — polyglot keeps a paused match alive **while any
+member is online or recently disconnected**, and the reaper honours exactly
+that. See docs/specs/retention.md.
 
 ## Migration
 

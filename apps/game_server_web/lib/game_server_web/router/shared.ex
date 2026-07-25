@@ -545,6 +545,8 @@ defmodule GameServerWeb.Router.Shared do
         get "/economy/items", EconomyController, :items
         post "/economy/grant-item", EconomyController, :grant_item
         post "/economy/consume-item", EconomyController, :consume_item
+        get "/retention", RetentionController, :show
+        post "/retention/run", RetentionController, :run
       end
     end
   end
