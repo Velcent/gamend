@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.1">
-    <meta name="project" content="game_server_core v1.0.1059">
+    <meta name="project" content="game_server_core v1.0.1063">
 
 
-    <title>GameServer.Hooks.Declarations — game_server_core v1.0.1059</title>
+    <title>GameServer.Hooks.Declarations — game_server_core v1.0.1063</title>
 
     <link rel="stylesheet" href="dist/html-elixir-YJO4MOOW.css" />
 
-    <script defer src="dist/sidebar_items-E947DB44.js"></script>
+    <script defer src="dist/sidebar_items-3111E92E.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-YU4BZFVS.js"></script>
 
@@ -37,7 +37,7 @@
 game_server_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1059
+          v1.0.1063
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ game_server_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">GameServer.<wbr>Hooks.<wbr>Declarations</span> 
-      <small class="app-vsn" translate="no">(game_server_core v1.0.1059)</small>
+      <small class="app-vsn" translate="no">(game_server_core v1.0.1063)</small>
 
     </h1>
 
@@ -117,17 +117,21 @@ game_server_core
 <p>Registry of what a plugin <em>declares</em> it contributes, for observability and
 validation.</p><p>Three optional callbacks, registered the same convention-based way as
 <a href="GameServer.Hooks.KvSchemas.html"><code class="inline">GameServer.Hooks.KvSchemas</code></a> — export them from the plugin's hooks module and
-they are picked up at load:</p><pre><code class="makeup elixir" translate="no"><span class="kd">def</span><span class="w"> </span><span class="nf">notification_types</span><span class="w"> </span><span class="k" data-group-id="3604218736-1">do</span><span class="w">
-  </span><span class="p" data-group-id="3604218736-2">%{</span><span class="s">&quot;quest_completed&quot;</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;Player finished a quest&quot;</span><span class="p" data-group-id="3604218736-2">}</span><span class="w">
-</span><span class="k" data-group-id="3604218736-1">end</span><span class="w">
+they are picked up at load:</p><pre><code class="makeup elixir" translate="no"><span class="kd">def</span><span class="w"> </span><span class="nf">notification_types</span><span class="w"> </span><span class="k" data-group-id="9858886184-1">do</span><span class="w">
+  </span><span class="p" data-group-id="9858886184-2">%{</span><span class="s">&quot;quest_completed&quot;</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;Player finished a quest&quot;</span><span class="p" data-group-id="9858886184-2">}</span><span class="w">
+</span><span class="k" data-group-id="9858886184-1">end</span><span class="w">
 
-</span><span class="kd">def</span><span class="w"> </span><span class="nf">realtime_events</span><span class="w"> </span><span class="k" data-group-id="3604218736-3">do</span><span class="w">
-  </span><span class="p" data-group-id="3604218736-4">%{</span><span class="s">&quot;quest_progress&quot;</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;Objective counter moved&quot;</span><span class="p" data-group-id="3604218736-4">}</span><span class="w">
-</span><span class="k" data-group-id="3604218736-3">end</span><span class="w">
+</span><span class="kd">def</span><span class="w"> </span><span class="nf">realtime_events</span><span class="w"> </span><span class="k" data-group-id="9858886184-3">do</span><span class="w">
+  </span><span class="p" data-group-id="9858886184-4">%{</span><span class="s">&quot;quest_progress&quot;</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;Objective counter moved&quot;</span><span class="p" data-group-id="9858886184-4">}</span><span class="w">
+</span><span class="k" data-group-id="9858886184-3">end</span><span class="w">
 
-</span><span class="kd">def</span><span class="w"> </span><span class="nf">env_vars</span><span class="w"> </span><span class="k" data-group-id="3604218736-5">do</span><span class="w">
-  </span><span class="p" data-group-id="3604218736-6">[</span><span class="p" data-group-id="3604218736-7">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;MYGAME_DIFFICULTY&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">default</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;normal&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Global difficulty&quot;</span><span class="p" data-group-id="3604218736-7">}</span><span class="p" data-group-id="3604218736-6">]</span><span class="w">
-</span><span class="k" data-group-id="3604218736-5">end</span></code></pre><p><a href="#notification_types/0"><code class="inline">notification_types/0</code></a> is <strong>enforced</strong>: <a href="GameServer.Notifications.html"><code class="inline">GameServer.Notifications</code></a> rejects a
+</span><span class="kd">def</span><span class="w"> </span><span class="nf">env_vars</span><span class="w"> </span><span class="k" data-group-id="9858886184-5">do</span><span class="w">
+  </span><span class="p" data-group-id="9858886184-6">[</span><span class="p" data-group-id="9858886184-7">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;MYGAME_DIFFICULTY&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">default</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;normal&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Global difficulty&quot;</span><span class="p" data-group-id="9858886184-7">}</span><span class="p" data-group-id="9858886184-6">]</span><span class="w">
+</span><span class="k" data-group-id="9858886184-5">end</span><span class="w">
+
+</span><span class="kd">def</span><span class="w"> </span><span class="nf">lobby_states</span><span class="w"> </span><span class="k" data-group-id="9858886184-8">do</span><span class="w">
+  </span><span class="p" data-group-id="9858886184-9">%{</span><span class="s">&quot;drafting&quot;</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p" data-group-id="9858886184-10">%{</span><span class="ss">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Picking teams&quot;</span><span class="p" data-group-id="9858886184-10">}</span><span class="p" data-group-id="9858886184-9">}</span><span class="w">
+</span><span class="k" data-group-id="9858886184-8">end</span></code></pre><p><a href="#notification_types/0"><code class="inline">notification_types/0</code></a> is <strong>enforced</strong>: <a href="GameServer.Notifications.html"><code class="inline">GameServer.Notifications</code></a> rejects a
 notification whose <code class="inline">metadata[&quot;type&quot;]</code> is not declared by core or a plugin, so
 a client is never sent a code nobody documented. The other two are
 declarations only — a plugin can always read an env var directly, and events
@@ -155,7 +159,7 @@ the whole truth instead of only core's half.</p>
 
       </div>
 
-        <div class="summary-synopsis"><p>The merged registry: <code class="inline">%{notification_types:, realtime_events:, env_vars:}</code>.</p></div>
+        <div class="summary-synopsis"><p>The merged registry: <code class="inline">%{notification_types:, realtime_events:, env_vars:, lobby_states:}</code>.</p></div>
 
     </div>
 
@@ -166,6 +170,18 @@ the whole truth instead of only core's half.</p>
       </div>
 
         <div class="summary-synopsis"><p>Env vars declared by plugins, each <code class="inline">%{name:, default:, type:, description:, plugin:}</code>.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#lobby_states/0" data-no-tooltip="" translate="no">lobby_states()</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Lobby states declared by plugins, each mapped to
+<code class="inline">%{description:, terminal:, prune_after_minutes:}</code>. See
+<a href="GameServer.Lobbies.States.html"><code class="inline">GameServer.Lobbies.States</code></a>.</p></div>
 
     </div>
 
@@ -223,7 +239,7 @@ the whole truth instead of only core's half.</p>
       <h1 class="signature" translate="no">all()</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks/declarations.ex#L41" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks/declarations.ex#L46" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -237,12 +253,13 @@ the whole truth instead of only core's half.</p>
           <pre translate="no"><span class="attribute">@spec</span> all() :: %{
   notification_types: %{required(<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()) =&gt; <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()},
   realtime_events: %{required(<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()) =&gt; <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()},
-  env_vars: [<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()]
+  env_vars: [<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()],
+  lobby_states: %{required(<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()) =&gt; <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()}
 }</pre>
 
       </div>
 
-<p>The merged registry: <code class="inline">%{notification_types:, realtime_events:, env_vars:}</code>.</p>
+<p>The merged registry: <code class="inline">%{notification_types:, realtime_events:, env_vars:, lobby_states:}</code>.</p>
   </section>
 </section>
 <section class="detail" id="env_vars/0">
@@ -255,7 +272,7 @@ the whole truth instead of only core's half.</p>
       <h1 class="signature" translate="no">env_vars()</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks/declarations.ex#L53" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks/declarations.ex#L58" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -273,6 +290,36 @@ the whole truth instead of only core's half.</p>
 <p>Env vars declared by plugins, each <code class="inline">%{name:, default:, type:, description:, plugin:}</code>.</p>
   </section>
 </section>
+<section class="detail" id="lobby_states/0">
+
+  <div class="detail-header">
+    <a href="#lobby_states/0" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">lobby_states()</h1>
+
+
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks/declarations.ex#L66" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> lobby_states() :: %{required(<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()) =&gt; <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()}</pre>
+
+      </div>
+
+<p>Lobby states declared by plugins, each mapped to
+<code class="inline">%{description:, terminal:, prune_after_minutes:}</code>. See
+<a href="GameServer.Lobbies.States.html"><code class="inline">GameServer.Lobbies.States</code></a>.</p>
+  </section>
+</section>
 <section class="detail" id="notification_types/0">
 
   <div class="detail-header">
@@ -283,7 +330,7 @@ the whole truth instead of only core's half.</p>
       <h1 class="signature" translate="no">notification_types()</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks/declarations.ex#L45" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks/declarations.ex#L50" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -311,7 +358,7 @@ the whole truth instead of only core's half.</p>
       <h1 class="signature" translate="no">realtime_events()</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks/declarations.ex#L49" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks/declarations.ex#L54" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -339,7 +386,7 @@ the whole truth instead of only core's half.</p>
       <h1 class="signature" translate="no">refresh(plugins)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks/declarations.ex#L57" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks/declarations.ex#L70" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -366,9 +413,9 @@ the whole truth instead of only core's half.</p>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/game_server_core/1.0.1059">Hex Package</a>
+              <a href="https://hex.pm/packages/game_server_core/1.0.1063">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/game_server_core/1.0.1059">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/game_server_core/1.0.1063">Hex Preview</a>
 
             </span>
 

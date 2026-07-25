@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.1">
-    <meta name="project" content="game_server_core v1.0.1059">
+    <meta name="project" content="game_server_core v1.0.1063">
 
 
-    <title>GameServer.Hooks — game_server_core v1.0.1059</title>
+    <title>GameServer.Hooks — game_server_core v1.0.1063</title>
 
     <link rel="stylesheet" href="dist/html-elixir-YJO4MOOW.css" />
 
-    <script defer src="dist/sidebar_items-E947DB44.js"></script>
+    <script defer src="dist/sidebar_items-3111E92E.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-YU4BZFVS.js"></script>
 
@@ -37,7 +37,7 @@
 game_server_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1059
+          v1.0.1063
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ game_server_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">GameServer.<wbr>Hooks</span> <small>behaviour</small>
-      <small class="app-vsn" translate="no">(game_server_core v1.0.1059)</small>
+      <small class="app-vsn" translate="no">(game_server_core v1.0.1063)</small>
 
     </h1>
 
@@ -287,6 +287,14 @@ email, device, and all OAuth providers (which register mid-login).</p></div>
 
     <div class="summary-row">
       <div class="summary-signature">
+        <a href="#c:after_lobby_state_changed/3" data-no-tooltip="" translate="no">after_lobby_state_changed(t, t, t)</a>
+
+      </div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
         <a href="#c:after_lobby_updated/1" data-no-tooltip="" translate="no">after_lobby_updated(t)</a>
 
       </div>
@@ -328,6 +336,14 @@ email, device, and all OAuth providers (which register mid-login).</p></div>
     <div class="summary-row">
       <div class="summary-signature">
         <a href="#c:before_lobby_leave/2" data-no-tooltip="" translate="no">before_lobby_leave(t, t)</a>
+
+      </div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#c:before_lobby_state_change/3" data-no-tooltip="" translate="no">before_lobby_state_change(t, t, t)</a>
 
       </div>
 
@@ -538,20 +554,6 @@ email, device, and all OAuth providers (which register mid-login).</p></div>
     <div class="summary-row">
       <div class="summary-signature">
         <a href="#c:before_chat_message/2" data-no-tooltip="" translate="no">before_chat_message(t, map)</a>
-
-      </div>
-
-    </div>
-
-</div>
-<div class="summary-achievement-hooks summary">
-  <h3>
-    <a href="#achievement-hooks">Achievement hooks</a>
-  </h3>
-
-    <div class="summary-row">
-      <div class="summary-signature">
-        <a href="#c:after_achievement_unlocked/2" data-no-tooltip="" translate="no">after_achievement_unlocked(t, t)</a>
 
       </div>
 
@@ -797,6 +799,52 @@ one of these client KV API access decisions</p></div>
     </div>
 
 </div>
+<div class="summary-callbacks summary">
+  <h3>
+    <a href="#callbacks">Callbacks</a>
+  </h3>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#c:after_push_sent/3" data-no-tooltip="" translate="no">after_push_sent(t, map, map)</a>
+
+      </div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#c:after_quest_claimed/1" data-no-tooltip="" translate="no">after_quest_claimed(t)</a>
+
+      </div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#c:after_quest_completed/1" data-no-tooltip="" translate="no">after_quest_completed(t)</a>
+
+      </div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#c:before_push_send/2" data-no-tooltip="" translate="no">before_push_send(t, map)</a>
+
+      </div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#c:before_quest_claim/3" data-no-tooltip="" translate="no">before_quest_claim(t, t, t)</a>
+
+      </div>
+
+    </div>
+
+</div>
 <div class="summary-functions summary">
   <h3>
     <a href="#functions">Functions</a>
@@ -935,7 +983,7 @@ than fanning out notifications. Exposed for the admin runtime page.</p></div>
       <h1 class="signature" translate="no">after_startup()</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L56" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L55" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -963,7 +1011,7 @@ than fanning out notifications. Exposed for the admin runtime page.</p></div>
       <h1 class="signature" translate="no">before_stop()</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L58" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L57" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -991,7 +1039,7 @@ than fanning out notifications. Exposed for the admin runtime page.</p></div>
       <h1 class="signature" translate="no">on_custom_hook(t, list)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L107" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L106" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1034,7 +1082,7 @@ exported Elixir functions on the hooks module.</p><p>Receives the function name 
       <h1 class="signature" translate="no">after_user_deleted(t)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L96" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L95" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1062,7 +1110,7 @@ exported Elixir functions on the hooks module.</p><p>Receives the function name 
       <h1 class="signature" translate="no">after_user_logged_in(t)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L89" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L88" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1090,7 +1138,7 @@ exported Elixir functions on the hooks module.</p><p>Receives the function name 
       <h1 class="signature" translate="no">after_user_offline(t)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L95" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L94" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1118,7 +1166,7 @@ exported Elixir functions on the hooks module.</p><p>Receives the function name 
       <h1 class="signature" translate="no">after_user_online(t)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L94" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L93" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1146,7 +1194,7 @@ exported Elixir functions on the hooks module.</p><p>Receives the function name 
       <h1 class="signature" translate="no">after_user_register(t)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L87" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L86" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1174,7 +1222,7 @@ exported Elixir functions on the hooks module.</p><p>Receives the function name 
       <h1 class="signature" translate="no">after_user_updated(t)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L92" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L91" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1202,7 +1250,7 @@ exported Elixir functions on the hooks module.</p><p>Receives the function name 
       <h1 class="signature" translate="no">before_user_register(t, user_registration_hook_attrs)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L84" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L83" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1229,13 +1277,13 @@ overridable. A hook-supplied username that is invalid or already taken is
 replaced with a generated one (a plugin bug must never lock a player out
 of login). For strict policy on player-initiated changes — profanity or
 reserved names — use <a href="#c:before_user_update/2"><code class="inline">before_user_update/2</code></a>, where errors are returned
-to the player:</p><pre><code class="makeup elixir" translate="no"><span class="kd">def</span><span class="w"> </span><span class="nf">before_user_update</span><span class="p" data-group-id="9914449889-1">(</span><span class="c">_user</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="9914449889-2">%{</span><span class="s">&quot;username&quot;</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="n">name</span><span class="p" data-group-id="9914449889-2">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">attrs</span><span class="p" data-group-id="9914449889-1">)</span><span class="w"> </span><span class="k" data-group-id="9914449889-3">do</span><span class="w">
-  </span><span class="k">if</span><span class="w"> </span><span class="nc">MyGame.Profanity</span><span class="o">.</span><span class="n">allowed?</span><span class="p" data-group-id="9914449889-4">(</span><span class="n">name</span><span class="p" data-group-id="9914449889-4">)</span><span class="p">,</span><span class="w">
-    </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="9914449889-5">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">attrs</span><span class="p" data-group-id="9914449889-5">}</span><span class="p">,</span><span class="w">
-    </span><span class="ss">else</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="9914449889-6">{</span><span class="ss">:error</span><span class="p">,</span><span class="w"> </span><span class="ss">:invalid_username</span><span class="p" data-group-id="9914449889-6">}</span><span class="w">
-</span><span class="k" data-group-id="9914449889-3">end</span><span class="w">
+to the player:</p><pre><code class="makeup elixir" translate="no"><span class="kd">def</span><span class="w"> </span><span class="nf">before_user_update</span><span class="p" data-group-id="1550620758-1">(</span><span class="c">_user</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="1550620758-2">%{</span><span class="s">&quot;username&quot;</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="n">name</span><span class="p" data-group-id="1550620758-2">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">attrs</span><span class="p" data-group-id="1550620758-1">)</span><span class="w"> </span><span class="k" data-group-id="1550620758-3">do</span><span class="w">
+  </span><span class="k">if</span><span class="w"> </span><span class="nc">MyGame.Profanity</span><span class="o">.</span><span class="n">allowed?</span><span class="p" data-group-id="1550620758-4">(</span><span class="n">name</span><span class="p" data-group-id="1550620758-4">)</span><span class="p">,</span><span class="w">
+    </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="1550620758-5">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">attrs</span><span class="p" data-group-id="1550620758-5">}</span><span class="p">,</span><span class="w">
+    </span><span class="ss">else</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="1550620758-6">{</span><span class="ss">:error</span><span class="p">,</span><span class="w"> </span><span class="ss">:invalid_username</span><span class="p" data-group-id="1550620758-6">}</span><span class="w">
+</span><span class="k" data-group-id="1550620758-3">end</span><span class="w">
 
-</span><span class="kd">def</span><span class="w"> </span><span class="nf">before_user_update</span><span class="p" data-group-id="9914449889-7">(</span><span class="c">_user</span><span class="p">,</span><span class="w"> </span><span class="n">attrs</span><span class="p" data-group-id="9914449889-7">)</span><span class="p">,</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="9914449889-8">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">attrs</span><span class="p" data-group-id="9914449889-8">}</span></code></pre>
+</span><span class="kd">def</span><span class="w"> </span><span class="nf">before_user_update</span><span class="p" data-group-id="1550620758-7">(</span><span class="c">_user</span><span class="p">,</span><span class="w"> </span><span class="n">attrs</span><span class="p" data-group-id="1550620758-7">)</span><span class="p">,</span><span class="w"> </span><span class="ss">do</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="1550620758-8">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">attrs</span><span class="p" data-group-id="1550620758-8">}</span></code></pre>
   </section>
 </section>
 <section class="detail" id="c:before_user_update/2">
@@ -1248,7 +1296,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
       <h1 class="signature" translate="no">before_user_update(t, map)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L91" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L90" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1289,7 +1337,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
       <h1 class="signature" translate="no">after_lobby_create(t)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L111" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L110" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1317,7 +1365,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
       <h1 class="signature" translate="no">after_lobby_deleted(t)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L241" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L264" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1345,7 +1393,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
       <h1 class="signature" translate="no">after_lobby_host_change(t, t)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L266" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L297" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1373,7 +1421,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
       <h1 class="signature" translate="no">after_lobby_join(t, t)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L115" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L114" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1402,7 +1450,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
       <h1 class="signature" translate="no">after_lobby_kick(t, t, t)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L245" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L276" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1434,7 +1482,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
       <h1 class="signature" translate="no">after_lobby_leave(t, t)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L235" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L258" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1453,6 +1501,37 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
 
   </section>
 </section>
+<section class="detail" id="c:after_lobby_state_changed/3">
+
+  <div class="detail-header">
+    <a href="#c:after_lobby_state_changed/3" class="detail-link" data-no-tooltip="" aria-label="Link to this callback">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">after_lobby_state_changed(t, t, t)</h1>
+
+        <span class="note">(optional)</span>
+
+
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L271" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@callback</span> after_lobby_state_changed(<a href="GameServer.Lobbies.Lobby.html#t:t/0">GameServer.Lobbies.Lobby.t</a>(), <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(), <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()) ::
+  <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>()</pre>
+
+      </div>
+
+
+  </section>
+</section>
 <section class="detail" id="c:after_lobby_updated/1">
 
   <div class="detail-header">
@@ -1463,7 +1542,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
       <h1 class="signature" translate="no">after_lobby_updated(t)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L238" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L261" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1491,7 +1570,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
       <h1 class="signature" translate="no">before_lobby_create(map)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L110" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L109" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1519,7 +1598,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
       <h1 class="signature" translate="no">before_lobby_delete(t)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L240" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L263" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1548,7 +1627,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
       <h1 class="signature" translate="no">before_lobby_join(t, t, keyword)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L113" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L112" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1583,7 +1662,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
       <h1 class="signature" translate="no">before_lobby_kick(t, t, t)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L243" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L274" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1621,7 +1700,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
         <span class="note">(optional)</span>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L232" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L255" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1640,6 +1719,37 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
 
   </section>
 </section>
+<section class="detail" id="c:before_lobby_state_change/3">
+
+  <div class="detail-header">
+    <a href="#c:before_lobby_state_change/3" class="detail-link" data-no-tooltip="" aria-label="Link to this callback">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">before_lobby_state_change(t, t, t)</h1>
+
+        <span class="note">(optional)</span>
+
+
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L270" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@callback</span> before_lobby_state_change(<a href="GameServer.Lobbies.Lobby.html#t:t/0">GameServer.Lobbies.Lobby.t</a>(), <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(), <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()) ::
+  <a href="#t:hook_result/1">hook_result</a>(<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>())</pre>
+
+      </div>
+
+
+  </section>
+</section>
 <section class="detail" id="c:before_lobby_update/2">
 
   <div class="detail-header">
@@ -1650,7 +1760,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
       <h1 class="signature" translate="no">before_lobby_update(t, map)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L237" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L260" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1691,7 +1801,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
       <h1 class="signature" translate="no">after_group_create(t)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L118" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L117" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1719,7 +1829,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
       <h1 class="signature" translate="no">after_group_deleted(t)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L128" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L127" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1747,7 +1857,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
       <h1 class="signature" translate="no">after_group_join(t, t)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L126" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L125" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1775,7 +1885,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
       <h1 class="signature" translate="no">after_group_kick(t, t, t)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L129" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L128" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1803,7 +1913,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
       <h1 class="signature" translate="no">after_group_leave(t, t)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L127" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L126" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1831,7 +1941,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
       <h1 class="signature" translate="no">after_group_updated(t)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L124" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L123" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1859,7 +1969,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
       <h1 class="signature" translate="no">before_group_create(t, map)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L117" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L116" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1887,7 +1997,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
       <h1 class="signature" translate="no">before_group_delete(t)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L131" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L130" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1916,7 +2026,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
       <h1 class="signature" translate="no">before_group_join(t, t, map)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L120" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L119" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1951,7 +2061,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
       <h1 class="signature" translate="no">before_group_kick(t, t, t)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L132" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L131" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1980,7 +2090,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
       <h1 class="signature" translate="no">before_group_update(t, map)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L123" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L122" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -2021,7 +2131,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
       <h1 class="signature" translate="no">after_party_create(t)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L137" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L136" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -2049,7 +2159,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
       <h1 class="signature" translate="no">after_party_disband(t)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L145" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L144" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -2077,7 +2187,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
       <h1 class="signature" translate="no">after_party_join(t, t)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L142" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L141" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -2106,7 +2216,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
       <h1 class="signature" translate="no">after_party_kick(t, t, t)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L144" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L143" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -2138,7 +2248,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
       <h1 class="signature" translate="no">after_party_leave(t, t)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L143" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L142" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -2166,7 +2276,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
       <h1 class="signature" translate="no">after_party_updated(t)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L140" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L139" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -2194,7 +2304,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
       <h1 class="signature" translate="no">before_party_create(t, map)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L136" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L135" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -2222,7 +2332,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
       <h1 class="signature" translate="no">before_party_join(t, t)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L147" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L146" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -2251,7 +2361,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
       <h1 class="signature" translate="no">before_party_kick(t, t, t)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L148" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L147" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -2287,7 +2397,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
       <h1 class="signature" translate="no">before_party_update(t, map)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L139" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L138" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -2328,7 +2438,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
       <h1 class="signature" translate="no">after_chat_message(t)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L225" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L237" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -2356,7 +2466,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
       <h1 class="signature" translate="no">before_chat_message(t, map)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L224" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L236" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -2368,48 +2478,6 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
       <div class="specs">
 
           <pre translate="no"><span class="attribute">@callback</span> before_chat_message(<a href="GameServer.Accounts.User.html#t:t/0">GameServer.Accounts.User.t</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()) :: <a href="#t:hook_result/1">hook_result</a>(<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>())</pre>
-
-      </div>
-
-
-  </section>
-</section>
-
-    </div>
-  </section>
-
-  <section id="achievement-hooks" class="details-list">
-    <h2 class="section-heading">
-      <a class="hover-link" href="#achievement-hooks">
-        <i class="ri-link-m" aria-hidden="true"></i>
-      </a>
-      <span class="text">Achievement hooks</span>
-    </h2>
-
-    <div class="achievement-hooks-list">
-<section class="detail" id="c:after_achievement_unlocked/2">
-
-  <div class="detail-header">
-    <a href="#c:after_achievement_unlocked/2" class="detail-link" data-no-tooltip="" aria-label="Link to this callback">
-      <i class="ri-link-m" aria-hidden="true"></i>
-    </a>
-    <div class="heading-with-actions">
-      <h1 class="signature" translate="no">after_achievement_unlocked(t, t)</h1>
-
-
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L152" class="icon-action" rel="help" aria-label="View Source">
-          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
-        </a>
-
-    </div>
-  </div>
-
-  <section class="docstring">
-
-      <div class="specs">
-
-          <pre translate="no"><span class="attribute">@callback</span> after_achievement_unlocked(<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(), <a href="GameServer.Achievements.Achievement.html#t:t/0">GameServer.Achievements.Achievement.t</a>()) ::
-  <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>()</pre>
 
       </div>
 
@@ -2439,7 +2507,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
       <h1 class="signature" translate="no">after_score_submitted(t)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L155" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L167" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -2482,7 +2550,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
         <span class="note">(optional)</span>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L174" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L186" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -2512,7 +2580,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
         <span class="note">(optional)</span>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L173" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L185" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -2542,7 +2610,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
         <span class="note">(optional)</span>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L166" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L178" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -2576,7 +2644,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
         <span class="note">(optional)</span>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L167" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L179" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -2610,7 +2678,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
         <span class="note">(optional)</span>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L164" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L176" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -2644,7 +2712,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
         <span class="note">(optional)</span>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L171" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L183" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -2675,7 +2743,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
         <span class="note">(optional)</span>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L170" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L182" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -2705,7 +2773,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
         <span class="note">(optional)</span>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L169" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L181" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -2748,7 +2816,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
         <span class="note">(optional)</span>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L190" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L202" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -2778,7 +2846,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
         <span class="note">(optional)</span>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L189" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L201" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -2811,7 +2879,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
         <span class="note">(optional)</span>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L193" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L205" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -2842,7 +2910,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
         <span class="note">(optional)</span>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L188" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L200" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -2873,7 +2941,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
         <span class="note">(optional)</span>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L191" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L203" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -2917,7 +2985,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
         <span class="note">(optional)</span>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L212" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L224" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -2947,7 +3015,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
         <span class="note">(optional)</span>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L210" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L222" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -2977,7 +3045,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
         <span class="note">(optional)</span>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L211" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L223" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -3020,7 +3088,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
         <span class="note">(optional)</span>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L220" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L232" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -3050,7 +3118,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
         <span class="note">(optional)</span>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L219" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L231" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -3091,7 +3159,7 @@ to the player:</p><pre><code class="makeup elixir" translate="no"><span class="k
       <h1 class="signature" translate="no">before_kv_get(t, kv_opts)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L264" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L295" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -3135,7 +3203,7 @@ to block the read.</p>
       <h1 class="signature" translate="no">hook_result(attrs_or_user)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L27" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L26" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -3163,7 +3231,7 @@ to block the read.</p>
       <h1 class="signature" translate="no">kv_access()</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L29" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L28" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -3197,7 +3265,7 @@ to block the read.</p>
       <h1 class="signature" translate="no">kv_access_result()</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L37" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L36" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -3225,7 +3293,7 @@ to block the read.</p>
       <h1 class="signature" translate="no">kv_opts()</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L54" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L53" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -3242,6 +3310,173 @@ to block the read.</p>
 
 <p>Options passed to hooks that accept an options map/keyword list.</p><p>Common keys include <code class="inline">:user_id</code>, <code class="inline">:lobby_id</code>, and other domain-specific options.
 Hooks may accept either a map or keyword list for convenience.</p>
+  </section>
+</section>
+
+    </div>
+  </section>
+
+  <section id="callbacks" class="details-list">
+    <h2 class="section-heading">
+      <a class="hover-link" href="#callbacks">
+        <i class="ri-link-m" aria-hidden="true"></i>
+      </a>
+      <span class="text">Callbacks</span>
+    </h2>
+
+    <div class="callbacks-list">
+<section class="detail" id="c:after_push_sent/3">
+
+  <div class="detail-header">
+    <a href="#c:after_push_sent/3" class="detail-link" data-no-tooltip="" aria-label="Link to this callback">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">after_push_sent(t, map, map)</h1>
+
+        <span class="note">(optional)</span>
+
+
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L246" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@callback</span> after_push_sent(<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()) :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>()</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="c:after_quest_claimed/1">
+
+  <div class="detail-header">
+    <a href="#c:after_quest_claimed/1" class="detail-link" data-no-tooltip="" aria-label="Link to this callback">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">after_quest_claimed(t)</h1>
+
+        <span class="note">(optional)</span>
+
+
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L161" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@callback</span> after_quest_claimed(<a href="GameServer.Quests.QuestProgress.html#t:t/0">GameServer.Quests.QuestProgress.t</a>()) :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>()</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="c:after_quest_completed/1">
+
+  <div class="detail-header">
+    <a href="#c:after_quest_completed/1" class="detail-link" data-no-tooltip="" aria-label="Link to this callback">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">after_quest_completed(t)</h1>
+
+        <span class="note">(optional)</span>
+
+
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L160" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@callback</span> after_quest_completed(<a href="GameServer.Quests.QuestProgress.html#t:t/0">GameServer.Quests.QuestProgress.t</a>()) :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>()</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="c:before_push_send/2">
+
+  <div class="detail-header">
+    <a href="#c:before_push_send/2" class="detail-link" data-no-tooltip="" aria-label="Link to this callback">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">before_push_send(t, map)</h1>
+
+        <span class="note">(optional)</span>
+
+
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L245" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@callback</span> before_push_send(<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()) :: <a href="#t:hook_result/1">hook_result</a>(<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>())</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="c:before_quest_claim/3">
+
+  <div class="detail-header">
+    <a href="#c:before_quest_claim/3" class="detail-link" data-no-tooltip="" aria-label="Link to this callback">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">before_quest_claim(t, t, t)</h1>
+
+        <span class="note">(optional)</span>
+
+
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L155" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@callback</span> before_quest_claim(
+  <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(),
+  <a href="GameServer.Quests.Quest.html#t:t/0">GameServer.Quests.Quest.t</a>(),
+  <a href="GameServer.Quests.QuestProgress.html#t:t/0">GameServer.Quests.QuestProgress.t</a>()
+) :: <a href="#t:hook_result/1">hook_result</a>(<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>())</pre>
+
+      </div>
+
+
   </section>
 </section>
 
@@ -3271,7 +3506,7 @@ Hooks may accept either a map or keyword list for convenience.</p>
       <h1 class="signature" translate="no">call(name, args \\ [], opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L289" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L320" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -3295,7 +3530,7 @@ timeout to avoid long-running user code.</p><p>Returns {:ok, result} | {:error, 
       <h1 class="signature" translate="no">caller()</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L1206" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L1261" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -3327,7 +3562,7 @@ when the value is a user struct or map containing <code class="inline">:id</code
       <h1 class="signature" translate="no">caller_id()</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L1211" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L1266" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -3355,7 +3590,7 @@ when the value is a user struct or map containing <code class="inline">:id</code
       <h1 class="signature" translate="no">caller_user()</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L1225" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L1280" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -3388,7 +3623,7 @@ when the value is a user struct or map containing <code class="inline">:id</code
       <h1 class="signature" translate="no">exported_functions(mod \\ module())</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L1124" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L1179" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -3415,7 +3650,7 @@ This is useful for tooling and admin UI to display what RPCs are available.</p>
       <h1 class="signature" translate="no">internal_call(name, args \\ [], opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L378" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L409" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -3439,7 +3674,7 @@ This is useful for tooling and admin UI to display what RPCs are available.</p>
       <h1 class="signature" translate="no">internal_hooks()</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L437" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L468" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -3470,7 +3705,7 @@ This is useful for tooling and admin UI to display what RPCs are available.</p>
       <h1 class="signature" translate="no">invoke(name, args \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L413" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L444" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -3495,7 +3730,7 @@ function doesn't exist.</p>
       <h1 class="signature" translate="no">module()</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L269" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L300" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -3517,7 +3752,7 @@ function doesn't exist.</p>
       <h1 class="signature" translate="no">pipeline_hook?(name, arity)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L534" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/hooks.ex#L571" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -3539,9 +3774,9 @@ than fanning out notifications. Exposed for the admin runtime page.</p>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/game_server_core/1.0.1059">Hex Package</a>
+              <a href="https://hex.pm/packages/game_server_core/1.0.1063">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/game_server_core/1.0.1059">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/game_server_core/1.0.1063">Hex Preview</a>
 
             </span>
 

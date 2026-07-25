@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.1">
-    <meta name="project" content="game_server_core v1.0.1059">
+    <meta name="project" content="game_server_core v1.0.1063">
 
 
-    <title>GameServer.Achievements.Achievement — game_server_core v1.0.1059</title>
+    <title>GameServer.Push.PushToken — game_server_core v1.0.1063</title>
 
     <link rel="stylesheet" href="dist/html-elixir-YJO4MOOW.css" />
 
-    <script defer src="dist/sidebar_items-E947DB44.js"></script>
+    <script defer src="dist/sidebar_items-3111E92E.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-YU4BZFVS.js"></script>
 
@@ -37,7 +37,7 @@
 game_server_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1059
+          v1.0.1063
         </div>
       </div>
     </div>
@@ -93,19 +93,19 @@ game_server_core
 <div id="top-content">
   <div class="heading-with-actions top-heading">
     <h1>
-      <span translate="no">GameServer.<wbr>Achievements.<wbr>Achievement</span> 
-      <small class="app-vsn" translate="no">(game_server_core v1.0.1059)</small>
+      <span translate="no">GameServer.<wbr>Push.<wbr>PushToken</span> 
+      <small class="app-vsn" translate="no">(game_server_core v1.0.1063)</small>
 
     </h1>
 
-<a href="GameServer.Achievements.Achievement.md" title="Copy Markdown (hold Ctrl/Cmd and click it to open as Markdown)" class="copy-markdown icon-action" rel="help">
+<a href="GameServer.Push.PushToken.md" title="Copy Markdown (hold Ctrl/Cmd and click it to open as Markdown)" class="copy-markdown icon-action" rel="help">
   <i class="ri-markdown-line" aria-hidden="true"></i>
   <span class="sr-only">Copy Markdown</span>
 </a>
 
 
 
-      <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/achievements/achievement.ex#L1" title="View Source" class="icon-action" rel="help">
+      <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/push/push_token.ex#L1" title="View Source" class="icon-action" rel="help">
         <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         <span class="sr-only">View Source</span>
       </a>
@@ -114,7 +114,8 @@ game_server_core
 
 
     <section id="moduledoc">
-<p>Ecto schema for the <code class="inline">achievements</code> table.</p><p>An achievement is a goal or milestone that players can unlock.</p><h2 id="module-fields" class="section-heading"><a href="#module-fields" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Fields</span></h2><ul><li><code class="inline">slug</code> — unique identifier (e.g., &quot;first_lobby_join&quot;)</li><li><code class="inline">title</code> — display name</li><li><code class="inline">description</code> — human-readable description</li><li><code class="inline">icon_url</code> — optional icon path/URL</li><li><code class="inline">sort_order</code> — display ordering (lower = first)</li><li><code class="inline">hidden</code> — if true, not shown until unlocked</li><li><code class="inline">progress_target</code> — number of steps to complete (1 = one-shot, &gt;1 = incremental)</li><li><code class="inline">metadata</code> — arbitrary JSON data</li></ul>
+<p>Ecto schema for a registered device push token.</p><p>Fields:</p><ul><li><code class="inline">user_id</code> – owner; a user has many devices</li><li><code class="inline">token</code> – the FCM registration token or APNs device token (globally unique)</li><li><p><code class="inline">platform</code> – <code class="inline">&quot;android&quot;</code> | <code class="inline">&quot;ios&quot;</code> | <code class="inline">&quot;web&quot;</code></p></li><li><p><code class="inline">provider</code> – <code class="inline">&quot;fcm&quot;</code> | <code class="inline">&quot;apns&quot;</code>; drives per-token delivery routing</p></li><li><code class="inline">device_id</code> – optional stable device key so re-registering rotates the
+token in place instead of accumulating rows</li><li><code class="inline">disabled_at</code> – set when the provider reports the token dead (soft-delete)</li><li><code class="inline">last_used_at</code> – bumped on successful delivery</li><li><code class="inline">metadata</code> – optional client info (<code class="inline">app_version</code>, <code class="inline">locale</code>, …), size-capped</li></ul>
     </section>
 
 </div>
@@ -137,6 +138,8 @@ game_server_core
 
       </div>
 
+        <div class="summary-synopsis"><p>A registered device push token.</p></div>
+
     </div>
 
 </div>
@@ -147,21 +150,21 @@ game_server_core
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#localized_description/2" data-no-tooltip="" translate="no">localized_description(map, locale)</a>
+        <a href="#platforms/0" data-no-tooltip="" translate="no">platforms()</a>
 
       </div>
 
-        <div class="summary-synopsis"><p>Returns the localized description for the given locale.</p></div>
+        <div class="summary-synopsis"><p>The accepted <code class="inline">platform</code> values.</p></div>
 
     </div>
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#localized_title/2" data-no-tooltip="" translate="no">localized_title(map, locale)</a>
+        <a href="#providers/0" data-no-tooltip="" translate="no">providers()</a>
 
       </div>
 
-        <div class="summary-synopsis"><p>Returns the localized title for the given locale.</p></div>
+        <div class="summary-synopsis"><p>The accepted <code class="inline">provider</code> values.</p></div>
 
     </div>
 
@@ -189,7 +192,7 @@ game_server_core
       <h1 class="signature" translate="no">t()</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/achievements/achievement.ex#L20" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/push/push_token.ex#L57" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -200,25 +203,25 @@ game_server_core
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@type</span> t() :: %GameServer.Achievements.Achievement{
+          <pre translate="no"><span class="attribute">@type</span> t() :: %GameServer.Push.PushToken{
   __meta__: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
-  description: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
-  hidden: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
-  icon_url: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
-  id: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
-  inserted_at: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
-  metadata: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
-  progress_target: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
-  slug: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
-  sort_order: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
-  title: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
-  updated_at: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
-  user_achievements: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()
+  device_id: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>() | nil,
+  disabled_at: <a href="https://hexdocs.pm/elixir/DateTime.html#t:t/0">DateTime.t</a>() | nil,
+  id: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>() | nil,
+  inserted_at: <a href="https://hexdocs.pm/elixir/DateTime.html#t:t/0">DateTime.t</a>() | nil,
+  last_used_at: <a href="https://hexdocs.pm/elixir/DateTime.html#t:t/0">DateTime.t</a>() | nil,
+  metadata: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>(),
+  platform: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>() | nil,
+  provider: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>() | nil,
+  token: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>() | nil,
+  updated_at: <a href="https://hexdocs.pm/elixir/DateTime.html#t:t/0">DateTime.t</a>() | nil,
+  user: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+  user_id: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>() | nil
 }</pre>
 
       </div>
 
-
+<p>A registered device push token.</p>
   </section>
 </section>
 
@@ -234,17 +237,17 @@ game_server_core
     </h2>
 
     <div class="functions-list">
-<section class="detail" id="localized_description/2">
+<section class="detail" id="platforms/0">
 
   <div class="detail-header">
-    <a href="#localized_description/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+    <a href="#platforms/0" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
       <i class="ri-link-m" aria-hidden="true"></i>
     </a>
     <div class="heading-with-actions">
-      <h1 class="signature" translate="no">localized_description(map, locale)</h1>
+      <h1 class="signature" translate="no">platforms()</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/achievements/achievement.ex#L88" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/push/push_token.ex#L73" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -253,20 +256,26 @@ game_server_core
 
   <section class="docstring">
 
-<p>Returns the localized description for the given locale.</p><p>Looks up <code class="inline">metadata[&quot;descriptions&quot;][locale]</code>, falling back to <code class="inline">description</code>.</p>
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> platforms() :: [<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()]</pre>
+
+      </div>
+
+<p>The accepted <code class="inline">platform</code> values.</p>
   </section>
 </section>
-<section class="detail" id="localized_title/2">
+<section class="detail" id="providers/0">
 
   <div class="detail-header">
-    <a href="#localized_title/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+    <a href="#providers/0" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
       <i class="ri-link-m" aria-hidden="true"></i>
     </a>
     <div class="heading-with-actions">
-      <h1 class="signature" translate="no">localized_title(map, locale)</h1>
+      <h1 class="signature" translate="no">providers()</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/achievements/achievement.ex#L77" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/push/push_token.ex#L77" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -275,11 +284,13 @@ game_server_core
 
   <section class="docstring">
 
-<p>Returns the localized title for the given locale.</p><p>Looks up <code class="inline">metadata[&quot;titles&quot;][locale]</code>, falling back to <code class="inline">title</code>.</p><h2 id="localized_title/2-examples" class="section-heading"><a href="#localized_title/2-examples" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Examples</span></h2><pre><code class="makeup elixir" translate="no"><span class="gp unselectable">iex&gt; </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p" data-group-id="0521451491-1">%</span><span class="nc" data-group-id="0521451491-1">Achievement</span><span class="p" data-group-id="0521451491-1">{</span><span class="ss">title</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;First Kill&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">metadata</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="0521451491-2">%{</span><span class="s">&quot;titles&quot;</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p" data-group-id="0521451491-3">%{</span><span class="s">&quot;es&quot;</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;Primera Baja&quot;</span><span class="p" data-group-id="0521451491-3">}</span><span class="p" data-group-id="0521451491-2">}</span><span class="p" data-group-id="0521451491-1">}</span><span class="w">
-</span><span class="gp unselectable">iex&gt; </span><span class="nc">Achievement</span><span class="o">.</span><span class="n">localized_title</span><span class="p" data-group-id="0521451491-4">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;es&quot;</span><span class="p" data-group-id="0521451491-4">)</span><span class="w">
-</span><span class="s">&quot;Primera Baja&quot;</span><span class="w">
-</span><span class="gp unselectable">iex&gt; </span><span class="nc">Achievement</span><span class="o">.</span><span class="n">localized_title</span><span class="p" data-group-id="0521451491-5">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;en&quot;</span><span class="p" data-group-id="0521451491-5">)</span><span class="w">
-</span><span class="s">&quot;First Kill&quot;</span></code></pre>
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> providers() :: [<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()]</pre>
+
+      </div>
+
+<p>The accepted <code class="inline">provider</code> values.</p>
   </section>
 </section>
 
@@ -291,9 +302,9 @@ game_server_core
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/game_server_core/1.0.1059">Hex Package</a>
+              <a href="https://hex.pm/packages/game_server_core/1.0.1063">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/game_server_core/1.0.1059">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/game_server_core/1.0.1063">Hex Preview</a>
 
             </span>
 

@@ -270,6 +270,7 @@ List lobbies. Accepts optional search filters.
   * `:title` - Filter by title (partial match)
   * `:is_passworded` - boolean or string 'true'/'false' (omit for any)
   * `:is_locked` - boolean or string 'true'/'false' (omit for any)
+  * `:state` - lifecycle state (see `GameServer.Lobbies.States`)
   * `:min_users` - Filter lobbies with max_users >= value
   * `:max_users` - Filter lobbies with max_users <= value
   * `:metadata_key` - Filter by metadata key
@@ -345,6 +346,47 @@ Subscribe to global lobby events (lobby created, updated, deleted).
 ```
 
 Subscribe to a specific lobby's events (membership changes, updates).
+
+# `transition_state`
+
+```elixir
+@spec transition_state(GameServer.Lobbies.Lobby.t(), String.t(), keyword()) ::
+  {:ok, GameServer.Lobbies.Lobby.t()}
+  | {:error, :unknown_state | {:hook_rejected, term()} | term()}
+```
+
+Move a lobby to `state` (see `GameServer.Lobbies.States`).
+
+The only writer of `state`/`state_changed_at` — the columns are not castable,
+so a generic `update_lobby/2` can never move a lobby's state.
+
+`state` must be a core default or declared by a plugin. A same-state call is
+a no-op (so at-least-once hook/job retries are safe) and does not re-fire
+hooks. `before_lobby_state_change` may veto; `after_lobby_state_changed`
+observes post-commit.
+
+Returns `{:ok, lobby}`, `{:error, :unknown_state}` or
+`{:error, {:hook_rejected, reason}}`.
+
+# `transition_state_by_host`
+
+```elixir
+@spec transition_state_by_host(
+  GameServer.Accounts.User.t(),
+  GameServer.Lobbies.Lobby.t(),
+  String.t()
+) ::
+  {:ok, GameServer.Lobbies.Lobby.t()}
+  | {:error, :not_host | :unknown_state | term()}
+```
+
+Player-initiated state change, subject to lobby ownership.
+
+Allowed only for the **host of a host-managed lobby** — the host already
+renames, locks, resizes and kicks, so `state` is no more powerful than what
+they hold, and "press Start" is a normal party-game action. **Hostless**
+lobbies (matchmaking's) belong to nobody, so no player may move them: use
+`transition_state/3` from server-side hooks instead.
 
 # `unsubscribe_lobby`
 

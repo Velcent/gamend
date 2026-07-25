@@ -23,6 +23,8 @@ visibility, lock/password and arbitrary metadata).
   metadata: term(),
   password_hash: term(),
   slowdown: term(),
+  state: term(),
+  state_changed_at: term(),
   title: term(),
   updated_at: term(),
   users: term()

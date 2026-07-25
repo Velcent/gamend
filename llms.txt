@@ -1,4 +1,4 @@
-# game_server_core v1.0.1059 - Table of Contents
+# game_server_core v1.0.1063 - Table of Contents
 
 Core functionality for Gamend GameServer, including user management, authentication, friends, matchmaking, and more.
 
@@ -24,9 +24,6 @@ application (registration, OAuth, and admin changes).
 - [GameServer.Accounts.UserToken](GameServer.Accounts.UserToken.md): Functions and schema for persistent user tokens used by sessions, magic links,
 and email-change workflows.
 - [GameServer.Accounts.UsernameGenerator](GameServer.Accounts.UsernameGenerator.md): Generates default usernames for new users.
-- [GameServer.Achievements](GameServer.Achievements.md): The Achievements context.
-- [GameServer.Achievements.Achievement](GameServer.Achievements.Achievement.md): Ecto schema for the `achievements` table.
-- [GameServer.Achievements.UserAchievement](GameServer.Achievements.UserAchievement.md): Ecto schema for the `user_achievements` table.
 - [GameServer.Apple](GameServer.Apple.md): Apple OAuth client secret generation for Ueberauth.
 - [GameServer.Async](GameServer.Async.md): Utilities for running best-effort background work.
 - [GameServer.Cache](GameServer.Cache.md): Application cache backed by Nebulex.
@@ -81,6 +78,10 @@ transport and payload format.
 (`"health_potion"`, `"sword"`, `"card_374"`) — the game decides which exist.
 `metadata` holds per-stack properties.
 
+- [GameServer.Inventory.LedgerEntry](GameServer.Inventory.LedgerEntry.md): Append-only record of a single item-stack change (grant, consume, admin
+adjustment) — the inventory counterpart of `GameServer.Economy.LedgerEntry`.
+Carries the `idempotency_key` that makes item grants safe to retry.
+
 - [GameServer.IpBans](GameServer.IpBans.md): Persistence for IP bans.
 - [GameServer.IpBans.IpBan](GameServer.IpBans.IpBan.md): A persisted IP ban. `expires_at` is `nil` for permanent bans.
 
@@ -93,6 +94,7 @@ transport and payload format.
 - [GameServer.Lobbies](GameServer.Lobbies.md): Context module for lobby management: creating, updating, listing and searching lobbies.
 - [GameServer.Lobbies.Lobby](GameServer.Lobbies.Lobby.md): Ecto schema for the `lobbies` table and changeset helpers.
 - [GameServer.Lobbies.SpectatorTracker](GameServer.Lobbies.SpectatorTracker.md): Lightweight ETS-based tracker for lobby spectators.
+- [GameServer.Lobbies.States](GameServer.Lobbies.States.md): The vocabulary a lobby's `state` may use.
 - [GameServer.LobbySnapshots](GameServer.LobbySnapshots.md): Durable record of how a lobby's state evolved during a run.
 - [GameServer.LobbySnapshots.Blob](GameServer.LobbySnapshots.Blob.md): Content-addressed storage for one snapshot section.
 - [GameServer.LobbySnapshots.Event](GameServer.LobbySnapshots.Event.md): A decision worth explaining, recorded between two snapshots.
@@ -143,6 +145,56 @@ Server Notifications V2).
 - [GameServer.Payments.ReconciliationCursor](GameServer.Payments.ReconciliationCursor.md): Provider reconciliation checkpoint.
 
 - [GameServer.Proto.GodobufPresence](GameServer.Proto.GodobufPresence.md): Fixes proto3-optional presence checks in godobuf-generated GDScript.
+- [GameServer.Push](GameServer.Push.md): Push context – device push-token registry and (see `send_to_user/3`)
+server-authoritative delivery of push notifications.
+- [GameServer.Push.APNSDispatcher](GameServer.Push.APNSDispatcher.md): Pigeon dispatcher for APNs. Configured by `host_runtime.exs` from the
+`APNS_*` env vars; started by `GameServer.Push.Supervisor` only when that
+config exists.
+
+- [GameServer.Push.DeliveryWorker](GameServer.Push.DeliveryWorker.md): Delivers one push message to one token. One job per token is deliberate:
+FCM v1 and APNs are one-request-per-token anyway, and it buys exact
+per-token Oban retry/backoff — a half-delivered batch job would re-push
+duplicates on retry.
+- [GameServer.Push.FCMDispatcher](GameServer.Push.FCMDispatcher.md): Pigeon dispatcher for FCM. Configured by `host_runtime.exs` from the
+`PUSH_FCM_*` env vars; started by `GameServer.Push.Supervisor` only when
+that config exists.
+
+- [GameServer.Push.FanoutWorker](GameServer.Push.FanoutWorker.md): Expands a multi-user send into per-token `DeliveryWorker` jobs, in chunks,
+off the caller's request path. `GameServer.Push.send_to_users/3` enqueues
+this above its inline threshold so a large broadcast never holds a long
+transaction (SQLite is single-writer) and survives restarts. Identical args
+within a minute dedupe via Oban uniqueness (double-broadcast guard).
+
+- [GameServer.Push.Message](GameServer.Push.Message.md): A validated push message: what `GameServer.Push.send_to_user/3` accepts and
+what the delivery workers carry through job args.
+- [GameServer.Push.Provider](GameServer.Push.Provider.md): Behaviour for push delivery providers.
+- [GameServer.Push.Providers.APNs](GameServer.Push.Providers.APNs.md): APNs-direct provider for iOS, delivered through the
+`GameServer.Push.APNSDispatcher` Pigeon dispatcher (token-auth `.p8`,
+HTTP/2 over Mint). The `apns-topic` comes from `APNS_TOPIC`.
+
+- [GameServer.Push.Providers.FCM](GameServer.Push.Providers.FCM.md): Firebase Cloud Messaging (HTTP v1) provider for Android and Web — and iOS
+relay, if a game prefers Firebase over APNs-direct — delivered through the
+`GameServer.Push.FCMDispatcher` Pigeon dispatcher, authenticated by the
+`GameServer.Push.Goth` worker.
+
+- [GameServer.Push.Providers.Log](GameServer.Push.Providers.Log.md): Zero-config default provider: logs each delivery instead of calling out —
+the `Storage.Local` of push. Every token routed here (nothing configured,
+`PUSH_ADAPTER=log`, or a provider whose dispatcher is down) reports success,
+so the whole flow is exercisable with no credentials.
+
+- [GameServer.Push.PushToken](GameServer.Push.PushToken.md): Ecto schema for a registered device push token.
+- [GameServer.Push.Supervisor](GameServer.Push.Supervisor.md): Supervises the push delivery processes: the Goth worker (FCM OAuth) and the
+two Pigeon dispatchers.
+- [GameServer.Quests](GameServer.Quests.md): Event-driven quest/progression engine.
+- [GameServer.Quests.Objective](GameServer.Quests.Objective.md): One objective inside a quest definition: reach `target` occurrences of
+`event` (as reported through `GameServer.Quests.report_event/4`).
+- [GameServer.Quests.Quest](GameServer.Quests.Quest.md): Ecto schema for the `quests` table.
+- [GameServer.Quests.QuestProgress](GameServer.Quests.QuestProgress.md): Ecto schema for the `quest_progress` table — one row per user, quest and
+reset period.
+- [GameServer.Quests.Reward](GameServer.Quests.Reward.md): One reward entry on a quest definition: `amount` of a currency
+(via `GameServer.Economy.grant/4`) or an item
+(via `GameServer.Inventory.grant_item/4`).
+
 - [GameServer.Realtime](GameServer.Realtime.md): Pushing game-defined realtime events to a player's socket.
 - [GameServer.Repo](GameServer.Repo.md)
 - [GameServer.Repo.AdvisoryLock](GameServer.Repo.AdvisoryLock.md): Advisory locking for protecting TOCTOU (Time-of-Check-Time-of-Use) patterns.

@@ -15,6 +15,9 @@ Retention is configured per table in days via env vars (see
   forever": snapshots hold user metadata, and the window is what bounds that
   exposure. Runs flagged anomalous keep
   `RETENTION_LOBBY_SNAPSHOTS_FLAGGED_DAYS` instead (default 90).
+- `RETENTION_PUSH_TOKENS_DAYS` — push tokens untouched (registered, used,
+  or disabled) for N days. Defaults to 270 — Google's stale-token guidance
+  — so the table tracks live devices, not install history.
 
 Expired IP bans and OAuth sessions older than a day are always removed
 (independent of the env vars above). Deletes are idempotent, so running on

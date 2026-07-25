@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.1">
-    <meta name="project" content="game_server_core v1.0.1059">
+    <meta name="project" content="game_server_core v1.0.1063">
 
 
-    <title>API Reference — game_server_core v1.0.1059</title>
+    <title>API Reference — game_server_core v1.0.1063</title>
 
     <link rel="stylesheet" href="dist/html-elixir-YJO4MOOW.css" />
 
-    <script defer src="dist/sidebar_items-E947DB44.js"></script>
+    <script defer src="dist/sidebar_items-3111E92E.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-YU4BZFVS.js"></script>
 
@@ -37,7 +37,7 @@
 game_server_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1059
+          v1.0.1063
         </div>
       </div>
     </div>
@@ -92,7 +92,7 @@ game_server_core
 
 <div id="top-content">
   <div class="heading-with-actions top-heading">
-    <h1>API Reference <small class="app-vsn">game_server_core v#1.0.1059</small></h1>
+    <h1>API Reference <small class="app-vsn">game_server_core v#1.0.1063</small></h1>
 <a href="api-reference.md" title="Copy Markdown (hold Ctrl/Cmd and click it to open as Markdown)" class="copy-markdown icon-action" rel="help">
   <i class="ri-markdown-line" aria-hidden="true"></i>
   <span class="sr-only">Copy Markdown</span>
@@ -195,33 +195,6 @@ and email-change workflows.</p></div>
   </div>
 
     <div class="summary-synopsis"><p>Generates default usernames for new users.</p></div>
-
-</div>
-<div class="summary-row">
-  <div class="summary-signature">
-    <a href="GameServer.Achievements.html" translate="no">GameServer.<wbr>Achievements</a>
-
-  </div>
-
-    <div class="summary-synopsis"><p>The Achievements context.</p></div>
-
-</div>
-<div class="summary-row">
-  <div class="summary-signature">
-    <a href="GameServer.Achievements.Achievement.html" translate="no">GameServer.<wbr>Achievements.<wbr>Achievement</a>
-
-  </div>
-
-    <div class="summary-synopsis"><p>Ecto schema for the <code class="inline">achievements</code> table.</p></div>
-
-</div>
-<div class="summary-row">
-  <div class="summary-signature">
-    <a href="GameServer.Achievements.UserAchievement.html" translate="no">GameServer.<wbr>Achievements.<wbr>UserAchievement</a>
-
-  </div>
-
-    <div class="summary-synopsis"><p>Ecto schema for the <code class="inline">user_achievements</code> table.</p></div>
 
 </div>
 <div class="summary-row">
@@ -588,6 +561,17 @@ transport and payload format.</p></div>
 </div>
 <div class="summary-row">
   <div class="summary-signature">
+    <a href="GameServer.Inventory.LedgerEntry.html" translate="no">GameServer.<wbr>Inventory.<wbr>LedgerEntry</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Append-only record of a single item-stack change (grant, consume, admin
+adjustment) — the inventory counterpart of <a href="GameServer.Economy.LedgerEntry.html"><code class="inline">GameServer.Economy.LedgerEntry</code></a>.
+Carries the <code class="inline">idempotency_key</code> that makes item grants safe to retry.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
     <a href="GameServer.IpBans.html" translate="no">GameServer.<wbr>IpBans</a>
 
   </div>
@@ -683,6 +667,15 @@ transport and payload format.</p></div>
   </div>
 
     <div class="summary-synopsis"><p>Lightweight ETS-based tracker for lobby spectators.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="GameServer.Lobbies.States.html" translate="no">GameServer.<wbr>Lobbies.<wbr>States</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>The vocabulary a lobby's <code class="inline">state</code> may use.</p></div>
 
 </div>
 <div class="summary-row">
@@ -1030,6 +1023,185 @@ Server Notifications V2).</p></div>
 </div>
 <div class="summary-row">
   <div class="summary-signature">
+    <a href="GameServer.Push.html" translate="no">GameServer.<wbr>Push</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Push context – device push-token registry and (see <a href="#send_to_user/3"><code class="inline">send_to_user/3</code></a>)
+server-authoritative delivery of push notifications.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="GameServer.Push.APNSDispatcher.html" translate="no">GameServer.<wbr>Push.<wbr>APNSDispatcher</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Pigeon dispatcher for APNs. Configured by <code class="inline">host_runtime.exs</code> from the
+<code class="inline">APNS_*</code> env vars; started by <a href="GameServer.Push.Supervisor.html"><code class="inline">GameServer.Push.Supervisor</code></a> only when that
+config exists.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="GameServer.Push.DeliveryWorker.html" translate="no">GameServer.<wbr>Push.<wbr>DeliveryWorker</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Delivers one push message to one token. One job per token is deliberate:
+FCM v1 and APNs are one-request-per-token anyway, and it buys exact
+per-token Oban retry/backoff — a half-delivered batch job would re-push
+duplicates on retry.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="GameServer.Push.FCMDispatcher.html" translate="no">GameServer.<wbr>Push.<wbr>FCMDispatcher</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Pigeon dispatcher for FCM. Configured by <code class="inline">host_runtime.exs</code> from the
+<code class="inline">PUSH_FCM_*</code> env vars; started by <a href="GameServer.Push.Supervisor.html"><code class="inline">GameServer.Push.Supervisor</code></a> only when
+that config exists.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="GameServer.Push.FanoutWorker.html" translate="no">GameServer.<wbr>Push.<wbr>FanoutWorker</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Expands a multi-user send into per-token <code class="inline">DeliveryWorker</code> jobs, in chunks,
+off the caller's request path. <a href="GameServer.Push.html#send_to_users/3"><code class="inline">GameServer.Push.send_to_users/3</code></a> enqueues
+this above its inline threshold so a large broadcast never holds a long
+transaction (SQLite is single-writer) and survives restarts. Identical args
+within a minute dedupe via Oban uniqueness (double-broadcast guard).</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="GameServer.Push.Message.html" translate="no">GameServer.<wbr>Push.<wbr>Message</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>A validated push message: what <a href="GameServer.Push.html#send_to_user/3"><code class="inline">GameServer.Push.send_to_user/3</code></a> accepts and
+what the delivery workers carry through job args.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="GameServer.Push.Provider.html" translate="no">GameServer.<wbr>Push.<wbr>Provider</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Behaviour for push delivery providers.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="GameServer.Push.Providers.APNs.html" translate="no">GameServer.<wbr>Push.<wbr>Providers.<wbr>APNs</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>APNs-direct provider for iOS, delivered through the
+<a href="GameServer.Push.APNSDispatcher.html"><code class="inline">GameServer.Push.APNSDispatcher</code></a> Pigeon dispatcher (token-auth <code class="inline">.p8</code>,
+HTTP/2 over Mint). The <code class="inline">apns-topic</code> comes from <code class="inline">APNS_TOPIC</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="GameServer.Push.Providers.FCM.html" translate="no">GameServer.<wbr>Push.<wbr>Providers.<wbr>FCM</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Firebase Cloud Messaging (HTTP v1) provider for Android and Web — and iOS
+relay, if a game prefers Firebase over APNs-direct — delivered through the
+<a href="GameServer.Push.FCMDispatcher.html"><code class="inline">GameServer.Push.FCMDispatcher</code></a> Pigeon dispatcher, authenticated by the
+<code class="inline">GameServer.Push.Goth</code> worker.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="GameServer.Push.Providers.Log.html" translate="no">GameServer.<wbr>Push.<wbr>Providers.<wbr>Log</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Zero-config default provider: logs each delivery instead of calling out —
+the <code class="inline">Storage.Local</code> of push. Every token routed here (nothing configured,
+<code class="inline">PUSH_ADAPTER=log</code>, or a provider whose dispatcher is down) reports success,
+so the whole flow is exercisable with no credentials.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="GameServer.Push.PushToken.html" translate="no">GameServer.<wbr>Push.<wbr>PushToken</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Ecto schema for a registered device push token.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="GameServer.Push.Supervisor.html" translate="no">GameServer.<wbr>Push.<wbr>Supervisor</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Supervises the push delivery processes: the Goth worker (FCM OAuth) and the
+two Pigeon dispatchers.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="GameServer.Quests.html" translate="no">GameServer.<wbr>Quests</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Event-driven quest/progression engine.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="GameServer.Quests.Objective.html" translate="no">GameServer.<wbr>Quests.<wbr>Objective</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>One objective inside a quest definition: reach <code class="inline">target</code> occurrences of
+<code class="inline">event</code> (as reported through <a href="GameServer.Quests.html#report_event/4"><code class="inline">GameServer.Quests.report_event/4</code></a>).</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="GameServer.Quests.Quest.html" translate="no">GameServer.<wbr>Quests.<wbr>Quest</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Ecto schema for the <code class="inline">quests</code> table.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="GameServer.Quests.QuestProgress.html" translate="no">GameServer.<wbr>Quests.<wbr>QuestProgress</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Ecto schema for the <code class="inline">quest_progress</code> table — one row per user, quest and
+reset period.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="GameServer.Quests.Reward.html" translate="no">GameServer.<wbr>Quests.<wbr>Reward</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>One reward entry on a quest definition: <code class="inline">amount</code> of a currency
+(via <a href="GameServer.Economy.html#grant/4"><code class="inline">GameServer.Economy.grant/4</code></a>) or an item
+(via <a href="GameServer.Inventory.html#grant_item/4"><code class="inline">GameServer.Inventory.grant_item/4</code></a>).</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
     <a href="GameServer.Realtime.html" translate="no">GameServer.<wbr>Realtime</a>
 
   </div>
@@ -1258,9 +1430,9 @@ list/detail pages at realistic sizes.</p></div>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/game_server_core/1.0.1059">Hex Package</a>
+              <a href="https://hex.pm/packages/game_server_core/1.0.1063">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/game_server_core/1.0.1059">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/game_server_core/1.0.1063">Hex Preview</a>
 
             </span>
 

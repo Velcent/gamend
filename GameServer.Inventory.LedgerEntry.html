@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.1">
-    <meta name="project" content="game_server_core v1.0.1059">
+    <meta name="project" content="game_server_core v1.0.1063">
 
 
-    <title>GameServer.Achievements.UserAchievement — game_server_core v1.0.1059</title>
+    <title>GameServer.Inventory.LedgerEntry — game_server_core v1.0.1063</title>
 
     <link rel="stylesheet" href="dist/html-elixir-YJO4MOOW.css" />
 
-    <script defer src="dist/sidebar_items-E947DB44.js"></script>
+    <script defer src="dist/sidebar_items-3111E92E.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-YU4BZFVS.js"></script>
 
@@ -37,7 +37,7 @@
 game_server_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1059
+          v1.0.1063
         </div>
       </div>
     </div>
@@ -93,19 +93,19 @@ game_server_core
 <div id="top-content">
   <div class="heading-with-actions top-heading">
     <h1>
-      <span translate="no">GameServer.<wbr>Achievements.<wbr>UserAchievement</span> 
-      <small class="app-vsn" translate="no">(game_server_core v1.0.1059)</small>
+      <span translate="no">GameServer.<wbr>Inventory.<wbr>LedgerEntry</span> 
+      <small class="app-vsn" translate="no">(game_server_core v1.0.1063)</small>
 
     </h1>
 
-<a href="GameServer.Achievements.UserAchievement.md" title="Copy Markdown (hold Ctrl/Cmd and click it to open as Markdown)" class="copy-markdown icon-action" rel="help">
+<a href="GameServer.Inventory.LedgerEntry.md" title="Copy Markdown (hold Ctrl/Cmd and click it to open as Markdown)" class="copy-markdown icon-action" rel="help">
   <i class="ri-markdown-line" aria-hidden="true"></i>
   <span class="sr-only">Copy Markdown</span>
 </a>
 
 
 
-      <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/achievements/user_achievement.ex#L1" title="View Source" class="icon-action" rel="help">
+      <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/inventory/ledger_entry.ex#L1" title="View Source" class="icon-action" rel="help">
         <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         <span class="sr-only">View Source</span>
       </a>
@@ -114,7 +114,9 @@ game_server_core
 
 
     <section id="moduledoc">
-<p>Ecto schema for the <code class="inline">user_achievements</code> table.</p><p>Tracks a user's progress toward (and unlock status of) an achievement.</p><h2 id="module-fields" class="section-heading"><a href="#module-fields" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Fields</span></h2><ul><li><code class="inline">user_id</code> — the user</li><li><code class="inline">achievement_id</code> — the achievement</li><li><code class="inline">progress</code> — current progress (0..progress_target)</li><li><code class="inline">unlocked_at</code> — nil if not yet unlocked, timestamp when unlocked</li><li><code class="inline">metadata</code> — arbitrary JSON data</li></ul>
+<p>Append-only record of a single item-stack change (grant, consume, admin
+adjustment) — the inventory counterpart of <a href="GameServer.Economy.LedgerEntry.html"><code class="inline">GameServer.Economy.LedgerEntry</code></a>.
+Carries the <code class="inline">idempotency_key</code> that makes item grants safe to retry.</p>
     </section>
 
 </div>
@@ -163,7 +165,7 @@ game_server_core
       <h1 class="signature" translate="no">t()</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/achievements/user_achievement.ex#L17" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/inventory/ledger_entry.ex#L11" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -174,16 +176,16 @@ game_server_core
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@type</span> t() :: %GameServer.Achievements.UserAchievement{
+          <pre translate="no"><span class="attribute">@type</span> t() :: %GameServer.Inventory.LedgerEntry{
   __meta__: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
-  achievement: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
-  achievement_id: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+  delta: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
   id: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+  idempotency_key: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
   inserted_at: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+  item: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
   metadata: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
-  progress: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
-  unlocked_at: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
-  updated_at: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+  quantity_after: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+  reason: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
   user: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
   user_id: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()
 }</pre>
@@ -202,9 +204,9 @@ game_server_core
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/game_server_core/1.0.1059">Hex Package</a>
+              <a href="https://hex.pm/packages/game_server_core/1.0.1063">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/game_server_core/1.0.1059">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/game_server_core/1.0.1063">Hex Preview</a>
 
             </span>
 

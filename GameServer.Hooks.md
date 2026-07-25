@@ -154,6 +154,14 @@ to the player:
   any()
 ```
 
+# `after_lobby_state_changed`
+*optional* 
+
+```elixir
+@callback after_lobby_state_changed(GameServer.Lobbies.Lobby.t(), String.t(), String.t()) ::
+  any()
+```
+
 # `after_lobby_updated`
 
 ```elixir
@@ -206,6 +214,14 @@ to the player:
 ```elixir
 @callback before_lobby_leave(GameServer.Accounts.User.t(), GameServer.Lobbies.Lobby.t()) ::
   any()
+```
+
+# `before_lobby_state_change`
+*optional* 
+
+```elixir
+@callback before_lobby_state_change(GameServer.Lobbies.Lobby.t(), String.t(), String.t()) ::
+  hook_result(term())
 ```
 
 # `before_lobby_update`
@@ -373,13 +389,6 @@ to the player:
 
 ```elixir
 @callback before_chat_message(GameServer.Accounts.User.t(), map()) :: hook_result(map())
-```
-
-# `after_achievement_unlocked`
-
-```elixir
-@callback after_achievement_unlocked(String.t(), GameServer.Achievements.Achievement.t()) ::
-  any()
 ```
 
 # `after_score_submitted`
@@ -589,6 +598,45 @@ Options passed to hooks that accept an options map/keyword list.
 
 Common keys include `:user_id`, `:lobby_id`, and other domain-specific options.
 Hooks may accept either a map or keyword list for convenience.
+
+# `after_push_sent`
+*optional* 
+
+```elixir
+@callback after_push_sent(String.t(), map(), map()) :: any()
+```
+
+# `after_quest_claimed`
+*optional* 
+
+```elixir
+@callback after_quest_claimed(GameServer.Quests.QuestProgress.t()) :: any()
+```
+
+# `after_quest_completed`
+*optional* 
+
+```elixir
+@callback after_quest_completed(GameServer.Quests.QuestProgress.t()) :: any()
+```
+
+# `before_push_send`
+*optional* 
+
+```elixir
+@callback before_push_send(String.t(), map()) :: hook_result(map())
+```
+
+# `before_quest_claim`
+*optional* 
+
+```elixir
+@callback before_quest_claim(
+  String.t(),
+  GameServer.Quests.Quest.t(),
+  GameServer.Quests.QuestProgress.t()
+) :: hook_result(term())
+```
 
 # `call`
 

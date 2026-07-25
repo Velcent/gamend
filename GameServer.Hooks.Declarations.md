@@ -20,6 +20,10 @@ they are picked up at load:
       [%{name: "MYGAME_DIFFICULTY", default: "normal", description: "Global difficulty"}]
     end
 
+    def lobby_states do
+      %{"drafting" => %{description: "Picking teams"}}
+    end
+
 `notification_types/0` is **enforced**: `GameServer.Notifications` rejects a
 notification whose `metadata["type"]` is not declared by core or a plugin, so
 a client is never sent a code nobody documented. The other two are
@@ -33,11 +37,12 @@ the whole truth instead of only core's half.
 @spec all() :: %{
   notification_types: %{required(String.t()) =&gt; String.t()},
   realtime_events: %{required(String.t()) =&gt; String.t()},
-  env_vars: [map()]
+  env_vars: [map()],
+  lobby_states: %{required(String.t()) =&gt; map()}
 }
 ```
 
-The merged registry: `%{notification_types:, realtime_events:, env_vars:}`.
+The merged registry: `%{notification_types:, realtime_events:, env_vars:, lobby_states:}`.
 
 # `env_vars`
 
@@ -46,6 +51,16 @@ The merged registry: `%{notification_types:, realtime_events:, env_vars:}`.
 ```
 
 Env vars declared by plugins, each `%{name:, default:, type:, description:, plugin:}`.
+
+# `lobby_states`
+
+```elixir
+@spec lobby_states() :: %{required(String.t()) =&gt; map()}
+```
+
+Lobby states declared by plugins, each mapped to
+`%{description:, terminal:, prune_after_minutes:}`. See
+`GameServer.Lobbies.States`.
 
 # `notification_types`
 
