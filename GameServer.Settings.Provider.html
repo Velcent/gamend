@@ -5,10 +5,10 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.1">
-    <meta name="project" content="game_server_core v1.0.1067">
+    <meta name="project" content="game_server_core v1.0.1068">
 
 
-    <title>GameServer.Settings.Provider — game_server_core v1.0.1067</title>
+    <title>GameServer.Settings.Provider — game_server_core v1.0.1068</title>
 
     <link rel="stylesheet" href="dist/html-elixir-YJO4MOOW.css" />
 
@@ -37,7 +37,7 @@
 game_server_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1067
+          v1.0.1068
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ game_server_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">GameServer.<wbr>Settings.<wbr>Provider</span> 
-      <small class="app-vsn" translate="no">(game_server_core v1.0.1067)</small>
+      <small class="app-vsn" translate="no">(game_server_core v1.0.1068)</small>
 
     </h1>
 
@@ -114,7 +114,7 @@ game_server_core
 
 
     <section id="moduledoc">
-<p>Declares a group of settings on a module.</p><pre><code class="makeup elixir" translate="no"><span class="kd">defmodule</span><span class="w"> </span><span class="nc">GameServer.Retention</span><span class="w"> </span><span class="k" data-group-id="3470143585-1">do</span><span class="w">
+<p>Declares a group of settings on a module.</p><pre><code class="makeup elixir" translate="no"><span class="kd">defmodule</span><span class="w"> </span><span class="nc">GameServer.Retention</span><span class="w"> </span><span class="k" data-group-id="8846011564-1">do</span><span class="w">
   </span><span class="kn">use</span><span class="w"> </span><span class="nc">GameServer.Settings.Provider</span><span class="p">,</span><span class="w">
     </span><span class="ss">app</span><span class="p">:</span><span class="w"> </span><span class="ss">:game_server_core</span><span class="p">,</span><span class="w">
     </span><span class="ss">group</span><span class="p">:</span><span class="w"> </span><span class="ss">:retention</span><span class="p">,</span><span class="w">
@@ -123,7 +123,7 @@ game_server_core
   </span><span class="n">setting</span><span class="w"> </span><span class="ss">:chat_messages_days</span><span class="p">,</span><span class="w"> </span><span class="ss">:integer</span><span class="p">,</span><span class="w">
     </span><span class="ss">default</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
     </span><span class="ss">doc</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Delete chat messages older than N days. 0 keeps forever.&quot;</span><span class="w">
-</span><span class="k" data-group-id="3470143585-1">end</span></code></pre><p>The declaration is the only place a setting is written down. Its environment
+</span><span class="k" data-group-id="8846011564-1">end</span></code></pre><p>The declaration is the only place a setting is written down. Its environment
 variable name is <strong>derived</strong> — <code class="inline">&lt;ROOT&gt;_&lt;GROUP&gt;_&lt;KEY&gt;</code>, e.g.
 <code class="inline">GAMEND_RETENTION_CHAT_MESSAGES_DAYS</code> — so the key and its env var can never
 disagree. Pass <code class="inline">env:</code> only for the handful of names other software owns
@@ -255,9 +255,9 @@ under &quot;Inherited&quot; rather than implying we own it.</li></ul>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/game_server_core/1.0.1067">Hex Package</a>
+              <a href="https://hex.pm/packages/game_server_core/1.0.1068">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/game_server_core/1.0.1067">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/game_server_core/1.0.1068">Hex Preview</a>
 
             </span>
 
