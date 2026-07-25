@@ -10,8 +10,10 @@ defmodule GameServer.ReadyChecks.Check do
       check; the deadline is mandatory.
     * `"ready"` — a toggle; a decline just leaves the check pending.
 
-  `lobby_id` is nil for a matchmaking check: at that point the group exists only
-  as its tickets, and no lobby has been created.
+  The subject is whichever of `lobby_id`/`party_id` is set — a lobby's
+  pre-match ready-up or a party's standing ready board. Both nil is a
+  matchmaking check: at that point the group exists only as its tickets, and
+  no lobby has been created.
   """
 
   use GameServer.Schema
@@ -20,13 +22,14 @@ defmodule GameServer.ReadyChecks.Check do
 
   alias GameServer.Accounts.User
   alias GameServer.Lobbies.Lobby
+  alias GameServer.Parties.Party
   alias GameServer.ReadyChecks.Participant
 
   @type t :: %__MODULE__{}
 
   @kinds ~w(accept ready)
   @statuses ~w(pending passed failed cancelled)
-  @reasons ~w(declined timeout cancelled)
+  @reasons ~w(declined timeout cancelled reset)
 
   @derive {Jason.Encoder,
            only: [
@@ -34,6 +37,7 @@ defmodule GameServer.ReadyChecks.Check do
              :kind,
              :status,
              :lobby_id,
+             :party_id,
              :deadline,
              :opened_by,
              :reason,
@@ -52,6 +56,7 @@ defmodule GameServer.ReadyChecks.Check do
     field :metadata, :map, default: %{}
 
     belongs_to :lobby, Lobby
+    belongs_to :party, Party
     belongs_to :opened_by_user, User, foreign_key: :opened_by
 
     has_many :participants, Participant, foreign_key: :ready_check_id
@@ -67,6 +72,7 @@ defmodule GameServer.ReadyChecks.Check do
       :kind,
       :status,
       :lobby_id,
+      :party_id,
       :deadline,
       :opened_by,
       :reason,
@@ -78,14 +84,28 @@ defmodule GameServer.ReadyChecks.Check do
     |> validate_inclusion(:status, @statuses)
     |> validate_inclusion(:reason, @reasons)
     |> validate_accept_deadline()
+    |> validate_one_subject()
     |> GameServer.Limits.validate_metadata_size(:metadata)
     |> foreign_key_constraint(:lobby_id)
+    |> foreign_key_constraint(:party_id)
     # Both names on purpose: Postgres reports the partial index by its real
     # name, while ecto_sqlite3 reports the default `<table>_<field>_index`.
     # Without the second clause a concurrent open raises instead of returning a
     # changeset on SQLite.
     |> unique_constraint(:lobby_id, name: :ready_checks_pending_lobby_index)
     |> unique_constraint(:lobby_id)
+    |> unique_constraint(:party_id, name: :ready_checks_pending_party_index)
+    |> unique_constraint(:party_id)
+  end
+
+  # A check belongs to exactly one subject; both set would make the participant
+  # set ambiguous the moment the two rosters diverge.
+  defp validate_one_subject(changeset) do
+    if get_field(changeset, :lobby_id) && get_field(changeset, :party_id) do
+      add_error(changeset, :party_id, "cannot be set together with lobby_id")
+    else
+      changeset
+    end
   end
 
   # An accept check with no deadline would strand a whole match on one absent

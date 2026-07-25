@@ -40,16 +40,14 @@ defmodule GameServer.LobbyStateTest do
     lobby
   end
 
-  describe "states registry" do
-    test "core ships a default vocabulary and knows only declared states" do
+  describe "states vocabulary" do
+    test "core documents a default vocabulary and assigns the initial state" do
       assert States.initial() == "created"
-      assert States.known?("created")
-      assert States.known?("playing")
-      assert States.known?("ended")
 
-      refute States.known?("drafting")
-      refute States.known?("Playing")
-      refute States.known?(nil)
+      # Documentation, not an enum: the game enforces its own vocabulary in
+      # before_lobby_state_change.
+      assert Map.keys(States.core()) |> Enum.sort() ==
+               ["created", "ended", "playing", "starting"]
     end
   end
 
@@ -71,11 +69,22 @@ defmodule GameServer.LobbyStateTest do
       assert DateTime.compare(playing.state_changed_at, lobby.state_changed_at) != :lt
     end
 
-    test "rejects a state nobody declared" do
+    test "the vocabulary is the game's — any sane word is accepted" do
       lobby = lobby_fixture()
 
-      assert {:error, :unknown_state} = Lobbies.transition_state(lobby, "drafting")
-      assert {:error, :unknown_state} = Lobbies.transition_state(lobby, "Playing")
+      # No declaration registry: a game that wants a closed vocabulary rejects
+      # unknown words in before_lobby_state_change.
+      assert {:ok, %{state: "drafting"}} = Lobbies.transition_state(lobby, "drafting")
+    end
+
+    test "rejects an empty or oversized state string" do
+      lobby = lobby_fixture()
+
+      assert {:error, :invalid_state} = Lobbies.transition_state(lobby, "")
+
+      assert {:error, :invalid_state} =
+               Lobbies.transition_state(lobby, String.duplicate("x", 65))
+
       assert Lobbies.get_lobby(lobby.id).state == "created"
     end
 

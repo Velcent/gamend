@@ -752,6 +752,7 @@ defmodule GameServerWeb.AdminLive.Index do
        leaderboards_count: r.leaderboards_count,
        tournaments_count: r.tournaments_count,
        matchmaking_stats: r.matchmaking_stats,
+       ready_check_stats: r.ready_check_stats,
        tournament_stats: r.tournament_stats,
        kv_count: r.kv_count,
        kv_global: r.kv_global,

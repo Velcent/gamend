@@ -60,6 +60,10 @@ defmodule GameServer.Lobbies do
   alias GameServer.Repo.AdvisoryLock
   alias GameServer.Types
 
+  # A state is a game-chosen word (see GameServer.Lobbies.States); core only
+  # keeps it a sane string, since a host can set it over the API.
+  @max_state_length 64
+
   defp invalidate_accounts_user_cache(user_id) when is_binary(user_id) do
     # Synchronous invalidation including index keys — the client may join a
     # channel immediately after a lobby operation, so the cached user must
@@ -908,7 +912,7 @@ defmodule GameServer.Lobbies do
   `transition_state/3` from server-side hooks instead.
   """
   @spec transition_state_by_host(User.t(), Lobby.t(), String.t()) ::
-          {:ok, Lobby.t()} | {:error, :not_host | :unknown_state | term()}
+          {:ok, Lobby.t()} | {:error, :not_host | :invalid_state | term()}
   def transition_state_by_host(%User{id: user_id}, %Lobby{} = lobby, state) do
     if not lobby.hostless and lobby.host_id == user_id do
       transition_state(lobby, state)
@@ -923,20 +927,21 @@ defmodule GameServer.Lobbies do
   The only writer of `state`/`state_changed_at` — the columns are not castable,
   so a generic `update_lobby/2` can never move a lobby's state.
 
-  `state` must be a core default or declared by a plugin. A same-state call is
+  The vocabulary is the game's: core only requires a sane string (non-empty,
+  ≤ #{@max_state_length} bytes) and `before_lobby_state_change` enforces
+  whatever words and ordering the game cares about. A same-state call is
   a no-op (so at-least-once hook/job retries are safe) and does not re-fire
-  hooks. `before_lobby_state_change` may veto; `after_lobby_state_changed`
-  observes post-commit.
+  hooks. `after_lobby_state_changed` observes post-commit.
 
-  Returns `{:ok, lobby}`, `{:error, :unknown_state}` or
+  Returns `{:ok, lobby}`, `{:error, :invalid_state}` or
   `{:error, {:hook_rejected, reason}}`.
   """
   @spec transition_state(Lobby.t(), String.t(), keyword()) ::
-          {:ok, Lobby.t()} | {:error, :unknown_state | {:hook_rejected, term()} | term()}
+          {:ok, Lobby.t()} | {:error, :invalid_state | {:hook_rejected, term()} | term()}
   def transition_state(%Lobby{} = lobby, state, opts \\ []) when is_binary(state) do
     cond do
-      not States.known?(state) ->
-        {:error, :unknown_state}
+      state == "" or byte_size(state) > @max_state_length ->
+        {:error, :invalid_state}
 
       lobby.state == state ->
         {:ok, lobby}

@@ -285,4 +285,96 @@ defmodule GameServer.ReadyChecksTest do
       assert ReadyChecks.list_checks(status: "passed") == []
     end
   end
+
+  describe "reset/3" do
+    test "quietly replaces the open board — no failed event, no failed hook", ctx do
+      Phoenix.PubSub.subscribe(GameServer.PubSub, "lobby:#{ctx.lobby.id}")
+
+      {:ok, first} = ReadyChecks.open(ctx.lobby, ctx.members)
+      assert_receive {:ready_check_event, "ready_check_started", _}
+
+      {:ok, second} = ReadyChecks.reset(ctx.lobby, ctx.members)
+
+      assert second.id != first.id
+
+      assert %{status: "cancelled", reason: "reset"} =
+               Map.take(ReadyChecks.get_check(first.id), [:status, :reason])
+
+      # Only the fresh board is announced; the replaced one dies silently.
+      assert_receive {:ready_check_event, "ready_check_started", %{id: id}}
+      assert id == second.id
+      refute_receive {:ready_check_event, "ready_check_failed", _}
+    end
+
+    test "makes passed?/1 false again — a rematch cannot ride the old pass", ctx do
+      {:ok, _} = ReadyChecks.open(ctx.lobby, ctx.members, opened_by: ctx.host.id)
+      {:ok, _} = ReadyChecks.respond(ctx.alice, true)
+      {:ok, _} = ReadyChecks.respond(ctx.bob, true)
+      assert ReadyChecks.passed?(ctx.lobby)
+
+      {:ok, _} = ReadyChecks.reset(ctx.lobby, ctx.members)
+      refute ReadyChecks.passed?(ctx.lobby)
+    end
+
+    test "opens fresh when there was nothing to replace", ctx do
+      assert {:ok, %Check{status: "pending"}} = ReadyChecks.reset(ctx.lobby, ctx.members)
+    end
+  end
+
+  describe "party boards" do
+    setup ctx do
+      {:ok, party} = GameServer.Parties.create_party(ctx.host)
+      Map.put(ctx, :party, party)
+    end
+
+    test "a party opens a kind-ready check carrying party_id", ctx do
+      {:ok, check} = ReadyChecks.open(ctx.party, [ctx.host.id])
+
+      assert check.kind == "ready"
+      assert check.party_id == ctx.party.id
+      assert check.lobby_id == nil
+    end
+
+    test "the party lane never blocks the match lane", ctx do
+      {:ok, _} = ReadyChecks.open(ctx.party, [ctx.host.id])
+      assert {:ok, _} = ReadyChecks.open(ctx.lobby, ctx.members)
+
+      # And the other way around: a second board in the *same* lane still
+      # conflicts.
+      assert {:error, :already_pending} = ReadyChecks.open(ctx.party, [ctx.host.id])
+    end
+
+    test "respond/3 scopes the answer to one lane", ctx do
+      {:ok, party_check} = ReadyChecks.open(ctx.party, [ctx.host.id])
+      {:ok, lobby_check} = ReadyChecks.open(ctx.lobby, ctx.members)
+
+      {:ok, _} = ReadyChecks.respond(ctx.host, true, :party)
+
+      assert ReadyChecks.get_check(party_check.id).status == "passed"
+      assert state_of(lobby_check, ctx.host.id) == "pending"
+    end
+
+    test "add_party_member/2 and remove_party_member/2 keep the roster true", ctx do
+      {:ok, check} = ReadyChecks.open(ctx.party, [ctx.host.id, ctx.alice.id])
+
+      :ok = ReadyChecks.add_party_member(ctx.party.id, ctx.bob.id)
+      assert length(ReadyChecks.get_check(check.id).participants) == 3
+
+      # Removing the two who never answered can pass the board outright.
+      {:ok, _} = ReadyChecks.respond(ctx.host, true, :party)
+      :ok = ReadyChecks.remove_party_member(ctx.party.id, ctx.alice.id)
+      :ok = ReadyChecks.remove_party_member(ctx.party.id, ctx.bob.id)
+
+      assert ReadyChecks.get_check(check.id).status == "passed"
+      assert ReadyChecks.passed?(ctx.party)
+    end
+
+    test "deleting the party cascades its checks", ctx do
+      {:ok, check} = ReadyChecks.open(ctx.party, [ctx.host.id])
+
+      {:ok, :disbanded} = GameServer.Parties.leave_party(ctx.host)
+
+      assert ReadyChecks.get_check(check.id) == nil
+    end
+  end
 end

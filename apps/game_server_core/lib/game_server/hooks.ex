@@ -279,7 +279,10 @@ defmodule GameServer.Hooks do
   # "everyone answered yes" callback — where a game starts its match.
   # `after_ready_check_failed` receives the participants who did not answer
   # ready; core kicks nobody, so acting on them is the game's call.
-  @callback before_ready_check_open(GameServer.Lobbies.Lobby.t() | :matchmaking, [String.t()]) ::
+  @callback before_ready_check_open(
+              GameServer.Lobbies.Lobby.t() | GameServer.Parties.Party.t() | :matchmaking,
+              [String.t()]
+            ) ::
               hook_result(term())
   @callback after_ready_check_passed(GameServer.ReadyChecks.Check.t()) :: any()
   @callback after_ready_check_failed(GameServer.ReadyChecks.Check.t(), String.t(), [map()]) ::

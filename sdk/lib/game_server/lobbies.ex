@@ -864,18 +864,19 @@ defmodule GameServer.Lobbies do
     The only writer of `state`/`state_changed_at` — the columns are not castable,
     so a generic `update_lobby/2` can never move a lobby's state.
     
-    `state` must be a core default or declared by a plugin. A same-state call is
+    The vocabulary is the game's: core only requires a sane string (non-empty,
+    ≤ 64 bytes) and `before_lobby_state_change` enforces
+    whatever words and ordering the game cares about. A same-state call is
     a no-op (so at-least-once hook/job retries are safe) and does not re-fire
-    hooks. `before_lobby_state_change` may veto; `after_lobby_state_changed`
-    observes post-commit.
+    hooks. `after_lobby_state_changed` observes post-commit.
     
-    Returns `{:ok, lobby}`, `{:error, :unknown_state}` or
+    Returns `{:ok, lobby}`, `{:error, :invalid_state}` or
     `{:error, {:hook_rejected, reason}}`.
     
   """
   @spec transition_state(GameServer.Lobbies.Lobby.t(), String.t(), keyword()) ::
   {:ok, GameServer.Lobbies.Lobby.t()}
-  | {:error, :unknown_state | {:hook_rejected, term()} | term()}
+  | {:error, :invalid_state | {:hook_rejected, term()} | term()}
   def transition_state(_lobby, _state, _opts) do
     case Application.get_env(:game_server_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -898,7 +899,7 @@ defmodule GameServer.Lobbies do
     
   """
   @spec transition_state_by_host(GameServer.Accounts.User.t(), GameServer.Lobbies.Lobby.t(), String.t()) ::
-  {:ok, GameServer.Lobbies.Lobby.t()} | {:error, :not_host | :unknown_state | term()}
+  {:ok, GameServer.Lobbies.Lobby.t()} | {:error, :not_host | :invalid_state | term()}
   def transition_state_by_host(_user, _lobby, _state) do
     case Application.get_env(:game_server_sdk, :stub_mode, :raise) do
       :placeholder ->

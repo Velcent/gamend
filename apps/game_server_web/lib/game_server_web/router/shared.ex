@@ -449,6 +449,8 @@ defmodule GameServerWeb.Router.Shared do
         get "/parties/invitations/sent", PartyController, :list_sent_invitations
         post "/parties/create_lobby", PartyController, :create_lobby
         post "/parties/join_lobby/:id", PartyController, :join_lobby
+        post "/parties/ready_check", ReadyCheckController, :open_party
+        delete "/parties/ready_check", ReadyCheckController, :cancel_party
       end
     end
   end

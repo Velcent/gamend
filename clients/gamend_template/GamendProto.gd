@@ -350,6 +350,7 @@ static func _ready_check(data: PackedByteArray) -> Variant:
 			"kind": m.get_kind(),
 			"status": m.get_status(),
 			"lobby_id": m.get_lobby_id(),
+			"party_id": m.get_party_id(),
 			"deadline_ms": m.get_deadline_ms(),
 			"total": m.get_total(),
 			"ready_count": m.get_ready_count(),

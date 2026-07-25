@@ -167,11 +167,11 @@ defmodule GameServerWeb.ApiSpec do
         ## **14. Ready checks**
         One primitive for "everyone must answer before this proceeds", with one client-facing surface:
 
-        - **A player is in at most one check**, so answering needs no id: `GET /me/ready_check` returns the open one (or null) and `POST /me/ready_check` with `{"ready": true|false}` answers it
-        - **Two kinds.** `ready` (lobby ready-up) is a toggle — a "no" just leaves the check open, and it lists every participant. `accept` (match confirmation) is final — one decline fails it for everyone — and returns counts plus your own state, so a pending match does not reveal who you were paired with
-        - **Hosts open one** with `POST /lobbies/ready_check` (host-managed lobbies only; hostless matchmaking lobbies belong to the server), call it off with `DELETE /lobbies/ready_check`, and are pre-marked ready — clicking the button is their answer
+        - **A player holds at most one check per lane** — the match lane (lobby ready-up or matchmaking accept) and the party lane (the party's standing board) — so answering needs no id: `GET /me/ready_check` returns `{"lobby": …, "party": …}` (each null when none) and `POST /me/ready_check` with `{"ready": true|false, "scope": "lobby"|"party"}` answers one (scope defaults to `lobby`)
+        - **Two kinds.** `ready` (lobby/party board) is a toggle — a "no" just leaves the check open, and it lists every participant. `accept` (match confirmation) is final — one decline fails it for everyone — and returns counts plus your own state, so a pending match does not reveal who you were paired with
+        - **Hosts open one** with `POST /lobbies/ready_check` (host-managed lobbies only; hostless matchmaking lobbies belong to the server), **party leaders** with `POST /parties/ready_check`; either call is a **reset** — it quietly replaces an already-open board with a fresh one over the current members, so the same endpoint serves "ready check!", "force ready" (with `timeout_ms`) and "start over". Call it off with `DELETE /lobbies/ready_check` / `DELETE /parties/ready_check`. The opener is pre-marked ready — clicking the button is their answer
         - **Failure does nothing on its own**: a declined or timed-out check kicks nobody, starts nothing, and moves no lobby state. It reports who did not answer, and the game (or the host, with the kick they already have) decides
-        - **Live**: `ready_check_started` / `ready_check_updated` / `ready_check_passed` / `ready_check_failed` on the lobby channel — or the user channel for an accept check
+        - **Live**: `ready_check_started` / `ready_check_updated` / `ready_check_passed` / `ready_check_failed` on the lobby channel, the party channel for a party board, or the user channel for an accept check
         - **Admin management** over HTTP: list/filter checks, force-cancel, and 24h outcome stats under `/api/v1/admin/ready_checks`
 
         ## **15. Real-time: WebSocket Channels**

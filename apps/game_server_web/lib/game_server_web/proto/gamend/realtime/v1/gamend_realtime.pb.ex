@@ -399,6 +399,7 @@ defmodule Gamend.Realtime.V1.ReadyCheckState do
   field :your_state, 8, type: :string, json_name: "yourState"
   field :reason, 9, type: :string
   field :participants, 10, repeated: true, type: Gamend.Realtime.V1.ReadyCheckParticipant
+  field :party_id, 11, type: :string, json_name: "partyId"
 end
 
 defmodule Gamend.Realtime.V1.KvEntry do

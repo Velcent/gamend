@@ -189,9 +189,9 @@ defmodule GameServerWeb.Api.V1.LobbyController do
     description:
       "Move the caller's lobby to another lifecycle state. Allowed only for the " <>
         "host of a host-managed lobby: hostless (matchmaking) lobbies belong to " <>
-        "the server, so no player may move them. The state must be a core default " <>
-        "(created, starting, playing, ended) or one the game declared via " <>
-        "lobby_states/0, and the game's before_lobby_state_change hook may veto.",
+        "the server, so no player may move them. The vocabulary is the game's " <>
+        "(core documents created, starting, playing, ended); the game's " <>
+        "before_lobby_state_change hook enforces its own words and ordering.",
     security: [%{"authorization" => []}],
     request_body: {
       "Target state",
@@ -225,8 +225,8 @@ defmodule GameServerWeb.Api.V1.LobbyController do
             {:error, :not_host} ->
               conn |> put_status(:forbidden) |> json(%{error: "not_host"})
 
-            {:error, :unknown_state} ->
-              conn |> put_status(:unprocessable_entity) |> json(%{error: "unknown_state"})
+            {:error, :invalid_state} ->
+              conn |> put_status(:unprocessable_entity) |> json(%{error: "invalid_state"})
 
             {:error, {:hook_rejected, reason}} ->
               conn

@@ -3592,9 +3592,14 @@ class ReadyCheckState:
 		service.field = __participants
 		service.func_ref = Callable(self, "add_participants")
 		data[__participants.tag] = service
-		
+
+		__party_id = PBField.new("party_id", PB_DATA_TYPE.STRING, PB_RULE.OPTIONAL, 11, true, DEFAULT_VALUES_3[PB_DATA_TYPE.STRING])
+		service = PBServiceField.new()
+		service.field = __party_id
+		data[__party_id.tag] = service
+
 	var data = {}
-	
+
 	var __id: PBField
 	func has_id() -> bool:
 		return data[1].state == PB_SERVICE_STATE.FILLED
@@ -3605,7 +3610,7 @@ class ReadyCheckState:
 		__id.value = DEFAULT_VALUES_3[PB_DATA_TYPE.STRING]
 	func set_id(value : String) -> void:
 		__id.value = value
-	
+
 	var __kind: PBField
 	func has_kind() -> bool:
 		return data[2].state == PB_SERVICE_STATE.FILLED
@@ -3704,7 +3709,18 @@ class ReadyCheckState:
 		var element = ReadyCheckParticipant.new()
 		__participants.value.append(element)
 		return element
-	
+
+	var __party_id: PBField
+	func has_party_id() -> bool:
+		return data[11].state == PB_SERVICE_STATE.FILLED
+	func get_party_id() -> String:
+		return __party_id.value
+	func clear_party_id() -> void:
+		data[11].state = PB_SERVICE_STATE.UNFILLED
+		__party_id.value = DEFAULT_VALUES_3[PB_DATA_TYPE.STRING]
+	func set_party_id(value : String) -> void:
+		__party_id.value = value
+
 	func _to_string() -> String:
 		return PBPacker.message_to_string(data)
 		

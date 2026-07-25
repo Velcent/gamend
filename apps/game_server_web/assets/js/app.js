@@ -34,6 +34,24 @@ const Hooks = {
   LocalDatetimeInput,
 
   /**
+   * GuideDisclosure — mirrors a <details> section's open state into the URL so
+   * the link can be shared and the state survives a reconnect (LiveView remounts
+   * from the same params). The `toggle` event is what native <details> fires;
+   * there is no click handler to keep in sync with keyboard use.
+   */
+  GuideDisclosure: {
+    mounted() {
+      this.onToggle = () =>
+        this.pushEvent("guide_toggled", {slug: this.el.dataset.slug, open: this.el.open})
+      this.el.addEventListener("toggle", this.onToggle)
+    },
+    destroyed() {
+      this.el.removeEventListener("toggle", this.onToggle)
+    },
+  },
+
+
+  /**
    * MermaidDiagram — renders the mermaid source in `data-diagram` into the
    * element. The 2.7MB mermaid bundle is lazy-loaded on first use so it never
    * weighs on normal pages (it is only used by /admin/runtime).

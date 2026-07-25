@@ -20,3 +20,9 @@ config :game_server_core, GameServer.Cache,
   levels: [
     {GameServer.Cache.L1, []}
   ]
+
+# MDEx renders every markdown surface (guides, blog, changelog). Its NIF only
+# builds in the syntax highlighter when told to at compile time, and each app
+# that compiles the NIF needs the flag - otherwise fenced code renders as one
+# undifferentiated colour, or raises once highlighting is requested.
+config :mdex_native, syntax_highlighter: :lumis

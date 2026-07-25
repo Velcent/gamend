@@ -19,10 +19,6 @@ defmodule GameServer.Hooks.Declarations do
         [%{name: "MYGAME_DIFFICULTY", default: "normal", description: "Global difficulty"}]
       end
 
-      def lobby_states do
-        %{"drafting" => %{description: "Picking teams"}}
-      end
-
   `notification_types/0` is **enforced**: `GameServer.Notifications` rejects a
   notification whose `metadata["type"]` is not declared by core or a plugin, so
   a client is never sent a code nobody documented. The other two are
@@ -34,14 +30,13 @@ defmodule GameServer.Hooks.Declarations do
   require Logger
 
   @pt_key {__MODULE__, :declarations}
-  @empty %{notification_types: %{}, realtime_events: %{}, env_vars: [], lobby_states: %{}}
+  @empty %{notification_types: %{}, realtime_events: %{}, env_vars: []}
 
-  @doc "The merged registry: `%{notification_types:, realtime_events:, env_vars:, lobby_states:}`."
+  @doc "The merged registry: `%{notification_types:, realtime_events:, env_vars:}`."
   @spec all() :: %{
           notification_types: %{String.t() => String.t()},
           realtime_events: %{String.t() => String.t()},
-          env_vars: [map()],
-          lobby_states: %{String.t() => String.t()}
+          env_vars: [map()]
         }
   def all, do: :persistent_term.get(@pt_key, @empty)
 
@@ -57,14 +52,6 @@ defmodule GameServer.Hooks.Declarations do
   @spec env_vars() :: [map()]
   def env_vars, do: all().env_vars
 
-  @doc """
-  Lobby states declared by plugins, each mapped to
-  `%{description:, terminal:, prune_after_minutes:}`. See
-  `GameServer.Lobbies.States`.
-  """
-  @spec lobby_states() :: %{String.t() => String.t()}
-  def lobby_states, do: all().lobby_states
-
   @doc "Rebuilds the registry from the loaded plugin list."
   @spec refresh([struct()]) :: :ok
   def refresh(plugins) do
@@ -73,8 +60,7 @@ defmodule GameServer.Hooks.Declarations do
     registry = %{
       notification_types: collect_map(loaded, :notification_types),
       realtime_events: collect_map(loaded, :realtime_events),
-      env_vars: collect_env_vars(loaded),
-      lobby_states: collect_map(loaded, :lobby_states)
+      env_vars: collect_env_vars(loaded)
     }
 
     :persistent_term.put(@pt_key, registry)
@@ -160,15 +146,9 @@ defmodule GameServer.Hooks.Declarations do
     false
   end
 
-  defp log(%{
-         notification_types: types,
-         realtime_events: events,
-         env_vars: vars,
-         lobby_states: states
-       }) do
+  defp log(%{notification_types: types, realtime_events: events, env_vars: vars}) do
     if types != %{}, do: Logger.info("plugin notification types: #{inspect(Map.keys(types))}")
     if events != %{}, do: Logger.info("plugin realtime events: #{inspect(Map.keys(events))}")
     if vars != [], do: Logger.info("plugin env vars: #{inspect(Enum.map(vars, & &1.name))}")
-    if states != %{}, do: Logger.info("plugin lobby states: #{inspect(Map.keys(states))}")
   end
 end

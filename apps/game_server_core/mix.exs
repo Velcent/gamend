@@ -70,6 +70,9 @@ defmodule GameServerCore.MixProject do
       {:crontab, "~> 1.1"},
       {:corsica, "~> 2.0"},
       {:mdex, "~> 0.13"},
+      # Syntax highlighting engine MDEx delegates to; without it fenced code
+      # renders as undifferentiated text.
+      {:lumis, "~> 0.1"},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.40", only: :dev, runtime: false}
     ]

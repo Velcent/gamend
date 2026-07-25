@@ -259,8 +259,11 @@ message ReadyCheckParticipant {
 }
 
 // "ready_check_started", "ready_check_updated", "ready_check_passed" and
-// "ready_check_failed" on lobby:<id> channels (and on user:<id> for a
-// matchmaking accept check, which has no lobby yet).
+// "ready_check_failed" on lobby:<id> and party:<id> channels (and on
+// user:<id> for a matchmaking accept check, which has no lobby yet).
+//
+// Exactly one of lobby_id/party_id is set for a lobby or party board; both
+// are empty for a matchmaking accept check.
 //
 // `participants` is populated only for kind "ready": an accept check that may
 // still dissolve does not reveal who the player was paired with, so it carries
@@ -277,9 +280,12 @@ message ReadyCheckState {
   int32 total = 6;
   int32 ready_count = 7;
   string your_state = 8;
-  // Set on "ready_check_failed": "declined" | "timeout" | "cancelled".
+  // Set on "ready_check_failed": "declined" | "timeout" | "cancelled"
+  // ("reset" never reaches clients — a reset broadcasts only the fresh
+  // "ready_check_started").
   string reason = 9;
   repeated ReadyCheckParticipant participants = 10;
+  string party_id = 11;
 }
 
 // ── Key/value store events ───────────────────────────────────────────────

@@ -46,6 +46,11 @@ config :game_server_web,
   well_known_static_app: :game_server_host,
   host_static_paths: ~w(images game favicon.ico robots.txt .well-known theme.css)
 
+# MDEx's NIF only builds in the syntax highlighter when told to at compile
+# time. Every root that compiles the NIF needs this - the host app, and each
+# app under apps/ - or fenced code raises the moment highlighting is requested.
+config :mdex_native, syntax_highlighter: :lumis
+
 # Adapter selection (compile-time). Override with DATABASE_ADAPTER=postgres
 # at build time for production Postgres deployments. In dev, setting
 # POSTGRES_*/DATABASE_URL (shell or .env) makes dev.exs override this with

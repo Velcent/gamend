@@ -1,10 +1,8 @@
 # July 2026
 
-- [changed] **Times are shown in the reader's timezone.** Storage and the API are unchanged (UTC everywhere, ISO8601 with `Z`); every rendered timestamp is now a `<time datetime="…Z">` that the browser rewrites in the viewer's own zone and locale, falling back to UTC-labelled text without JS. Use `<.timestamp at={...} />` rather than `Calendar.strftime` for anything a person reads.
-- [fixed] **Admin datetime fields no longer store local time as UTC.** A `datetime-local` input submits the browser's wall clock with no offset, so scheduling a tournament, leaderboard window or quest event for 14:30 previously stored 14:30 UTC — three hours off for an admin in UTC+3. The new `utc-datetime-local` input keeps a hidden UTC field the form casts and converts in the browser against the entered date, so DST is right for a value months out.
-- [fixed] `friendships` and `oauth_sessions` used a bare `timestamps()` (naive) while every other schema stores `:utc_datetime`; both are now `:utc_datetime`. Same column type, so no migration.
-
-- [added] Retention for every unbounded table
+- [changed] **Guides are markdown files.** `/docs/setup`
+- [changed] **Times are shown in the reader's timezone.**
+- [added] Retention for every unbounded table.
 - [added] **Ready checks**
 - [added] **Push notifications**
 - [added] **Lobby state**

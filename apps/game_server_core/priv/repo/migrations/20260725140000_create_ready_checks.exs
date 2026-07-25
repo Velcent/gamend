@@ -8,7 +8,9 @@ defmodule GameServer.Repo.Migrations.CreateReadyChecks do
   instant cannot lose each other's flag.
 
   `lobby_id` is nullable because a matchmaking check has no lobby yet — the
-  group exists only as its tickets.
+  group exists only as its tickets. `party_id` is the second subject: a party
+  keeps a standing ready board (see docs/specs/ready-check.md). At most one of
+  the two is set; both nil means a matchmaking check.
   """
   use Ecto.Migration
 
@@ -17,6 +19,7 @@ defmodule GameServer.Repo.Migrations.CreateReadyChecks do
       add :kind, :string, null: false
       add :status, :string, null: false, default: "pending"
       add :lobby_id, references(:lobbies, on_delete: :delete_all)
+      add :party_id, references(:parties, on_delete: :delete_all)
       add :deadline, :utc_datetime
       add :opened_by, references(:users, on_delete: :nilify_all)
       add :reason, :string
@@ -31,6 +34,12 @@ defmodule GameServer.Repo.Migrations.CreateReadyChecks do
     create unique_index(:ready_checks, [:lobby_id],
              name: :ready_checks_pending_lobby_index,
              where: "status = 'pending' AND lobby_id IS NOT NULL"
+           )
+
+    # Same rule for the party board: one open check per party.
+    create unique_index(:ready_checks, [:party_id],
+             name: :ready_checks_pending_party_index,
+             where: "status = 'pending' AND party_id IS NOT NULL"
            )
 
     # The expiry sweep reads exactly this predicate.

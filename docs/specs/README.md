@@ -41,6 +41,34 @@ has shipped.
   enriched, auto-pruned `events` capture in Postgres — the base a later
   ClickHouse/PostHog sink swaps into.
 
+## Phase 4 — plugin-facing foundations
+
+Seven specs from a July 2026 pass over the `gamend_polyglot` game, reading what
+a real game had to build for itself because core had no primitive. Ordered by
+what the rest depend on.
+
+- [locking.md](locking.md) — **Locking that holds on SQLite too.**
+  `Lock.serialize/3` is a no-op on the default adapter, so every plugin
+  read-modify-write is unprotected there. Correctness, not a feature.
+- [lobby-session.md](lobby-session.md) — **Lobby session.** One supervised,
+  cluster-unique process per lobby that games run mutations inside; holds no
+  authoritative state, owns one timer, carries a strict-mode tripwire.
+- [netcode-sync.md](netcode-sync.md) — **Server time, state revision, action
+  idempotency.** `server_now`, a monotonic `lobbies.revision` with optimistic
+  updates, and `seq`-deduped actions. Latency compensation stays in the game.
+- [disconnect-grace.md](disconnect-grace.md) — **Disconnect grace and
+  state-aware reaping.** `after_user_absent/1` on a durable timer, and
+  `prune_after_minutes` / `terminal` on declared lobby states finally read.
+- [resource-regen.md](resource-regen.md) — **Regenerating currencies.** Lives,
+  energy and stamina as a declared `%{amount, interval, cap}` on a wallet,
+  folded lazily from a timestamp with no timers.
+- [kv-prefix-streaming.md](kv-prefix-streaming.md) — **KV prefix queries and
+  streaming.** Indexed left-anchored prefixes and a keyset cursor, replacing the
+  substring filter and offset paging plugins loop over today.
+- [discord-notifications.md](discord-notifications.md) — **Discord
+  notifications.** One env var, Oban-delivered, rate-limit aware and redacted by
+  construction — the concrete slice of the parked webhooks spec.
+
 ## Unscheduled
 
 - [settings.md](settings.md) — **Settings: one declared config surface.** One

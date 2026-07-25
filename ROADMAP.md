@@ -27,6 +27,13 @@ spine**, designed together rather than bolted on.
 | **3** | Quests/progression — generalizes achievements, pays into economy | High | L | Economy + Jobs |
 | **3** | Webhooks (signed, retried) + remote config | Med | S–M | Jobs |
 | **3** | Event-tracking API → Postgres `events` table | Med | S | — |
+| **4** | Locking that holds on SQLite — `Lock.serialize/3` is a no-op there | High | S | — |
+| **4** | Lobby session — one serialized process per lobby | High | M | locking |
+| **4** | Server time + state revision + action idempotency | Med–High | M | lobby session |
+| **4** | Disconnect grace + state-aware lobby reaping | Med–High | S–M | jobs, lobby state |
+| **4** | Regenerating currencies (lives / energy) | Med | S–M | economy |
+| **4** | KV prefix queries + streaming | Med | S | — |
+| **4** | Discord notifications | Med | S | jobs |
 | Later | ClickHouse / PostHog analytics | Med | L (ops) | Event API |
 | Defer | Unity / Unreal SDKs | Med | XL | — |
 
@@ -292,9 +299,9 @@ Per CONTRIBUTING §Finish, plus the user's ask to reframe cron→jobs everywhere
 
 ---
 
-## Design specs (Phases 1–3)
+## Design specs (Phases 1–4)
 
-Phase 0 is specced inline above (shipped). Every planned item in Phases 1–3 has
+Phase 0 is specced inline above (shipped). Every planned item in Phases 1–4 has
 a full design spec under [docs/specs/](docs/specs/) — see the
 [index](docs/specs/README.md). Each carries goal, architecture grounded in the
 current codebase, and the CONTRIBUTING checklist.
@@ -326,3 +333,31 @@ current codebase, and the CONTRIBUTING checklist.
   retried webhooks on the Oban `webhooks` queue; client-read-only live config.
 - [Event-tracking API](docs/specs/event-tracking.md) — batched, enriched,
   auto-pruned `events` capture in Postgres.
+
+**Phase 4 — plugin-facing foundations**
+
+Where Phases 1–3 added features, Phase 4 adds the primitives a game needs to
+build its own. Every item comes from reading the `gamend_polyglot` game and
+asking what it had to write itself, or route around, because core offered
+nothing.
+
+- [Locking](docs/specs/locking.md) — `Lock.serialize/3` is a **no-op on
+  SQLite**, so every plugin read-modify-write is unprotected on the default
+  adapter. Polyglot's top code-review finding was a double-spend caused by
+  exactly this; it now uses its own `:global.trans` lock instead of core's.
+- [Lobby session](docs/specs/lobby-session.md) — one supervised, cluster-unique
+  process per lobby, holding no authoritative state, that games run mutations
+  inside. Replaces the per-game `BoatGameServer` every action title writes.
+- [Netcode sync](docs/specs/netcode-sync.md) — `server_now`, a monotonic
+  `lobbies.revision` with optimistic updates, and `seq`-deduped actions. Core
+  supplies the inputs; latency compensation stays in the game.
+- [Disconnect grace](docs/specs/disconnect-grace.md) — `after_user_absent/1` on
+  a durable timer, plus `prune_after_minutes`/`terminal` on declared lobby
+  states, which `Hooks.Declarations` already documents and nothing reads.
+- [Regenerating currencies](docs/specs/resource-regen.md) — lives/energy as a
+  declared `%{amount, interval, cap}` on a wallet, folded from a timestamp.
+- [KV prefix streaming](docs/specs/kv-prefix-streaming.md) — indexed prefixes
+  and a keyset cursor, replacing substring `LIKE` behind offset paging.
+- [Discord notifications](docs/specs/discord-notifications.md) — the concrete
+  slice of the parked webhooks spec, redacted by construction (polyglot's
+  hand-rolled version leaked player emails).

@@ -641,6 +641,16 @@ defmodule GameServerWeb.CoreComponents do
   @doc """
   A user's avatar as a round image when they have one (`profile_url`), falling
   back to the generic person icon. Pass `class` for sizing, e.g. `"w-5 h-5"`.
+
+  `crossorigin="anonymous"` is load-bearing, not decoration: `/play` and
+  `/game/*` are served cross-origin isolated for Godot's `SharedArrayBuffer`
+  (see `GameServerWeb.Plugs.GameHeaders`), and under
+  `Cross-Origin-Embedder-Policy: require-corp` a cross-origin subresource is
+  blocked unless it either sends `Cross-Origin-Resource-Policy` or is fetched in
+  CORS mode. OAuth avatar CDNs (Google, Discord, Steam, Gravatar) send no CORP
+  header but do send `Access-Control-Allow-Origin: *`, so asking for CORS mode
+  is what makes them load on those pages. Same-origin and object-storage avatars
+  are unaffected — buckets already need CORS for the presigned upload flow.
   """
   attr :user, :any, default: nil
   attr :class, :string, default: "w-6 h-6"
@@ -653,6 +663,7 @@ defmodule GameServerWeb.CoreComponents do
       :if={@avatar_url}
       src={@avatar_url}
       alt=""
+      crossorigin="anonymous"
       class={["rounded-full object-cover bg-base-300", @class]}
     />
     <.icon :if={!@avatar_url} name="hero-user-circle-solid" class={@class} />

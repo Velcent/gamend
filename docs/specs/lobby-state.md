@@ -3,6 +3,14 @@
 Design spec. Gives lobbies a `state` string that core owns, indexes and
 broadcasts, but whose **vocabulary the game defines**.
 
+**Amendment (July 2026): the `lobby_states/0` declaration was removed.** It
+was registry plumbing that nothing consumed — not even the admin runtime page
+— and the same protection is one guard clause in the callback a game already
+writes. Core now accepts any sane state string (non-empty, ≤ 64 bytes) and a
+game that wants a closed vocabulary rejects unknown words in
+`before_lobby_state_change`. Sections below that mention the declaration
+describe the original design.
+
 Goal: one place to record "where is this lobby in its life", so core can hook,
 filter and (later) reap on it — without core asserting game semantics it does
 not own.
@@ -174,10 +182,10 @@ then drops the metadata key.
       SQLite **and** `DATABASE_ADAPTER=postgres`.
 - [ ] Neither column is castable via `PATCH /lobbies/:id`; `create_lobby` sets
       `"created"`.
-- [ ] `transition_state/3` validates against core ∪ declared states, is
-      idempotent, broadcasts, and defers hooks post-commit.
-- [ ] `lobby_states/0` declaration registered, merged, and shown on the admin
-      runtime page.
+- [ ] `transition_state/3` accepts any sane string (vocabulary enforcement is
+      the game's, in `before_lobby_state_change`), is idempotent, broadcasts,
+      and defers hooks post-commit. *(Amended: the original "validate against
+      core ∪ declared states" and the `lobby_states/0` registry were removed.)*
 - [ ] Hooks in all six places, RPC-blocked, SDK-mirrored.
 - [ ] `POST /lobbies/state` allows the host, rejects a non-host and **any**
       caller on a hostless lobby, and honours the veto.

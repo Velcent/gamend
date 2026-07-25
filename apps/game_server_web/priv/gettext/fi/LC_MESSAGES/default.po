@@ -11,10 +11,10 @@ msgstr ""
 "Language: fi\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: lib/game_server_web/components/core_components.ex:346
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:248
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:760
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:804
+#: lib/game_server_web/components/core_components.ex:381
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:245
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:757
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:801
 #, elixir-autogen, elixir-format
 msgid "Actions"
 msgstr "Toiminnot"
@@ -30,7 +30,7 @@ msgstr "Sähköposti"
 
 #: lib/game_server_web/live/leaderboards_live.ex:25
 #: lib/game_server_web/live/leaderboards_live.ex:103
-#: lib/game_server_web/live/leaderboards_live.ex:288
+#: lib/game_server_web/live/leaderboards_live.ex:286
 #, elixir-autogen, elixir-format
 msgid "Leaderboards"
 msgstr "Tulostaulukot"
@@ -95,7 +95,7 @@ msgid "Register"
 msgstr "Rekisteröidy"
 
 #: lib/game_server_web/live/user_live/settings/friends_tab.ex:69
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:729
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:726
 #, elixir-autogen, elixir-format
 msgid "Accept"
 msgstr "Hyväksy"
@@ -103,7 +103,7 @@ msgstr "Hyväksy"
 #: lib/game_server_web/live/groups_live.ex:421
 #: lib/game_server_web/live/quests_live.ex:239
 #: lib/game_server_web/live/quests_live.ex:251
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:598
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:595
 #, elixir-autogen, elixir-format
 msgid "All"
 msgstr "Kaikki"
@@ -113,7 +113,7 @@ msgstr "Kaikki"
 msgid "Apply"
 msgstr "Käytä"
 
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:354
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:351
 #, elixir-autogen, elixir-format
 msgid "Approve"
 msgstr "Hyväksy"
@@ -132,21 +132,22 @@ msgstr "Takaisin"
 msgid "Block"
 msgstr "Estä"
 
+#: lib/game_server_web/live/admin_live/lobbies.ex:372
 #: lib/game_server_web/live/admin_live/matchmaking.ex:241
 #: lib/game_server_web/live/chat_live.ex:255
 #: lib/game_server_web/live/lobby_live/index.ex:760
 #: lib/game_server_web/live/user_live/settings/friends_tab.ex:109
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:75
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:170
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:782
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:828
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:779
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:825
 #, elixir-autogen, elixir-format
 msgid "Cancel"
 msgstr "Peruuta"
 
 #: lib/game_server_web/live/lobby_live/index.ex:805
 #: lib/game_server_web/live/user_live/settings/data_tab.ex:53
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:609
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:606
 #, elixir-autogen, elixir-format
 msgid "Clear"
 msgstr "Tyhjennä"
@@ -186,8 +187,8 @@ msgstr "Luo"
 #: lib/game_server_web/live/notifications_live.ex:44
 #: lib/game_server_web/live/user_live/settings/data_tab.ex:72
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:199
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:705
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:803
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:702
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:800
 #: lib/game_server_web/live/user_live/settings/payments_tab.ex:61
 #: lib/game_server_web/live/user_live/settings/wallet_tab.ex:61
 #, elixir-autogen, elixir-format
@@ -204,7 +205,7 @@ msgstr "Päivämäärä"
 msgid "Delete"
 msgstr "Poista"
 
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:297
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:294
 #, elixir-autogen, elixir-format
 msgid "Demote"
 msgstr "Alenna"
@@ -218,14 +219,14 @@ msgid "Description"
 msgstr "Kuvaus"
 
 #: lib/game_server_web/live/notifications_live.ex:43
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:704
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:701
 #, elixir-autogen, elixir-format
 msgid "From"
 msgstr "Lähettäjä"
 
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:703
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:757
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:801
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:700
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:754
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:798
 #, elixir-autogen, elixir-format
 msgid "Group"
 msgstr "Ryhmä"
@@ -236,7 +237,7 @@ msgstr "Ryhmä"
 #: lib/game_server_web/live/groups_live.ex:391
 #: lib/game_server_web/live/user_live/settings.ex:92
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:59
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:479
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:476
 #, elixir-autogen, elixir-format
 msgid "Groups"
 msgstr "Ryhmät"
@@ -255,11 +256,11 @@ msgstr "Piilotettu"
 msgid "ID"
 msgstr "ID"
 
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:370
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:419
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:458
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:481
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:802
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:367
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:416
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:455
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:478
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:799
 #, elixir-autogen, elixir-format
 msgid "Invite"
 msgstr "Kutsu"
@@ -269,7 +270,7 @@ msgstr "Kutsu"
 #: lib/game_server_web/live/lobby_live/index.ex:726
 #: lib/game_server_web/live/lobby_live/index.ex:738
 #: lib/game_server_web/live/tournaments_live.ex:743
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:662
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:659
 #, elixir-autogen, elixir-format
 msgid "Join"
 msgstr "Liity"
@@ -279,14 +280,14 @@ msgstr "Liity"
 #: lib/game_server_web/live/lobby_live/index.ex:425
 #: lib/game_server_web/live/lobby_live/index.ex:664
 #: lib/game_server_web/live/tournaments_live.ex:115
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:246
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:650
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:243
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:647
 #, elixir-autogen, elixir-format
 msgid "Joined"
 msgstr "Liittyi"
 
 #: lib/game_server_web/live/lobby_live/index.ex:852
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:307
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:304
 #, elixir-autogen, elixir-format
 msgid "Kick"
 msgstr "Poista pelistä"
@@ -295,8 +296,8 @@ msgstr "Poista pelistä"
 #: lib/game_server_web/live/lobby_live/index.ex:841
 #: lib/game_server_web/live/lobby_live/index.ex:877
 #: lib/game_server_web/live/tournaments_live.ex:737
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:229
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:567
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:226
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:564
 #, elixir-autogen, elixir-format
 msgid "Leave"
 msgstr "Poistu"
@@ -323,24 +324,24 @@ msgstr "Jäsen"
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:118
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:160
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:196
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:238
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:513
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:622
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:235
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:510
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:619
 #, elixir-autogen, elixir-format
 msgid "Members"
 msgstr "Jäsenet"
 
 #: lib/game_server_web/live/groups_live.ex:445
 #: lib/game_server_web/live/groups_live.ex:619
-#: lib/game_server_web/live/leaderboards_live.ex:308
+#: lib/game_server_web/live/leaderboards_live.ex:306
 #: lib/game_server_web/live/tournaments_live.ex:655
 #: lib/game_server_web/live/user_live/settings/account_tab.ex:112
 #: lib/game_server_web/live/user_live/settings/data_tab.ex:71
 #: lib/game_server_web/live/user_live/settings/friends_tab.ex:219
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:142
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:177
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:244
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:392
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:241
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:389
 #, elixir-autogen, elixir-format
 msgid "Name"
 msgstr "Nimi"
@@ -350,13 +351,13 @@ msgstr "Nimi"
 msgid "Newest"
 msgstr "Uusimmat"
 
-#: lib/game_server_web/components/core_components.ex:527
+#: lib/game_server_web/components/core_components.ex:607
 #: lib/game_server_web/live/lobby_live/index.ex:654
 #, elixir-autogen, elixir-format
 msgid "Next"
 msgstr "Seuraava"
 
-#: lib/game_server_web/components/core_components.ex:513
+#: lib/game_server_web/components/core_components.ex:593
 #: lib/game_server_web/live/lobby_live/index.ex:644
 #, elixir-autogen, elixir-format
 msgid "Prev"
@@ -367,12 +368,12 @@ msgstr "Edellinen"
 #: lib/game_server_web/live/groups_live.ex:564
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:111
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:154
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:600
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:597
 #, elixir-autogen, elixir-format
 msgid "Private"
 msgstr "Yksityinen"
 
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:288
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:285
 #, elixir-autogen, elixir-format
 msgid "Promote"
 msgstr "Ylennä"
@@ -382,13 +383,13 @@ msgstr "Ylennä"
 #: lib/game_server_web/live/groups_live.ex:562
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:110
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:153
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:599
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:596
 #, elixir-autogen, elixir-format
 msgid "Public"
 msgstr "Julkinen"
 
 #: lib/game_server_web/live/user_live/settings/friends_tab.ex:72
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:361
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:358
 #, elixir-autogen, elixir-format
 msgid "Reject"
 msgstr "Hylkää"
@@ -403,7 +404,7 @@ msgstr "Hylkää"
 #: lib/game_server_web/live/user_live/settings/account_tab.ex:305
 #: lib/game_server_web/live/user_live/settings/account_tab.ex:331
 #: lib/game_server_web/live/user_live/settings/account_tab.ex:335
-#: lib/game_server_web/live/user_live/settings/devices_tab.ex:80
+#: lib/game_server_web/live/user_live/settings/devices_tab.ex:78
 #: lib/game_server_web/live/user_live/settings/friends_tab.ex:151
 #, elixir-autogen, elixir-format
 msgid "Remove"
@@ -411,18 +412,18 @@ msgstr "Poista"
 
 #: lib/game_server_web/live/groups_live.ex:539
 #: lib/game_server_web/live/groups_live.ex:708
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:333
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:482
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:670
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:759
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:330
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:479
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:667
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:756
 #, elixir-autogen, elixir-format
 msgid "Request"
 msgstr "Pyyntö"
 
 #: lib/game_server_web/live/groups_live.ex:620
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:207
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:245
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:514
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:204
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:242
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:511
 #, elixir-autogen, elixir-format
 msgid "Role"
 msgstr "Rooli"
@@ -448,7 +449,7 @@ msgstr "Tallennetaan..."
 #: lib/game_server_web/live/chat_live.ex:310
 #: lib/game_server_web/live/chat_live.ex:315
 #: lib/game_server_web/live/user_live/settings/friends_tab.ex:236
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:484
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:481
 #, elixir-autogen, elixir-format
 msgid "Send"
 msgstr "Lähetä"
@@ -458,7 +459,7 @@ msgstr "Lähetä"
 #: lib/game_server_web/live/quests_live.ex:576
 #: lib/game_server_web/live/store_live/index.ex:130
 #: lib/game_server_web/live/user_live/settings/devices_tab.ex:48
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:758
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:755
 #: lib/game_server_web/live/user_live/settings/payments_tab.ex:58
 #, elixir-autogen, elixir-format
 msgid "Status"
@@ -467,9 +468,9 @@ msgstr "Tila"
 #: lib/game_server_web/live/lobby_live/index.ex:659
 #: lib/game_server_web/live/notifications_live.ex:42
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:97
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:511
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:590
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:620
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:508
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:587
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:617
 #, elixir-autogen, elixir-format
 msgid "Title"
 msgstr "Otsikko"
@@ -477,9 +478,9 @@ msgstr "Otsikko"
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:108
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:150
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:183
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:512
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:596
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:621
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:509
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:593
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:618
 #, elixir-autogen, elixir-format
 msgid "Type"
 msgstr "Tyyppi"
@@ -501,17 +502,17 @@ msgstr "Poista esto"
 #: lib/game_server_web/live/notifications_live.ex:242
 #: lib/game_server_web/live/notifications_live.ex:245
 #: lib/game_server_web/live/notifications_live.ex:248
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:559
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:556
 #, elixir-autogen, elixir-format
 msgid "View"
 msgstr "Näytä"
 
 #: lib/game_server_web/live/chat_live.ex:226
-#: lib/game_server_web/live/leaderboards_live.ex:338
+#: lib/game_server_web/live/leaderboards_live.ex:336
 #: lib/game_server_web/live/tournaments_live.ex:676
 #: lib/game_server_web/live/tournaments_live.ex:740
 #: lib/game_server_web/live/tournaments_live.ex:808
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:310
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:307
 #, elixir-autogen, elixir-format
 msgid "You"
 msgstr "Sinä"
@@ -519,9 +520,9 @@ msgstr "Sinä"
 #: lib/game_server_web/live/groups_live.ex:411
 #: lib/game_server_web/live/user_live/settings/data_tab.ex:46
 #: lib/game_server_web/live/user_live/settings/friends_tab.ex:212
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:375
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:383
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:480
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:372
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:380
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:477
 #, elixir-autogen, elixir-format
 msgid "Search..."
 msgstr "Hae..."
@@ -546,7 +547,7 @@ msgstr "Tili"
 msgid "Chat"
 msgstr "Chat"
 
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:736
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:733
 #, elixir-autogen, elixir-format
 msgid "Decline"
 msgstr "Kieltäydy"
@@ -554,7 +555,7 @@ msgstr "Kieltäydy"
 #: lib/game_server_web/live/chat_live.ex:272
 #: lib/game_server_web/live/chat_live.ex:274
 #: lib/game_server_web/live/lobby_live/index.ex:698
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:221
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:218
 #, elixir-autogen, elixir-format
 msgid "Edit"
 msgstr "Muokkaa"
@@ -563,7 +564,7 @@ msgstr "Muokkaa"
 #: lib/game_server_web/live/user_live/settings.ex:91
 #: lib/game_server_web/live/user_live/settings/friends_tab.ex:45
 #: lib/game_server_web/live/user_live/settings/friends_tab.ex:126
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:435
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:432
 #, elixir-autogen, elixir-format
 msgid "Friends"
 msgstr "Kaverit"
@@ -585,14 +586,14 @@ msgstr "Ilmoitukset"
 msgid "Select a conversation"
 msgstr "Valitse keskustelu"
 
-#: lib/game_server_web/live/leaderboards_live.ex:252
+#: lib/game_server_web/live/leaderboards_live.ex:250
 #: lib/game_server_web/live/tournaments_live.ex:560
 #, elixir-autogen, elixir-format
 msgid "Newer"
 msgstr "Uudemmat"
 
 #: lib/game_server_web/live/chat_live.ex:205
-#: lib/game_server_web/live/leaderboards_live.ex:237
+#: lib/game_server_web/live/leaderboards_live.ex:235
 #: lib/game_server_web/live/tournaments_live.ex:549
 #, elixir-autogen, elixir-format
 msgid "Older"
@@ -624,7 +625,7 @@ msgstr "Ladataan..."
 #: lib/game_server_web/live/lobby_live/index.ex:174
 #: lib/game_server_web/live/tournaments_live.ex:389
 #: lib/game_server_web/live/user_live/settings/account_tab.ex:584
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:1318
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:1315
 #, elixir-autogen, elixir-format
 msgid "Not found"
 msgstr "Ei löytynyt"
@@ -655,27 +656,27 @@ msgstr "Ei löytynyt"
 #: lib/game_server_web/live/user_live/settings/account_tab.ex:548
 #: lib/game_server_web/live/user_live/settings/account_tab.ex:566
 #: lib/game_server_web/live/user_live/settings/account_tab.ex:612
-#: lib/game_server_web/live/user_live/settings/devices_tab.ex:119
+#: lib/game_server_web/live/user_live/settings/devices_tab.ex:117
 #: lib/game_server_web/live/user_live/settings/friends_tab.ex:288
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:1117
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:1140
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:1158
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:1175
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:1226
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:1257
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:1268
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:1114
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:1137
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:1155
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:1172
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:1223
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:1254
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:1265
 #, elixir-autogen, elixir-format
 msgid "Success."
 msgstr "Valmis."
 
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:780
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:826
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:777
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:823
 #, elixir-autogen, elixir-format
 msgid "Cancel?"
 msgstr "Peruutetaanko?"
 
 #: lib/game_server_web/live/chat_live.ex:437
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:1264
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:1261
 #, elixir-autogen, elixir-format
 msgid "Cannot be empty."
 msgstr "Ei voi olla tyhjä."
@@ -684,7 +685,7 @@ msgstr "Ei voi olla tyhjä."
 #: lib/game_server_web/live/notifications_live.ex:27
 #: lib/game_server_web/live/user_live/settings.ex:75
 #: lib/game_server_web/live/user_live/settings/account_tab.ex:369
-#: lib/game_server_web/live/user_live/settings/devices_tab.ex:77
+#: lib/game_server_web/live/user_live/settings/devices_tab.ex:75
 #, elixir-autogen, elixir-format
 msgid "Delete?"
 msgstr "Poistetaanko?"
@@ -695,18 +696,18 @@ msgstr "Poistetaanko?"
 #: lib/game_server_web/live/groups_live.ex:499
 #: lib/game_server_web/live/groups_live.ex:652
 #: lib/game_server_web/live/leaderboards_live.ex:176
-#: lib/game_server_web/live/leaderboards_live.ex:352
+#: lib/game_server_web/live/leaderboards_live.ex:350
 #: lib/game_server_web/live/quests_live.ex:377
 #: lib/game_server_web/live/tournaments_live.ex:492
 #: lib/game_server_web/live/tournaments_live.ex:704
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:212
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:429
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:465
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:504
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:629
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:696
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:750
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:795
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:209
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:426
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:462
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:501
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:626
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:693
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:747
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:792
 #: lib/game_server_web/live/user_live/settings/items_tab.ex:58
 #: lib/game_server_web/live/user_live/settings/payments_tab.ex:48
 #: lib/game_server_web/live/user_live/settings/payments_tab.ex:101
@@ -769,7 +770,7 @@ msgstr "Avoin"
 #: lib/game_server_web/live/user_live/settings/account_tab.ex:594
 #: lib/game_server_web/live/user_live/settings/account_tab.ex:603
 #: lib/game_server_web/live/user_live/settings/account_tab.ex:616
-#: lib/game_server_web/live/user_live/settings/devices_tab.ex:123
+#: lib/game_server_web/live/user_live/settings/devices_tab.ex:121
 #: lib/game_server_web/live/user_live/settings/friends_tab.ex:292
 #: lib/game_server_web/live/user_live/settings/friends_tab.ex:295
 #: lib/game_server_web/live/user_live/settings/friends_tab.ex:308
@@ -778,16 +779,16 @@ msgstr "Avoin"
 #: lib/game_server_web/live/user_live/settings/friends_tab.ex:347
 #: lib/game_server_web/live/user_live/settings/friends_tab.ex:360
 #: lib/game_server_web/live/user_live/settings/friends_tab.ex:373
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:890
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:1127
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:1145
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:1162
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:1179
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:887
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:1124
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:1142
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:1159
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:1176
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:1234
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:1237
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:1240
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:1261
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:1271
-#: lib/game_server_web/live/user_live/settings/payments_tab.ex:178
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:1258
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:1268
+#: lib/game_server_web/live/user_live/settings/payments_tab.ex:184
 #: lib/game_server_web/user_auth.ex:252
 #: lib/game_server_web/user_auth.ex:276
 #: lib/game_server_web/user_auth.ex:294
@@ -814,7 +815,7 @@ msgstr "Käynnissä"
 #: lib/game_server_web/live/groups_live.ex:199
 #: lib/game_server_web/live/groups_live.ex:524
 #: lib/game_server_web/live/groups_live.ex:691
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:654
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:651
 #, elixir-autogen, elixir-format
 msgid "Pending"
 msgstr "Odottaa"
@@ -822,7 +823,7 @@ msgstr "Odottaa"
 #: lib/game_server_web/live/leaderboards_live.ex:154
 #: lib/game_server_web/live/leaderboards_live.ex:205
 #: lib/game_server_web/live/store_live/index.ex:132
-#: lib/game_server_web/live/user_live/settings/devices_tab.ex:66
+#: lib/game_server_web/live/user_live/settings/devices_tab.ex:64
 #, elixir-autogen, elixir-format
 msgid "Active"
 msgstr "Aktiivinen"
@@ -839,13 +840,13 @@ msgstr "Päättynyt"
 msgid "Host"
 msgstr "Isäntä"
 
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:305
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:302
 #, elixir-autogen, elixir-format
 msgid "Kick?"
 msgstr "Poistetaanko pelistä?"
 
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:227
-#: lib/game_server_web/live/user_live/settings/groups_tab.ex:565
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:224
+#: lib/game_server_web/live/user_live/settings/groups_tab.ex:562
 #, elixir-autogen, elixir-format
 msgid "Leave?"
 msgstr "Poistutaanko?"
@@ -861,8 +862,8 @@ msgstr "Aulat"
 msgid "Privacy"
 msgstr "Tietosuoja"
 
-#: lib/game_server_web/live/leaderboards_live.ex:269
-#: lib/game_server_web/live/leaderboards_live.ex:307
+#: lib/game_server_web/live/leaderboards_live.ex:267
+#: lib/game_server_web/live/leaderboards_live.ex:305
 #, elixir-autogen, elixir-format
 msgid "Rank"
 msgstr "Sijoitus"
@@ -872,8 +873,8 @@ msgstr "Sijoitus"
 msgid "Removed"
 msgstr "Poistettu"
 
-#: lib/game_server_web/live/leaderboards_live.ex:275
-#: lib/game_server_web/live/leaderboards_live.ex:309
+#: lib/game_server_web/live/leaderboards_live.ex:273
+#: lib/game_server_web/live/leaderboards_live.ex:307
 #, elixir-autogen, elixir-format
 msgid "Score"
 msgstr "Pisteet"
@@ -905,7 +906,7 @@ msgstr "Vain API"
 msgid "Amount"
 msgstr "Summa"
 
-#: lib/game_server_web/live/user_live/settings/payments_tab.ex:231
+#: lib/game_server_web/live/user_live/settings/payments_tab.ex:131
 #, elixir-autogen, elixir-format
 msgid "Auto-renews"
 msgstr "Uusiutuu automaattisesti"
@@ -920,17 +921,17 @@ msgstr "Estetyt käyttäjät"
 msgid "Buy"
 msgstr "Osta"
 
-#: lib/game_server_web/live/user_live/settings/payments_tab.ex:141
+#: lib/game_server_web/live/user_live/settings/payments_tab.ex:147
 #, elixir-autogen, elixir-format
 msgid "Cancel renewal"
 msgstr "Peruuta uusiminen"
 
-#: lib/game_server_web/live/user_live/settings/payments_tab.ex:219
+#: lib/game_server_web/live/user_live/settings/payments_tab.ex:225
 #, elixir-autogen, elixir-format
 msgid "Cancels"
 msgstr "Päättyy"
 
-#: lib/game_server_web/live/user_live/settings/payments_tab.ex:147
+#: lib/game_server_web/live/user_live/settings/payments_tab.ex:153
 #, elixir-autogen, elixir-format
 msgid "Cancels at period end"
 msgstr "Päättyy kauden lopussa"
@@ -984,7 +985,7 @@ msgstr "Vaaravyöhyke"
 msgid "Delete account"
 msgstr "Poista tili"
 
-#: lib/game_server_web/live/user_live/settings/payments_tab.ex:154
+#: lib/game_server_web/live/user_live/settings/payments_tab.ex:160
 #, elixir-autogen, elixir-format
 msgid "Download"
 msgstr "Lataa"
@@ -999,7 +1000,7 @@ msgstr "Ladattava"
 msgid "Environment"
 msgstr "Ympäristö"
 
-#: lib/game_server_web/live/user_live/settings/payments_tab.ex:225
+#: lib/game_server_web/live/user_live/settings/payments_tab.ex:231
 #, elixir-autogen, elixir-format
 msgid "Expires"
 msgstr "Vanhenee"
@@ -1010,7 +1011,7 @@ msgid "Grant"
 msgstr "Myönnä"
 
 #: lib/game_server_web/live/store_live/index.ex:132
-#: lib/game_server_web/live/user_live/settings/devices_tab.ex:69
+#: lib/game_server_web/live/user_live/settings/devices_tab.ex:67
 #, elixir-autogen, elixir-format
 msgid "Inactive"
 msgstr "Ei aktiivinen"
@@ -1020,7 +1021,7 @@ msgstr "Ei aktiivinen"
 msgid "Incoming requests"
 msgstr "Saapuneet pyynnöt"
 
-#: lib/game_server_web/live/user_live/settings/payments_tab.ex:191
+#: lib/game_server_web/live/user_live/settings/payments_tab.ex:197
 #, elixir-autogen, elixir-format
 msgid "Invalid payment state"
 msgstr "Virheellinen maksutila"
@@ -1149,7 +1150,7 @@ msgstr "Ostokset"
 msgid "Read data deletion instructions"
 msgstr "Lue tietojen poisto-ohjeet"
 
-#: lib/game_server_web/live/user_live/settings/payments_tab.ex:222
+#: lib/game_server_web/live/user_live/settings/payments_tab.ex:228
 #, elixir-autogen, elixir-format
 msgid "Renews"
 msgstr "Uusiutuu"
@@ -1180,7 +1181,7 @@ msgstr "Kaupan tuote"
 msgid "Stripe is not configured."
 msgstr "Stripeä ei ole määritetty."
 
-#: lib/game_server_web/live/user_live/settings/payments_tab.ex:174
+#: lib/game_server_web/live/user_live/settings/payments_tab.ex:180
 #, elixir-autogen, elixir-format
 msgid "Subscription will cancel at the end of the period."
 msgstr "Tilaus päättyy kauden lopussa."
@@ -1349,7 +1350,7 @@ msgid "Result"
 msgstr "Tulos"
 
 #: lib/game_server_web/live/groups_live.ex:608
-#: lib/game_server_web/live/leaderboards_live.ex:296
+#: lib/game_server_web/live/leaderboards_live.ex:294
 #: lib/game_server_web/live/tournaments_live.ex:643
 #, elixir-autogen, elixir-format
 msgid "Search players..."
@@ -1593,6 +1594,7 @@ msgstr "Alusta"
 msgid "Passed"
 msgstr "Hyväksytty"
 
+#: lib/game_server_web/live/admin_live/lobbies.ex:402
 #: lib/game_server_web/live/admin_live/matchmaking.ex:222
 #, elixir-autogen, elixir-format
 msgid "Ready"
@@ -1612,3 +1614,13 @@ msgstr "viimeiset 24 h"
 #, elixir-autogen, elixir-format
 msgid "Created"
 msgstr "Luotu"
+
+#: lib/game_server_web/live/admin_live/lobbies.ex:359
+#, elixir-autogen, elixir-format
+msgid "Ready check"
+msgstr "Valmiustarkistus"
+
+#: lib/game_server_web/live/admin_live/lobbies.ex:363
+#, elixir-autogen, elixir-format
+msgid "deadline"
+msgstr "määräaika"

@@ -156,7 +156,9 @@ defmodule GameServer.ReadyChecksEdgeCasesTest do
 
       # Both non-ready players are on the host's list, for different reasons.
       not_ready = check.id |> ReadyChecks.get_check() |> ReadyChecks.not_ready()
-      assert Enum.map(not_ready, & &1.user_id) |> Enum.sort() == Enum.sort([ctx.alice.id, ctx.bob.id])
+
+      assert Enum.map(not_ready, & &1.user_id) |> Enum.sort() ==
+               Enum.sort([ctx.alice.id, ctx.bob.id])
     end
 
     test "a check with no deadline is never expired", ctx do
@@ -242,9 +244,10 @@ defmodule GameServer.ReadyChecksEdgeCasesTest do
     end
 
     test "past the participant cap it is refused", ctx do
-      ids = Enum.map(1..(GameServer.Limits.get(:max_ready_check_participants) + 1), fn _ ->
-        Ecto.UUID.generate()
-      end)
+      ids =
+        Enum.map(1..(GameServer.Limits.get(:max_ready_check_participants) + 1), fn _ ->
+          Ecto.UUID.generate()
+        end)
 
       assert {:error, :too_many_participants} = ReadyChecks.open(ctx.lobby, ids)
     end

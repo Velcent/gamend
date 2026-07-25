@@ -191,7 +191,7 @@ defmodule GameServer.Hooks do
   - `after_lobby_updated/1` - After lobby is updated
   - `before_lobby_delete/1` - Before lobby is deleted
   - `after_lobby_deleted/1` - After lobby is deleted
-  - `before_lobby_state_change/3` - Before a lobby's `state` changes, receives `(lobby, from, to)`. Veto-only: return `{:error, reason}` to reject, anything else allows. The vocabulary is yours — declare it with `lobby_states/0`
+  - `before_lobby_state_change/3` - Before a lobby's `state` changes, receives `(lobby, from, to)`. Veto-only: return `{:error, reason}` to reject, anything else allows. The vocabulary is yours — enforce it here (reject words you don't use)
   - `after_lobby_state_changed/3` - After a lobby's `state` changed (fire-and-forget), receives `(lobby, from, to)`
   - `before_lobby_kick/3` - Before user is kicked from lobby
   - `after_lobby_kick/3` - After user is kicked from lobby
@@ -442,9 +442,9 @@ defmodule GameServer.Hooks do
   @callback before_lobby_delete(lobby()) :: hook_result(lobby())
   @callback after_lobby_deleted(lobby()) :: any()
 
-  # Lobby lifecycle state. Core only ever sets "created"; the rest of the
-  # vocabulary is the game's, declared via lobby_states/0 and validated
-  # against it. Veto-only: the return never rewrites the args.
+  # Lobby lifecycle state. Core only ever sets "created" and accepts any sane
+  # word; the vocabulary and its ordering are the game's, enforced right here.
+  # Veto-only: the return never rewrites the args.
   @callback before_lobby_state_change(lobby(), String.t(), String.t()) ::
               {:ok, term()} | {:error, term()} | any()
   @callback after_lobby_state_changed(lobby(), String.t(), String.t()) :: any()

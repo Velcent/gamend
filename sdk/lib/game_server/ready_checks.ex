@@ -12,8 +12,16 @@ defmodule GameServer.ReadyChecks do
   | Deadline | mandatory | optional |
   | On timeout | fails | fails, naming who stalled |
   
-  `"ready"` is the lobby's ready-up; `"accept"` is matchmaking's match
-  confirmation (see `docs/specs/ready-check.md`).
+  `"ready"` is the lobby's ready-up and the party's standing ready board;
+  `"accept"` is matchmaking's match confirmation (see
+  `docs/specs/ready-check.md`).
+  
+  ## Two lanes
+  
+  A player can be in at most one open check *per lane*: the match lane (lobby
+  ready or matchmaking accept — one match at a time) and the party lane. The
+  lanes are independent, so a party's standing board never blocks the party's
+  lobby from opening its own check.
   
   ## What core does *not* do
   
@@ -32,7 +40,7 @@ defmodule GameServer.ReadyChecks do
   Answering is a single-row write, so no two players can lose each other's
   flag. *Evaluating* the result is the part that races: two players answering
   at once can each count the other as still pending, and nobody passes. So
-  `respond/2` holds a per-check advisory lock (`:ready_check`) around
+  `respond/3` holds a per-check advisory lock (`:ready_check`) around
   write-then-evaluate. Hooks and broadcasts fire after the lock is released —
   never inside the transaction.
   
@@ -42,7 +50,8 @@ defmodule GameServer.ReadyChecks do
   """
 
   @type answer() :: boolean()
-  @type subject() :: GameServer.Lobbies.Lobby.t() | :matchmaking
+  @type scope() :: :match | :party
+  @type subject() :: GameServer.Lobbies.Lobby.t() | GameServer.Parties.Party.t() | :matchmaking
 
   @doc ~S"""
     Adds a member to the lobby's open check, if there is one.
@@ -55,6 +64,21 @@ defmodule GameServer.ReadyChecks do
 
       _ ->
         raise "GameServer.ReadyChecks.add_member/2 is a stub - only available at runtime on GameServer"
+    end
+  end
+
+
+  @doc ~S"""
+    Adds a member to the party's open check, if there is one.
+  """
+  @spec add_party_member(Ecto.UUID.t(), Ecto.UUID.t()) :: :ok
+  def add_party_member(_party_id, _user_id) do
+    case Application.get_env(:game_server_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        :ok
+
+      _ ->
+        raise "GameServer.ReadyChecks.add_party_member/2 is a stub - only available at runtime on GameServer"
     end
   end
 
@@ -112,6 +136,21 @@ defmodule GameServer.ReadyChecks do
 
 
   @doc ~S"""
+    Cancels the party's pending check, if it has one.
+  """
+  @spec cancel_for_party(Ecto.UUID.t()) :: :ok
+  def cancel_for_party(_party_id) do
+    case Application.get_env(:game_server_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        :ok
+
+      _ ->
+        raise "GameServer.ReadyChecks.cancel_for_party/1 is a stub - only available at runtime on GameServer"
+    end
+  end
+
+
+  @doc ~S"""
     Counts checks matching the same filters as `list_checks/1`.
   """
   @spec count_checks(keyword()) :: non_neg_integer()
@@ -163,15 +202,21 @@ defmodule GameServer.ReadyChecks do
 
   @doc ~S"""
     The caller's open check, with participants preloaded, or nil.
+    
+    `scope` narrows to one lane: `:match` (lobby or matchmaking) or `:party`.
+    `:any` returns the newest across both lanes — the admin's view, not the
+    API's.
+    
   """
-  @spec for_user(GameServer.Accounts.User.t() | Ecto.UUID.t()) :: GameServer.ReadyChecks.Check.t() | nil
-  def for_user(_user) do
+  @spec for_user(GameServer.Accounts.User.t() | Ecto.UUID.t(), scope() | :any) ::
+  GameServer.ReadyChecks.Check.t() | nil
+  def for_user(_user, _scope) do
     case Application.get_env(:game_server_sdk, :stub_mode, :raise) do
       :placeholder ->
         if :erlang.phash2(make_ref(), 2) == 0, do: nil, else: %GameServer.ReadyChecks.Check{id: "", kind: "ready", status: "pending", lobby_id: nil, deadline: nil, opened_by: nil, reason: nil, resolved_at: nil, metadata: %{}, participants: [], inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}
 
       _ ->
-        raise "GameServer.ReadyChecks.for_user/1 is a stub - only available at runtime on GameServer"
+        raise "GameServer.ReadyChecks.for_user/2 is a stub - only available at runtime on GameServer"
     end
   end
 
@@ -194,7 +239,8 @@ defmodule GameServer.ReadyChecks do
   @doc ~S"""
     Lists checks for the admin views, newest first.
     
-    Options: `:status`, `:kind`, `:lobby_id`, `:page`, `:page_size`.
+    Options: `:status`, `:kind`, `:lobby_id`, `:party_id`, `:page`,
+    `:page_size`.
     
   """
   @spec list_checks(keyword()) :: [GameServer.ReadyChecks.Check.t()]
@@ -229,8 +275,8 @@ defmodule GameServer.ReadyChecks do
   @doc ~S"""
     Opens a check over `user_ids` and notifies them.
     
-    `subject` is a `%Lobby{}` (kind `"ready"`) or `:matchmaking` (kind
-    `"accept"`). Options:
+    `subject` is a `%Lobby{}` or `%Party{}` (kind `"ready"`) or `:matchmaking`
+    (kind `"accept"`). Options:
     
       * `:kind` — override the kind implied by the subject
       * `:timeout_ms` — answering window; `nil` leaves a `"ready"` check open
@@ -241,9 +287,9 @@ defmodule GameServer.ReadyChecks do
       * `:tickets` — `%{user_id => ticket_id}` for matchmaking checks
       * `:metadata` — game payload echoed to clients (match params, mode)
     
-    Fails with `{:error, :already_pending}` when the lobby already has an open
-    check or any player is in one, `{:error, :no_participants}`, and
-    `{:error, :too_many_participants}` past `max_ready_check_participants`.
+    Fails with `{:error, :already_pending}` when the subject already has an open
+    check or any player is in one in the same lane, `{:error, :no_participants}`,
+    and `{:error, :too_many_participants}` past `max_ready_check_participants`.
     
   """
   @spec open(subject(), [Ecto.UUID.t()], keyword()) ::
@@ -260,12 +306,14 @@ defmodule GameServer.ReadyChecks do
 
 
   @doc ~S"""
-    True when the lobby's most recent check passed.
+    True when the subject's most recent check passed.
     
     What a game calls from `before_lobby_state_change` to gate its own start.
+    A reset opens a fresh pending check, which makes this false again — so a
+    rematch cannot ride the previous match's pass.
     
   """
-  @spec passed?(GameServer.Lobbies.Lobby.t() | Ecto.UUID.t()) :: boolean()
+  @spec passed?(GameServer.Lobbies.Lobby.t() | GameServer.Parties.Party.t() | Ecto.UUID.t()) :: boolean()
   def passed?(_lobby_id) do
     case Application.get_env(:game_server_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -293,6 +341,21 @@ defmodule GameServer.ReadyChecks do
 
 
   @doc ~S"""
+    The party's open check, with participants preloaded, or nil.
+  """
+  @spec pending_for_party(Ecto.UUID.t()) :: GameServer.ReadyChecks.Check.t() | nil
+  def pending_for_party(_party_id) do
+    case Application.get_env(:game_server_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        if :erlang.phash2(make_ref(), 2) == 0, do: nil, else: %GameServer.ReadyChecks.Check{id: "", kind: "ready", status: "pending", lobby_id: nil, deadline: nil, opened_by: nil, reason: nil, resolved_at: nil, metadata: %{}, participants: [], inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}
+
+      _ ->
+        raise "GameServer.ReadyChecks.pending_for_party/1 is a stub - only available at runtime on GameServer"
+    end
+  end
+
+
+  @doc ~S"""
     Drops a member from the lobby's open check and re-evaluates it.
     
     Called when someone leaves or is kicked: kicking the one player who never
@@ -312,7 +375,51 @@ defmodule GameServer.ReadyChecks do
 
 
   @doc ~S"""
-    Records the caller's answer to their open check and re-evaluates it.
+    Drops a member from the party's open check and re-evaluates it.
+  """
+  @spec remove_party_member(Ecto.UUID.t(), Ecto.UUID.t()) :: :ok
+  def remove_party_member(_party_id, _user_id) do
+    case Application.get_env(:game_server_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        :ok
+
+      _ ->
+        raise "GameServer.ReadyChecks.remove_party_member/2 is a stub - only available at runtime on GameServer"
+    end
+  end
+
+
+  @doc ~S"""
+    Resets the subject's board: quietly cancels its pending check (no failed
+    event, no hook — the fresh `ready_check_started` replaces it on clients) and
+    opens a new one over `user_ids`.
+    
+    The one verb behind every "answers are stale now" moment: a match ended
+    (rematch needs a fresh board), the game mode changed, a member joined a
+    party whose board had already resolved, or the host wants everyone to
+    re-confirm on a deadline ("force ready"). Same options as `open/3`.
+    
+  """
+  @spec reset(subject(), [Ecto.UUID.t()], keyword()) ::
+  {:ok, GameServer.ReadyChecks.Check.t()} | {:error, term()}
+  def reset(_subject, _user_ids, _opts) do
+    case Application.get_env(:game_server_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        {:ok, %GameServer.ReadyChecks.Check{id: "", kind: "ready", status: "pending", lobby_id: nil, deadline: nil, opened_by: nil, reason: nil, resolved_at: nil, metadata: %{}, participants: [], inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+
+      _ ->
+        raise "GameServer.ReadyChecks.reset/3 is a stub - only available at runtime on GameServer"
+    end
+  end
+
+
+  @doc ~S"""
+    Records the caller's answer to their open check in `scope` and re-evaluates
+    it.
+    
+    `scope` is `:match` (the lobby ready-up or matchmaking accept — the default)
+    or `:party` (the party's standing board): a player can hold one open check
+    in each lane, so the answer needs to say which one it is for.
     
     `true` is "ready"/"accept"; `false` is "not ready"/"decline". In an `accept`
     check a decline fails the whole check; in a `ready` check it just leaves the
@@ -323,15 +430,15 @@ defmodule GameServer.ReadyChecks do
     answered, `{:error, :not_revocable}`.
     
   """
-  @spec respond(GameServer.Accounts.User.t() | Ecto.UUID.t(), answer()) ::
+  @spec respond(GameServer.Accounts.User.t() | Ecto.UUID.t(), answer(), scope()) ::
   {:ok, GameServer.ReadyChecks.Check.t()} | {:error, term()}
-  def respond(_user, _ready?) do
+  def respond(_user, _ready?, _scope) do
     case Application.get_env(:game_server_sdk, :stub_mode, :raise) do
       :placeholder ->
         {:ok, %GameServer.ReadyChecks.Check{id: "", kind: "ready", status: "pending", lobby_id: nil, deadline: nil, opened_by: nil, reason: nil, resolved_at: nil, metadata: %{}, participants: [], inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
 
       _ ->
-        raise "GameServer.ReadyChecks.respond/2 is a stub - only available at runtime on GameServer"
+        raise "GameServer.ReadyChecks.respond/3 is a stub - only available at runtime on GameServer"
     end
   end
 

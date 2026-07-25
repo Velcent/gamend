@@ -11,6 +11,13 @@ match you were paired into) and **lobbies** (ready up before the host starts).
 `accept` kind exists and is exercised by tests, but nothing opens one yet:
 Phase 2 (matchmaking accept) is the remaining unchecked item at the bottom.
 
+**Amendment (July 2026):** the party became the third subject and the check
+grew a `reset/3` verb, turning a `ready` check into a **standing, resettable
+board** on both containers. See "Party boards and reset" below. A player now
+holds at most one open check *per lane* (match lane: lobby/matchmaking; party
+lane), `GET /me/ready_check` returns `{lobby, party}`, and
+`POST /me/ready_check` takes a `scope`.
+
 ## Two features hiding under one name
 
 | | Matchmaking **accept** | Lobby **ready** |
@@ -69,13 +76,16 @@ single-row write — no read-modify-write, therefore no lock on the hot path.
 ```
 ready_checks
   id, kind ("accept" | "ready"), status ("pending"|"passed"|"failed"|"cancelled"),
-  lobby_id (FK lobbies, on_delete: delete_all — NULL for a matchmaking check,
-            which has no lobby yet),
+  lobby_id (FK lobbies, on_delete: delete_all),
+  party_id (FK parties, on_delete: delete_all),
+      -- at most one of the two is set; both NULL = a matchmaking check,
+      -- whose group exists only as its tickets
   deadline (utc_datetime, null only for kind="ready"),
   opened_by (user_id, null when the server opened it),
-  reason (string, null | "declined" | "timeout" | "cancelled"),
+  reason (string, null | "declined" | "timeout" | "cancelled" | "reset"),
   resolved_at, metadata (map), timestamps
   unique index [lobby_id] where status = 'pending'   -- one open check per lobby
+  unique index [party_id] where status = 'pending'   -- one open board per party
   index [deadline] where status = 'pending'          -- the expiry sweep
 
 ready_check_participants
@@ -86,16 +96,20 @@ ready_check_participants
   index [user_id]                                    -- see below
 ```
 
-"One open check per player" is **not** an index: it depends on the *check's*
-status, not the participant's state, and a player who has already answered still
-belongs to the open check. `open/3` enforces it with a join instead, which the
-`user_id` index serves along with `for_user/1`.
+"One open check per player **per lane**" is **not** an index: it depends on the
+*check's* status, not the participant's state, and a player who has already
+answered still belongs to the open check. `open/3` enforces it with a join
+instead, which the `user_id` index serves along with `for_user/2`. There are
+two lanes — the match lane (a check with `lobby_id` set, or a matchmaking
+check) and the party lane (`party_id` set) — so a party's standing board never
+blocks that party's lobby from opening its own check.
 
-A real `lobby_id` FK rather than a polymorphic `subject_type`/`subject_id` pair:
-a matchmaking check has no subject row to point at (the group only exists as its
-tickets), and the FK buys a database-level cascade — deleting a lobby cannot
-leave an orphaned check behind. A third subject later (a tournament match) adds
-a second nullable FK; that is cheaper than losing the cascade on the two that
+Real `lobby_id`/`party_id` FKs rather than a polymorphic
+`subject_type`/`subject_id` pair: a matchmaking check has no subject row to
+point at (the group only exists as its tickets), and the FKs buy a
+database-level cascade — deleting a lobby or disbanding a party cannot leave
+an orphaned check behind. A further subject later (a tournament match) adds
+another nullable FK; that is cheaper than losing the cascade on the ones that
 exist now.
 
 In Phase 2, `matchmaking_tickets` gains `ready_check_id` and one status,
@@ -200,18 +214,28 @@ Delivery rules:
 
 `GameServer.ReadyChecks`:
 
-- `open(subject, user_ids, opts)` — `subject` is a `Lobby` or `:matchmaking`.
-  Inserts the check and its participants,
+- `open(subject, user_ids, opts)` — `subject` is a `Lobby`, a `Party` or
+  `:matchmaking`. Inserts the check and its participants,
   broadcasts `ready_check_started`, schedules expiry. Fails with
-  `{:error, :already_pending}` if any player is already in an open check.
-- `respond(user, ready?)` — resolves the caller's open check, writes their
-  participant row, then evaluates.
+  `{:error, :already_pending}` if any player is already in an open check in
+  the same lane.
+- `reset(subject, user_ids, opts)` — quietly cancels the subject's pending
+  check (reason `"reset"`, no failed event, no hook) and opens a fresh one.
+  The one verb behind every "answers are stale now" moment: rematch, mode
+  change, membership change after a resolved board, "force ready" (pass a
+  `timeout_ms`).
+- `respond(user, ready?, scope)` — resolves the caller's open check in the
+  lane `scope` names (`:match` default, or `:party`), writes their participant
+  row, then evaluates.
 - `cancel(check, reason)` — the host called it off, or the subject went away
   (lobby deleted, match dissolved, admin action).
 - `answer_for(check, user_id, ready?)` — server-side answer for a bot or an
   AI-controlled member; never reachable over RPC.
-- `for_user(user_id)` / `passed?(subject)` / `not_ready(check)` — reads for the
-  API, for a game's own gating, and for the host's kick list.
+- `for_user(user_id, scope)` / `passed?(subject)` / `not_ready(check)` — reads
+  for the API, for a game's own gating, and for the host's kick list.
+  `passed?/1` orders by insertion, so a reset (which opens a fresh pending
+  check) makes it false again — a rematch cannot ride the previous match's
+  pass.
 
 Evaluation is the one place that must not race: two concurrent "ready" writes
 can each count the other as still pending and nobody passes (write skew). So
@@ -234,7 +258,24 @@ slow player deserves removal.
 
 Members who join the lobby while it is open are added as `pending`; members who
 leave or are kicked have their row removed and the check re-evaluated — kicking
-the one straggler can therefore pass the check outright.
+the one straggler can therefore pass the check outright. The party seams mirror
+this exactly (`add_party_member/2`, `remove_party_member/2`, wired into party
+join/leave/kick); disbanding a party cascades its checks at the DB level.
+
+### Party boards and reset
+
+A party is a persistent group, so its `ready` check is used as a **standing
+board** rather than a moment: a game opens one when the party forms (core
+never opens one itself), members toggle at leisure, and `reset/3` starts the
+answers over whenever they go stale. The same shape works on a lobby — reset
+on match end and the next match needs a fresh board, which is what makes
+`passed?/1` a sound start gate.
+
+What a party board *gates* is the game's business, exactly like lobby state: a
+passed party board fires `after_ready_check_passed` and nothing else. Party
+events ride the existing `party:<party_id>` topic. The leader opens/resets via
+`POST /parties/ready_check` and cancels via `DELETE /parties/ready_check` —
+the same authorization shape as the lobby host.
 
 ### Expiry
 

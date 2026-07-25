@@ -42,6 +42,7 @@ defmodule GameServerWeb.Serializers do
       kind: check.kind,
       status: check.status,
       lobby_id: check.lobby_id || "",
+      party_id: check.party_id || "",
       deadline: check.deadline,
       opened_by: check.opened_by || "",
       reason: check.reason || "",

@@ -12,8 +12,16 @@ defmodule GameServer.ReadyChecks do
   | Deadline | mandatory | optional |
   | On timeout | fails | fails, naming who stalled |
 
-  `"ready"` is the lobby's ready-up; `"accept"` is matchmaking's match
-  confirmation (see `docs/specs/ready-check.md`).
+  `"ready"` is the lobby's ready-up and the party's standing ready board;
+  `"accept"` is matchmaking's match confirmation (see
+  `docs/specs/ready-check.md`).
+
+  ## Two lanes
+
+  A player can be in at most one open check *per lane*: the match lane (lobby
+  ready or matchmaking accept — one match at a time) and the party lane. The
+  lanes are independent, so a party's standing board never blocks the party's
+  lobby from opening its own check.
 
   ## What core does *not* do
 
@@ -32,7 +40,7 @@ defmodule GameServer.ReadyChecks do
   Answering is a single-row write, so no two players can lose each other's
   flag. *Evaluating* the result is the part that races: two players answering
   at once can each count the other as still pending, and nobody passes. So
-  `respond/2` holds a per-check advisory lock (`:ready_check`) around
+  `respond/3` holds a per-check advisory lock (`:ready_check`) around
   write-then-evaluate. Hooks and broadcasts fire after the lock is released —
   never inside the transaction.
   """
@@ -42,6 +50,7 @@ defmodule GameServer.ReadyChecks do
   alias GameServer.Accounts.User
   alias GameServer.Limits
   alias GameServer.Lobbies.Lobby
+  alias GameServer.Parties.Party
   alias GameServer.ReadyChecks.Check
   alias GameServer.ReadyChecks.ExpiryWorker
   alias GameServer.ReadyChecks.Participant
@@ -49,7 +58,8 @@ defmodule GameServer.ReadyChecks do
 
   @pubsub GameServer.PubSub
 
-  @type subject :: Lobby.t() | :matchmaking
+  @type subject :: Lobby.t() | Party.t() | :matchmaking
+  @type scope :: :match | :party
   @type answer :: boolean()
 
   # ── Opening ───────────────────────────────────────────────────────────────
@@ -57,8 +67,8 @@ defmodule GameServer.ReadyChecks do
   @doc """
   Opens a check over `user_ids` and notifies them.
 
-  `subject` is a `%Lobby{}` (kind `"ready"`) or `:matchmaking` (kind
-  `"accept"`). Options:
+  `subject` is a `%Lobby{}` or `%Party{}` (kind `"ready"`) or `:matchmaking`
+  (kind `"accept"`). Options:
 
     * `:kind` — override the kind implied by the subject
     * `:timeout_ms` — answering window; `nil` leaves a `"ready"` check open
@@ -69,9 +79,9 @@ defmodule GameServer.ReadyChecks do
     * `:tickets` — `%{user_id => ticket_id}` for matchmaking checks
     * `:metadata` — game payload echoed to clients (match params, mode)
 
-  Fails with `{:error, :already_pending}` when the lobby already has an open
-  check or any player is in one, `{:error, :no_participants}`, and
-  `{:error, :too_many_participants}` past `max_ready_check_participants`.
+  Fails with `{:error, :already_pending}` when the subject already has an open
+  check or any player is in one in the same lane, `{:error, :no_participants}`,
+  and `{:error, :too_many_participants}` past `max_ready_check_participants`.
   """
   @spec open(subject(), [Ecto.UUID.t()], keyword()) ::
           {:ok, Check.t()} | {:error, term()}
@@ -79,7 +89,7 @@ defmodule GameServer.ReadyChecks do
     user_ids = user_ids |> Enum.filter(&is_binary/1) |> Enum.uniq()
 
     with :ok <- validate_participants(user_ids),
-         :ok <- ensure_none_pending(user_ids),
+         :ok <- ensure_none_pending(subject, user_ids),
          {:ok, attrs} <- run_open_hook(subject, user_ids, opts),
          {:ok, check} <- insert_check(subject, user_ids, attrs, opts) do
       check = Repo.preload(check, :participants)
@@ -87,6 +97,42 @@ defmodule GameServer.ReadyChecks do
       schedule_expiry(check)
       {:ok, check}
     end
+  end
+
+  @doc """
+  Resets the subject's board: quietly cancels its pending check (no failed
+  event, no hook — the fresh `ready_check_started` replaces it on clients) and
+  opens a new one over `user_ids`.
+
+  The one verb behind every "answers are stale now" moment: a match ended
+  (rematch needs a fresh board), the game mode changed, a member joined a
+  party whose board had already resolved, or the host wants everyone to
+  re-confirm on a deadline ("force ready"). Same options as `open/3`.
+  """
+  @spec reset(subject(), [Ecto.UUID.t()], keyword()) ::
+          {:ok, Check.t()} | {:error, term()}
+  def reset(subject, user_ids, opts \\ []) do
+    case pending_for_subject(subject) do
+      nil -> :ok
+      check -> quiet_cancel(check)
+    end
+
+    open(subject, user_ids, opts)
+  end
+
+  # Resolves a pending check as cancelled/"reset" without running effects.
+  # Deliberately no broadcast and no `after_ready_check_failed`: a reset is not
+  # a failure, and the caller immediately opens the replacement.
+  defp quiet_cancel(check) do
+    result =
+      GameServer.Lock.serialize(:ready_check, check.id, fn ->
+        case reload_pending(check) do
+          {:ok, check} -> resolve(check, "cancelled", "reset")
+          {:error, reason} -> Repo.rollback(reason)
+        end
+      end)
+
+    with {:ok, _} <- result, do: :ok
   end
 
   defp validate_participants([]), do: {:error, :no_participants}
@@ -99,9 +145,11 @@ defmodule GameServer.ReadyChecks do
     end
   end
 
-  # "One open check per player" spans two tables, so it cannot be an index —
-  # a player who has already answered still belongs to the open check.
-  defp ensure_none_pending(user_ids) do
+  # "One open check per player per lane" spans two tables, so it cannot be an
+  # index — a player who has already answered still belongs to the open check.
+  # The lane filter keeps a party's standing board from blocking that party's
+  # lobby check (and vice versa).
+  defp ensure_none_pending(subject, user_ids) do
     query =
       from(p in Participant,
         join: c in Check,
@@ -109,8 +157,17 @@ defmodule GameServer.ReadyChecks do
         where: p.user_id in ^user_ids and c.status == "pending"
       )
 
+    query =
+      case lane(subject) do
+        :party -> where(query, [p, c], not is_nil(c.party_id))
+        :match -> where(query, [p, c], is_nil(c.party_id))
+      end
+
     if Repo.exists?(query), do: {:error, :already_pending}, else: :ok
   end
+
+  defp lane(%Party{}), do: :party
+  defp lane(_subject), do: :match
 
   defp run_open_hook(subject, user_ids, opts) do
     case GameServer.Hooks.internal_call(:before_ready_check_open, [subject, user_ids]) do
@@ -131,6 +188,7 @@ defmodule GameServer.ReadyChecks do
       kind: kind,
       status: "pending",
       lobby_id: lobby_id(subject),
+      party_id: party_id(subject),
       deadline: deadline_for(opts),
       opened_by: opened_by,
       metadata: Keyword.get(opts, :metadata, %{})
@@ -168,10 +226,18 @@ defmodule GameServer.ReadyChecks do
   end
 
   defp default_kind(%Lobby{}), do: "ready"
+  defp default_kind(%Party{}), do: "ready"
   defp default_kind(:matchmaking), do: "accept"
 
   defp lobby_id(%Lobby{id: id}), do: id
-  defp lobby_id(:matchmaking), do: nil
+  defp lobby_id(_subject), do: nil
+
+  defp party_id(%Party{id: id}), do: id
+  defp party_id(_subject), do: nil
+
+  defp pending_for_subject(%Lobby{id: id}), do: pending_for_lobby(id)
+  defp pending_for_subject(%Party{id: id}), do: pending_for_party(id)
+  defp pending_for_subject(:matchmaking), do: nil
 
   # An explicit `timeout_ms: nil` means "no deadline" whatever the kind; the
   # changeset then rejects it for an accept check, rather than this quietly
@@ -189,7 +255,12 @@ defmodule GameServer.ReadyChecks do
   # ── Answering ─────────────────────────────────────────────────────────────
 
   @doc """
-  Records the caller's answer to their open check and re-evaluates it.
+  Records the caller's answer to their open check in `scope` and re-evaluates
+  it.
+
+  `scope` is `:match` (the lobby ready-up or matchmaking accept — the default)
+  or `:party` (the party's standing board): a player can hold one open check
+  in each lane, so the answer needs to say which one it is for.
 
   `true` is "ready"/"accept"; `false` is "not ready"/"decline". In an `accept`
   check a decline fails the whole check; in a `ready` check it just leaves the
@@ -199,11 +270,12 @@ defmodule GameServer.ReadyChecks do
   `{:error, :no_open_check}` and, for an `accept` check the caller already
   answered, `{:error, :not_revocable}`.
   """
-  @spec respond(User.t() | Ecto.UUID.t(), answer()) :: {:ok, Check.t()} | {:error, term()}
-  def respond(user, ready?) when is_boolean(ready?) do
+  @spec respond(User.t() | Ecto.UUID.t(), answer(), scope()) ::
+          {:ok, Check.t()} | {:error, term()}
+  def respond(user, ready?, scope \\ :match) when is_boolean(ready?) do
     user_id = user_id(user)
 
-    case for_user(user_id) do
+    case for_user(user_id, scope) do
       nil -> {:error, :no_open_check}
       check -> write_answer(check, user_id, ready?)
     end
@@ -358,49 +430,61 @@ defmodule GameServer.ReadyChecks do
   """
   @spec remove_member(Ecto.UUID.t(), Ecto.UUID.t()) :: :ok
   def remove_member(lobby_id, user_id) when is_binary(lobby_id) and is_binary(user_id) do
-    case pending_for_lobby(lobby_id) do
-      nil ->
-        :ok
+    do_remove_member(pending_for_lobby(lobby_id), user_id)
+  end
 
-      check ->
-        result =
-          GameServer.Lock.serialize(:ready_check, check.id, fn ->
-            Participant
-            |> where([p], p.ready_check_id == ^check.id and p.user_id == ^user_id)
-            |> Repo.delete_all()
+  @doc "Drops a member from the party's open check and re-evaluates it."
+  @spec remove_party_member(Ecto.UUID.t(), Ecto.UUID.t()) :: :ok
+  def remove_party_member(party_id, user_id) when is_binary(party_id) and is_binary(user_id) do
+    do_remove_member(pending_for_party(party_id), user_id)
+  end
 
-            case remaining_count(check) do
-              0 -> resolve(check, "cancelled", "cancelled")
-              _ -> evaluate(check)
-            end
-          end)
+  defp do_remove_member(nil, _user_id), do: :ok
 
-        with {:ok, {check, effects}} <- result, do: run_effects(check, effects)
-        :ok
-    end
+  defp do_remove_member(check, user_id) do
+    result =
+      GameServer.Lock.serialize(:ready_check, check.id, fn ->
+        Participant
+        |> where([p], p.ready_check_id == ^check.id and p.user_id == ^user_id)
+        |> Repo.delete_all()
+
+        case remaining_count(check) do
+          0 -> resolve(check, "cancelled", "cancelled")
+          _ -> evaluate(check)
+        end
+      end)
+
+    with {:ok, {check, effects}} <- result, do: run_effects(check, effects)
+    :ok
   end
 
   @doc "Adds a member to the lobby's open check, if there is one."
   @spec add_member(Ecto.UUID.t(), Ecto.UUID.t()) :: :ok
   def add_member(lobby_id, user_id) when is_binary(lobby_id) and is_binary(user_id) do
-    case pending_for_lobby(lobby_id) do
-      nil ->
-        :ok
+    do_add_member(pending_for_lobby(lobby_id), user_id)
+  end
 
-      check ->
-        %Participant{}
-        |> Participant.changeset(%{ready_check_id: check.id, user_id: user_id, state: "pending"})
-        |> Repo.insert()
-        |> case do
-          {:ok, _participant} ->
-            broadcast(Repo.preload(check, :participants, force: true), "ready_check_updated")
+  @doc "Adds a member to the party's open check, if there is one."
+  @spec add_party_member(Ecto.UUID.t(), Ecto.UUID.t()) :: :ok
+  def add_party_member(party_id, user_id) when is_binary(party_id) and is_binary(user_id) do
+    do_add_member(pending_for_party(party_id), user_id)
+  end
 
-          {:error, _changeset} ->
-            :ok
-        end
+  defp do_add_member(nil, _user_id), do: :ok
 
+  defp do_add_member(check, user_id) do
+    %Participant{}
+    |> Participant.changeset(%{ready_check_id: check.id, user_id: user_id, state: "pending"})
+    |> Repo.insert()
+    |> case do
+      {:ok, _participant} ->
+        broadcast(Repo.preload(check, :participants, force: true), "ready_check_updated")
+
+      {:error, _changeset} ->
         :ok
     end
+
+    :ok
   end
 
   defp remaining_count(check) do
@@ -430,6 +514,15 @@ defmodule GameServer.ReadyChecks do
   @spec cancel_for_lobby(Ecto.UUID.t()) :: :ok
   def cancel_for_lobby(lobby_id) when is_binary(lobby_id) do
     case pending_for_lobby(lobby_id) do
+      nil -> :ok
+      check -> with {:ok, _} <- cancel(check), do: :ok
+    end
+  end
+
+  @doc "Cancels the party's pending check, if it has one."
+  @spec cancel_for_party(Ecto.UUID.t()) :: :ok
+  def cancel_for_party(party_id) when is_binary(party_id) do
+    case pending_for_party(party_id) do
       nil -> :ok
       check -> with {:ok, _} <- cancel(check), do: :ok
     end
@@ -487,21 +580,32 @@ defmodule GameServer.ReadyChecks do
 
   # ── Reads ─────────────────────────────────────────────────────────────────
 
-  @doc "The caller's open check, with participants preloaded, or nil."
-  @spec for_user(User.t() | Ecto.UUID.t()) :: Check.t() | nil
-  def for_user(user) do
+  @doc """
+  The caller's open check, with participants preloaded, or nil.
+
+  `scope` narrows to one lane: `:match` (lobby or matchmaking) or `:party`.
+  `:any` returns the newest across both lanes — the admin's view, not the
+  API's.
+  """
+  @spec for_user(User.t() | Ecto.UUID.t(), scope() | :any) :: Check.t() | nil
+  def for_user(user, scope \\ :any) do
     user_id = user_id(user)
 
     from(c in Check,
       join: p in Participant,
       on: p.ready_check_id == c.id,
       where: p.user_id == ^user_id and c.status == "pending",
-      order_by: [desc: c.inserted_at],
+      order_by: [desc: c.inserted_at, desc: c.id],
       limit: 1,
       preload: [:participants]
     )
+    |> scope_filter(scope)
     |> Repo.one()
   end
+
+  defp scope_filter(query, :match), do: where(query, [c], is_nil(c.party_id))
+  defp scope_filter(query, :party), do: where(query, [c], not is_nil(c.party_id))
+  defp scope_filter(query, :any), do: query
 
   @doc "The lobby's open check, with participants preloaded, or nil."
   @spec pending_for_lobby(Ecto.UUID.t()) :: Check.t() | nil
@@ -514,25 +618,44 @@ defmodule GameServer.ReadyChecks do
 
   def pending_for_lobby(_lobby_id), do: nil
 
+  @doc "The party's open check, with participants preloaded, or nil."
+  @spec pending_for_party(Ecto.UUID.t()) :: Check.t() | nil
+  def pending_for_party(party_id) when is_binary(party_id) do
+    Check
+    |> where([c], c.party_id == ^party_id and c.status == "pending")
+    |> preload(:participants)
+    |> Repo.one()
+  end
+
+  def pending_for_party(_party_id), do: nil
+
   @doc """
-  True when the lobby's most recent check passed.
+  True when the subject's most recent check passed.
 
   What a game calls from `before_lobby_state_change` to gate its own start.
+  A reset opens a fresh pending check, which makes this false again — so a
+  rematch cannot ride the previous match's pass.
   """
-  @spec passed?(Lobby.t() | Ecto.UUID.t()) :: boolean()
+  @spec passed?(Lobby.t() | Party.t() | Ecto.UUID.t()) :: boolean()
   def passed?(%Lobby{id: id}), do: passed?(id)
+  def passed?(%Party{id: id}), do: subject_passed?(:party_id, id)
 
-  def passed?(lobby_id) when is_binary(lobby_id) do
+  def passed?(lobby_id) when is_binary(lobby_id), do: subject_passed?(:lobby_id, lobby_id)
+
+  def passed?(_lobby), do: false
+
+  # `id` breaks ties: `inserted_at` has second precision, and a reset opens
+  # the replacement within the same second as the check it replaces. Ids are
+  # UUIDv7, so they order by creation time.
+  defp subject_passed?(field, id) do
     Check
-    |> where([c], c.lobby_id == ^lobby_id)
-    |> order_by([c], desc: c.inserted_at)
+    |> where([c], field(c, ^field) == ^id)
+    |> order_by([c], desc: c.inserted_at, desc: c.id)
     |> limit(1)
     |> select([c], c.status)
     |> Repo.one()
     |> Kernel.==("passed")
   end
-
-  def passed?(_lobby), do: false
 
   @doc """
   The participants who did not answer ready — the host's kick list, and what
@@ -557,7 +680,8 @@ defmodule GameServer.ReadyChecks do
   @doc """
   Lists checks for the admin views, newest first.
 
-  Options: `:status`, `:kind`, `:lobby_id`, `:page`, `:page_size`.
+  Options: `:status`, `:kind`, `:lobby_id`, `:party_id`, `:page`,
+  `:page_size`.
   """
   @spec list_checks(keyword()) :: [Check.t()]
   def list_checks(opts \\ []) do
@@ -599,6 +723,7 @@ defmodule GameServer.ReadyChecks do
     |> filter_equals(:status, Keyword.get(opts, :status))
     |> filter_equals(:kind, Keyword.get(opts, :kind))
     |> filter_equals(:lobby_id, Keyword.get(opts, :lobby_id))
+    |> filter_equals(:party_id, Keyword.get(opts, :party_id))
   end
 
   defp filter_equals(query, field, value) when is_binary(value) and value != "",
@@ -628,12 +753,21 @@ defmodule GameServer.ReadyChecks do
   defp user_id(%User{id: id}), do: id
   defp user_id(id) when is_binary(id), do: id
 
-  # Lobby checks go to the lobby topic so every member and spectator sees one
-  # event; matchmaking checks have no lobby yet, so they fan out per user.
+  # Lobby checks go to the lobby topic and party checks to the party topic, so
+  # every member (and, for lobbies, spectator) sees one event; matchmaking
+  # checks have no shared topic yet, so they fan out per user.
   defp broadcast(%Check{lobby_id: lobby_id} = check, event) when is_binary(lobby_id) do
     Phoenix.PubSub.broadcast(
       @pubsub,
       "lobby:#{lobby_id}",
+      {:ready_check_event, event, check}
+    )
+  end
+
+  defp broadcast(%Check{party_id: party_id} = check, event) when is_binary(party_id) do
+    Phoenix.PubSub.broadcast(
+      @pubsub,
+      "party:#{party_id}",
       {:ready_check_event, event, check}
     )
   end

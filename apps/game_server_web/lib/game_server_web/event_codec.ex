@@ -244,6 +244,7 @@ defmodule GameServerWeb.EventCodec do
       kind: get(p, :kind),
       status: get(p, :status),
       lobby_id: get(p, :lobby_id) || "",
+      party_id: get(p, :party_id) || "",
       deadline_ms: ms(p, :deadline) || 0,
       total: get(p, :total) || 0,
       ready_count: get(p, :ready_count) || 0,
