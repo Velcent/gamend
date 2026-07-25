@@ -65,17 +65,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # Single-arch first, loaded into the local daemon so the next step can
-      # actually run it. The multi-arch build below reuses this layer cache, so
-      # the extra build is close to free.
-      #
-      # A boot smoke test is the only thing that exercises the real CMD, the
-      # real migrations and the real build args. Two production incidents got
-      # past a green build here: config/runtime.exs is evaluated at container
-      # start, not at build time, and a build arg renamed in the Dockerfile but
-      # not here is silently ignored - which shipped a SQLite build under the
-      # -postgres tag.
-      - name: Build image for the smoke test (amd64, loaded locally)
+      - name: Build and (conditionally) push multi-arch image
         uses: docker/build-push-action@v4
         with:
           context: .
@@ -83,51 +73,85 @@ jobs:
           build-args: |
             GAMEND_CONTENT_APP_VERSION=${{ env.APP_VERSION }}
             GAMEND_DB_ADAPTER=${{ matrix.adapter }}
+          platforms: linux/amd64,linux/arm64
+          # amd64 reuses the smoke build's layers; arm64 keeps its own scope.
+          # Without this every run rebuilt the Rust toolchain, every dependency
+          # and every NIF from scratch.
+          cache-from: type=gha,scope=${{ matrix.adapter }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.adapter }}
+          push: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
+          tags: |
+            ${{ env.IMAGE }}:latest${{ matrix.tags_suffix }}
+            ${{ env.IMAGE }}:${{ github.sha }}${{ matrix.extra_tag_suffix }}
+
+  smoke:
+    name: Boot the image (${{ matrix.adapter }})
+    runs-on: ubuntu-latest
+
+    # Deliberately independent of `build`: this proves the image starts and
+    # serves traffic, which unit tests cannot. config/runtime.exs is evaluated
+    # at container start, not at build time, so a green build says nothing
+    # about whether the app boots. It does not gate publishing.
+    strategy:
+      fail-fast: false
+      matrix:
+        adapter: [sqlite, postgres]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v2
+
+      - name: Build the image (amd64, loaded locally)
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: Dockerfile
+          build-args: |
+            GAMEND_DB_ADAPTER=${{ matrix.adapter }}
           platforms: linux/amd64
           load: true
           tags: gamend-smoke:${{ matrix.adapter }}
-          cache-from: type=gha,scope=${{ matrix.adapter }}-amd64
-          cache-to: type=gha,mode=max,scope=${{ matrix.adapter }}-amd64
+          cache-from: type=gha,scope=${{ matrix.adapter }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.adapter }}
 
-      - name: Start a Postgres for the smoke test
-        if: matrix.adapter == 'postgres'
-        run: |
-          docker run -d --name smoke-db \
-            -e POSTGRES_PASSWORD=postgres \
-            -e POSTGRES_USER=postgres \
-            -e POSTGRES_DB=game_server_prod \
-            -p 5432:5432 postgres:15
-          for _ in $(seq 1 30); do
-            docker exec smoke-db pg_isready -U postgres && break
-            sleep 2
-          done
-
-      - name: Boot the image and check it serves traffic
+      - name: Boot it and check it serves traffic
         run: |
           set -euo pipefail
 
-          # An env file keeps this out of word-splitting, and keeps the
-          # docker run line readable whichever adapter is being smoked.
-          : > /tmp/smoke.env
-          echo "GAMEND_AUTH_SECRET_KEY_BASE=$(head -c 48 /dev/urandom | base64 | tr -d '\n')" >> /tmp/smoke.env
-          echo "GAMEND_HTTP_HOST=localhost" >> /tmp/smoke.env
-          echo "GAMEND_OBSERVABILITY_LOG_LEVEL=info" >> /tmp/smoke.env
+          docker network create smoke-net
+
+          # POSTGRES_* are inherited names — platforms provision them, so they
+          # are the only database variables the server reads. Using a derived
+          # GAMEND_DB_POSTGRES_* name here silently configures nothing.
+          {
+            echo "GAMEND_AUTH_SECRET_KEY_BASE=$(head -c 48 /dev/urandom | base64 | tr -d '\n')"
+            echo "GAMEND_HTTP_HOST=localhost"
+            echo "GAMEND_OBSERVABILITY_LOG_LEVEL=info"
+          } > smoke.env
 
           if [ "${{ matrix.adapter }}" = "postgres" ]; then
+            docker run -d --name smoke-db --network smoke-net \
+              -e POSTGRES_PASSWORD=postgres \
+              -e POSTGRES_USER=postgres \
+              -e POSTGRES_DB=game_server_prod \
+              postgres:15
+
+            for _ in $(seq 1 30); do
+              docker exec smoke-db pg_isready -U postgres >/dev/null 2>&1 && break
+              sleep 2
+            done
+
             {
-              echo "GAMEND_DB_POSTGRES_HOST=host.docker.internal"
-              echo "GAMEND_DB_POSTGRES_USER=postgres"
-              echo "GAMEND_DB_POSTGRES_PASSWORD=postgres"
-              echo "GAMEND_DB_POSTGRES_DB=game_server_prod"
-            } >> /tmp/smoke.env
+              echo "POSTGRES_HOST=smoke-db"
+              echo "POSTGRES_USER=postgres"
+              echo "POSTGRES_PASSWORD=postgres"
+              echo "POSTGRES_DB=game_server_prod"
+            } >> smoke.env
           fi
 
-          # A real production environment: enough to enter the branches in
-          # config/host_runtime.exs that only prod takes.
-          docker run -d --name gamend-smoke \
-            --add-host=host.docker.internal:host-gateway \
-            -p 4000:4000 \
-            --env-file /tmp/smoke.env \
+          docker run -d --name gamend-smoke --network smoke-net \
+            -p 4000:4000 --env-file smoke.env \
             gamend-smoke:${{ matrix.adapter }}
 
           for _ in $(seq 1 60); do
@@ -148,7 +172,7 @@ jobs:
           exit 1
 
       # The build arg has to reach the compiled code, not just the shell: an
-      # ignored GAMEND_DB_ADAPTER used to publish a SQLite build as -postgres.
+      # ignored GAMEND_DB_ADAPTER once published a SQLite build as -postgres.
       - name: Verify the image compiled against the expected adapter
         run: |
           set -euo pipefail
@@ -160,32 +184,12 @@ jobs:
             sqlite)   echo "$adapter" | grep -q "Ecto.Adapters.SQLite3" ;;
           esac
 
-      - name: Smoke test teardown
+      - name: Teardown
         if: always()
         run: |
           docker logs gamend-smoke 2>&1 | tail -50 || true
           docker rm -f gamend-smoke smoke-db 2>/dev/null || true
-
-      - name: Build and (conditionally) push multi-arch image
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          file: Dockerfile
-          build-args: |
-            GAMEND_CONTENT_APP_VERSION=${{ env.APP_VERSION }}
-            GAMEND_DB_ADAPTER=${{ matrix.adapter }}
-          platforms: linux/amd64,linux/arm64
-          # amd64 reuses the smoke build's layers; arm64 keeps its own scope.
-          # Without this every run rebuilt the Rust toolchain, every dependency
-          # and every NIF from scratch.
-          cache-from: |
-            type=gha,scope=${{ matrix.adapter }}-amd64
-            type=gha,scope=${{ matrix.adapter }}-arm64
-          cache-to: type=gha,mode=max,scope=${{ matrix.adapter }}-arm64
-          push: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
-          tags: |
-            ${{ env.IMAGE }}:latest${{ matrix.tags_suffix }}
-            ${{ env.IMAGE }}:${{ github.sha }}${{ matrix.extra_tag_suffix }}
+          docker network rm smoke-net 2>/dev/null || true
 
   lint:
     name: Elixir lint
