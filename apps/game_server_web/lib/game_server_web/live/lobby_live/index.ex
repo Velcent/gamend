@@ -189,10 +189,11 @@ defmodule GameServerWeb.LobbyLive.Index do
       "is_locked" => lobby.is_locked
     }
 
-    # only allow editing for the host or hostless lobbies; others get a view-only modal
+    # only the host of a host-managed lobby may edit; everyone else, and every
+    # member of a hostless lobby, gets a view-only modal
     can_edit =
       case socket.assigns.current_scope do
-        %{user_id: uid} when uid != nil -> uid == lobby.host_id or lobby.hostless
+        %{user_id: uid} when uid != nil -> not lobby.hostless and uid == lobby.host_id
         _ -> false
       end
 

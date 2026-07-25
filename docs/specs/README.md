@@ -43,6 +43,9 @@ has shipped.
 
 ## Unscheduled
 
+- [retention.md](retention.md) — **Retention for every unbounded table.**
+  Extends the existing sweep to lobbies, expired tokens, resolved invites,
+  stale tickets and the ledgers, batched and configurable via `RETENTION_*`.
 - [lobby-state.md](lobby-state.md) — **Lobby state.** A server-owned
   `waiting/starting/playing/ended` column with legal transitions, hooks and a
   generic stale-lobby reaper; unoverloads `is_locked` and replaces the

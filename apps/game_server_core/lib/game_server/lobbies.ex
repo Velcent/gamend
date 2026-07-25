@@ -54,8 +54,8 @@ defmodule GameServer.Lobbies do
   alias GameServer.KV
   alias GameServer.KV.Entry, as: KVEntry
   alias GameServer.Lobbies.Lobby
-  alias GameServer.Lobbies.States
   alias GameServer.Lobbies.SpectatorTracker
+  alias GameServer.Lobbies.States
   alias GameServer.Repo
   alias GameServer.Repo.AdvisoryLock
   alias GameServer.Types
@@ -709,7 +709,7 @@ defmodule GameServer.Lobbies do
         |> Multi.run(:check_host, fn _repo, _changes ->
           validate_host_not_in_lobby(attrs)
         end)
-        |> Multi.insert(:lobby, Lobby.changeset(%Lobby{}, attrs))
+        |> Multi.insert(:lobby, new_lobby_changeset(attrs))
         |> maybe_add_host_membership(attrs)
         |> Repo.transaction()
 
@@ -883,6 +883,16 @@ defmodule GameServer.Lobbies do
       {:error, reason} ->
         {:error, {:hook_rejected, reason}}
     end
+  end
+
+  # Core owns the lifecycle field: a new lobby always starts in the initial
+  # state, stamped, regardless of what the caller passed (state is not
+  # castable, so this is the only way it gets set at insert).
+  defp new_lobby_changeset(attrs) do
+    %Lobby{}
+    |> Lobby.changeset(attrs)
+    |> Ecto.Changeset.put_change(:state, States.initial())
+    |> Ecto.Changeset.put_change(:state_changed_at, DateTime.utc_now(:second))
   end
 
   @doc """
@@ -1385,11 +1395,12 @@ defmodule GameServer.Lobbies do
   end
 
   @doc """
-  Check if a user can edit a lobby (is host or lobby is hostless).
+  Check if a user can edit a lobby: the host of a host-managed lobby, nobody
+  else. Hostless lobbies have no editor — see `update_lobby_by_host/3`.
   """
   @spec can_edit_lobby?(User.t() | nil, Lobby.t() | nil) :: boolean()
   def can_edit_lobby?(%User{id: user_id}, %Lobby{} = lobby) do
-    lobby.host_id == user_id or lobby.hostless
+    not lobby.hostless and lobby.host_id == user_id
   end
 
   def can_edit_lobby?(nil, _lobby), do: false
@@ -1414,10 +1425,19 @@ defmodule GameServer.Lobbies do
   def spectatable?(%Lobby{is_locked: true}), do: false
   def spectatable?(%Lobby{}), do: true
 
+  @doc """
+  Player-initiated lobby update, subject to lobby ownership.
+
+  Allowed only for the **host of a host-managed lobby**. **Hostless** lobbies
+  (matchmaking's) belong to nobody, so no player may edit them — a member
+  could otherwise rewrite `metadata`, `max_users`, `password_hash` and the
+  visibility flags of a ranked match they merely happen to be in. Server-side
+  code (hooks, jobs, matchmaking, admin) uses `update_lobby/2` instead.
+  """
   @spec update_lobby_by_host(User.t(), Lobby.t(), Types.lobby_update_attrs()) ::
           {:ok, Lobby.t()} | {:error, :not_host | :too_small | Ecto.Changeset.t() | term()}
   def update_lobby_by_host(%User{id: host_id}, %Lobby{} = lobby, attrs) do
-    if lobby.host_id == host_id or lobby.hostless do
+    if not lobby.hostless and lobby.host_id == host_id do
       attrs = maybe_hash_password(attrs)
       new_max = Map.get(attrs, "max_users") || Map.get(attrs, :max_users)
 

@@ -5,6 +5,34 @@ defmodule GameServer.LobbyStateTest do
   alias GameServer.Lobbies
   alias GameServer.Lobbies.States
 
+  # Vetoes any move into "playing" and reports what it saw, so both the veto
+  # path and the after-hook's arguments are covered.
+  defmodule StateHook do
+    def before_lobby_state_change(_lobby, from, to) do
+      send(Application.get_env(:game_server, :hooks_test_pid), {:before_state, from, to})
+      if to == "playing", do: {:error, :not_ready}, else: :ok
+    end
+
+    def after_lobby_state_changed(_lobby, from, to) do
+      send(Application.get_env(:game_server, :hooks_test_pid), {:after_state, from, to})
+      :ok
+    end
+  end
+
+  defp with_state_hook(fun) do
+    orig = Application.get_env(:game_server_core, :hooks_module)
+    Application.put_env(:game_server_core, :hooks_module, StateHook)
+    Application.put_env(:game_server, :hooks_test_pid, self())
+
+    try do
+      fun.()
+    after
+      if orig,
+        do: Application.put_env(:game_server_core, :hooks_module, orig),
+        else: Application.delete_env(:game_server_core, :hooks_module)
+    end
+  end
+
   defp lobby_fixture(attrs \\ %{}) do
     {:ok, lobby} =
       Lobbies.create_lobby(Map.merge(%{title: "L#{System.unique_integer([:positive])}"}, attrs))
@@ -111,6 +139,40 @@ defmodule GameServer.LobbyStateTest do
       # The server itself still can, via the unscoped call.
       assert {:ok, ended} = Lobbies.transition_state(lobby, "ended")
       assert ended.state == "ended"
+    end
+  end
+
+  describe "hooks" do
+    test "before_lobby_state_change can veto the move" do
+      lobby = lobby_fixture()
+
+      with_state_hook(fn ->
+        assert {:error, {:hook_rejected, :not_ready}} =
+                 Lobbies.transition_state(lobby, "playing")
+
+        assert_received {:before_state, "created", "playing"}
+      end)
+
+      assert Lobbies.get_lobby(lobby.id).state == "created"
+    end
+
+    test "after_lobby_state_changed observes an allowed move" do
+      lobby = lobby_fixture()
+
+      with_state_hook(fn ->
+        assert {:ok, _} = Lobbies.transition_state(lobby, "ended")
+        assert_received {:before_state, "created", "ended"}
+        assert_receive {:after_state, "created", "ended"}, 1_000
+      end)
+    end
+
+    test "skip_hooks bypasses the veto (admin/server path)" do
+      lobby = lobby_fixture()
+
+      with_state_hook(fn ->
+        assert {:ok, moved} = Lobbies.transition_state(lobby, "playing", skip_hooks: true)
+        assert moved.state == "playing"
+      end)
     end
   end
 

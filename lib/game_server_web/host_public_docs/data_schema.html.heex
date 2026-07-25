@@ -120,6 +120,9 @@
       password_hash: string (bcrypt hash, optional: requires password to join)
       metadata     : jsonb/map (searchable metadata)
       slowdown     : integer (chat slow-mode seconds, 0 = off)
+      state        : string (lifecycle; core sets "created", the game owns the
+                     rest of the vocabulary — server-owned, not client-writable)
+      state_changed_at : utc_datetime
       inserted_at  : utc_datetime
       updated_at   : utc_datetime
     )</pre>

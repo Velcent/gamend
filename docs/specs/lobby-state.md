@@ -102,7 +102,7 @@ lobby has a host.
 | Writer | Scope |
 | --- | --- |
 | **Core** | `create_lobby` → `"created"` |
-| **The host** | `POST /lobbies/:id/state` — host-managed lobbies only |
+| **The host** | `POST /lobbies/state` — host-managed lobbies only |
 | **The game, server-side** | `Lobbies.transition_state/3` from hooks/RPCs — the only path for hostless lobbies |
 | **Admins** | force any state from the admin page/API |
 
@@ -133,8 +133,10 @@ Dispatched after commit via `defer/1`, never inside the lock.
 - `state` and `state_changed_at` in lobby payloads (REST + protobuf); `state`
   filter on `GET /lobbies`.
 - `lobby_state_changed` on the lobby channel, registered in `RealtimeEvents`.
-- `POST /lobbies/:id/state` — `403 not_host` for a non-host or **any** caller on
-  a hostless lobby; `422` for an unknown state; veto errors passed through.
+- `POST /lobbies/state` — acts on the caller's own lobby (matching
+  `PATCH /lobbies` and `POST /lobbies/leave`); `403 not_host` for a non-host or
+  **any** caller on a hostless lobby; `422` for an unknown state; veto errors
+  passed through.
 - Admin: state column + filter on `/admin/lobbies`, force-state action, API
   parity; declared states listed on the runtime page next to notification types.
 
@@ -175,7 +177,7 @@ then drops the metadata key.
 - [ ] `lobby_states/0` declaration registered, merged, and shown on the admin
       runtime page.
 - [ ] Hooks in all six places, RPC-blocked, SDK-mirrored.
-- [ ] `POST /lobbies/:id/state` allows the host, rejects a non-host and **any**
+- [ ] `POST /lobbies/state` allows the host, rejects a non-host and **any**
       caller on a hostless lobby, and honours the veto.
 - [ ] `state` filter + payload fields + `lobby_state_changed` registered.
 - [ ] Admin column/filter/force-state + API parity + render test.

@@ -251,7 +251,10 @@ defmodule GameServerWeb.Api.V1.LobbyController do
     operation_id: "update_lobby",
     summary: "Update lobby (host only)",
     description:
-      "Update lobby settings. Only the host can update the lobby via the API (returns 403 if not host). Admins can still modify lobbies from the admin console - those changes are broadcast to viewers.",
+      "Update the caller's lobby settings. Allowed only for the host of a host-managed " <>
+        "lobby: hostless (matchmaking) lobbies belong to the server, so no player may edit " <>
+        "them (both cases return 403). Admins can still modify any lobby from the admin " <>
+        "console or the admin API - those changes are broadcast to viewers.",
     security: [%{"authorization" => []}],
     request_body: {
       "Lobby update parameters",
@@ -281,7 +284,7 @@ defmodule GameServerWeb.Api.V1.LobbyController do
     responses: [
       ok: {"Lobby updated", "application/json", @lobby_schema},
       forbidden:
-        {"Not the host", "application/json",
+        {"Not the host, or lobby is hostless", "application/json",
          %Schema{type: :object, properties: %{error: %Schema{type: :string}}}},
       unauthorized:
         {"Not authenticated", "application/json",

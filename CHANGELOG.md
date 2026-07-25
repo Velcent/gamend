@@ -1,7 +1,9 @@
 # July 2026
 
+- [breaking] **Hostless lobbies are server-owned** — `PATCH /lobbies` (and `Lobbies.update_lobby_by_host/3`) now returns `403 not_host` for every player in a hostless (matchmaking) lobby, where any member could previously rewrite `metadata`, `max_users`, `password_hash`, `title` and the visibility flags. Server-side code uses `Lobbies.update_lobby/2`; the admin API and console are unchanged.
 - [added] **Push notifications** — FCM + APNs-direct via Pigeon, routed per token; offline notification delivery.
 - [added] **Push-token registry** — `/me/push-tokens`, admin page, retention pruning.
+- [added] **Lobby state** — server-owned `state` + `state_changed_at`, a game-defined vocabulary via the `lobby_states/0` declaration, `POST /lobbies/state` for hosts (hostless lobbies stay server-only), `state` filter, `state_changed` event and `before_lobby_state_change` / `after_lobby_state_changed` hooks.
 - [added] **Quests / progression**.
 - [breaking] **Achievements removed** — replaced by permanent quests categorised "achievement"; `/quests` supersedes the `/achievements` API, page and hooks.
 - [added] **Economy**.

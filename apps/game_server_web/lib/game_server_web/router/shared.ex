@@ -350,6 +350,7 @@ defmodule GameServerWeb.Router.Shared do
         post "/lobbies", LobbyController, :create
         post "/lobbies/quick_join", LobbyController, :quick_join
         patch "/lobbies", LobbyController, :update
+        post "/lobbies/state", LobbyController, :set_state
         post "/lobbies/:id/join", LobbyController, :join
         post "/lobbies/leave", LobbyController, :leave
         post "/lobbies/kick", LobbyController, :kick
@@ -518,7 +519,6 @@ defmodule GameServerWeb.Router.Shared do
 
         get "/lobbies", LobbyController, :index
         patch "/lobbies/:id", LobbyController, :update
-        post "/lobbies/:id/state", LobbyController, :set_state
         delete "/lobbies/:id", LobbyController, :delete
         patch "/users/:id", UserController, :update
         delete "/users/:id", UserController, :delete
