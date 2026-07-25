@@ -94,7 +94,8 @@ the process dies, the next `run/3` starts a fresh one and reads the lobby back
 from the database. A game that keeps match state only in the process loses a
 match to any crash, and core should not make that easy.
 
-- **Idle timeout** — `LOBBY_SESSION_IDLE_MS` (default 30 min, polyglot's value),
+- **Idle timeout** — `GAMEND_LOBBY_SESSION_IDLE_MS` (default 30 min, polyglot's
+  value),
   then `:hibernate` before shutdown so a long-lived quiet lobby costs a word or
   two of heap.
 - **Lobby deleted** — the session subscribes to its own lobby topic and stops on
@@ -136,7 +137,7 @@ timer), all mirrored in the SDK.
 
 Polyglot's `warn_if_unserialized_write` is the reason its invariant held. Core
 can do it properly: `Lobbies.update_lobby/2` checks, when
-`LOBBY_SESSION_STRICT=true` (default on in dev/test, off in prod), whether a
+`GAMEND_LOBBY_SESSION_STRICT=true` (default on in dev/test, off in prod), whether a
 session exists for that lobby and the caller is not it, and logs a warning with
 the stacktrace. Off by default in production because the check costs a `:global`
 lookup per update; on in dev because that is where the mistake is made.
@@ -187,10 +188,12 @@ few milliseconds is queueing its own players.
 - [ ] Timers deliver to `handle_lobby_timer/2`, do not survive restart, and the
       docs show the Oban alternative for must-run work.
 - [ ] Three hooks in all six places, RPC-blocked, SDK-mirrored.
-- [ ] `LOBBY_SESSION_STRICT` tripwire warns on out-of-session
+- [ ] `GAMEND_LOBBY_SESSION_STRICT` tripwire warns on out-of-session
       `update_lobby/2`; off in prod, on in dev/test.
-- [ ] Limits: `LOBBY_SESSION_IDLE_MS`, `LOBBY_SESSION_CALL_TIMEOUT_MS` in
-      `Limits` + `.env.example`.
+- [ ] `session_idle_ms`, `session_call_timeout_ms` and `session_strict`
+      declared on the `:lobby` settings provider (names derive to
+      `GAMEND_LOBBY_SESSION_*`); `.env.example` regenerated with
+      `mix gamend.settings.env_example`.
 - [ ] Admin section (live sessions, mailbox, timers, force-stop) + API parity +
       `admin_pages_render_test`; PromEx gauge + histogram.
 - [ ] Docs: server-scripting page gets a "one writer per lobby" section stating

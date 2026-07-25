@@ -44,6 +44,11 @@ defmodule GameServerWeb.HostSupervision do
   """
   @spec init_runtime() :: :ok
   def init_runtime do
+    # Before anything starts: a missing required setting should stop the boot
+    # here, with a list of what is missing, rather than surface later as a
+    # crash-loop in whichever child needed it.
+    GameServer.Settings.validate!(Application.get_env(:game_server_web, :environment, :prod))
+
     Application.start(:os_mon)
 
     # ETS owner for the Schedule registry + protected-callback set — must exist

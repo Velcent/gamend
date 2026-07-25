@@ -39,9 +39,27 @@ defmodule GameServer.Storage do
   @default_cache_policies [{"avatars/", "public, max-age=31536000, immutable"}]
   @default_cache_control "public, max-age=0, must-revalidate"
 
+  # `cache_policies` and `default_cache_control` above stay host-config-only:
+  # they are prefix/policy lists, not scalars an env var can carry.
+  use GameServer.Settings.Provider,
+    app: :game_server_core,
+    group: :storage,
+    label: "Storage"
+
+  setting(:adapter, :atom,
+    default: :local,
+    doc: "Backend for avatars and uploads: local | s3 (any S3-compatible service)."
+  )
+
+  setting(:public_url, :string,
+    doc: "CDN or base URL serving stored objects, whichever backend is behind it."
+  )
+
+  @adapters %{local: GameServer.Storage.Local, s3: GameServer.Storage.S3}
+
   @doc "The configured backend module (defaults to `GameServer.Storage.Local`)."
   @spec adapter() :: module()
-  def adapter, do: Keyword.get(config(), :adapter, GameServer.Storage.Local)
+  def adapter, do: Map.fetch!(@adapters, GameServer.Settings.get(__MODULE__, :adapter))
 
   @doc false
   def config, do: Application.get_env(:game_server_core, __MODULE__, [])

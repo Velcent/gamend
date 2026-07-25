@@ -1188,46 +1188,46 @@ defmodule GameServer.Accounts do
     end
   end
 
-  @doc """
-  Returns true when device-based auth is enabled. This checks the
-  application config `:game_server, :device_auth_enabled` and falls back
-  to the environment variable `DEVICE_AUTH_ENABLED`. If neither
-  is set, device auth is enabled by default.
-  """
+  use GameServer.Settings.Provider,
+    app: :game_server_core,
+    group: :auth,
+    label: "Authentication"
+
+  setting(:device_auth_enabled, :boolean,
+    default: true,
+    doc:
+      "Allow POST /api/v1/login/device. When on, any unknown device_id creates an anonymous account."
+  )
+
+  setting(:require_activation, :boolean,
+    default: false,
+    doc: "New accounts cannot log in until an admin activates them (beta mode)."
+  )
+
+  # Dev and test carry compiled values (config/dev.exs, config/test.exs), so
+  # this only ever fires on a real deployment. Generate one with
+  # `mix phx.gen.secret`.
+  setting(:secret_key_base, :string,
+    secret: true,
+    required: :prod,
+    doc: "Signs and encrypts cookies, tokens and LiveView sessions."
+  )
+
+  setting(:guardian_secret_key, :string,
+    secret: true,
+    doc: "JWT signing key. Defaults to secret_key_base when unset."
+  )
+
+  @doc "Whether device-based auth is enabled. Defaults to on."
   @spec device_auth_enabled?() :: boolean()
-  def device_auth_enabled? do
-    case Application.get_env(:game_server_core, :device_auth_enabled) do
-      nil ->
-        case System.get_env("DEVICE_AUTH_ENABLED") do
-          v when v in ["1", "true", "TRUE", "True"] -> true
-          v when v in ["0", "false", "FALSE", "False"] -> false
-          _ -> true
-        end
-
-      bool when is_boolean(bool) ->
-        bool
-
-      other ->
-        # support string-like values in config
-        case other do
-          v when v in ["1", "true", "TRUE", "True"] -> true
-          v when v in ["0", "false", "FALSE", "False"] -> false
-          _ -> true
-        end
-    end
-  end
+  def device_auth_enabled?, do: GameServer.Settings.get(__MODULE__, :device_auth_enabled) == true
 
   @doc """
-  Returns true when new accounts require manual admin activation before
-  they can log in. Reads from application config
-  `:game_server_core, :require_account_activation` which is set at boot
-  from the `REQUIRE_ACCOUNT_ACTIVATION` environment variable in `runtime.exs`.
-  Defaults to `false` when not configured.
+  Whether new accounts require manual admin activation before they can log in.
   """
   @spec require_account_activation?() :: boolean()
-  def require_account_activation? do
-    Application.get_env(:game_server_core, :require_account_activation, false) == true
-  end
+  def require_account_activation?,
+    do: GameServer.Settings.get(__MODULE__, :require_activation) == true
 
   @doc """
   Returns true when the given user is activated or when account activation

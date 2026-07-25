@@ -129,13 +129,15 @@ defmodule GameServerHost.Application do
   defp oauth_info do
     providers =
       [
-        {"Discord", "DISCORD_CLIENT_ID"},
-        {"Apple", "APPLE_WEB_CLIENT_ID"},
-        {"Google", "GOOGLE_CLIENT_ID"},
-        {"Facebook", "FACEBOOK_CLIENT_ID"},
-        {"Steam", "STEAM_API_KEY"}
+        {"Discord", :discord_client_id},
+        {"Apple", :apple_client_id},
+        {"Google", :google_client_id},
+        {"Facebook", :facebook_client_id},
+        {"Steam", :steam_api_key}
       ]
-      |> Enum.filter(fn {_name, env} -> System.get_env(env) not in [nil, ""] end)
+      |> Enum.filter(fn {_name, key} ->
+        GameServer.Settings.get(GameServer.OAuth.Providers, key) not in [nil, ""]
+      end)
       |> Enum.map(fn {name, _} -> name end)
 
     if providers == [] do

@@ -443,9 +443,7 @@ defmodule GameServerWeb.AdminLive.System do
   end
 
   defp grafana_url do
-    Application.get_env(:game_server_web, :grafana_url) ||
-      System.get_env("GRAFANA_PUBLIC_URL") ||
-      "http://localhost:3130"
+    GameServerWeb.Observability.get(:grafana_url) || "http://localhost:3130"
   end
 
   defp build_memory_breakdown(memory, total_bytes) do

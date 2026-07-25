@@ -435,18 +435,79 @@ defmodule GameServer.Push do
     "apns" => GameServer.Push.Providers.APNs
   }
 
+  # With nothing configured, neither dispatcher starts and every delivery
+  # routes to the Log provider — the whole flow works with zero credentials.
+  # The APNs four are all-or-nothing: a partial set means someone meant to
+  # enable it and mistyped, which is worth a warning rather than silence.
+  use GameServer.Settings.Provider,
+    app: :game_server_core,
+    group: :push,
+    label: "Push notifications"
+
+  setting(:adapter, :atom,
+    default: :auto,
+    doc: "Set to `log` to route every delivery to the Log provider, credentials or not."
+  )
+
+  setting(:queue_concurrency, :integer,
+    default: 10,
+    doc: "Per-node concurrent deliveries on the push queue."
+  )
+
+  setting(:fcm_credentials, :string,
+    secret: true,
+    doc: "FCM service-account JSON, inline or a path to the file."
+  )
+
+  setting(:fcm_project_id, :string, doc: "Defaults to the project id inside the FCM credentials.")
+
+  @apns_group [:apns_private_key, :apns_key_id, :apns_team_id, :apns_topic]
+
+  setting(:apns_private_key, :string,
+    secret: true,
+    required: :warn,
+    with: @apns_group,
+    doc: "APNs .p8 key contents, or a path to the file."
+  )
+
+  setting(:apns_key_id, :string,
+    required: :warn,
+    with: @apns_group,
+    doc: "10-character key id of the APNs auth key."
+  )
+
+  setting(:apns_team_id, :string,
+    required: :warn,
+    with: @apns_group,
+    doc: "Apple developer team id."
+  )
+
+  setting(:apns_topic, :string,
+    required: :warn,
+    with: @apns_group,
+    doc: "App bundle id, sent as apns-topic."
+  )
+
+  setting(:apns_env, :atom,
+    default: :production,
+    doc: "`production`, or `sandbox` for dev builds."
+  )
+
+  @doc "Whether every delivery is forced to the Log provider (`PUSH_ADAPTER=log`)."
+  @spec force_log?() :: boolean()
+  def force_log?, do: GameServer.Settings.get(__MODULE__, :adapter) == :log
+
   @doc """
   Resolve the delivery provider for a token: its `provider` column's module
   when that module's `configured?/0` says it can deliver, else the zero-config
-  `Log` provider. `force_log: true` (`PUSH_ADAPTER=log`) short-circuits
-  everything to `Log`.
+  `Log` provider. `PUSH_ADAPTER=log` short-circuits everything to `Log`.
   """
   @spec provider_for(PushToken.t()) :: module()
   def provider_for(%PushToken{provider: provider}) do
     config = Application.get_env(:game_server_core, __MODULE__, [])
     providers = config[:providers] || @default_providers
 
-    with false <- config[:force_log] == true,
+    with false <- force_log?(),
          module when module != nil <- providers[provider],
          true <- module.configured?() do
       module

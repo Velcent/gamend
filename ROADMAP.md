@@ -121,7 +121,7 @@ def up,   do: Oban.Migration.up(version: 12)
 def down, do: Oban.Migration.down(version: 1)
 ```
 
-Verify it applies cleanly under `DATABASE_ADAPTER=postgres` **and** default
+Verify it applies cleanly under `GAMEND_DB_ADAPTER=postgres` **and** default
 SQLite (CONTRIBUTING §Data model). A **separate** migration drops the now-dead
 `schedule_locks` table — dropping a table is safe on both adapters.
 
@@ -210,7 +210,7 @@ DigitalOcean Spaces — same code, different endpoint).
   shared concerns: key namespacing (`avatars/<user_id>/...`), content-type +
   size validation (caps in `GameServer.Limits` → `LIMIT_*`), and a deterministic
   key scheme.
-- **`GameServer.Storage.Local`** — writes under `STORAGE_LOCAL_DIR`
+- **`GameServer.Storage.Local`** — writes under `GAMEND_STORAGE_DIR`
   (default `priv/storage`, git-ignored). `url/2` points at a Plug route
   `GET /storage/*key`; `presigned_upload/2` returns a signed (HMAC + expiry)
   URL to a local `PUT /storage/upload` endpoint so the client-side flow is
@@ -223,14 +223,14 @@ DigitalOcean Spaces — same code, different endpoint).
 selected like the DB adapter:
 
 ```
-STORAGE_ADAPTER=local|s3          # default local
-STORAGE_LOCAL_DIR=priv/storage
-STORAGE_PUBLIC_URL=               # CDN / base URL override
-STORAGE_S3_BUCKET=
-STORAGE_S3_REGION=auto
-STORAGE_S3_ENDPOINT=              # e.g. https://<acct>.r2.cloudflarestorage.com
-STORAGE_S3_ACCESS_KEY_ID=
-STORAGE_S3_SECRET_ACCESS_KEY=
+GAMEND_STORAGE_ADAPTER=local|s3          # default local
+GAMEND_STORAGE_DIR=priv/storage
+GAMEND_STORAGE_PUBLIC_URL=               # CDN / base URL override
+GAMEND_STORAGE_BUCKET=
+GAMEND_STORAGE_REGION=auto
+GAMEND_STORAGE_ENDPOINT=              # e.g. https://<acct>.r2.cloudflarestorage.com
+GAMEND_STORAGE_ACCESS_KEY_ID=
+GAMEND_STORAGE_SECRET_ACCESS_KEY=
 STORAGE_MAX_UPLOAD_BYTES=5242880
 ```
 
@@ -284,7 +284,7 @@ Per CONTRIBUTING §Finish, plus the user's ask to reframe cron→jobs everywhere
 
 ### Definition of done (CONTRIBUTING)
 
-- [ ] Migrations apply on SQLite **and** `DATABASE_ADAPTER=postgres`.
+- [ ] Migrations apply on SQLite **and** `GAMEND_DB_ADAPTER=postgres`.
 - [ ] `GameServer.Jobs` + reworked `Schedule` + `Storage` with pagination on any
       list endpoints and `Limits` caps enforced in changesets.
 - [ ] Hooks: enqueued-hook callbacks protected from RPC; SDK mirrors any new

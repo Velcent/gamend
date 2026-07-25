@@ -49,6 +49,7 @@ jobs:
           VERSION="1.0.${COMMIT_COUNT}"
           echo "Generated version=${VERSION}"
           echo "APP_VERSION=${VERSION}" >> $GITHUB_ENV
+          echo "GAMEND_CONTENT_APP_VERSION=${VERSION}" >> $GITHUB_ENV
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
 
       - name: Set up QEMU
@@ -64,15 +65,123 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # Single-arch first, loaded into the local daemon so the next step can
+      # actually run it. The multi-arch build below reuses this layer cache, so
+      # the extra build is close to free.
+      #
+      # A boot smoke test is the only thing that exercises the real CMD, the
+      # real migrations and the real build args. Two production incidents got
+      # past a green build here: config/runtime.exs is evaluated at container
+      # start, not at build time, and a build arg renamed in the Dockerfile but
+      # not here is silently ignored - which shipped a SQLite build under the
+      # -postgres tag.
+      - name: Build image for the smoke test (amd64, loaded locally)
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: Dockerfile
+          build-args: |
+            GAMEND_CONTENT_APP_VERSION=${{ env.APP_VERSION }}
+            GAMEND_DB_ADAPTER=${{ matrix.adapter }}
+          platforms: linux/amd64
+          load: true
+          tags: gamend-smoke:${{ matrix.adapter }}
+          cache-from: type=gha,scope=${{ matrix.adapter }}-amd64
+          cache-to: type=gha,mode=max,scope=${{ matrix.adapter }}-amd64
+
+      - name: Start a Postgres for the smoke test
+        if: matrix.adapter == 'postgres'
+        run: |
+          docker run -d --name smoke-db \
+            -e POSTGRES_PASSWORD=postgres \
+            -e POSTGRES_USER=postgres \
+            -e POSTGRES_DB=game_server_prod \
+            -p 5432:5432 postgres:15
+          for _ in $(seq 1 30); do
+            docker exec smoke-db pg_isready -U postgres && break
+            sleep 2
+          done
+
+      - name: Boot the image and check it serves traffic
+        run: |
+          set -euo pipefail
+
+          # An env file keeps this out of word-splitting, and keeps the
+          # docker run line readable whichever adapter is being smoked.
+          : > /tmp/smoke.env
+          echo "GAMEND_AUTH_SECRET_KEY_BASE=$(head -c 48 /dev/urandom | base64 | tr -d '\n')" >> /tmp/smoke.env
+          echo "GAMEND_HTTP_HOST=localhost" >> /tmp/smoke.env
+          echo "GAMEND_OBSERVABILITY_LOG_LEVEL=info" >> /tmp/smoke.env
+
+          if [ "${{ matrix.adapter }}" = "postgres" ]; then
+            {
+              echo "GAMEND_DB_POSTGRES_HOST=host.docker.internal"
+              echo "GAMEND_DB_POSTGRES_USER=postgres"
+              echo "GAMEND_DB_POSTGRES_PASSWORD=postgres"
+              echo "GAMEND_DB_POSTGRES_DB=game_server_prod"
+            } >> /tmp/smoke.env
+          fi
+
+          # A real production environment: enough to enter the branches in
+          # config/host_runtime.exs that only prod takes.
+          docker run -d --name gamend-smoke \
+            --add-host=host.docker.internal:host-gateway \
+            -p 4000:4000 \
+            --env-file /tmp/smoke.env \
+            gamend-smoke:${{ matrix.adapter }}
+
+          for _ in $(seq 1 60); do
+            if curl -fsS http://localhost:4000/api/v1/health | grep -q '"status":"ok"'; then
+              echo "healthy"
+              exit 0
+            fi
+            if [ -z "$(docker ps -q -f name=gamend-smoke)" ]; then
+              echo "::error::container exited before serving traffic"
+              docker logs gamend-smoke
+              exit 1
+            fi
+            sleep 2
+          done
+
+          echo "::error::timed out waiting for /api/v1/health"
+          docker logs gamend-smoke
+          exit 1
+
+      # The build arg has to reach the compiled code, not just the shell: an
+      # ignored GAMEND_DB_ADAPTER used to publish a SQLite build as -postgres.
+      - name: Verify the image compiled against the expected adapter
+        run: |
+          set -euo pipefail
+          adapter=$(docker exec gamend-smoke sh -c \
+            'mix run --no-start -e "IO.puts(inspect(GameServer.Repo.__adapter__()))"' | tail -1)
+          echo "compiled adapter: $adapter"
+          case "${{ matrix.adapter }}" in
+            postgres) echo "$adapter" | grep -q "Ecto.Adapters.Postgres" ;;
+            sqlite)   echo "$adapter" | grep -q "Ecto.Adapters.SQLite3" ;;
+          esac
+
+      - name: Smoke test teardown
+        if: always()
+        run: |
+          docker logs gamend-smoke 2>&1 | tail -50 || true
+          docker rm -f gamend-smoke smoke-db 2>/dev/null || true
+
       - name: Build and (conditionally) push multi-arch image
         uses: docker/build-push-action@v4
         with:
           context: .
           file: Dockerfile
           build-args: |
-            APP_VERSION=${{ env.APP_VERSION }}
-            DATABASE_ADAPTER=${{ matrix.adapter }}
+            GAMEND_CONTENT_APP_VERSION=${{ env.APP_VERSION }}
+            GAMEND_DB_ADAPTER=${{ matrix.adapter }}
           platforms: linux/amd64,linux/arm64
+          # amd64 reuses the smoke build's layers; arm64 keeps its own scope.
+          # Without this every run rebuilt the Rust toolchain, every dependency
+          # and every NIF from scratch.
+          cache-from: |
+            type=gha,scope=${{ matrix.adapter }}-amd64
+            type=gha,scope=${{ matrix.adapter }}-arm64
+          cache-to: type=gha,mode=max,scope=${{ matrix.adapter }}-arm64
           push: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
           tags: |
             ${{ env.IMAGE }}:latest${{ matrix.tags_suffix }}
@@ -121,6 +230,11 @@ jobs:
       - name: Credo (strict, web app)
         working-directory: apps/game_server_web
         run: MIX_ENV=dev mix credo --strict
+
+      - name: Settings docs are in sync with the declarations
+        run: |
+          MIX_ENV=dev mix gamend.settings.env_example --check
+          MIX_ENV=dev mix gamend.settings.guide --check
 
       - name: Audit dependencies for known vulnerabilities
         run: MIX_ENV=dev mix deps.audit
@@ -386,6 +500,7 @@ jobs:
 
           # Export for remaining steps in this job
           echo "APP_VERSION=${VERSION}" >> $GITHUB_ENV
+          echo "GAMEND_CONTENT_APP_VERSION=${VERSION}" >> $GITHUB_ENV
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
 
       - name: Set up Elixir
@@ -486,6 +601,7 @@ jobs:
 
           # Export for remaining steps in this job
           echo "APP_VERSION=${VERSION}" >> $GITHUB_ENV
+          echo "GAMEND_CONTENT_APP_VERSION=${VERSION}" >> $GITHUB_ENV
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
 
       - name: Set up Elixir (for mix openapi task)
@@ -566,6 +682,7 @@ jobs:
           VERSION="1.0.${COMMIT_COUNT}"
           echo "Generated version=${VERSION}"
           echo "APP_VERSION=${VERSION}" >> $GITHUB_ENV
+          echo "GAMEND_CONTENT_APP_VERSION=${VERSION}" >> $GITHUB_ENV
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
 
       - name: Set up Elixir
@@ -638,6 +755,7 @@ jobs:
 
           # Export for remaining steps in this job
           echo "APP_VERSION=${VERSION}" >> $GITHUB_ENV
+          echo "GAMEND_CONTENT_APP_VERSION=${VERSION}" >> $GITHUB_ENV
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
 
       - name: Setup Elixir

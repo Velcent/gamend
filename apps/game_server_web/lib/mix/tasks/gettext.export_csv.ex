@@ -334,8 +334,8 @@ defmodule Mix.Tasks.Gettext.ExportCsv do
   end
 
   defp detect_config_base(nil) do
-    # Auto-detect: check THEME_CONFIG env, then common patterns
-    env_path = System.get_env("THEME_CONFIG")
+    # Auto-detect: the declared theme_config setting, then common patterns.
+    env_path = GameServer.Settings.get(GameServer.ContentSettings, :theme_config)
 
     cond do
       env_path && env_path != "" ->

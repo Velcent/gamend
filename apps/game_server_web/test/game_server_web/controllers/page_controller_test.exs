@@ -8,10 +8,11 @@ defmodule GameServerWeb.PageControllerTest do
   alias GameServer.Theme.JSONConfig
 
   setup do
-    # Ensure a known THEME_CONFIG is active so tests aren't affected by other
+    # Ensure a known GAMEND_CONTENT_THEME_CONFIG is active so tests aren't affected by other
     # modules that may delete/restore the env var concurrently.
     # Use a temp file with known content for reliable path resolution.
-    orig = System.get_env("THEME_CONFIG")
+    orig =
+      GameServer.SettingsHelpers.get(:game_server_core, GameServer.ContentSettings, :theme_config)
 
     base =
       Path.join(System.tmp_dir!(), "theme_page_test_#{System.unique_integer([:positive])}.json")
@@ -174,12 +175,33 @@ defmodule GameServerWeb.PageControllerTest do
 
     File.write!(en_path, json)
     File.write!(ro_path, ro_json)
-    System.put_env("THEME_CONFIG", base)
+
+    GameServer.SettingsHelpers.put(
+      :game_server_core,
+      GameServer.ContentSettings,
+      :theme_config,
+      base
+    )
+
     JSONConfig.reload()
     Content.reload()
 
     on_exit(fn ->
-      if orig, do: System.put_env("THEME_CONFIG", orig), else: System.delete_env("THEME_CONFIG")
+      if orig,
+        do:
+          GameServer.SettingsHelpers.put(
+            :game_server_core,
+            GameServer.ContentSettings,
+            :theme_config,
+            orig
+          ),
+        else:
+          GameServer.SettingsHelpers.delete(
+            :game_server_core,
+            GameServer.ContentSettings,
+            :theme_config
+          )
+
       JSONConfig.reload()
       Content.reload()
       File.rm(en_path)
@@ -230,8 +252,13 @@ defmodule GameServerWeb.PageControllerTest do
     assert body =~ "fi-ro"
   end
 
-  test "home renders without errors when THEME_CONFIG is unset", %{conn: conn} do
-    System.delete_env("THEME_CONFIG")
+  test "home renders without errors when GAMEND_CONTENT_THEME_CONFIG is unset", %{conn: conn} do
+    GameServer.SettingsHelpers.delete(
+      :game_server_core,
+      GameServer.ContentSettings,
+      :theme_config
+    )
+
     JSONConfig.reload()
     Content.reload()
 

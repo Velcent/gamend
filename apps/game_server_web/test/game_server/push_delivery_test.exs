@@ -134,12 +134,12 @@ defmodule GameServer.PushDeliveryTest do
       assert Push.provider_for(token) == InvalidProvider
     end
 
-    test "force_log overrides everything (PUSH_ADAPTER=log)" do
+    test "adapter: :log overrides everything (GAMEND_PUSH_ADAPTER=log)" do
       user = AccountsFixtures.user_fixture()
       token = register!(user, %{"platform" => "android"})
 
       swap_provider("fcm", InvalidProvider)
-      put_push_env(force_log: true)
+      put_push_env(adapter: :log)
 
       assert Push.provider_for(token) == Log
     end

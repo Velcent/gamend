@@ -6,12 +6,28 @@ defmodule GameServerWeb.Plugs.LoadThemeTest do
   alias GameServerWeb.Plugs.LoadTheme
 
   setup do
-    orig = System.get_env("THEME_CONFIG")
+    orig =
+      GameServer.SettingsHelpers.get(:game_server_core, GameServer.ContentSettings, :theme_config)
+
     JSONConfig.reload()
     Content.reload()
 
     on_exit(fn ->
-      if orig, do: System.put_env("THEME_CONFIG", orig), else: System.delete_env("THEME_CONFIG")
+      if orig,
+        do:
+          GameServer.SettingsHelpers.put(
+            :game_server_core,
+            GameServer.ContentSettings,
+            :theme_config,
+            orig
+          ),
+        else:
+          GameServer.SettingsHelpers.delete(
+            :game_server_core,
+            GameServer.ContentSettings,
+            :theme_config
+          )
+
       JSONConfig.reload()
       Content.reload()
     end)
@@ -20,7 +36,12 @@ defmodule GameServerWeb.Plugs.LoadThemeTest do
   end
 
   test "assigns fallback theme keys into conn when no local theme is configured", %{conn: conn} do
-    System.delete_env("THEME_CONFIG")
+    GameServer.SettingsHelpers.delete(
+      :game_server_core,
+      GameServer.ContentSettings,
+      :theme_config
+    )
+
     JSONConfig.reload()
 
     conn = LoadTheme.call(conn, [])
@@ -28,13 +49,16 @@ defmodule GameServerWeb.Plugs.LoadThemeTest do
     assert conn.assigns[:theme]
     assert is_map(conn.assigns[:theme])
     assert conn.assigns[:theme]["title"] == "MISSING_THEME"
-    assert conn.assigns[:theme]["tagline"] == "Add host theme config or set THEME_CONFIG"
+
+    assert conn.assigns[:theme]["tagline"] ==
+             "Add host theme config or set GAMEND_CONTENT_THEME_CONFIG"
+
     assert conn.assigns[:theme]["logo"] == "/images/logo.png"
     assert conn.assigns[:theme]["footer"] in [nil, %{}]
     assert conn.assigns[:theme]["navigation"] in [nil, %{}]
   end
 
-  test "populates theme values from THEME_CONFIG", %{conn: conn} do
+  test "populates theme values from GAMEND_CONTENT_THEME_CONFIG", %{conn: conn} do
     base =
       Path.join(System.tmp_dir!(), "theme_plug_vals_#{System.unique_integer([:positive])}.json")
 
@@ -45,7 +69,13 @@ defmodule GameServerWeb.Plugs.LoadThemeTest do
       Jason.encode!(%{"title" => "Test Title", "tagline" => "Test Tag", "logo" => "/logo.png"})
     )
 
-    System.put_env("THEME_CONFIG", base)
+    GameServer.SettingsHelpers.put(
+      :game_server_core,
+      GameServer.ContentSettings,
+      :theme_config,
+      base
+    )
+
     JSONConfig.reload()
 
     on_exit(fn -> File.rm(en_path) end)
@@ -77,11 +107,16 @@ defmodule GameServerWeb.Plugs.LoadThemeTest do
     conn = LoadTheme.call(conn, [])
 
     assert conn.assigns[:theme]["title"] == "MISSING_THEME"
-    assert conn.assigns[:theme]["tagline"] == "Add host theme config or set THEME_CONFIG"
+
+    assert conn.assigns[:theme]["tagline"] ==
+             "Add host theme config or set GAMEND_CONTENT_THEME_CONFIG"
+
     assert conn.assigns[:theme]["logo"] == "/images/logo.png"
   end
 
-  test "prefers locale-specific THEME_CONFIG when locale is assigned", %{conn: conn} do
+  test "prefers locale-specific GAMEND_CONTENT_THEME_CONFIG when locale is assigned", %{
+    conn: conn
+  } do
     base =
       Path.join(System.tmp_dir!(), "theme_test_plug_#{System.unique_integer([:positive])}.json")
 
@@ -91,7 +126,13 @@ defmodule GameServerWeb.Plugs.LoadThemeTest do
     File.write!(en_path, Jason.encode!(%{"title" => "English Title", "tagline" => "EN"}))
     File.write!(es_path, Jason.encode!(%{"title" => "Titulo ES", "tagline" => "ES"}))
 
-    System.put_env("THEME_CONFIG", base)
+    GameServer.SettingsHelpers.put(
+      :game_server_core,
+      GameServer.ContentSettings,
+      :theme_config,
+      base
+    )
+
     JSONConfig.reload()
 
     on_exit(fn ->

@@ -50,8 +50,8 @@ abcdefghijklmnopqrstuvwx
 Set these environment variables:
 
 ```bash
-DISCORD_CLIENT_ID="your_client_id_here"
-DISCORD_CLIENT_SECRET="your_client_secret_here"
+GAMEND_OAUTH_DISCORD_CLIENT_ID="your_client_id_here"
+GAMEND_OAUTH_DISCORD_CLIENT_SECRET="your_client_secret_here"
 ```
 
 ## Test Discord Login

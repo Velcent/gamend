@@ -3,7 +3,6 @@ defmodule GameServerWeb.UserLive.Login do
 
   alias GameServer.Accounts
   alias GameServer.Accounts.Scope
-  alias GameServer.Env
 
   @impl true
   def render(assigns) do
@@ -225,7 +224,7 @@ defmodule GameServerWeb.UserLive.Login do
       Application.get_env(:game_server_core, GameServer.Mailer)[:adapter] == Swoosh.Adapters.Local
 
     mailbox_preview_enabled? =
-      Env.bool("MAILBOX_PREVIEW_ENABLED", false)
+      GameServerWeb.Features.enabled?(:mailbox_preview)
 
     adapter_is_local? and (dev_env?() or mailbox_preview_enabled?)
   end

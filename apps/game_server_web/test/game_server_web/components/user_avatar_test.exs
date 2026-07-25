@@ -26,6 +26,15 @@ defmodule GameServerWeb.Components.UserAvatarTest do
     assert html =~ ~s(src="https://lh3.googleusercontent.com/a/abc=s96-c")
   end
 
+  test "a broken image swaps to a hidden icon fallback via onerror" do
+    user = %User{profile_url: "https://example.com/not-ready-yet.png"}
+
+    html = render_component(&CoreComponents.user_avatar/1, user: user)
+
+    assert html =~ "onerror="
+    assert html =~ ~s(class="hero-user-circle-solid hidden w-6 h-6")
+  end
+
   test "a user without one falls back to the icon" do
     html = render_component(&CoreComponents.user_avatar/1, user: %User{profile_url: nil})
 

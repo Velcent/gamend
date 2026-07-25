@@ -23,7 +23,7 @@ defmodule GameServer.Push.Supervisor do
   end
 
   defp children do
-    if Application.get_env(:game_server_core, GameServer.Push, [])[:force_log] do
+    if GameServer.Push.force_log?() do
       []
     else
       fcm_children() ++ apns_children()

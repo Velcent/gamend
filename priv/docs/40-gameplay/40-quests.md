@@ -59,7 +59,7 @@ Every active quest with a matching objective advances (an objective's params mus
 ## API, events, hooks
 
 Player endpoints live under `/api/v1/me/quests` and the catalogue under
-`/api/v1/quests` (gated by `LIST_QUESTS_ENABLED`) - see [/api/docs](/api/docs).
+`/api/v1/quests` (gated by `GAMEND_FEATURES_LIST_QUESTS`) - see [/api/docs](/api/docs).
 
 - **Channel events:** `quest_progress`, `quest_completed`, `quest_claimed`
 - **Hooks:** `before_quest_claim/3` (may veto), `after_quest_completed/1`,

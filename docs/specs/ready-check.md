@@ -492,7 +492,7 @@ Polyglot then deletes `metadata["ready"]`, `set_ready/1`,
 ## Definition of done (CONTRIBUTING)
 
 - [x] Migration adds both tables and the partial indexes; applies on SQLite
-      **and** `DATABASE_ADAPTER=postgres`. (`matchmaking_tickets.ready_check_id`
+      **and** `GAMEND_DB_ADAPTER=postgres`. (`matchmaking_tickets.ready_check_id`
       lands with Phase 2, which is what needs it.)
 - [x] No column added to `users`; no key added to `lobbies.metadata`; deleting a
       lobby cascades its checks and participants.

@@ -7,16 +7,27 @@ defmodule GameServerWeb.OnMount.ThemeTest do
   alias Phoenix.LiveView
 
   setup do
-    orig_theme_config = System.get_env("THEME_CONFIG")
+    orig_theme_config =
+      GameServer.SettingsHelpers.get(:game_server_core, GameServer.ContentSettings, :theme_config)
+
     orig_locale = Gettext.get_locale(GameServerWeb.Gettext)
 
     JSONConfig.reload()
 
     on_exit(fn ->
       if orig_theme_config do
-        System.put_env("THEME_CONFIG", orig_theme_config)
+        GameServer.SettingsHelpers.put(
+          :game_server_core,
+          GameServer.ContentSettings,
+          :theme_config,
+          orig_theme_config
+        )
       else
-        System.delete_env("THEME_CONFIG")
+        GameServer.SettingsHelpers.delete(
+          :game_server_core,
+          GameServer.ContentSettings,
+          :theme_config
+        )
       end
 
       GettextSync.put_locale(orig_locale)
@@ -36,7 +47,13 @@ defmodule GameServerWeb.OnMount.ThemeTest do
     File.write!(en_path, Jason.encode!(%{"title" => "English Title"}))
     File.write!(id_path, Jason.encode!(%{"title" => "Indonesian Title"}))
 
-    System.put_env("THEME_CONFIG", base)
+    GameServer.SettingsHelpers.put(
+      :game_server_core,
+      GameServer.ContentSettings,
+      :theme_config,
+      base
+    )
+
     JSONConfig.reload()
 
     on_exit(fn ->

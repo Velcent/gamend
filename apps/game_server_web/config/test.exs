@@ -80,3 +80,8 @@ config :game_server_core, GameServer.Accounts.StalePresenceSweeper, enabled: fal
 # Jobs run inline on demand in tests (no queues/plugins/cron). Kept in sync with
 # the root config/test.exs.
 config :game_server_core, Oban, testing: :manual
+
+# The declared setting, not just the endpoint's copy: GameServer.Settings
+# validates `auth.secret_key_base` at boot, and dev should not warn about a
+# secret it demonstrably has.
+config :game_server_core, GameServer.Accounts, secret_key_base: "dJoNJZBOt08JlBREyPV5xvuOdwgHPORxK9WHp/k3Cs+g0R9ctyheJ8/CMeg/AdI1"

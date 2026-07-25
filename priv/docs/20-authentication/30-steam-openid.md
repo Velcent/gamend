@@ -24,7 +24,7 @@ Steam uses OpenID for sign-in. When registering your domain at [steamcommunity.c
 Set the following environment variable:
 
 ```bash
-STEAM_API_KEY="your_steam_api_key_here"
+GAMEND_OAUTH_STEAM_API_KEY="your_steam_api_key_here"
 ```
 
 ## Test Steam Login

@@ -43,6 +43,13 @@ signal party_disbanded(payload: Dictionary)       ## {party_id}
 signal party_invite_accepted(payload: Dictionary)  ## {party_id, user_id} via user channel
 signal party_invite_declined(payload: Dictionary)  ## {party_id, user_id} via user channel
 signal party_invite_cancelled(payload: Dictionary) ## {party_id, user_id} via user channel
+
+## Ready check realtime events. Fired for both the lobby board and the party
+## board — the payload's lobby_id/party_id says which one it is.
+signal ready_check_started(check: Dictionary)
+signal ready_check_updated(check: Dictionary)
+signal ready_check_passed(check: Dictionary)
+signal ready_check_failed(check: Dictionary)
 signal party_chat_message(message: Dictionary)
 signal party_chat_message_updated(message: Dictionary)
 signal party_chat_message_deleted(payload: Dictionary)
@@ -738,6 +745,14 @@ func _handle_lobby_event(event: String, payload: Dictionary):
 			lobby_chat_message_updated.emit(payload)
 		"chat_message_deleted":
 			lobby_chat_message_deleted.emit(payload)
+		"ready_check_started":
+			ready_check_started.emit(payload)
+		"ready_check_updated":
+			ready_check_updated.emit(payload)
+		"ready_check_passed":
+			ready_check_passed.emit(payload)
+		"ready_check_failed":
+			ready_check_failed.emit(payload)
 
 func _handle_lobbies_event(event: String, payload: Dictionary):
 	match event:
@@ -772,6 +787,14 @@ func _handle_party_event(event: String, payload: Dictionary):
 			party_chat_message_updated.emit(payload)
 		"chat_message_deleted":
 			party_chat_message_deleted.emit(payload)
+		"ready_check_started":
+			ready_check_started.emit(payload)
+		"ready_check_updated":
+			ready_check_updated.emit(payload)
+		"ready_check_passed":
+			ready_check_passed.emit(payload)
+		"ready_check_failed":
+			ready_check_failed.emit(payload)
 
 func _handle_group_event(event: String, payload: Dictionary):
 	match event:
@@ -1363,6 +1386,36 @@ func groups_update_group(
 	id: String,
 	updateGroupRequest: UpdateGroupRequest):
 	return await _call_api(GroupsApi.new(_config), "update_group", [id, updateGroupRequest])
+
+## READY CHECKS
+
+## The caller's open ready checks, one per lane: {lobby: check|null, party: check|null}
+func ready_checks_get_mine() -> GamendResult:
+	return await _call_api(ReadyChecksApi.new(_config), "get_my_ready_check", [])
+
+## Answer the open check in one lane ("lobby" also answers a matchmaking accept)
+func ready_checks_respond(ready: bool, scope: String = "lobby") -> GamendResult:
+	var request := RespondReadyCheckRequest.new()
+	request.ready = ready
+	request.scope = scope
+	return await _call_api(ReadyChecksApi.new(_config), "respond_ready_check", [request])
+
+## Open (or reset) the lobby board — host only; pass timeout_ms to force ready
+func ready_checks_open_lobby(request: OpenLobbyReadyCheckRequest = null) -> GamendResult:
+	return await _call_api(ReadyChecksApi.new(_config), "open_lobby_ready_check", [request])
+
+## Call off the lobby board — host only
+func ready_checks_cancel_lobby() -> GamendResult:
+	return await _call_api(ReadyChecksApi.new(_config), "cancel_lobby_ready_check", [])
+
+## Open (or reset) the party board — leader only; pass timeout_ms to force ready
+## (the request schema is shared with the lobby variant)
+func ready_checks_open_party(request: OpenLobbyReadyCheckRequest = null) -> GamendResult:
+	return await _call_api(ReadyChecksApi.new(_config), "open_party_ready_check", [request])
+
+## Call off the party board — leader only
+func ready_checks_cancel_party() -> GamendResult:
+	return await _call_api(ReadyChecksApi.new(_config), "cancel_party_ready_check", [])
 
 ## PARTIES
 

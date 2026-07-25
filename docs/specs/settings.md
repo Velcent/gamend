@@ -159,13 +159,26 @@ and the two redis-backend checks (`host_runtime.exs:270`, `:567`).
 
 ### Three levels
 
-One `required:` axis. Nothing is ever enforced outside prod.
+One `required:` axis. Nothing ever *fails* outside prod.
 
-| Level | Declared | Missing in prod | Missing in dev/test |
-| --- | --- | --- | --- |
-| **required** | `required: :prod` | boot fails | silent |
-| **warn** | `required: :warn` | logs a warning, feature degrades | silent |
-| **optional** | *(omitted)* | nothing — the default applies | silent |
+| Level | Declared | Missing in prod | Missing in dev | Missing in test |
+| --- | --- | --- | --- | --- |
+| **required** | `required: :prod` | boot fails | **warns** | silent |
+| **warn** | `required: :warn` | logs a warning, feature degrades | silent | silent |
+| **optional** | *(omitted)* | nothing — the default applies | silent | silent |
+
+The dev warning on a `:prod` requirement is the point of having one: it says
+*"this deployment will not boot in prod"* while the developer is at the
+keyboard, instead of at deploy time. It never blocks local work.
+
+In practice it is quiet. Dev already satisfies `auth.secret_key_base` from
+`config/dev.exs:44`, and the other three requirements are gated on choices a dev
+environment does not usually make — so it fires exactly when someone points dev
+at S3 or a redis backend and forgets the credentials, which is the case worth
+catching early.
+
+Test stays silent at every level: the suite boots hundreds of times, and a
+warning per boot is noise rather than signal.
 
 ### Two gates
 
@@ -332,9 +345,16 @@ entirely. Each `config/runtime.exs` becomes:
 
 ```elixir
 import Config
-config :game_server_core, GameServer.Settings.from_env()
+
+for {app, module, opts} <- GameServer.Settings.from_env() do
+  config app, module, opts
+end
+
 # host-specific config below
 ```
+
+(Settings span `:game_server_core` and `:game_server_web`, so `from_env/0`
+returns `{app, module, opts}` triples rather than one app's keyword list.)
 
 Polyglot additionally drops its `POLYGLOT_OBSERVABILITY` translation block
 (three places for one setting today: an `env_vars/0` declaration, a
@@ -343,15 +363,29 @@ Polyglot additionally drops its `POLYGLOT_OBSERVABILITY` translation block
 
 ## Phasing
 
-| Phase | What | Breaking |
-| --- | --- | --- |
-| 1 | `Settings` + `Provider` macro + groups + required model. Schema declares **current** names via explicit `env:`. Generate `.env.example` and the admin viewer; delete the source-scraping. | No |
-| 2 | Drop the `env:` overrides so names derive. Migrate the ~60 business-logic `System.get_env` calls. **One atomic commit.** | **Yes** |
-| 3 | Update starter and polyglot, including their `.env`, compose, fly and Dockerfile args. | — |
-| 4 | Fold in the 31 undocumented vars and the two doc-placement bugs (`GOOGLE_PLAY_ACCESS_TOKEN` filed under OAuth; `STEAM_APP_ID` documented twice). | No |
+All four phases are implemented. Status as built:
 
-Phase 1 makes the schema authoritative while every existing name still works, so
-Phase 2 is a mechanical flip rather than a 191-name leap.
+| Phase | What | Done |
+| --- | --- | --- |
+| 1 | `Settings` + `Provider` macro, 18 groups, three levels + gates. Every core section declared; `.env.example` generated; `admin_live/settings.ex`; `runtime_introspection` scraping deleted. | Yes |
+| 2 | Names derive (`GAMEND_<GROUP>_<KEY>`); ~90 business-logic `System.get_env` reads migrated; `host_runtime.exs` down to zero raw env reads; the Apple credential split. | Yes |
+| 3 | `gamend_starter` and `gamend_polyglot` on the thin `runtime.exs`; polyglot's plugin converted to the provider; `.env`, compose, fly and Dockerfile renamed in both. | Yes |
+| 4 | The 31 undocumented vars fold in for free (generated); docs, CONTRIBUTING and CHANGELOG updated. | Yes |
+
+Counts as built: **218 settings across 18 groups**, 15 inherited names kept,
+`host_runtime.exs` from 824 lines to 218 (the rest is derivation — endpoint,
+Repo, cache levels, Pigeon and Swoosh config — which turns settings into the
+shapes those libraries expect).
+
+`GameServer.Env` is deleted — `Settings.cast/2` replaced it, and removing it
+surfaced one last undeclared variable (`MAILBOX_PREVIEW_ENABLED`, now
+`features.mailbox_preview`). `GameServer.Config` stays for `infer_type/1`,
+which the plugin declaration registry still uses.
+
+`gamend_starter` resolves `game_server_core` as a GitHub dependency, so its
+updated code and config could not be compiled locally; every changed file
+syntax-checks and no removed API is referenced, but it needs this repo pushed
+before it can actually be built.
 
 ## Deferred / rejected
 
@@ -394,7 +428,15 @@ Phase 2 is a mechanical flip rather than a 191-name leap.
       push_notifications / apple_sign_in pages updated to the new names;
       CONTRIBUTING's "document new env vars" item replaced with "declare a
       setting"; CHANGELOG `[breaking]`.
-- [ ] Tests: derivation, precedence, each required state, secret masking,
+- [x] Tests: derivation, precedence, each required state, secret masking,
       plugin registration, viewer rendering; both adapters.
+- [x] `settings_coverage_test.exs` generates **one test per declared setting**
+      (218 of them) plus five integrity checks: unique variable names, every
+      name derives from its group and key, only the inherited 15 opt out,
+      defaults type-check, and every value round-trips
+      environment → `from_env/0` → `get/2` → `resolve/0`. This is what a
+      hand-written per-setting suite would give, without needing to be
+      hand-written — and it caught 24 declarations the rename script missed,
+      including `STEAM_APP_ID` claimed by two groups at once.
 - [ ] `mix format`, `mix credo --strict`, full `mix test` green; `mix gen.sdk`
       clean; example plugin compiles warning-free.

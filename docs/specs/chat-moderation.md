@@ -209,7 +209,7 @@ the insert transaction).
 ## Definition of done (CONTRIBUTING)
 
 - [ ] Migrations for `chat_filter_words` / `chat_reports` / `chat_mutes` apply on
-      SQLite **and** `DATABASE_ADAPTER=postgres`; indexes as above.
+      SQLite **and** `GAMEND_DB_ADAPTER=postgres`; indexes as above.
 - [ ] Filter + mute enforced in `before_chat_message` (nothing unmoderated
       persists/broadcasts); expired-mute sweep supervised in both trees.
 - [ ] Paginated `list_*`/`count_*`; `Limits` caps in changesets; report

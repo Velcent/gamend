@@ -11,13 +11,13 @@ Ticket-based queueing that turns waiting players into hidden, locked lobbies. A 
 ```text
 POST /matchmaking/tickets ──► ticket (queued)
                                   │
-              worker sweep (every LIMIT_MATCHMAKING_TICK_MS)
+              worker sweep (every GAMEND_LIMITS_MATCHMAKING_TICK_MS)
                                   │
         group by identical match_params, oldest first
                                   │
         enough players?  ──► max_players reached: match now
                          ──► ≥ min_players and oldest waited
-                             LIMIT_MATCHMAKING_TIMEOUT_MS: match now
+                             GAMEND_LIMITS_MATCHMAKING_TIMEOUT_MS: match now
                          ──► otherwise: keep waiting
                                   │
         hidden lobby created, players seated, lobby locked
@@ -124,13 +124,13 @@ Packing is FIFO by the party's oldest ticket, anchored on the longest-waiting gr
 
 ## Leaving the queue
 
-Going offline does not immediately cost a queue position. A ticket is pruned only once its owner has been offline longer than LIMIT_MATCHMAKING_OFFLINE_GRACE_MS (5 minutes by default), so a brief disconnect is survivable. A player who queued over HTTP and never opened a socket has no last-seen time, so the same grace period runs from when they queued.
+Going offline does not immediately cost a queue position. A ticket is pruned only once its owner has been offline longer than GAMEND_LIMITS_MATCHMAKING_OFFLINE_GRACE_MS (5 minutes by default), so a brief disconnect is survivable. A player who queued over HTTP and never opened a socket has no last-seen time, so the same grace period runs from when they queued.
 
 ## Operations
 
 - The Admin → Matchmaking page shows live queue depths and the ticket list, with per-ticket force-cancel and a manual sweep trigger.
 - Admin HTTP mirrors of everything: GET/DELETE under /api/v1/admin/matchmaking.
-- Tuning via env vars: LIMIT_MATCHMAKING_TICK_MS (sweep interval), LIMIT_MATCHMAKING_TIMEOUT_MS (wait before a below-max group forms), LIMIT_MATCHMAKING_OFFLINE_GRACE_MS (how long a disconnected player keeps their place), LIMIT_MAX_MATCHMAKING_PLAYERS, LIMIT_MAX_MATCHMAKING_PARAMS_SIZE.
+- Tuning via env vars: GAMEND_LIMITS_MATCHMAKING_TICK_MS (sweep interval), GAMEND_LIMITS_MATCHMAKING_TIMEOUT_MS (wait before a below-max group forms), GAMEND_LIMITS_MATCHMAKING_OFFLINE_GRACE_MS (how long a disconnected player keeps their place), GAMEND_LIMITS_MAX_MATCHMAKING_PLAYERS, GAMEND_LIMITS_MAX_MATCHMAKING_PARAMS_SIZE.
 - Multi-instance safe: every node runs the worker, but the sweep body is serialized cluster-wide by an advisory lock, so exactly one node forms matches per tick.
 
 ## Ready checks
@@ -141,7 +141,7 @@ A player is in at most one check at a time, so answering needs no id: GET /me/re
 
 What core does on failure is nothing. A declined or timed-out check kicks nobody, deletes no lobby and moves no lobby state — it records who did not answer and stops there. The host can kick them with the kick they already have, or your after_ready_check_failed hook can decide. Likewise a passed check starts no match by itself: call Lobbies.transition_state/3 from after_ready_check_passed, and gate your own start in before_lobby_state_change with ReadyChecks.passed?/1.
 
-Tuning: LIMIT_READY_CHECK_TIMEOUT_MS (default 15s answering window; a host may override it per check) and LIMIT_MAX_READY_CHECK_PARTICIPANTS. The Admin → Matchmaking page lists recent checks with their outcomes and a force-cancel, mirrored at /api/v1/admin/ready_checks.
+Tuning: GAMEND_LIMITS_READY_CHECK_TIMEOUT_MS (default 15s answering window; a host may override it per check) and GAMEND_LIMITS_MAX_READY_CHECK_PARTICIPANTS. The Admin → Matchmaking page lists recent checks with their outcomes and a force-cancel, mirrored at /api/v1/admin/ready_checks.
 
 ## Reference
 

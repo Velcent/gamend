@@ -90,3 +90,8 @@ config :game_server_web, GameServerWeb.Auth.Guardian,
   issuer: "game_server",
   secret_key: "l/tTJZ4KUNjIfiUsNQDQLWOTgFlyiOz8RQ2EgSRa7mopMzPLJuu7/8s5pA7iiSgO",
   ttl: {15, :minutes}
+
+# The declared setting, not just the endpoint's copy: GameServer.Settings
+# validates `auth.secret_key_base` at boot, and dev should not warn about a
+# secret it demonstrably has.
+config :game_server_core, GameServer.Accounts, secret_key_base: "l/tTJZ4KUNjIfiUsNQDQLWOTgFlyiOz8RQ2EgSRa7mopMzPLJuu7/8s5pA7iiSgO"

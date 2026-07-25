@@ -161,7 +161,7 @@ exceed 1).
 - [ ] Lock acquired outside the transaction on SQLite, inside on Postgres.
 - [ ] `busy_timeout` set explicitly on the SQLite connection and documented.
 - [ ] The 50-concurrent-spend test passes on SQLite **and**
-      `DATABASE_ADAPTER=postgres`; a reentrancy test and a mutual-exclusion
+      `GAMEND_DB_ADAPTER=postgres`; a reentrancy test and a mutual-exclusion
       test alongside it.
 - [ ] Moduledoc, server-scripting docs page and example plugin state the
       both-adapters guarantee, the RMW rule, and the session/value distinction.

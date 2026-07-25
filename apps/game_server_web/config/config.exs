@@ -52,7 +52,7 @@ config :game_server_core, Oban,
   ]
 
 # Object storage — defaults to local disk (see config/host_config.exs).
-config :game_server_core, GameServer.Storage, adapter: GameServer.Storage.Local
+config :game_server_core, GameServer.Storage, adapter: :local
 config :ex_aws, json_codec: Jason
 
 config :game_server_web, GameServerWeb.Endpoint,

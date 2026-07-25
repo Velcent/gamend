@@ -38,11 +38,36 @@ const Hooks = {
    * the link can be shared and the state survives a reconnect (LiveView remounts
    * from the same params). The `toggle` event is what native <details> fires;
    * there is no click handler to keep in sync with keyboard use.
+   *
+   * One guide is open at a time. The previously open one is closed HERE, not
+   * by the server patch: collapsing a tall section above the one just clicked
+   * shifts the whole page, so it must happen synchronously with a scroll
+   * correction that keeps the clicked summary where the reader sees it. The
+   * patch then finds both `open` attributes already right and changes no
+   * layout. (The programmatic close fires that section's own toggle event,
+   * whose push the server ignores — it no longer matches the open slug.)
    */
   GuideDisclosure: {
     mounted() {
-      this.onToggle = () =>
+      this.onToggle = () => {
+        if (this.el.open) {
+          const before = this.el.getBoundingClientRect().top
+          for (const other of document.querySelectorAll("details[data-slug][open]")) {
+            if (other !== this.el) other.open = false
+          }
+          // "instant" bypasses the page's smooth scroll-behavior: this is a
+          // correction, not a navigation, and animating it looks like a jump.
+          // The second pass one frame later absorbs the browser's own scroll
+          // anchoring, which adjusts again after this handler returns.
+          const correct = () => {
+            const delta = this.el.getBoundingClientRect().top - before
+            if (delta !== 0) window.scrollBy({top: delta, behavior: "instant"})
+          }
+          correct()
+          requestAnimationFrame(correct)
+        }
         this.pushEvent("guide_toggled", {slug: this.el.dataset.slug, open: this.el.open})
+      }
       this.el.addEventListener("toggle", this.onToggle)
     },
     destroyed() {

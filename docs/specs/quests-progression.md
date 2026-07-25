@@ -212,7 +212,7 @@ keep working.
 
 - [ ] Migrations create `quests`/`quest_progress`/`inventory_ledger` and migrate
       achievement definitions/progress in; apply on SQLite **and**
-      `DATABASE_ADAPTER=postgres`.
+      `GAMEND_DB_ADAPTER=postgres`.
 - [ ] `report_event` dispatch advances objectives (definitions via
       `GameServer.Cache`); claim = atomic `completed → claimed` transition;
       rewards post-commit with **per-entry** idempotency keys through Economy

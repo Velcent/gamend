@@ -86,7 +86,7 @@ Three adapters ship:
 **Routing.** Unlike the single-switch Storage adapter, Push routes **per token**
 off the `push_tokens.provider` column: `"fcm"` → FCM, `"apns"` → APNs. A
 provider whose `configured?/0` is false (dispatcher not running) — and the
-global `PUSH_ADAPTER=log` override — both fall through to `Log`. So: no config
+global `GAMEND_PUSH_ADAPTER=log` override — both fall through to `Log`. So: no config
 → dev logs everything; configure only `PUSH_FCM_*` → iOS tokens registered as
 `fcm` relay through Google; configure `APNS_*` too → iOS tokens registered as
 `apns` go straight to Apple.
@@ -116,7 +116,7 @@ end
 
 - Config lives under
   `config :game_server_core, GameServer.Push.FCMDispatcher, ...` (and `APNS...`),
-  set by `host_runtime.exs` from env — same pattern as the `STORAGE_ADAPTER`
+  set by `host_runtime.exs` from env — same pattern as the `GAMEND_STORAGE_ADAPTER`
   case block.
 - **FCM** needs a Goth worker: `{Goth, name: GameServer.Push.Goth, source:
   {:service_account, decoded_credentials}}`, started **before** the FCM
@@ -129,7 +129,7 @@ end
   are up when push-queue workers start). The supervisor is always present but
   builds its **children** from config: Goth + FCM dispatcher only when the FCM
   vars are set, APNS dispatcher only when the APNs vars are set, none under
-  `PUSH_ADAPTER=log` — zero config supervises nothing. The starter repo builds
+  `GAMEND_PUSH_ADAPTER=log` — zero config supervises nothing. The starter repo builds
   its tree from `HostSupervision.children()`, so it inherits the child on its
   next dep bump with no change of its own. The subtree has
   its own restart budget, so a crash-looping dispatcher exhausts *its*
@@ -225,7 +225,7 @@ Push.send_to_users([user_id], message, opts)          # reliable fan-out
   prevents double-broadcast).
 - Add a **`push`** queue to the Oban config in `host_config.exs`
   (`queues: [..., push: 10]`), overridable at runtime via
-  `PUSH_QUEUE_CONCURRENCY` (see Config).
+  `GAMEND_PUSH_QUEUE_CONCURRENCY` (see Config).
 
 ## Performance & scale
 
@@ -245,7 +245,7 @@ push routing to `Log` while the server runs on.
 
 **Throughput & the queue knob.** Default `push: 10` ≈ 50–200 deliveries/sec
 per node at typical provider RTTs — a 100k-device broadcast drains in tens of
-minutes, which is fine for "patch notes" pushes. `PUSH_QUEUE_CONCURRENCY`
+minutes, which is fine for "patch notes" pushes. `GAMEND_PUSH_QUEUE_CONCURRENCY`
 raises it: APNs/FCM speak HTTP/2 (Apple allows ~1000 concurrent streams per
 connection), so one dispatcher per provider sustains hundreds of concurrent
 pushes; OSS Oban has no rate limiter (that's Oban Pro), so concurrency **is**
@@ -275,7 +275,7 @@ FCM OAuth) is Pigeon's/Goth's job — they mint and refresh internally.
 **Steady-state hygiene.** Dead tokens are soft-disabled immediately on
 provider signal (no growth in the hot partial index), and
 `GameServer.Retention` hard-prunes the long tail — disabled rows and tokens
-unused for `RETENTION_PUSH_TOKENS_DAYS` (default 270, Google's own staleness
+unused for `GAMEND_RETENTION_PUSH_TOKENS_DAYS` (default 270, Google's own staleness
 guidance; `0` disables) — so `push_tokens` tracks the *live* device count, not
 install history.
 
@@ -324,14 +324,14 @@ roll back a notification.
 ## Config (`host_config.exs` default + `host_runtime.exs` runtime)
 
 ```
-PUSH_ADAPTER=log                 # optional override: force everything to Log (dev/staging)
+GAMEND_PUSH_ADAPTER=log                 # optional override: force everything to Log (dev/staging)
                                  # unset → route per token to whichever provider is configured
-PUSH_QUEUE_CONCURRENCY=10        # per-node concurrent deliveries (the throughput/throttle knob)
-RETENTION_PUSH_TOKENS_DAYS=270   # prune disabled/unused tokens after N days (0 = keep forever)
+GAMEND_PUSH_QUEUE_CONCURRENCY=10        # per-node concurrent deliveries (the throughput/throttle knob)
+GAMEND_RETENTION_PUSH_TOKENS_DAYS=270   # prune disabled/unused tokens after N days (0 = keep forever)
 
 # FCM (Android/Web, or iOS relay) — enabled when credentials are set
-PUSH_FCM_CREDENTIALS=            # path to, or inline JSON of, the service-account key
-PUSH_FCM_PROJECT_ID=             # optional — defaults to project_id from the credentials JSON
+GAMEND_PUSH_FCM_CREDENTIALS=            # path to, or inline JSON of, the service-account key
+GAMEND_PUSH_FCM_PROJECT_ID=             # optional — defaults to project_id from the credentials JSON
 
 # APNs-direct (iOS) — enabled when the .p8 key + ids are set
 APNS_KEY_ID=                     # 10-char key id of the APNs .p8 auth key
@@ -342,8 +342,8 @@ APNS_ENV=production|sandbox      # default production (Pigeon mode :prod / :dev)
 ```
 
 `host_runtime.exs` translates these into the two dispatcher configs (+ Goth)
-described under Dispatchers, mirroring the `STORAGE_ADAPTER` case block, and
-rewrites the Oban `queues` entry when `PUSH_QUEUE_CONCURRENCY` is set
+described under Dispatchers, mirroring the `GAMEND_STORAGE_ADAPTER` case block, and
+rewrites the Oban `queues` entry when `GAMEND_PUSH_QUEUE_CONCURRENCY` is set
 (`GameServer.Jobs.oban_config/0` reads app env, so runtime config wins). No
 vars → no dispatchers → everything routes to `Log`.
 
@@ -374,7 +374,7 @@ vars → no dispatchers → everything routes to `Log`.
   `joken`).
 - **`host_supervision.ex`** (+ starter repo tree) — the conditional
   `GameServer.Push.Supervisor` child.
-- **`retention.ex`** — `RETENTION_PUSH_TOKENS_DAYS` pruning wired into
+- **`retention.ex`** — `GAMEND_RETENTION_PUSH_TOKENS_DAYS` pruning wired into
   `prune_all/0` and the moduledoc's env-var list.
 - **README.md** — Features: add **Push notifications**.
 - **CHANGELOG.md** — `[added]` Push notifications (FCM + APNs); `[added]`
@@ -416,7 +416,7 @@ vars → no dispatchers → everything routes to `Log`.
 - **Dispatcher pools / rate limiting: defer.** One dispatcher per provider per
   node multiplexes hundreds of concurrent HTTP/2 streams — measure before
   pooling (Pigeon supports N dispatchers when needed). A real rate limiter is
-  Oban Pro's Smart Engine; on OSS, `PUSH_QUEUE_CONCURRENCY` is the throttle
+  Oban Pro's Smart Engine; on OSS, `GAMEND_PUSH_QUEUE_CONCURRENCY` is the throttle
   and provider `429`s back off through retry.
 - **Certificate-based APNs auth: no.** Pigeon supports `.p12` certs, but token
   auth (`.p8` ES256) is the modern path — one key for all apps, no yearly cert
@@ -424,7 +424,7 @@ vars → no dispatchers → everything routes to `Log`.
 
 ## Definition of done (CONTRIBUTING)
 
-- [x] `push_tokens` migration applies on SQLite **and** `DATABASE_ADAPTER=postgres`.
+- [x] `push_tokens` migration applies on SQLite **and** `GAMEND_DB_ADAPTER=postgres`.
 - [x] `GameServer.Push` context: paginated `list_*`/`count_*`, `Limits` caps in
       the changeset, capacity write-modify-write under a `:push_tokens` lock,
       dead-token soft-disable, per-token provider routing.
@@ -435,14 +435,14 @@ vars → no dispatchers → everything routes to `Log`.
       instead of crash-looping.
 - [x] `DeliveryWorker` on the new `push` Oban queue, one job per token: retries
       transient, cancels permanent, disables invalid, fires `after_push_sent`;
-      `PUSH_QUEUE_CONCURRENCY` respected.
+      `GAMEND_PUSH_QUEUE_CONCURRENCY` respected.
 - [x] `FanoutWorker` chunks large `send_to_users/3` (chunked resolution +
       `insert_all` × 500, unique-keyed against double broadcast); inline path
       below the threshold.
 - [x] `user_has_live_tokens?/1` cached with invalidation on
       register/unregister/disable; `Notifications` uses it for the no-device
       fast path.
-- [x] `RETENTION_PUSH_TOKENS_DAYS` pruning in `GameServer.Retention`.
+- [x] `GAMEND_RETENTION_PUSH_TOKENS_DAYS` pruning in `GameServer.Retention`.
 - [x] Hooks `before_push_send` / `after_push_sent` in all six places, RPC-blocked,
       SDK-mirrored; `Notifications` calls `Push.send_to_user/3` after commit.
 - [x] Admin page + `/admin` card + route + nav + `admin_pages_render_test`;

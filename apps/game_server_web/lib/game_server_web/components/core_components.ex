@@ -641,6 +641,8 @@ defmodule GameServerWeb.CoreComponents do
   @doc """
   A user's avatar as a round image when they have one (`profile_url`), falling
   back to the generic person icon. Pass `class` for sizing, e.g. `"w-5 h-5"`.
+  If the image URL fails to load (provider not ready yet, expired CDN link),
+  the `onerror` handler hides the broken image and reveals the same icon.
 
   `crossorigin="anonymous"` is load-bearing, not decoration: `/play` and
   `/game/*` are served cross-origin isolated for Godot's `SharedArrayBuffer`
@@ -664,8 +666,10 @@ defmodule GameServerWeb.CoreComponents do
       src={@avatar_url}
       alt=""
       crossorigin="anonymous"
+      onerror="this.classList.add('hidden');this.nextElementSibling.classList.remove('hidden')"
       class={["rounded-full object-cover bg-base-300", @class]}
     />
+    <.icon :if={@avatar_url} name="hero-user-circle-solid" class={"hidden " <> @class} />
     <.icon :if={!@avatar_url} name="hero-user-circle-solid" class={@class} />
     """
   end

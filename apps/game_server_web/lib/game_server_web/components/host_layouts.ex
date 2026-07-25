@@ -139,7 +139,8 @@ defmodule GameServerWeb.HostLayouts do
     |> Map.put("title", Map.get(theme, "title") || if(missing?, do: "MISSING_THEME"))
     |> Map.put(
       "tagline",
-      Map.get(theme, "tagline") || if(missing?, do: "Add host theme config or set THEME_CONFIG")
+      Map.get(theme, "tagline") ||
+        if(missing?, do: "Add host theme config or set GAMEND_CONTENT_THEME_CONFIG")
     )
     |> then(&Map.merge(host_theme_settings, &1))
     |> translate_theme(locale)

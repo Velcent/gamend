@@ -1,7 +1,7 @@
 defmodule GameServer.Theme.JSONConfig do
   @moduledoc """
   JSON-backed Theme provider. Reads a locale-specific JSON file from either the
-  THEME_CONFIG environment variable override or the host-owned default path
+  GAMEND_CONTENT_THEME_CONFIG environment variable override or the host-owned default path
   configured by the runnable host application.
 
   Only locale-suffixed files are loaded (e.g. `example_config.en.json`,
@@ -9,7 +9,7 @@ defmodule GameServer.Theme.JSONConfig do
   never loaded directly — it serves only as a naming template to derive
   locale-specific paths.
 
-  When THEME_CONFIG is not set, the provider falls back to the host-owned
+  When GAMEND_CONTENT_THEME_CONFIG is not set, the provider falls back to the host-owned
   default path configured under `GameServer.Theme.JSONConfig`.
 
   Theme configs are cached in `:persistent_term` after the first read so
@@ -25,7 +25,7 @@ defmodule GameServer.Theme.JSONConfig do
   end
 
   @doc """
-  Variant of `get_theme/0` that prefers a locale-specific THEME_CONFIG file when present.
+  Variant of `get_theme/0` that prefers a locale-specific GAMEND_CONTENT_THEME_CONFIG file when present.
 
   Given a base config like `modules/example_config.json` and locale `"es"`, we will
   try `modules/example_config.es.json` first, then fall back to `.en.json`.
@@ -110,16 +110,16 @@ defmodule GameServer.Theme.JSONConfig do
   end
 
   @doc """
-  Returns the runtime THEME_CONFIG override if present and non-blank,
+  Returns the runtime GAMEND_CONTENT_THEME_CONFIG override if present and non-blank,
   otherwise nil. This intentionally excludes the host default path so admin
   diagnostics can distinguish explicit overrides from host defaults.
   """
   def runtime_path do
-    normalize_path_env(System.get_env("THEME_CONFIG"))
+    normalize_path_env(GameServer.Settings.get(GameServer.ContentSettings, :theme_config))
   end
 
   @doc """
-  Returns the effective theme config path, preferring THEME_CONFIG when set and
+  Returns the effective theme config path, preferring GAMEND_CONTENT_THEME_CONFIG when set and
   otherwise falling back to the host-owned default path.
   """
   def active_path do

@@ -25,18 +25,32 @@ delivery adapter under it.
 
 ## Configuration
 
-```
-DISCORD_WEBHOOK_URL=          # unset ⇒ the whole feature is inert
-DISCORD_USERNAME=Gamend       # optional display name on messages
-DISCORD_EVENTS=payment_succeeded,user_reported,plugin_crashed
-DISCORD_MIN_LEVEL=info        # info | warning | error
+One settings provider; every env name derives from the declaration:
+
+```elixir
+defmodule GameServer.Discord do
+  use GameServer.Settings.Provider, app: :game_server_core, group: :discord
+
+  setting :webhook_url, :string, secret: true,
+    doc: "Channel webhook URL. Unset leaves the whole feature inert."
+  setting :username, :string, default: "Gamend"
+  setting :events, :list, default: [], doc: "Allow-list; empty means the defaults below."
+  setting :min_level, :atom, default: :info, doc: "info | warning | error"
+end
 ```
 
-`DISCORD_EVENTS` is an allow-list; empty means the sensible default set below.
-Per [issue #29](https://github.com/appsinacup/game_server/issues/29) the URL is
-a secret (env) while the event list is configuration — so the event list is also
-settable from the config file once [settings.md](settings.md) lands, and the URL
-never is.
+→ `GAMEND_DISCORD_WEBHOOK_URL` (masked everywhere it is displayed),
+`GAMEND_DISCORD_USERNAME`, `GAMEND_DISCORD_EVENTS`, `GAMEND_DISCORD_MIN_LEVEL`.
+
+This is also the shape [issue #29](https://github.com/appsinacup/game_server/issues/29)
+asked for, and the settings system that shipped in July 2026 already delivers
+it: the URL is `secret: true` and belongs in the environment, while the event
+list, username and level are ordinary configuration a host can set in
+`config/` and never touch an env var —
+
+```elixir
+config :game_server_core, GameServer.Discord, events: ["payment_succeeded", "plugin_crashed"]
+```
 
 ## What core sends
 
@@ -137,7 +151,8 @@ building a message that would be dropped.
 
 - [ ] `GameServer.Discord` + `Discord.Worker` on the `notifications` queue; no
       new table, no new queue.
-- [ ] Inert with `DISCORD_WEBHOOK_URL` unset — no jobs enqueued, no warnings.
+- [ ] Inert with `GAMEND_DISCORD_WEBHOOK_URL` unset — no jobs enqueued, no
+      warnings.
 - [ ] Event allow-list honoured; operational events default on, player events
       default off.
 - [ ] Redaction: single `format_user/1` path; no interpolation hook for raw
@@ -148,8 +163,10 @@ building a message that would be dropped.
       `configured?/0` exposed.
 - [ ] Admin card with status, last error, 24 h counts and a working test-send;
       API parity; `admin_pages_render_test`.
-- [ ] `.env.example` entries; env vars declared so the admin runtime page shows
-      them; docs page section; `api_spec.ex`; CHANGELOG; i18n.
+- [ ] Settings declared with `GameServer.Settings.Provider` (group `:discord`,
+      URL `secret: true`), rendered on the admin Settings page; `.env.example`
+      regenerated with `mix gamend.settings.env_example`; docs page section;
+      `api_spec.ex`; CHANGELOG; i18n.
 - [ ] Tests: allow-list filtering, coalescing, `429` snooze, redaction, and a
       booted end-to-end send against a stub endpoint.
 - [ ] Polyglot's `discord.ex` deletes its transport and calls core (tracked in

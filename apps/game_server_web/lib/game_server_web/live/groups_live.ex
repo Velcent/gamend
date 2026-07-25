@@ -11,7 +11,7 @@ defmodule GameServerWeb.GroupsLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    unless FeatureGate.enabled?("LIST_GROUPS_ENABLED", true) do
+    unless FeatureGate.enabled?(:list_groups) do
       raise GameServerWeb.NotFoundError
     end
 

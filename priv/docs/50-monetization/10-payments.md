@@ -16,24 +16,24 @@ Payments use a server-side ledger. Clients may start purchases through Stripe Ch
 
 ## Stripe Sandbox And Live Mode
 
-PAYMENTS_ENVIRONMENT is the global payment mode. Use sandbox for non-real provider flows, and production only when ready to charge real payment methods.
+GAMEND_PAYMENTS_ENVIRONMENT is the global payment mode. Use sandbox for non-real provider flows, and production only when ready to charge real payment methods.
 
 ```bash
 # Stripe sandbox mode (Stripe test keys)
-PAYMENTS_ENVIRONMENT=sandbox
-STRIPE_API_VERSION=2022-11-15
-STRIPE_SANDBOX_SECRET_KEY=sk_test_...
-STRIPE_SANDBOX_WEBHOOK_SECRET=whsec_...
+GAMEND_PAYMENTS_ENVIRONMENT=sandbox
+GAMEND_PAYMENTS_STRIPE_API_VERSION=2022-11-15
+GAMEND_PAYMENTS_STRIPE_SANDBOX_SECRET_KEY=sk_test_...
+GAMEND_PAYMENTS_STRIPE_SANDBOX_WEBHOOK_SECRET=whsec_...
 # Stripe live mode
-PAYMENTS_ENVIRONMENT=production
-STRIPE_API_VERSION=2022-11-15
-STRIPE_PRODUCTION_SECRET_KEY=sk_live_...
-STRIPE_PRODUCTION_WEBHOOK_SECRET=whsec_...
+GAMEND_PAYMENTS_ENVIRONMENT=production
+GAMEND_PAYMENTS_STRIPE_API_VERSION=2022-11-15
+GAMEND_PAYMENTS_STRIPE_PRODUCTION_SECRET_KEY=sk_live_...
+GAMEND_PAYMENTS_STRIPE_PRODUCTION_WEBHOOK_SECRET=whsec_...
 ```
 
 - Copy the Stripe API secret key from `Developers / Workbench > API keys`. Use a `sk_test_...` key for sandbox and a `sk_live_...` key for production.
 - The webhook secret is not the API key. Copy the webhook signing secret from the Stripe webhook endpoint details after the endpoint exists.
-- `STRIPE_API_VERSION` is optional. If omitted, the Stripe SDK default is 2022-11-15; the webhook endpoint should use the same version.
+- `GAMEND_PAYMENTS_STRIPE_API_VERSION` is optional. If omitted, the Stripe SDK default is 2022-11-15; the webhook endpoint should use the same version.
 - Live secret keys may be shown only once when created. Store them in deployment secrets or environment variables, never in source control.
 
 ### Create Stripe Webhook Endpoint
@@ -41,7 +41,7 @@ STRIPE_PRODUCTION_WEBHOOK_SECRET=whsec_...
 1. Open Stripe Dashboard `Developers / Workbench > Webhooks`.
 2. Click Add endpoint.
 3. Set endpoint URL to `https://your-domain.com/api/v1/payments/webhooks/stripe`.
-4. For API version, choose `2022-11-15` for the default integration, or the exact value configured in STRIPE_API_VERSION. Checkout requests use stripity_stripe with the same API version.
+4. For API version, choose `2022-11-15` for the default integration, or the exact value configured in GAMEND_PAYMENTS_STRIPE_API_VERSION. Checkout requests use stripity_stripe with the same API version.
 5. Select only the events this server handles:
 
 ```text
@@ -62,19 +62,19 @@ charge.dispute.funds_withdrawn
 
 1. Save the endpoint.
 2. Open endpoint details and copy the signing secret starting with `whsec_...`.
-3. Set `STRIPE_SANDBOX_WEBHOOK_SECRET` or `STRIPE_PRODUCTION_WEBHOOK_SECRET` to that value, matching `PAYMENTS_ENVIRONMENT`.
+3. Set `GAMEND_PAYMENTS_STRIPE_SANDBOX_WEBHOOK_SECRET` or `GAMEND_PAYMENTS_STRIPE_PRODUCTION_WEBHOOK_SECRET` to that value, matching `GAMEND_PAYMENTS_ENVIRONMENT`.
 
 Do not enable all Stripe events. Extra events add webhook traffic, stored provider events, retries, and logs without changing purchase fulfillment.
 
 refund.failed is not enabled by default because a failed refund does not mean access should be automatically regranted; add that only with an explicit ops policy.
 
-Do not choose Latest API version without testing. If you change STRIPE_API_VERSION, update the webhook endpoint to the same version and run Stripe checkout/webhook tests before production.
+Do not choose Latest API version without testing. If you change GAMEND_PAYMENTS_STRIPE_API_VERSION, update the webhook endpoint to the same version and run Stripe checkout/webhook tests before production.
 
 ```text
 # Local testing with Stripe CLI
 stripe listen --forward-to localhost:4000/api/v1/payments/webhooks/stripe
 
-# Use printed whsec_... as STRIPE_SANDBOX_WEBHOOK_SECRET
+# Use printed whsec_... as GAMEND_PAYMENTS_STRIPE_SANDBOX_WEBHOOK_SECRET
 ```
 
 Detected Stripe mode and masked provider variables are visible in [Admin > Config](/admin/config).
@@ -152,11 +152,11 @@ Google, Apple, and Steam adapters are built in. They store normalized validation
 ### Google Play
 
 ```bash
-PAYMENTS_ENVIRONMENT=sandbox
-GOOGLE_PLAY_PACKAGE_NAME=com.example.game
-GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_PATH=/run/secrets/google-play-service-account.json
-GOOGLE_PLAY_RTDN_TOKEN=shared_push_token
-GOOGLE_PLAY_AUTO_ACKNOWLEDGE=true
+GAMEND_PAYMENTS_ENVIRONMENT=sandbox
+GAMEND_PAYMENTS_GOOGLE_PLAY_PACKAGE_NAME=com.example.game
+GAMEND_PAYMENTS_GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_PATH=/run/secrets/google-play-service-account.json
+GAMEND_PAYMENTS_GOOGLE_PLAY_RTDN_TOKEN=shared_push_token
+GAMEND_PAYMENTS_GOOGLE_PLAY_AUTO_ACKNOWLEDGE=true
 ```
 
 1. Create provider SKUs with provider `google` and external ID equal to the Play product ID.
@@ -173,11 +173,11 @@ Google RTDN
 ### App Store
 
 ```bash
-PAYMENTS_ENVIRONMENT=sandbox
-APPLE_BUNDLE_ID=com.example.game
-APPLE_ISSUER_ID=app_store_server_api_issuer_id
-APPLE_KEY_ID=app_store_server_api_key_id
-APPLE_PRIVATE_KEY_PATH=/run/secrets/AuthKey_ABC123DEFG.p8
+GAMEND_PAYMENTS_ENVIRONMENT=sandbox
+GAMEND_PAYMENTS_APPLE_BUNDLE_ID=com.example.game
+GAMEND_PAYMENTS_APPLE_ISSUER_ID=app_store_server_api_issuer_id
+GAMEND_PAYMENTS_APPLE_KEY_ID=app_store_server_api_key_id
+GAMEND_PAYMENTS_APPLE_PRIVATE_KEY_PATH=/run/secrets/AuthKey_ABC123DEFG.p8
 ```
 
 1. Create provider SKUs with provider `apple` and external ID equal to the App Store product ID.
@@ -194,12 +194,12 @@ Apple Notifications
 ### Steam MicroTxn
 
 ```bash
-PAYMENTS_ENVIRONMENT=sandbox
-STEAM_WEB_API_KEY=steam_web_api_key
-STEAM_APP_ID=480
+GAMEND_PAYMENTS_ENVIRONMENT=sandbox
+GAMEND_PAYMENTS_STEAM_WEB_API_KEY=steam_web_api_key
+GAMEND_PAYMENTS_STEAM_APP_ID=480
 ```
 
-If `STEAM_WEB_API_KEY` is unset, payments reuse `STEAM_API_KEY` from Steam OpenID config.
+If `GAMEND_PAYMENTS_STEAM_WEB_API_KEY` is unset, payments reuse `GAMEND_OAUTH_STEAM_API_KEY` from Steam OpenID config.
 
 1. Create provider SKUs with provider `steam` and external ID equal to the numeric Steam item ID.
 2. Client starts payment with `POST /api/v1/payments/checkout/steam` using `steam_id`.

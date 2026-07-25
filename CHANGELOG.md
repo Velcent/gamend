@@ -1,5 +1,6 @@
 # July 2026
 
+- [added] **Settings**: one declared config surface.
 - [changed] **Guides are markdown files.** `/docs/setup`
 - [changed] **Times are shown in the reader's timezone.**
 - [added] Retention for every unbounded table.

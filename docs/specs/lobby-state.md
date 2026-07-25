@@ -152,7 +152,7 @@ Dispatched after commit via `defer/1`, never inside the lock.
 
 Shipped in the Retention pass, and deliberately **not** keyed on state: a lobby
 is reaped only when nobody in it has been seen for
-`RETENTION_ABANDONED_LOBBY_MINUTES`. A game that ends a match deletes its own
+`GAMEND_RETENTION_ABANDONED_LOBBY_MINUTES`. A game that ends a match deletes its own
 lobby; core does not decide that `ended` means "delete this", because core
 assigns no meaning to any state but `created`. Presence, not membership, is
 what protects a live game — polyglot keeps a paused match alive **while any
@@ -179,7 +179,7 @@ then drops the metadata key.
 ## Definition of done (CONTRIBUTING)
 
 - [ ] Migration adds `state` + `state_changed_at` with an index; applies on
-      SQLite **and** `DATABASE_ADAPTER=postgres`.
+      SQLite **and** `GAMEND_DB_ADAPTER=postgres`.
 - [ ] Neither column is castable via `PATCH /lobbies/:id`; `create_lobby` sets
       `"created"`.
 - [ ] `transition_state/3` accepts any sane string (vocabulary enforcement is

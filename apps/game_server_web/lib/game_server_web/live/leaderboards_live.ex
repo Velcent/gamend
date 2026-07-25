@@ -15,7 +15,7 @@ defmodule GameServerWeb.LeaderboardsLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    unless FeatureGate.enabled?("LIST_LEADERBOARDS_ENABLED", true) do
+    unless FeatureGate.enabled?(:list_leaderboards) do
       raise GameServerWeb.NotFoundError
     end
 

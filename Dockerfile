@@ -23,16 +23,12 @@ ENV MIX_ENV=prod
 
 # Database adapter for compile-time selection (sqlite or postgres).
 # Set to "postgres" when deploying with PostgreSQL.
-ARG DATABASE_ADAPTER=sqlite
-ENV DATABASE_ADAPTER=${DATABASE_ADAPTER}
+ARG GAMEND_DB_ADAPTER=sqlite
+ENV GAMEND_DB_ADAPTER=${GAMEND_DB_ADAPTER}
 
 # Plugin build configuration
-ARG GAME_SERVER_PLUGINS_DIR=modules/plugins_examples
-ENV GAME_SERVER_PLUGINS_DIR=${GAME_SERVER_PLUGINS_DIR}
-
-ARG APP_VERSION=1.0.0
-ENV APP_VERSION=${APP_VERSION}
-RUN echo -n "${APP_VERSION}" > /app/VERSION
+ARG GAMEND_CONTENT_PLUGINS_DIR=modules/plugins_examples
+ENV GAMEND_CONTENT_PLUGINS_DIR=${GAMEND_CONTENT_PLUGINS_DIR}
 
 COPY mix.exs mix.lock ./
 
@@ -47,15 +43,15 @@ RUN mix deps.get
 COPY . .
 
 # Build any plugins that ship with the repository. Copy paste this to your own Dockerfile
-RUN if [ -d "${GAME_SERVER_PLUGINS_DIR}" ]; then \
-        for plugin_path in ${GAME_SERVER_PLUGINS_DIR}/*; do \
+RUN if [ -d "${GAMEND_CONTENT_PLUGINS_DIR}" ]; then \
+        for plugin_path in ${GAMEND_CONTENT_PLUGINS_DIR}/*; do \
             if [ -d "${plugin_path}" ] && [ -f "${plugin_path}/mix.exs" ]; then \
                 echo "Building plugin ${plugin_path}"; \
                 (cd "${plugin_path}" && mix deps.get && mix compile && mix plugin.bundle --verbose); \
             fi; \
         done; \
     else \
-        echo "Plugin sources dir ${GAME_SERVER_PLUGINS_DIR} missing, skipping plugin builds"; \
+        echo "Plugin sources dir ${GAMEND_CONTENT_PLUGINS_DIR} missing, skipping plugin builds"; \
     fi
 
 # Compile the application FIRST (generates phoenix-colocated hooks)
@@ -63,6 +59,18 @@ RUN mix compile
 
 # Build and digest static assets for production for the root host app.
 RUN mix assets.deploy
+
+# Version last, deliberately. It is `1.0.<commit_count>`, so it changes on
+# every commit — and an ARG/ENV invalidates every layer below it, which would
+# rebuild dependencies, NIFs and assets on every build for nothing.
+#
+# The cost of declaring it here is that the compiled OTP `vsn` keeps mix.exs's
+# default. That is only a fallback: the reported version comes from the
+# `content.app_version` setting, which this ENV supplies at runtime and which
+# takes precedence (see GameServerWeb.ApiSpec.api_version/0).
+ARG GAMEND_CONTENT_APP_VERSION=1.0.0
+ENV GAMEND_CONTENT_APP_VERSION=${GAMEND_CONTENT_APP_VERSION}
+RUN echo -n "${GAMEND_CONTENT_APP_VERSION}" > /app/VERSION
 
 # Expose ports (HTTP + HTTPS)
 EXPOSE 4000 443

@@ -75,7 +75,7 @@ A custom matchmaking_form_matches/2 hook does not need to check blocks itself: w
 
 - The Admin → Blacklist page lists every block in the system, filterable by a user on either side, with force-unblock for support cases.
 - Blocks are permanent until lifted; there is no expiry. Removing a block deletes the row rather than reverting it to a friendship.
-- LIMIT_MAX_FRIENDS_PER_USER caps accepted friendships per user; blocks are not counted against it.
+- GAMEND_LIMITS_MAX_FRIENDS_PER_USER caps accepted friendships per user; blocks are not counted against it.
 
 ## Reference
 

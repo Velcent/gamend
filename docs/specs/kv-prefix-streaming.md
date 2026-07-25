@@ -120,9 +120,11 @@ makes the retention conversation possible at all.
 - [ ] `delete_by_prefix/2` batches, invalidates the scope cache once, broadcasts
       deletions, and refuses an empty prefix.
 - [ ] Migration adds the Postgres `text_pattern_ops` index; applies on SQLite
-      **and** `DATABASE_ADAPTER=postgres`; `EXPLAIN` asserts index use in the
+      **and** `GAMEND_DB_ADAPTER=postgres`; `EXPLAIN` asserts index use in the
       Postgres run.
-- [ ] `max_kv_page_size` in `Limits` + `.env.example`.
+- [ ] `max_kv_page_size` declared on the `Limits` settings provider
+      (`GAMEND_LIMITS_MAX_KV_PAGE_SIZE`); `.env.example` regenerated with
+      `mix gamend.settings.env_example`.
 - [ ] Admin KV page: `*` prefix search and per-prefix counts; API parity;
       `admin_pages_render_test`.
 - [ ] Docs (Key-Value page) show the prefix convention and the stream API;

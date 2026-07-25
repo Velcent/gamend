@@ -38,7 +38,7 @@ end
 Hooks are loaded from OTP plugin applications under `modules/plugins/*`. You can override the plugins directory using:
 
 ```elixir
-GAME_SERVER_PLUGINS_DIR=modules/plugins
+GAMEND_CONTENT_PLUGINS_DIR=modules/plugins
 ```
 
 Each plugin is an OTP app directory with an `ebin` folder containing a `.app` file and compiled `.beam` modules. The plugin's `.app` env must include a `hooks_module` entry pointing at the module name.
@@ -231,7 +231,7 @@ end
 - Keep hooks fast and resilient — avoid long blocking work in the main request path. Use `Task.start` for background processing.
 - When returning values from lifecycle hooks, prefer a `{:ok, map}` shape for "before" hooks that may modify attrs. Return `{:error, reason}` to reject flows; domain code will convert to `{:hook_rejected, reason}`.
 - Do not return structs as hook results intended to be used as params — always return plain maps when you intend to pass modified params into changesets.
-- Tests that modify global plugin configuration (eg. `GAME_SERVER_PLUGINS_DIR` ) should run serially (`async: false`) and restore env via `on_exit` to avoid cross-test races.
+- Tests that modify global plugin configuration (eg. `GAMEND_CONTENT_PLUGINS_DIR` ) should run serially (`async: false`) and restore env via `on_exit` to avoid cross-test races.
 - Be careful modifying user or lobby data from hooks — reuse high-level domain functions (eg. `GameServer.Accounts.update_user/2`, `GameServer.Lobbies.update_lobby/2` ) so changes are validated and broadcast consistently.
 
 ## Every hook

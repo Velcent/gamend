@@ -12,11 +12,11 @@ Before pushing an update, the channel compares it to the last one it sent for th
 
 ## Debouncing (opt-in)
 
-Set REALTIME_DEBOUNCE_MS to hold outbound updates for that many milliseconds and then push only the latest state per object. A burst of ten writes to one lobby becomes one message. It is 0 by default, which pushes immediately and only deduplicates.
+Set GAMEND_REALTIME_DEBOUNCE_MS to hold outbound updates for that many milliseconds and then push only the latest state per object. A burst of ten writes to one lobby becomes one message. It is 0 by default, which pushes immediately and only deduplicates.
 
 | Env var | Default | Effect |
 |---|---|---|
-| REALTIME_DEBOUNCE_MS | 0 | Milliseconds to coalesce state updates. 0 pushes immediately. A small value (50-100) collapses rapid bursts at the cost of that much added latency on updates. |
+| GAMEND_REALTIME_DEBOUNCE_MS | 0 | Milliseconds to coalesce state updates. 0 pushes immediately. A small value (50-100) collapses rapid bursts at the cost of that much added latency on updates. |
 
 This is the lever that actually reduces bandwidth on a compressed connection, because each message costs about 76 bytes of framing and headers before any payload (see below). Removing a message saves more than shrinking one. The trade is latency: an update may wait up to the debounce window before the client sees it, so leave it at 0 for twitch-sensitive state and raise it only for chatty, non-urgent updates.
 
@@ -63,7 +63,7 @@ Protobuf keeps a real edge after compression — 22-27% on the payload, 9-17% on
 
 Ranking the levers (compressed connection)
 
-Coalescing bursts (REALTIME_DEBOUNCE_MS) — the largest win, roughly 30% on a 4-message burst. Protobuf (?format=protobuf) — 9-17%. They compose: a debounced protobuf socket gets both.
+Coalescing bursts (GAMEND_REALTIME_DEBOUNCE_MS) — the largest win, roughly 30% on a 4-message burst. Protobuf (?format=protobuf) — 9-17%. They compose: a debounced protobuf socket gets both.
 
 Reproducing these numbers
 

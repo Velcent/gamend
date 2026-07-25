@@ -119,7 +119,8 @@ Pure, documented with the anti-cheat rules polyglot derived, defaulting to
 - **never** apply compensation to cooldowns, rate limits or reward eligibility —
   only to "did this action beat that event?".
 
-The cap lives in `Limits` (`max_latency_compensation_ms`, default 500) so a host
+The cap is a declared setting (`Limits`, `max_latency_compensation_ms` →
+`GAMEND_LIMITS_MAX_LATENCY_COMPENSATION_MS`, default 500) so a host
 can bound what any plugin may claim, and the amount used is returned to the
 caller for logging and tuning.
 
@@ -172,7 +173,7 @@ Each phase ships alone and each is opt-in from the client's side.
 ## Definition of done (CONTRIBUTING)
 
 - [ ] Migration adds `lobbies.revision bigint default 0`; applies on SQLite
-      **and** `DATABASE_ADAPTER=postgres`.
+      **and** `GAMEND_DB_ADAPTER=postgres`.
 - [ ] `GET /time` + channel `get_server_time`; `server_now` on lobby payloads
       and every lobby event.
 - [ ] `update_lobby/3` accepts `expected_revision:` and returns
@@ -192,7 +193,8 @@ Each phase ships alone and each is opt-in from the client's side.
       wins, one gets `:stale_state`), duplicate/reordered/late actions, event
       ordering by revision, and the four `effective_now/3` anti-cheat rules.
 - [ ] Admin revision display; PromEx counters + skew histogram.
-- [ ] Docs (Lobbies, Realtime, server-scripting), `.env.example`,
+- [ ] `max_latency_compensation_ms` declared on the `Limits` provider,
+      `.env.example` regenerated; docs (Lobbies, Realtime, server-scripting),
       `api_spec.ex`, CHANGELOG, i18n.
 - [ ] `mix format`, `mix credo --strict`, full `mix test` green; example plugin
       warning-free.

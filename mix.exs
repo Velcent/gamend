@@ -5,7 +5,7 @@ defmodule GameServerHost.MixProject do
     [
       app: :game_server_host,
       name: "GameServer",
-      version: System.get_env("APP_VERSION") || "1.0.0",
+      version: System.get_env("GAMEND_CONTENT_APP_VERSION") || "1.0.0",
       elixir: "~> 1.20",
       elixirc_paths: ["lib"],
       start_permanent: Mix.env() == :prod,
@@ -105,6 +105,11 @@ defmodule GameServerHost.MixProject do
           "compile --warning-as-errors",
           "format",
           "gen.sdk",
+          # Regenerate rather than --check, like format and gen.sdk above: a
+          # stale settings doc is fixed and committed here, and CI runs the
+          # --check form so a bypassed precommit still cannot ship one.
+          "gamend.settings.env_example",
+          "gamend.settings.guide",
           "test",
           "credo --strict"
         ] ++

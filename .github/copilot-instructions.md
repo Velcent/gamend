@@ -226,9 +226,9 @@ API routes use JWT tokens via Guardian for stateless authentication:
 ### Push notifications
 
 - Push context: `GameServer.Push` — token registry (`register_token/2` upsert, `list_tokens/2`, `delete_token/2`, soft `disable_token/1`) + server-authoritative delivery (`send_to_user/3`, `send_to_users/3`; no public send endpoint).
-- Delivery routes **per token** off `push_tokens.provider` ("fcm" | "apns") through Pigeon dispatchers; unconfigured providers fall back to the zero-config `Log` provider. One Oban job per token on the `push` queue (`PUSH_QUEUE_CONCURRENCY`); large fan-outs expand via `FanoutWorker`.
+- Delivery routes **per token** off `push_tokens.provider` ("fcm" | "apns") through Pigeon dispatchers; unconfigured providers fall back to the zero-config `Log` provider. One Oban job per token on the `push` queue (`GAMEND_PUSH_QUEUE_CONCURRENCY`); large fan-outs expand via `FanoutWorker`.
 - Hooks: `before_push_send/2` (per-recipient veto/rewrite pipeline), `after_push_sent/3` (per-token outcome). `Notifications` bridges committed notifications to push for offline users via the cached `user_has_live_tokens?/1`.
-- API: `POST/GET /api/v1/me/push-tokens`, `DELETE /api/v1/me/push-tokens/:id`; admin under `/api/v1/admin/push/*`; admin page at `/admin/push`. Stale tokens prune via `RETENTION_PUSH_TOKENS_DAYS` (default 270).
+- API: `POST/GET /api/v1/me/push-tokens`, `DELETE /api/v1/me/push-tokens/:id`; admin under `/api/v1/admin/push/*`; admin page at `/admin/push`. Stale tokens prune via `GAMEND_RETENTION_PUSH_TOKENS_DAYS` (default 270).
 
 ### Notifications
 

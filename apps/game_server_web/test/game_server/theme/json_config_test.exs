@@ -6,14 +6,29 @@ defmodule GameServer.Theme.JSONConfigTest do
 
   setup do
     # ensure any global env change is reset after
-    orig = System.get_env("THEME_CONFIG")
+    orig =
+      GameServer.SettingsHelpers.get(:game_server_core, GameServer.ContentSettings, :theme_config)
 
     # Clear theme cache before each test so env var changes take effect
     JSONConfig.reload()
     Content.reload()
 
     on_exit(fn ->
-      if orig, do: System.put_env("THEME_CONFIG", orig), else: System.delete_env("THEME_CONFIG")
+      if orig,
+        do:
+          GameServer.SettingsHelpers.put(
+            :game_server_core,
+            GameServer.ContentSettings,
+            :theme_config,
+            orig
+          ),
+        else:
+          GameServer.SettingsHelpers.delete(
+            :game_server_core,
+            GameServer.ContentSettings,
+            :theme_config
+          )
+
       JSONConfig.reload()
       Content.reload()
     end)
@@ -31,7 +46,12 @@ defmodule GameServer.Theme.JSONConfigTest do
 
     on_exit(fn -> File.rm(en_path) end)
 
-    System.put_env("THEME_CONFIG", base)
+    GameServer.SettingsHelpers.put(
+      :game_server_core,
+      GameServer.ContentSettings,
+      :theme_config,
+      base
+    )
 
     theme = JSONConfig.get_theme()
     assert theme == %{"title" => "My Test", "logo" => "/theme/logo.png"}
@@ -52,34 +72,57 @@ defmodule GameServer.Theme.JSONConfigTest do
       File.rm(es_path)
     end)
 
-    System.put_env("THEME_CONFIG", base)
+    GameServer.SettingsHelpers.put(
+      :game_server_core,
+      GameServer.ContentSettings,
+      :theme_config,
+      base
+    )
 
     assert %{"title" => "Titulo ES", "logo" => "/es.png"} = JSONConfig.get_theme("es")
     # nil locale falls back to .en variant
     assert %{"title" => "English Title", "logo" => "/en.png"} = JSONConfig.get_theme()
   end
 
-  test "returns empty map when THEME_CONFIG points to missing file" do
-    System.put_env("THEME_CONFIG", "nonexistent.json")
+  test "returns empty map when GAMEND_CONTENT_THEME_CONFIG points to missing file" do
+    GameServer.SettingsHelpers.put(
+      :game_server_core,
+      GameServer.ContentSettings,
+      :theme_config,
+      "nonexistent.json"
+    )
 
     theme = JSONConfig.get_theme()
     assert theme == %{}
   end
 
-  test "returns an empty theme when THEME_CONFIG is unset in standalone web mode" do
-    System.delete_env("THEME_CONFIG")
+  test "returns an empty theme when GAMEND_CONTENT_THEME_CONFIG is unset in standalone web mode" do
+    GameServer.SettingsHelpers.delete(
+      :game_server_core,
+      GameServer.ContentSettings,
+      :theme_config
+    )
 
     assert JSONConfig.get_theme() == %{}
   end
 
-  test "treats blank THEME_CONFIG as unset in standalone web mode" do
-    System.put_env("THEME_CONFIG", "")
+  test "treats blank GAMEND_CONTENT_THEME_CONFIG as unset in standalone web mode" do
+    GameServer.SettingsHelpers.put(
+      :game_server_core,
+      GameServer.ContentSettings,
+      :theme_config,
+      ""
+    )
 
     assert JSONConfig.get_theme() == %{}
   end
 
   test "runtime_path reports only the env override when no standalone default is configured" do
-    System.delete_env("THEME_CONFIG")
+    GameServer.SettingsHelpers.delete(
+      :game_server_core,
+      GameServer.ContentSettings,
+      :theme_config
+    )
 
     assert JSONConfig.runtime_path() == nil
     assert JSONConfig.active_path() == nil
@@ -109,7 +152,12 @@ defmodule GameServer.Theme.JSONConfigTest do
 
     on_exit(fn -> File.rm(en_path) end)
 
-    System.put_env("THEME_CONFIG", base)
+    GameServer.SettingsHelpers.put(
+      :game_server_core,
+      GameServer.ContentSettings,
+      :theme_config,
+      base
+    )
 
     theme = JSONConfig.get_theme()
 

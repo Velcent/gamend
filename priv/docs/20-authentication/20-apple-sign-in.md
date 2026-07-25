@@ -65,11 +65,11 @@ Find your Team ID:
 Set these environment variables:
 
 ```bash
-APPLE_WEB_CLIENT_ID="com.yourcompany.gameserver.web"
-APPLE_IOS_CLIENT_ID="com.yourcompany.gameserver.ios"
-APPLE_TEAM_ID="A1B2C3D4E5"
-APPLE_KEY_ID="ABC123XYZ"
-APPLE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----"
+GAMEND_OAUTH_APPLE_CLIENT_ID="com.yourcompany.gameserver.web"
+GAMEND_OAUTH_APPLE_IOS_CLIENT_ID="com.yourcompany.gameserver.ios"
+GAMEND_OAUTH_APPLE_TEAM_ID="A1B2C3D4E5"
+GAMEND_OAUTH_APPLE_KEY_ID="ABC123XYZ"
+GAMEND_OAUTH_APPLE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----"
 "MIGTAgEAMBMGByq...your key content..."
 "-----END PRIVATE KEY-----"
 ```

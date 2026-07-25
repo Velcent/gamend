@@ -8,7 +8,7 @@ Deliver push notifications to your players' devices — the one channel that rea
 
 ## Device registration
 
-Clients obtain a token from their platform (FCM registration token or APNs device token) and register it against the authenticated user. Passing a stable device_id makes re-registration rotate the token in place instead of accumulating rows; a token re-registered by another account moves to that account. Live devices per user are capped by LIMIT_MAX_PUSH_TOKENS_PER_USER (default 20).
+Clients obtain a token from their platform (FCM registration token or APNs device token) and register it against the authenticated user. Passing a stable device_id makes re-registration rotate the token in place instead of accumulating rows; a token re-registered by another account moves to that account. Live devices per user are capped by GAMEND_LIMITS_MAX_PUSH_TOKENS_PER_USER (default 20).
 
 ```text
 POST /api/v1/me/push-tokens
@@ -24,22 +24,22 @@ DELETE /api/v1/me/push-tokens/:id    # unregister (e.g. on logout)
 
 ### FCM setup (Android / Web)
 
-Create a Firebase project, open Project settings → Service accounts, and generate a service-account key (JSON). Point PUSH_FCM_CREDENTIALS at the file (or paste the JSON inline); the project id is read from the credentials. The server obtains and refreshes the OAuth token itself.
+Create a Firebase project, open Project settings → Service accounts, and generate a service-account key (JSON). Point GAMEND_PUSH_FCM_CREDENTIALS at the file (or paste the JSON inline); the project id is read from the credentials. The server obtains and refreshes the OAuth token itself.
 
 ```bash
-PUSH_FCM_CREDENTIALS=/etc/gamend/fcm-service-account.json
+GAMEND_PUSH_FCM_CREDENTIALS=/etc/gamend/fcm-service-account.json
 ```
 
 ### APNs setup (iOS, no Firebase)
 
-In the Apple Developer portal, create an APNs auth key (Certificates, Identifiers & Profiles → Keys → enable Apple Push Notifications service) and download the .p8 file — one key serves all your apps and never expires. Configure all four variables; APNS_ENV=sandbox targets Apple's sandbox gateway for development builds.
+In the Apple Developer portal, create an APNs auth key (Certificates, Identifiers & Profiles → Keys → enable Apple Push Notifications service) and download the .p8 file — one key serves all your apps and never expires. Configure all four variables; GAMEND_PUSH_APNS_ENV=sandbox targets Apple's sandbox gateway for development builds.
 
 ```bash
-APNS_PRIVATE_KEY=/etc/gamend/AuthKey_AB12CD34EF.p8
-APNS_KEY_ID=AB12CD34EF        # the key's 10-char id
-APNS_TEAM_ID=TEAM123456       # your developer team id
-APNS_TOPIC=com.example.game   # the app's bundle id
-APNS_ENV=production           # or sandbox
+GAMEND_PUSH_APNS_PRIVATE_KEY=/etc/gamend/AuthKey_AB12CD34EF.p8
+GAMEND_PUSH_APNS_KEY_ID=AB12CD34EF        # the key's 10-char id
+GAMEND_PUSH_APNS_TEAM_ID=TEAM123456       # your developer team id
+GAMEND_PUSH_APNS_TOPIC=com.example.game   # the app's bundle id
+GAMEND_PUSH_APNS_ENV=production           # or sandbox
 ```
 
 ### Sending from a hook
@@ -62,7 +62,7 @@ GameServer.Push.send_to_users(user_ids, %{"title" => "Event starts now!"})
 
 ### Operations
 
-The /admin/push page lists registered devices (filter by user, platform, provider, status) and can send a test push. Delivery jobs are visible on the push queue at /admin/oban; PUSH_QUEUE_CONCURRENCY sets per-node delivery throughput. Devices untouched for RETENTION_PUSH_TOKENS_DAYS (default 270) are pruned as dead installs. PUSH_ADAPTER=log forces log-only delivery even with credentials configured — useful on staging.
+The /admin/push page lists registered devices (filter by user, platform, provider, status) and can send a test push. Delivery jobs are visible on the push queue at /admin/oban; GAMEND_PUSH_QUEUE_CONCURRENCY sets per-node delivery throughput. Devices untouched for GAMEND_RETENTION_PUSH_TOKENS_DAYS (default 270) are pruned as dead installs. GAMEND_PUSH_ADAPTER=log forces log-only delivery even with credentials configured — useful on staging.
 
 ## Reference
 

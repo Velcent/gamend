@@ -54,10 +54,10 @@ Key variables to set:
 
 | Variable | Description |
 |---|---|
-| SECRET_KEY_BASE | 64-byte hex secret for session signing. Generate with: mix phx.gen.secret |
+| GAMEND_AUTH_SECRET_KEY_BASE | 64-byte hex secret for session signing. Generate with: mix phx.gen.secret |
 | DATABASE_URL | PostgreSQL connection string (pre-configured for the Docker Compose DB) |
-| PHX_HOST | Your public hostname (e.g. play.example.com) |
-| GUARDIAN_SECRET_KEY | Secret for signing JWT API tokens |
+| GAMEND_HTTP_HOST | Your public hostname (e.g. play.example.com) |
+| GAMEND_AUTH_GUARDIAN_SECRET_KEY | Secret for signing JWT API tokens |
 
 See the .env.example file for the full list of available environment variables including OAuth providers, email, rate limiting, and more.
 
@@ -84,7 +84,7 @@ docker compose logs -f app
 ## Production recommendations
 
 - Enable HTTPS with automatic certificate renewal (see below)
-- Set PHX_HOST to your actual domain
+- Set GAMEND_HTTP_HOST to your actual domain
 - Configure OAuth providers for social login (see provider guides above)
 - Enable email delivery via SMTP for password resets and notifications
 - Set up Redis for distributed caching when running multiple instances (see Scaling guide)
@@ -92,22 +92,19 @@ docker compose logs -f app
 
 ## Data retention
 
-A sweep runs every 6 hours and prunes tables that would otherwise grow forever. Each window is one env var; 0 keeps that class forever. See the last run and its per-class counts under Admin -> System, where you can also run a sweep on demand.
+A sweep runs every 6 hours and prunes tables that would otherwise grow forever.
+Each class has its own window; `0` keeps that class forever. The current values
+and their variables are in the [Settings](/docs/setup?guide=settings) guide
+under **Retention**; the last run and its per-class counts are on
+Admin -> System, which can also sweep on demand.
 
-| Variable | Default | Prunes |
-|---|---|---|
-| RETENTION_ABANDONED_LOBBY_MINUTES | 15 | Lobbies nobody in them has been seen in for the window, so a reconnect always saves one. Ending a match is not a reason to delete: a game that ends one deletes its own lobby. Raise this if your game keeps rooms open between sessions. |
-| RETENTION_INVITES_DAYS | 30 | Resolved group/party invites and join requests. Pending ones are never pruned. |
-| RETENTION_MATCHMAKING_TICKETS_HOURS | 24 | Matchmaking tickets, in any status. |
-| RETENTION_CHAT_DAYS | 0 | Chat messages. |
-| RETENTION_NOTIFICATIONS_DAYS | 0 | Notifications. |
-| RETENTION_PAYMENT_EVENTS_DAYS | 0 | Provider webhook events. Purchases and entitlements are never pruned. |
-| RETENTION_LOBBY_SNAPSHOTS_DAYS | 30 | Lobby snapshots, events and blobs. Runs flagged anomalous keep RETENTION_LOBBY_SNAPSHOTS_FLAGGED_DAYS (90) instead. |
-| RETENTION_PUSH_TOKENS_DAYS | 270 | Push tokens untouched this long: dead installs. |
-| RETENTION_TOURNAMENTS_DAYS | 0 | Finished tournaments and their bracket rows. Opt-in. |
-| RETENTION_LEDGER_DAYS | 0 | Wallet and inventory ledgers. Opt-in: this is the audit trail behind every balance. |
+Two rules worth knowing before you tune them:
 
-Expired sessions and magic-link tokens are always pruned on their own validity, and are not configurable.
+- A lobby is deleted only when **nobody in it has been seen** for the window, so
+  a reconnect always saves one. Ending a match is not itself a reason to delete:
+  a game that ends one deletes its own lobby.
+- Expired sessions and magic-link tokens are always pruned on their own
+  validity and are not configurable.
 
 ## HTTPS
 
@@ -118,10 +115,10 @@ effect **without a restart**.
 
 | Variable | Purpose |
 |---|---|
-| `SSL_CERTFILE` | Path to `fullchain.pem` (certificate + CA chain) |
-| `SSL_KEYFILE` | Path to `privkey.pem` |
-| `FORCE_SSL` | `true` redirects HTTP to HTTPS and enables HSTS |
-| `ACME_WEBROOT` | Directory the ACME challenge is served from |
+| `GAMEND_TLS_CERTFILE` | Path to `fullchain.pem` (certificate + CA chain) |
+| `GAMEND_TLS_KEYFILE` | Path to `privkey.pem` |
+| `GAMEND_TLS_FORCE` | `true` redirects HTTP to HTTPS and enables HSTS |
+| `GAMEND_TLS_ACME_WEBROOT` | Directory the ACME challenge is served from |
 
 Get a certificate with the server already running on HTTP, so certbot can
 validate over the webroot:
@@ -135,11 +132,11 @@ sudo certbot certonly --webroot --webroot-path /var/www/acme \
 Then point the server at what certbot wrote and restart:
 
 ```bash
-PHX_HOST=play.example.com
-SSL_CERTFILE=/etc/letsencrypt/live/play.example.com/fullchain.pem
-SSL_KEYFILE=/etc/letsencrypt/live/play.example.com/privkey.pem
-FORCE_SSL=true
-ACME_WEBROOT=/var/www/acme
+GAMEND_HTTP_HOST=play.example.com
+GAMEND_TLS_CERTFILE=/etc/letsencrypt/live/play.example.com/fullchain.pem
+GAMEND_TLS_KEYFILE=/etc/letsencrypt/live/play.example.com/privkey.pem
+GAMEND_TLS_FORCE=true
+GAMEND_TLS_ACME_WEBROOT=/var/www/acme
 ```
 
 Certbot installs its own renewal timer, so there is nothing further to
@@ -157,11 +154,11 @@ services:
       - "4000:4000"
       - "443:443"
     environment:
-      PHX_HOST: play.example.com
-      SSL_CERTFILE: /etc/letsencrypt/live/play.example.com/fullchain.pem
-      SSL_KEYFILE: /etc/letsencrypt/live/play.example.com/privkey.pem
-      FORCE_SSL: "true"
-      ACME_WEBROOT: /var/www/acme
+      GAMEND_HTTP_HOST: play.example.com
+      GAMEND_TLS_CERTFILE: /etc/letsencrypt/live/play.example.com/fullchain.pem
+      GAMEND_TLS_KEYFILE: /etc/letsencrypt/live/play.example.com/privkey.pem
+      GAMEND_TLS_FORCE: "true"
+      GAMEND_TLS_ACME_WEBROOT: /var/www/acme
     volumes:
       - ./certbot/conf:/etc/letsencrypt:ro
       - ./certbot/www:/var/www/acme:ro
@@ -198,11 +195,11 @@ Renewed certs are picked up automatically — no container restart needed.
 
 | Variable | Description | Default |
 |---|---|---|
-| SSL_CERTFILE | Path to fullchain.pem (certificate + CA chain) | — |
-| SSL_KEYFILE | Path to privkey.pem | — |
-| HTTPS_PORT | Port for HTTPS listener | 443 |
-| FORCE_SSL | Redirect HTTP → HTTPS and enable HSTS | true when SSL_CERTFILE is set |
-| ACME_WEBROOT | Webroot directory for Let's Encrypt HTTP-01 challenges (same as certbot --webroot-path) | /var/www/acme |
+| GAMEND_TLS_CERTFILE | Path to fullchain.pem (certificate + CA chain) | — |
+| GAMEND_TLS_KEYFILE | Path to privkey.pem | — |
+| GAMEND_TLS_PORT | Port for HTTPS listener | 443 |
+| GAMEND_TLS_FORCE | Redirect HTTP → HTTPS and enable HSTS | true when GAMEND_TLS_CERTFILE is set |
+| GAMEND_TLS_ACME_WEBROOT | Webroot directory for Let's Encrypt HTTP-01 challenges (same as certbot --webroot-path) | /var/www/acme |
 
 Port 443 access
 

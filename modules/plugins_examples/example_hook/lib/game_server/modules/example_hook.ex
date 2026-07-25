@@ -7,7 +7,7 @@ defmodule GameServer.Modules.ExampleHook do
 
   To try it locally:
 
-      export GAME_SERVER_PLUGINS_DIR=modules/plugins_examples
+      export GAMEND_CONTENT_PLUGINS_DIR=modules/plugins_examples
 
   Then restart the server and use the Admin Config page to reload plugins.
   """

@@ -42,6 +42,13 @@ Undeclared currencies keep working exactly as now (no regen, no cap). The
 declaration is also what the admin runtime page and `/config` publish, so the
 client can compute the same countdown instead of hardcoding 900.
 
+Note the difference from `lobby_states/0`, which was removed from
+`Declarations` in July 2026: that one declared *words core attached no meaning
+to*, so the registry bought nothing over documentation. `currencies/0` declares
+**behaviour core executes** — the fold below reads `amount`, `interval_sec` and
+`cap` on every balance read — which puts it in the enforced category alongside
+`notification_types/0`, not the observability-only one.
+
 ## Data model
 
 One nullable column on the existing table:
@@ -158,7 +165,7 @@ so they fold first).
 ## Definition of done (CONTRIBUTING)
 
 - [ ] Migration adds `wallets.regen_at` (nullable); applies on SQLite **and**
-      `DATABASE_ADAPTER=postgres`.
+      `GAMEND_DB_ADAPTER=postgres`.
 - [ ] `currencies/0` declaration registered in `Hooks.Declarations`, surfaced on
       the admin runtime page, published to clients via `/config`.
 - [ ] `balance/2` folds without writing; `debit`/`credit` fold inside the
@@ -172,7 +179,8 @@ so they fold first).
 - [ ] `wallet_updated` carries regen fields, with protobuf + `EventCodec` +
       Godot parity.
 - [ ] Admin economy page shows folded balance, cap and next tick; API parity.
-- [ ] Docs (Economy page), `.env.example` if any limits added, `api_spec.ex`,
+- [ ] Docs (Economy page); any new setting declared on a provider with
+      `.env.example` regenerated; `api_spec.ex`,
       CHANGELOG, i18n.
 - [ ] Polyglot's `Lives` and `Shields` collapse onto declared currencies
       (tracked in that repo).

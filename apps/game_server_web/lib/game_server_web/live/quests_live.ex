@@ -19,7 +19,7 @@ defmodule GameServerWeb.QuestsLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    unless FeatureGate.enabled?("LIST_QUESTS_ENABLED", true) do
+    unless FeatureGate.enabled?(:list_quests) do
       raise GameServerWeb.NotFoundError
     end
 

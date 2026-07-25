@@ -32,7 +32,7 @@ Audited every table. These grow unbounded with **no** retention at all:
 | `tournaments` + entries/matches/brackets | Finished tournaments and their bracket rows accumulate per occurrence; recurring tournaments create one per cycle. | **0 (keep)**, opt-in |
 | `ledger_entries`, `inventory_ledger` | Append-only by design — one row per currency/item mutation, forever. | **0 (keep)** — financial audit trail; opt-in only |
 
-Deliberately **not** given retention: `users`, `groups`, `parties`,
+Deliberately **not** given retention: `users`, `groups`,
 `friendships`, `wallets`, `inventory_items`, `kv_entries`,
 `leaderboard_records`, `chat_read_cursors`, `quests`, `purchases`,
 `entitlements`, `store_products`, `provider_products`,
@@ -41,13 +41,36 @@ they are bounded by their owners and deleting rows would destroy player data,
 not reclaim garbage. (Cascade on user deletion already covers the per-user
 ones.)
 
+**Amendment (July 2026): `parties` moved off that list.** It was grouped with
+entity state, but a party is not bounded by its owner the way a wallet is: a
+party disbands only when its **leader** leaves, and disconnecting never clears
+`users.party_id`, so a group that simply closes the game leaves a row that lives
+forever — still holding every member (a user may be in only one party, so it
+blocks their next one), still listed, still receiving invites. That is the
+abandoned-lobby problem with a different column, so it gets the same rule and
+the same silence test:
+
+| Table | Why it grows | Proposed default |
+| --- | --- | --- |
+| `parties` | Disbands only on leader-leave; an abandoned party is never removed | **15 min** after every member goes quiet |
+
+Reaping goes through `Parties.disband_party/1` per row, exactly as lobbies go
+through `reap_lobby/1` — members' `party_id` cleared, pending invites cancelled,
+caches invalidated, `party_disbanded` broadcast, `after_party_disband` fired. A
+bulk delete would leave every member pointing at a party that no longer exists.
+The default is the lobby's 15 minutes, because the two settings answer the same
+question and a host should not have to learn two numbers; a game that wants
+parties to outlive a session raises it, and `0` keeps them forever. Full
+reasoning in [disconnect-grace.md](disconnect-grace.md), which is where the
+per-user side of the same problem lives.
+
 ## Lobbies — the one that needs real logic
 
 Everything else is "delete rows older than N". Lobbies are not, and getting
 this wrong deletes live games. One rule:
 
 > Delete a lobby when it has not been touched for
-> `RETENTION_ABANDONED_LOBBY_MINUTES` **and** no member is online or was online
+> `GAMEND_RETENTION_ABANDONED_LOBBY_MINUTES` **and** no member is online or was online
 > inside that window.
 
 Note this is not "no members": `set_user_offline/1` clears `is_online` but
@@ -84,11 +107,11 @@ New vars, all following the existing convention (read in
 `config/host_runtime.exs`, `0` disables, documented in `.env.example`):
 
 ```
-RETENTION_ABANDONED_LOBBY_MINUTES=15      # lobbies everyone has gone quiet in
-RETENTION_INVITES_DAYS=30                 # resolved invites/join requests
-RETENTION_MATCHMAKING_TICKETS_HOURS=24    # never-matched tickets
-RETENTION_TOURNAMENTS_DAYS=0              # finished tournaments (opt-in)
-RETENTION_LEDGER_DAYS=0                   # wallet + inventory ledgers (opt-in)
+GAMEND_RETENTION_ABANDONED_LOBBY_MINUTES=15      # lobbies everyone has gone quiet in
+GAMEND_RETENTION_INVITES_DAYS=30                 # resolved invites/join requests
+GAMEND_RETENTION_MATCHMAKING_TICKETS_HOURS=24    # never-matched tickets
+GAMEND_RETENTION_TOURNAMENTS_DAYS=0              # finished tournaments (opt-in)
+GAMEND_RETENTION_LEDGER_DAYS=0                   # wallet + inventory ledgers (opt-in)
 ```
 
 Defaults live in `GameServer.Retention` itself, not only in

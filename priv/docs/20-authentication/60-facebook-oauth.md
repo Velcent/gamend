@@ -66,8 +66,8 @@ For production use, switch to live mode:
 Set these environment variables:
 
 ```bash
-FACEBOOK_CLIENT_ID="your_app_id"
-FACEBOOK_CLIENT_SECRET="your_app_secret"
+GAMEND_OAUTH_FACEBOOK_CLIENT_ID="your_app_id"
+GAMEND_OAUTH_FACEBOOK_CLIENT_SECRET="your_app_secret"
 ```
 
 ## Test Facebook Login

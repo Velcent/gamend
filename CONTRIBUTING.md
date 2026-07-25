@@ -5,7 +5,7 @@ Checklist for adding a feature. Keep PRs small; one feature at a time.
 ## Data model (if the feature stores data)
 
 - Schema in `apps/game_server_core/lib/game_server/<feature>/` using `use GameServer.Schema` (UUIDv7 ids).
-- Migration in `apps/game_server_core/priv/repo/migrations/`. Must work on **both SQLite and Postgres** — no `ALTER COLUMN` and no `DISTINCT ON` on SQLite (rebuild the table / group in Elixir instead), test with `DATABASE_ADAPTER=postgres` too.
+- Migration in `apps/game_server_core/priv/repo/migrations/`. Must work on **both SQLite and Postgres** — no `ALTER COLUMN` and no `DISTINCT ON` on SQLite (rebuild the table / group in Elixir instead), test with `GAMEND_DB_ADAPTER=postgres` too.
 - Index every column you filter, sort or count on. Use partial indexes for hot predicates (e.g. `create index(:t, [:deadline], where: "resolved_at IS NULL")`) — they serve sweeps and dashboard counters at once.
 - Size/count caps in `GameServer.Limits` (auto-exposed as `LIMIT_*` env vars), enforced in the changeset, and listed in `@limit_categories` on the admin Config page.
 - `timestamps(type: :utc_datetime)`, never a bare `timestamps()` — the bare form stores naive values that lose the zone and cannot be rendered safely (see **Time**).
@@ -85,7 +85,7 @@ Adding one callback touches six places — miss one and plugins break in confusi
 
 - Guide in `priv/docs/<NN-category>/<NN-name>.md` if user-facing — a markdown file is the whole change, no registration and no Elixir. The folder is the category, the numeric prefixes order it, the first `# ` heading is the title and the first paragraph becomes the one-line summary on the index. Also update the realtime events table and the feature list in `api_spec.ex`.
 - Keep guides short. They render inside a disclosure someone opened with a question in mind: lead with the answer, prefer a table or a short example over prose, and leave the exhaustive reference to the API docs.
-- New env vars documented in `.env.example`.
+- New settings declared with `GameServer.Settings.Provider`, never read with `System.get_env/1`. The env var name derives from the declaration, and both `.env.example` and the public Settings guide are generated — run `mix gamend.settings.env_example` and `mix gamend.settings.guide`, and commit the result. Both take `--check` so CI catches a declaration whose docs were never regenerated.
 - `CHANGELOG.md` entry (`[added]` / `[changed]` / `[breaking]`), 3–4 words, grouped with related items.
 - `mix format`, `mix credo --strict`, full `mix test` green.
 - SDKs regenerate from the OpenAPI spec in CI — no manual SDK edits.

@@ -32,6 +32,9 @@ defmodule GameServerWeb.AdminLive.Index do
           <.link navigate={~p"/admin/config"} class="btn btn-outline">
             Configuration
           </.link>
+          <.link navigate={~p"/admin/settings"} class="btn btn-outline">
+            Settings
+          </.link>
           <.link navigate={~p"/admin/kv"} class="btn btn-outline">
             KV ({@kv_count})
           </.link>

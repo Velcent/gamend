@@ -55,8 +55,8 @@ Go to "APIs & Services" → "Credentials":
 Set these environment variables:
 
 ```bash
-GOOGLE_CLIENT_ID="your_client_id.apps.googleusercontent.com"
-GOOGLE_CLIENT_SECRET="your_client_secret"
+GAMEND_OAUTH_GOOGLE_CLIENT_ID="your_client_id.apps.googleusercontent.com"
+GAMEND_OAUTH_GOOGLE_CLIENT_SECRET="your_client_secret"
 ```
 
 ## Test Google Login

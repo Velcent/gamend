@@ -96,10 +96,10 @@ The theme_color field tints the browser chrome (address bar, tab bar) in Safari 
 Optional: point the runtime override at a different JSON file:
 
 ```bash
-THEME_CONFIG=theme/my_config.json
+GAMEND_CONTENT_THEME_CONFIG=theme/my_config.json
 ```
 
-Only locale-suffixed config files are loaded. For example, if THEME_CONFIG is set to theme/my_config.json, the server will load theme/my_config.en.json for English, theme/my_config.es.json for Spanish, etc. The base file (without locale suffix) is never loaded directly — it serves only as a naming template. When THEME_CONFIG is not set, the host falls back to its packaged default theme under theme/.
+Only locale-suffixed config files are loaded. For example, if GAMEND_CONTENT_THEME_CONFIG is set to theme/my_config.json, the server will load theme/my_config.en.json for English, theme/my_config.es.json for Spanish, etc. The base file (without locale suffix) is never loaded directly — it serves only as a naming template. When GAMEND_CONTENT_THEME_CONFIG is not set, the host falls back to its packaged default theme under theme/.
 
 ## Host-owned branding and content
 
@@ -113,7 +113,7 @@ Presentation media is visual only. Use buttons for links and calls to action.
 
 Edit assets/css/app.css when you want to change the full base stylesheet. The compiled bundle is written to priv/static/assets/css/app.css. Use priv/static/theme.css for a small layer of token or color overrides without forking the whole base CSS.
 
-Changelog, roadmap, and blog pages are host-owned, and their Markdown content now lives at the repository root as CHANGELOG.md, ROADMAP.md, and blog/. They are no longer configured through THEME_CONFIG.
+Changelog, roadmap, and blog pages are host-owned, and their Markdown content now lives at the repository root as CHANGELOG.md, ROADMAP.md, and blog/. They are no longer configured through GAMEND_CONTENT_THEME_CONFIG.
 
 ## Configure navigation
 

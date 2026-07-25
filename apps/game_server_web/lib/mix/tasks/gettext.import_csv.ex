@@ -615,7 +615,7 @@ defmodule Mix.Tasks.Gettext.ImportCsv do
   end
 
   defp detect_config_base(nil) do
-    env_path = System.get_env("THEME_CONFIG")
+    env_path = GameServer.Settings.get(GameServer.ContentSettings, :theme_config)
 
     cond do
       env_path && env_path != "" -> env_path

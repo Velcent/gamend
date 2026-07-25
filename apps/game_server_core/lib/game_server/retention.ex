@@ -445,27 +445,69 @@ defmodule GameServer.Retention do
     end
   end
 
-  # Defaults live here, not only in `config/host_runtime.exs`: that file's
-  # retention block is inside the prod-only branch, so anything documented as a
-  # default would silently be "keep forever" in dev and in every host app that
-  # never sets the vars. Env vars still override, per class.
-  @defaults [
-    chat_messages_days: 0,
-    notifications_days: 0,
-    payment_events_days: 0,
-    lobby_snapshots_days: 30,
-    lobby_snapshots_flagged_days: 90,
-    push_tokens_days: 270,
-    abandoned_lobby_minutes: 15,
-    invites_days: 30,
-    matchmaking_tickets_hours: 24,
-    tournaments_days: 0,
-    ledger_days: 0
-  ]
+  # Defaults live in the declaration, not only in `config/host_runtime.exs`:
+  # that file's retention block is inside the prod-only branch, so anything
+  # documented as a default would silently be "keep forever" in dev and in
+  # every host app that never sets the vars.
+  use GameServer.Settings.Provider,
+    app: :game_server_core,
+    group: :retention,
+    label: "Retention"
 
-  defp config(key) do
-    :game_server_core
-    |> Application.get_env(__MODULE__, [])
-    |> Keyword.get(key, Keyword.get(@defaults, key, 0))
-  end
+  setting(:chat_messages_days, :integer,
+    default: 0,
+    doc: "Delete chat messages older than N days. 0 keeps forever."
+  )
+
+  setting(:notifications_days, :integer,
+    default: 0,
+    doc: "Delete notifications older than N days. 0 keeps forever."
+  )
+
+  setting(:payment_events_days, :integer,
+    default: 0,
+    doc: "Delete payment provider webhook events older than N days. Purchases are never pruned."
+  )
+
+  setting(:lobby_snapshots_days, :integer,
+    default: 30,
+    doc: "Delete lobby snapshots, events and blobs older than N days."
+  )
+
+  setting(:lobby_snapshots_flagged_days, :integer,
+    default: 90,
+    doc: "Longer window for snapshots of runs flagged anomalous."
+  )
+
+  setting(:push_tokens_days, :integer,
+    default: 270,
+    doc: "Delete push tokens untouched for N days. Defaults to Google's stale-token guidance."
+  )
+
+  setting(:abandoned_lobby_minutes, :integer,
+    default: 15,
+    doc: "Delete lobbies nobody has been seen in for N minutes. 0 disables."
+  )
+
+  setting(:invites_days, :integer,
+    default: 30,
+    doc: "Delete resolved invites and join requests N days after resolution."
+  )
+
+  setting(:matchmaking_tickets_hours, :integer,
+    default: 24,
+    doc: "Delete matchmaking tickets older than N hours, in any status."
+  )
+
+  setting(:tournaments_days, :integer,
+    default: 0,
+    doc: "Delete finished tournaments older than N days. 0 keeps forever."
+  )
+
+  setting(:ledger_days, :integer,
+    default: 0,
+    doc: "Delete wallet/inventory ledger entries older than N days. 0 keeps forever."
+  )
+
+  defp config(key), do: GameServer.Settings.get(__MODULE__, key)
 end

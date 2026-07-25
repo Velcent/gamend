@@ -51,13 +51,13 @@ config :game_server_web,
 # app under apps/ - or fenced code raises the moment highlighting is requested.
 config :mdex_native, syntax_highlighter: :lumis
 
-# Adapter selection (compile-time). Override with DATABASE_ADAPTER=postgres
+# Adapter selection (compile-time). Override with GAMEND_DB_ADAPTER=postgres
 # at build time for production Postgres deployments. In dev, setting
 # POSTGRES_*/DATABASE_URL (shell or .env) makes dev.exs override this with
 # Postgres; after changing them, recompile:
 #   mix deps.clean game_server_core game_server_web --build && mix compile
 default_adapter =
-  if System.get_env("DATABASE_ADAPTER") == "postgres",
+  if System.get_env("GAMEND_DB_ADAPTER") == "postgres",
     do: Ecto.Adapters.Postgres,
     else: Ecto.Adapters.SQLite3
 
@@ -89,7 +89,7 @@ config :game_server_core, Oban,
 # Object storage (GameServer.Storage). Defaults to local disk; STORAGE_ADAPTER
 # and the STORAGE_* vars (see config/host_runtime.exs) select and configure a
 # backend at runtime.
-config :game_server_core, GameServer.Storage, adapter: GameServer.Storage.Local
+config :game_server_core, GameServer.Storage, adapter: :local
 
 # HTTP caching per key-prefix (first match wins). The `avatars/` immutable rule
 # and the revalidate-by-ETag default ship in code; override here to add prefixes
@@ -240,20 +240,6 @@ config :ueberauth, Ueberauth,
     steam: {Ueberauth.Strategy.Steam, []}
   ]
 
-config :ueberauth, Ueberauth.Strategy.Discord.OAuth,
-  client_id: System.get_env("DISCORD_CLIENT_ID"),
-  client_secret: System.get_env("DISCORD_CLIENT_SECRET")
-
-config :ueberauth, Ueberauth.Strategy.Apple.OAuth,
-  client_id: System.get_env("APPLE_WEB_CLIENT_ID"),
-  client_secret: {GameServer.Apple, :client_secret}
-
-config :ueberauth, Ueberauth.Strategy.Google.OAuth,
-  client_id: System.get_env("GOOGLE_CLIENT_ID"),
-  client_secret: System.get_env("GOOGLE_CLIENT_SECRET")
-
-config :ueberauth, Ueberauth.Strategy.Facebook.OAuth,
-  client_id: System.get_env("FACEBOOK_CLIENT_ID"),
-  client_secret: System.get_env("FACEBOOK_CLIENT_SECRET")
-
-config :ueberauth, Ueberauth.Strategy.Steam, api_key: System.get_env("STEAM_API_KEY")
+# Provider credentials are not set here. Ueberauth reads them from its own
+# application env, which host_runtime.exs fills from the declared
+# GameServer.OAuth.Providers settings — one source, resolved at boot.

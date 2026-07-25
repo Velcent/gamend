@@ -115,6 +115,21 @@ defmodule GameServer.Push do
 
 
   @doc ~S"""
+    Whether every delivery is forced to the Log provider (`PUSH_ADAPTER=log`).
+  """
+  @spec force_log?() :: boolean()
+  def force_log?() do
+    case Application.get_env(:game_server_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        false
+
+      _ ->
+        raise "GameServer.Push.force_log?/0 is a stub - only available at runtime on GameServer"
+    end
+  end
+
+
+  @doc ~S"""
     Admin listing across all users. Supported `filters` keys (atom or string):
     `:user_id`, `:platform`, `:provider`, and `:status` (`"live"` | `"disabled"`).
     
@@ -194,8 +209,7 @@ defmodule GameServer.Push do
   @doc ~S"""
     Resolve the delivery provider for a token: its `provider` column's module
     when that module's `configured?/0` says it can deliver, else the zero-config
-    `Log` provider. `force_log: true` (`PUSH_ADAPTER=log`) short-circuits
-    everything to `Log`.
+    `Log` provider. `PUSH_ADAPTER=log` short-circuits everything to `Log`.
     
   """
   @spec provider_for(GameServer.Push.PushToken.t()) :: module()
