@@ -77,6 +77,16 @@ defmodule GameServerWeb.ApiSpec do
         - **Delete notifications** by ID (single or batch)
         - **Real-time delivery** via the user WebSocket channel (`"notification"` events)
         - **Offline delivery**: undeleted notifications are replayed on WebSocket reconnect
+        - **Push delivery**: notifications also fan out to the recipient's registered mobile devices (see Push notifications)
+
+        ## **5b. Push notifications**
+        Mobile/web push delivery to registered devices (FCM for Android/Web, APNs-direct for iOS):
+
+        - **Register device tokens** via `POST /me/push-tokens` (`token`, `platform`, optional `provider`/`device_id`); re-registering a `device_id` rotates its token in place
+        - **List/remove own devices** via `GET /me/push-tokens` and `DELETE /me/push-tokens/:id`
+        - **Server-authoritative sending** — no public send endpoint; pushes originate from server hooks (`GameServer.Push.send_to_user/2`) or the admin API
+        - **Per-token routing**: each token's `provider` ("fcm" | "apns") selects the delivery backend; unconfigured backends log instead of sending (dev-friendly)
+        - **Reliability**: delivery rides the durable job queue with retries; dead tokens reported by the provider are disabled automatically
 
         ## **6. Groups**
         Groups provide persistent community management for players:
@@ -233,6 +243,7 @@ defmodule GameServerWeb.ApiSpec do
           description: "Real-time messaging across lobbies, groups, parties, and friends"
         },
         %Tag{name: "Notifications", description: "Persistent user notifications"},
+        %Tag{name: "Push", description: "Device push-token registration"},
         %Tag{name: "Leaderboards", description: "Ranked scoreboards and score submission"},
         %Tag{name: "Tournaments", description: "Bracket tournaments — browse, join, standings"},
         %Tag{
@@ -262,6 +273,7 @@ defmodule GameServerWeb.ApiSpec do
         %Tag{name: "Admin – Chat", description: "Admin chat management"},
         %Tag{name: "Admin – Quests", description: "Admin quest management"},
         %Tag{name: "Admin – Notifications", description: "Admin notification management"},
+        %Tag{name: "Admin – Push", description: "Admin push-token management and sending"},
         %Tag{name: "Admin – Leaderboards", description: "Admin leaderboard management"},
         %Tag{name: "Admin – Tournaments", description: "Admin tournament management"},
         %Tag{name: "Admin – Matchmaking", description: "Admin matchmaking queue management"},

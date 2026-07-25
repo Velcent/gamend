@@ -2,10 +2,13 @@ defmodule GameServer.Quests do
   @moduledoc """
   Event-driven quest/progression engine.
 
-  One engine covers achievements (permanent one-shots, `kind: "achievement"`),
-  daily/weekly quests (repeat per UTC period), event quests (time-boxed) and
-  chains (gated on a prerequisite quest) — each able to pay rewards into
-  `GameServer.Economy` / `GameServer.Inventory` exactly once.
+  One engine, three independent dimensions: a **reset** cycle (never / daily /
+  weekly / monthly / every N days), an optional **window**
+  (`starts_at`/`ends_at`), and an optional **prerequisite**
+  (`prerequisite_quest_key`). Any combination works — a biweekly quest inside
+  a seasonal window that also requires an earlier quest is just those three
+  fields set. Rewards pay into `GameServer.Economy` / `GameServer.Inventory`
+  exactly once. `category` is a free-form label for your UI only.
 
   ## Reporting progress (server-side / hooks)
 
@@ -31,10 +34,11 @@ defmodule GameServer.Quests do
 
   ## Resets
 
-  `period_key` is derived from **UTC time** by kind (daily → `"2026-07-22"`,
-  weekly → `"2026-W30"`, otherwise `"static"`). A new period simply means a
-  new progress row on the next reported event — nothing needs to fire at
-  midnight, and state resolves correctly even if no job ever runs.
+  `period_key` is derived from **UTC time** by the quest's reset (daily →
+  `"2026-07-22"`, weekly → `"2026-W30"`, monthly → `"2026-07"`, interval →
+  `"I14-1436"`, never → `"static"`). A new period simply means a new progress
+  row on the next reported event — nothing needs to fire at midnight, and
+  state resolves correctly even if no job ever runs.
   """
 
   import Ecto.Query, warn: false
@@ -190,7 +194,7 @@ defmodule GameServer.Quests do
   Lists quest definitions (admin view — no per-user state).
 
   ## Options
-  - `:kind` — filter by kind
+  - `:category` — filter by category
   - `:active` — filter by active flag
   - `:search` — substring match on key/title
   - `:page` / `:page_size`
@@ -211,13 +215,13 @@ defmodule GameServer.Quests do
 
   defp quest_query(opts) do
     Quest
-    |> maybe_filter_kind(Keyword.get(opts, :kind))
+    |> maybe_filter_category(Keyword.get(opts, :category))
     |> maybe_filter_active(Keyword.get(opts, :active))
     |> maybe_search(Keyword.get(opts, :search))
   end
 
-  defp maybe_filter_kind(query, nil), do: query
-  defp maybe_filter_kind(query, kind), do: where(query, [q], q.kind == ^kind)
+  defp maybe_filter_category(query, nil), do: query
+  defp maybe_filter_category(query, category), do: where(query, [q], q.category == ^category)
 
   defp maybe_filter_active(query, nil), do: query
   defp maybe_filter_active(query, active), do: where(query, [q], q.active == ^active)
@@ -312,14 +316,14 @@ defmodule GameServer.Quests do
 
   # Once a period's row is completed/claimed it can never advance again, so
   # later events skip the advisory lock entirely via a cached marker. For
-  # permanent kinds (every achievement) this makes the steady state free:
+  # never-resetting quests (achievements) this makes the steady state free:
   # after the first post-completion no-op, events cost one L1 cache read.
   # Keyed by quests_version so definition changes drop all markers; admin
   # resets invalidate the specific key across nodes.
   @done_marker_ttl_ms :timer.hours(1)
 
   defp done_marker_key(user_id, quest, now) do
-    {:quests, :done, quests_version(), user_id, quest.key, current_period_key(quest.kind, now)}
+    {:quests, :done, quests_version(), user_id, quest.key, period_key(quest, now)}
   end
 
   defp done_cached?(user_id, quest, now) do
@@ -383,7 +387,7 @@ defmodule GameServer.Quests do
   end
 
   defp do_advance(user_id, quest, event, amount, meta, now) do
-    period_key = current_period_key(quest.kind, now)
+    period_key = period_key(quest, now)
 
     progress =
       Repo.get_by(QuestProgress,
@@ -526,9 +530,9 @@ defmodule GameServer.Quests do
 
   defp send_completion_notification(user_id, quest) do
     # The stored title is the fallback; the notifications UI re-titles by
-    # type + metadata (achievement-kind quests keep the "unlocked" flavor).
+    # type + metadata (quests categorised "achievement" keep that flavor).
     title =
-      if quest.kind == "achievement",
+      if quest.category == "achievement",
         do: "Achievement unlocked: #{quest.title}",
         else: "Quest completed: #{quest.title}"
 
@@ -539,7 +543,7 @@ defmodule GameServer.Quests do
         metadata: %{
           type: "quest_completed",
           quest_key: quest.key,
-          kind: quest.kind,
+          category: quest.category,
           quest_title: quest.title
         }
       })
@@ -571,7 +575,7 @@ defmodule GameServer.Quests do
 
   defp do_claim(user_id, quest, opts) do
     now = DateTime.utc_now(:second)
-    period_key = current_period_key(quest.kind, now)
+    period_key = period_key(quest, now)
 
     progress =
       Repo.get_by(QuestProgress,
@@ -720,7 +724,7 @@ defmodule GameServer.Quests do
   them). Chain quests only appear once their prerequisite is met.
 
   ## Options
-  - `:kind` — filter by kind
+  - `:category` — filter by category
   - `:status` — `"in_progress"` (not yet completed), `"claimable"`
     (completed, waiting to be claimed) or `"done"` (completed or claimed)
   - `:page` / `:page_size`
@@ -752,11 +756,11 @@ defmodule GameServer.Quests do
   # Definitions are few (capped by max_quests) and cached, so visibility and
   # pagination are resolved in memory; the user's rows come from one query.
   defp visible_quests(user_id, now, opts) do
-    kind = Keyword.get(opts, :kind)
+    category = Keyword.get(opts, :category)
 
     quests =
       Enum.filter(active_quests(), fn q ->
-        within_window?(q, now) and kind in [nil, q.kind]
+        within_window?(q, now) and category in [nil, q.category]
       end)
 
     keys = Enum.map(quests, & &1.key)
@@ -774,7 +778,7 @@ defmodule GameServer.Quests do
 
     quests
     |> Enum.map(fn quest ->
-      progress = Map.get(rows, {quest.key, current_period_key(quest.kind, now)})
+      progress = Map.get(rows, {quest.key, period_key(quest, now)})
 
       %{
         quest: quest,
@@ -811,7 +815,7 @@ defmodule GameServer.Quests do
   ("their achievements"). Hidden quests appear once earned.
 
   ## Options
-  - `:kind` — filter by kind (a public profile typically wants `"achievement"`)
+  - `:category` — filter by category (a profile typically wants `"achievement"`)
   - `:page` / `:page_size`
   """
   @spec list_user_completions(user_id(), keyword()) ::
@@ -838,9 +842,9 @@ defmodule GameServer.Quests do
         on: q.key == p.quest_key,
         where: p.user_id == ^user_id and p.status in ^@statuses_done and q.active == true
 
-    case Keyword.get(opts, :kind) do
+    case Keyword.get(opts, :category) do
       nil -> query
-      kind -> where(query, [p, q], q.kind == ^kind)
+      category -> where(query, [p, q], q.category == ^category)
     end
   end
 
@@ -864,7 +868,7 @@ defmodule GameServer.Quests do
         nil
 
       quest ->
-        period_key = current_period_key(quest.kind, DateTime.utc_now(:second))
+        period_key = period_key(quest, DateTime.utc_now(:second))
         Repo.get_by(QuestProgress, user_id: user_id, quest_key: quest_key, period_key: period_key)
     end
   end
@@ -944,7 +948,7 @@ defmodule GameServer.Quests do
 
       quest ->
         now = DateTime.utc_now(:second)
-        period_key = current_period_key(quest.kind, now)
+        period_key = period_key(quest, now)
 
         full =
           quest.objectives
@@ -1093,27 +1097,46 @@ defmodule GameServer.Quests do
   # ---------------------------------------------------------------------------
 
   @doc """
-  The reset bucket for a quest kind at `now` (UTC): `"2026-07-22"` for a
-  daily, `"2026-W30"` for a weekly, `"static"` otherwise.
+  The reset bucket a quest is in at `now` (UTC).
+
+  `"static"` when it never resets, else the current day (`"2026-07-22"`),
+  ISO week (`"2026-W30"`), month (`"2026-07"`), or interval bucket
+  (`"I14-1436"` — the 1436th 14-day window since the epoch). Derived purely
+  from the clock, so a reset needs nothing to fire at midnight.
   """
-  @spec current_period_key(String.t(), DateTime.t()) :: String.t()
-  def current_period_key(kind, now)
+  @spec period_key(Quest.t() | String.t(), DateTime.t()) :: String.t()
+  def period_key(quest_or_reset, now)
 
-  def current_period_key("daily", now), do: now |> DateTime.to_date() |> Date.to_iso8601()
+  def period_key(%Quest{reset: "interval", reset_interval_days: days}, now)
+      when is_integer(days) and days > 0 do
+    "I#{days}-#{div(Date.diff(DateTime.to_date(now), ~D[1970-01-01]), days)}"
+  end
 
-  def current_period_key("weekly", now) do
+  def period_key(%Quest{reset: reset}, now), do: period_key(reset, now)
+
+  def period_key("daily", now), do: now |> DateTime.to_date() |> Date.to_iso8601()
+
+  def period_key("weekly", now) do
     date = DateTime.to_date(now)
     {year, week} = :calendar.iso_week_number({date.year, date.month, date.day})
-    year_str = String.pad_leading(Integer.to_string(year), 4, "0")
-    week_str = String.pad_leading(Integer.to_string(week), 2, "0")
-    "#{year_str}-W#{week_str}"
+
+    "#{String.pad_leading(Integer.to_string(year), 4, "0")}-W#{String.pad_leading(Integer.to_string(week), 2, "0")}"
   end
 
-  def current_period_key(_kind, _now), do: "static"
+  def period_key("monthly", now) do
+    date = DateTime.to_date(now)
+    "#{date.year}-#{String.pad_leading(Integer.to_string(date.month), 2, "0")}"
+  end
 
+  def period_key(_reset, _now), do: "static"
+
+  # Every bucket the currently-active definitions can be in right now — used
+  # to scope per-user progress queries without enumerating all resets.
   defp current_period_keys(now) do
-    ["static", current_period_key("daily", now), current_period_key("weekly", now)]
+    active_quests() |> Enum.map(&period_key(&1, now)) |> Enum.uniq() |> add_static()
   end
+
+  defp add_static(keys), do: if("static" in keys, do: keys, else: ["static" | keys])
 
   # ---------------------------------------------------------------------------
   # Private helpers

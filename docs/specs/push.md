@@ -28,9 +28,12 @@ after Phase 0 because reliable fan-out is exactly what the job queue exists for
 
 ## Delivery via Pigeon
 
-Provider transport is **[Pigeon 2.x](https://hex.pm/packages/pigeon)**
-(`{:pigeon, "~> 2.0"}` in `apps/game_server_core/mix.exs`), the maintained
-Elixir push library. What it buys:
+Provider transport is **[Pigeon 2.x](https://hex.pm/packages/pigeon)** in
+`apps/game_server_core/mix.exs`, the maintained Elixir push library — pinned
+to the post-2.0.1 main-branch ref that replaced kadabra+httpoison with Mint
+(#296): the hex release's httpoison dependency conflicts with
+`ueberauth_steam_strategy`'s `~> 3.0` pin, and the Mint rewrite is the
+architecture we want anyway. Re-point at hex on the next release. What it buys:
 
 - **APNs over HTTP/2 on Mint** — the same HTTP/2 engine already in this tree
   (under `finch`), with connection lifecycle Pigeon owns: pings (10-min
@@ -54,10 +57,14 @@ config and routes everything to `Log`.
 ## Provider model — routed per token, not one global switch
 
 A behaviour `GameServer.Push.Provider` — kept as our seam over Pigeon, so the
-`Log` adapter, tests, and any future transport swap all sit behind one contract:
+`Log` adapter, tests, and any future transport swap all sit behind one
+contract. Delivery is one message to one token (matching the one-job-per-token
+worker), and the error class is decided by the provider, where the
+provider-specific response taxonomy lives:
 
 ```elixir
-@callback deliver([Message.t()], keyword()) :: [{:ok, token :: String.t()} | {:invalid, token :: String.t()} | {:error, token :: String.t(), term()}]
+@callback deliver(Message.t(), PushToken.t()) ::
+            :ok | {:invalid, atom()} | {:error, :transient | :permanent, term()}
 @callback configured?() :: boolean()
 ```
 
@@ -117,14 +124,17 @@ end
   GameServer.Push.Goth, project_id: ...`.
 - **APNs**: `adapter: Pigeon.APNS, key:, key_identifier:, team_id:, mode:`
   (`:prod`/`:dev` from `APNS_ENV`). Token auth only — no `.p12` certs.
-- All push processes live under one **`GameServer.Push.Supervisor`** subtree,
-  added **conditionally** in `GameServerWeb.HostSupervision.children()`: Goth +
-  FCM dispatcher only when the FCM vars are set, APNS dispatcher only when the
-  APNs vars are set, none under `PUSH_ADAPTER=log`. Per CONTRIBUTING, the same
-  child goes in the **starter repo's** supervision tree. The subtree has its
-  own restart budget, so a crash-looping dispatcher exhausts *its* supervisor,
-  not the app's — push degrades to `Log` routing (see `configured?/0`) while
-  the rest of the server keeps running.
+- All push processes live under one **`GameServer.Push.Supervisor`** subtree
+  in `GameServerWeb.HostSupervision.children()` (before Oban, so dispatchers
+  are up when push-queue workers start). The supervisor is always present but
+  builds its **children** from config: Goth + FCM dispatcher only when the FCM
+  vars are set, APNS dispatcher only when the APNs vars are set, none under
+  `PUSH_ADAPTER=log` — zero config supervises nothing. The starter repo builds
+  its tree from `HostSupervision.children()`, so it inherits the child on its
+  next dep bump with no change of its own. The subtree has
+  its own restart budget, so a crash-looping dispatcher exhausts *its*
+  supervisor, not the app's — push degrades to `Log` routing (see
+  `configured?/0`) while the rest of the server keeps running.
 - **Credentials are parse-validated at boot** in `host_runtime.exs`: an
   unreadable `.p8` key or unparseable service-account JSON logs one loud error
   and leaves that dispatcher unconfigured (→ `Log` fallback) instead of
@@ -409,35 +419,35 @@ vars → no dispatchers → everything routes to `Log`.
 
 ## Definition of done (CONTRIBUTING)
 
-- [ ] `push_tokens` migration applies on SQLite **and** `DATABASE_ADAPTER=postgres`.
-- [ ] `GameServer.Push` context: paginated `list_*`/`count_*`, `Limits` caps in
+- [x] `push_tokens` migration applies on SQLite **and** `DATABASE_ADAPTER=postgres`.
+- [x] `GameServer.Push` context: paginated `list_*`/`count_*`, `Limits` caps in
       the changeset, capacity write-modify-write under a `:push_tokens` lock,
       dead-token soft-disable, per-token provider routing.
-- [ ] `FCM` + `APNs` + `Log` providers behind the behaviour, the Pigeon ones as
+- [x] `FCM` + `APNs` + `Log` providers behind the behaviour, the Pigeon ones as
       thin wrappers over `Pigeon.push/2`; Goth + dispatchers under
-      `GameServer.Push.Supervisor`, conditionally started (host **and** starter
-      repo); zero-config boot still works; garbage credentials boot to `Log`
-      with one loud error instead of crash-looping.
-- [ ] `DeliveryWorker` on the new `push` Oban queue, one job per token: retries
+      `GameServer.Push.Supervisor`, conditionally started; zero-config boot
+      still works; garbage credentials boot to `Log` with one loud error
+      instead of crash-looping.
+- [x] `DeliveryWorker` on the new `push` Oban queue, one job per token: retries
       transient, cancels permanent, disables invalid, fires `after_push_sent`;
       `PUSH_QUEUE_CONCURRENCY` respected.
-- [ ] `FanoutWorker` chunks large `send_to_users/3` (keyset pagination +
+- [x] `FanoutWorker` chunks large `send_to_users/3` (chunked resolution +
       `insert_all` × 500, unique-keyed against double broadcast); inline path
       below the threshold.
-- [ ] `user_has_live_tokens?/1` cached with invalidation on
+- [x] `user_has_live_tokens?/1` cached with invalidation on
       register/unregister/disable; `Notifications` uses it for the no-device
       fast path.
-- [ ] `RETENTION_PUSH_TOKENS_DAYS` pruning in `GameServer.Retention`.
-- [ ] Hooks `before_push_send` / `after_push_sent` in all six places, RPC-blocked,
+- [x] `RETENTION_PUSH_TOKENS_DAYS` pruning in `GameServer.Retention`.
+- [x] Hooks `before_push_send` / `after_push_sent` in all six places, RPC-blocked,
       SDK-mirrored; `Notifications` calls `Push.send_to_user/3` after commit.
-- [ ] Admin page + `/admin` card + route + nav + `admin_pages_render_test`;
+- [x] Admin page + `/admin` card + route + nav + `admin_pages_render_test`;
       admin API parity (list / delete / send).
-- [ ] Docs pages, `.env.example`, `CHANGELOG`, README, `api_spec.ex`.
-- [ ] Tests: context + controller + admin + LiveView, on both DB adapters. Boot
+- [x] Docs pages, `.env.example`, `CHANGELOG`, README, `api_spec.ex`.
+- [x] Tests: context + controller + admin + LiveView, on both DB adapters. Boot
       and actually register a token and run a delivery job end-to-end (Log
-      provider); via `Pigeon.Sandbox` preset responses, prove
-      `:unregistered`/`:bad_device_token` (APNs) and
-      `:unregistered`/`:invalid_argument` (FCM) disable the token, and that a
-      transient error retries; unit-test the response classification.
-- [ ] `mix format`, `mix credo --strict`, full `mix test` green; `mix gen.sdk`
+      provider); stub providers through the worker prove dead-token responses
+      disable the token and transient errors retry; response classification
+      unit-tested for both providers; Sandbox-backed dispatcher exercised end
+      to end.
+- [x] `mix format`, `mix credo --strict`, full `mix test` green; `mix gen.sdk`
       clean; example plugin compiles warning-free.

@@ -101,8 +101,8 @@ msgid "Accept"
 msgstr "Acceptă"
 
 #: lib/game_server_web/live/groups_live.ex:421
-#: lib/game_server_web/live/quests_live.ex:187
-#: lib/game_server_web/live/quests_live.ex:194
+#: lib/game_server_web/live/quests_live.ex:239
+#: lib/game_server_web/live/quests_live.ex:251
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:598
 #, elixir-autogen, elixir-format
 msgid "All"
@@ -241,6 +241,7 @@ msgid "Groups"
 msgstr "Grupuri"
 
 #: lib/game_server_web/live/lobby_live/index.ex:799
+#: lib/game_server_web/live/quests_live.ex:442
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:112
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:155
 #, elixir-autogen, elixir-format
@@ -451,7 +452,7 @@ msgid "Send"
 msgstr "Trimite"
 
 #: lib/game_server_web/live/groups_live.ex:439
-#: lib/game_server_web/live/quests_live.ex:466
+#: lib/game_server_web/live/quests_live.ex:576
 #: lib/game_server_web/live/store_live/index.ex:130
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:758
 #: lib/game_server_web/live/user_live/settings/payments_tab.ex:58
@@ -534,11 +535,6 @@ msgstr "(editat)"
 #, elixir-autogen, elixir-format
 msgid "Account"
 msgstr "Cont"
-
-#: lib/game_server_web/live/quests_live.ex:188
-#, elixir-autogen, elixir-format
-msgid "Achievements"
-msgstr "Realizări"
 
 #: lib/game_server_web/live/chat_live.ex:118
 #: lib/game_server_web/live/notifications_live.ex:60
@@ -694,7 +690,7 @@ msgstr "Șterge?"
 #: lib/game_server_web/live/groups_live.ex:652
 #: lib/game_server_web/live/leaderboards_live.ex:176
 #: lib/game_server_web/live/leaderboards_live.ex:352
-#: lib/game_server_web/live/quests_live.ex:300
+#: lib/game_server_web/live/quests_live.ex:377
 #: lib/game_server_web/live/tournaments_live.ex:492
 #: lib/game_server_web/live/tournaments_live.ex:704
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:212
@@ -801,7 +797,7 @@ msgstr "A eșuat"
 msgid "Your account is pending activation."
 msgstr "Contul dumneavoastră așteaptă să fie activat."
 
-#: lib/game_server_web/live/quests_live.ex:195
+#: lib/game_server_web/live/quests_live.ex:252
 #, elixir-autogen, elixir-format
 msgid "In Progress"
 msgstr "În curs"
@@ -1473,79 +1469,80 @@ msgstr "Tranzacții"
 msgid "Wallet"
 msgstr "Portofel"
 
-#: lib/game_server_web/live/quests_live.ex:87
+#: lib/game_server_web/live/quests_live.ex:86
 #, elixir-autogen, elixir-format
 msgid "Already claimed."
 msgstr "Deja revendicat."
 
-#: lib/game_server_web/live/quests_live.ex:192
-#, elixir-autogen, elixir-format
-msgid "Chains"
-msgstr "Lanțuri"
-
-#: lib/game_server_web/live/quests_live.ex:446
+#: lib/game_server_web/live/quests_live.ex:556
 #, elixir-autogen, elixir-format
 msgid "Claim"
 msgstr "Revendică"
 
-#: lib/game_server_web/live/quests_live.ex:196
+#: lib/game_server_web/live/quests_live.ex:253
 #, elixir-autogen, elixir-format
 msgid "Claimable"
 msgstr "De revendicat"
 
-#: lib/game_server_web/live/quests_live.ex:452
+#: lib/game_server_web/live/quests_live.ex:562
 #, elixir-autogen, elixir-format
 msgid "Claimed"
 msgstr "Revendicat"
 
-#: lib/game_server_web/live/quests_live.ex:197
-#: lib/game_server_web/live/quests_live.ex:461
+#: lib/game_server_web/live/quests_live.ex:254
+#: lib/game_server_web/live/quests_live.ex:571
 #, elixir-autogen, elixir-format
 msgid "Completed"
 msgstr "Finalizat"
 
-#: lib/game_server_web/live/quests_live.ex:90
+#: lib/game_server_web/live/quests_live.ex:89
 #, elixir-autogen, elixir-format
 msgid "Could not claim this quest."
 msgstr "Nu s-a putut revendica această misiune."
 
-#: lib/game_server_web/live/quests_live.ex:189
+#: lib/game_server_web/live/quests_live.ex:242
 #, elixir-autogen, elixir-format
 msgid "Daily"
 msgstr "Zilnice"
 
-#: lib/game_server_web/live/quests_live.ex:427
+#: lib/game_server_web/live/quests_live.ex:537
 #, elixir-autogen, elixir-format
 msgid "Ends in %{time}"
 msgstr "Se încheie în %{time}"
 
-#: lib/game_server_web/live/quests_live.ex:191
-#, elixir-autogen, elixir-format
-msgid "Events"
-msgstr "Evenimente"
-
-#: lib/game_server_web/live/quests_live.ex:37
-#: lib/game_server_web/live/quests_live.ex:249
+#: lib/game_server_web/live/quests_live.ex:36
+#: lib/game_server_web/live/quests_live.ex:326
+#: lib/game_server_web/live/quests_live.ex:501
 #, elixir-autogen, elixir-format
 msgid "Quests"
 msgstr "Misiuni"
 
-#: lib/game_server_web/live/quests_live.ex:429
+#: lib/game_server_web/live/quests_live.ex:539
 #, elixir-autogen, elixir-format
 msgid "Resets in %{time}"
 msgstr "Se resetează în %{time}"
 
-#: lib/game_server_web/live/quests_live.ex:83
+#: lib/game_server_web/live/quests_live.ex:82
 #, elixir-autogen, elixir-format
 msgid "Rewards claimed!"
 msgstr "Recompense revendicate!"
 
-#: lib/game_server_web/live/quests_live.ex:190
+#: lib/game_server_web/live/quests_live.ex:243
 #, elixir-autogen, elixir-format
 msgid "Weekly"
 msgstr "Săptămânale"
 
-#: lib/game_server_web/live/quests_live.ex:291
+#: lib/game_server_web/live/quests_live.ex:368
 #, elixir-autogen, elixir-format
 msgid "You have %{count} quest(s) ready to claim!"
 msgstr "Ai %{count} misiuni de revendicat!"
+
+#: lib/game_server_web/live/quests_live.ex:247
+#, elixir-autogen, elixir-format
+msgid "Every %{count}d"
+msgstr "La %{count} zile"
+
+#: lib/game_server_web/live/quests_live.ex:244
+#, elixir-autogen, elixir-format
+msgid "Monthly"
+msgstr "Lunare"

@@ -496,10 +496,40 @@ defmodule GameServer.Notifications do
         invalidate_notifications_cache(recipient_id)
         invalidate_notifications_cache(sender_id)
         broadcast_user(recipient_id, {:notification_created, notification})
+        push_notification(notification)
         {:ok, notification}
 
       error ->
         error
+    end
+  end
+
+  # Best-effort bridge to push so an offline recipient still gets pinged:
+  # runs after the row is committed and broadcast, and its outcome never
+  # affects the notification (delivery itself is queued jobs). The cached
+  # has-live-tokens check keeps the common no-device case free.
+  defp push_notification(%Notification{} = notification) do
+    if GameServer.Push.user_has_live_tokens?(notification.recipient_id) do
+      max_body = GameServer.Limits.get(:max_push_body)
+
+      _ =
+        GameServer.Push.send_to_user(notification.recipient_id, %{
+          "title" => notification.title,
+          "body" => String.slice(notification.content || "", 0, max_body),
+          "data" => push_data(notification),
+          # One collapse id per notification row, so the re-upserted rows
+          # (chat previews) replace their earlier push instead of stacking.
+          "collapse_key" => "notif-#{notification.id}"
+        })
+    end
+
+    :ok
+  end
+
+  defp push_data(%Notification{} = notification) do
+    case notification.metadata do
+      %{"type" => type} -> %{"type" => type, "notification_id" => notification.id}
+      _ -> %{"notification_id" => notification.id}
     end
   end
 
@@ -543,6 +573,7 @@ defmodule GameServer.Notifications do
         invalidate_notifications_cache(recipient_id)
         invalidate_notifications_cache(sender_id)
         broadcast_user(recipient_id, {:notification_created, notification})
+        push_notification(notification)
         {:ok, notification}
 
       error ->

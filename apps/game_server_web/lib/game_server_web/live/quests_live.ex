@@ -3,7 +3,7 @@ defmodule GameServerWeb.QuestsLive do
   Public-facing quests page.
 
   Anonymous users browse the catalog (hidden quests appear as teasers).
-  Logged-in users see their progress per reset period, can filter by kind
+  Logged-in users see their progress per reset period, can filter by category
   and status, and claim completed quests.
   """
   use GameServerWeb, :live_view
@@ -15,7 +15,6 @@ defmodule GameServerWeb.QuestsLive do
 
   @page_size 50
 
-  @kind_filters [nil | Quest.kinds()]
   @status_filters [nil, "in_progress", "claimable", "done"]
 
   @impl true
@@ -37,7 +36,7 @@ defmodule GameServerWeb.QuestsLive do
       |> assign(:page_title, gettext("Quests"))
       |> assign(:page, 1)
       |> assign(:page_size, @page_size)
-      |> assign(:kind, nil)
+      |> assign(:category, nil)
       |> assign(:status, nil)
       |> load_quests()
 
@@ -50,12 +49,12 @@ defmodule GameServerWeb.QuestsLive do
   end
 
   @impl true
-  def handle_event("kind", %{"kind" => kind}, socket) do
-    kind = if kind == "", do: nil, else: kind
+  def handle_event("category", %{"category" => category}, socket) do
+    category = if category == "", do: nil, else: category
 
     {:noreply,
      socket
-     |> assign(:kind, if(kind in @kind_filters, do: kind))
+     |> assign(:category, if(category in socket.assigns.categories, do: category))
      |> assign(:page, 1)
      |> load_quests()}
   end
@@ -138,27 +137,29 @@ defmodule GameServerWeb.QuestsLive do
     user = get_user(socket)
     page = socket.assigns.page
     page_size = socket.assigns.page_size
-    kind = socket.assigns.kind
+    category = socket.assigns.category
     status = socket.assigns.status
+    active = Quests.active_quests()
 
     {entries, total_count, claimable} =
       if user do
-        opts = [page: page, page_size: page_size, kind: kind, status: status]
+        opts = [page: page, page_size: page_size, category: category, status: status]
 
         {Quests.list_user_quests(user.id, opts),
-         Quests.count_user_quests(user.id, kind: kind, status: status),
+         Quests.count_user_quests(user.id, category: category, status: status),
          Quests.claimable_count(user.id)}
       else
-        {catalog_entries, total} = anonymous_catalog(kind, page, page_size)
+        {catalog_entries, total} = anonymous_catalog(active, category, page, page_size)
         {catalog_entries, total, 0}
       end
 
     socket
+    |> assign(:categories, categories_of(active))
     |> assign(:entries, entries)
     |> assign(:total_count, total_count)
     |> assign(:total_pages, max(ceil(total_count / page_size), 1))
     |> assign(:claimable_count, claimable)
-    |> assign(:chain_positions, chain_positions(Quests.active_quests()))
+    |> assign(:chain_positions, chain_positions(active))
     |> assign(:now, DateTime.utc_now(:second))
   end
 
@@ -205,13 +206,20 @@ defmodule GameServerWeb.QuestsLive do
 
   defp chain_root(key, _prereq_by_key, _hops), do: key
 
-  defp anonymous_catalog(kind, page, page_size) do
+  # Tabs come from the data — games label their own categories.
+  defp categories_of(quests) do
+    [
+      nil
+      | quests |> Enum.map(& &1.category) |> Enum.reject(&is_nil/1) |> Enum.uniq() |> Enum.sort()
+    ]
+  end
+
+  defp anonymous_catalog(active, category, page, page_size) do
     now = DateTime.utc_now(:second)
 
     visible =
-      Quests.active_quests()
-      |> Enum.filter(fn q ->
-        kind in [nil, q.kind] and within_window?(q, now)
+      Enum.filter(active, fn q ->
+        category in [nil, q.category] and within_window?(q, now)
       end)
 
     entries =
@@ -228,36 +236,61 @@ defmodule GameServerWeb.QuestsLive do
       (is_nil(quest.ends_at) or DateTime.compare(quest.ends_at, now) == :gt)
   end
 
-  defp kind_label(nil), do: gettext("All")
-  defp kind_label("achievement"), do: gettext("Achievements")
-  defp kind_label("daily"), do: gettext("Daily")
-  defp kind_label("weekly"), do: gettext("Weekly")
-  defp kind_label("event"), do: gettext("Events")
-  defp kind_label("chain"), do: gettext("Chains")
+  defp category_label(nil), do: gettext("All")
+  defp category_label(category), do: category
+
+  defp reset_label(%Quest{reset: "daily"}), do: gettext("Daily")
+  defp reset_label(%Quest{reset: "weekly"}), do: gettext("Weekly")
+  defp reset_label(%Quest{reset: "monthly"}), do: gettext("Monthly")
+
+  defp reset_label(%Quest{reset: "interval", reset_interval_days: days}),
+    do: gettext("Every %{count}d", count: days)
+
+  defp reset_label(_quest), do: ""
 
   defp status_label(nil), do: gettext("All")
   defp status_label("in_progress"), do: gettext("In Progress")
   defp status_label("claimable"), do: gettext("Claimable")
   defp status_label("done"), do: gettext("Completed")
 
-  # Time left in the quest's current cycle: end of UTC day/ISO week for
-  # daily/weekly, ends_at for event quests, nothing for permanent kinds.
-  defp time_left(%Quest{kind: "daily"}, now) do
-    tomorrow = now |> DateTime.to_date() |> Date.add(1)
-    DateTime.diff(DateTime.new!(tomorrow, ~T[00:00:00]), now)
+  # Whichever comes first: the window closing, or the next reset.
+  defp time_left(quest, now) do
+    [window_left(quest, now), reset_left(quest, now)]
+    |> Enum.reject(&is_nil/1)
+    |> case do
+      [] -> nil
+      values -> Enum.min(values)
+    end
   end
 
-  defp time_left(%Quest{kind: "weekly"}, now) do
+  defp window_left(%Quest{ends_at: %DateTime{} = ends_at}, now),
+    do: max(DateTime.diff(ends_at, now), 0)
+
+  defp window_left(_quest, _now), do: nil
+
+  defp reset_left(%Quest{reset: "never"}, _now), do: nil
+
+  defp reset_left(quest, now) do
     date = DateTime.to_date(now)
-    next_monday = Date.add(date, 8 - Date.day_of_week(date))
-    DateTime.diff(DateTime.new!(next_monday, ~T[00:00:00]), now)
+
+    next =
+      case quest.reset do
+        "daily" -> Date.add(date, 1)
+        "weekly" -> Date.add(date, 8 - Date.day_of_week(date))
+        "monthly" -> date |> Date.end_of_month() |> Date.add(1)
+        "interval" -> Date.add(date, interval_days_left(quest, date))
+        _ -> nil
+      end
+
+    if next, do: DateTime.diff(DateTime.new!(next, ~T[00:00:00]), now)
   end
 
-  defp time_left(%Quest{kind: "event", ends_at: %DateTime{} = ends_at}, now) do
-    max(DateTime.diff(ends_at, now), 0)
+  defp interval_days_left(%Quest{reset_interval_days: days}, date)
+       when is_integer(days) and days > 0 do
+    days - rem(Date.diff(date, ~D[1970-01-01]), days)
   end
 
-  defp time_left(_quest, _now), do: nil
+  defp interval_days_left(_quest, _date), do: 1
 
   defp format_duration(seconds) when seconds >= 86_400, do: "#{div(seconds, 86_400)}d"
 
@@ -318,13 +351,13 @@ defmodule GameServerWeb.QuestsLive do
         <%!-- Kind tabs --%>
         <div role="tablist" class="tabs tabs-box w-fit">
           <button
-            :for={kind <- [nil, "daily", "weekly", "event", "achievement", "chain"]}
+            :for={category <- @categories}
             role="tab"
-            phx-click="kind"
-            phx-value-kind={kind || ""}
-            class={["tab", @kind == kind && "tab-active"]}
+            phx-click="category"
+            phx-value-category={category || ""}
+            class={["tab", @category == category && "tab-active"]}
           >
-            {kind_label(kind)}
+            {category_label(category)}
           </button>
         </div>
 
@@ -426,7 +459,7 @@ defmodule GameServerWeb.QuestsLive do
             "flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center text-2xl",
             if(@done?, do: "bg-success/20 text-success", else: "bg-base-300 text-base-content/40")
           ]}>
-            <%= if @quest.icon_url && @quest.icon_url != "" and not @secret? do %>
+            <%= if @quest.icon_url && @quest.icon_url != "" && not @secret? do %>
               <img
                 src={@quest.icon_url}
                 alt={@quest.title}
@@ -456,8 +489,11 @@ defmodule GameServerWeb.QuestsLive do
               ]}>
                 {@localized_title}
               </h3>
-              <span class="badge badge-xs badge-outline flex-shrink-0">
-                {kind_label(@quest.kind)}
+              <span :if={@quest.category} class="badge badge-xs badge-outline flex-shrink-0">
+                {@quest.category}
+              </span>
+              <span :if={@quest.reset != "never"} class="badge badge-xs badge-ghost flex-shrink-0">
+                {reset_label(@quest)}
               </span>
               <span
                 :if={@chain_position}
@@ -474,7 +510,7 @@ defmodule GameServerWeb.QuestsLive do
             </p>
 
             <%!-- Rewards --%>
-            <%= if @quest.rewards != [] and not @secret? do %>
+            <%= if @quest.rewards != [] && not @secret? do %>
               <div class="flex flex-wrap gap-1 mt-2">
                 <span :for={reward <- @quest.rewards} class="badge badge-sm badge-ghost gap-1">
                   <.icon
@@ -497,7 +533,7 @@ defmodule GameServerWeb.QuestsLive do
           <div class="flex items-center gap-1.5 mt-2 text-base-content/40">
             <.icon name="hero-clock" class="w-3.5 h-3.5" />
             <span class="text-xs">
-              <%= if @quest.kind == "event" do %>
+              <%= if @quest.ends_at do %>
                 {gettext("Ends in %{time}", time: format_duration(@left))}
               <% else %>
                 {gettext("Resets in %{time}", time: format_duration(@left))}

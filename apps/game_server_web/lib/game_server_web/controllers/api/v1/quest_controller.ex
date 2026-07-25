@@ -53,10 +53,20 @@ defmodule GameServerWeb.Api.V1.QuestController do
       icon_url: %Schema{type: :string, description: "Icon URL"},
       sort_order: %Schema{type: :integer, description: "Display order"},
       hidden: %Schema{type: :boolean, description: "Whether hidden until completed"},
-      kind: %Schema{
+      reset: %Schema{
         type: :string,
-        enum: ["achievement", "daily", "weekly", "event", "chain"],
-        description: "Quest kind (determines the reset cycle)"
+        enum: ["never", "daily", "weekly", "monthly", "interval"],
+        description: "When progress starts over"
+      },
+      reset_interval_days: %Schema{
+        type: :integer,
+        nullable: true,
+        description: "Cadence in days when reset is \"interval\" (biweekly = 14)"
+      },
+      category: %Schema{
+        type: :string,
+        nullable: true,
+        description: "Free-form grouping label for your UI (no engine behavior)"
       },
       objectives: %Schema{type: :array, items: @objective_schema},
       rewards: %Schema{type: :array, items: @reward_schema},
@@ -80,7 +90,9 @@ defmodule GameServerWeb.Api.V1.QuestController do
       icon_url: "",
       sort_order: 0,
       hidden: false,
-      kind: "daily",
+      reset: "daily",
+      reset_interval_days: nil,
+      category: "daily",
       objectives: [%{event: "match_won", target: 3, params: %{}}],
       rewards: [%{type: "currency", code: "gold", amount: 100}],
       auto_claim: false,
@@ -123,11 +135,7 @@ defmodule GameServerWeb.Api.V1.QuestController do
         "reset period and a claimable flag. Hidden quests appear once completed; " <>
         "chain quests appear once their prerequisite is met.",
     parameters: [
-      kind: [
-        in: :query,
-        schema: %Schema{type: :string, enum: ["achievement", "daily", "weekly", "event", "chain"]},
-        required: false
-      ],
+      category: [in: :query, schema: %Schema{type: :string}, required: false],
       page: [in: :query, schema: %Schema{type: :integer}, required: false],
       page_size: [in: :query, schema: %Schema{type: :integer}, required: false]
     ],
@@ -150,10 +158,10 @@ defmodule GameServerWeb.Api.V1.QuestController do
       %{user_id: user_id} ->
         page = parse_int(params["page"], 1)
         page_size = parse_int(params["page_size"], 25)
-        opts = [page: page, page_size: page_size, kind: params["kind"]]
+        opts = [page: page, page_size: page_size, category: params["category"]]
 
         entries = Quests.list_user_quests(user_id, opts)
-        total_count = Quests.count_user_quests(user_id, kind: params["kind"])
+        total_count = Quests.count_user_quests(user_id, category: params["category"])
 
         json(conn, %{
           data: Enum.map(entries, &serialize_entry/1),
@@ -243,11 +251,7 @@ defmodule GameServerWeb.Api.V1.QuestController do
       "Public quest catalog: active, in-window quest definitions. If authenticated, " <>
         "includes user progress (same shape as /me/quests).",
     parameters: [
-      kind: [
-        in: :query,
-        schema: %Schema{type: :string, enum: ["achievement", "daily", "weekly", "event", "chain"]},
-        required: false
-      ],
+      category: [in: :query, schema: %Schema{type: :string}, required: false],
       page: [in: :query, schema: %Schema{type: :integer}, required: false],
       page_size: [in: :query, schema: %Schema{type: :integer}, required: false]
     ],
@@ -277,8 +281,7 @@ defmodule GameServerWeb.Api.V1.QuestController do
         visible =
           Quests.active_quests()
           |> Enum.filter(fn q ->
-            not q.hidden and within_window?(q, now) and
-              params["kind"] in [nil, q.kind]
+            within_window?(q, now) and params["category"] in [nil, q.category]
           end)
 
         entries =
@@ -308,15 +311,11 @@ defmodule GameServerWeb.Api.V1.QuestController do
     summary: "List a user's completed quests",
     description:
       "Publicly visible completions for a specific user, newest first — " <>
-        "defaults to kind \"achievement\" (the replacement for the old " <>
+        "defaults to category \"achievement\" (the replacement for the old " <>
         "/achievements/user/:user_id endpoint). Hidden quests appear once earned.",
     parameters: [
       user_id: [in: :path, schema: %Schema{type: :string, format: :uuid}, required: true],
-      kind: [
-        in: :query,
-        schema: %Schema{type: :string, enum: ["achievement", "daily", "weekly", "event", "chain"]},
-        required: false
-      ],
+      category: [in: :query, schema: %Schema{type: :string}, required: false],
       page: [in: :query, schema: %Schema{type: :integer}, required: false],
       page_size: [in: :query, schema: %Schema{type: :integer}, required: false]
     ],
@@ -339,11 +338,11 @@ defmodule GameServerWeb.Api.V1.QuestController do
       {:ok, user_id} ->
         page = parse_int(params["page"], 1)
         page_size = parse_int(params["page_size"], 25)
-        kind = params["kind"] || "achievement"
-        opts = [page: page, page_size: page_size, kind: kind]
+        category = params["category"] || "achievement"
+        opts = [page: page, page_size: page_size, category: category]
 
         entries = Quests.list_user_completions(user_id, opts)
-        total_count = Quests.count_user_completions(user_id, kind: kind)
+        total_count = Quests.count_user_completions(user_id, category: category)
 
         json(conn, %{
           data:
@@ -376,7 +375,9 @@ defmodule GameServerWeb.Api.V1.QuestController do
           icon_url: "",
           sort_order: quest.sort_order,
           hidden: true,
-          kind: quest.kind,
+          reset: quest.reset,
+          reset_interval_days: quest.reset_interval_days,
+          category: quest.category,
           objectives: [],
           rewards: [],
           auto_claim: quest.auto_claim,
@@ -394,7 +395,9 @@ defmodule GameServerWeb.Api.V1.QuestController do
           icon_url: quest.icon_url || "",
           sort_order: quest.sort_order,
           hidden: quest.hidden,
-          kind: quest.kind,
+          reset: quest.reset,
+          reset_interval_days: quest.reset_interval_days,
+          category: quest.category,
           objectives: Enum.map(quest.objectives, &serialize_objective/1),
           rewards: Enum.map(quest.rewards, &serialize_reward/1),
           auto_claim: quest.auto_claim,

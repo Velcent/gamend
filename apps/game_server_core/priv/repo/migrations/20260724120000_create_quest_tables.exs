@@ -1,9 +1,10 @@
 defmodule GameServer.Repo.Migrations.CreateQuestTables do
   @moduledoc """
-  Quests/progression engine tables, folding achievements in as
-  `kind: "achievement"` (see docs/specs/quests-progression.md):
+  Quests/progression engine tables, folding achievements in as permanent
+  (`reset: "never"`) quests categorised `"achievement"`
+  (see docs/specs/quests-progression.md):
 
-  - `quests` — definitions for every kind (achievement/daily/weekly/event/chain).
+  - `quests` — definitions (reset cycle, optional window, optional prerequisite).
   - `quest_progress` — per user per quest per reset period.
   - `inventory_ledger` — audit + idempotency for item grants, mirroring
     `ledger_entries`, so quest item rewards can be exactly-once.
@@ -22,7 +23,12 @@ defmodule GameServer.Repo.Migrations.CreateQuestTables do
       add :icon_url, :string
       add :sort_order, :integer, default: 0
       add :hidden, :boolean, default: false
-      add :kind, :string, null: false
+      # Orthogonal by design: `reset` is the only thing that drives period
+      # bucketing; a time window is starts_at/ends_at and a chain is
+      # prerequisite_quest_key, so any quest can be either or both.
+      add :reset, :string, null: false, default: "never"
+      add :reset_interval_days, :integer
+      add :category, :string
       # A bare [] default is rejected by Postgres DDL; the quoted fragment
       # works on both adapters. An uncast embed inserts NULL, so keep both.
       add :objectives, :map, null: false, default: fragment("'[]'")
@@ -38,7 +44,8 @@ defmodule GameServer.Repo.Migrations.CreateQuestTables do
     end
 
     create unique_index(:quests, [:key])
-    create index(:quests, [:kind])
+    create index(:quests, [:category])
+    create index(:quests, [:reset])
     create index(:quests, [:active], where: "active")
 
     create table(:quest_progress) do
@@ -142,10 +149,10 @@ defmodule GameServer.Repo.Migrations.CreateQuestTables do
   defp fold_achievements_in do
     if postgres?() do
       execute("""
-      INSERT INTO quests (id, key, title, description, icon_url, sort_order, hidden, kind,
+      INSERT INTO quests (id, key, title, description, icon_url, sort_order, hidden, reset, category,
                           objectives, rewards, auto_claim, active, metadata, inserted_at, updated_at)
       SELECT id, slug, title, COALESCE(description, ''), icon_url, COALESCE(sort_order, 0),
-             COALESCE(hidden, false), 'achievement',
+             COALESCE(hidden, false), 'never', 'achievement',
              jsonb_build_array(jsonb_build_object('event', slug, 'target', COALESCE(progress_target, 1))),
              '[]'::jsonb, true, true, COALESCE(metadata, '{}'::jsonb), inserted_at, updated_at
       FROM achievements
@@ -164,10 +171,10 @@ defmodule GameServer.Repo.Migrations.CreateQuestTables do
       """)
     else
       execute("""
-      INSERT INTO quests (id, key, title, description, icon_url, sort_order, hidden, kind,
+      INSERT INTO quests (id, key, title, description, icon_url, sort_order, hidden, reset, category,
                           objectives, rewards, auto_claim, active, metadata, inserted_at, updated_at)
       SELECT id, slug, title, COALESCE(description, ''), icon_url, COALESCE(sort_order, 0),
-             COALESCE(hidden, 0), 'achievement',
+             COALESCE(hidden, 0), 'never', 'achievement',
              json_array(json_object('event', slug, 'target', COALESCE(progress_target, 1))),
              '[]', 1, 1, COALESCE(metadata, '{}'), inserted_at, updated_at
       FROM achievements
@@ -194,7 +201,7 @@ defmodule GameServer.Repo.Migrations.CreateQuestTables do
                                 hidden, progress_target, metadata, inserted_at, updated_at)
       SELECT id, key, title, description, icon_url, 0, sort_order, hidden,
              COALESCE((objectives->0->>'target')::int, 1), metadata, inserted_at, updated_at
-      FROM quests WHERE kind = 'achievement'
+      FROM quests WHERE category = 'achievement'
       """)
 
       execute("""
@@ -203,7 +210,7 @@ defmodule GameServer.Repo.Migrations.CreateQuestTables do
       SELECT qp.id, qp.user_id, q.id, COALESCE((qp.objective_progress->>'0')::int, 0),
              qp.completed_at, qp.metadata, qp.inserted_at, qp.updated_at
       FROM quest_progress qp JOIN quests q ON q.key = qp.quest_key
-      WHERE q.kind = 'achievement' AND qp.period_key = 'static'
+      WHERE q.category = 'achievement' AND qp.period_key = 'static'
       """)
     else
       execute("""
@@ -211,7 +218,7 @@ defmodule GameServer.Repo.Migrations.CreateQuestTables do
                                 hidden, progress_target, metadata, inserted_at, updated_at)
       SELECT id, key, title, description, icon_url, 0, sort_order, hidden,
              COALESCE(json_extract(objectives, '$[0].target'), 1), metadata, inserted_at, updated_at
-      FROM quests WHERE kind = 'achievement'
+      FROM quests WHERE category = 'achievement'
       """)
 
       execute("""
@@ -220,7 +227,7 @@ defmodule GameServer.Repo.Migrations.CreateQuestTables do
       SELECT qp.id, qp.user_id, q.id, COALESCE(json_extract(qp.objective_progress, '$."0"'), 0),
              qp.completed_at, qp.metadata, qp.inserted_at, qp.updated_at
       FROM quest_progress qp JOIN quests q ON q.key = qp.quest_key
-      WHERE q.kind = 'achievement' AND qp.period_key = 'static'
+      WHERE q.category = 'achievement' AND qp.period_key = 'static'
       """)
     end
   end

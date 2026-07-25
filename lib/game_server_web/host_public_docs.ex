@@ -51,6 +51,7 @@ defmodule GameServerWeb.HostPublicDocs do
         {GameServerWeb.HostPublicDocsTemplates.friends(assigns)}
         {GameServerWeb.HostPublicDocsTemplates.chat(assigns)}
         {GameServerWeb.HostPublicDocsTemplates.notifications(assigns)}
+        {GameServerWeb.HostPublicDocsTemplates.push_notifications(assigns)}
         {GameServerWeb.HostPublicDocsTemplates.server_scripting(assigns)}
 
         <.guide_category_heading title="Monetization" />

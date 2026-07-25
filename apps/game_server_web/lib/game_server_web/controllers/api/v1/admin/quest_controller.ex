@@ -19,7 +19,9 @@ defmodule GameServerWeb.Api.V1.Admin.QuestController do
       icon_url: %Schema{type: :string},
       sort_order: %Schema{type: :integer},
       hidden: %Schema{type: :boolean},
-      kind: %Schema{type: :string, enum: ["achievement", "daily", "weekly", "event", "chain"]},
+      reset: %Schema{type: :string, enum: ["never", "daily", "weekly", "monthly", "interval"]},
+      reset_interval_days: %Schema{type: :integer, nullable: true},
+      category: %Schema{type: :string, nullable: true},
       objectives: %Schema{type: :array, items: %Schema{type: :object}},
       rewards: %Schema{type: :array, items: %Schema{type: :object}},
       auto_claim: %Schema{type: :boolean},
@@ -59,7 +61,9 @@ defmodule GameServerWeb.Api.V1.Admin.QuestController do
       icon_url: %Schema{type: :string},
       sort_order: %Schema{type: :integer},
       hidden: %Schema{type: :boolean},
-      kind: %Schema{type: :string, enum: ["achievement", "daily", "weekly", "event", "chain"]},
+      reset: %Schema{type: :string, enum: ["never", "daily", "weekly", "monthly", "interval"]},
+      reset_interval_days: %Schema{type: :integer, nullable: true},
+      category: %Schema{type: :string, nullable: true},
       objectives: %Schema{
         type: :array,
         items: %Schema{
@@ -111,7 +115,7 @@ defmodule GameServerWeb.Api.V1.Admin.QuestController do
     summary: "List all quest definitions (admin, includes inactive/hidden)",
     security: [%{"authorization" => []}],
     parameters: [
-      kind: [in: :query, schema: %Schema{type: :string}, required: false],
+      category: [in: :query, schema: %Schema{type: :string}, required: false],
       search: [in: :query, schema: %Schema{type: :string}, required: false],
       page: [in: :query, schema: %Schema{type: :integer}, required: false],
       page_size: [in: :query, schema: %Schema{type: :integer}, required: false]
@@ -132,10 +136,16 @@ defmodule GameServerWeb.Api.V1.Admin.QuestController do
   def index(conn, params) do
     page = parse_int(params["page"], 1)
     page_size = parse_int(params["page_size"], 25)
-    opts = [page: page, page_size: page_size, kind: params["kind"], search: params["search"]]
+
+    opts = [
+      page: page,
+      page_size: page_size,
+      category: params["category"],
+      search: params["search"]
+    ]
 
     quests = Quests.list_quests(opts)
-    total_count = Quests.count_quests(kind: params["kind"], search: params["search"])
+    total_count = Quests.count_quests(category: params["category"], search: params["search"])
     total_pages = max(ceil(total_count / page_size), 1)
 
     json(conn, %{

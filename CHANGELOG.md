@@ -1,7 +1,9 @@
 # July 2026
 
+- [added] **Push notifications** — FCM + APNs-direct via Pigeon, routed per token; offline notification delivery.
+- [added] **Push-token registry** — `/me/push-tokens`, admin page, retention pruning.
 - [added] **Quests / progression**.
-- [breaking] **Achievements removed** — replaced by `kind: "achievement"` quests; `/quests` supersedes the `/achievements` API, page and hooks.
+- [breaking] **Achievements removed** — replaced by permanent quests categorised "achievement"; `/quests` supersedes the `/achievements` API, page and hooks.
 - [added] **Economy**.
 - [added] **Inventory**.
 - [added] **Object storage** — with local-disk and S3/R2 backends; presigned avatar uploads.

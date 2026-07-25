@@ -101,8 +101,8 @@ msgid "Accept"
 msgstr "接受"
 
 #: lib/game_server_web/live/groups_live.ex:421
-#: lib/game_server_web/live/quests_live.ex:187
-#: lib/game_server_web/live/quests_live.ex:194
+#: lib/game_server_web/live/quests_live.ex:239
+#: lib/game_server_web/live/quests_live.ex:251
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:598
 #, elixir-autogen, elixir-format
 msgid "All"
@@ -241,6 +241,7 @@ msgid "Groups"
 msgstr "群组"
 
 #: lib/game_server_web/live/lobby_live/index.ex:799
+#: lib/game_server_web/live/quests_live.ex:442
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:112
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:155
 #, elixir-autogen, elixir-format
@@ -451,7 +452,7 @@ msgid "Send"
 msgstr "发送"
 
 #: lib/game_server_web/live/groups_live.ex:439
-#: lib/game_server_web/live/quests_live.ex:466
+#: lib/game_server_web/live/quests_live.ex:576
 #: lib/game_server_web/live/store_live/index.ex:130
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:758
 #: lib/game_server_web/live/user_live/settings/payments_tab.ex:58
@@ -534,11 +535,6 @@ msgstr "（已编辑）"
 #, elixir-autogen, elixir-format
 msgid "Account"
 msgstr "账户"
-
-#: lib/game_server_web/live/quests_live.ex:188
-#, elixir-autogen, elixir-format
-msgid "Achievements"
-msgstr "成就"
 
 #: lib/game_server_web/live/chat_live.ex:118
 #: lib/game_server_web/live/notifications_live.ex:60
@@ -694,7 +690,7 @@ msgstr "删除？"
 #: lib/game_server_web/live/groups_live.ex:652
 #: lib/game_server_web/live/leaderboards_live.ex:176
 #: lib/game_server_web/live/leaderboards_live.ex:352
-#: lib/game_server_web/live/quests_live.ex:300
+#: lib/game_server_web/live/quests_live.ex:377
 #: lib/game_server_web/live/tournaments_live.ex:492
 #: lib/game_server_web/live/tournaments_live.ex:704
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:212
@@ -801,7 +797,7 @@ msgstr "失败"
 msgid "Your account is pending activation."
 msgstr "你的账户正在等待激活。"
 
-#: lib/game_server_web/live/quests_live.ex:195
+#: lib/game_server_web/live/quests_live.ex:252
 #, elixir-autogen, elixir-format
 msgid "In Progress"
 msgstr "进行中"
@@ -1472,79 +1468,80 @@ msgstr "交易记录"
 msgid "Wallet"
 msgstr "钱包"
 
-#: lib/game_server_web/live/quests_live.ex:87
+#: lib/game_server_web/live/quests_live.ex:86
 #, elixir-autogen, elixir-format
 msgid "Already claimed."
 msgstr "已领取过。"
 
-#: lib/game_server_web/live/quests_live.ex:192
-#, elixir-autogen, elixir-format
-msgid "Chains"
-msgstr "连锁"
-
-#: lib/game_server_web/live/quests_live.ex:446
+#: lib/game_server_web/live/quests_live.ex:556
 #, elixir-autogen, elixir-format
 msgid "Claim"
 msgstr "领取"
 
-#: lib/game_server_web/live/quests_live.ex:196
+#: lib/game_server_web/live/quests_live.ex:253
 #, elixir-autogen, elixir-format
 msgid "Claimable"
 msgstr "可领取"
 
-#: lib/game_server_web/live/quests_live.ex:452
+#: lib/game_server_web/live/quests_live.ex:562
 #, elixir-autogen, elixir-format
 msgid "Claimed"
 msgstr "已领取"
 
-#: lib/game_server_web/live/quests_live.ex:197
-#: lib/game_server_web/live/quests_live.ex:461
+#: lib/game_server_web/live/quests_live.ex:254
+#: lib/game_server_web/live/quests_live.ex:571
 #, elixir-autogen, elixir-format
 msgid "Completed"
 msgstr "已完成"
 
-#: lib/game_server_web/live/quests_live.ex:90
+#: lib/game_server_web/live/quests_live.ex:89
 #, elixir-autogen, elixir-format
 msgid "Could not claim this quest."
 msgstr "无法领取该任务。"
 
-#: lib/game_server_web/live/quests_live.ex:189
+#: lib/game_server_web/live/quests_live.ex:242
 #, elixir-autogen, elixir-format
 msgid "Daily"
 msgstr "每日"
 
-#: lib/game_server_web/live/quests_live.ex:427
+#: lib/game_server_web/live/quests_live.ex:537
 #, elixir-autogen, elixir-format
 msgid "Ends in %{time}"
 msgstr "%{time}后结束"
 
-#: lib/game_server_web/live/quests_live.ex:191
-#, elixir-autogen, elixir-format
-msgid "Events"
-msgstr "活动"
-
-#: lib/game_server_web/live/quests_live.ex:37
-#: lib/game_server_web/live/quests_live.ex:249
+#: lib/game_server_web/live/quests_live.ex:36
+#: lib/game_server_web/live/quests_live.ex:326
+#: lib/game_server_web/live/quests_live.ex:501
 #, elixir-autogen, elixir-format
 msgid "Quests"
 msgstr "任务"
 
-#: lib/game_server_web/live/quests_live.ex:429
+#: lib/game_server_web/live/quests_live.ex:539
 #, elixir-autogen, elixir-format
 msgid "Resets in %{time}"
 msgstr "%{time}后重置"
 
-#: lib/game_server_web/live/quests_live.ex:83
+#: lib/game_server_web/live/quests_live.ex:82
 #, elixir-autogen, elixir-format
 msgid "Rewards claimed!"
 msgstr "已领取奖励！"
 
-#: lib/game_server_web/live/quests_live.ex:190
+#: lib/game_server_web/live/quests_live.ex:243
 #, elixir-autogen, elixir-format
 msgid "Weekly"
 msgstr "每周"
 
-#: lib/game_server_web/live/quests_live.ex:291
+#: lib/game_server_web/live/quests_live.ex:368
 #, elixir-autogen, elixir-format
 msgid "You have %{count} quest(s) ready to claim!"
 msgstr "你有 %{count} 个任务可领取！"
+
+#: lib/game_server_web/live/quests_live.ex:247
+#, elixir-autogen, elixir-format
+msgid "Every %{count}d"
+msgstr "每 %{count} 天"
+
+#: lib/game_server_web/live/quests_live.ex:244
+#, elixir-autogen, elixir-format
+msgid "Monthly"
+msgstr "每月"

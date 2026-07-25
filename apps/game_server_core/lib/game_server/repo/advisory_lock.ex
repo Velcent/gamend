@@ -51,7 +51,8 @@ defmodule GameServer.Repo.AdvisoryLock do
     tournament_match: 6,
     tournaments_tick: 7,
     matchmaking_sweep: 8,
-    quest: 9
+    quest: 9,
+    push_tokens: 10
   }
 
   # Reserve 0..99 for atom namespaces; string hashes start at 100.

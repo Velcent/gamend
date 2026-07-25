@@ -267,6 +267,32 @@
       "quest_completed" — metadata: { quest_key, kind, quest_title }</pre>
       </div>
 
+      <h4 class="font-semibold mt-3">{doc_text("Push tokens")}</h4>
+      <div
+        class="bg-base-200 font-mono text-sm p-4 rounded-lg overflow-auto"
+        phx-no-curly-interpolation
+      >
+        <pre>
+    push_tokens (
+      id           : uuid (UUIDv7 string primary key)
+      user_id      : uuid (FK to users, cascade delete)
+      token        : text (FCM registration / APNs device token, unique)
+      platform     : string ("android" | "ios" | "web")
+      provider     : string ("fcm" | "apns", drives delivery routing)
+      device_id    : string (optional; re-registering rotates the token
+                     in place — unique per user when set)
+      disabled_at  : utc_datetime (soft-disabled when the provider
+                     reports the token dead; re-registration re-enables)
+      last_used_at : utc_datetime (bumped on successful delivery)
+      metadata     : jsonb/map (optional client info: app_version, ...)
+      inserted_at  : utc_datetime
+      updated_at   : utc_datetime
+    )
+
+    Rows untouched for RETENTION_PUSH_TOKENS_DAYS (default 270) are
+    pruned as dead installs.</pre>
+      </div>
+
       <h4 class="font-semibold mt-3">{doc_text("Groups")}</h4>
       <div class="bg-base-200 font-mono text-sm p-4 rounded-lg overflow-auto">
         <pre>

@@ -14,6 +14,9 @@ defmodule GameServer.Retention do
     forever": snapshots hold user metadata, and the window is what bounds that
     exposure. Runs flagged anomalous keep
     `RETENTION_LOBBY_SNAPSHOTS_FLAGGED_DAYS` instead (default 90).
+  - `RETENTION_PUSH_TOKENS_DAYS` — push tokens untouched (registered, used,
+    or disabled) for N days. Defaults to 270 — Google's stale-token guidance
+    — so the table tracks live devices, not install history.
 
   Expired IP bans and OAuth sessions older than a day are always removed
   (independent of the env vars above). Deletes are idempotent, so running on
@@ -73,7 +76,8 @@ defmodule GameServer.Retention do
       lobby_snapshots: prune_lobby_snapshots(),
       lobby_snapshot_blobs: prune_lobby_snapshot_blobs(),
       quest_periods: GameServer.Quests.prune_old_periods(),
-      quest_reward_recoveries: GameServer.Quests.recover_pending_rewards()
+      quest_reward_recoveries: GameServer.Quests.recover_pending_rewards(),
+      push_tokens: prune_push_tokens()
     }
 
     pruned = results |> Map.values() |> Enum.sum()
@@ -158,6 +162,24 @@ defmodule GameServer.Retention do
   end
 
   defp cutoff(days), do: DateTime.add(DateTime.utc_now(:second), -days, :day)
+
+  # updated_at is the staleness signal: every register/rotate/delivery/disable
+  # touches it, so pruning by it removes exactly the tokens nothing has needed
+  # for the whole window — disabled rows included.
+  defp prune_push_tokens do
+    days = config(:push_tokens_days)
+
+    if is_integer(days) and days > 0 do
+      cutoff = cutoff(days)
+
+      {count, _} =
+        Repo.delete_all(from(t in GameServer.Push.PushToken, where: t.updated_at < ^cutoff))
+
+      count
+    else
+      0
+    end
+  end
 
   defp prune_expired_ip_bans do
     now = DateTime.utc_now(:second)

@@ -107,6 +107,10 @@ defmodule GameServerWeb.HostSupervision do
         GameServer.Retention,
         # Tournament lifecycle: transitions, draws, match deadlines, recurrence
         GameServer.Tournaments.Ticker,
+        # Push delivery processes (Goth + Pigeon dispatchers); supervises
+        # nothing when no PUSH_*/APNS_* vars are set. Before Oban so
+        # dispatchers are up when push-queue workers start running.
+        GameServer.Push.Supervisor,
         # Durable background jobs (GameServer.Jobs) + the per-minute Cron tick
         # that drives GameServer.Schedule.
         {Oban, GameServer.Jobs.oban_config()},

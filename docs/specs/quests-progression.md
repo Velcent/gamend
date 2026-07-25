@@ -18,38 +18,42 @@ target, and an `after_achievement_unlocked` hook. What it can't express is
 everything that makes a *quest*: **multiple objectives**, **repetition on a
 reset cycle**, **time windows**, **prerequisites**, and **rewards**. Rather than
 grow a second half-copy of the progress machinery, quests generalize it: an
-achievement becomes a quest of `kind: "achievement"` (permanent, non-repeating,
-badge reward), and daily/weekly/event/chain quests are the other kinds on the
+achievement becomes a quest of `reset: "never"`, `category: "achievement"` (permanent, non-repeating,
+badge reward), and dailies, events and quest lines are the same engine with a
 same engine.
 
 ### Decision: fold, don't fork — then remove
 
-Achievements migrate into the quest tables as `kind: "achievement"`. Per the
+Achievements migrate into the quest tables as `reset: "never"`, `category: "achievement"`. Per the
 project's "no backwards-compat shims" stance the fold is a full clean break
 (`[breaking]` CHANGELOG): the `/achievements` API, page, admin surface,
 `GameServer.Achievements` module and `after_achievement_unlocked` hook are
 **removed** — `/quests` (and `GET /quests/user/:user_id` for public
 completions), the `/quests` page and the quest hooks supersede them. Clients
-and plugins branch on the quest's `kind` where achievement-specific behavior
+and plugins branch on the quest's `category` where achievement-specific behavior
 is wanted; completion notifications keep the "Achievement unlocked" wording
-for achievement-kind quests as product copy, not compatibility.
+for `category: "achievement"` quests as product copy, not compatibility.
 
 ## Data model (both adapters)
 
 - **`quests`** (definitions): `key` (unique slug), `title`, `description`,
   `icon_url`/`sort_order`/`hidden` (carried from achievements — the
   `/achievements` read view needs them),
-  `kind` (`"achievement"|"daily"|"weekly"|"event"|"chain"`),
+  `reset` (`"never"|"daily"|"weekly"|"monthly"|"interval"`) +
+  `reset_interval_days`, `category` (free-form UI label),
   `objectives` (jsonb list — each `{event, target, params}`),
   `rewards` (jsonb list — each `{type: "currency"|"item", code, amount}`),
   `auto_claim` (bool — grant on completion without a claim step; migrated
   achievements set it, they never had one),
   `prerequisite_quest_key` (nullable — chains),
   `starts_at`/`ends_at` (nullable — event windows), `active`, `metadata`,
-  timestamps. Index `[:kind]`, partial `index([:active], where: "active")`.
-  **Kind determines the reset cycle** (daily → UTC date bucket, weekly → ISO
-  week, others → static) — no `repeatable`/`reset_cron` columns; a custom
-  cadence would be a new kind, not per-row cron.
+  timestamps. Index `[:category]`, `[:reset]`, partial `index([:active], where: "active")`.
+  **Three orthogonal dimensions**: `reset` drives period bucketing (daily →
+  UTC date, weekly → ISO week, monthly → month, interval → N-day bucket,
+  never → static); `starts_at`/`ends_at` make it an "event"; and
+  `prerequisite_quest_key` makes it a "chain". Any combination is valid — a
+  biweekly quest inside a seasonal window that also chains is just those
+  fields set. `category` carries no engine behavior.
 - **`quest_progress`** (per user per quest per period):
   `user_id`, `quest_key`, `period_key` (reset bucket — `"2026-07-22"` for a
   daily, `"static"` for a permanent), `objective_progress` (jsonb map,
@@ -152,7 +156,7 @@ commits (`defer/1`), never inside the lock.
 
 Each in all six places (`@callback`+`@optional_callbacks`, `internal_hooks()`,
 `Hooks.Default`, SDK incl. `defoverridable`, docs). `after_achievement_unlocked`
-stays as an alias fired for `kind: "achievement"` completions so existing plugins
+stays as an alias fired for `reset: "never"`, `category: "achievement"` completions so existing plugins
 keep working.
 
 ## Web / API
@@ -160,7 +164,7 @@ keep working.
 - `GET /me/quests` — active quests + progress + claimable flag (paginated).
 - `POST /me/quests/:key/claim` — claim a completed quest's rewards.
 - Quest **catalog** listing behind a `LIST_*_ENABLED` gate.
-- `/achievements` read endpoints preserved as the `kind = achievement` view.
+- `/achievements` read endpoints preserved as the `category = achievement` view.
 - Event reporting: **no public endpoint** (server-authoritative).
 
 ## Limits (`GameServer.Limits`, auto `LIMIT_*`, `@limit_categories`)
@@ -180,11 +184,11 @@ keep working.
 ## "Update everywhere" — file list
 
 - **README** Features: Quests/progression (mention achievements are now a quest
-  kind). **CHANGELOG** `[added]` Quests/progression; `[added]` inventory
+  category). **CHANGELOG** `[added]` Quests/progression; `[added]` inventory
   ledger + idempotent grants; `[changed]`/`[breaking]` achievements folded
   into quests.
 - **.env.example** — the `LIMIT_*` caps.
-- **host_public_docs/** — new Quests page (kinds, objectives, `report_event`,
+- **host_public_docs/** — new Quests page (reset/window/prereq, objectives, `report_event`,
   reward/idempotency contract, resets); Server-scripting page gains the hooks;
   Data Schema gains `quests`/`quest_progress`, notes the achievements migration.
 - **api_spec.ex** — feature list + quest endpoints; keep achievements entries.

@@ -225,6 +225,37 @@ end</code></pre>
       </div>
 
       <div class="step">
+        <h4 class="font-semibold">{doc_text("Push hooks")}</h4>
+        <div class="ml-6 mt-2 space-y-2">
+          <p>
+            {doc_text(
+              "before_push_send/2 runs once per recipient before any delivery job is enqueued. It receives the user id and the message as a string-keyed map; return {:ok, message} to allow (optionally rewritten — the result is re-validated against the push limits) or {:error, reason} to drop the push for that user. It is where per-user opt-out, quiet hours, or moderation belong. after_push_sent/3 observes each device's final outcome — \"delivered\", \"invalid\" (token disabled), or \"failed\". Send a push from any hook with GameServer.Push.send_to_user/2 — delivery is queued, retried, and never blocks the caller:"
+            )}
+          </p>
+          <div class="bg-base-300 p-4 rounded-lg font-mono text-sm">
+            <pre><code class="language-elixir" phx-no-curly-interpolation>@impl true
+def before_push_send(user_id, message) do
+<span class="code-comment"># Example: respect a per-user mute stored in KV</span>
+  case GameServer.KV.get("push_muted", user_id: user_id) do
+    {:ok, %{value: %{"muted" => true}}} -> {:error, :muted}
+    _ -> {:ok, message}
+  end
+end
+
+<span class="code-comment"># From any hook: ping an offline player</span>
+def on_turn_ready(user_id, match_id) do
+  GameServer.Push.send_to_user(user_id, %{
+    "title" => "Your move!",
+    "body" => "It is your turn.",
+    "data" => %{"match_id" => match_id},
+    "collapse_key" => "turn-#{match_id}"
+  })
+end</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
         <h4 class="font-semibold">{doc_text("Exposing an RPC function")}</h4>
         <div class="ml-6 mt-2 space-y-2">
           <p>

@@ -236,6 +236,17 @@ defmodule GameServer.Hooks do
   @callback before_chat_message(User.t(), map()) :: hook_result(map())
   @callback after_chat_message(Message.t()) :: any()
 
+  # Push delivery hooks. `before_push_send/2` runs once per recipient before
+  # any delivery job is enqueued: return `{:ok, message}` (possibly rewritten)
+  # or `{:error, reason}` to drop the push for that user (per-user opt-out,
+  # quiet hours, moderation). `after_push_sent/3` observes each token's final
+  # outcome (`"delivered"` / `"invalid"` / `"failed"`). Both receive the
+  # message as a plain string-keyed map.
+  @callback before_push_send(String.t(), map()) :: hook_result(map())
+  @callback after_push_sent(String.t(), map(), map()) :: any()
+  @optional_callbacks before_push_send: 2,
+                      after_push_sent: 3
+
   # Fired synchronously just before a member leaves and the lobby-scoped KV is
   # wiped, so a plugin can persist state that dies with the membership (e.g.
   # banking cargo collected in a level the player abandons). Non-gating: the
@@ -487,6 +498,8 @@ defmodule GameServer.Hooks do
       :before_party_kick,
       :before_chat_message,
       :after_chat_message,
+      :before_push_send,
+      :after_push_sent,
       :before_lobby_leave,
       :after_lobby_leave,
       :before_lobby_update,
@@ -561,6 +574,7 @@ defmodule GameServer.Hooks do
       :before_party_create,
       :before_party_update,
       :before_chat_message,
+      :before_push_send,
       :before_lobby_update,
       :before_lobby_delete,
       :before_lobby_kick,
@@ -666,6 +680,14 @@ defmodule GameServer.Hooks do
     end
   end
 
+  defp normalize_pipeline_args(:before_push_send, value, current_args)
+       when is_list(current_args) and length(current_args) == 2 do
+    case value do
+      tuple when is_tuple(tuple) and tuple_size(tuple) == 2 -> {:ok, Tuple.to_list(tuple)}
+      message -> {:ok, [Enum.at(current_args, 0), message]}
+    end
+  end
+
   defp normalize_pipeline_args(:before_party_create, value, current_args)
        when is_list(current_args) and length(current_args) == 2 do
     case value do
@@ -752,6 +774,11 @@ defmodule GameServer.Hooks do
   end
 
   defp finalize_pipeline_value(:before_chat_message, args)
+       when is_list(args) and length(args) == 2 do
+    Enum.at(args, 1)
+  end
+
+  defp finalize_pipeline_value(:before_push_send, args)
        when is_list(args) and length(args) == 2 do
     Enum.at(args, 1)
   end
@@ -1378,6 +1405,12 @@ defmodule GameServer.Hooks.Default do
 
   @impl true
   def after_chat_message(_message), do: :ok
+
+  @impl true
+  def before_push_send(_user_id, message), do: {:ok, message}
+
+  @impl true
+  def after_push_sent(_user_id, _message, _result), do: :ok
 
   @impl true
   def after_lobby_join(_user, _lobby), do: :ok

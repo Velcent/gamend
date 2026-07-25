@@ -2,10 +2,13 @@ defmodule GameServer.Quests do
   @moduledoc ~S"""
   Event-driven quest/progression engine.
   
-  One engine covers achievements (permanent one-shots, `kind: "achievement"`),
-  daily/weekly quests (repeat per UTC period), event quests (time-boxed) and
-  chains (gated on a prerequisite quest) — each able to pay rewards into
-  `GameServer.Economy` / `GameServer.Inventory` exactly once.
+  One engine, three independent dimensions: a **reset** cycle (never / daily /
+  weekly / monthly / every N days), an optional **window**
+  (`starts_at`/`ends_at`), and an optional **prerequisite**
+  (`prerequisite_quest_key`). Any combination works — a biweekly quest inside
+  a seasonal window that also requires an earlier quest is just those three
+  fields set. Rewards pay into `GameServer.Economy` / `GameServer.Inventory`
+  exactly once. `category` is a free-form label for your UI only.
   
   ## Reporting progress (server-side / hooks)
   
@@ -31,10 +34,11 @@ defmodule GameServer.Quests do
   
   ## Resets
   
-  `period_key` is derived from **UTC time** by kind (daily → `"2026-07-22"`,
-  weekly → `"2026-W30"`, otherwise `"static"`). A new period simply means a
-  new progress row on the next reported event — nothing needs to fire at
-  midnight, and state resolves correctly even if no job ever runs.
+  `period_key` is derived from **UTC time** by the quest's reset (daily →
+  `"2026-07-22"`, weekly → `"2026-W30"`, monthly → `"2026-07"`, interval →
+  `"I14-1436"`, never → `"static"`). A new period simply means a new progress
+  row on the next reported event — nothing needs to fire at midnight, and
+  state resolves correctly even if no job ever runs.
   
 
   **Note:** This is an SDK stub. Calling these functions will raise an error.
@@ -243,23 +247,6 @@ defmodule GameServer.Quests do
 
 
   @doc ~S"""
-    The reset bucket for a quest kind at `now` (UTC): `"2026-07-22"` for a
-    daily, `"2026-W30"` for a weekly, `"static"` otherwise.
-    
-  """
-  @spec current_period_key(String.t(), DateTime.t()) :: String.t()
-  def current_period_key(_kind, _now) do
-    case Application.get_env(:game_server_sdk, :stub_mode, :raise) do
-      :placeholder ->
-        ""
-
-      _ ->
-        raise "GameServer.Quests.current_period_key/2 is a stub - only available at runtime on GameServer"
-    end
-  end
-
-
-  @doc ~S"""
     Quest statistics for the admin dashboard.
   """
   @spec dashboard_stats() :: map()
@@ -375,7 +362,7 @@ defmodule GameServer.Quests do
     Lists quest definitions (admin view — no per-user state).
     
     ## Options
-    - `:kind` — filter by kind
+    - `:category` — filter by category
     - `:active` — filter by active flag
     - `:search` — substring match on key/title
     - `:page` / `:page_size`
@@ -398,7 +385,7 @@ defmodule GameServer.Quests do
     ("their achievements"). Hidden quests appear once earned.
     
     ## Options
-    - `:kind` — filter by kind (a public profile typically wants `"achievement"`)
+    - `:category` — filter by category (a profile typically wants `"achievement"`)
     - `:page` / `:page_size`
     
   """
@@ -421,11 +408,11 @@ defmodule GameServer.Quests do
     Lists quests as seen by one user: active definitions in-window with the
     user's current-period progress and a claimable flag.
     
-    Hidden quests only appear once completed. Chain quests only appear once
-    their prerequisite is met.
+    Hidden quests are listed but carry no details until earned (callers obscure
+    them). Chain quests only appear once their prerequisite is met.
     
     ## Options
-    - `:kind` — filter by kind
+    - `:category` — filter by category
     - `:status` — `"in_progress"` (not yet completed), `"claimable"`
       (completed, waiting to be claimed) or `"done"` (completed or claimed)
     - `:page` / `:page_size`
@@ -448,6 +435,27 @@ defmodule GameServer.Quests do
 
       _ ->
         raise "GameServer.Quests.list_user_quests/2 is a stub - only available at runtime on GameServer"
+    end
+  end
+
+
+  @doc ~S"""
+    The reset bucket a quest is in at `now` (UTC).
+    
+    `"static"` when it never resets, else the current day (`"2026-07-22"`),
+    ISO week (`"2026-W30"`), month (`"2026-07"`), or interval bucket
+    (`"I14-1436"` — the 1436th 14-day window since the epoch). Derived purely
+    from the clock, so a reset needs nothing to fire at midnight.
+    
+  """
+  @spec period_key(GameServer.Quests.Quest.t() | String.t(), DateTime.t()) :: String.t()
+  def period_key(_quest_or_reset, _now) do
+    case Application.get_env(:game_server_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        ""
+
+      _ ->
+        raise "GameServer.Quests.period_key/2 is a stub - only available at runtime on GameServer"
     end
   end
 

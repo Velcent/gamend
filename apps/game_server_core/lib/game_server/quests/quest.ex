@@ -1,23 +1,26 @@
 defmodule GameServer.Quests.Quest do
   @moduledoc """
-  Ecto schema for the `quests` table — one definition per quest, of any kind.
+  Ecto schema for the `quests` table.
 
-  ## Kinds
+  Three independent dimensions, so any combination is expressible:
 
-  - `"achievement"` — permanent one-shot (folded-in achievements)
-  - `"daily"` / `"weekly"` — repeat per UTC period (`period_key` bucket)
-  - `"event"` — time-boxed by `starts_at`/`ends_at`
-  - `"chain"` — gated on `prerequisite_quest_key` being completed
-
-  The kind determines the reset cycle; there is no per-row cron.
+  - **`reset`** — when progress starts over: `"never"` (permanent, e.g. an
+    achievement), `"daily"`, `"weekly"`, `"monthly"`, or `"interval"` with
+    `reset_interval_days` (biweekly = 14, or any cadence).
+  - **`starts_at`/`ends_at`** — an availability window ("event" quests). Works
+    with any reset, so a daily can run only during a seasonal window.
+  - **`prerequisite_quest_key`** — must be completed first ("chains"). Works
+    with any reset, so dailies and events can chain too.
 
   ## Fields
 
   - `key` — unique slug (e.g. "daily_win_3"); progress rows reference it
+  - `category` — free-form label for grouping/filtering in your UI
+    ("achievement", "story", "seasonal", …); no engine behavior
   - `objectives` — list of `GameServer.Quests.Objective` (event/target/params)
   - `rewards` — list of `GameServer.Quests.Reward`, paid exactly-once
   - `auto_claim` — grant rewards on completion without a claim step
-  - `hidden` — not shown until completed (achievements' hidden flag)
+  - `hidden` — details withheld until earned (a teaser)
   - `active` — inactive quests never advance and are not listed
   """
 
@@ -30,7 +33,7 @@ defmodule GameServer.Quests.Quest do
 
   @type t :: %__MODULE__{}
 
-  @kinds ~w(achievement daily weekly event chain)
+  @resets ~w(never daily weekly monthly interval)
 
   @derive {Jason.Encoder,
            only: [
@@ -41,7 +44,9 @@ defmodule GameServer.Quests.Quest do
              :icon_url,
              :sort_order,
              :hidden,
-             :kind,
+             :reset,
+             :reset_interval_days,
+             :category,
              :objectives,
              :rewards,
              :auto_claim,
@@ -61,7 +66,9 @@ defmodule GameServer.Quests.Quest do
     field :icon_url, :string
     field :sort_order, :integer, default: 0
     field :hidden, :boolean, default: false
-    field :kind, :string
+    field :reset, :string, default: "never"
+    field :reset_interval_days, :integer
+    field :category, :string
 
     embeds_many :objectives, Objective, on_replace: :delete
     embeds_many :rewards, Reward, on_replace: :delete
@@ -80,12 +87,13 @@ defmodule GameServer.Quests.Quest do
     timestamps(type: :utc_datetime)
   end
 
-  @required_fields ~w(key title kind)a
-  @optional_fields ~w(description icon_url sort_order hidden auto_claim
-                      prerequisite_quest_key starts_at ends_at active metadata)a
+  @required_fields ~w(key title)a
+  @optional_fields ~w(description icon_url sort_order hidden reset reset_interval_days
+                      category auto_claim prerequisite_quest_key starts_at ends_at
+                      active metadata)a
 
-  @doc "The valid quest kinds."
-  def kinds, do: @kinds
+  @doc "The valid reset cycles."
+  def resets, do: @resets
 
   @doc false
   def changeset(quest, attrs) do
@@ -100,13 +108,33 @@ defmodule GameServer.Quests.Quest do
     )
     |> validate_length(:title, max: GameServer.Limits.get(:max_quest_title))
     |> validate_length(:description, max: GameServer.Limits.get(:max_quest_description))
-    |> validate_inclusion(:kind, @kinds)
+    |> validate_inclusion(:reset, @resets)
+    |> validate_interval()
+    |> validate_length(:category, max: GameServer.Limits.get(:max_quest_category))
     |> validate_objective_count()
     |> validate_reward_count()
     |> validate_window()
     |> validate_no_self_prerequisite()
     |> validate_metadata_size(:metadata)
     |> unique_constraint(:key)
+  end
+
+  # An "interval" reset is meaningless without its cadence; other resets must
+  # not carry a stray one.
+  defp validate_interval(changeset) do
+    case {get_field(changeset, :reset), get_field(changeset, :reset_interval_days)} do
+      {"interval", days} when is_integer(days) and days > 0 ->
+        changeset
+
+      {"interval", _} ->
+        add_error(changeset, :reset_interval_days, "is required when reset is \"interval\"")
+
+      {_reset, nil} ->
+        changeset
+
+      {_reset, _days} ->
+        add_error(changeset, :reset_interval_days, "only applies when reset is \"interval\"")
+    end
   end
 
   defp validate_objective_count(changeset) do

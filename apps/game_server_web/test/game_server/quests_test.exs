@@ -12,7 +12,6 @@ defmodule GameServer.QuestsTest do
     defaults = %{
       key: "quest_#{System.unique_integer([:positive])}",
       title: "Test Quest",
-      kind: "achievement",
       objectives: [%{event: "test_event", target: 1}]
     }
 
@@ -29,7 +28,8 @@ defmodule GameServer.QuestsTest do
       attrs = %{
         key: "daily_win_3",
         title: "Win 3 matches",
-        kind: "daily",
+        reset: "daily",
+        category: "daily",
         objectives: [%{event: "match_won", target: 3, params: %{"mode" => "ranked"}}],
         rewards: [%{type: "currency", code: "gold", amount: 100}],
         auto_claim: false
@@ -37,7 +37,8 @@ defmodule GameServer.QuestsTest do
 
       assert {:ok, %Quest{} = quest} = Quests.create_quest(attrs)
       assert quest.key == "daily_win_3"
-      assert quest.kind == "daily"
+      assert quest.reset == "daily"
+      assert quest.category == "daily"
       assert [objective] = quest.objectives
       assert objective.event == "match_won"
       assert objective.target == 3
@@ -48,20 +49,54 @@ defmodule GameServer.QuestsTest do
       assert reward.amount == 100
     end
 
-    test "create_quest/1 validates required fields and kind" do
+    test "create_quest/1 validates required fields and reset" do
       assert {:error, changeset} = Quests.create_quest(%{})
       assert "can't be blank" in errors_on(changeset).key
       assert "can't be blank" in errors_on(changeset).title
 
       assert {:error, changeset} =
                Quests.create_quest(%{
-                 key: "bad_kind",
+                 key: "bad_reset",
                  title: "Bad",
-                 kind: "monthly",
+                 reset: "fortnightly",
                  objectives: [%{event: "x"}]
                })
 
-      assert "is invalid" in errors_on(changeset).kind
+      assert "is invalid" in errors_on(changeset).reset
+    end
+
+    test "create_quest/1 requires an interval only for reset: interval" do
+      assert {:error, changeset} =
+               Quests.create_quest(%{
+                 key: "no_interval",
+                 title: "Missing",
+                 reset: "interval",
+                 objectives: [%{event: "x"}]
+               })
+
+      assert errors_on(changeset).reset_interval_days != []
+
+      assert {:error, changeset} =
+               Quests.create_quest(%{
+                 key: "stray_interval",
+                 title: "Stray",
+                 reset: "daily",
+                 reset_interval_days: 14,
+                 objectives: [%{event: "x"}]
+               })
+
+      assert errors_on(changeset).reset_interval_days != []
+
+      assert {:ok, quest} =
+               Quests.create_quest(%{
+                 key: "biweekly",
+                 title: "Biweekly",
+                 reset: "interval",
+                 reset_interval_days: 14,
+                 objectives: [%{event: "x"}]
+               })
+
+      assert quest.reset_interval_days == 14
     end
 
     test "create_quest/1 requires at least one objective" do
@@ -78,7 +113,8 @@ defmodule GameServer.QuestsTest do
                Quests.create_quest(%{
                  key: "unique_key",
                  title: "Dupe",
-                 kind: "daily",
+                 reset: "daily",
+                 category: "daily",
                  objectives: [%{event: "x"}]
                })
 
@@ -90,7 +126,7 @@ defmodule GameServer.QuestsTest do
                Quests.create_quest(%{
                  key: "bad_window",
                  title: "Window",
-                 kind: "event",
+                 reset: "never",
                  objectives: [%{event: "x"}],
                  starts_at: ~U[2026-07-02 00:00:00Z],
                  ends_at: ~U[2026-07-01 00:00:00Z]
@@ -162,7 +198,7 @@ defmodule GameServer.QuestsTest do
 
       create_quest(%{
         key: "over",
-        kind: "event",
+        reset: "never",
         objectives: [%{event: "e1"}],
         starts_at: ~U[2020-01-01 00:00:00Z],
         ends_at: ~U[2020-02-01 00:00:00Z]
@@ -196,7 +232,6 @@ defmodule GameServer.QuestsTest do
 
       create_quest(%{
         key: "step2",
-        kind: "chain",
         prerequisite_quest_key: "step1",
         objectives: [%{event: "win", target: 2}]
       })
@@ -213,16 +248,31 @@ defmodule GameServer.QuestsTest do
   end
 
   describe "periods" do
-    test "current_period_key/2 buckets by kind in UTC" do
+    test "period_key/2 buckets by reset in UTC" do
       now = ~U[2026-07-24 10:00:00Z]
-      assert Quests.current_period_key("daily", now) == "2026-07-24"
-      assert Quests.current_period_key("weekly", now) == "2026-W30"
-      assert Quests.current_period_key("achievement", now) == "static"
-      assert Quests.current_period_key("chain", now) == "static"
+      assert Quests.period_key("daily", now) == "2026-07-24"
+      assert Quests.period_key("weekly", now) == "2026-W30"
+      assert Quests.period_key("monthly", now) == "2026-07"
+      assert Quests.period_key("never", now) == "static"
+    end
+
+    test "period_key/2 buckets interval resets by cadence" do
+      quest = %Quest{reset: "interval", reset_interval_days: 14}
+
+      # Buckets are floor(days-since-epoch / cadence): stable inside a window,
+      # incrementing exactly once per cadence.
+      assert Quests.period_key(quest, ~U[2026-07-24 10:00:00Z]) == "I14-1475"
+      assert Quests.period_key(quest, ~U[2026-07-29 23:59:59Z]) == "I14-1475"
+      assert Quests.period_key(quest, ~U[2026-07-30 00:00:00Z]) == "I14-1476"
+      assert Quests.period_key(quest, ~U[2026-08-13 00:00:00Z]) == "I14-1477"
+
+      # A different cadence buckets independently.
+      weekly_ish = %Quest{reset: "interval", reset_interval_days: 7}
+      assert Quests.period_key(weekly_ish, ~U[2026-07-24 10:00:00Z]) == "I7-2951"
     end
 
     test "a new daily period gets a fresh progress row" do
-      create_quest(%{key: "daily_q", kind: "daily", objectives: [%{event: "e", target: 5}]})
+      create_quest(%{key: "daily_q", reset: "daily", objectives: [%{event: "e", target: 5}]})
       user = user_fixture()
 
       {:ok, [p]} = Quests.report_event(user.id, "e", 5)
@@ -360,7 +410,6 @@ defmodule GameServer.QuestsTest do
 
       create_quest(%{
         key: "second",
-        kind: "chain",
         prerequisite_quest_key: "first",
         objectives: [%{event: "win", target: 2}]
       })
@@ -435,7 +484,7 @@ defmodule GameServer.QuestsTest do
 
   describe "retention" do
     test "prune_old_periods/0 removes old daily rows but keeps static ones" do
-      create_quest(%{key: "prune_daily", kind: "daily", objectives: [%{event: "e"}]})
+      create_quest(%{key: "prune_daily", reset: "daily", objectives: [%{event: "e"}]})
       create_quest(%{key: "prune_static", objectives: [%{event: "e"}]})
       user = user_fixture()
       {:ok, _} = Quests.report_event(user.id, "e")

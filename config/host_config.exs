@@ -69,11 +69,17 @@ config :game_server_core, GameServer.Repo,
 # Cron entry drives Schedule.TickWorker (see GameServer.Schedule).
 config :game_server_core, Oban,
   repo: GameServer.Repo,
-  queues: [default: 10, hooks: 20, mailers: 5, storage: 5, webhooks: 10],
+  queues: [default: 10, hooks: 20, mailers: 5, storage: 5, webhooks: 10, push: 10],
   plugins: [
     {Oban.Plugins.Pruner, max_age: 60 * 60 * 24 * 7},
     {Oban.Plugins.Cron, crontab: [{"* * * * *", GameServer.Schedule.TickWorker}]}
   ]
+
+# Push notifications (GameServer.Push) need no compiled config: delivery
+# routes per token off its `provider` column, and a provider whose dispatcher
+# isn't running falls back to the zero-config Log provider. The PUSH_* /
+# APNS_* vars (see config/host_runtime.exs) configure the dispatchers at
+# runtime.
 
 # Object storage (GameServer.Storage). Defaults to local disk; STORAGE_ADAPTER
 # and the STORAGE_* vars (see config/host_runtime.exs) select and configure a

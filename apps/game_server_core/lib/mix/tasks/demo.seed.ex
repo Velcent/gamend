@@ -24,8 +24,8 @@ defmodule Mix.Tasks.Demo.Seed do
     * `lobby_snapshot` — recorded runs for `/admin/lobby-snapshots`, capped at 12
       regardless of `--count` (this set is about having something to read, not
       volume)
-    * `quest` — a daily, an auto-claim achievement and a chain quest, with
-      per-user progress in every state (including claimable completed rows)
+    * `quest` — a daily, an auto-claim achievement and a chained follow-up,
+      with per-user progress in every state (including claimable rows)
 
   The `lobby_snapshot` set goes through the real `capture_lobby/3` path rather
   than inserting rows, so what you see is shaped exactly like production data —
@@ -59,6 +59,7 @@ defmodule Mix.Tasks.Demo.Seed do
   alias GameServer.LobbySnapshots.Event, as: SnapshotEvent
   alias GameServer.LobbySnapshots.Snapshot
   alias GameServer.LobbySnapshots.Writer
+  alias GameServer.Push.PushToken
   alias GameServer.Quests.Quest
   alias GameServer.Quests.QuestProgress
   alias GameServer.Repo
@@ -73,7 +74,7 @@ defmodule Mix.Tasks.Demo.Seed do
   @quest_key_prefix "demo-seed-"
   @default_count 1000
   @batch 500
-  @all_sets ~w(leaderboard group tournament lobby_snapshot quest)
+  @all_sets ~w(leaderboard group tournament lobby_snapshot quest push)
   @lobby_title_prefix "Demo Seed Run"
   @max_runs 12
 
@@ -99,6 +100,7 @@ defmodule Mix.Tasks.Demo.Seed do
         "tournament" -> seed_tournament(users)
         "lobby_snapshot" -> seed_lobby_snapshots(users)
         "quest" -> seed_quests(users)
+        "push" -> seed_push_tokens(users)
       end)
 
       GameServer.Cache.delete_all()
@@ -287,7 +289,8 @@ defmodule Mix.Tasks.Demo.Seed do
         key: @quest_key_prefix <> "daily-login",
         title: "Demo Daily Login",
         description: "Log in 3 times today.",
-        kind: "daily",
+        reset: "daily",
+        category: "daily",
         objectives: [%{event: "login", target: 3, params: %{}}],
         rewards: [%{type: "currency", code: "gold", amount: 100}],
         auto_claim: false,
@@ -300,7 +303,8 @@ defmodule Mix.Tasks.Demo.Seed do
         key: @quest_key_prefix <> "first-win",
         title: "Demo First Win",
         description: "Win your first demo match.",
-        kind: "achievement",
+        reset: "never",
+        category: "achievement",
         objectives: [%{event: "demo_win", target: 1, params: %{}}],
         rewards: [],
         auto_claim: true,
@@ -313,7 +317,8 @@ defmodule Mix.Tasks.Demo.Seed do
         key: @quest_key_prefix <> "veteran",
         title: "Demo Veteran",
         description: "Win 10 demo matches (after your first win).",
-        kind: "chain",
+        reset: "never",
+        category: "story",
         objectives: [%{event: "demo_win", target: 10, params: %{}}],
         rewards: [%{type: "item", code: "loot_crate", amount: 1}],
         auto_claim: false,
@@ -323,7 +328,7 @@ defmodule Mix.Tasks.Demo.Seed do
       })
 
     now = DateTime.utc_now(:second)
-    today = GameServer.Quests.current_period_key("daily", now)
+    today = GameServer.Quests.period_key("daily", now)
 
     Repo.delete_all(from(p in QuestProgress, where: like(p.quest_key, ^"#{@quest_key_prefix}%")))
 
@@ -421,6 +426,42 @@ defmodule Mix.Tasks.Demo.Seed do
   defp clean_quests do
     Repo.delete_all(from(p in QuestProgress, where: like(p.quest_key, ^"#{@quest_key_prefix}%")))
     Repo.delete_all(from(q in Quest, where: like(q.key, ^"#{@quest_key_prefix}%")))
+  end
+
+  # One device per player (platform/provider cycling), every tenth disabled so
+  # the admin page shows the dead-token state. Log provider, so a test push
+  # against this data is observable in the server log. Rows cascade-delete
+  # with their demo user on clean.
+  defp seed_push_tokens(user_ids) do
+    Repo.delete_all(from(t in PushToken, where: like(t.token, ^"#{@prefix}-token-%")))
+    now = DateTime.utc_now(:second)
+
+    user_ids
+    |> Enum.with_index()
+    |> Enum.map(fn {user_id, i} ->
+      {platform, provider} =
+        case rem(i, 3) do
+          0 -> {"android", "fcm"}
+          1 -> {"ios", "apns"}
+          2 -> {"web", "fcm"}
+        end
+
+      %{
+        id: UUIDv7.generate(),
+        user_id: user_id,
+        token: "#{@prefix}-token-#{pad(i)}",
+        platform: platform,
+        provider: provider,
+        device_id: device_id(i),
+        disabled_at: if(rem(i, 10) == 9, do: now),
+        metadata: %{},
+        inserted_at: now,
+        updated_at: now
+      }
+    end)
+    |> insert_batches(PushToken)
+
+    info("push: #{length(user_ids)} device tokens -> /admin/push")
   end
 
   defp clean do

@@ -5,7 +5,7 @@ defmodule GameServerWeb.AdminLive.Quests do
   alias GameServer.Quests.Quest
   alias GameServerWeb.AdminLive.TranslationMetadata
 
-  @kinds Quest.kinds()
+  @resets Quest.resets()
   @statuses ~w(active completed claimed)
 
   @impl true
@@ -16,7 +16,7 @@ defmodule GameServerWeb.AdminLive.Quests do
       socket
       |> assign(:page, 1)
       |> assign(:page_size, 25)
-      |> assign(:kind_filter, nil)
+      |> assign(:category_filter, nil)
       |> assign(:selected_quest, nil)
       |> assign(:form, nil)
       |> assign(:grant_form, nil)
@@ -43,10 +43,15 @@ defmodule GameServerWeb.AdminLive.Quests do
             <div class="flex flex-wrap items-center justify-between">
               <h2 class="card-title">Quests ({@count})</h2>
               <div class="flex flex-wrap gap-2">
-                <select class="select select-sm" phx-change="filter_kind" name="kind">
-                  <option value="">All kinds</option>
-                  <option :for={k <- @kinds} value={k} selected={@kind_filter == k}>{k}</option>
-                </select>
+                <input
+                  type="text"
+                  name="category"
+                  value={@category_filter || ""}
+                  placeholder="Filter by category"
+                  class="input input-sm input-bordered"
+                  phx-change="filter_category"
+                  phx-debounce="300"
+                />
                 <button phx-click="new_quest" class="btn btn-primary btn-sm">
                   + Create Quest
                 </button>
@@ -59,7 +64,8 @@ defmodule GameServerWeb.AdminLive.Quests do
                   <tr>
                     <th>Key</th>
                     <th>Title</th>
-                    <th>Kind</th>
+                    <th>Reset</th>
+                    <th>Category</th>
                     <th>Objectives</th>
                     <th>Rewards</th>
                     <th>Active</th>
@@ -73,10 +79,17 @@ defmodule GameServerWeb.AdminLive.Quests do
                     <td class="font-mono text-sm">{q.key}</td>
                     <td class="text-sm">{q.title}</td>
                     <td class="text-sm">
-                      <span class={["badge badge-sm", kind_badge(q.kind)]}>{q.kind}</span>
+                      <span class={["badge badge-sm", reset_badge(q.reset)]}>{reset_text(q)}</span>
                       <span :if={q.hidden} class="badge badge-warning badge-sm ml-1">hidden</span>
                       <span :if={q.auto_claim} class="badge badge-ghost badge-sm ml-1">auto</span>
+                      <span :if={q.prerequisite_quest_key} class="badge badge-ghost badge-sm ml-1">
+                        chained
+                      </span>
+                      <span :if={q.starts_at || q.ends_at} class="badge badge-ghost badge-sm ml-1">
+                        window
+                      </span>
                     </td>
+                    <td class="text-sm">{q.category}</td>
                     <td class="text-xs font-mono">{objectives_summary(q)}</td>
                     <td class="text-xs font-mono">{rewards_summary(q)}</td>
                     <td class="text-sm">
@@ -281,10 +294,20 @@ defmodule GameServerWeb.AdminLive.Quests do
               <.input field={@form[:description]} type="textarea" label="Description" />
               <.input field={@form[:icon_url]} type="text" label="Icon URL (optional)" />
               <.input
-                field={@form[:kind]}
+                field={@form[:reset]}
                 type="select"
-                label="Kind"
-                options={Enum.map(@kinds, &{&1, &1})}
+                label="Reset cycle"
+                options={Enum.map(@resets, &{&1, &1})}
+              />
+              <.input
+                field={@form[:reset_interval_days]}
+                type="number"
+                label="Reset interval in days (only for reset: interval — biweekly = 14)"
+              />
+              <.input
+                field={@form[:category]}
+                type="text"
+                label="Category (free-form label for your UI)"
               />
 
               <div class="form-control">
@@ -423,10 +446,10 @@ defmodule GameServerWeb.AdminLive.Quests do
   # ---------------------------------------------------------------------------
 
   @impl true
-  def handle_event("filter_kind", %{"kind" => kind}, socket) do
+  def handle_event("filter_category", %{"category" => category}, socket) do
     {:noreply,
      socket
-     |> assign(:kind_filter, if(kind == "", do: nil, else: kind))
+     |> assign(:category_filter, if(category == "", do: nil, else: category))
      |> assign(:page, 1)
      |> reload_quests()}
   end
@@ -690,15 +713,15 @@ defmodule GameServerWeb.AdminLive.Quests do
   defp reload_quests(socket) do
     page = socket.assigns[:page] || 1
     page_size = socket.assigns[:page_size] || 25
-    kind = socket.assigns[:kind_filter]
+    category = socket.assigns[:category_filter]
 
-    quests = Quests.list_quests(page: page, page_size: page_size, kind: kind)
-    count = Quests.count_quests(kind: kind)
+    quests = Quests.list_quests(page: page, page_size: page_size, category: category)
+    count = Quests.count_quests(category: category)
     total_pages = if page_size > 0, do: div(count + page_size - 1, page_size), else: 0
     funnels = Map.new(quests, fn q -> {q.key, Quests.funnel(q.key)} end)
 
     socket
-    |> assign(:kinds, @kinds)
+    |> assign(:resets, @resets)
     |> assign(:statuses, @statuses)
     |> assign(:quests, quests)
     |> assign(:funnels, funnels)
@@ -759,16 +782,19 @@ defmodule GameServerWeb.AdminLive.Quests do
     "#{Map.get(funnel, "active", 0)}/#{Map.get(funnel, "completed", 0)}/#{Map.get(funnel, "claimed", 0)}"
   end
 
-  defp kind_badge(kind) do
-    case kind do
-      "achievement" -> "badge-primary"
+  defp reset_badge(reset) do
+    case reset do
+      "never" -> "badge-primary"
       "daily" -> "badge-info"
       "weekly" -> "badge-accent"
-      "event" -> "badge-warning"
-      "chain" -> "badge-secondary"
+      "monthly" -> "badge-secondary"
+      "interval" -> "badge-warning"
       _ -> "badge-ghost"
     end
   end
+
+  defp reset_text(%{reset: "interval", reset_interval_days: days}), do: "every #{days}d"
+  defp reset_text(%{reset: reset}), do: reset
 
   defp status_badge(status) do
     case status do

@@ -18,6 +18,7 @@ Game + Backend = Gamend
 - **Friends** — Requests, accept/reject, blocking
 - **Chat** — Lobby, group, party, and friend DMs with read cursors and unread counts
 - **Notifications** — Typed notifications for all social events, read/unread, real-time delivery
+- **Push Notifications** — FCM + APNs-direct mobile push, routed per device token; notifications reach offline players, with zero-config log delivery in dev
 - **Quests / Progression** — One event-driven engine: achievements (permanent quests), daily/weekly quests, event windows, chains; exactly-once rewards into the economy
 - **Leaderboards** — Global and per-user rankings
 - **Payments** — Stripe Checkout, Google Play, App Store, and Steam provider flows with receipt validation, webhooks, entitlements, refunds, and admin tools

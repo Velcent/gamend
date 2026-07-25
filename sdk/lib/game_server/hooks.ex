@@ -410,6 +410,9 @@ defmodule GameServer.Hooks do
   @callback before_chat_message(user(), attrs :: map()) :: hook_result(map())
   @callback after_chat_message(message()) :: any()
 
+  @callback before_push_send(user_id :: String.t(), message :: map()) :: hook_result(map())
+  @callback after_push_sent(user_id :: String.t(), message :: map(), result :: map()) :: any()
+
   @callback before_lobby_leave(user(), lobby()) :: hook_result({user(), lobby()})
   @callback after_lobby_leave(user(), lobby()) :: any()
 
@@ -445,7 +448,9 @@ defmodule GameServer.Hooks do
                       after_quest_completed: 1,
                       after_quest_claimed: 1,
                       before_chat_message: 2,
-                      after_chat_message: 1
+                      after_chat_message: 1,
+                      before_push_send: 2,
+                      after_push_sent: 3
 
   @doc """
   Called before a KV `get/2` is performed. Implementations should return
@@ -604,6 +609,12 @@ defmodule GameServer.Hooks do
       def after_chat_message(_message), do: :ok
 
       @impl true
+      def before_push_send(_user_id, message), do: {:ok, message}
+
+      @impl true
+      def after_push_sent(_user_id, _message, _result), do: :ok
+
+      @impl true
       def before_lobby_leave(user, lobby), do: {:ok, {user, lobby}}
 
       @impl true
@@ -710,6 +721,8 @@ defmodule GameServer.Hooks do
                      after_lobby_join: 2,
                      before_chat_message: 2,
                      after_chat_message: 1,
+                     before_push_send: 2,
+                     after_push_sent: 3,
                      before_lobby_leave: 2,
                      after_lobby_leave: 2,
                      before_lobby_update: 2,

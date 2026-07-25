@@ -91,6 +91,99 @@ if base = System.get_env("STORAGE_PUBLIC_URL") do
   config :game_server_core, GameServer.Storage.Local, base_url: base
 end
 
+# ── Push notifications ──────────────────────────────────────────────────────
+# (docs/specs/push.md) With nothing set, neither dispatcher is configured, so
+# GameServer.Push.Supervisor starts no children and every delivery routes to
+# the Log provider. Credentials are parse-validated here so a bad value
+# degrades to that Log fallback with one loud error instead of handing the
+# dispatcher a config it would crash-loop on.
+
+# Secret env vars accept inline contents or a path to a file holding them.
+read_push_secret = fn
+  nil -> nil
+  "" -> nil
+  value -> if File.regular?(value), do: File.read!(value), else: value
+end
+
+if System.get_env("PUSH_ADAPTER") == "log" do
+  config :game_server_core, GameServer.Push, force_log: true
+end
+
+case Integer.parse(System.get_env("PUSH_QUEUE_CONCURRENCY") || "") do
+  {concurrency, _} when concurrency > 0 ->
+    config :game_server_core, Oban, queues: [push: concurrency]
+
+  _ ->
+    :ok
+end
+
+fcm_credentials = read_push_secret.(System.get_env("PUSH_FCM_CREDENTIALS"))
+
+if fcm_credentials do
+  case Jason.decode(fcm_credentials) do
+    {:ok, %{} = credentials} ->
+      project_id = System.get_env("PUSH_FCM_PROJECT_ID") || credentials["project_id"]
+
+      if project_id in [nil, ""] do
+        IO.puts(
+          :stderr,
+          "[push] PUSH_FCM_CREDENTIALS has no project_id and PUSH_FCM_PROJECT_ID is unset — " <>
+            "FCM disabled, deliveries fall back to the Log provider"
+        )
+      else
+        config :game_server_core, GameServer.Push.Goth,
+          source: {:service_account, credentials, []}
+
+        config :game_server_core, GameServer.Push.FCMDispatcher,
+          adapter: Pigeon.FCM,
+          auth: GameServer.Push.Goth,
+          project_id: project_id
+      end
+
+    {:error, _} ->
+      IO.puts(
+        :stderr,
+        "[push] PUSH_FCM_CREDENTIALS is neither valid service-account JSON nor a readable " <>
+          "file — FCM disabled, deliveries fall back to the Log provider"
+      )
+  end
+end
+
+apns_key = read_push_secret.(System.get_env("APNS_PRIVATE_KEY"))
+apns_key_id = System.get_env("APNS_KEY_ID")
+apns_team_id = System.get_env("APNS_TEAM_ID")
+apns_topic = System.get_env("APNS_TOPIC")
+apns_vars = [apns_key, apns_key_id, apns_team_id, apns_topic]
+
+cond do
+  Enum.all?(apns_vars, &(&1 in [nil, ""])) ->
+    :ok
+
+  Enum.any?(apns_vars, &(&1 in [nil, ""])) ->
+    IO.puts(
+      :stderr,
+      "[push] APNs needs all of APNS_PRIVATE_KEY, APNS_KEY_ID, APNS_TEAM_ID and APNS_TOPIC — " <>
+        "APNs disabled, deliveries fall back to the Log provider"
+    )
+
+  not String.contains?(apns_key, "PRIVATE KEY") ->
+    IO.puts(
+      :stderr,
+      "[push] APNS_PRIVATE_KEY does not look like .p8 key contents (or a path to them) — " <>
+        "APNs disabled, deliveries fall back to the Log provider"
+    )
+
+  true ->
+    config :game_server_core, GameServer.Push.APNSDispatcher,
+      adapter: Pigeon.APNS,
+      key: apns_key,
+      key_identifier: apns_key_id,
+      team_id: apns_team_id,
+      mode: if(System.get_env("APNS_ENV") == "sandbox", do: :dev, else: :prod)
+
+    config :game_server_core, GameServer.Push, apns_topic: apns_topic
+end
+
 # ── Account activation ──────────────────────────────────────────────────────
 # Read REQUIRE_ACCOUNT_ACTIVATION once at boot so the function only hits the
 # fast Application.get_env path at runtime.
@@ -403,7 +496,11 @@ if config_env() == :prod do
     # data embedded in JSONB, so this is the control that bounds it.
     lobby_snapshots_days: GameServer.Env.integer("RETENTION_LOBBY_SNAPSHOTS_DAYS", 30),
     lobby_snapshots_flagged_days:
-      GameServer.Env.integer("RETENTION_LOBBY_SNAPSHOTS_FLAGGED_DAYS", 90)
+      GameServer.Env.integer("RETENTION_LOBBY_SNAPSHOTS_FLAGGED_DAYS", 90),
+    # Defaults to Google's stale-token guidance rather than "keep forever":
+    # rows untouched this long are dead installs, and pruning them is what
+    # keeps push_tokens tracking live devices.
+    push_tokens_days: GameServer.Env.integer("RETENTION_PUSH_TOKENS_DAYS", 270)
 
   # Durable per-run record of lobby state changes, for debugging bad runs.
   # Off by default: it stores user metadata and KV, so switching it on is a

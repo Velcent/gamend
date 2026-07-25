@@ -24,6 +24,7 @@ defmodule Mix.Tasks.Gen.Sdk do
     {GameServer.Groups, "groups.ex"},
     {GameServer.Parties, "parties.ex"},
     {GameServer.Notifications, "notifications.ex"},
+    {GameServer.Push, "push.ex"},
     {GameServer.Chat, "chat.ex"},
     {GameServer.Schedule, "schedule.ex"},
     {GameServer.Jobs, "jobs.ex"},
@@ -287,6 +288,8 @@ defmodule Mix.Tasks.Gen.Sdk do
        "{:ok, #{tournament_entry_placeholder_expr()}}"},
       {fn rt -> String.contains?(rt, "{:ok, GameServer.Tournaments.Match.t()}") end,
        "{:ok, #{tournament_match_placeholder_expr()}}"},
+      {fn rt -> String.contains?(rt, "{:ok, GameServer.Push.PushToken.t()}") end,
+       "{:ok, #{push_token_placeholder_expr()}}"},
       {fn rt -> String.contains?(rt, "{:ok, GameServer.Quests.Quest.t()}") end,
        "{:ok, #{quest_placeholder_expr()}}"},
       {fn rt -> String.contains?(rt, "{:ok, GameServer.Quests.QuestProgress.t()}") end,
@@ -479,6 +482,12 @@ defmodule Mix.Tasks.Gen.Sdk do
     dt = dt_placeholder_expr()
 
     "%GameServer.Tournaments.Bracket{id: \"\", tournament_id: \"\", index: 0, size: 8, inserted_at: #{dt}}"
+  end
+
+  defp push_token_placeholder_expr do
+    dt = dt_placeholder_expr()
+
+    "%GameServer.Push.PushToken{id: \"\", user_id: \"\", token: \"\", platform: \"android\", provider: \"fcm\", device_id: nil, disabled_at: nil, last_used_at: nil, metadata: %{}, inserted_at: #{dt}, updated_at: #{dt}}"
   end
 
   defp quest_placeholder_expr do

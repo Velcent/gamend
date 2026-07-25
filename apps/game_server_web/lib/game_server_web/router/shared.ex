@@ -370,6 +370,9 @@ defmodule GameServerWeb.Router.Shared do
         delete "/me/providers/:provider", ProviderController, :unlink
         post "/me/device", ProviderController, :link_device
         delete "/me/device", ProviderController, :unlink_device
+        post "/me/push-tokens", PushTokenController, :create
+        get "/me/push-tokens", PushTokenController, :index
+        delete "/me/push-tokens/:id", PushTokenController, :delete
       end
     end
   end
@@ -521,6 +524,9 @@ defmodule GameServerWeb.Router.Shared do
         get "/notifications", NotificationController, :index
         post "/notifications", NotificationController, :create
         delete "/notifications/:id", NotificationController, :delete
+        get "/push/tokens", PushController, :index
+        delete "/push/tokens/:id", PushController, :delete
+        post "/push/send", PushController, :send
         get "/groups", GroupController, :index
         patch "/groups/:id", GroupController, :update
         delete "/groups/:id", GroupController, :delete
@@ -645,6 +651,7 @@ defmodule GameServerWeb.Router.Shared do
           live "/admin/users", AdminLive.Users, :index
           live "/admin/sessions", AdminLive.Sessions, :index
           live "/admin/notifications", AdminLive.Notifications, :index
+          live "/admin/push", AdminLive.Push, :index
           live "/admin/groups", AdminLive.Groups, :index
           live "/admin/parties", AdminLive.Parties, :index
           live "/admin/blacklist", AdminLive.Blacklist, :index

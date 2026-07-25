@@ -56,6 +56,9 @@ defmodule GameServerWeb.AdminLive.Index do
           <.link navigate={~p"/admin/notifications"} class="btn btn-outline">
             Notifications ({@notifications_count})
           </.link>
+          <.link navigate={~p"/admin/push"} class="btn btn-outline">
+            Push Devices ({@push_stats.live})
+          </.link>
           <.link navigate={~p"/admin/groups"} class="btn btn-outline">
             Groups ({@groups_count})
           </.link>
@@ -673,6 +676,7 @@ defmodule GameServerWeb.AdminLive.Index do
       sessions_count: Task.async(fn -> Repo.aggregate(UserToken, :count) end),
       lobbies_count: Task.async(fn -> Repo.aggregate(Lobby, :count) end),
       notifications_count: Task.async(fn -> Notifications.count_all_notifications() end),
+      push_stats: Task.async(fn -> GameServer.Push.token_stats() end),
       leaderboards_count: Task.async(fn -> Repo.aggregate(Leaderboard, :count) end),
       tournaments_count:
         Task.async(fn -> Repo.aggregate(GameServer.Tournaments.Tournament, :count) end),
@@ -756,6 +760,7 @@ defmodule GameServerWeb.AdminLive.Index do
        lobbies_locked: r.lobbies_locked,
        lobbies_passworded: r.lobbies_passworded,
        notifications_count: r.notifications_count,
+       push_stats: r.push_stats,
        leaderboard_records: r.leaderboard_records,
        groups_count: r.groups_count,
        groups_public: r.groups_public,

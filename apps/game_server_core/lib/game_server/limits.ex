@@ -73,6 +73,14 @@ defmodule GameServer.Limits do
     max_notification_content: 10_000,
     max_notifications_per_user: 500,
 
+    # ── Push ────────────────────────────────────────────────
+    # Live (non-disabled) device tokens per user.
+    max_push_tokens_per_user: 20,
+    max_push_title: 255,
+    max_push_body: 4_000,
+    # Serialized byte size of a push message's custom data map.
+    max_push_data_size: 4_096,
+
     # ── Friends ─────────────────────────────────────────────
     max_friends_per_user: 500,
     max_pending_friend_requests: 100,
@@ -103,6 +111,7 @@ defmodule GameServer.Limits do
     max_quests: 500,
     max_quest_key: 100,
     max_quest_title: 255,
+    max_quest_category: 64,
     max_quest_description: 1_000,
     max_objectives_per_quest: 10,
     max_quest_reward_entries: 10,

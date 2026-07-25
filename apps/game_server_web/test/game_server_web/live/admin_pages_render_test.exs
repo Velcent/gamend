@@ -26,6 +26,7 @@ defmodule GameServerWeb.AdminPagesRenderTest do
     {"/admin/users", "Users"},
     {"/admin/sessions", "Sessions"},
     {"/admin/notifications", "Notifications"},
+    {"/admin/push", "Push"},
     {"/admin/groups", "Groups"},
     {"/admin/parties", "Parties"},
     {"/admin/blacklist", "Blacklist"},
