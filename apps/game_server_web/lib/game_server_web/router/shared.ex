@@ -518,6 +518,7 @@ defmodule GameServerWeb.Router.Shared do
 
         get "/lobbies", LobbyController, :index
         patch "/lobbies/:id", LobbyController, :update
+        post "/lobbies/:id/state", LobbyController, :set_state
         delete "/lobbies/:id", LobbyController, :delete
         patch "/users/:id", UserController, :update
         delete "/users/:id", UserController, :delete

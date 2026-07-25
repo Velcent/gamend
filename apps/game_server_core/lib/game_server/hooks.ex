@@ -263,6 +263,14 @@ defmodule GameServer.Hooks do
   @callback before_lobby_delete(Lobby.t()) :: hook_result(Lobby.t())
   @callback after_lobby_deleted(Lobby.t()) :: any()
 
+  # Lobby lifecycle state (see GameServer.Lobbies.States). The vocabulary is
+  # the game's — core only sets "created" — so `before_lobby_state_change` is
+  # where a game enforces its own ordering or entry conditions. Veto-only: the
+  # return never rewrites the args.
+  @callback before_lobby_state_change(Lobby.t(), String.t(), String.t()) :: hook_result(term())
+  @callback after_lobby_state_changed(Lobby.t(), String.t(), String.t()) :: any()
+  @optional_callbacks before_lobby_state_change: 3, after_lobby_state_changed: 3
+
   @callback before_lobby_kick(User.t(), User.t(), Lobby.t()) ::
               hook_result({User.t(), User.t(), Lobby.t()})
   @callback after_lobby_kick(User.t(), User.t(), Lobby.t()) :: any()
@@ -506,6 +514,8 @@ defmodule GameServer.Hooks do
       :after_lobby_updated,
       :before_lobby_delete,
       :after_lobby_deleted,
+      :before_lobby_state_change,
+      :after_lobby_state_changed,
       :before_lobby_kick,
       :after_lobby_kick,
       :after_lobby_host_change,
@@ -586,7 +596,8 @@ defmodule GameServer.Hooks do
       :before_tournament_register,
       :before_tournament_leave,
       :before_tournament_result,
-      :before_quest_claim
+      :before_quest_claim,
+      :before_lobby_state_change
     ] and arity > 0
   end
 
@@ -743,7 +754,8 @@ defmodule GameServer.Hooks do
               :before_tournament_register,
               :before_tournament_leave,
               :before_tournament_result,
-              :before_quest_claim
+              :before_quest_claim,
+              :before_lobby_state_change
             ] and is_list(current_args) do
     {:ok, current_args}
   end
@@ -1432,6 +1444,12 @@ defmodule GameServer.Hooks.Default do
 
   @impl true
   def after_lobby_deleted(_lobby), do: :ok
+
+  @impl true
+  def before_lobby_state_change(_lobby, _from, _to), do: :ok
+
+  @impl true
+  def after_lobby_state_changed(_lobby, _from, _to), do: :ok
 
   @impl true
   def before_lobby_kick(host, target, lobby), do: {:ok, {host, target, lobby}}

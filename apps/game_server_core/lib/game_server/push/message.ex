@@ -5,12 +5,16 @@ defmodule GameServer.Push.Message do
 
   Fields:
 
-  - `title` – required, capped by `max_push_title`
-  - `body` – optional, capped by `max_push_body`
+  - `title` – required, capped by `max_push_title` **bytes**
+  - `body` – optional, capped by `max_push_body` **bytes**
   - `data` – optional custom key/value map, serialized size capped by
-    `max_push_data_size`. FCM requires string values on the wire, so
+    `max_push_data_size` bytes. FCM requires string values on the wire, so
     non-string values are JSON-encoded by the FCM provider; clients decode
     them back.
+
+  Caps are bytes, not characters, because the provider limits are bytes (FCM
+  and APNs both cap the payload at 4096) — a character cap would let multibyte
+  text through validation only to fail on the wire.
   - `image` – optional image URL
   - `sound` – optional sound name
   - `badge` – optional iOS badge count
@@ -75,7 +79,7 @@ defmodule GameServer.Push.Message do
     cond do
       title in [nil, ""] -> Map.put(errors, :title, "can't be blank")
       not is_binary(title) -> Map.put(errors, :title, "must be a string")
-      String.length(title) > max -> Map.put(errors, :title, "too long (max #{max})")
+      byte_size(title) > max -> Map.put(errors, :title, "too long (max #{max} bytes)")
       true -> errors
     end
   end
@@ -96,7 +100,7 @@ defmodule GameServer.Push.Message do
     cond do
       body == nil -> errors
       not is_binary(body) -> Map.put(errors, :body, "must be a string")
-      String.length(body) > max -> Map.put(errors, :body, "too long (max #{max})")
+      byte_size(body) > max -> Map.put(errors, :body, "too long (max #{max} bytes)")
       true -> errors
     end
   end
@@ -124,6 +128,30 @@ defmodule GameServer.Push.Message do
       errors
     else
       Map.put(errors, :badge, "must be a non-negative integer")
+    end
+  end
+
+  @doc """
+  Truncate a UTF-8 string to at most `max_bytes` without splitting a
+  character. For callers bridging longer content (notification bodies,
+  personalized titles) into the push byte caps.
+  """
+  @spec truncate(String.t(), non_neg_integer()) :: String.t()
+  def truncate(string, max_bytes) when is_binary(string) and is_integer(max_bytes) do
+    if byte_size(string) <= max_bytes do
+      string
+    else
+      string |> binary_part(0, max_bytes) |> trim_partial_char()
+    end
+  end
+
+  defp trim_partial_char(<<>>), do: <<>>
+
+  defp trim_partial_char(part) do
+    if String.valid?(part) do
+      part
+    else
+      trim_partial_char(binary_part(part, 0, byte_size(part) - 1))
     end
   end
 

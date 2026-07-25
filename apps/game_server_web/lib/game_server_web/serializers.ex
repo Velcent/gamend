@@ -88,6 +88,8 @@ defmodule GameServerWeb.Serializers do
       max_users: lobby.max_users,
       is_hidden: lobby.is_hidden,
       is_locked: lobby.is_locked,
+      state: lobby.state,
+      state_changed_at: lobby.state_changed_at,
       metadata: lobby.metadata || %{}
     }
     |> maybe_put(

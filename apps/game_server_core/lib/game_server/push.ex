@@ -106,9 +106,11 @@ defmodule GameServer.Push do
 
   defp normalize_attrs(attrs) do
     attrs = Map.new(attrs, fn {k, v} -> {to_string(k), v} end)
-    platform = attrs["platform"]
 
-    default_provider = if platform == "ios", do: "apns", else: "fcm"
+    attrs =
+      if attrs["provider"] in [nil, ""], do: Map.delete(attrs, "provider"), else: attrs
+
+    default_provider = if attrs["platform"] == "ios", do: "apns", else: "fcm"
 
     Map.put_new(attrs, "provider", default_provider)
   end
@@ -144,17 +146,21 @@ defmodule GameServer.Push do
   defp update_registration(existing, user_id, attrs) do
     previous_owner = existing.user_id
 
-    result =
-      existing
-      |> PushToken.changeset(Map.put(attrs, "user_id", user_id))
-      |> Ecto.Changeset.put_change(:disabled_at, nil)
-      |> Repo.update()
-
-    with {:ok, _} <- result do
+    with :ok <- claim_capacity(previous_owner, user_id),
+         {:ok, _} = result <-
+           existing
+           |> PushToken.changeset(Map.put(attrs, "user_id", user_id))
+           |> Ecto.Changeset.put_change(:disabled_at, nil)
+           |> Repo.update() do
       if previous_owner != user_id, do: invalidate_push_cache(previous_owner)
       result
     end
   end
+
+  # Rotating/re-enabling your own row never adds a device, but claiming a
+  # token from another account does — it must respect the cap like an insert.
+  defp claim_capacity(owner, owner), do: :ok
+  defp claim_capacity(_previous_owner, user_id), do: check_token_capacity(user_id)
 
   defp check_token_capacity(user_id) do
     max = GameServer.Limits.get(:max_push_tokens_per_user)
@@ -210,7 +216,9 @@ defmodule GameServer.Push do
         {:error, :not_found}
 
       %PushToken{} = token ->
-        case Repo.delete(token) do
+        # allow_stale: a concurrent delete of the same row (double-click,
+        # admin + user racing) must land as a no-op, not a StaleEntryError.
+        case Repo.delete(token, allow_stale: true) do
           {:ok, deleted} ->
             invalidate_push_cache(deleted.user_id)
             {:ok, deleted}
@@ -344,10 +352,20 @@ defmodule GameServer.Push do
     filters = Map.new(filters, fn {k, v} -> {to_string(k), v} end)
 
     PushToken
-    |> maybe_filter(:user_id, filters["user_id"])
+    |> maybe_filter_user(filters["user_id"])
     |> maybe_filter(:platform, filters["platform"])
     |> maybe_filter(:provider, filters["provider"])
     |> maybe_filter_status(filters["status"])
+  end
+
+  # Cast before querying: a half-typed id in the admin filter box must be
+  # ignored (the notifications-filter convention), not raise a CastError on
+  # Postgres.
+  defp maybe_filter_user(query, value) do
+    case value != nil and GameServer.UUIDv7.cast_or_nil(value) do
+      id when is_binary(id) -> where(query, [t], t.user_id == ^id)
+      _ -> query
+    end
   end
 
   defp maybe_filter(query, _field, value) when value in [nil, ""], do: query

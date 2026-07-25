@@ -109,6 +109,12 @@ defmodule GameServer.Hooks do
         def after_lobby_deleted(_lobby), do: :ok
 
         @impl true
+        def before_lobby_state_change(_lobby, _from, _to), do: :ok
+
+        @impl true
+        def after_lobby_state_changed(_lobby, _from, _to), do: :ok
+
+        @impl true
         def before_lobby_kick(host, target, lobby) do
           {:ok, {host, target, lobby}}
         end
@@ -176,6 +182,8 @@ defmodule GameServer.Hooks do
   - `after_lobby_updated/1` - After lobby is updated
   - `before_lobby_delete/1` - Before lobby is deleted
   - `after_lobby_deleted/1` - After lobby is deleted
+  - `before_lobby_state_change/3` - Before a lobby's `state` changes, receives `(lobby, from, to)`. Veto-only: return `{:error, reason}` to reject, anything else allows. The vocabulary is yours — declare it with `lobby_states/0`
+  - `after_lobby_state_changed/3` - After a lobby's `state` changed (fire-and-forget), receives `(lobby, from, to)`
   - `before_lobby_kick/3` - Before user is kicked from lobby
   - `after_lobby_kick/3` - After user is kicked from lobby
   - `after_lobby_host_change/2` - After lobby host changes
@@ -422,6 +430,13 @@ defmodule GameServer.Hooks do
   @callback before_lobby_delete(lobby()) :: hook_result(lobby())
   @callback after_lobby_deleted(lobby()) :: any()
 
+  # Lobby lifecycle state. Core only ever sets "created"; the rest of the
+  # vocabulary is the game's, declared via lobby_states/0 and validated
+  # against it. Veto-only: the return never rewrites the args.
+  @callback before_lobby_state_change(lobby(), String.t(), String.t()) ::
+              {:ok, term()} | {:error, term()} | any()
+  @callback after_lobby_state_changed(lobby(), String.t(), String.t()) :: any()
+
   @callback before_lobby_kick(host :: user(), target :: user(), lobby()) ::
               hook_result({user(), user(), lobby()})
   @callback after_lobby_kick(host :: user(), target :: user(), lobby()) :: any()
@@ -633,6 +648,12 @@ defmodule GameServer.Hooks do
       def after_lobby_deleted(_lobby), do: :ok
 
       @impl true
+      def before_lobby_state_change(_lobby, _from, _to), do: :ok
+
+      @impl true
+      def after_lobby_state_changed(_lobby, _from, _to), do: :ok
+
+      @impl true
       def before_lobby_kick(host, target, lobby), do: {:ok, {host, target, lobby}}
 
       @impl true
@@ -729,6 +750,8 @@ defmodule GameServer.Hooks do
                      after_lobby_updated: 1,
                      before_lobby_delete: 1,
                      after_lobby_deleted: 1,
+                     before_lobby_state_change: 3,
+                     after_lobby_state_changed: 3,
                      before_lobby_kick: 3,
                      after_lobby_kick: 3,
                      after_lobby_host_change: 2,

@@ -72,7 +72,7 @@
   │  ┌───────── Business Layer (Contexts) ────────────────────┐ │
   │  │                                                        │ │
   │  │  Accounts  │  Lobbies       │  Parties  │  Friends     │ │
-  │  │  Groups    │  Leaderboards  │  Notifications           │ │
+  │  │  Groups    │  Leaderboards  │  Notifications │ Push    │ │
   │  │  Quests (incl. achievements)  │ Chat  │  Economy       │ │
   │  │  KV Storage │ Hooks (server scripting)                 │ │
   │  │                                                        │ │
@@ -89,9 +89,9 @@
   │  │   Database   │  │    Redis     │  │  OAuth       │      │
   │  │ SQLite / PG  │  │  (optional)  │  │  Providers   │      │
   │  └──────────────┘  └──────────────┘  └──────────────┘      │
-  │  ┌──────────────┐                                          │
-  │  │  Email SMTP  │                                          │
-  │  └──────────────┘                                          │
+  │  ┌──────────────┐  ┌──────────────────────────────┐        │
+  │  │  Email SMTP  │  │  Push: FCM / APNs (optional) │        │
+  │  └──────────────┘  └──────────────────────────────┘        │
   └────────────────────────────────────────────────────────────┘</pre>
       </div>
 
@@ -175,6 +175,10 @@
              │       Invites are stored in dedicated tables
              │       (group_invites, party_invites) and are
              │       independent of notifications.
+             │
+             ├──── push_tokens (registered devices)
+             │       Committed notifications also fan out to the
+             │       recipient's live device tokens (FCM / APNs).
              │
              ├──── chat_messages (sender_id ─► messages)
              │         chat_type: lobby | group | friend

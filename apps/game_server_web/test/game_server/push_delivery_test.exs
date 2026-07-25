@@ -94,6 +94,28 @@ defmodule GameServer.PushDeliveryTest do
       assert {:error, %{badge: _}} = Message.new(%{title: "t", badge: -1})
       assert {:error, %{sound: _}} = Message.new(%{title: "t", sound: 5})
     end
+
+    test "caps are bytes, not characters" do
+      # 100 CJK chars = 300 bytes: passes a 255-char reading, must fail a
+      # byte reading of max_push_title (255).
+      multibyte_title = String.duplicate("語", 100)
+      assert {:error, %{title: _}} = Message.new(%{title: multibyte_title})
+
+      max_body = GameServer.Limits.get(:max_push_body)
+      multibyte_body = String.duplicate("語", div(max_body, 3) + 1)
+      assert {:error, %{body: _}} = Message.new(%{title: "t", body: multibyte_body})
+    end
+
+    test "truncate/2 cuts to bytes without splitting characters" do
+      assert Message.truncate("hello", 10) == "hello"
+      assert Message.truncate("hello", 3) == "hel"
+
+      # Each 語 is 3 bytes; a 4-byte budget must not tear one apart.
+      truncated = Message.truncate("語語", 4)
+      assert truncated == "語"
+      assert String.valid?(truncated)
+      assert Message.truncate("語語", 2) == ""
+    end
   end
 
   describe "provider_for/1" do
@@ -314,6 +336,22 @@ defmodule GameServer.PushDeliveryTest do
       assert aps["sound"] == "ping"
       assert notification.payload["kind"] == "chat"
       assert notification.payload["image"] == "https://example.com/i.png"
+    end
+
+    test "FCM refuses a combined payload past its wire limit before sending" do
+      user = AccountsFixtures.user_fixture()
+      token = register!(user, %{"platform" => "android"})
+
+      # Individually within caps, combined past FCM's 4096-byte message limit.
+      {:ok, message} =
+        Message.new(%{
+          title: String.duplicate("t", 250),
+          body: String.duplicate("b", 3_900),
+          data: %{"k" => String.duplicate("d", 3_000)}
+        })
+
+      assert {:error, :permanent, :payload_too_large} =
+               FCM.deliver(message, token)
     end
 
     test "FCM notification stringifies data values and carries android options" do

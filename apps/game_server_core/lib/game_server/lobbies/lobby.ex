@@ -22,6 +22,8 @@ defmodule GameServer.Lobbies.Lobby do
              :max_users,
              :is_hidden,
              :is_locked,
+             :state,
+             :state_changed_at,
              :metadata,
              :inserted_at,
              :updated_at
@@ -36,6 +38,12 @@ defmodule GameServer.Lobbies.Lobby do
     field :password_hash, :string
     field :metadata, :map, default: %{}
     field :slowdown, :integer, default: 0
+
+    # Server-owned lifecycle (see GameServer.Lobbies.States). Deliberately not
+    # castable: only Lobbies.transition_state/3 may write these, so a generic
+    # PATCH /lobbies/:id can never move a lobby's state.
+    field :state, :string, default: "created"
+    field :state_changed_at, :utc_datetime
 
     belongs_to :host, User
 

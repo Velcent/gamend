@@ -11,20 +11,40 @@ defmodule GameServer.Push.Providers.FCM do
   alias GameServer.Push.FCMDispatcher
   alias Pigeon.FCM.Notification
 
-  # The payload is pre-validated by GameServer.Push.Message, so
+  # The payload is size-checked before sending (below), so
   # :invalid_argument in practice means a malformed token.
   @invalid_responses [:unregistered, :invalid_argument]
 
   # Project/credential misconfiguration a retry cannot fix.
   @permanent_responses [:sender_id_mismatch, :third_party_auth_error, :permission_denied]
 
+  # FCM caps a message at 4096 bytes and reports oversize as INVALID_ARGUMENT —
+  # the same error as a malformed token. Rejecting oversize before the wire is
+  # what keeps that ambiguity from soft-disabling a healthy token (individual
+  # field caps can't guarantee this: title + body + data may combine past it).
+  @max_payload_bytes 4000
+
   @impl true
   def deliver(message, token) do
     notification = build_notification(message, token)
 
-    FCMDispatcher
-    |> Pigeon.push(notification)
-    |> classify()
+    if payload_too_large?(notification) do
+      {:error, :permanent, :payload_too_large}
+    else
+      FCMDispatcher
+      |> Pigeon.push(notification)
+      |> classify()
+    end
+  end
+
+  defp payload_too_large?(notification) do
+    payload = %{
+      "notification" => notification.notification,
+      "data" => notification.data,
+      "android" => notification.android
+    }
+
+    byte_size(Jason.encode!(payload)) > @max_payload_bytes
   end
 
   @impl true

@@ -97,6 +97,37 @@ defmodule GameServer.PushTest do
       assert Push.user_has_live_tokens?(user.id)
     end
 
+    test "claiming another user's token respects the claimer's capacity" do
+      victim = AccountsFixtures.user_fixture()
+      claimer = AccountsFixtures.user_fixture()
+      max = GameServer.Limits.get(:max_push_tokens_per_user)
+
+      stolen = register!(victim, %{"platform" => "android"})
+      for _ <- 1..max, do: register!(claimer, %{"platform" => "android"})
+
+      assert {:error, :too_many_tokens} =
+               Push.register_token(claimer.id, %{
+                 "token" => stolen.token,
+                 "platform" => "android"
+               })
+
+      # The victim keeps the row when the claim is rejected.
+      assert [_] = Push.live_tokens(victim.id)
+    end
+
+    test "a blank provider falls back to the platform default" do
+      user = AccountsFixtures.user_fixture()
+
+      assert {:ok, token} =
+               Push.register_token(user.id, %{
+                 "token" => "blank-provider",
+                 "platform" => "ios",
+                 "provider" => ""
+               })
+
+      assert token.provider == "apns"
+    end
+
     test "enforces max_push_tokens_per_user counting live tokens only" do
       user = AccountsFixtures.user_fixture()
       max = GameServer.Limits.get(:max_push_tokens_per_user)
@@ -183,6 +214,9 @@ defmodule GameServer.PushTest do
 
       # Admin listing preloads user names.
       assert [%{user: %{id: _}} | _] = Push.list_all_tokens()
+
+      # A half-typed id in the filter box is ignored, never a query crash.
+      assert Push.count_all_tokens(%{user_id: "not-a-uuid"}) == Push.count_all_tokens(%{})
     end
 
     test "token_stats/0 aggregates totals and live splits" do

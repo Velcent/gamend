@@ -113,6 +113,7 @@ defmodule GameServerWeb.AdminLive.Lobbies do
                       <th>Spectators</th>
                       <th>Hidden</th>
                       <th>Locked</th>
+                      <th>State</th>
                       <th>Password</th>
                       <th>Created</th>
                       <th>Updated</th>
@@ -174,6 +175,15 @@ defmodule GameServerWeb.AdminLive.Lobbies do
                         </select>
                       </th>
                       <th>
+                        <input
+                          type="text"
+                          name="state"
+                          value={@filters["state"] || ""}
+                          placeholder="state"
+                          class="input input-bordered input-xs w-full"
+                        />
+                      </th>
+                      <th>
                         <select name="has_password" class="select select-bordered select-xs w-full">
                           <option value="" selected={@filters["has_password"] == ""}>All</option>
                           <option value="true" selected={@filters["has_password"] == "true"}>
@@ -216,6 +226,9 @@ defmodule GameServerWeb.AdminLive.Lobbies do
                         <% else %>
                           <span class="badge badge-ghost badge-sm">Open</span>
                         <% end %>
+                      </td>
+                      <td class="text-sm">
+                        <span class="badge badge-ghost badge-sm font-mono">{l.state}</span>
                       </td>
                       <td class="text-sm">
                         <%= if l.password_hash do %>

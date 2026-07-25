@@ -84,6 +84,8 @@ defmodule GameServerWeb.RealtimeEvents do
     {@lobby, "user_offline", true, "member event", "A lobby user's socket went offline"},
     {@lobby, "user_updated", true, "user brief", "A lobby user's profile changed"},
     {@lobby, "host_changed", true, "new host", "Lobby host transferred"},
+    {@lobby, "state_changed", false, "lobby id + from + to + state_changed_at",
+     "The lobby moved to another lifecycle state"},
     {@lobby, "chat_message_created", true, "chat message", "Lobby chat message"},
     {@lobby, "chat_message_updated", true, "chat message", "Lobby chat message edited"},
     {@lobby, "chat_message_deleted", true, "message id", "Lobby chat message deleted"},

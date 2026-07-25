@@ -183,6 +183,70 @@ defmodule GameServerWeb.Api.V1.LobbyController do
     ]
   )
 
+  operation(:set_state,
+    operation_id: "set_lobby_state",
+    summary: "Set lobby state (host only)",
+    description:
+      "Move the caller's lobby to another lifecycle state. Allowed only for the " <>
+        "host of a host-managed lobby: hostless (matchmaking) lobbies belong to " <>
+        "the server, so no player may move them. The state must be a core default " <>
+        "(created, starting, playing, ended) or one the game declared via " <>
+        "lobby_states/0, and the game's before_lobby_state_change hook may veto.",
+    security: [%{"authorization" => []}],
+    request_body: {
+      "Target state",
+      "application/json",
+      %Schema{
+        type: :object,
+        properties: %{state: %Schema{type: :string, description: "Target lifecycle state"}},
+        required: [:state]
+      }
+    },
+    responses: %{
+      200 => {"Updated lobby", "application/json", %Schema{type: :object}},
+      400 => {"Not in a lobby / missing state", "application/json", %Schema{type: :object}},
+      403 => {"Not the host, or lobby is hostless", "application/json", %Schema{type: :object}},
+      422 => {"Unknown state or hook rejection", "application/json", %Schema{type: :object}}
+    }
+  )
+
+  def set_state(conn, %{"state" => state}) when is_binary(state) do
+    case Scope.user(conn.assigns[:current_scope]) do
+      %User{} = user ->
+        if is_nil(user.lobby_id) do
+          conn |> put_status(:bad_request) |> json(%{error: "not_in_lobby"})
+        else
+          lobby = Lobbies.get_lobby!(user.lobby_id)
+
+          case Lobbies.transition_state_by_host(user, lobby, state) do
+            {:ok, updated} ->
+              json(conn, serialize_lobby(updated))
+
+            {:error, :not_host} ->
+              conn |> put_status(:forbidden) |> json(%{error: "not_host"})
+
+            {:error, :unknown_state} ->
+              conn |> put_status(:unprocessable_entity) |> json(%{error: "unknown_state"})
+
+            {:error, {:hook_rejected, reason}} ->
+              conn
+              |> put_status(:unprocessable_entity)
+              |> json(%{error: "rejected", reason: inspect(reason)})
+
+            _other ->
+              conn |> put_status(:unprocessable_entity) |> json(%{error: "unexpected_error"})
+          end
+        end
+
+      _ ->
+        conn |> put_status(:unauthorized) |> json(%{error: "Not authenticated"})
+    end
+  end
+
+  def set_state(conn, _params) do
+    conn |> put_status(:bad_request) |> json(%{error: "state_required"})
+  end
+
   operation(:update,
     operation_id: "update_lobby",
     summary: "Update lobby (host only)",

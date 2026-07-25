@@ -54,6 +54,7 @@ defmodule GameServer.Lobbies do
   alias GameServer.KV
   alias GameServer.KV.Entry, as: KVEntry
   alias GameServer.Lobbies.Lobby
+  alias GameServer.Lobbies.States
   alias GameServer.Lobbies.SpectatorTracker
   alias GameServer.Repo
   alias GameServer.Repo.AdvisoryLock
@@ -133,6 +134,7 @@ defmodule GameServer.Lobbies do
     * `:title` - Filter by title (partial match)
     * `:is_passworded` - boolean or string 'true'/'false' (omit for any)
     * `:is_locked` - boolean or string 'true'/'false' (omit for any)
+    * `:state` - lifecycle state (see `GameServer.Lobbies.States`)
     * `:min_users` - Filter lobbies with max_users >= value
     * `:max_users` - Filter lobbies with max_users <= value
     * `:metadata_key` - Filter by metadata key
@@ -158,6 +160,7 @@ defmodule GameServer.Lobbies do
       |> filter_by_hidden_false()
       |> filter_by_passworded(filters)
       |> filter_by_locked(filters)
+      |> filter_by_state(filters)
       |> filter_by_min_users(filters)
       |> filter_by_max_users(filters)
 
@@ -168,6 +171,14 @@ defmodule GameServer.Lobbies do
 
   defp filter_by_hidden_false(q) do
     from l in q, where: l.is_hidden == false
+  end
+
+  defp filter_by_state(q, filters) do
+    case Map.get(filters, :state) || Map.get(filters, "state") do
+      nil -> q
+      v when is_binary(v) and v != "" -> from l in q, where: l.state == ^v
+      _ -> q
+    end
   end
 
   defp filter_by_passworded(q, filters) do
@@ -338,6 +349,7 @@ defmodule GameServer.Lobbies do
     |> filter_by_title(filters)
     |> filter_by_hidden(filters)
     |> filter_by_locked(filters)
+    |> filter_by_state(filters)
     |> filter_by_password(filters)
     |> filter_by_min_users_admin(filters)
     |> filter_by_max_users_admin(filters)
@@ -871,6 +883,94 @@ defmodule GameServer.Lobbies do
       {:error, reason} ->
         {:error, {:hook_rejected, reason}}
     end
+  end
+
+  @doc """
+  Player-initiated state change, subject to lobby ownership.
+
+  Allowed only for the **host of a host-managed lobby** — the host already
+  renames, locks, resizes and kicks, so `state` is no more powerful than what
+  they hold, and "press Start" is a normal party-game action. **Hostless**
+  lobbies (matchmaking's) belong to nobody, so no player may move them: use
+  `transition_state/3` from server-side hooks instead.
+  """
+  @spec transition_state_by_host(User.t(), Lobby.t(), String.t()) ::
+          {:ok, Lobby.t()} | {:error, :not_host | :unknown_state | term()}
+  def transition_state_by_host(%User{id: user_id}, %Lobby{} = lobby, state) do
+    if not lobby.hostless and lobby.host_id == user_id do
+      transition_state(lobby, state)
+    else
+      {:error, :not_host}
+    end
+  end
+
+  @doc """
+  Move a lobby to `state` (see `GameServer.Lobbies.States`).
+
+  The only writer of `state`/`state_changed_at` — the columns are not castable,
+  so a generic `update_lobby/2` can never move a lobby's state.
+
+  `state` must be a core default or declared by a plugin. A same-state call is
+  a no-op (so at-least-once hook/job retries are safe) and does not re-fire
+  hooks. `before_lobby_state_change` may veto; `after_lobby_state_changed`
+  observes post-commit.
+
+  Returns `{:ok, lobby}`, `{:error, :unknown_state}` or
+  `{:error, {:hook_rejected, reason}}`.
+  """
+  @spec transition_state(Lobby.t(), String.t(), keyword()) ::
+          {:ok, Lobby.t()} | {:error, :unknown_state | {:hook_rejected, term()} | term()}
+  def transition_state(%Lobby{} = lobby, state, opts \\ []) when is_binary(state) do
+    cond do
+      not States.known?(state) ->
+        {:error, :unknown_state}
+
+      lobby.state == state ->
+        {:ok, lobby}
+
+      true ->
+        do_transition_state(lobby, lobby.state, state, opts)
+    end
+  end
+
+  defp do_transition_state(lobby, from, to, opts) do
+    with :ok <- run_before_state_change(lobby, from, to, opts),
+         {:ok, updated} <- write_state(lobby, to) do
+      GameServer.Async.run(fn ->
+        GameServer.Hooks.internal_call(:after_lobby_state_changed, [updated, from, to])
+      end)
+
+      _ = invalidate_lobby_cache(updated.id)
+
+      payload = %{
+        lobby_id: updated.id,
+        from: from,
+        to: to,
+        state_changed_at: updated.state_changed_at
+      }
+
+      broadcast_lobby(updated.id, {:lobby_state_changed, payload})
+      broadcast_lobbies({:lobby_updated, updated})
+
+      {:ok, updated}
+    end
+  end
+
+  defp run_before_state_change(lobby, from, to, opts) do
+    if Keyword.get(opts, :skip_hooks, false) do
+      :ok
+    else
+      case GameServer.Hooks.internal_call(:before_lobby_state_change, [lobby, from, to]) do
+        {:ok, _} -> :ok
+        {:error, reason} -> {:error, {:hook_rejected, reason}}
+      end
+    end
+  end
+
+  defp write_state(lobby, to) do
+    lobby
+    |> Ecto.Changeset.change(%{state: to, state_changed_at: DateTime.utc_now(:second)})
+    |> Repo.update()
   end
 
   @spec delete_lobby(Lobby.t()) :: {:ok, Lobby.t()} | {:error, Ecto.Changeset.t() | term()}

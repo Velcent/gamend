@@ -168,6 +168,11 @@ in `apps/game_server_core/priv/repo/migrations/`:
 - **Caps** in `GameServer.Limits` (auto `LIMIT_*`, enforced in the changeset,
   listed in `@limit_categories`): `max_push_tokens_per_user` (20),
   `max_push_title` (255), `max_push_body` (4000), `max_push_data_size` (4096).
+  The message caps are **bytes**, matching the providers' 4096-byte payload
+  limits; the FCM adapter additionally size-checks the combined payload before
+  sending, because FCM reports oversize as `INVALID_ARGUMENT` — the same code
+  as a dead token — and only the pre-check keeps that from disabling a healthy
+  device.
 
 ## `GameServer.Push` — the context
 

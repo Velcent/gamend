@@ -510,12 +510,17 @@ defmodule GameServer.Notifications do
   # has-live-tokens check keeps the common no-device case free.
   defp push_notification(%Notification{} = notification) do
     if GameServer.Push.user_has_live_tokens?(notification.recipient_id) do
-      max_body = GameServer.Limits.get(:max_push_body)
+      alias GameServer.Push.Message
 
+      # Byte-safe truncation: notification titles/content allow more than the
+      # push byte caps (and titles are personalized, so multibyte names can
+      # exceed the cap even at equal char limits) — a push must degrade to a
+      # shorter preview, never be dropped by validation.
       _ =
         GameServer.Push.send_to_user(notification.recipient_id, %{
-          "title" => notification.title,
-          "body" => String.slice(notification.content || "", 0, max_body),
+          "title" => Message.truncate(notification.title, GameServer.Limits.get(:max_push_title)),
+          "body" =>
+            Message.truncate(notification.content || "", GameServer.Limits.get(:max_push_body)),
           "data" => push_data(notification),
           # One collapse id per notification row, so the re-upserted rows
           # (chat previews) replace their earlier push instead of stacking.

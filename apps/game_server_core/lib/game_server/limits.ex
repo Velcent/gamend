@@ -76,6 +76,8 @@ defmodule GameServer.Limits do
     # ── Push ────────────────────────────────────────────────
     # Live (non-disabled) device tokens per user.
     max_push_tokens_per_user: 20,
+    # Byte caps (not characters): FCM and APNs limit the wire payload to
+    # 4096 bytes, so only byte caps can guarantee deliverability.
     max_push_title: 255,
     max_push_body: 4_000,
     # Serialized byte size of a push message's custom data map.

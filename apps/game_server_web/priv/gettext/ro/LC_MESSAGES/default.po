@@ -198,7 +198,7 @@ msgstr "Dată"
 #: lib/game_server_web/live/chat_live.ex:283
 #: lib/game_server_web/live/notifications_live.ex:30
 #: lib/game_server_web/live/notifications_live.ex:84
-#: lib/game_server_web/live/user_live/settings.ex:75
+#: lib/game_server_web/live/user_live/settings.ex:77
 #, elixir-autogen, elixir-format
 msgid "Delete"
 msgstr "Șterge"
@@ -233,7 +233,7 @@ msgstr "Grup"
 #: lib/game_server_web/live/groups_live.ex:44
 #: lib/game_server_web/live/groups_live.ex:94
 #: lib/game_server_web/live/groups_live.ex:391
-#: lib/game_server_web/live/user_live/settings.ex:90
+#: lib/game_server_web/live/user_live/settings.ex:92
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:59
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:479
 #, elixir-autogen, elixir-format
@@ -402,6 +402,7 @@ msgstr "Respinge"
 #: lib/game_server_web/live/user_live/settings/account_tab.ex:305
 #: lib/game_server_web/live/user_live/settings/account_tab.ex:331
 #: lib/game_server_web/live/user_live/settings/account_tab.ex:335
+#: lib/game_server_web/live/user_live/settings/devices_tab.ex:80
 #: lib/game_server_web/live/user_live/settings/friends_tab.ex:151
 #, elixir-autogen, elixir-format
 msgid "Remove"
@@ -454,6 +455,7 @@ msgstr "Trimite"
 #: lib/game_server_web/live/groups_live.ex:439
 #: lib/game_server_web/live/quests_live.ex:576
 #: lib/game_server_web/live/store_live/index.ex:130
+#: lib/game_server_web/live/user_live/settings/devices_tab.ex:48
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:758
 #: lib/game_server_web/live/user_live/settings/payments_tab.ex:58
 #, elixir-autogen, elixir-format
@@ -527,9 +529,9 @@ msgstr "Caută..."
 msgid "(edited)"
 msgstr "(editat)"
 
-#: lib/game_server_web/live/user_live/settings.ex:53
-#: lib/game_server_web/live/user_live/settings.ex:88
-#: lib/game_server_web/live/user_live/settings.ex:145
+#: lib/game_server_web/live/user_live/settings.ex:55
+#: lib/game_server_web/live/user_live/settings.ex:90
+#: lib/game_server_web/live/user_live/settings.ex:149
 #: lib/game_server_web/live/user_live/settings/account_tab.ex:39
 #: lib/game_server_web/live/user_live/settings/account_tab.ex:180
 #, elixir-autogen, elixir-format
@@ -556,7 +558,7 @@ msgid "Edit"
 msgstr "Editează"
 
 #: lib/game_server_web/live/chat_live.ex:127
-#: lib/game_server_web/live/user_live/settings.ex:89
+#: lib/game_server_web/live/user_live/settings.ex:91
 #: lib/game_server_web/live/user_live/settings/friends_tab.ex:45
 #: lib/game_server_web/live/user_live/settings/friends_tab.ex:126
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:435
@@ -644,13 +646,14 @@ msgstr "Nu a fost găsit"
 #: lib/game_server_web/live/user_live/login.ex:207
 #: lib/game_server_web/live/user_live/registration.ex:181
 #: lib/game_server_web/live/user_live/registration.ex:191
-#: lib/game_server_web/live/user_live/settings.ex:131
+#: lib/game_server_web/live/user_live/settings.ex:135
 #: lib/game_server_web/live/user_live/settings/account_tab.ex:404
 #: lib/game_server_web/live/user_live/settings/account_tab.ex:432
 #: lib/game_server_web/live/user_live/settings/account_tab.ex:462
 #: lib/game_server_web/live/user_live/settings/account_tab.ex:548
 #: lib/game_server_web/live/user_live/settings/account_tab.ex:566
 #: lib/game_server_web/live/user_live/settings/account_tab.ex:612
+#: lib/game_server_web/live/user_live/settings/devices_tab.ex:119
 #: lib/game_server_web/live/user_live/settings/friends_tab.ex:288
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:1117
 #: lib/game_server_web/live/user_live/settings/groups_tab.ex:1140
@@ -677,8 +680,9 @@ msgstr "Nu poate fi gol"
 
 #: lib/game_server_web/live/chat_live.ex:279
 #: lib/game_server_web/live/notifications_live.ex:27
-#: lib/game_server_web/live/user_live/settings.ex:73
+#: lib/game_server_web/live/user_live/settings.ex:75
 #: lib/game_server_web/live/user_live/settings/account_tab.ex:369
+#: lib/game_server_web/live/user_live/settings/devices_tab.ex:77
 #, elixir-autogen, elixir-format
 msgid "Delete?"
 msgstr "Șterge?"
@@ -754,14 +758,15 @@ msgstr "Deschide"
 #: lib/game_server_web/live/tournaments_live.ex:173
 #: lib/game_server_web/live/user_live/confirmation.ex:95
 #: lib/game_server_web/live/user_live/registration.ex:211
-#: lib/game_server_web/live/user_live/settings.ex:63
-#: lib/game_server_web/live/user_live/settings.ex:134
+#: lib/game_server_web/live/user_live/settings.ex:65
+#: lib/game_server_web/live/user_live/settings.ex:138
 #: lib/game_server_web/live/user_live/settings/account_tab.ex:552
 #: lib/game_server_web/live/user_live/settings/account_tab.ex:555
 #: lib/game_server_web/live/user_live/settings/account_tab.ex:570
 #: lib/game_server_web/live/user_live/settings/account_tab.ex:594
 #: lib/game_server_web/live/user_live/settings/account_tab.ex:603
 #: lib/game_server_web/live/user_live/settings/account_tab.ex:616
+#: lib/game_server_web/live/user_live/settings/devices_tab.ex:123
 #: lib/game_server_web/live/user_live/settings/friends_tab.ex:292
 #: lib/game_server_web/live/user_live/settings/friends_tab.ex:295
 #: lib/game_server_web/live/user_live/settings/friends_tab.ex:308
@@ -813,6 +818,7 @@ msgstr "În așteptare"
 #: lib/game_server_web/live/leaderboards_live.ex:154
 #: lib/game_server_web/live/leaderboards_live.ex:205
 #: lib/game_server_web/live/store_live/index.ex:132
+#: lib/game_server_web/live/user_live/settings/devices_tab.ex:66
 #, elixir-autogen, elixir-format
 msgid "Active"
 msgstr "Activ"
@@ -873,7 +879,7 @@ msgstr "Scor"
 msgid "Terms"
 msgstr "Termeni"
 
-#: lib/game_server_web/live/user_live/settings.ex:94
+#: lib/game_server_web/live/user_live/settings.ex:96
 #: lib/game_server_web/live/user_live/settings/data_tab.ex:31
 #, elixir-autogen, elixir-format
 msgid "Data"
@@ -1000,6 +1006,7 @@ msgid "Grant"
 msgstr "Acordă"
 
 #: lib/game_server_web/live/store_live/index.ex:132
+#: lib/game_server_web/live/user_live/settings/devices_tab.ex:69
 #, elixir-autogen, elixir-format
 msgid "Inactive"
 msgstr "Inactiv"
@@ -1104,7 +1111,7 @@ msgstr ""
 "Plata este încă în procesare. Reîmprospătează după livrarea webhook-ului."
 
 #: lib/game_server_web/live/store_live/index.ex:63
-#: lib/game_server_web/live/user_live/settings.ex:93
+#: lib/game_server_web/live/user_live/settings.ex:95
 #: lib/game_server_web/live/user_live/settings/payments_tab.ex:33
 #, elixir-autogen, elixir-format
 msgid "Payments"
@@ -1122,6 +1129,7 @@ msgstr "Produs"
 
 #: lib/game_server_web/live/store_live/index.ex:118
 #: lib/game_server_web/live/store_live/index.ex:248
+#: lib/game_server_web/live/user_live/settings/devices_tab.ex:45
 #: lib/game_server_web/live/user_live/settings/payments_tab.ex:57
 #, elixir-autogen, elixir-format
 msgid "Provider"
@@ -1325,6 +1333,7 @@ msgstr "Joacă"
 
 #: lib/game_server_web/live/tournaments_live.ex:634
 #: lib/game_server_web/live/tournaments_live.ex:947
+#: lib/game_server_web/live/user_live/settings/devices_tab.ex:46
 #, elixir-autogen, elixir-format
 msgid "Registered"
 msgstr "Înregistrat"
@@ -1427,7 +1436,7 @@ msgstr "Fișierul este prea mare sau nu este o imagine acceptată."
 msgid "Item"
 msgstr "Obiect"
 
-#: lib/game_server_web/live/user_live/settings.ex:92
+#: lib/game_server_web/live/user_live/settings.ex:94
 #: lib/game_server_web/live/user_live/settings/items_tab.ex:28
 #, elixir-autogen, elixir-format
 msgid "Items"
@@ -1463,7 +1472,7 @@ msgstr "Elimină fișierul selectat"
 msgid "Transactions"
 msgstr "Tranzacții"
 
-#: lib/game_server_web/live/user_live/settings.ex:91
+#: lib/game_server_web/live/user_live/settings.ex:93
 #: lib/game_server_web/live/user_live/settings/wallet_tab.ex:29
 #, elixir-autogen, elixir-format
 msgid "Wallet"
@@ -1546,3 +1555,29 @@ msgstr "La %{count} zile"
 #, elixir-autogen, elixir-format
 msgid "Monthly"
 msgstr "Lunare"
+
+#: lib/game_server_web/live/user_live/settings.ex:97
+#: lib/game_server_web/live/user_live/settings/devices_tab.ex:29
+#, elixir-autogen, elixir-format
+msgid "Devices"
+msgstr "Dispozitive"
+
+#: lib/game_server_web/live/user_live/settings/devices_tab.ex:31
+#, elixir-autogen, elixir-format
+msgid "Devices registered for push notifications."
+msgstr "Dispozitive înregistrate pentru notificări push."
+
+#: lib/game_server_web/live/user_live/settings/devices_tab.ex:47
+#, elixir-autogen, elixir-format
+msgid "Last used"
+msgstr "Ultima utilizare"
+
+#: lib/game_server_web/live/user_live/settings/devices_tab.ex:37
+#, elixir-autogen, elixir-format
+msgid "No devices registered."
+msgstr "Niciun dispozitiv înregistrat."
+
+#: lib/game_server_web/live/user_live/settings/devices_tab.ex:44
+#, elixir-autogen, elixir-format
+msgid "Platform"
+msgstr "Platformă"

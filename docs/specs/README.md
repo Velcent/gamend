@@ -32,14 +32,21 @@ has shipped.
 ## Phase 3
 
 - [quests-progression.md](quests-progression.md) — **Quests / progression.** One
-  event-driven engine; achievements fold in as a quest kind; rewards pay into the
-  economy exactly-once. **Shipped July 2026.**
+  event-driven engine; achievements fold in as permanent quests; rewards pay into
+  the economy exactly-once. **Shipped July 2026.**
 - [webhooks-remote-config.md](webhooks-remote-config.md) — **Webhooks + remote
   config.** Signed, retried outbound webhooks on the Oban `webhooks` queue;
   client-read-only live remote config.
 - [event-tracking.md](event-tracking.md) — **Event-tracking API.** Batched,
   enriched, auto-pruned `events` capture in Postgres — the base a later
   ClickHouse/PostHog sink swaps into.
+
+## Unscheduled
+
+- [lobby-state.md](lobby-state.md) — **Lobby state.** A server-owned
+  `waiting/starting/playing/ended` column with legal transitions, hooks and a
+  generic stale-lobby reaper; unoverloads `is_locked` and replaces the
+  spoofable `metadata["game_state"]` games write today.
 
 ## Not specced (parked by the roadmap)
 
