@@ -1,43 +1,31 @@
 # `GameServer.Lobbies.States`
 [🔗](https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/lobbies/states.ex#L1)
 
-The vocabulary a lobby's `state` may use.
+The vocabulary a lobby's `state` commonly uses.
 
 Core does not model a state *machine* — it does not know when a match starts,
 ends, drafts, pauses or goes to overtime. It knows a lobby was created, and
-nothing more. So the values below are a documented default vocabulary, not an
-enum, and any state may follow any other; a game that needs ordering enforces
-it in `before_lobby_state_change`.
+nothing more. So the values below are documentation, not an enum: core
+accepts any state word, any state may follow any other, and a game that
+needs a vocabulary or an ordering enforces both in
+`before_lobby_state_change` — the same callback that already gates who may
+move to what:
 
-Games add their own by exporting `lobby_states/0` (see
-`GameServer.Hooks.Declarations`), which merge with the core defaults:
+    def before_lobby_state_change(_lobby, _from, to)
+        when to not in ["created", "starting", "playing", "ended"],
+        do: {:error, :unknown_state}
 
-    def lobby_states do
-      %{
-        "drafting" => %{description: "Picking teams"},
-        "post_game" => %{description: "Scoreboard", terminal: true, prune_after_minutes: 10}
-      }
-    end
-
-Declaring is optional — a game that says nothing simply uses the defaults.
-`terminal`/`prune_after_minutes` are read by lobby retention (see
-docs/specs/lobby-state.md); they have no other effect.
-
-# `all`
-
-```elixir
-@spec all() :: %{required(String.t()) =&gt; map()}
-```
-
-Core defaults plus every plugin-declared state.
+A state is a word, not a lifecycle: core attaches no meaning to any of them,
+including whether one ends the lobby. A game that finishes a match deletes
+the lobby itself; retention only reaps lobbies everyone has gone quiet in.
 
 # `core`
 
 ```elixir
-@spec core() :: %{required(String.t()) =&gt; map()}
+@spec core() :: %{required(String.t()) =&gt; String.t()}
 ```
 
-Core's default vocabulary, mapped to its metadata.
+Core's default vocabulary, mapped to each state's description.
 
 # `initial`
 
@@ -46,23 +34,6 @@ Core's default vocabulary, mapped to its metadata.
 ```
 
 The state core assigns when a lobby is created.
-
-# `known?`
-
-```elixir
-@spec known?(term()) :: boolean()
-```
-
-True when `state` is a core default or declared by a loaded plugin.
-
-# `terminal`
-
-```elixir
-@spec terminal() :: %{required(String.t()) =&gt; map()}
-```
-
-States that end a lobby's life, mapped to their metadata. Lobby retention
-consumes this; nothing else in core reads it.
 
 ---
 

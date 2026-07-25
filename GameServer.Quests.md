@@ -41,6 +41,12 @@ Quests with `auto_claim` grant immediately on completion (skipping the
 row on the next reported event — nothing needs to fire at midnight, and
 state resolves correctly even if no job ever runs.
 
+UTC means one global rollover instant rather than one per player: a daily
+turns over at noon in New Zealand and mid-afternoon the day before on the US
+west coast. That is deliberate — everyone races the same clock — but it is
+why the API exposes the *remaining time* on a period and never a reset
+timestamp, and why clients should show a countdown rather than an hour.
+
 # `user_id`
 
 ```elixir

@@ -59,7 +59,8 @@ Broadcast a member presence event (online/offline) to a lobby's PubSub topic.
   boolean()
 ```
 
-Check if a user can edit a lobby (is host or lobby is hostless).
+Check if a user can edit a lobby: the host of a host-managed lobby, nobody
+else. Hostless lobbies have no editor — see `update_lobby_by_host/3`.
 
 # `can_view_lobby?`
 
@@ -352,7 +353,7 @@ Subscribe to a specific lobby's events (membership changes, updates).
 ```elixir
 @spec transition_state(GameServer.Lobbies.Lobby.t(), String.t(), keyword()) ::
   {:ok, GameServer.Lobbies.Lobby.t()}
-  | {:error, :unknown_state | {:hook_rejected, term()} | term()}
+  | {:error, :invalid_state | {:hook_rejected, term()} | term()}
 ```
 
 Move a lobby to `state` (see `GameServer.Lobbies.States`).
@@ -360,12 +361,13 @@ Move a lobby to `state` (see `GameServer.Lobbies.States`).
 The only writer of `state`/`state_changed_at` — the columns are not castable,
 so a generic `update_lobby/2` can never move a lobby's state.
 
-`state` must be a core default or declared by a plugin. A same-state call is
+The vocabulary is the game's: core only requires a sane string (non-empty,
+≤ 64 bytes) and `before_lobby_state_change` enforces
+whatever words and ordering the game cares about. A same-state call is
 a no-op (so at-least-once hook/job retries are safe) and does not re-fire
-hooks. `before_lobby_state_change` may veto; `after_lobby_state_changed`
-observes post-commit.
+hooks. `after_lobby_state_changed` observes post-commit.
 
-Returns `{:ok, lobby}`, `{:error, :unknown_state}` or
+Returns `{:ok, lobby}`, `{:error, :invalid_state}` or
 `{:error, {:hook_rejected, reason}}`.
 
 # `transition_state_by_host`
@@ -377,7 +379,7 @@ Returns `{:ok, lobby}`, `{:error, :unknown_state}` or
   String.t()
 ) ::
   {:ok, GameServer.Lobbies.Lobby.t()}
-  | {:error, :not_host | :unknown_state | term()}
+  | {:error, :not_host | :invalid_state | term()}
 ```
 
 Player-initiated state change, subject to lobby ownership.
@@ -423,6 +425,14 @@ See `t:GameServer.Types.lobby_update_attrs/0` for available fields.
   {:ok, GameServer.Lobbies.Lobby.t()}
   | {:error, :not_host | :too_small | Ecto.Changeset.t() | term()}
 ```
+
+Player-initiated lobby update, subject to lobby ownership.
+
+Allowed only for the **host of a host-managed lobby**. **Hostless** lobbies
+(matchmaking's) belong to nobody, so no player may edit them — a member
+could otherwise rewrite `metadata`, `max_users`, `password_hash` and the
+visibility flags of a ranked match they merely happen to be in. Server-side
+code (hooks, jobs, matchmaking, admin) uses `update_lobby/2` instead.
 
 ---
 

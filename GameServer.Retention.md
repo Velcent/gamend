@@ -18,10 +18,21 @@ Retention is configured per table in days via env vars (see
 - `RETENTION_PUSH_TOKENS_DAYS` — push tokens untouched (registered, used,
   or disabled) for N days. Defaults to 270 — Google's stale-token guidance
   — so the table tracks live devices, not install history.
+- `RETENTION_INVITES_DAYS` — resolved group/party invites and join requests,
+  N days after resolution (default 30). Pending rows are never pruned.
+- `RETENTION_MATCHMAKING_TICKETS_HOURS` — tickets older than N hours
+  (default 24), in any status.
+- `RETENTION_TOURNAMENTS_DAYS` / `RETENTION_LEDGER_DAYS` — finished
+  tournaments and the wallet/inventory ledgers. Both default to `0`: they
+  are history an operator may be required to keep.
+- `RETENTION_ABANDONED_LOBBY_MINUTES` (15) — lobbies nobody has been seen in
+  for N minutes, in minutes rather than days. See `prune_lobbies/0`.
 
-Expired IP bans and OAuth sessions older than a day are always removed
-(independent of the env vars above). Deletes are idempotent, so running on
-several instances at once is harmless.
+Expired IP bans, OAuth sessions older than a day, and user tokens past their
+own context's validity are always removed (independent of the env vars
+above). Deletes are idempotent, so running on several instances at once is
+harmless; each class is batched and failure-isolated, and emits
+`[:game_server, :retention, :pruned]` telemetry with its count.
 
 # `child_spec`
 
@@ -38,7 +49,30 @@ See `Supervisor`.
 Runs all configured pruning steps once. Returns a map of deleted row
 counts per table.
 
+# `run_now`
+
+```elixir
+@spec run_now() :: %{required(atom()) =&gt; non_neg_integer()}
+```
+
+Sweeps now instead of waiting for the next cycle, and records the run like a
+scheduled one. Runs inside the GenServer so a manual run and the timer can
+never overlap.
+
 # `start_link`
+
+# `status`
+
+```elixir
+@spec status() :: %{
+  last_run_at: DateTime.t() | nil,
+  duration_ms: non_neg_integer() | nil,
+  results: %{required(atom()) =&gt; non_neg_integer()}
+}
+```
+
+What the last sweep did, for the admin page. Falls back to "never run" when
+the sweeper is not supervised (tests, or an instance with it disabled).
 
 ---
 

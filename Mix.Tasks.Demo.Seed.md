@@ -25,6 +25,8 @@ again without touching real data.
     volume)
   * `quest` — a daily, an auto-claim achievement and a chained follow-up,
     with per-user progress in every state (including claimable rows)
+  * `ready_check` — one check per seeded lobby in every outcome (open,
+    passed, timed out, declined), also capped at 12
 
 The `lobby_snapshot` set goes through the real `capture_lobby/3` path rather
 than inserting rows, so what you see is shaped exactly like production data —

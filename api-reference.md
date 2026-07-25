@@ -1,4 +1,4 @@
-# game_server_core v1.0.1063 - API Reference
+# game_server_core v1.0.1070 - API Reference
 
 ## Modules
 
@@ -88,7 +88,7 @@ Carries the `idempotency_key` that makes item grants safe to retry.
 - [GameServer.Lobbies](GameServer.Lobbies.md): Context module for lobby management: creating, updating, listing and searching lobbies.
 - [GameServer.Lobbies.Lobby](GameServer.Lobbies.Lobby.md): Ecto schema for the `lobbies` table and changeset helpers.
 - [GameServer.Lobbies.SpectatorTracker](GameServer.Lobbies.SpectatorTracker.md): Lightweight ETS-based tracker for lobby spectators.
-- [GameServer.Lobbies.States](GameServer.Lobbies.States.md): The vocabulary a lobby's `state` may use.
+- [GameServer.Lobbies.States](GameServer.Lobbies.States.md): The vocabulary a lobby's `state` commonly uses.
 - [GameServer.LobbySnapshots](GameServer.LobbySnapshots.md): Durable record of how a lobby's state evolved during a run.
 - [GameServer.LobbySnapshots.Blob](GameServer.LobbySnapshots.Blob.md): Content-addressed storage for one snapshot section.
 - [GameServer.LobbySnapshots.Event](GameServer.LobbySnapshots.Event.md): A decision worth explaining, recorded between two snapshots.
@@ -189,6 +189,10 @@ reset period.
 (via `GameServer.Economy.grant/4`) or an item
 (via `GameServer.Inventory.grant_item/4`).
 
+- [GameServer.ReadyChecks](GameServer.ReadyChecks.md): Ready checks: *these players must each answer before this proceeds*.
+- [GameServer.ReadyChecks.Check](GameServer.ReadyChecks.Check.md): Ecto schema for one ready check — a *moment* at which a set of players must
+each answer before something proceeds.
+- [GameServer.ReadyChecks.Participant](GameServer.ReadyChecks.Participant.md): Ecto schema for one player's answer inside a ready check.
 - [GameServer.Realtime](GameServer.Realtime.md): Pushing game-defined realtime events to a player's socket.
 - [GameServer.Repo](GameServer.Repo.md)
 - [GameServer.Repo.AdvisoryLock](GameServer.Repo.AdvisoryLock.md): Advisory locking for protecting TOCTOU (Time-of-Check-Time-of-Use) patterns.

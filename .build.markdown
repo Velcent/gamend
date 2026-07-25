@@ -113,6 +113,9 @@ GameServer.Quests.Quest.md
 GameServer.Quests.QuestProgress.md
 GameServer.Quests.Reward.md
 GameServer.Quests.md
+GameServer.ReadyChecks.Check.md
+GameServer.ReadyChecks.Participant.md
+GameServer.ReadyChecks.md
 GameServer.Realtime.md
 GameServer.Repo.AdvisoryLock.md
 GameServer.Repo.MigrationPaths.md

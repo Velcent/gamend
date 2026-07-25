@@ -620,6 +620,21 @@ Hooks may accept either a map or keyword list for convenience.
 @callback after_quest_completed(GameServer.Quests.QuestProgress.t()) :: any()
 ```
 
+# `after_ready_check_failed`
+*optional* 
+
+```elixir
+@callback after_ready_check_failed(GameServer.ReadyChecks.Check.t(), String.t(), [map()]) ::
+  any()
+```
+
+# `after_ready_check_passed`
+*optional* 
+
+```elixir
+@callback after_ready_check_passed(GameServer.ReadyChecks.Check.t()) :: any()
+```
+
 # `before_push_send`
 *optional* 
 
@@ -635,6 +650,16 @@ Hooks may accept either a map or keyword list for convenience.
   String.t(),
   GameServer.Quests.Quest.t(),
   GameServer.Quests.QuestProgress.t()
+) :: hook_result(term())
+```
+
+# `before_ready_check_open`
+*optional* 
+
+```elixir
+@callback before_ready_check_open(
+  GameServer.Lobbies.Lobby.t() | GameServer.Parties.Party.t() | :matchmaking,
+  [String.t()]
 ) :: hook_result(term())
 ```
 

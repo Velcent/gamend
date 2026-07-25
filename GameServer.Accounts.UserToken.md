@@ -58,6 +58,19 @@ You could then use this information to display all valid sessions
 and devices in the UI and allow users to explicitly expire any
 session they deem invalid.
 
+# `expired_query`
+
+```elixir
+@spec expired_query() :: Ecto.Query.t()
+```
+
+Query selecting token rows that are past their own context's validity window.
+
+Each context expires on a different clock (session 14d, magic link 15min,
+email change 7d), and those windows live here — so retention inverts the
+same predicate the verify queries use instead of guessing a single age.
+Contexts this module does not know are never selected.
+
 # `verify_change_email_token_query`
 
 Checks if the token is valid and returns its underlying lookup query.

@@ -54,6 +54,28 @@ Returns a list of `{year, [{month, [posts]}]}`.
 Returns the rendered changelog HTML, or `nil` when the changelog path is
 not configured or the file doesn't exist.
 
+# `doc_html`
+
+```elixir
+@spec doc_html(String.t()) :: String.t() | nil
+```
+
+Renders a guide's markdown to HTML, or `nil`.
+
+The leading `# ` heading is dropped: the page renders the title itself, in
+the disclosure summary you click to open the guide.
+
+# `frontmatter`
+
+```elixir
+@spec frontmatter(String.t()) :: %{required(String.t()) =&gt; String.t()}
+```
+
+Reads a leading `---` fenced block of `key: value` lines.
+
+Deliberately not YAML: the values here are single-line strings, and a parser
+dependency for that would be its own liability.
+
 # `get_blog_post`
 
 ```elixir
@@ -61,6 +83,14 @@ not configured or the file doesn't exist.
 ```
 
 Returns a single blog post map by slug, or `nil`.
+
+# `get_doc`
+
+```elixir
+@spec get_doc(String.t()) :: map() | nil
+```
+
+Returns a single guide map by slug, or `nil`.
 
 # `list_blog_posts`
 
@@ -76,6 +106,32 @@ Each post is a map with keys:
   * `:date`  – `Date.t()` parsed from filename prefix or file mtime
   * `:path`  – absolute path to the `.md` file
   * `:excerpt` – first non-heading paragraph (≤ 200 chars)
+
+# `list_doc_categories`
+
+```elixir
+@spec list_doc_categories() :: [%{category: String.t(), guides: [map()]}]
+```
+
+Lists every guide, grouped into categories in reading order.
+
+Structure comes from the file tree rather than front matter, so a guide is a
+file and nothing else has to be edited to add one:
+
+    priv/docs/10-core-setup/20-deployment.md
+
+The numeric prefixes order categories and guides and are stripped from the
+slug; the folder name is the category; the title is the first `# ` heading.
+Returns `[%{category: String.t(), guides: [guide]}]`, each guide a map of
+`:slug`, `:title`, `:summary` and `:path`.
+
+# `list_docs`
+
+```elixir
+@spec list_docs() :: [map()]
+```
+
+Every guide as a flat list, in the same order as `list_doc_categories/0`.
 
 # `path`
 
