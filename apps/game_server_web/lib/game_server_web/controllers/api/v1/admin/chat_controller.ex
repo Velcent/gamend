@@ -112,7 +112,9 @@ defmodule GameServerWeb.Api.V1.Admin.ChatController do
         {"Deleted count", "application/json",
          %Schema{
            type: :object,
-           properties: %{deleted: %Schema{type: :integer}}
+           properties: %{
+             data: %Schema{type: :object, properties: %{deleted: %Schema{type: :integer}}}
+           }
          }},
       unprocessable_entity: {"Missing params", "application/json", @error_schema}
     ]

@@ -26,13 +26,17 @@ defmodule GameServerWeb.Components.UserAvatarTest do
     assert html =~ ~s(src="https://lh3.googleusercontent.com/a/abc=s96-c")
   end
 
-  test "a broken image swaps to a hidden icon fallback via onerror" do
+  test "a broken image carries the CSP-safe fallback marker" do
     user = %User{profile_url: "https://example.com/not-ready-yet.png"}
 
     html = render_component(&CoreComponents.user_avatar/1, user: user)
 
-    assert html =~ "onerror="
-    assert html =~ ~s(class="hero-user-circle-solid hidden w-6 h-6")
+    # The swap lives in assets/js/avatar_fallback.js: an inline `onerror`
+    # attribute is an inline event handler, which this app's CSP refuses, so
+    # the handler never ran and a failed avatar stayed a broken-image glyph.
+    assert html =~ "data-avatar-fallback"
+    refute html =~ "onerror="
+    assert html =~ "hidden w-6 h-6", "the fallback icon ships hidden, ready to be revealed"
   end
 
   test "a user without one falls back to the icon" do

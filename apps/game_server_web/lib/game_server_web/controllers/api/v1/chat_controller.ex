@@ -362,7 +362,10 @@ defmodule GameServerWeb.Api.V1.ChatController do
          %Schema{
            type: :object,
            properties: %{
-             unread_count: %Schema{type: :integer}
+             data: %Schema{
+               type: :object,
+               properties: %{unread_count: %Schema{type: :integer}}
+             }
            }
          }}
     ]

@@ -66,9 +66,12 @@ an `Ecto.Enum` — those serialize as atoms and force every serializer to
 document exists to remove.
 
 > **Not yet true.** Four schemas still call this field `state` (lobbies,
-> tournaments, tournament entries, ready-check participants) and leaderboards
-> still uses `Ecto.Enum`. Phase 2 of the standardization plan renames them;
-> until then, new schemas use `status` + string.
+> tournaments, tournament entries, ready-check participants); Phase 2 of the
+> standardization plan renames them. Until then, new schemas use `status` +
+> string. Leaderboards' `sort_order`/`operator` stay `Ecto.Enum` deliberately:
+> they are classifications, not lifecycle, and converting them would trade two
+> `to_string/1` calls in one serializer for seven pattern-match rewrites in
+> the scoring engine.
 
 `type`, `kind`, `category` and `provider` are classifications, not lifecycle —
 they say what a row *is*, not where it is in a process.
@@ -117,9 +120,9 @@ return `data` with the affected resource, or `{"ok": true}` when there is
 nothing to return. Errors return `{"error": "snake_case_reason"}` with a
 matching HTTP status.
 
-> **Not yet true.** Nine endpoints hand-roll `meta` and emit between three and
-> six keys; a few return top-level `deleted`/`sent`/`unread_count`. Phase 1
-> routes them all through the helper.
+An endpoint returning two parallel collections (friend requests) nests one
+standard meta per collection under `meta.incoming` / `meta.outgoing` rather
+than inventing a parallel-map shape.
 
 ## Paths
 

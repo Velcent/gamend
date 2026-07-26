@@ -142,41 +142,25 @@ defmodule GameServerWeb.LeaderboardsLive do
   defp render_group_list(assigns) do
     ~H"""
     <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      <.link
+      <.entity_card
         :for={group <- @groups}
         navigate={~p"/leaderboards/#{group.slug}"}
-        class="card bg-base-200 hover:bg-base-300 transition-colors cursor-pointer"
+        title={group.title}
+        icon_url={group.icon_url}
+        type={:leaderboard}
+        description={group.description}
       >
-        <div class="card-body">
-          <div class="flex items-start justify-between">
-            <h3 class="card-title text-lg">
-              <.entity_icon
-                icon_url={group.icon_url}
-                type={:leaderboard}
-                class="w-6 h-6 text-base-content/60"
-              />
-              {group.title}
-            </h3>
-            <div class="flex flex-col items-end gap-1">
-              <%= if group.active_id do %>
-                <span class="badge badge-success">{gettext("Active")}</span>
-              <% else %>
-                <span class="badge badge-neutral">{gettext("Ended")}</span>
-              <% end %>
-              <%= if group.season_count > 1 do %>
-                <span class="badge badge-ghost badge-sm text-nowrap">
-                  {group.season_count}
-                </span>
-              <% end %>
-            </div>
-          </div>
-
-          <% localized_desc = group.description %>
-          <%= if localized_desc do %>
-            <p class="text-sm text-base-content/70 line-clamp-2">{localized_desc}</p>
+        <:badges>
+          <%= if group.active_id do %>
+            <span class="badge badge-success">{gettext("Active")}</span>
+          <% else %>
+            <span class="badge badge-neutral">{gettext("Ended")}</span>
           <% end %>
-        </div>
-      </.link>
+          <span :if={group.season_count > 1} class="badge badge-ghost badge-sm text-nowrap">
+            {group.season_count}
+          </span>
+        </:badges>
+      </.entity_card>
     </div>
 
     <%= if @groups == [] do %>

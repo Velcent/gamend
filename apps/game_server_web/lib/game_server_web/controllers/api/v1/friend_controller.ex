@@ -20,6 +20,52 @@ defmodule GameServerWeb.Api.V1.FriendController do
 
   tags(["Friends"])
 
+  @request_list_schema %Schema{
+    type: :array,
+    items: %Schema{
+      type: :object,
+      properties: %{
+        id: %Schema{type: :string, format: :uuid},
+        requester: %Schema{
+          type: :object,
+          properties: %{
+            id: %Schema{type: :string, format: :uuid},
+            username: %Schema{type: :string},
+            display_name: %Schema{type: :string},
+            metadata: %Schema{type: :object, description: "User metadata"},
+            is_online: %Schema{type: :boolean},
+            last_seen_at: %Schema{type: :string, format: :date_time, nullable: false}
+          }
+        },
+        target: %Schema{
+          type: :object,
+          properties: %{
+            id: %Schema{type: :string, format: :uuid},
+            username: %Schema{type: :string},
+            display_name: %Schema{type: :string},
+            metadata: %Schema{type: :object, description: "User metadata"},
+            is_online: %Schema{type: :boolean},
+            last_seen_at: %Schema{type: :string, format: :date_time, nullable: false}
+          }
+        },
+        status: %Schema{type: :string},
+        inserted_at: %Schema{type: :string, format: :date_time}
+      }
+    }
+  }
+
+  @request_meta_schema %Schema{
+    type: :object,
+    properties: %{
+      page: %Schema{type: :integer},
+      page_size: %Schema{type: :integer},
+      count: %Schema{type: :integer},
+      total_count: %Schema{type: :integer},
+      total_pages: %Schema{type: :integer},
+      has_more: %Schema{type: :boolean}
+    }
+  }
+
   operation(:create,
     operation_id: "create_friend_request",
     summary: "Send a friend request",
@@ -140,81 +186,18 @@ defmodule GameServerWeb.Api.V1.FriendController do
         %Schema{
           type: :object,
           properties: %{
-            incoming: %Schema{
-              type: :array,
-              items: %Schema{
-                type: :object,
-                properties: %{
-                  id: %Schema{type: :string, format: :uuid},
-                  requester: %Schema{
-                    type: :object,
-                    properties: %{
-                      id: %Schema{type: :string, format: :uuid},
-                      username: %Schema{type: :string},
-                      display_name: %Schema{type: :string},
-                      metadata: %Schema{type: :object, description: "User metadata"},
-                      is_online: %Schema{type: :boolean},
-                      last_seen_at: %Schema{type: :string, format: :date_time, nullable: false}
-                    }
-                  },
-                  target: %Schema{
-                    type: :object,
-                    properties: %{
-                      id: %Schema{type: :string, format: :uuid},
-                      username: %Schema{type: :string},
-                      display_name: %Schema{type: :string},
-                      metadata: %Schema{type: :object, description: "User metadata"},
-                      is_online: %Schema{type: :boolean},
-                      last_seen_at: %Schema{type: :string, format: :date_time, nullable: false}
-                    }
-                  },
-                  status: %Schema{type: :string},
-                  inserted_at: %Schema{type: :string, format: :date_time}
-                }
-              }
-            },
-            outgoing: %Schema{
-              type: :array,
-              items: %Schema{
-                type: :object,
-                properties: %{
-                  id: %Schema{type: :string, format: :uuid},
-                  requester: %Schema{
-                    type: :object,
-                    properties: %{
-                      id: %Schema{type: :string, format: :uuid},
-                      username: %Schema{type: :string},
-                      display_name: %Schema{type: :string},
-                      metadata: %Schema{type: :object, description: "User metadata"},
-                      is_online: %Schema{type: :boolean},
-                      last_seen_at: %Schema{type: :string, format: :date_time, nullable: false}
-                    }
-                  },
-                  target: %Schema{
-                    type: :object,
-                    properties: %{
-                      id: %Schema{type: :string, format: :uuid},
-                      username: %Schema{type: :string},
-                      display_name: %Schema{type: :string},
-                      metadata: %Schema{type: :object, description: "User metadata"},
-                      is_online: %Schema{type: :boolean},
-                      last_seen_at: %Schema{type: :string, format: :date_time, nullable: false}
-                    }
-                  },
-                  status: %Schema{type: :string},
-                  inserted_at: %Schema{type: :string, format: :date_time}
-                }
+            data: %Schema{
+              type: :object,
+              properties: %{
+                incoming: @request_list_schema,
+                outgoing: @request_list_schema
               }
             },
             meta: %Schema{
               type: :object,
               properties: %{
-                page: %Schema{type: :integer},
-                page_size: %Schema{type: :integer},
-                counts: %Schema{type: :object},
-                total_counts: %Schema{type: :object},
-                total_pages: %Schema{type: :object},
-                has_more: %Schema{type: :object}
+                incoming: @request_meta_schema,
+                outgoing: @request_meta_schema
               }
             }
           }

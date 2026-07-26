@@ -54,6 +54,10 @@ defmodule GameServerWeb.UserAuth do
       # Use safe wrapper for hook invocation so missing hooks don't crash background tasks
       GameServer.Async.run(fn ->
         GameServer.Hooks.internal_call(:after_user_logged_in, [user])
+        # The quest event travels with the hook: password and OAuth logins land
+        # here, and only the magic-link path (Accounts) emits it itself — without
+        # this, "log in" quests never progressed for most sign-ins.
+        GameServer.Quests.report_event(user.id, "login")
       end)
     end
 

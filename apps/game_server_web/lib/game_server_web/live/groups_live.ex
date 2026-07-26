@@ -458,47 +458,35 @@ defmodule GameServerWeb.GroupsLive do
     </div>
 
     <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3" id="groups-list">
-      <div
+      <.entity_card
         :for={group <- @groups}
         id={"group-#{group.id}"}
-        class="card bg-base-200 hover:bg-base-300 transition-colors cursor-pointer"
+        title={group.title}
+        icon_url={group.icon_url}
+        type={:group}
+        description={group.description}
+        class="cursor-pointer"
         phx-click="view_group"
         phx-value-id={group.id}
       >
-        <div class="card-body">
-          <div class="flex items-start justify-between">
-            <h3 class="card-title text-lg">
-              <.entity_icon
-                icon_url={group.icon_url}
-                type={:group}
-                class="w-6 h-6 text-base-content/60"
-              />
-              {group.title}
-            </h3>
-            <div class="flex flex-col items-end gap-1">
-              <%= if group.type == "public" do %>
-                <span class="badge badge-success">{gettext("Public")}</span>
-              <% else %>
-                <span class="badge badge-warning">{gettext("Private")}</span>
-              <% end %>
-              {render_group_action_button(
-                assigns
-                |> Map.put(:group, group)
-              )}
-            </div>
-          </div>
-
-          <%= if group.description && group.description != "" do %>
-            <p class="text-sm text-base-content/70 line-clamp-2">{group.description}</p>
+        <:badges>
+          <%= if group.type == "public" do %>
+            <span class="badge badge-success">{gettext("Public")}</span>
+          <% else %>
+            <span class="badge badge-warning">{gettext("Private")}</span>
           <% end %>
+          {render_group_action_button(
+            assigns
+            |> Map.put(:group, group)
+          )}
+        </:badges>
 
-          <div class="flex items-center gap-2 mt-1">
-            <span class="badge badge-ghost badge-sm text-nowrap">
-              {@member_counts[group.id] || 0} / {group.max_members} {gettext("Members")}
-            </span>
-          </div>
+        <div class="flex items-center gap-2 mt-1">
+          <span class="badge badge-ghost badge-sm text-nowrap">
+            {@member_counts[group.id] || 0} / {group.max_members} {gettext("Members")}
+          </span>
         </div>
-      </div>
+      </.entity_card>
     </div>
 
     <%= if @groups == [] do %>

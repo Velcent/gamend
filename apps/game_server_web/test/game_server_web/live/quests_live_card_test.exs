@@ -69,18 +69,29 @@ defmodule GameServerWeb.QuestsLiveCardTest do
   end
 
   test "a signed-out visitor gets no per-viewer status badge", %{conn: conn} do
-    refute page(conn) =~ "Not started",
+    html = page(conn)
+
+    refute html =~ "Not started",
            "progress belongs to a viewer; seven cards reading Not started is noise"
+
+    refute html =~ "In progress"
   end
 
-  test "a signed-in player does get one", %{conn: conn} do
+  test "a signed-in player gets one, coloured like Active/Ended elsewhere", %{conn: conn} do
     conn = log_in_user(conn, GameServer.AccountsFixtures.user_fixture())
     html = page(conn)
 
     assert html =~ "Daily check-in", "the signed-in user should still see the quests"
-    IO.puts("DBG-AFTER " <> (html |> String.split("Daily check-in") |> Enum.at(1) |> String.slice(0, 500)))
-    assert html =~ "Not started"
-    assert html =~ "badge-neutral" or html =~ "badge-success"
+
+    # Logging in fires the `login` event these quests track, so the daily is
+    # already claimable and the weekly in progress — any of the labels will do,
+    # the point is that a status badge is present and colour-coded.
+    assert html =~ "badge-success" or html =~ "badge-neutral"
+
+    assert Enum.any?(
+             ["Not started", "In progress", "Ready to claim", "Completed", "Claimed"],
+             &String.contains?(html, &1)
+           )
   end
 
   test "the cadence badge is dropped when it just repeats the category", %{conn: conn} do

@@ -106,6 +106,9 @@ defmodule GameServer.Modules.ExampleHook do
     :ok
   end
 
+  # Category is a theme ("Check-ins", "Events"), not a cadence — the reset
+  # field already says daily/weekly/monthly, and the page shows it as its own
+  # badge. Using the cadence as the category rendered every label twice.
   # ── Sample quests ─────────────────────────────────────────────────────────
   # The core wires the "login" event into the quest engine, so no unlock call
   # is needed anywhere — defining a quest is enough. Every one below tracks
@@ -138,7 +141,7 @@ defmodule GameServer.Modules.ExampleHook do
         icon_url: "/icons/calendar-days.svg",
         title: "Daily check-in",
         description: "Log in today.",
-        category: "Daily",
+        category: "Check-ins",
         reset: "daily",
         objectives: [%{event: "login", target: 1}]
       },
@@ -147,7 +150,7 @@ defmodule GameServer.Modules.ExampleHook do
         icon_url: "/icons/calendar.svg",
         title: "Weekly regular",
         description: "Log in on five different days this week.",
-        category: "Weekly",
+        category: "Check-ins",
         reset: "weekly",
         objectives: [%{event: "login", target: 5}]
       },
@@ -156,7 +159,7 @@ defmodule GameServer.Modules.ExampleHook do
         icon_url: "/icons/calendar-date-range.svg",
         title: "Monthly devotee",
         description: "Log in twenty times this month.",
-        category: "Monthly",
+        category: "Check-ins",
         reset: "monthly",
         objectives: [%{event: "login", target: 20}]
       },
@@ -167,7 +170,7 @@ defmodule GameServer.Modules.ExampleHook do
         icon_url: "/icons/arrow-path.svg",
         title: "Stop by again",
         description: "Log in. Becomes available again three days later.",
-        category: "Recurring",
+        category: "Check-ins",
         reset: "interval",
         reset_interval_days: 3,
         objectives: [%{event: "login", target: 1}]
@@ -178,7 +181,7 @@ defmodule GameServer.Modules.ExampleHook do
         icon_url: "/icons/shield-check.svg",
         title: "Loyal veteran",
         description: "Log in fifty times, once you have said hello.",
-        category: "Chained",
+        category: "Achievements",
         reset: "never",
         prerequisite_quest_key: @quest_prefix <> "first_login",
         objectives: [%{event: "login", target: 50}]

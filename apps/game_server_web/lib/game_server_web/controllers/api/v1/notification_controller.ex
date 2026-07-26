@@ -161,7 +161,12 @@ defmodule GameServerWeb.Api.V1.NotificationController do
          %Schema{
            type: :object,
            properties: %{
-             deleted: %Schema{type: :integer, description: "Number of notifications deleted"}
+             data: %Schema{
+               type: :object,
+               properties: %{
+                 deleted: %Schema{type: :integer, description: "Number of notifications deleted"}
+               }
+             }
            }
          }},
       bad_request: {"Bad request", "application/json", @error_schema},

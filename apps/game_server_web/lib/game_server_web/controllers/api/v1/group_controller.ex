@@ -819,7 +819,12 @@ defmodule GameServerWeb.Api.V1.GroupController do
          %Schema{
            type: :object,
            properties: %{
-             sent: %Schema{type: :integer, description: "Number of notifications delivered"}
+             data: %Schema{
+               type: :object,
+               properties: %{
+                 sent: %Schema{type: :integer, description: "Number of notifications delivered"}
+               }
+             }
            }
          }},
       forbidden: {"Not a member", "application/json", @error_schema},

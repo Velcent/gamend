@@ -460,6 +460,89 @@ defmodule GameServerWeb.CoreComponents do
   end
 
   @doc """
+  The grid card every entity list shares — leaderboards, tournaments, groups,
+  quests. One recipe (`bg-base-200`, icon in the title, badges stacked
+  top-right, muted two-line description) so the grids read as one family
+  instead of four dialects.
+
+      <.entity_card
+        navigate={~p"/leaderboards/\#{group.slug}"}
+        title={group.title}
+        icon_url={group.icon_url}
+        type={:leaderboard}
+        description={group.description}
+      >
+        <:badges>
+          <span class="badge badge-success">{gettext("Active")}</span>
+        </:badges>
+      </.entity_card>
+
+  With `navigate` the card is a `<.link>`; without it a `<div>`, and any
+  `phx-click`/`title` in `rest` lands on it. `class` appends to the wrapper —
+  state borders (`border-success`), `cursor-pointer`, and the like.
+  """
+  attr :title, :string, required: true
+  attr :icon_url, :string, default: nil
+  attr :icon, :atom, default: nil
+
+  attr :type, :atom,
+    required: true,
+    values: [:group, :tournament, :leaderboard, :quest, :notification]
+
+  attr :description, :string, default: nil
+  attr :navigate, :string, default: nil
+  attr :class, :any, default: nil
+  attr :rest, :global
+
+  slot :badges
+  slot :inner_block
+
+  def entity_card(%{navigate: navigate} = assigns) when is_binary(navigate) do
+    ~H"""
+    <.link navigate={@navigate} class={[card_classes(), "cursor-pointer", @class]} {@rest}>
+      {render_slot_card_body(assigns)}
+    </.link>
+    """
+  end
+
+  def entity_card(assigns) do
+    ~H"""
+    <div class={[card_classes(), @class]} {@rest}>
+      {render_slot_card_body(assigns)}
+    </div>
+    """
+  end
+
+  defp card_classes, do: "card bg-base-200 hover:bg-base-300 transition-colors"
+
+  defp render_slot_card_body(assigns) do
+    ~H"""
+    <div class="card-body">
+      <div class="flex items-start justify-between">
+        <h3 class="card-title text-lg">
+          <.entity_icon
+            icon_url={@icon_url}
+            icon={@icon}
+            type={@type}
+            class="w-6 h-6 shrink-0 text-base-content/60"
+          />
+          {@title}
+        </h3>
+        <div :if={@badges != []} class="flex flex-col items-end gap-1 shrink-0">
+          {render_slot(@badges)}
+        </div>
+      </div>
+
+      <p :if={@description not in [nil, ""]} class="text-sm text-base-content/70 line-clamp-2">
+        {@description}
+      </p>
+
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
+
+  @doc """
   An entity's icon: the uploaded `icon_url` when set, otherwise the typed
   default for its entity type (`GameServerWeb.Icons.default/1`) — so every
   group, tournament, leaderboard, quest and notification has *some* icon
@@ -594,6 +677,17 @@ defmodule GameServerWeb.CoreComponents do
 
   def timestamp(%{at: nil} = assigns) do
     ~H"{@empty}"
+  end
+
+  # A bare date (blog posts, release dates) has no instant to localize, so it
+  # is rendered as-is with no `data-local-time` — shifting it into the
+  # reader's zone would move it across midnight boundaries it never crossed.
+  def timestamp(%{at: %Date{} = at} = assigns) do
+    assigns = assign(assigns, :iso, Date.to_iso8601(at))
+
+    ~H"""
+    <time datetime={@iso} class={@class}>{Calendar.strftime(@at, "%b %d, %Y")}</time>
+    """
   end
 
   def timestamp(assigns) do

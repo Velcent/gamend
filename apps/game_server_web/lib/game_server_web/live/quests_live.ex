@@ -487,7 +487,7 @@ defmodule GameServerWeb.QuestsLive do
   defp chain_modal(assigns) do
     ~H"""
     <div
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      class="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4"
       phx-click="close_chain"
     >
       <%!-- Inner clicks land on this binding (closest phx-click wins), so they
@@ -607,146 +607,130 @@ defmodule GameServerWeb.QuestsLive do
       )
 
     ~H"""
-    <div
+    <.entity_card
+      title={@localized_title}
+      icon_url={@quest.icon_url}
+      type={:quest}
+      description={@localized_desc}
       class={[
-        "card bg-base-100 shadow-sm hover:shadow-md transition-all duration-200 border",
         @chain_position && "cursor-pointer",
         cond do
-          @claimable -> "border-success"
-          @done? -> "border-success/30"
-          true -> "border-base-300"
+          @claimable -> "border border-success"
+          @done? -> "border border-success/30"
+          true -> ""
         end
       ]}
       phx-click={@chain_position && "show_chain"}
       phx-value-key={@chain_position && @quest.key}
-      title={@chain_position && gettext("View quest chain")}
     >
-      <div class="card-body">
-        <div class="flex items-start justify-between gap-2">
-          <h3 class="card-title text-lg">
-            <%!-- A secret quest keeps its icon; only its wording is withheld. --%>
-            <.entity_icon
-              icon_url={@quest.icon_url}
-              type={:quest}
-              class="w-6 h-6 shrink-0 text-base-content/60"
+      <:badges>
+        <%!-- Progress is a property of the viewer, not the quest, so a
+              signed-out visitor gets no status badge — seven cards all
+              reading "Not started" is noise, and it crowds the title. --%>
+        <span :if={@logged_in} class={["badge text-nowrap", card_status_class(assigns)]}>
+          {card_status_label(assigns)}
+        </span>
+        <span :if={@quest.category} class="badge badge-ghost badge-sm text-nowrap">
+          {@quest.category}
+        </span>
+        <span
+          :if={@quest.reset != "never" and not same_as_category?(@quest)}
+          class="badge badge-ghost badge-sm text-nowrap"
+        >
+          {reset_label(@quest)}
+        </span>
+        <span
+          :if={@chain_position}
+          class="badge badge-ghost badge-sm gap-0.5 text-nowrap"
+          title={gettext("View quest chain")}
+        >
+          <.icon name="hero-link" class="w-3 h-3" />
+          {elem(@chain_position, 0)}/{elem(@chain_position, 1)}
+        </span>
+      </:badges>
+
+      <%!-- Rewards --%>
+      <%= if @quest.rewards != [] && not @secret? do %>
+        <div class="flex flex-wrap gap-1">
+          <span :for={reward <- @quest.rewards} class="badge badge-sm badge-ghost gap-1">
+            <.icon
+              name={
+                if reward.type == "currency",
+                  do: "hero-currency-dollar",
+                  else: "hero-cube"
+              }
+              class="w-3 h-3"
             />
-            {@localized_title}
-          </h3>
-
-          <div class="flex flex-col items-end gap-1 shrink-0">
-            <%!-- Progress is a property of the viewer, not the quest, so a
-                  signed-out visitor gets no status badge — seven cards all
-                  reading "Not started" is noise, and it crowds the title. --%>
-            <span :if={@logged_in} class={["badge text-nowrap", card_status_class(assigns)]}>
-              {card_status_label(assigns)}
-            </span>
-            <span :if={@quest.category} class="badge badge-ghost badge-sm text-nowrap">
-              {@quest.category}
-            </span>
-            <span
-              :if={@quest.reset != "never" and not same_as_category?(@quest)}
-              class="badge badge-ghost badge-sm text-nowrap"
-            >
-              {reset_label(@quest)}
-            </span>
-            <span
-              :if={@chain_position}
-              class="badge badge-ghost badge-sm gap-0.5 text-nowrap"
-              title={gettext("View quest chain")}
-            >
-              <.icon name="hero-link" class="w-3 h-3" />
-              {elem(@chain_position, 0)}/{elem(@chain_position, 1)}
-            </span>
-          </div>
+            {reward.amount} {reward.code}
+          </span>
         </div>
+      <% end %>
 
-        <p class="text-sm text-base-content/70 line-clamp-2">
-          {@localized_desc}
-        </p>
+      <%!-- Countdown --%>
+      <%= if @left do %>
+        <div class="flex items-center gap-1.5 text-base-content/40">
+          <.icon name="hero-clock" class="w-3.5 h-3.5" />
+          <span class="text-xs">
+            <%= if @quest.ends_at do %>
+              {gettext("Ends in %{time}", time: format_duration(@left))}
+            <% else %>
+              {gettext("Resets in %{time}", time: format_duration(@left))}
+            <% end %>
+          </span>
+        </div>
+      <% end %>
 
-        <%!-- Rewards --%>
-        <%= if @quest.rewards != [] && not @secret? do %>
-          <div class="flex flex-wrap gap-1">
-            <span :for={reward <- @quest.rewards} class="badge badge-sm badge-ghost gap-1">
-              <.icon
-                name={
-                  if reward.type == "currency",
-                    do: "hero-currency-dollar",
-                    else: "hero-cube"
-                }
-                class="w-3 h-3"
-              />
-              {reward.amount} {reward.code}
-            </span>
-          </div>
-        <% end %>
-
-        <%!-- Countdown --%>
-        <%= if @left do %>
-          <div class="flex items-center gap-1.5 text-base-content/40">
-            <.icon name="hero-clock" class="w-3.5 h-3.5" />
-            <span class="text-xs">
-              <%= if @quest.ends_at do %>
-                {gettext("Ends in %{time}", time: format_duration(@left))}
-              <% else %>
-                {gettext("Resets in %{time}", time: format_duration(@left))}
-              <% end %>
-            </span>
-          </div>
-        <% end %>
-
-        <%!-- Progress / claim (logged-in users only) --%>
-        <%= if @logged_in do %>
-          <div class="mt-3">
-            <%= cond do %>
-              <% @claimable -> %>
-                <button
-                  phx-click="claim"
-                  phx-value-key={@quest.key}
-                  class="btn btn-success btn-sm w-full"
-                >
-                  <.icon name="hero-gift" class="w-4 h-4" />
-                  {gettext("Claim")}
-                </button>
-              <% @claimed? -> %>
-                <div class="flex items-center gap-1.5 text-success">
-                  <.icon name="hero-check-circle-solid" class="w-4 h-4" />
-                  <span class="text-xs font-medium">
-                    {gettext("Claimed")}
-                    <span :if={@progress.completed_at} class="text-base-content/40 ml-1">
-                      <.timestamp at={@progress.completed_at} format="date" />
-                    </span>
+      <%!-- Progress / claim (logged-in users only) --%>
+      <%= if @logged_in do %>
+        <div class="mt-3">
+          <%= cond do %>
+            <% @claimable -> %>
+              <button
+                phx-click="claim"
+                phx-value-key={@quest.key}
+                class="btn btn-success btn-sm w-full"
+              >
+                <.icon name="hero-gift" class="w-4 h-4" />
+                {gettext("Claim")}
+              </button>
+            <% @claimed? -> %>
+              <div class="flex items-center gap-1.5 text-success">
+                <.icon name="hero-check-circle-solid" class="w-4 h-4" />
+                <span class="text-xs font-medium">
+                  {gettext("Claimed")}
+                  <span :if={@progress.completed_at} class="text-base-content/40 ml-1">
+                    <.timestamp at={@progress.completed_at} format="date" />
+                  </span>
+                </span>
+              </div>
+            <% @done? -> %>
+              <div class="flex items-center gap-1.5 text-success">
+                <.icon name="hero-check-circle-solid" class="w-4 h-4" />
+                <span class="text-xs font-medium">{gettext("Completed")}</span>
+              </div>
+            <% true -> %>
+              <div :for={row <- @objective_rows} class="mb-1.5 last:mb-0">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-xs text-base-content/50">{gettext("Status")}</span>
+                  <span class="text-xs font-medium text-base-content/70">
+                    {row.count} / {row.target}
                   </span>
                 </div>
-              <% @done? -> %>
-                <div class="flex items-center gap-1.5 text-success">
-                  <.icon name="hero-check-circle-solid" class="w-4 h-4" />
-                  <span class="text-xs font-medium">{gettext("Completed")}</span>
-                </div>
-              <% true -> %>
-                <div :for={row <- @objective_rows} class="mb-1.5 last:mb-0">
-                  <div class="flex items-center justify-between mb-1">
-                    <span class="text-xs text-base-content/50">{gettext("Status")}</span>
-                    <span class="text-xs font-medium text-base-content/70">
-                      {row.count} / {row.target}
-                    </span>
-                  </div>
-                  <div class="w-full bg-base-300 rounded-full h-2 overflow-hidden">
-                    <div
-                      class={[
-                        "h-2 rounded-full transition-all duration-500",
-                        if(row.count > 0, do: "bg-primary", else: "bg-base-300")
-                      ]}
-                      style={"width: #{trunc(row.count / max(row.target, 1) * 100)}%"}
-                    >
-                    </div>
+                <div class="w-full bg-base-300 rounded-full h-2 overflow-hidden">
+                  <div
+                    class={[
+                      "h-2 rounded-full transition-all duration-500",
+                      if(row.count > 0, do: "bg-primary", else: "bg-base-300")
+                    ]}
+                    style={"width: #{trunc(row.count / max(row.target, 1) * 100)}%"}
+                  >
                   </div>
                 </div>
-            <% end %>
-          </div>
-        <% end %>
-      </div>
-    </div>
+              </div>
+          <% end %>
+        </div>
+      <% end %>
+    </.entity_card>
     """
   end
 end

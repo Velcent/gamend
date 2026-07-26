@@ -603,4 +603,25 @@ defmodule GameServer.Quests do
     end
   end
 
+
+  @doc ~S"""
+    The categories that actually have something behind them for this viewer.
+    
+    Derived from the same visibility rule as `list_user_quests/2` rather than
+    from every definition: a chain's later tiers are hidden until unlocked, so
+    listing their category gives a tab that opens onto nothing. Pass `nil` for
+    the signed-out catalog.
+    
+  """
+  @spec visible_categories(user_id() | nil) :: [String.t()]
+  def visible_categories(_user_id) do
+    case Application.get_env(:game_server_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        ""
+
+      _ ->
+        raise "GameServer.Quests.visible_categories/1 is a stub - only available at runtime on GameServer"
+    end
+  end
+
 end

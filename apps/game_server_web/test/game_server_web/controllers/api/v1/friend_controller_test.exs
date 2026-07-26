@@ -83,8 +83,8 @@ defmodule GameServerWeb.Api.V1.FriendControllerTest do
     # meta total counts and pages should be present
     assert resp["meta"]["incoming"]["total_count"] == 1
     assert resp["meta"]["outgoing"]["total_count"] == 0
-    assert resp["meta"]["total_pages"]["incoming"] == 1
-    assert resp["meta"]["total_pages"]["outgoing"] == 0
+    assert resp["meta"]["incoming"]["total_pages"] == 1
+    assert resp["meta"]["outgoing"]["total_pages"] == 0
   end
 
   test "DELETE cancels pending and deletes accepted", %{conn: conn} do

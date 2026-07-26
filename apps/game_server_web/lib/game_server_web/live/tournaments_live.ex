@@ -460,41 +460,25 @@ defmodule GameServerWeb.TournamentsLive do
   defp group_list(assigns) do
     ~H"""
     <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      <.link
+      <.entity_card
         :for={group <- @groups}
         navigate={~p"/tournaments/#{group.slug}"}
-        class="card bg-base-200 hover:bg-base-300 transition-colors cursor-pointer"
+        title={group.title}
+        icon_url={group.icon_url}
+        type={:tournament}
+        description={group.description}
       >
-        <div class="card-body">
-          <div class="flex items-start justify-between">
-            <h3 class="card-title text-lg">
-              <.entity_icon
-                icon_url={group.icon_url}
-                type={:tournament}
-                class="w-6 h-6 text-base-content/60"
-              />
-              {group.title}
-            </h3>
-            <div class="flex flex-col items-end gap-1">
-              <.state_badge state={group.state} />
-              <span :if={group.edition_count > 1} class="badge badge-ghost badge-sm text-nowrap">
-                {group.edition_count}
-              </span>
-            </div>
-          </div>
+        <:badges>
+          <.state_badge state={group.state} />
+          <span :if={group.edition_count > 1} class="badge badge-ghost badge-sm text-nowrap">
+            {group.edition_count}
+          </span>
+        </:badges>
 
-          <p
-            :if={group.description not in [nil, ""]}
-            class="text-sm text-base-content/70 line-clamp-2"
-          >
-            {group.description}
-          </p>
-
-          <div class="text-sm text-base-content/60">
-            {gettext("Players")}: {group.entry_count}
-          </div>
+        <div class="text-sm text-base-content/60">
+          {gettext("Players")}: {group.entry_count}
         </div>
-      </.link>
+      </.entity_card>
     </div>
 
     <div :if={@groups == []} class="text-center py-12 text-base-content/60">
