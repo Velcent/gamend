@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.1">
-    <meta name="project" content="game_server_core v1.0.1075">
+    <meta name="project" content="game_server_core v1.0.1076">
 
 
-    <title>GameServer.ApiConventions — game_server_core v1.0.1075</title>
+    <title>GameServer.ApiConventions — game_server_core v1.0.1076</title>
 
     <link rel="stylesheet" href="dist/html-elixir-YJO4MOOW.css" />
 
-    <script defer src="dist/sidebar_items-65CB7F35.js"></script>
+    <script defer src="dist/sidebar_items-C8081AB0.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-YU4BZFVS.js"></script>
 
@@ -37,7 +37,7 @@
 game_server_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1075
+          v1.0.1076
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ game_server_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">GameServer.<wbr>ApiConventions</span> 
-      <small class="app-vsn" translate="no">(game_server_core v1.0.1075)</small>
+      <small class="app-vsn" translate="no">(game_server_core v1.0.1076)</small>
 
     </h1>
 
@@ -151,6 +151,16 @@ A convention nothing enforces is a suggestion.</p>
   <h3>
     <a href="#functions">Functions</a>
   </h3>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#declared_route_paths/0" data-no-tooltip="" translate="no">declared_route_paths()</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Every path the compiled router serves, <code class="inline">:params</code> as <code class="inline">{}</code>.</p></div>
+
+    </div>
 
     <div class="summary-row">
       <div class="summary-signature">
@@ -233,6 +243,36 @@ the changeset's required list.</p></div>
     </h2>
 
     <div class="functions-list">
+<section class="detail" id="declared_route_paths/0">
+
+  <div class="detail-header">
+    <a href="#declared_route_paths/0" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">declared_route_paths()</h1>
+
+
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/api_conventions.ex#L290" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> declared_route_paths() :: [<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()]</pre>
+
+      </div>
+
+<p>Every path the compiled router serves, <code class="inline">:params</code> as <code class="inline">{}</code>.</p><p>Read from <a href="https://hexdocs.pm/phoenix/1.8.7/Phoenix.Router.html#routes/1"><code class="inline">Phoenix.Router.routes/1</code></a> rather than parsed from source — routes
+live inside <code class="inline">scope</code> blocks, so the literal strings in the source are
+suffixes, not full paths.</p>
+  </section>
+</section>
 <section class="detail" id="nullable_schema_fields/0">
 
   <div class="detail-header">
@@ -243,7 +283,7 @@ the changeset's required list.</p></div>
       <h1 class="signature" translate="no">nullable_schema_fields()</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/api_conventions.ex#L210" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/api_conventions.ex#L312" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -272,7 +312,7 @@ the changeset's required list.</p>
       <h1 class="signature" translate="no">violations()</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/api_conventions.ex#L34" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/api_conventions.ex#L47" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -299,9 +339,9 @@ the changeset's required list.</p>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/game_server_core/1.0.1075">Hex Package</a>
+              <a href="https://hex.pm/packages/game_server_core/1.0.1076">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/game_server_core/1.0.1075">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/game_server_core/1.0.1076">Hex Preview</a>
 
             </span>
 

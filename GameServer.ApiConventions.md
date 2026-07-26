@@ -25,6 +25,18 @@ A convention nothing enforces is a suggestion.
 }
 ```
 
+# `declared_route_paths`
+
+```elixir
+@spec declared_route_paths() :: [String.t()]
+```
+
+Every path the compiled router serves, `:params` as `{}`.
+
+Read from `Phoenix.Router.routes/1` rather than parsed from source — routes
+live inside `scope` blocks, so the literal strings in the source are
+suffixes, not full paths.
+
 # `nullable_schema_fields`
 
 ```elixir
