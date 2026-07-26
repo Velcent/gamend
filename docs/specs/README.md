@@ -71,6 +71,11 @@ what the rest depend on.
 
 ## Unscheduled
 
+- [i18n.md](i18n.md) — **One place for every translatable string.** Theme
+  config collapses from one JSON per locale to one config plus a `theme` PO
+  domain; quest/leaderboard/tournament titles translate at render via
+  `dgettext_noop` + `dgettext`, so code-defined content is translatable and
+  admin-typed content degrades to its source language.
 - [settings.md](settings.md) — **Settings: one declared config surface.** One
   provider macro core, hosts and plugins register into; env var names derived
   from the declaration; required/optional enforced at boot; every variable we
