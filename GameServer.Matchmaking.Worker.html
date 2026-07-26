@@ -5,10 +5,10 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.1">
-    <meta name="project" content="game_server_core v1.0.1076">
+    <meta name="project" content="game_server_core v1.0.1077">
 
 
-    <title>GameServer.Matchmaking.Worker — game_server_core v1.0.1076</title>
+    <title>GameServer.Matchmaking.Worker — game_server_core v1.0.1077</title>
 
     <link rel="stylesheet" href="dist/html-elixir-YJO4MOOW.css" />
 
@@ -37,7 +37,7 @@
 game_server_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1076
+          v1.0.1077
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ game_server_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">GameServer.<wbr>Matchmaking.<wbr>Worker</span> 
-      <small class="app-vsn" translate="no">(game_server_core v1.0.1076)</small>
+      <small class="app-vsn" translate="no">(game_server_core v1.0.1077)</small>
 
     </h1>
 
@@ -119,7 +119,10 @@ cluster-wide via <a href="GameServer.Lock.html"><code class="inline">GameServer.
 and a node joining or leaving never breaks supervision (a <code class="inline">:global</code> name
 would fail the second node's supervisor start with <code class="inline">:already_started</code>).</p><p>Each tick, inside the lock: prune tickets of users that went offline, then
 group the queued tickets by <code class="inline">match_params</code> and create a hidden lobby per
-formed match. Broadcasts go out after the lock's transaction commits.</p>
+formed match. Broadcasts go out after the lock's transaction commits.</p><pre><code class="makeup elixir" translate="no"><span class="n">config</span><span class="w"> </span><span class="ss">:game_server_core</span><span class="p">,</span><span class="w"> </span><span class="nc">GameServer.Matchmaking.Worker</span><span class="p">,</span><span class="w">
+  </span><span class="ss">enabled</span><span class="p">:</span><span class="w"> </span><span class="no">true</span><span class="w">               </span><span class="c1"># set false to leave the worker idle</span></code></pre><p>Disabled in test configs, like the other periodic workers: the tick owns no
+sandbox connection, so it only produces &quot;database is locked&quot; noise. Tests
+call <a href="#sweep/0"><code class="inline">sweep/0</code></a> directly.</p>
     </section>
 
 </div>
@@ -189,7 +192,7 @@ demand without waiting for the timer.</p></div>
       <h1 class="signature" translate="no">child_spec(init_arg)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/matchmaking/worker.ex#L15" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/matchmaking/worker.ex#L22" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -211,7 +214,7 @@ demand without waiting for the timer.</p></div>
       <h1 class="signature" translate="no">start_link(opts)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/matchmaking/worker.ex#L25" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/matchmaking/worker.ex#L32" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -233,7 +236,7 @@ demand without waiting for the timer.</p></div>
       <h1 class="signature" translate="no">sweep()</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/matchmaking/worker.ex#L61" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/matchmaking/worker.ex#L72" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -265,9 +268,9 @@ sweepers, and a failed lobby simply requeues them for the next tick.</p><p>Retur
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/game_server_core/1.0.1076">Hex Package</a>
+              <a href="https://hex.pm/packages/game_server_core/1.0.1077">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/game_server_core/1.0.1076">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/game_server_core/1.0.1077">Hex Preview</a>
 
             </span>
 

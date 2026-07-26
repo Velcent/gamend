@@ -12,6 +12,13 @@ Each tick, inside the lock: prune tickets of users that went offline, then
 group the queued tickets by `match_params` and create a hidden lobby per
 formed match. Broadcasts go out after the lock's transaction commits.
 
+    config :game_server_core, GameServer.Matchmaking.Worker,
+      enabled: true               # set false to leave the worker idle
+
+Disabled in test configs, like the other periodic workers: the tick owns no
+sandbox connection, so it only produces "database is locked" noise. Tests
+call `sweep/0` directly.
+
 # `child_spec`
 
 Returns a specification to start this module under a supervisor.
