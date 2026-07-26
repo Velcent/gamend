@@ -11,7 +11,13 @@ defmodule Mix.Tasks.Gamend.Settings.Guide do
   Sibling of `mix gamend.settings.env_example`, for the same reason: the
   guides used to hand-list environment variables, and every rename left them
   describing variables the server no longer read. A declared setting is now
-  documented for players of the docs site the moment it exists.
+  documented for readers of the docs site the moment it exists.
+
+  **Only for hosts that have a docs site.** When `priv/docs/60-operations`
+  does not exist the task says so and does nothing, including under `--check`
+  — a game built on this server has its own docs, or none, and should not have
+  a `priv/docs` tree conjured for it. Pass `-o PATH` to write somewhere else
+  deliberately; an explicit path is always honoured.
   """
 
   use Mix.Task
@@ -28,14 +34,22 @@ defmodule Mix.Tasks.Gamend.Settings.Guide do
       OptionParser.parse!(argv, strict: [check: :boolean, output: :string], aliases: [o: :output])
 
     path = Keyword.get(opts, :output, @default_path)
+    explicit? = Keyword.has_key?(opts, :output)
     generated = render()
 
-    if Keyword.get(opts, :check, false) do
-      check(path, generated)
-    else
-      File.mkdir_p!(Path.dirname(path))
-      File.write!(path, generated)
-      Mix.shell().info("wrote #{path} (#{length(Settings.all())} settings)")
+    cond do
+      not explicit? and not File.dir?(Path.dirname(path)) ->
+        # A host without a docs site has nowhere to put this. Skipping beats
+        # conjuring a priv/docs tree it never asked for — game_server ships the
+        # guide, a game built on it does not have to.
+        Mix.shell().info("no #{Path.dirname(path)} directory - skipping the settings guide")
+
+      Keyword.get(opts, :check, false) ->
+        check(path, generated)
+
+      true ->
+        File.write!(path, generated)
+        Mix.shell().info("wrote #{path} (#{length(Settings.all())} settings)")
     end
   end
 

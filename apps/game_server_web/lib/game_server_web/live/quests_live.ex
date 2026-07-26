@@ -237,7 +237,17 @@ defmodule GameServerWeb.QuestsLive do
   end
 
   defp category_label(nil), do: gettext("All")
-  defp category_label(category), do: category
+
+  # Categories are free-form host labels, so only the first grapheme is
+  # upcased — `String.capitalize/1` would downcase the rest and turn "PvP"
+  # into "Pvp". Anything beyond that (plurals especially) is the host's to
+  # write, since "story" cannot be pluralised mechanically.
+  defp category_label(category) do
+    case String.next_grapheme(category) do
+      {first, rest} -> String.upcase(first) <> rest
+      nil -> category
+    end
+  end
 
   defp reset_label(%Quest{reset: "daily"}), do: gettext("Daily")
   defp reset_label(%Quest{reset: "weekly"}), do: gettext("Weekly")

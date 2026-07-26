@@ -31,7 +31,7 @@ defmodule GameServer.Modules.ExampleHook do
   # ignore leaderboards/tournaments belonging to the rest of the game.
   @login_leaderboard "example_login_count"
   @tournament_slug "example-weekly-cup"
-  @first_login_quest "example_first_login"
+  @quest_prefix "example_"
   @group_title "Example Guild"
   @welcome_kv_key "example_welcome"
 
@@ -44,7 +44,7 @@ defmodule GameServer.Modules.ExampleHook do
     # groups need a creator and there may be no users yet at boot.
     ensure_login_leaderboard()
     ensure_weekly_cup()
-    ensure_first_login_quest()
+    ensure_quests()
     ensure_welcome_kv()
 
     [
@@ -94,21 +94,109 @@ defmodule GameServer.Modules.ExampleHook do
     :ok
   end
 
-  # ── Sample quest: an achievement earned on first login ────────────────────
-  # The core wires the "login" event into the quest engine, so no unlock
-  # call is needed anywhere — defining the quest is enough.
+  # ── Sample quests ─────────────────────────────────────────────────────────
+  # The core wires the "login" event into the quest engine, so no unlock call
+  # is needed anywhere — defining a quest is enough. Every one below tracks
+  # logins so they all make visible progress from a single action.
 
-  defp ensure_first_login_quest do
-    if is_nil(GameServer.Quests.get_quest_by_key(@first_login_quest)) do
-      GameServer.Quests.create_quest(%{
-        key: @first_login_quest,
+  # One quest of every shape the engine supports, so a fresh deployment shows
+  # the whole feature surface rather than a single row: each reset cycle, plus
+  # the orthogonal flags (auto-claim, chained, hidden, time-windowed).
+  #
+  # `category` is a free-form display label, so it is written the way it should
+  # read on the page. It used to be passed as `kind:`, which is not a Quest
+  # field — the changeset dropped it silently and every quest here was created
+  # with no category at all.
+  defp ensure_quests do
+    now = DateTime.utc_now(:second)
+
+    [
+      %{
+        key: "first_login",
         title: "Welcome aboard",
         description: "Log in for the first time.",
-        kind: "achievement",
+        category: "Achievements",
+        reset: "never",
         auto_claim: true,
         objectives: [%{event: "login", target: 1}]
-      })
-    end
+      },
+      %{
+        key: "daily_login",
+        title: "Daily check-in",
+        description: "Log in today.",
+        category: "Daily",
+        reset: "daily",
+        objectives: [%{event: "login", target: 1}]
+      },
+      %{
+        key: "weekly_regular",
+        title: "Weekly regular",
+        description: "Log in on five different days this week.",
+        category: "Weekly",
+        reset: "weekly",
+        objectives: [%{event: "login", target: 5}]
+      },
+      %{
+        key: "monthly_devotee",
+        title: "Monthly devotee",
+        description: "Log in twenty times this month.",
+        category: "Monthly",
+        reset: "monthly",
+        objectives: [%{event: "login", target: 20}]
+      },
+      # `interval` restarts a fixed number of days after each completion,
+      # rather than on a calendar boundary.
+      %{
+        key: "recurring_visit",
+        title: "Stop by again",
+        description: "Log in. Becomes available again three days later.",
+        category: "Recurring",
+        reset: "interval",
+        reset_interval_days: 3,
+        objectives: [%{event: "login", target: 1}]
+      },
+      # Chained: stays locked until its prerequisite is completed.
+      %{
+        key: "loyal_veteran",
+        title: "Loyal veteran",
+        description: "Log in fifty times, once you have said hello.",
+        category: "Chained",
+        reset: "never",
+        prerequisite_quest_key: @quest_prefix <> "first_login",
+        objectives: [%{event: "login", target: 50}]
+      },
+      # Hidden quests stay a teaser in the catalog until they are earned.
+      %{
+        key: "night_owl",
+        title: "Night owl",
+        description: "Some things are found rather than announced.",
+        category: "Secrets",
+        reset: "never",
+        hidden: true,
+        objectives: [%{event: "login", target: 100}]
+      },
+      # A window is orthogonal to the reset cycle: this is a daily that only
+      # runs while the event is on.
+      %{
+        key: "launch_festival",
+        title: "Launch festival",
+        description: "A daily that only counts while the festival is running.",
+        category: "Events",
+        reset: "daily",
+        starts_at: DateTime.add(now, -1, :day),
+        ends_at: DateTime.add(now, 30, :day),
+        objectives: [%{event: "login", target: 1}]
+      }
+    ]
+    |> Enum.each(fn attrs ->
+      key = @quest_prefix <> attrs.key
+
+      # Created only when missing, so restarts and plugin reloads are safe and
+      # a host's own edits are never overwritten.
+      if is_nil(GameServer.Quests.get_quest_by_key(key)) do
+        GameServer.Quests.create_quest(Map.put(attrs, :key, key))
+      end
+    end)
 
     :ok
   end
