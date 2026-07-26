@@ -25,7 +25,7 @@ defmodule GameServerWeb.Api.V1.Admin.PushController do
       token: %Schema{type: :string},
       platform: %Schema{type: :string, enum: ["android", "ios", "web"]},
       provider: %Schema{type: :string, enum: ["fcm", "apns"]},
-      device_id: %Schema{type: :string, nullable: true},
+      device_id: %Schema{type: :string},
       disabled_at: %Schema{type: :string, format: :"date-time", nullable: true},
       last_used_at: %Schema{type: :string, format: :"date-time", nullable: true},
       inserted_at: %Schema{type: :string, format: :"date-time"}
@@ -168,8 +168,8 @@ defmodule GameServerWeb.Api.V1.Admin.PushController do
       user_name: user_name(token),
       token: token.token,
       platform: token.platform,
-      provider: token.provider,
-      device_id: token.device_id,
+      provider: token.provider || "",
+      device_id: token.device_id || "",
       disabled_at: token.disabled_at,
       last_used_at: token.last_used_at,
       inserted_at: token.inserted_at

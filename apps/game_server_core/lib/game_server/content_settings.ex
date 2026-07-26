@@ -10,7 +10,8 @@ defmodule GameServer.ContentSettings do
     label: "Content & plugins"
 
   setting(:theme_config, :string,
-    doc: "Base path of the theme JSON. Only locale-suffixed files are loaded (.en.json, ...)."
+    doc:
+      "Path to the theme JSON. A single file serves every locale; its text is translated via the gettext `theme` domain."
   )
 
   setting(:plugins_dir, :string,

@@ -643,7 +643,7 @@ defmodule GameServerWeb.AdminLive.Config do
                       <% end %>
                     </td>
                     <td class="font-mono text-sm break-all whitespace-normal">
-                      <.link navigate={~p"/admin/rate-limiting"} class="link link-primary text-sm">
+                      <.link navigate={~p"/admin/rate_limiting"} class="link link-primary text-sm">
                         Manage IP Bans →
                       </.link>
                     </td>

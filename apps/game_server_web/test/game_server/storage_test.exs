@@ -79,6 +79,11 @@ defmodule GameServer.StorageTest do
                "public, max-age=31536000, immutable"
     end
 
+    test "entity icons do too — build_key/3 makes their URL content-unique" do
+      assert Storage.cache_control("icons/groups/group-1/abc.png") ==
+               "public, max-age=31536000, immutable"
+    end
+
     test "everything else revalidates by default" do
       assert Storage.cache_control("uploads/report.pdf") == "public, max-age=0, must-revalidate"
     end

@@ -338,7 +338,7 @@ defmodule GameServerWeb.AuthController do
 
     conn
     |> put_flash(:error, msg)
-    |> redirect(to: ~p"/users/log-in")
+    |> redirect(to: ~p"/users/log_in")
   end
 
   defp oauth_provider(provider) do
@@ -603,7 +603,7 @@ defmodule GameServerWeb.AuthController do
                 :error,
                 gettext("Your account is pending activation.")
               )
-              |> redirect(to: ~p"/users/log-in")
+              |> redirect(to: ~p"/users/log_in")
             end
 
           {:error, changeset} ->
@@ -615,7 +615,7 @@ defmodule GameServerWeb.AuthController do
 
             conn
             |> put_flash(:error, gettext("Failed"))
-            |> redirect(to: ~p"/users/log-in")
+            |> redirect(to: ~p"/users/log_in")
         end
     end
   end
@@ -856,7 +856,7 @@ defmodule GameServerWeb.AuthController do
 
     conn
     |> put_flash(:error, gettext("Failed"))
-    |> redirect(to: ~p"/users/log-in")
+    |> redirect(to: ~p"/users/log_in")
   end
 
   defp handle_oauth_state_success(conn, provider, user_params, state) do

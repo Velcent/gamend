@@ -70,7 +70,7 @@ Live values, and where each one came from, are on the
 | `GAMEND_CONTENT_APP_VERSION` | string | - | Version reported in the OpenAPI spec and admin pages. |
 | `GAMEND_CONTENT_GEOIP_DB_PATH` | string | - | MaxMind mmdb file. Defaults to data/GeoLite2-Country.mmdb when present. |
 | `GAMEND_CONTENT_PLUGINS_DIR` | string | `"modules/plugins"` | Directory containing OTP hook plugins. |
-| `GAMEND_CONTENT_THEME_CONFIG` | string | - | Base path of the theme JSON. Only locale-suffixed files are loaded (.en.json, ...). |
+| `GAMEND_CONTENT_THEME_CONFIG` | string | - | Path to the theme JSON. A single file serves every locale; its text is translated via the gettext `theme` domain. |
 
 
 ## Database
@@ -193,7 +193,7 @@ Live values, and where each one came from, are on the
 
 | Variable | Type | Default | Notes |
 |---|---|---|---|
-| `GAMEND_LOBBY_SNAPSHOTS_ENABLED` | boolean | `false` | Record a durable per-run snapshot of lobby state, browsable at /admin/lobby-snapshots. |
+| `GAMEND_LOBBY_SNAPSHOTS_ENABLED` | boolean | `false` | Record a durable per-run snapshot of lobby state, browsable at /admin/lobby_snapshots. |
 | `GAMEND_LOBBY_SNAPSHOTS_MAX_KV_ENTRIES` | integer | `200` | Cap on KV entries captured per snapshot. |
 | `GAMEND_LOBBY_SNAPSHOTS_USER_KV_KEYS` | list | `` | User-scoped KV keys to capture. Empty captures none — the widest exposure in a snapshot. |
 

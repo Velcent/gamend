@@ -57,34 +57,10 @@ config :phoenix_live_view,
   debug_attributes: true,
   enable_expensive_runtime_checks: true
 
-if System.get_env("SMTP_PASSWORD") do
-  config :game_server_core, GameServer.Mailer,
-    adapter: Swoosh.Adapters.SMTP,
-    relay: System.get_env("SMTP_RELAY"),
-    username: System.get_env("SMTP_USERNAME"),
-    password: System.get_env("SMTP_PASSWORD"),
-    port: String.to_integer(System.get_env("SMTP_PORT") || "587"),
-    tls: String.to_existing_atom(System.get_env("SMTP_TLS") || "never"),
-    ssl: String.to_existing_atom(System.get_env("SMTP_SSL") || "true"),
-    auth: :always,
-    no_mx_lookups: false,
-    retries: 2,
-    sockopts: [
-      versions: [:"tlsv1.2", :"tlsv1.3"],
-      verify: :verify_peer,
-      cacerts: :public_key.cacerts_get(),
-      depth: 3,
-      customize_hostname_check: [
-        match_fun: :public_key.pkix_verify_hostname_match_fun(:https)
-      ],
-      server_name_indication:
-        if(sni = System.get_env("SMTP_SNI"), do: String.to_charlist(sni), else: :disable)
-    ]
-
-  config :swoosh, :api_client, Swoosh.ApiClient.Req
-else
-  config :swoosh, :api_client, false
-end
+# The mailer is configured by the host (config/host_runtime.exs) from the
+# declared GameServer.Mail settings. This app only needs the local adapter's
+# api_client off when running standalone.
+config :swoosh, :api_client, false
 
 config :game_server_web, GameServerWeb.Auth.Guardian,
   issuer: "game_server",

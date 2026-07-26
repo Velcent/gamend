@@ -19,7 +19,7 @@ defmodule GameServerWeb.Api.V1.Admin.ReadyCheckController do
       lobby_id: %Schema{type: :string, format: :uuid, nullable: true},
       deadline: %Schema{type: :string, format: "date-time", nullable: true},
       opened_by: %Schema{type: :string, format: :uuid, nullable: true},
-      reason: %Schema{type: :string, nullable: true},
+      reason: %Schema{type: :string},
       resolved_at: %Schema{type: :string, format: "date-time", nullable: true},
       participants: %Schema{type: :array, items: %Schema{type: :object}}
     }
@@ -144,7 +144,7 @@ defmodule GameServerWeb.Api.V1.Admin.ReadyCheckController do
       lobby_id: check.lobby_id,
       deadline: check.deadline,
       opened_by: check.opened_by,
-      reason: check.reason,
+      reason: check.reason || "",
       resolved_at: check.resolved_at,
       inserted_at: check.inserted_at,
       participants: Enum.map(check.participants, &serialize_participant/1)

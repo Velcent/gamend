@@ -340,6 +340,7 @@ defmodule GameServer.Leaderboards do
       slug: slug,
       title: latest.title,
       description: latest.description,
+      icon_url: latest.icon_url,
       metadata: latest.metadata,
       active_id: active && active.id,
       latest_id: latest.id,

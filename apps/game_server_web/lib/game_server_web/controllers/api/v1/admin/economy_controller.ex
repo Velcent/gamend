@@ -109,7 +109,7 @@ defmodule GameServerWeb.Api.V1.Admin.EconomyController do
           %{
             id: e.id,
             user_id: e.user_id,
-            currency: e.currency,
+            currency: e.currency || "",
             delta: e.delta,
             balance_after: e.balance_after,
             reason: e.reason,

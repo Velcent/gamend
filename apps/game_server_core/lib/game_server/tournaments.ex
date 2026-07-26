@@ -212,6 +212,7 @@ defmodule GameServer.Tournaments do
       slug: slug,
       title: latest.title,
       description: latest.description,
+      icon_url: latest.icon_url,
       state: (current || latest).state,
       current_id: (current || latest).id,
       latest_id: latest.id,

@@ -34,7 +34,7 @@ A bracket side is an entry, and an entry is a leader (one user). For team tourna
 | DELETE /api/v1/tournaments/:id/join | Withdraw before the draw (before_tournament_leave hook can veto) |
 | GET /api/v1/tournaments/:id/standings | Placements, wins, champions |
 | GET /api/v1/tournaments/:id/bracket | Brackets, entries and matches |
-| GET /api/v1/tournaments/:id/my-match | The caller's current unresolved match, if any |
+| GET /api/v1/tournaments/:id/my_match | The caller's current unresolved match, if any |
 
 Match resolution has no public endpoint — verdicts are server-side (hooks); expose your own call_hook RPC if your flow needs a client trigger. Entry leaders receive tournament_updated, tournament_match_ready, tournament_match_resolved and tournament_finished on their user channel (see WebSocket Channels).
 
@@ -79,6 +79,11 @@ The Tournaments admin page covers create/edit (cron recurrence included), live b
 Admin endpoints under `/api/v1/admin/tournaments` cover create, update, delete,
 cancel, draw, finish and match resolution - see [/api/docs](/api/docs).
 Resolving a match takes `winner_entry_id`; omit it for a double forfeit.
+
+Tournaments carry an optional `icon_url` (set it in the admin form or via the
+API; upload the image through the admin Storage page to host it on the
+server). When unset, the web UI shows the shared default tournament icon and
+the API returns `""` so game clients can apply their own.
 
 ## Reference
 

@@ -11,15 +11,15 @@ Deliver push notifications to your players' devices — the one channel that rea
 Clients obtain a token from their platform (FCM registration token or APNs device token) and register it against the authenticated user. Passing a stable device_id makes re-registration rotate the token in place instead of accumulating rows; a token re-registered by another account moves to that account. Live devices per user are capped by GAMEND_LIMITS_MAX_PUSH_TOKENS_PER_USER (default 20).
 
 ```text
-POST /api/v1/me/push-tokens
+POST /api/v1/me/push_tokens
 token": "<platform token>", "platform": "android", "device_id": "<stable id>
 
 # platform: "android" | "ios" | "web"
 # provider defaults from the platform: ios → "apns", otherwise "fcm".
 # An iOS app using Firebase instead of APNs-direct registers provider "fcm".
 
-GET    /api/v1/me/push-tokens        # list my devices (paginated)
-DELETE /api/v1/me/push-tokens/:id    # unregister (e.g. on logout)
+GET    /api/v1/me/push_tokens        # list my devices (paginated)
+DELETE /api/v1/me/push_tokens/:id    # unregister (e.g. on logout)
 ```
 
 ### FCM setup (Android / Web)

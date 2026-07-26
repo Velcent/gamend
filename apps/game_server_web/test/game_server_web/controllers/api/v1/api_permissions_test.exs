@@ -39,7 +39,7 @@ defmodule GameServerWeb.Api.V1.ApiPermissionsTest do
       # Friends
       {:post, "/api/v1/friends"},
       {:get, "/api/v1/me/friends"},
-      {:get, "/api/v1/me/friend-requests"},
+      {:get, "/api/v1/me/friend_requests"},
       {:get, "/api/v1/me/blocked"},
       {:post, "/api/v1/friends/1/accept"},
       {:post, "/api/v1/friends/1/reject"},

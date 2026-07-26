@@ -110,6 +110,8 @@ defmodule GameServerHost.MixProject do
           # --check form so a bypassed precommit still cannot ship one.
           "gamend.settings.env_example",
           "gamend.settings.guide",
+          # Theme text lives in data, so `gettext.extract` cannot see it.
+          "gamend.theme.extract",
           "test",
           "credo --strict"
         ] ++

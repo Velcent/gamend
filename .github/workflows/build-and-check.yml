@@ -238,6 +238,7 @@ jobs:
         run: |
           MIX_ENV=dev mix gamend.settings.env_example --check
           MIX_ENV=dev mix gamend.settings.guide --check
+          MIX_ENV=dev mix gamend.theme.extract --check
 
       - name: Audit dependencies for known vulnerabilities
         run: MIX_ENV=dev mix deps.audit

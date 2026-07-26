@@ -18,7 +18,11 @@ defmodule GameServerWeb.Api.V1.LeaderboardController do
         description: "Human-readable identifier (reusable across seasons)"
       },
       title: %Schema{type: :string, description: "Display title"},
-      description: %Schema{type: :string, description: "Description", nullable: true},
+      description: %Schema{type: :string, description: "Description"},
+      icon_url: %Schema{
+        type: :string,
+        description: "Icon URL; empty when unset (the client applies its own default)"
+      },
       sort_order: %Schema{
         type: :string,
         enum: ["desc", "asc"],
@@ -506,6 +510,7 @@ defmodule GameServerWeb.Api.V1.LeaderboardController do
       slug: lb.slug,
       title: lb.title,
       description: lb.description || "",
+      icon_url: lb.icon_url || "",
       sort_order: to_string(lb.sort_order),
       operator: to_string(lb.operator),
       starts_at: lb.starts_at,

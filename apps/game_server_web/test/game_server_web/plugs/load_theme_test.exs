@@ -62,10 +62,8 @@ defmodule GameServerWeb.Plugs.LoadThemeTest do
     base =
       Path.join(System.tmp_dir!(), "theme_plug_vals_#{System.unique_integer([:positive])}.json")
 
-    en_path = String.trim_trailing(base, ".json") <> ".en.json"
-
     File.write!(
-      en_path,
+      base,
       Jason.encode!(%{"title" => "Test Title", "tagline" => "Test Tag", "logo" => "/logo.png"})
     )
 
@@ -78,7 +76,7 @@ defmodule GameServerWeb.Plugs.LoadThemeTest do
 
     JSONConfig.reload()
 
-    on_exit(fn -> File.rm(en_path) end)
+    on_exit(fn -> File.rm(base) end)
 
     conn = LoadTheme.call(conn, [])
 
@@ -114,35 +112,27 @@ defmodule GameServerWeb.Plugs.LoadThemeTest do
     assert conn.assigns[:theme]["logo"] == "/images/logo.png"
   end
 
-  test "prefers locale-specific GAMEND_CONTENT_THEME_CONFIG when locale is assigned", %{
-    conn: conn
-  } do
-    base =
-      Path.join(System.tmp_dir!(), "theme_test_plug_#{System.unique_integer([:positive])}.json")
-
-    en_path = String.trim_trailing(base, ".json") <> ".en.json"
-    es_path = String.trim_trailing(base, ".json") <> ".es.json"
-
-    File.write!(en_path, Jason.encode!(%{"title" => "English Title", "tagline" => "EN"}))
-    File.write!(es_path, Jason.encode!(%{"title" => "Titulo ES", "tagline" => "ES"}))
-
-    GameServer.SettingsHelpers.put(
-      :game_server_core,
-      GameServer.ContentSettings,
-      :theme_config,
-      base
-    )
-
-    JSONConfig.reload()
+  # There is one config file now, so the locale can only reach the text through
+  # gettext — which means the plug's whole job here is to pass it on. The
+  # translation itself is the host's (its gettext tree owns the `theme` domain,
+  # so this app's test env cannot resolve it); see the host suite for that.
+  test "hands the request locale to the theme provider", %{conn: conn} do
+    orig_mod = Application.get_env(:game_server_web, :theme_module)
+    Application.put_env(:game_server_web, :theme_module, __MODULE__.LocaleEchoMock)
 
     on_exit(fn ->
-      File.rm(en_path)
-      File.rm(es_path)
+      if orig_mod,
+        do: Application.put_env(:game_server_web, :theme_module, orig_mod),
+        else: Application.delete_env(:game_server_web, :theme_module)
     end)
+
+    defmodule __MODULE__.LocaleEchoMock do
+      def get_theme, do: %{"title" => "no locale"}
+      def get_theme(locale), do: %{"title" => "locale=#{locale}"}
+    end
 
     conn = conn |> Plug.Conn.assign(:locale, "es") |> LoadTheme.call([])
 
-    assert conn.assigns[:theme]["title"] == "Titulo ES"
-    assert conn.assigns[:theme]["tagline"] == "ES"
+    assert conn.assigns[:theme]["title"] == "locale=es"
   end
 end

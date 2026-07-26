@@ -20,7 +20,8 @@ defmodule GameServerWeb.Api.V1.NotificationController do
       sender_name: %Schema{type: :string, description: "Display name of the sender"},
       recipient_id: %Schema{type: :string, format: :uuid, description: "User ID of the recipient"},
       title: %Schema{type: :string, description: "Notification title"},
-      content: %Schema{type: :string, description: "Notification body text", nullable: true},
+      content: %Schema{type: :string, description: "Notification body text"},
+      icon_url: %Schema{type: :string, description: "Icon URL; empty when unset"},
       metadata: %Schema{type: :object, description: "Arbitrary metadata"},
       inserted_at: %Schema{
         type: :string,
@@ -35,6 +36,7 @@ defmodule GameServerWeb.Api.V1.NotificationController do
       recipient_id: 7,
       title: "Game invite",
       content: "Join my lobby!",
+      icon_url: "",
       metadata: %{"lobby_id" => 10},
       inserted_at: "2026-02-22T12:00:00Z"
     }
@@ -107,6 +109,11 @@ defmodule GameServerWeb.Api.V1.NotificationController do
           content: %Schema{
             type: :string,
             description: "Notification body text (optional)",
+            nullable: true
+          },
+          icon_url: %Schema{
+            type: :string,
+            description: "Icon URL (optional)",
             nullable: true
           },
           metadata: %Schema{

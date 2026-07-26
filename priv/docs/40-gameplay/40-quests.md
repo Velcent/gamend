@@ -46,6 +46,21 @@ One engine for achievements, dailies, seasonal events and quest lines. A quest i
   rewards: [%{type: "item", code: "loot_crate", amount: 1}]}
 ```
 
+## Chains
+
+`prerequisite_quest_key` links quests into tiers. A chain occupies **one
+slot** in the quest list: the earliest tier the player can still act on — in
+progress or completed-but-unclaimed. Claiming advances the slot to the next
+tier; once every tier is claimed the final one stands for the chain. On the
+web quests page, clicking the chained card opens the whole chain — earlier
+tiers and locked ones ahead alike (hidden quests stay `???` until earned).
+Plugins can read the same view with
+`GameServer.Quests.chain(user_id, quest_key)`.
+
+Quests also carry an optional `icon_url`; when unset, the web UI shows the
+shared default quest icon and the API returns an empty value so game clients
+can apply their own.
+
 ## Progress is server-authoritative
 
 Clients cannot advance their own quests — there is no endpoint for it. Core reports login, chat_message, score_submitted, lobby_joined and match_won; your game reports the rest from hooks:

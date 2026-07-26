@@ -10,10 +10,10 @@ The host ships a default theme JSON for copy, navigation, footer sections, and r
 
 ## Configure theming JSON
 
-Edit the packaged host default theme at theme/config.en.json, or place an override JSON file somewhere in your project. For example:
+Edit the packaged host default theme at theme/config.json, or place an override JSON file somewhere in your project. For example:
 
 ```text
-theme/my_config.en.json
+theme/my_config.json
 ```
 
 With the following:
@@ -99,7 +99,18 @@ Optional: point the runtime override at a different JSON file:
 GAMEND_CONTENT_THEME_CONFIG=theme/my_config.json
 ```
 
-Only locale-suffixed config files are loaded. For example, if GAMEND_CONTENT_THEME_CONFIG is set to theme/my_config.json, the server will load theme/my_config.en.json for English, theme/my_config.es.json for Spanish, etc. The base file (without locale suffix) is never loaded directly — it serves only as a naming template. When GAMEND_CONTENT_THEME_CONFIG is not set, the host falls back to its packaged default theme under theme/.
+That exact file is the only one loaded — there is no per-locale variant. When GAMEND_CONTENT_THEME_CONFIG is not set, the host falls back to its packaged default theme under theme/.
+
+## Translating the theme
+
+Write the theme once, in English, and translate it through gettext like the rest of the UI. Text keys (title, tagline, description, label, text, alt, site_message, cta, subtitle) are translatable; everything else — colours, hrefs, icons, image paths, layout — is configuration and can never vary by locale.
+
+```bash
+mix gamend.theme.extract
+mix gettext.merge priv/gettext
+```
+
+Then translate priv/gettext/LOCALE/LC_MESSAGES/theme.po. A missing translation falls back to the English source, so a partly translated locale still renders.
 
 ## Host-owned branding and content
 

@@ -3,6 +3,7 @@ defmodule GameServerWeb.Api.V1.Admin.QuestController do
   use OpenApiSpex.ControllerSpecs
 
   alias GameServer.Quests
+  alias GameServerWeb.Uploads
   alias OpenApiSpex.Schema
 
   tags(["Admin – Quests"])
@@ -21,11 +22,11 @@ defmodule GameServerWeb.Api.V1.Admin.QuestController do
       hidden: %Schema{type: :boolean},
       reset: %Schema{type: :string, enum: ["never", "daily", "weekly", "monthly", "interval"]},
       reset_interval_days: %Schema{type: :integer, nullable: true},
-      category: %Schema{type: :string, nullable: true},
+      category: %Schema{type: :string},
       objectives: %Schema{type: :array, items: %Schema{type: :object}},
       rewards: %Schema{type: :array, items: %Schema{type: :object}},
       auto_claim: %Schema{type: :boolean},
-      prerequisite_quest_key: %Schema{type: :string, nullable: true},
+      prerequisite_quest_key: %Schema{type: :string},
       starts_at: %Schema{type: :string, format: "date-time", nullable: true},
       ends_at: %Schema{type: :string, format: "date-time", nullable: true},
       active: %Schema{type: :boolean},
@@ -63,7 +64,7 @@ defmodule GameServerWeb.Api.V1.Admin.QuestController do
       hidden: %Schema{type: :boolean},
       reset: %Schema{type: :string, enum: ["never", "daily", "weekly", "monthly", "interval"]},
       reset_interval_days: %Schema{type: :integer, nullable: true},
-      category: %Schema{type: :string, nullable: true},
+      category: %Schema{type: :string},
       objectives: %Schema{
         type: :array,
         items: %Schema{
@@ -89,7 +90,7 @@ defmodule GameServerWeb.Api.V1.Admin.QuestController do
         }
       },
       auto_claim: %Schema{type: :boolean},
-      prerequisite_quest_key: %Schema{type: :string, nullable: true},
+      prerequisite_quest_key: %Schema{type: :string},
       starts_at: %Schema{type: :string, format: "date-time", nullable: true},
       ends_at: %Schema{type: :string, format: "date-time", nullable: true},
       active: %Schema{type: :boolean},
@@ -207,21 +208,70 @@ defmodule GameServerWeb.Api.V1.Admin.QuestController do
   )
 
   def update(conn, %{"id" => id} = params) do
-    case Quests.get_quest(id) do
-      nil ->
-        conn |> put_status(:not_found) |> json(%{error: "not_found"})
+    with_quest(conn, id, fn quest ->
+      case Quests.update_quest(quest, Map.delete(params, "id")) do
+        {:ok, updated} -> json(conn, %{data: updated})
+        {:error, %Ecto.Changeset{} = changeset} -> changeset_error(conn, changeset)
+      end
+    end)
+  end
 
-      quest ->
-        case Quests.update_quest(quest, Map.delete(params, "id")) do
-          {:ok, updated} ->
-            json(conn, %{data: updated})
+  operation(:icon_upload_url,
+    operation_id: "admin_quest_icon_upload_url",
+    summary: "Request an upload ticket for a quest icon (admin)",
+    description: """
+    Step one of two. Returns a presigned ticket; PUT the image straight to
+    `url`, then POST the returned `key` to the icon endpoint. Bytes never pass
+    through the app server.
+    """,
+    security: [%{"authorization" => []}],
+    parameters: [id: [in: :path, schema: %Schema{type: :string}, required: true]],
+    request_body:
+      {"Declared content type", "application/json",
+       %Schema{
+         type: :object,
+         properties: %{content_type: %Schema{type: :string, example: "image/png"}},
+         required: [:content_type]
+       }},
+    responses: [
+      ok: {"Upload ticket", "application/json", %Schema{type: :object}},
+      bad_request: {"Unsupported content type", "application/json", @error_schema},
+      not_found: {"Not found", "application/json", @error_schema}
+    ]
+  )
 
-          {:error, %Ecto.Changeset{} = changeset} ->
-            conn
-            |> put_status(:unprocessable_entity)
-            |> json(%{errors: changeset_errors(changeset)})
+  def icon_upload_url(conn, %{"id" => id} = params) do
+    with_quest(conn, id, fn quest ->
+      Uploads.ticket(conn, "icons/quests", quest.id, "icon", Uploads.content_type(params))
+    end)
+  end
+
+  operation(:set_icon,
+    operation_id: "admin_set_quest_icon",
+    summary: "Confirm an uploaded quest icon (admin)",
+    description: "Step two: records a previously uploaded object as the icon.",
+    security: [%{"authorization" => []}],
+    parameters: [id: [in: :path, schema: %Schema{type: :string}, required: true]],
+    request_body:
+      {"Uploaded object key", "application/json",
+       %Schema{type: :object, properties: %{key: %Schema{type: :string}}, required: [:key]}},
+    responses: [
+      ok: {"Updated quest", "application/json", %Schema{type: :object}},
+      bad_request: {"Object not found", "application/json", @error_schema},
+      forbidden: {"Key not owned by this quest", "application/json", @error_schema},
+      not_found: {"Not found", "application/json", @error_schema}
+    ]
+  )
+
+  def set_icon(conn, %{"id" => id} = params) do
+    with_quest(conn, id, fn quest ->
+      Uploads.confirm(conn, "icons/quests", quest.id, params["key"], fn url ->
+        case Quests.update_quest(quest, %{"icon_url" => url}) do
+          {:ok, updated} -> json(conn, %{data: updated})
+          {:error, %Ecto.Changeset{} = changeset} -> changeset_error(conn, changeset)
         end
-    end
+      end)
+    end)
   end
 
   operation(:delete,
@@ -449,4 +499,15 @@ defmodule GameServerWeb.Api.V1.Admin.QuestController do
 
   defp parse_int(val, _default) when is_integer(val), do: max(val, 1)
   defp parse_int(_, default), do: default
+
+  defp with_quest(conn, id, fun) do
+    case Quests.get_quest(id) do
+      nil -> conn |> put_status(:not_found) |> json(%{error: "not_found"})
+      quest -> fun.(quest)
+    end
+  end
+
+  defp changeset_error(conn, changeset) do
+    conn |> put_status(:unprocessable_entity) |> json(%{errors: changeset_errors(changeset)})
+  end
 end

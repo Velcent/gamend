@@ -68,7 +68,7 @@ defmodule GameServerWeb.Api.V1.FriendControllerTest do
     # b should see incoming
     {:ok, token_b, _} = Guardian.encode_and_sign(b)
     conn_b = conn |> put_req_header("authorization", "Bearer " <> token_b)
-    resp = get(conn_b, "/api/v1/me/friend-requests") |> json_response(200)
+    resp = get(conn_b, "/api/v1/me/friend_requests") |> json_response(200)
 
     # Expect exactly one incoming and zero outgoing requests
     assert [_] = resp["incoming"]

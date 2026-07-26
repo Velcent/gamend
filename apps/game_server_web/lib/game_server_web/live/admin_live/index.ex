@@ -83,13 +83,13 @@ defmodule GameServerWeb.AdminLive.Index do
           <.link navigate={~p"/admin/connections"} class="btn btn-outline">
             Connections ({@conn_stats.total_connections})
           </.link>
-          <.link navigate={~p"/admin/rate-limiting"} class="btn btn-outline">
+          <.link navigate={~p"/admin/rate_limiting"} class="btn btn-outline">
             Rate Limiting ({@rate_stats.limited})
           </.link>
           <.link navigate={~p"/admin/logs"} class="btn btn-outline">
             Logs ({@log_recent_errors} errors/1h)
           </.link>
-          <.link navigate={~p"/admin/lobby-snapshots"} class="btn btn-outline">
+          <.link navigate={~p"/admin/lobby_snapshots"} class="btn btn-outline">
             Lobby Snapshots ({@lobby_snapshot_runs.total})
           </.link>
           <.link navigate={~p"/admin/geo"} class="btn btn-outline">
@@ -432,7 +432,7 @@ defmodule GameServerWeb.AdminLive.Index do
               <div class="card bg-base-100 p-4">
                 <div class="flex items-center justify-between mb-2">
                   <div class="text-sm font-semibold">Rate Limiting</div>
-                  <.link navigate={~p"/admin/rate-limiting"} class="link link-primary text-xs">
+                  <.link navigate={~p"/admin/rate_limiting"} class="link link-primary text-xs">
                     View →
                   </.link>
                 </div>
@@ -496,7 +496,7 @@ defmodule GameServerWeb.AdminLive.Index do
               <div class="card bg-base-100 p-4">
                 <div class="flex items-center justify-between mb-2">
                   <div class="text-sm font-semibold">Lobby snapshots</div>
-                  <.link navigate={~p"/admin/lobby-snapshots"} class="link link-primary text-xs">
+                  <.link navigate={~p"/admin/lobby_snapshots"} class="link link-primary text-xs">
                     View →
                   </.link>
                 </div>
@@ -721,7 +721,6 @@ defmodule GameServerWeb.AdminLive.Index do
       quest_stats: Task.async(fn -> GameServer.Quests.dashboard_stats() end),
       payments_stats: Task.async(fn -> Payments.admin_stats() end),
       translation_stats: Task.async(fn -> TranslationStats.all_completeness() end),
-      content_i18n_stats: Task.async(fn -> compute_content_i18n_stats() end),
       users_registered_1d: Task.async(fn -> Accounts.count_users_registered_since(1) end),
       users_registered_7d: Task.async(fn -> Accounts.count_users_registered_since(7) end),
       users_registered_30d: Task.async(fn -> Accounts.count_users_registered_since(30) end),
@@ -789,7 +788,6 @@ defmodule GameServerWeb.AdminLive.Index do
        chat_by_group: Map.get(r.chat_by_type, "group", 0),
        chat_by_friend: Map.get(r.chat_by_type, "friend", 0),
        translation_stats: r.translation_stats,
-       content_i18n_stats: r.content_i18n_stats,
        quest_stats: r.quest_stats,
        payments_stats: r.payments_stats,
        conn_stats: conn_stats,
@@ -914,53 +912,6 @@ defmodule GameServerWeb.AdminLive.Index do
   end
 
   defp country_flag(_), do: "🌐"
-
-  defp compute_content_i18n_stats do
-    locales = Gettext.known_locales(GameServerWeb.Gettext) -- ["en"]
-
-    if locales == [] do
-      %{total: 0, translated: 0, resources: []}
-    else
-      # Leaderboards
-      leaderboards = GameServer.Leaderboards.list_leaderboards(page: 1, page_size: 10_000)
-      lb_total = length(leaderboards) * length(locales)
-
-      lb_translated =
-        Enum.reduce(leaderboards, 0, fn lb, acc ->
-          titles = get_in(lb.metadata || %{}, ["titles"]) || %{}
-
-          acc +
-            Enum.count(locales, fn locale ->
-              title = Map.get(titles, locale, "")
-              is_binary(title) and String.trim(title) != ""
-            end)
-        end)
-
-      # Quests (includes achievement-kind definitions)
-      quests = GameServer.Quests.list_quests(page: 1, page_size: 10_000)
-      quest_total = length(quests) * length(locales)
-
-      quest_translated =
-        Enum.reduce(quests, 0, fn q, acc ->
-          titles = get_in(q.metadata || %{}, ["titles"]) || %{}
-
-          acc +
-            Enum.count(locales, fn locale ->
-              title = Map.get(titles, locale, "")
-              is_binary(title) and String.trim(title) != ""
-            end)
-        end)
-
-      %{
-        total: lb_total + quest_total,
-        translated: lb_translated + quest_translated,
-        resources: [
-          {"Leaderboards", %{total: lb_total, translated: lb_translated}},
-          {"Quests", %{total: quest_total, translated: quest_translated}}
-        ]
-      }
-    end
-  end
 
   defp safe_log_count_by_level do
     GameServerWeb.AdminLogBuffer.count_by_level()

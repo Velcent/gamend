@@ -459,6 +459,62 @@ defmodule GameServerWeb.CoreComponents do
     """
   end
 
+  @doc """
+  An entity's icon: the uploaded `icon_url` when set, otherwise the typed
+  default for its entity type (`GameServerWeb.Icons.default/1`) — so every
+  group, tournament, leaderboard, quest and notification has *some* icon
+  without storing one.
+
+  Pass `icon` (any `GameServerWeb.Icons` atom — the full heroicons catalog)
+  to override the type default.
+
+  ## Examples
+
+      <.entity_icon icon_url={group.icon_url} type={:group} />
+      <.entity_icon icon_url={nil} type={:quest} icon={:fire} />
+  """
+  attr :icon_url, :string, default: nil
+  attr :icon, :atom, default: nil
+
+  attr :type, :atom,
+    required: true,
+    values: [:group, :tournament, :leaderboard, :quest, :notification]
+
+  # `:any` so callers can pass the usual Phoenix class list; both branches
+  # below normalise it the same way.
+  attr :class, :any, default: "w-6 h-6"
+
+  def entity_icon(%{icon_url: url} = assigns) when is_binary(url) and url != "" do
+    ~H"""
+    <img src={@icon_url} alt="" loading="lazy" decoding="async" class={[@class, "object-contain"]} />
+    """
+  end
+
+  def entity_icon(assigns) do
+    icon = assigns.icon || GameServerWeb.Icons.default(assigns.type)
+
+    # Inline SVG, not a `hero-*` class: Tailwind only generates those classes
+    # for names it finds literally in source, and this one is chosen at runtime.
+    # The class is interpolated into raw markup, so it has to be flattened to a
+    # string first — a list would render as one run-on token.
+    svg =
+      GameServerWeb.Icons.svg(icon)
+      |> String.replace("<svg ", ~s|<svg class="#{class_string(assigns.class)}" |, global: false)
+
+    assigns = assign(assigns, :svg, svg)
+
+    ~H"""
+    {Phoenix.HTML.raw(@svg)}
+    """
+  end
+
+  defp class_string(class) do
+    class
+    |> List.wrap()
+    |> Enum.reject(&(&1 in [nil, false, ""]))
+    |> Enum.join(" ")
+  end
+
   ## JS Commands
 
   def show(js \\ %JS{}, selector) do

@@ -32,7 +32,7 @@ defmodule GameServerWeb.Api.V1.Admin.GroupController do
     properties: %{
       id: %Schema{type: :string, format: :uuid},
       title: %Schema{type: :string},
-      description: %Schema{type: :string, nullable: true},
+      description: %Schema{type: :string},
       type: %Schema{type: :string},
       max_members: %Schema{type: :integer},
       metadata: %Schema{type: :object},

@@ -34,7 +34,7 @@ defmodule GameServerWeb.AdminPagesRenderTest do
     {"/admin/quests", "Quests"},
     {"/admin/payments", "Payments"},
     {"/admin/translations", "Translation"},
-    {"/admin/lobby-snapshots", "Lobby snapshots"},
+    {"/admin/lobby_snapshots", "Lobby snapshots"},
     {"/admin/storage", "Storage"},
     {"/admin/economy", "Economy"}
   ]

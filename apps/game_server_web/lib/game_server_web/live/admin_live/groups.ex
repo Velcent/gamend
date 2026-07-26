@@ -242,6 +242,7 @@ defmodule GameServerWeb.AdminLive.Groups do
           <.form for={@form} id="group-edit-form" phx-submit="save_group">
             <.input field={@form[:title]} type="text" label="Title (unique)" />
             <.input field={@form[:description]} type="text" label="Description" />
+            <.input field={@form[:icon_url]} type="text" label="Icon URL (optional)" />
             <.input
               field={@form[:type]}
               type="select"

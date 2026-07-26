@@ -528,12 +528,10 @@ defmodule GameServerWeb.AdminLive.ConfigTest do
   test "renders theme diagnostics when GAMEND_CONTENT_THEME_CONFIG is set (env var)", %{
     conn: conn
   } do
-    # create temporary locale-specific theme config file
     orig =
       GameServer.SettingsHelpers.get(:game_server_core, GameServer.ContentSettings, :theme_config)
 
     base = Path.join(System.tmp_dir!(), "theme_test_#{System.unique_integer([:positive])}.json")
-    en_path = String.trim_trailing(base, ".json") <> ".en.json"
 
     json =
       Jason.encode!(%{
@@ -555,7 +553,7 @@ defmodule GameServerWeb.AdminLive.ConfigTest do
         }
       })
 
-    File.write!(en_path, json)
+    File.write!(base, json)
 
     GameServer.SettingsHelpers.put(
       :game_server_core,
@@ -585,7 +583,7 @@ defmodule GameServerWeb.AdminLive.ConfigTest do
 
       JSONConfig.reload()
       Content.reload()
-      File.rm_rf(en_path)
+      File.rm_rf(base)
     end)
 
     {:ok, user} =

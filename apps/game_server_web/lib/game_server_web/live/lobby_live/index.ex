@@ -81,7 +81,7 @@ defmodule GameServerWeb.LobbyLive.Index do
         end
 
       _ ->
-        {:noreply, push_navigate(socket, to: ~p"/users/log-in")}
+        {:noreply, push_navigate(socket, to: ~p"/users/log_in")}
     end
   end
 
@@ -121,7 +121,7 @@ defmodule GameServerWeb.LobbyLive.Index do
         end
 
       _ ->
-        {:noreply, push_navigate(socket, to: ~p"/users/log-in")}
+        {:noreply, push_navigate(socket, to: ~p"/users/log_in")}
     end
   end
 
@@ -146,7 +146,7 @@ defmodule GameServerWeb.LobbyLive.Index do
         confirm_lobby_join(socket, user, id, password)
 
       _ ->
-        {:noreply, push_navigate(socket, to: ~p"/users/log-in")}
+        {:noreply, push_navigate(socket, to: ~p"/users/log_in")}
     end
   end
 
@@ -281,7 +281,7 @@ defmodule GameServerWeb.LobbyLive.Index do
         end
 
       _ ->
-        {:noreply, push_navigate(socket, to: ~p"/users/log-in")}
+        {:noreply, push_navigate(socket, to: ~p"/users/log_in")}
     end
   end
 
@@ -316,7 +316,7 @@ defmodule GameServerWeb.LobbyLive.Index do
         end
 
       _ ->
-        {:noreply, push_navigate(socket, to: ~p"/users/log-in")}
+        {:noreply, push_navigate(socket, to: ~p"/users/log_in")}
     end
   end
 
@@ -416,7 +416,7 @@ defmodule GameServerWeb.LobbyLive.Index do
   defp handle_start_join_for_lobby(socket, lobby) do
     case Scope.user(socket.assigns.current_scope) do
       %User{} = user -> handle_start_join_for_user(socket, lobby, user)
-      _ -> {:noreply, push_navigate(socket, to: ~p"/users/log-in")}
+      _ -> {:noreply, push_navigate(socket, to: ~p"/users/log_in")}
     end
   end
 

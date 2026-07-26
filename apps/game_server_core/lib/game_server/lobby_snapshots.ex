@@ -579,7 +579,7 @@ defmodule GameServer.LobbySnapshots do
 
   setting(:enabled, :boolean,
     default: false,
-    doc: "Record a durable per-run snapshot of lobby state, browsable at /admin/lobby-snapshots."
+    doc: "Record a durable per-run snapshot of lobby state, browsable at /admin/lobby_snapshots."
   )
 
   setting(:user_kv_keys, :list,

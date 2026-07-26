@@ -235,7 +235,7 @@ STORAGE_MAX_UPLOAD_BYTES=5242880
 ```
 
 **Upload flow (client-agnostic, same for Godot/JS):**
-1. Client asks `POST /me/avatar/upload-url` → server validates size/type,
+1. Client asks `POST /me/avatar/upload_url` → server validates size/type,
    returns `{url, method, headers, key}` from `presigned_upload/2`.
 2. Client uploads bytes directly to `url` (S3/R2 or the local endpoint).
 3. Client `POST /me/avatar {key}` → server verifies the object exists and
@@ -311,7 +311,7 @@ current codebase, and the CONTRIBUTING checklist.
   `GameServer.Push` fan-out on the Oban `push` queue; FCM + APNs-direct behind
   one behaviour, routed per token, delivered via **Pigeon 2**.
 - [Push — Godot client](docs/specs/push-godot-client.md) — Android (FCM) then iOS
-  (native APNs) behind one `GamendPush.gd`, registering to `/me/push-tokens`.
+  (native APNs) behind one `GamendPush.gd`, registering to `/me/push_tokens`.
 - [Chat moderation](docs/specs/chat-moderation.md) — word filter + report queue +
   mute, enforced in the existing `before_chat_message` pipeline.
 

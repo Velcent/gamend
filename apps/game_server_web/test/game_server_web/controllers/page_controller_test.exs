@@ -17,9 +17,6 @@ defmodule GameServerWeb.PageControllerTest do
     base =
       Path.join(System.tmp_dir!(), "theme_page_test_#{System.unique_integer([:positive])}.json")
 
-    en_path = String.trim_trailing(base, ".json") <> ".en.json"
-    ro_path = String.trim_trailing(base, ".json") <> ".ro.json"
-
     theme = %{
       "title" => "Gamend",
       "tagline" => "Game + Backend",
@@ -135,46 +132,7 @@ defmodule GameServerWeb.PageControllerTest do
       }
     }
 
-    json = Jason.encode!(theme)
-
-    ro_json =
-      Jason.encode!(
-        Map.put(theme, "navigation", %{
-          "primary_links" => [
-            %{"label" => "Joacă", "href" => "/play", "icon" => "hero-play-solid"},
-            %{
-              "label" => "Social",
-              "icon" => "hero-user-group-solid",
-              "items" => [
-                %{
-                  "label" => "Clasamente",
-                  "href" => "/leaderboards",
-                  "icon" => "hero-chart-bar-solid"
-                },
-                %{
-                  "label" => "Realizări",
-                  "href" => "/quests",
-                  "icon" => "hero-trophy-solid"
-                },
-                %{
-                  "label" => "Grupuri",
-                  "href" => "/groups",
-                  "icon" => "hero-user-group-solid"
-                },
-                %{
-                  "label" => "Petreceri",
-                  "href" => "/parties",
-                  "icon" => "hero-user-plus-solid",
-                  "auth" => "authenticated"
-                }
-              ]
-            }
-          ]
-        })
-      )
-
-    File.write!(en_path, json)
-    File.write!(ro_path, ro_json)
+    File.write!(base, Jason.encode!(theme))
 
     GameServer.SettingsHelpers.put(
       :game_server_core,
@@ -204,8 +162,7 @@ defmodule GameServerWeb.PageControllerTest do
 
       JSONConfig.reload()
       Content.reload()
-      File.rm(en_path)
-      File.rm(ro_path)
+      File.rm(base)
     end)
 
     :ok
@@ -238,18 +195,22 @@ defmodule GameServerWeb.PageControllerTest do
     assert text_response(conn, 404) == "Not Found"
   end
 
-  test "home uses localized primary nav labels from locale theme config", %{conn: conn} do
+  test "home renders in the visitor's locale", %{conn: conn} do
     conn = get(conn, "/ro")
     assert redirected_to(conn) == "/"
 
     conn = get(recycle(conn), "/")
     body = html_response(conn, 200)
 
-    assert body =~ "Joacă"
-    assert body =~ "Clasamente"
-    assert body =~ "Realizări"
-    assert body =~ "Grupuri"
+    assert body =~ ~s(lang="ro")
     assert body =~ "fi-ro"
+
+    # Chrome this app owns and translates itself. Labels that come from the
+    # theme config are translated through the host's `theme` domain, which
+    # this app's test env has no backend for.
+    assert body =~ "Clasamente"
+    assert body =~ "Grupuri"
+    assert body =~ "Conectare"
   end
 
   test "home renders without errors when GAMEND_CONTENT_THEME_CONFIG is unset", %{conn: conn} do

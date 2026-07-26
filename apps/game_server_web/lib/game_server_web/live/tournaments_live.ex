@@ -18,6 +18,7 @@ defmodule GameServerWeb.TournamentsLive do
   alias GameServer.Accounts.User
   alias GameServer.Tournaments
   alias GameServer.Tournaments.Tournament
+  alias GameServerWeb.ContentText
   alias GameServerWeb.LiveHelpers
 
   @page_size 25
@@ -147,7 +148,7 @@ defmodule GameServerWeb.TournamentsLive do
         {:noreply, load_detail(socket, refresh(socket.assigns.tournament), socket.assigns.page)}
 
       _ ->
-        {:noreply, push_navigate(socket, to: ~p"/users/log-in")}
+        {:noreply, push_navigate(socket, to: ~p"/users/log_in")}
     end
   end
 
@@ -248,13 +249,13 @@ defmodule GameServerWeb.TournamentsLive do
     |> assign(:tournament, nil)
     |> assign(:bracket, nil)
     |> assign(:page, page)
-    |> assign(:groups, groups)
+    |> assign(:groups, ContentText.translate(groups))
     |> assign(:count, total)
     |> assign(:total_pages, ceil_div(total, @page_size))
   end
 
   defp load_detail(socket, tournament, page) do
-    tournament = Tournaments.advance_lifecycle(tournament)
+    tournament = tournament |> Tournaments.advance_lifecycle() |> ContentText.translate()
     bracket_count = Tournaments.count_brackets(tournament.id)
     editions = Tournaments.list_occurrences(tournament.slug)
 
@@ -337,6 +338,7 @@ defmodule GameServerWeb.TournamentsLive do
   end
 
   defp load_bracket(socket, tournament, bracket, highlight_entry_id) do
+    tournament = ContentText.translate(tournament)
     matches = Tournaments.list_matches(tournament.id, bracket_index: bracket.index)
     editions = Tournaments.list_occurrences(tournament.slug)
 
@@ -465,7 +467,14 @@ defmodule GameServerWeb.TournamentsLive do
       >
         <div class="card-body">
           <div class="flex items-start justify-between">
-            <h3 class="card-title text-lg">{group.title}</h3>
+            <h3 class="card-title text-lg">
+              <.entity_icon
+                icon_url={group.icon_url}
+                type={:tournament}
+                class="w-6 h-6 text-base-content/60"
+              />
+              {group.title}
+            </h3>
             <div class="flex flex-col items-end gap-1">
               <.state_badge state={group.state} />
               <span :if={group.edition_count > 1} class="badge badge-ghost badge-sm text-nowrap">
@@ -515,7 +524,14 @@ defmodule GameServerWeb.TournamentsLive do
           {gettext("Back")}
         </.link>
         <div>
-          <h1 class="text-2xl font-bold">{@tournament.title}</h1>
+          <h1 class="text-2xl font-bold flex items-center gap-2">
+            <.entity_icon
+              icon_url={@tournament.icon_url}
+              type={:tournament}
+              class="w-7 h-7 text-base-content/60"
+            />
+            {@tournament.title}
+          </h1>
           <div class="flex items-center gap-2 mt-1">
             <.state_badge state={@tournament.state} />
             <span :if={@tournament.starts_at} class="text-sm text-base-content/60">
@@ -727,7 +743,7 @@ defmodule GameServerWeb.TournamentsLive do
     ~H"""
     <%= cond do %>
       <% not @signed_in? and @tournament.state == "registration" -> %>
-        <.link navigate={~p"/users/log-in"} class="btn btn-outline btn-sm">
+        <.link navigate={~p"/users/log_in"} class="btn btn-outline btn-sm">
           {gettext("Log in")}
         </.link>
       <% not @signed_in? -> %>

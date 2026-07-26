@@ -11,6 +11,7 @@ defmodule GameServerWeb.QuestsLive do
   alias GameServer.Accounts.Scope
   alias GameServer.Quests
   alias GameServer.Quests.Quest
+  alias GameServerWeb.ContentText
   alias GameServerWeb.Plugs.FeatureGate
 
   @page_size 50
@@ -38,6 +39,8 @@ defmodule GameServerWeb.QuestsLive do
       |> assign(:page_size, @page_size)
       |> assign(:category, nil)
       |> assign(:status, nil)
+      |> assign(:chain, nil)
+      |> assign(:chain_focus, nil)
       |> load_quests()
 
     {:ok, socket}
@@ -90,6 +93,27 @@ defmodule GameServerWeb.QuestsLive do
         end
     end
   end
+
+  def handle_event("show_chain", %{"key" => key}, socket) do
+    user = get_user(socket)
+
+    case Quests.chain(user && user.id, key) do
+      entries when length(entries) > 1 ->
+        {:noreply,
+         socket
+         |> assign(:chain, ContentText.translate(entries))
+         |> assign(:chain_focus, key)}
+
+      _ ->
+        {:noreply, socket}
+    end
+  end
+
+  def handle_event("close_chain", _params, socket) do
+    {:noreply, socket |> assign(:chain, nil) |> assign(:chain_focus, nil)}
+  end
+
+  def handle_event("chain_noop", _params, socket), do: {:noreply, socket}
 
   def handle_event("prev_page", _params, socket) do
     {:noreply,
@@ -155,12 +179,32 @@ defmodule GameServerWeb.QuestsLive do
 
     socket
     |> assign(:categories, categories_of(active))
-    |> assign(:entries, entries)
+    # Titles and descriptions are stored in the source language; translate on
+    # the way to the page. Admin pages deliberately show the stored string.
+    |> assign(:entries, ContentText.translate(entries))
     |> assign(:total_count, total_count)
     |> assign(:total_pages, max(ceil(total_count / page_size), 1))
     |> assign(:claimable_count, claimable)
     |> assign(:chain_positions, chain_positions(active))
     |> assign(:now, DateTime.utc_now(:second))
+    |> refresh_chain()
+  end
+
+  # Keep an open chain modal current when quest data changes underneath it
+  # (a claim, a PubSub progress event). Closes it if the chain dissolved.
+  defp refresh_chain(socket) do
+    case socket.assigns[:chain_focus] do
+      nil ->
+        socket
+
+      key ->
+        user = get_user(socket)
+
+        case Quests.chain(user && user.id, key) do
+          entries when length(entries) > 1 -> assign(socket, :chain, entries)
+          _ -> socket |> assign(:chain, nil) |> assign(:chain_focus, nil)
+        end
+    end
   end
 
   # Position of each chained quest within its prerequisite line, as
@@ -217,9 +261,12 @@ defmodule GameServerWeb.QuestsLive do
   defp anonymous_catalog(active, category, page, page_size) do
     now = DateTime.utc_now(:second)
 
+    # Chains collapse to their first tier: with no progress every later tier
+    # is locked anyway, and listing them would show one chain as N cards.
     visible =
       Enum.filter(active, fn q ->
-        category in [nil, q.category] and within_window?(q, now)
+        category in [nil, q.category] and within_window?(q, now) and
+          is_nil(q.prerequisite_quest_key)
       end)
 
     entries =
@@ -413,9 +460,107 @@ defmodule GameServerWeb.QuestsLive do
             page_sizes={[24, 50, 100, 200]}
           />
         </div>
+
+        <.chain_modal :if={@chain} chain={@chain} focus={@chain_focus} locale={@locale} />
       </div>
     </Layouts.app>
     """
+  end
+
+  # Full prerequisite chain of one quest, shown when a chained card is clicked.
+  # This is the only place a player sees tiers ahead of the one they are on —
+  # the list itself hides a quest until its prerequisite is done. Hidden quests
+  # keep their teaser ("???") until earned, so the chain never spoils them.
+  defp chain_modal(assigns) do
+    ~H"""
+    <div
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      phx-click="close_chain"
+    >
+      <%!-- Inner clicks land on this binding (closest phx-click wins), so they
+            don't reach the backdrop's close_chain. --%>
+      <div
+        class="card bg-base-100 shadow-xl w-full max-w-md max-h-[80vh] overflow-y-auto"
+        phx-click="chain_noop"
+      >
+        <div class="card-body p-5">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="font-bold text-lg flex items-center gap-2">
+              <.icon name="hero-link" class="w-5 h-5" />
+              {gettext("Quest chain")}
+            </h3>
+            <button phx-click="close_chain" class="btn btn-ghost btn-sm btn-circle" type="button">
+              <.icon name="hero-x-mark" class="w-4 h-4" />
+            </button>
+          </div>
+
+          <ol class="space-y-0">
+            <li :for={{entry, index} <- Enum.with_index(@chain)} class="relative">
+              <div :if={index > 0} class="ml-[15px] h-4 border-l-2 border-base-300"></div>
+              <div class={[
+                "flex items-center gap-3 rounded-lg p-2",
+                entry.quest.key == @focus && "bg-base-200"
+              ]}>
+                <div class={[
+                  "flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold",
+                  chain_tier_class(entry)
+                ]}>
+                  <%= if chain_done?(entry) do %>
+                    <.icon name="hero-check" class="w-4 h-4" />
+                  <% else %>
+                    {entry.tier}
+                  <% end %>
+                </div>
+                <div class="min-w-0 flex-1">
+                  <div class="font-medium text-sm truncate">
+                    {chain_title(entry)}
+                  </div>
+                  <div class="text-xs text-base-content/60">
+                    {chain_status_label(entry)}
+                  </div>
+                </div>
+                <%!-- A secret tier must not leak its icon, so it keeps the
+                      shared fallback. --%>
+                <.entity_icon
+                  icon_url={if chain_secret?(entry), do: nil, else: entry.quest.icon_url}
+                  type={:quest}
+                  class="w-6 h-6 flex-shrink-0"
+                />
+              </div>
+            </li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  defp chain_done?(%{progress: progress}),
+    do: progress != nil and progress.status in ["completed", "claimed"]
+
+  defp chain_secret?(entry), do: entry.quest.hidden and not chain_done?(entry)
+
+  defp chain_title(entry) do
+    if chain_secret?(entry), do: "???", else: entry.quest.title
+  end
+
+  defp chain_tier_class(entry) do
+    cond do
+      chain_done?(entry) -> "bg-success/20 text-success"
+      entry.locked -> "bg-base-300 text-base-content/40"
+      true -> "bg-primary/20 text-primary"
+    end
+  end
+
+  defp chain_status_label(entry) do
+    cond do
+      entry.progress != nil and entry.progress.status == "claimed" -> gettext("Claimed")
+      entry.claimable -> gettext("Ready to claim")
+      chain_done?(entry) -> gettext("Completed")
+      entry.locked -> gettext("Locked")
+      entry.progress != nil -> gettext("In progress")
+      true -> gettext("Not started")
+    end
   end
 
   # ---------------------------------------------------------------------------
@@ -442,53 +587,46 @@ defmodule GameServerWeb.QuestsLive do
       |> assign(:left, left)
       |> assign(:secret?, secret?)
       |> assign(:objective_rows, if(secret?, do: [], else: objective_rows(quest, progress)))
-      |> assign(
-        :localized_title,
-        if(secret?, do: "???", else: Quest.localized_title(quest, assigns.locale))
-      )
+      |> assign(:localized_title, if(secret?, do: "???", else: quest.title))
       |> assign(
         :localized_desc,
-        if(secret?,
-          do: gettext("Hidden"),
-          else: Quest.localized_description(quest, assigns.locale)
-        )
+        if(secret?, do: gettext("Hidden"), else: quest.description)
       )
 
     ~H"""
-    <div class={[
-      "card bg-base-100 shadow-sm hover:shadow-md transition-all duration-200 border",
-      cond do
-        @claimable -> "border-success"
-        @done? -> "border-success/30"
-        true -> "border-base-300"
-      end
-    ]}>
+    <div
+      class={[
+        "card bg-base-100 shadow-sm hover:shadow-md transition-all duration-200 border",
+        @chain_position && "cursor-pointer",
+        cond do
+          @claimable -> "border-success"
+          @done? -> "border-success/30"
+          true -> "border-base-300"
+        end
+      ]}
+      phx-click={@chain_position && "show_chain"}
+      phx-value-key={@chain_position && @quest.key}
+      title={@chain_position && gettext("View quest chain")}
+    >
       <div class="card-body p-4">
         <div class="flex items-start gap-3">
           <div class={[
             "flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center text-2xl",
             if(@done?, do: "bg-success/20 text-success", else: "bg-base-300 text-base-content/40")
           ]}>
-            <%= if @quest.icon_url && @quest.icon_url != "" && not @secret? do %>
-              <img
-                src={@quest.icon_url}
-                alt={@quest.title}
-                loading="lazy"
-                decoding="async"
-                class={["w-8 h-8 object-contain", if(!@done?, do: "opacity-60")]}
-              />
-            <% else %>
-              <.icon
-                name={
-                  cond do
-                    @secret? -> "hero-question-mark-circle"
-                    @done? -> "hero-trophy"
-                    true -> "hero-map"
-                  end
-                }
-                class="w-7 h-7"
-              />
-            <% end %>
+            <%!-- A secret quest must not leak its icon, so the state icon wins. --%>
+            <.entity_icon
+              icon_url={if @secret?, do: nil, else: @quest.icon_url}
+              type={:quest}
+              icon={
+                cond do
+                  @secret? -> :question_mark_circle
+                  @done? -> :trophy
+                  true -> :map
+                end
+              }
+              class={["w-8 h-8", if(!@done?, do: "opacity-60")]}
+            />
           </div>
 
           <div class="flex-1 min-w-0">

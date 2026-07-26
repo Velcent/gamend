@@ -474,6 +474,7 @@ defmodule GameServer.Notifications do
   defp upsert_notification(sender_id, recipient_id, attrs) do
     content = Map.get(attrs, "content") || Map.get(attrs, :content, "")
     metadata = Map.get(attrs, "metadata") || Map.get(attrs, :metadata, %{})
+    icon_url = Map.get(attrs, "icon_url") || Map.get(attrs, :icon_url)
 
     %Notification{}
     |> Notification.changeset(attrs)
@@ -483,6 +484,7 @@ defmodule GameServer.Notifications do
       on_conflict: [
         set: [
           content: content,
+          icon_url: icon_url,
           metadata: metadata,
           read: false,
           updated_at: DateTime.utc_now(:second)

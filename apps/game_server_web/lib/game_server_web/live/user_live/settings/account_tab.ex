@@ -143,7 +143,7 @@ defmodule GameServerWeb.UserLive.Settings.AccountTab do
           <.form
             for={@password_form}
             id="password_form"
-            action={~p"/users/update-password"}
+            action={~p"/users/update_password"}
             method="post"
             phx-change="validate_password"
             phx-submit="update_password"
@@ -356,7 +356,7 @@ defmodule GameServerWeb.UserLive.Settings.AccountTab do
         <div class="font-semibold text-error">{gettext("Danger zone")}</div>
         <div class="text-sm mt-2 text-base-content/80">
           <.link
-            href={~p"/data-deletion"}
+            href={~p"/data_deletion"}
             class="link link-primary"
           >
             {gettext("Read data deletion instructions")}
@@ -398,7 +398,7 @@ defmodule GameServerWeb.UserLive.Settings.AccountTab do
         Accounts.deliver_user_update_email_instructions(
           Ecto.Changeset.apply_action!(changeset, :insert),
           user.email,
-          &url(~p"/users/settings/confirm-email/#{&1}")
+          &url(~p"/users/settings/confirm_email/#{&1}")
         )
 
         {:noreply, put_flash(socket, :info, gettext("Success."))}

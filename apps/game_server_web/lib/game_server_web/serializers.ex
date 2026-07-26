@@ -1,6 +1,13 @@
 defmodule GameServerWeb.Serializers do
   @moduledoc """
   Shared JSON payload serializers used by API controllers and channels.
+
+  ## Null policy
+
+  String-typed fields are never `null` — an unset value serializes as `""`.
+  Game clients (Godot in particular) choke on `null` where they expect a
+  string. Datetimes, numbers and objects keep `null` where absence is
+  semantic (e.g. `ends_at: null` = permanent).
   """
 
   alias GameServer.Accounts
@@ -90,11 +97,12 @@ defmodule GameServerWeb.Serializers do
 
     %{
       id: notification.id,
-      sender_id: notification.sender_id,
+      sender_id: notification.sender_id || "",
       sender_name: assoc_display_name(sender),
       recipient_id: notification.recipient_id,
       title: notification.title,
       content: notification.content || "",
+      icon_url: notification.icon_url || "",
       metadata: notification.metadata || %{},
       inserted_at: notification.inserted_at
     }
@@ -193,6 +201,7 @@ defmodule GameServerWeb.Serializers do
       id: group.id,
       title: group.title,
       description: group.description || "",
+      icon_url: group.icon_url || "",
       type: group.type,
       max_members: group.max_members,
       creator_id: response_id(group.creator_id),

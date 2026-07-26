@@ -11,6 +11,7 @@ defmodule GameServerWeb.LeaderboardsLive do
   alias GameServer.Accounts.Scope
   alias GameServer.Leaderboards
   alias GameServer.Leaderboards.Leaderboard
+  alias GameServerWeb.ContentText
   alias GameServerWeb.Plugs.FeatureGate
 
   @impl true
@@ -148,7 +149,14 @@ defmodule GameServerWeb.LeaderboardsLive do
       >
         <div class="card-body">
           <div class="flex items-start justify-between">
-            <h3 class="card-title text-lg">{Leaderboard.localized_title(group, @locale)}</h3>
+            <h3 class="card-title text-lg">
+              <.entity_icon
+                icon_url={group.icon_url}
+                type={:leaderboard}
+                class="w-6 h-6 text-base-content/60"
+              />
+              {group.title}
+            </h3>
             <div class="flex flex-col items-end gap-1">
               <%= if group.active_id do %>
                 <span class="badge badge-success">{gettext("Active")}</span>
@@ -163,7 +171,7 @@ defmodule GameServerWeb.LeaderboardsLive do
             </div>
           </div>
 
-          <% localized_desc = Leaderboard.localized_description(group, @locale) %>
+          <% localized_desc = group.description %>
           <%= if localized_desc do %>
             <p class="text-sm text-base-content/70 line-clamp-2">{localized_desc}</p>
           <% end %>
@@ -199,7 +207,14 @@ defmodule GameServerWeb.LeaderboardsLive do
           {gettext("Back")}
         </.link>
         <div>
-          <h1 class="text-2xl font-bold">{Leaderboard.localized_title(@leaderboard, @locale)}</h1>
+          <h1 class="text-2xl font-bold flex items-center gap-2">
+            <.entity_icon
+              icon_url={@leaderboard.icon_url}
+              type={:leaderboard}
+              class="w-7 h-7 text-base-content/60"
+            />
+            {@leaderboard.title}
+          </h1>
           <div class="flex items-center gap-2 mt-1">
             <%= if Leaderboard.active?(@leaderboard) do %>
               <span class="badge badge-success">{gettext("Active")}</span>
@@ -253,7 +268,7 @@ defmodule GameServerWeb.LeaderboardsLive do
       <% end %>
     </div>
 
-    <% localized_desc = Leaderboard.localized_description(@leaderboard, @locale) %>
+    <% localized_desc = @leaderboard.description %>
     <%= if localized_desc do %>
       <p class="text-base-content/70 mb-6">{localized_desc}</p>
     <% end %>
@@ -447,7 +462,7 @@ defmodule GameServerWeb.LeaderboardsLive do
     total_pages = max(1, div(count + page_size - 1, page_size))
 
     socket
-    |> assign(:groups, groups)
+    |> assign(:groups, ContentText.translate(groups))
     |> assign(:count, count)
     |> assign(:total_pages, total_pages)
   end
@@ -489,8 +504,8 @@ defmodule GameServerWeb.LeaderboardsLive do
 
     {:noreply,
      socket
-     |> assign(:selected_leaderboard, leaderboard)
-     |> assign(:slug_leaderboards, slug_leaderboards)
+     |> assign(:selected_leaderboard, ContentText.translate(leaderboard))
+     |> assign(:slug_leaderboards, ContentText.translate(slug_leaderboards))
      |> assign(:current_season_index, current_index)
      |> assign(:user_record, user_record)
      |> assign(:records_page, 1)

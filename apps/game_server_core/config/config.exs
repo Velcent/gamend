@@ -3,7 +3,7 @@ import Config
 config :game_server_core, ecto_repos: [GameServer.Repo]
 
 default_adapter =
-  if System.get_env("DATABASE_ADAPTER") == "postgres",
+  if System.get_env("GAMEND_DB_ADAPTER") == "postgres",
     do: Ecto.Adapters.Postgres,
     else: Ecto.Adapters.SQLite3
 

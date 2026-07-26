@@ -349,9 +349,9 @@ vars → no dispatchers → everything routes to `Log`.
 
 ## Web / API
 
-- `POST /me/push-tokens` — register `{token, platform, provider?, device_id?}`.
-- `GET  /me/push-tokens` — list my devices (paginated `meta` block).
-- `DELETE /me/push-tokens/:id` — unregister one.
+- `POST /me/push_tokens` — register `{token, platform, provider?, device_id?}`.
+- `GET  /me/push_tokens` — list my devices (paginated `meta` block).
+- `DELETE /me/push_tokens/:id` — unregister one.
 - Routes in `router/shared.ex` under the authenticated `/me` scope. **No**
   public send route — sending is server-authoritative. Listing is per-user
   (own devices), so no `LIST_*_ENABLED` global gate needed.

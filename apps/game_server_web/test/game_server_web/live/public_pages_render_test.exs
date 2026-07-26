@@ -120,5 +120,54 @@ defmodule GameServerWeb.PublicPagesRenderTest do
       {:ok, _view, html} = live(conn, ~p"/groups")
       assert html =~ "Groups"
     end
+
+    test "clicking a chained quest opens the chain with locked tiers ahead", %{
+      conn: conn,
+      user: user
+    } do
+      {:ok, _} =
+        GameServer.Quests.create_quest(%{
+          key: "chain_t1",
+          title: "First step",
+          reset: "never",
+          objectives: [%{event: "chain_e", target: 1}]
+        })
+
+      {:ok, _} =
+        GameServer.Quests.create_quest(%{
+          key: "chain_t2",
+          title: "Second step",
+          reset: "never",
+          prerequisite_quest_key: "chain_t1",
+          objectives: [%{event: "chain_e", target: 1}]
+        })
+
+      {:ok, _} =
+        GameServer.Quests.create_quest(%{
+          key: "chain_t3",
+          title: "Final step",
+          reset: "never",
+          prerequisite_quest_key: "chain_t2",
+          objectives: [%{event: "chain_e", target: 1}]
+        })
+
+      {:ok, _} = GameServer.Quests.report_event(user.id, "chain_e")
+
+      {:ok, view, html} = live(conn, ~p"/quests")
+
+      # Tier 3 is hidden from the list until tier 2 completes...
+      refute html =~ "Final step"
+
+      # ...but the chain view shows the whole line, locked tiers included.
+      html = render_click(view, "show_chain", %{"key" => "chain_t2"})
+      assert html =~ "Quest chain"
+      assert html =~ "First step"
+      assert html =~ "Second step"
+      assert html =~ "Final step"
+      assert html =~ "Locked"
+
+      html = render_click(view, "close_chain", %{})
+      refute html =~ "Quest chain"
+    end
   end
 end

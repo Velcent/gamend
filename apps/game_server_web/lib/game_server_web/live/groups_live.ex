@@ -176,7 +176,7 @@ defmodule GameServerWeb.GroupsLive do
         end
 
       _ ->
-        {:noreply, push_navigate(socket, to: ~p"/users/log-in")}
+        {:noreply, push_navigate(socket, to: ~p"/users/log_in")}
     end
   end
 
@@ -211,7 +211,7 @@ defmodule GameServerWeb.GroupsLive do
         end
 
       _ ->
-        {:noreply, push_navigate(socket, to: ~p"/users/log-in")}
+        {:noreply, push_navigate(socket, to: ~p"/users/log_in")}
     end
   end
 
@@ -233,7 +233,7 @@ defmodule GameServerWeb.GroupsLive do
         end
 
       _ ->
-        {:noreply, push_navigate(socket, to: ~p"/users/log-in")}
+        {:noreply, push_navigate(socket, to: ~p"/users/log_in")}
     end
   end
 
@@ -467,7 +467,14 @@ defmodule GameServerWeb.GroupsLive do
       >
         <div class="card-body">
           <div class="flex items-start justify-between">
-            <h3 class="card-title text-lg">{group.title}</h3>
+            <h3 class="card-title text-lg">
+              <.entity_icon
+                icon_url={group.icon_url}
+                type={:group}
+                class="w-6 h-6 text-base-content/60"
+              />
+              {group.title}
+            </h3>
             <div class="flex flex-col items-end gap-1">
               <%= if group.type == "public" do %>
                 <span class="badge badge-success">{gettext("Public")}</span>
@@ -541,7 +548,7 @@ defmodule GameServerWeb.GroupsLive do
         <% true -> %>
       <% end %>
     <% else %>
-      <.link navigate={~p"/users/log-in"} class="btn btn-ghost btn-xs">
+      <.link navigate={~p"/users/log_in"} class="btn btn-ghost btn-xs">
         {gettext("Log in")}
       </.link>
     <% end %>
@@ -556,7 +563,14 @@ defmodule GameServerWeb.GroupsLive do
           ← {gettext("Back")}
         </button>
         <div>
-          <h1 class="text-2xl font-bold">{@selected_group.title}</h1>
+          <h1 class="text-2xl font-bold flex items-center gap-2">
+            <.entity_icon
+              icon_url={@selected_group.icon_url}
+              type={:group}
+              class="w-7 h-7 text-base-content/60"
+            />
+            {@selected_group.title}
+          </h1>
           <div class="flex items-center gap-2 mt-1">
             <%= if @selected_group.type == "public" do %>
               <span class="badge badge-success">{gettext("Public")}</span>
@@ -710,7 +724,7 @@ defmodule GameServerWeb.GroupsLive do
         <% true -> %>
       <% end %>
     <% else %>
-      <.link navigate={~p"/users/log-in"} class="btn btn-outline btn-sm">
+      <.link navigate={~p"/users/log_in"} class="btn btn-outline btn-sm">
         {gettext("Log in")}
       </.link>
     <% end %>

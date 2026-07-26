@@ -16,6 +16,10 @@ defmodule GameServerWeb.Api.V1.TournamentController do
       slug: %Schema{type: :string, description: "Shared across recurring occurrences"},
       title: %Schema{type: :string},
       description: %Schema{type: :string},
+      icon_url: %Schema{
+        type: :string,
+        description: "Icon URL; empty when unset (the client applies its own default)"
+      },
       state: %Schema{
         type: :string,
         enum: ["scheduled", "registration", "running", "finished", "cancelled"]
@@ -28,7 +32,7 @@ defmodule GameServerWeb.Api.V1.TournamentController do
         description: "nil = manual start"
       },
       ends_at: %Schema{type: :string, format: "date-time", nullable: true},
-      recur: %Schema{type: :string, nullable: true, description: "Cron; nil = one-shot"},
+      recur: %Schema{type: :string, description: "Cron; empty = one-shot"},
       max_entries: %Schema{type: :integer, nullable: true},
       team_size: %Schema{type: :integer, description: "Advisory; enforced by game hooks"},
       bracket_size: %Schema{type: :integer},
@@ -361,12 +365,13 @@ defmodule GameServerWeb.Api.V1.TournamentController do
       id: t.id,
       slug: t.slug,
       title: t.title,
-      description: t.description,
+      description: t.description || "",
+      icon_url: t.icon_url || "",
       state: t.state,
       registration_opens_at: t.registration_opens_at,
       starts_at: t.starts_at,
       ends_at: t.ends_at,
-      recur: t.recur,
+      recur: t.recur || "",
       max_entries: t.max_entries,
       team_size: t.team_size,
       bracket_size: t.bracket_size,

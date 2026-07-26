@@ -114,6 +114,7 @@ defmodule GameServerWeb.AdminLive.Tournaments do
               <.input field={@form[:slug]} label="Slug" />
               <.input field={@form[:title]} label="Title" />
               <.input field={@form[:description]} label="Description" />
+              <.input field={@form[:icon_url]} type="text" label="Icon URL (optional)" />
               <.input
                 field={@form[:registration_opens_at]}
                 type="utc-datetime-local"

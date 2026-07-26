@@ -40,12 +40,12 @@ defmodule GameServer.Modules.ExampleHook do
     Logger.info("[ExampleHook] after_startup called")
 
     # Every sample is created only when missing, so restarts and plugin
-    # reloads are safe. The group is seeded on first registration instead —
-    # groups need a creator and there may be no users yet at boot.
+    # reloads are safe.
     ensure_login_leaderboard()
     ensure_weekly_cup()
     ensure_quests()
     ensure_welcome_kv()
+    ensure_group()
 
     [
       %{
@@ -82,10 +82,6 @@ defmodule GameServer.Modules.ExampleHook do
 
   @impl true
   def after_user_logged_in(user) do
-    # Also seeded here, not just on registration: on a database that already
-    # has players, nobody registers again and the group would never appear.
-    ensure_group(user)
-
     case Leaderboards.get_active_leaderboard_by_slug(@login_leaderboard) do
       nil -> :ok
       board -> Leaderboards.submit_score(board.id, user.id, 1)
@@ -212,7 +208,19 @@ defmodule GameServer.Modules.ExampleHook do
     :ok
   end
 
-  # ── Sample group: seeded by the first player to register ──────────────────
+  # ── Sample group ──────────────────────────────────────────────────────────
+  #
+  # A group needs a creator, so unlike the other samples this one cannot be
+  # made out of nothing at boot. It is seeded with the oldest account when one
+  # exists, and otherwise by the first player to register — so an instance ends
+  # up with one of every entity either way.
+
+  defp ensure_group do
+    case List.first(Accounts.list_all_users(%{}, page_size: 1, sort_dir: "asc")) do
+      nil -> :ok
+      owner -> ensure_group(owner)
+    end
+  end
 
   defp ensure_group(user) do
     if is_nil(Groups.get_group_by_title(@group_title)) do

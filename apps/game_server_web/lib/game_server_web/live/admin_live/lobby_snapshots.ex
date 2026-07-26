@@ -52,7 +52,7 @@ defmodule GameServerWeb.AdminLive.LobbySnapshots do
             <div :for={gap <- Enum.take(@gaps, 5)} class="flex items-baseline gap-2 text-xs">
               <span class="font-mono">{gap.kind}</span>
               <.link
-                patch={~p"/admin/lobby-snapshots?lobby_id=#{gap.lobby_id}"}
+                patch={~p"/admin/lobby_snapshots?lobby_id=#{gap.lobby_id}"}
                 class="link font-mono truncate"
               >
                 {gap.lobby_id}
@@ -112,7 +112,7 @@ defmodule GameServerWeb.AdminLive.LobbySnapshots do
                   <td class="text-xs"><.timestamp at={run.ended_at} format="full" empty="—" /></td>
                   <td>
                     <.link
-                      patch={~p"/admin/lobby-snapshots?lobby_id=#{run.lobby_id}"}
+                      patch={~p"/admin/lobby_snapshots?lobby_id=#{run.lobby_id}"}
                       class="link link-primary text-xs"
                     >
                       Timeline →
@@ -127,7 +127,7 @@ defmodule GameServerWeb.AdminLive.LobbySnapshots do
         <%!-- Timeline for one lobby --%>
         <div :if={@lobby_id} class="space-y-3">
           <div class="flex flex-col sm:flex-row sm:items-center gap-3">
-            <.link patch={~p"/admin/lobby-snapshots"} class="btn btn-ghost btn-xs">
+            <.link patch={~p"/admin/lobby_snapshots"} class="btn btn-ghost btn-xs">
               &larr; All runs
             </.link>
             <span class="font-mono text-sm truncate">{@lobby_id}</span>

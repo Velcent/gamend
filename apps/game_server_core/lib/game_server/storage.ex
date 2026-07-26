@@ -31,12 +31,14 @@ defmodule GameServer.Storage do
   # Conservative default allow-list; callers can override per upload.
   @default_content_types ~w(image/png image/jpeg image/webp image/gif)
 
-  # Cache policy, keyed by key-prefix (first match wins). Avatars get a fresh
-  # random key on every change, so their URL is content-unique and safe to cache
-  # forever; everything else revalidates via ETag by default. Override with
+  # Cache policy, keyed by key-prefix (first match wins). Avatars and entity
+  # icons get a fresh random key on every change (see `build_key/3`), so their
+  # URL is content-unique and safe to cache forever; everything else
+  # revalidates via ETag by default. Override with
   # `config :game_server_core, GameServer.Storage, cache_policies: [...],
   # default_cache_control: "..."`.
-  @default_cache_policies [{"avatars/", "public, max-age=31536000, immutable"}]
+  @immutable "public, max-age=31536000, immutable"
+  @default_cache_policies [{"avatars/", @immutable}, {"icons/", @immutable}]
   @default_cache_control "public, max-age=0, must-revalidate"
 
   # `cache_policies` and `default_cache_control` above stay host-config-only:
@@ -126,6 +128,14 @@ defmodule GameServer.Storage do
     rand = 16 |> :crypto.strong_rand_bytes() |> Base.url_encode64(padding: false)
     "#{namespace}/#{owner_id}/#{rand}#{ext}"
   end
+
+  @doc ~S|File extension for a declared image content type ("" when unknown).|
+  @spec extension_for(String.t()) :: String.t()
+  def extension_for("image/png"), do: ".png"
+  def extension_for("image/jpeg"), do: ".jpg"
+  def extension_for("image/webp"), do: ".webp"
+  def extension_for("image/gif"), do: ".gif"
+  def extension_for(_content_type), do: ""
 
   @doc """
   Validate an upload's content type and size before issuing a ticket.

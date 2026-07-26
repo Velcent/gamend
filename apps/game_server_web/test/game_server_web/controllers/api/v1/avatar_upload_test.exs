@@ -19,9 +19,9 @@ defmodule GameServerWeb.Api.V1.AvatarUploadTest do
     %{conn: authed, user: user}
   end
 
-  describe "POST /api/v1/me/avatar/upload-url" do
+  describe "POST /api/v1/me/avatar/upload_url" do
     test "returns a ticket with an owned key", %{conn: conn, user: user} do
-      conn = post(conn, "/api/v1/me/avatar/upload-url", %{content_type: "image/png"})
+      conn = post(conn, "/api/v1/me/avatar/upload_url", %{content_type: "image/png"})
       body = json_response(conn, 200)
 
       assert body["method"] == "PUT"
@@ -30,7 +30,7 @@ defmodule GameServerWeb.Api.V1.AvatarUploadTest do
     end
 
     test "rejects an unsupported content type", %{conn: conn} do
-      conn = post(conn, "/api/v1/me/avatar/upload-url", %{content_type: "application/zip"})
+      conn = post(conn, "/api/v1/me/avatar/upload_url", %{content_type: "application/zip"})
       assert json_response(conn, 400)["error"] == "unsupported_content_type"
     end
   end

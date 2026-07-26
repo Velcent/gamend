@@ -36,15 +36,11 @@ defmodule GameServer.Theme.JSONConfigTest do
     :ok
   end
 
-  test "loads theme from locale-specific JSON path" do
-    # Only locale-suffixed files are loaded — create the .en.json variant
+  test "loads the config file itself, with no locale suffix" do
     base = Path.join(System.tmp_dir!(), "theme_test_#{System.unique_integer([:positive])}.json")
-    en_path = String.trim_trailing(base, ".json") <> ".en.json"
 
-    json = Jason.encode!(%{"title" => "My Test", "logo" => "/theme/logo.png"})
-    File.write!(en_path, json)
-
-    on_exit(fn -> File.rm(en_path) end)
+    File.write!(base, Jason.encode!(%{"title" => "My Test", "logo" => "/theme/logo.png"}))
+    on_exit(fn -> File.rm(base) end)
 
     GameServer.SettingsHelpers.put(
       :game_server_core,
@@ -53,22 +49,21 @@ defmodule GameServer.Theme.JSONConfigTest do
       base
     )
 
-    theme = JSONConfig.get_theme()
-    assert theme == %{"title" => "My Test", "logo" => "/theme/logo.png"}
+    assert JSONConfig.get_theme() == %{"title" => "My Test", "logo" => "/theme/logo.png"}
   end
 
-  test "prefers locale-specific config when present" do
+  test "a locale-suffixed file is ignored — one config, translated via gettext" do
     base =
       Path.join(System.tmp_dir!(), "theme_test_base_#{System.unique_integer([:positive])}.json")
 
-    en_path = String.trim_trailing(base, ".json") <> ".en.json"
     es_path = String.trim_trailing(base, ".json") <> ".es.json"
 
-    File.write!(en_path, Jason.encode!(%{"title" => "English Title", "logo" => "/en.png"}))
+    File.write!(base, Jason.encode!(%{"title" => "English Title", "logo" => "/en.png"}))
+    # Left over from the per-locale era: it must have no effect at all.
     File.write!(es_path, Jason.encode!(%{"title" => "Titulo ES", "logo" => "/es.png"}))
 
     on_exit(fn ->
-      File.rm(en_path)
+      File.rm(base)
       File.rm(es_path)
     end)
 
@@ -79,8 +74,7 @@ defmodule GameServer.Theme.JSONConfigTest do
       base
     )
 
-    assert %{"title" => "Titulo ES", "logo" => "/es.png"} = JSONConfig.get_theme("es")
-    # nil locale falls back to .en variant
+    assert %{"title" => "English Title", "logo" => "/en.png"} = JSONConfig.get_theme("es")
     assert %{"title" => "English Title", "logo" => "/en.png"} = JSONConfig.get_theme()
   end
 
@@ -132,8 +126,6 @@ defmodule GameServer.Theme.JSONConfigTest do
     base =
       Path.join(System.tmp_dir!(), "theme_test_paths_#{System.unique_integer([:positive])}.json")
 
-    en_path = String.trim_trailing(base, ".json") <> ".en.json"
-
     json =
       Jason.encode!(%{
         "description" => "Path Test",
@@ -148,9 +140,9 @@ defmodule GameServer.Theme.JSONConfigTest do
         "blog" => "/blog"
       })
 
-    File.write!(en_path, json)
+    File.write!(base, json)
 
-    on_exit(fn -> File.rm(en_path) end)
+    on_exit(fn -> File.rm(base) end)
 
     GameServer.SettingsHelpers.put(
       :game_server_core,

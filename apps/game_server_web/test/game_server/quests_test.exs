@@ -245,6 +245,67 @@ defmodule GameServer.QuestsTest do
       {:ok, advanced} = Quests.report_event(user.id, "win")
       assert Enum.map(advanced, & &1.quest_key) == ["step2"]
     end
+
+    test "chain/2 returns every tier in order with per-tier status" do
+      create_quest(%{key: "tier1", objectives: [%{event: "win", target: 1}]})
+
+      create_quest(%{
+        key: "tier2",
+        prerequisite_quest_key: "tier1",
+        objectives: [%{event: "win", target: 1}]
+      })
+
+      create_quest(%{
+        key: "tier3",
+        prerequisite_quest_key: "tier2",
+        objectives: [%{event: "win", target: 5}]
+      })
+
+      user = user_fixture()
+      {:ok, _} = Quests.report_event(user.id, "win")
+
+      # Same chain regardless of which member is asked about — including a
+      # tier the quest list itself would still hide from this user.
+      for key <- ["tier1", "tier2", "tier3"] do
+        entries = Quests.chain(user.id, key)
+        assert Enum.map(entries, & &1.quest.key) == ["tier1", "tier2", "tier3"]
+        assert Enum.map(entries, & &1.tier) == [1, 2, 3]
+      end
+
+      [t1, t2, t3] = Quests.chain(user.id, "tier2")
+
+      assert t1.progress.status == "completed"
+      assert t1.claimable
+      refute t1.locked
+
+      # tier1 is done, so tier2 is unlocked even with no progress row yet.
+      assert t2.progress == nil
+      refute t2.locked
+
+      assert t3.locked
+    end
+
+    test "chain/2 without a user locks everything past the root" do
+      create_quest(%{key: "solo_a", objectives: [%{event: "win", target: 1}]})
+
+      create_quest(%{
+        key: "solo_b",
+        prerequisite_quest_key: "solo_a",
+        objectives: [%{event: "win", target: 1}]
+      })
+
+      assert [a, b] = Quests.chain(nil, "solo_b")
+      refute a.locked
+      assert b.locked
+      assert a.progress == nil and b.progress == nil
+    end
+
+    test "chain/2 returns [] for unknown keys and a single entry for unchained quests" do
+      quest = create_quest(%{})
+      assert Quests.chain(nil, "no_such_quest") == []
+      assert [%{quest: %{key: key}, tier: 1}] = Quests.chain(nil, quest.key)
+      assert key == quest.key
+    end
   end
 
   describe "periods" do
@@ -405,7 +466,7 @@ defmodule GameServer.QuestsTest do
                Quests.list_user_quests(user.id)
     end
 
-    test "chain quests are hidden until the prerequisite completes" do
+    test "a chain lists as one entry: the tier the player can act on" do
       create_quest(%{key: "first", objectives: [%{event: "win", target: 1}]})
 
       create_quest(%{
@@ -416,11 +477,26 @@ defmodule GameServer.QuestsTest do
 
       user = user_fixture()
 
+      # Untouched chain: only the first tier.
       assert Enum.map(Quests.list_user_quests(user.id), & &1.quest.key) == ["first"]
 
+      # Completed but unclaimed: still the first tier — the claim is the
+      # player's pending action, and showing tier two too would list the
+      # chain twice.
       {:ok, _} = Quests.report_event(user.id, "win")
+      assert [%{quest: %{key: "first"}, claimable: true}] = Quests.list_user_quests(user.id)
 
-      assert Enum.map(Quests.list_user_quests(user.id), & &1.quest.key) == ["first", "second"]
+      # Claiming advances the card to the next tier.
+      {:ok, _} = Quests.claim(user.id, "first")
+      assert Enum.map(Quests.list_user_quests(user.id), & &1.quest.key) == ["second"]
+
+      # Fully claimed chain: the final tier stands for it.
+      {:ok, _} = Quests.report_event(user.id, "win")
+      {:ok, _} = Quests.report_event(user.id, "win")
+      {:ok, _} = Quests.claim(user.id, "second")
+
+      assert [%{quest: %{key: "second"}, progress: %{status: "claimed"}}] =
+               Quests.list_user_quests(user.id)
     end
   end
 

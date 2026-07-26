@@ -3,7 +3,6 @@ defmodule GameServerWeb.AdminLive.Quests do
 
   alias GameServer.Quests
   alias GameServer.Quests.Quest
-  alias GameServerWeb.AdminLive.TranslationMetadata
 
   @resets Quest.resets()
   @statuses ~w(active completed claimed)
@@ -20,7 +19,6 @@ defmodule GameServerWeb.AdminLive.Quests do
       |> assign(:selected_quest, nil)
       |> assign(:form, nil)
       |> assign(:grant_form, nil)
-      |> assign(:translation_values, %{})
       |> assign(:progress_page, 1)
       |> assign(:progress_page_size, 25)
       |> assign(:progress_filters, %{"user_id" => "", "quest_key" => "", "status" => ""})
@@ -100,19 +98,6 @@ defmodule GameServerWeb.AdminLive.Quests do
                       <% end %>
                     </td>
                     <td class="text-xs font-mono">{funnel_summary(@funnels[q.key])}</td>
-                    <td class="text-sm">
-                      <% pct = TranslationMetadata.completeness(q.metadata) %>
-                      <span class={[
-                        "badge badge-sm",
-                        cond do
-                          pct == 100 -> "badge-success"
-                          pct > 0 -> "badge-warning"
-                          true -> "badge-ghost"
-                        end
-                      ]}>
-                        {pct}%
-                      </span>
-                    </td>
                     <td class="text-sm">
                       <div class="flex flex-wrap gap-1">
                         <button
@@ -360,47 +345,6 @@ defmodule GameServerWeb.AdminLive.Quests do
               />
               <.input field={@form[:active]} type="checkbox" label="Active" />
 
-              <%!-- Per-locale translations --%>
-              <% locales = Gettext.known_locales(GameServerWeb.Gettext) -- ["en"] %>
-              <%= if locales != [] do %>
-                <div class="collapse collapse-arrow bg-base-200 mt-4">
-                  <input type="checkbox" />
-                  <div class="collapse-title font-medium text-sm">
-                    Translations ({Enum.join(locales, ", ")})
-                  </div>
-                  <div class="collapse-content space-y-3">
-                    <%= for locale <- locales do %>
-                      <div class="text-xs font-semibold uppercase text-base-content/50 mt-2">
-                        {locale}
-                      </div>
-                      <div class="fieldset mb-2">
-                        <label>
-                          <span class="label mb-1">Title ({locale})</span>
-                          <input
-                            type="text"
-                            name={"translations[#{locale}][title]"}
-                            value={get_in(@translation_values, [locale, "title"]) || ""}
-                            class="w-full input"
-                            placeholder="Leave empty to use default"
-                          />
-                        </label>
-                      </div>
-                      <div class="fieldset mb-2">
-                        <label>
-                          <span class="label mb-1">Description ({locale})</span>
-                          <textarea
-                            name={"translations[#{locale}][description]"}
-                            class="w-full textarea textarea-bordered"
-                            rows="2"
-                            placeholder="Leave empty to use default"
-                          ><%= get_in(@translation_values, [locale, "description"]) || "" %></textarea>
-                        </label>
-                      </div>
-                    <% end %>
-                  </div>
-                </div>
-              <% end %>
-
               <div class="form-control">
                 <label class="label"><span class="label-text">Metadata (JSON)</span></label>
                 <textarea
@@ -486,7 +430,6 @@ defmodule GameServerWeb.AdminLive.Quests do
     {:noreply,
      socket
      |> assign(:selected_quest, nil)
-     |> assign(:translation_values, %{})
      |> assign(:objectives_json, ~s([{"event": "example_event", "target": 1, "params": {}}]))
      |> assign(:rewards_json, "[]")
      |> assign(:form, to_form(changeset, as: "quest"))}
@@ -498,7 +441,6 @@ defmodule GameServerWeb.AdminLive.Quests do
     {:noreply,
      socket
      |> assign(:selected_quest, quest)
-     |> assign(:translation_values, TranslationMetadata.extract(quest.metadata))
      |> assign(:objectives_json, Jason.encode!(quest.objectives))
      |> assign(:rewards_json, Jason.encode!(quest.rewards))
      |> assign(:form, to_form(Quests.change_quest(quest), as: "quest"))}
@@ -515,7 +457,6 @@ defmodule GameServerWeb.AdminLive.Quests do
     params =
       params
       |> parse_metadata()
-      |> TranslationMetadata.merge(Map.get(all_params, "translations", %{}))
       |> put_json_list(all_params, "objectives_json", "objectives")
       |> put_json_list(all_params, "rewards_json", "rewards")
 

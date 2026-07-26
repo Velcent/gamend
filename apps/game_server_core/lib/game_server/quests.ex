@@ -723,6 +723,104 @@ defmodule GameServer.Quests do
   # ---------------------------------------------------------------------------
 
   @doc """
+  Every quest in `quest_key`'s prerequisite chain, in tier order, each with the
+  user's current-period progress.
+
+  The quest list hides a tier until its prerequisite is done; this is the one
+  read that shows a whole chain — earlier tiers and the ones still ahead. Each
+  entry carries `:tier` (1-based), `:locked` (prerequisite not yet done for
+  this user) and the usual `:progress`/`:claimable`. With a `nil` user every
+  tier after the first is locked and progress is `nil`.
+
+  Returns `[]` for an unknown or inactive key. A quest with no chain links
+  returns just its own entry.
+  """
+  @spec chain(user_id() | nil, String.t()) ::
+          [
+            %{
+              quest: Quest.t(),
+              progress: QuestProgress.t() | nil,
+              claimable: boolean(),
+              locked: boolean(),
+              tier: pos_integer()
+            }
+          ]
+  def chain(user_id, quest_key) when is_binary(quest_key) do
+    quests = active_quests()
+    prereq_by_key = Map.new(quests, &{&1.key, &1.prerequisite_quest_key})
+
+    if Map.has_key?(prereq_by_key, quest_key) do
+      root = walk_to_root(quest_key, prereq_by_key)
+
+      members =
+        quests
+        |> Enum.filter(&(walk_to_root(&1.key, prereq_by_key) == root))
+        |> Enum.sort_by(&chain_hops(&1.key, prereq_by_key, 0))
+
+      now = DateTime.utc_now(:second)
+      rows = chain_progress(user_id, members)
+
+      done =
+        for {{key, _period}, progress} <- rows,
+            progress.status in @statuses_done,
+            into: MapSet.new(),
+            do: key
+
+      members
+      |> Enum.with_index(1)
+      |> Enum.map(fn {quest, tier} ->
+        progress = Map.get(rows, {quest.key, period_key(quest, now)})
+        prereq = quest.prerequisite_quest_key
+
+        %{
+          quest: quest,
+          progress: progress,
+          claimable: progress != nil and progress.status == "completed",
+          locked: prereq != nil and prereq not in done,
+          tier: tier
+        }
+      end)
+    else
+      []
+    end
+  end
+
+  # The chain's earlier tiers may sit in past periods for resetting quests, so
+  # this reads each member's *current* period only — the same window the quest
+  # list uses. `done_prerequisites/2` is deliberately not reused here: it spans
+  # all periods, which is the unlock rule, and that distinction matters — a
+  # tier can be unlocked (prereq done once, ever) while its own current-period
+  # progress starts empty.
+  defp chain_progress(nil, _members), do: %{}
+
+  defp chain_progress(user_id, members) do
+    keys = Enum.map(members, & &1.key)
+
+    from(p in QuestProgress, where: p.user_id == ^user_id and p.quest_key in ^keys)
+    |> Repo.all()
+    |> Map.new(fn p -> {{p.quest_key, p.period_key}, p} end)
+  end
+
+  defp walk_to_root(key, prereq_by_key, hops \\ 0)
+  defp walk_to_root(key, _prereq_by_key, hops) when hops >= 20, do: key
+
+  defp walk_to_root(key, prereq_by_key, hops) do
+    case Map.get(prereq_by_key, key) do
+      nil -> key
+      prereq -> walk_to_root(prereq, prereq_by_key, hops + 1)
+    end
+  end
+
+  defp chain_hops(key, prereq_by_key, hops) when hops < 20 do
+    case Map.get(prereq_by_key, key) do
+      nil -> hops
+      prereq -> chain_hops(prereq, prereq_by_key, hops + 1)
+    end
+  end
+
+  defp chain_hops(_key, _prereq_by_key, hops), do: hops
+
+  @doc """
   Lists quests as seen by one user: active definitions in-window with the
   user's current-period progress and a claimable flag.
 
@@ -782,6 +880,8 @@ defmodule GameServer.Quests do
     done_prereqs = done_prerequisites(user_id, Enum.map(quests, & &1.prerequisite_quest_key))
     status = Keyword.get(opts, :status)
 
+    prereq_by_key = Map.new(quests, &{&1.key, &1.prerequisite_quest_key})
+
     quests
     |> Enum.map(fn quest ->
       progress = Map.get(rows, {quest.key, period_key(quest, now)})
@@ -792,10 +892,39 @@ defmodule GameServer.Quests do
         claimable: progress != nil and progress.status == "completed"
       }
     end)
-    |> Enum.filter(fn %{quest: quest, progress: progress} = entry ->
-      visible_to_user?(quest, progress, done_prereqs) and matches_status?(entry, status)
+    |> Enum.filter(fn %{quest: quest, progress: progress} ->
+      visible_to_user?(quest, progress, done_prereqs)
+    end)
+    |> collapse_chains(prereq_by_key)
+    |> Enum.filter(&matches_status?(&1, status))
+  end
+
+  # One entry per chain: the earliest tier the player can still act on — in
+  # progress or completed-but-unclaimed. Only claiming advances the card to
+  # the next tier; once every tier is claimed the final one stands for the
+  # chain. Without this, a finished tier and its unlocked successor listed
+  # side by side and the chain appeared twice.
+  defp collapse_chains(entries, prereq_by_key) do
+    representatives =
+      entries
+      |> Enum.group_by(fn %{quest: quest} -> walk_to_root(quest.key, prereq_by_key) end)
+      |> Map.new(fn {root, group} ->
+        ordered =
+          Enum.sort_by(group, fn %{quest: quest} ->
+            chain_hops(quest.key, prereq_by_key, 0)
+          end)
+
+        representative = Enum.find(ordered, &(not claimed_entry?(&1))) || List.last(ordered)
+        {root, representative.quest.key}
+      end)
+
+    Enum.filter(entries, fn %{quest: quest} ->
+      representatives[walk_to_root(quest.key, prereq_by_key)] == quest.key
     end)
   end
+
+  defp claimed_entry?(%{progress: progress}),
+    do: progress != nil and progress.status == "claimed"
 
   defp matches_status?(_entry, nil), do: true
 

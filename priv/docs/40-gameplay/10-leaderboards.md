@@ -44,6 +44,12 @@ GameServer.Leaderboards.list_records_around_user(board.id, user_id, limit: 5)
 GameServer.Leaderboards.end_leaderboard(board)
 ```
 
+## Icons
+
+Leaderboards carry an optional `icon_url` (admin form or API). When unset,
+the web UI shows the shared default leaderboard icon and the API returns
+`""` so game clients can apply their own.
+
 ## Best Practices
 
 - Use descriptive slugs like `weekly_score_2024_w48` or `season_3_pvp`

@@ -200,7 +200,7 @@ defmodule GameServerWeb.Router.Shared do
         pipe_through :browser
 
         get "/privacy", PageController, :privacy
-        get "/data-deletion", PageController, :data_deletion
+        get "/data_deletion", PageController, :data_deletion
         get "/terms", PageController, :terms
       end
 
@@ -324,7 +324,7 @@ defmodule GameServerWeb.Router.Shared do
 
         post "/tournaments/:id/join", TournamentController, :join
         delete "/tournaments/:id/join", TournamentController, :leave
-        get "/tournaments/:id/my-match", TournamentController, :my_match
+        get "/tournaments/:id/my_match", TournamentController, :my_match
       end
     end
   end
@@ -421,7 +421,7 @@ defmodule GameServerWeb.Router.Shared do
         patch "/me/password", MeController, :update_password
         patch "/me/display_name", MeController, :update_display_name
         patch "/me/username", MeController, :update_username
-        post "/me/avatar/upload-url", MeController, :avatar_upload_url
+        post "/me/avatar/upload_url", MeController, :avatar_upload_url
         post "/me/avatar", MeController, :set_avatar
         put "/storage/upload", StorageController, :upload
         get "/me/wallet", EconomyController, :wallet
@@ -435,9 +435,9 @@ defmodule GameServerWeb.Router.Shared do
         delete "/me/providers/:provider", ProviderController, :unlink
         post "/me/device", ProviderController, :link_device
         delete "/me/device", ProviderController, :unlink_device
-        post "/me/push-tokens", PushTokenController, :create
-        get "/me/push-tokens", PushTokenController, :index
-        delete "/me/push-tokens/:id", PushTokenController, :delete
+        post "/me/push_tokens", PushTokenController, :create
+        get "/me/push_tokens", PushTokenController, :index
+        delete "/me/push_tokens/:id", PushTokenController, :delete
       end
     end
   end
@@ -449,7 +449,7 @@ defmodule GameServerWeb.Router.Shared do
 
         post "/friends", FriendController, :create
         get "/me/friends", FriendController, :index
-        get "/me/friend-requests", FriendController, :requests
+        get "/me/friend_requests", FriendController, :requests
         get "/me/blocked", FriendController, :blocked
         post "/friends/:id/accept", FriendController, :accept
         post "/friends/:id/reject", FriendController, :reject
@@ -484,6 +484,8 @@ defmodule GameServerWeb.Router.Shared do
         delete "/groups/:id/join_requests/:request_id", GroupController, :cancel_request
         post "/groups/:id/invite", GroupController, :invite
         post "/groups/:id/notify", GroupController, :notify_group
+        post "/groups/:id/icon/upload_url", GroupController, :icon_upload_url
+        post "/groups/:id/icon", GroupController, :set_icon
       end
     end
   end
@@ -555,6 +557,8 @@ defmodule GameServerWeb.Router.Shared do
         post "/leaderboards", LeaderboardController, :create
         patch "/leaderboards/:id", LeaderboardController, :update
         post "/leaderboards/:id/end", LeaderboardController, :end_leaderboard
+        post "/leaderboards/:id/icon/upload_url", LeaderboardController, :icon_upload_url
+        post "/leaderboards/:id/icon", LeaderboardController, :set_icon
         delete "/leaderboards/:id", LeaderboardController, :delete
         post "/leaderboards/:id/records", LeaderboardRecordController, :create
         patch "/leaderboards/:id/records/:record_id", LeaderboardRecordController, :update
@@ -567,6 +571,8 @@ defmodule GameServerWeb.Router.Shared do
         post "/tournaments", TournamentController, :create
         patch "/tournaments/:id", TournamentController, :update
         delete "/tournaments/:id", TournamentController, :delete
+        post "/tournaments/:id/icon/upload_url", TournamentController, :icon_upload_url
+        post "/tournaments/:id/icon", TournamentController, :set_icon
         post "/tournaments/:id/cancel", TournamentController, :cancel
         post "/tournaments/:id/reopen", TournamentController, :reopen
         post "/tournaments/:id/draw", TournamentController, :draw
@@ -614,8 +620,8 @@ defmodule GameServerWeb.Router.Shared do
         post "/economy/grant", EconomyController, :grant
         post "/economy/spend", EconomyController, :spend
         get "/economy/items", EconomyController, :items
-        post "/economy/grant-item", EconomyController, :grant_item
-        post "/economy/consume-item", EconomyController, :consume_item
+        post "/economy/grant_item", EconomyController, :grant_item
+        post "/economy/consume_item", EconomyController, :consume_item
         get "/retention", RetentionController, :show
         post "/retention/run", RetentionController, :run
       end
@@ -634,6 +640,8 @@ defmodule GameServerWeb.Router.Shared do
         post "/quests", QuestController, :create
         patch "/quests/:id", QuestController, :update
         delete "/quests/:id", QuestController, :delete
+        post "/quests/:id/icon/upload_url", QuestController, :icon_upload_url
+        post "/quests/:id/icon", QuestController, :set_icon
         get "/quests/progress", QuestController, :progress
         post "/quests/grant", QuestController, :grant
         post "/quests/reset", QuestController, :reset
@@ -695,7 +703,7 @@ defmodule GameServerWeb.Router.Shared do
   admin pipeline and `on_mount` chain without the host restating them:
 
       game_server_admin_live_routes @require_admin_on_mount do
-        live "/admin/my-thing", MyThingLive, :index
+        live "/admin/my_thing", MyThingLive, :index
       end
 
   It exists so a host that needs one extra admin page does not fork the whole
@@ -735,9 +743,9 @@ defmodule GameServerWeb.Router.Shared do
           live "/admin/payments", AdminLive.Payments, :index
           live "/admin/translations", AdminLive.Translations, :index
           live "/admin/connections", AdminLive.Connections, :index
-          live "/admin/rate-limiting", AdminLive.RateLimiting, :index
+          live "/admin/rate_limiting", AdminLive.RateLimiting, :index
           live "/admin/logs", AdminLive.Logs, :index
-          live "/admin/lobby-snapshots", AdminLive.LobbySnapshots, :index
+          live "/admin/lobby_snapshots", AdminLive.LobbySnapshots, :index
           live "/admin/geo", AdminLive.Geo, :index
           live "/admin/system", AdminLive.System, :index
           live "/admin/runtime", AdminLive.Runtime, :index
@@ -769,7 +777,7 @@ defmodule GameServerWeb.Router.Shared do
           unquote(host_routes)
 
           live "/users/settings", UserLive.Settings, :edit
-          live "/users/settings/confirm-email/:token", UserLive.Settings, :confirm_email
+          live "/users/settings/confirm_email/:token", UserLive.Settings, :confirm_email
           live "/store", StoreLive.Index, :index
           live "/store/success", StoreLive.Index, :success
           live "/store/cancel", StoreLive.Index, :cancel
@@ -777,7 +785,7 @@ defmodule GameServerWeb.Router.Shared do
           live "/chat", unquote(chat), :index
         end
 
-        post "/users/update-password", UserSessionController, :update_password
+        post "/users/update_password", UserSessionController, :update_password
         get "/payments/downloads/:id", PaymentDownloadController, :show
       end
     end
@@ -846,8 +854,8 @@ defmodule GameServerWeb.Router.Shared do
           live "/leaderboards", LeaderboardsLive, :index
           live "/leaderboards/:slug/:id", LeaderboardsLive, :show
           live "/leaderboards/:slug", LeaderboardsLive, :show_active
-          live "/users/log-in", UserLive.Login, :new
-          live "/users/log-in/:token", UserLive.Confirmation, :new
+          live "/users/log_in", UserLive.Login, :new
+          live "/users/log_in/:token", UserLive.Confirmation, :new
           get "/users/confirm/:token", UserSessionController, :confirm
           unquote(docs_route)
           unquote(changelog_route)
@@ -857,8 +865,8 @@ defmodule GameServerWeb.Router.Shared do
           live "/play", PlayLive, :index
         end
 
-        post "/users/log-in", UserSessionController, :create
-        delete "/users/log-out", UserSessionController, :delete
+        post "/users/log_in", UserSessionController, :create
+        delete "/users/log_out", UserSessionController, :delete
       end
     end
   end

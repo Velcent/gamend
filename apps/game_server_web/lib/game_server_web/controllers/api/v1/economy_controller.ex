@@ -114,7 +114,7 @@ defmodule GameServerWeb.Api.V1.EconomyController do
   defp serialize(entry) do
     %{
       id: entry.id,
-      currency: entry.currency,
+      currency: entry.currency || "",
       delta: entry.delta,
       balance_after: entry.balance_after,
       reason: entry.reason,

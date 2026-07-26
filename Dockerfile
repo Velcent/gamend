@@ -39,6 +39,16 @@ COPY apps/game_server_core/mix.exs apps/game_server_core/mix.exs
 # Install dependencies
 RUN mix deps.get
 
+# Compile-time config must be present before deps compile (mdex reads its
+# syntax highlighter from config). Copied on its own so the layer only busts
+# when config changes, not on every source commit.
+COPY config config
+
+# Compile external deps (hex + git, including the Rust NIFs) in a cached
+# layer. Without this, `COPY . .` below invalidated `mix compile` on every
+# commit and all ~140 deps rebuilt from scratch each CI run. Local path deps
+# (apps/*) are skipped: their sources arrive with COPY and compile next.
+RUN mix deps.compile --skip-local-deps
 
 COPY . .
 

@@ -51,7 +51,14 @@ defmodule GameServerWeb.NotificationsLive do
                     id={"notif-" <> to_string(n.id)}
                   >
                     <td class="text-sm">
-                      {translate_notification_title(n)}
+                      <div class="flex items-center gap-2">
+                        <.entity_icon
+                          icon_url={n.icon_url}
+                          type={:notification}
+                          class="w-4 h-4 shrink-0 text-base-content/60"
+                        />
+                        {translate_notification_title(n)}
+                      </div>
                     </td>
                     <td class="text-sm">
                       <%= cond do %>

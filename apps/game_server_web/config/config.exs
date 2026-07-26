@@ -29,7 +29,7 @@ config :game_server_web,
   host_static_paths: ~w(images game favicon.ico robots.txt .well-known theme.css)
 
 default_adapter =
-  if System.get_env("DATABASE_ADAPTER") == "postgres",
+  if System.get_env("GAMEND_DB_ADAPTER") == "postgres",
     do: Ecto.Adapters.Postgres,
     else: Ecto.Adapters.SQLite3
 
@@ -138,20 +138,8 @@ config :ueberauth, Ueberauth,
     steam: {Ueberauth.Strategy.Steam, []}
   ]
 
-config :ueberauth, Ueberauth.Strategy.Discord.OAuth,
-  client_id: System.get_env("DISCORD_CLIENT_ID"),
-  client_secret: System.get_env("DISCORD_CLIENT_SECRET")
-
+# Provider credentials are not set here. Ueberauth reads them from its own
+# application env, which the host's config/host_runtime.exs fills from the
+# declared GameServer.OAuth.Providers settings — one source, resolved at boot.
 config :ueberauth, Ueberauth.Strategy.Apple.OAuth,
-  client_id: System.get_env("APPLE_WEB_CLIENT_ID"),
   client_secret: {GameServer.Apple, :client_secret}
-
-config :ueberauth, Ueberauth.Strategy.Google.OAuth,
-  client_id: System.get_env("GOOGLE_CLIENT_ID"),
-  client_secret: System.get_env("GOOGLE_CLIENT_SECRET")
-
-config :ueberauth, Ueberauth.Strategy.Facebook.OAuth,
-  client_id: System.get_env("FACEBOOK_CLIENT_ID"),
-  client_secret: System.get_env("FACEBOOK_CLIENT_SECRET")
-
-config :ueberauth, Ueberauth.Strategy.Steam, api_key: System.get_env("STEAM_API_KEY")

@@ -14,7 +14,7 @@ has shipped.
   behind one behaviour, routed per token, delivered via **Pigeon 2**.
 - [push-godot-client.md](push-godot-client.md) — **Push: Godot client.** The
   client half — Android (FCM plugin) then iOS (native APNs plugin) behind one
-  `GamendPush.gd` API; registers against the server's `/me/push-tokens`.
+  `GamendPush.gd` API; registers against the server's `/me/push_tokens`.
 - [chat-moderation.md](chat-moderation.md) — **Chat moderation.** Word filter +
   report queue + mute, enforced in the existing `before_chat_message` pipeline.
 

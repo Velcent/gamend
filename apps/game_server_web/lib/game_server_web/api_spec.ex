@@ -82,8 +82,8 @@ defmodule GameServerWeb.ApiSpec do
         ## **5b. Push notifications**
         Mobile/web push delivery to registered devices (FCM for Android/Web, APNs-direct for iOS):
 
-        - **Register device tokens** via `POST /me/push-tokens` (`token`, `platform`, optional `provider`/`device_id`); re-registering a `device_id` rotates its token in place
-        - **List/remove own devices** via `GET /me/push-tokens` and `DELETE /me/push-tokens/:id`
+        - **Register device tokens** via `POST /me/push_tokens` (`token`, `platform`, optional `provider`/`device_id`); re-registering a `device_id` rotates its token in place
+        - **List/remove own devices** via `GET /me/push_tokens` and `DELETE /me/push_tokens/:id`
         - **Server-authoritative sending** — no public send endpoint; pushes originate from server hooks (`GameServer.Push.send_to_user/2`) or the admin API
         - **Per-token routing**: each token's `provider` ("fcm" | "apns") selects the delivery backend; unconfigured backends log instead of sending (dev-friendly)
         - **Reliability**: delivery rides the durable job queue with retries; dead tokens reported by the provider are disabled automatically
@@ -151,7 +151,7 @@ defmodule GameServerWeb.ApiSpec do
 
         - **Registration window → seeded draw → timed rounds → champions**; recurring tournaments (cron) create one occurrence per cycle sharing a slug; a nil starts_at keeps registration open until an admin draws manually
         - **Join/leave** as an entry leader (`POST`/`DELETE /tournaments/:id/join`); team composition is game policy
-        - **Browse**: list/filter tournaments, standings, full bracket view, and the caller's current match (`GET /tournaments/:id/my-match`)
+        - **Browse**: list/filter tournaments, standings, full bracket view, and the caller's current match (`GET /tournaments/:id/my_match`)
         - **Match verdicts are server-side** (game hooks) — no public resolve endpoint; clients get `tournament_match_ready` / `tournament_match_resolved` / `tournament_updated` / `tournament_finished` on the user channel
         - **Admin management** over HTTP: create/update/delete, cancel, draw now, finish, and force match verdicts under `/api/v1/admin/tournaments`
 

@@ -255,7 +255,7 @@ defmodule GameServerWeb.UserAuth do
         # while the log-in LiveView lives under the :current_user live_session.
         # Forcing an external redirect avoids the client-side "unauthorized live_redirect"
         # warning and performs a clean full page navigation.
-        |> Phoenix.LiveView.redirect(external: ~p"/users/log-in")
+        |> Phoenix.LiveView.redirect(external: ~p"/users/log_in")
 
       {:halt, socket}
     end
@@ -294,7 +294,7 @@ defmodule GameServerWeb.UserAuth do
           gettext("Failed")
         )
         # See :require_authenticated above for why this must be an external redirect.
-        |> Phoenix.LiveView.redirect(external: ~p"/users/log-in")
+        |> Phoenix.LiveView.redirect(external: ~p"/users/log_in")
 
       {:halt, socket}
     end
@@ -342,7 +342,7 @@ defmodule GameServerWeb.UserAuth do
       conn
       |> put_flash(:error, gettext("Failed"))
       |> maybe_store_return_to()
-      |> redirect(to: ~p"/users/log-in")
+      |> redirect(to: ~p"/users/log_in")
       |> halt()
     end
   end
