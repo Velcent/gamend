@@ -3,10 +3,17 @@ defmodule GameServer.Cluster do
   Erlang distribution, needed for multi-node deployments and the partitioned
   L2 cache.
 
-  Every name here is inherited: `RELEASE_*` and `ERL_AFLAGS` are read by the
-  BEAM and by Elixir's release scripts before any of our code runs, and the
-  `FLY_*` values are injected by the platform. They are declared so the admin
-  page can show what the node actually came up with.
+  Only `dns_query` and `redis_url` are settings — values this server reads.
+  The rest of a clustered deployment is configured through variables *other
+  software* reads before any of our code runs: `RELEASE_DISTRIBUTION`,
+  `RELEASE_NODE` and `RELEASE_COOKIE` are consumed by the release boot script,
+  `ERL_AFLAGS` by `erl` itself, and the `FLY_*` values are injected by the
+  platform.
+
+  Declaring those as settings would be a lie: renaming them onto our convention
+  would not rename what the BEAM and the platform read, it would leave the
+  settings permanently empty. `environment/0` reports them for the admin page
+  as observations rather than settings.
   """
 
   use GameServer.Settings.Provider,
@@ -18,38 +25,26 @@ defmodule GameServer.Cluster do
     doc: "DNS name whose A/AAAA records list the other nodes, polled at boot."
   )
 
-  setting(:release_distribution, :string,
-    env: "RELEASE_DISTRIBUTION",
-    external: true,
-    doc: "name (long names) or sname. Read by the release boot script."
-  )
-
-  setting(:release_node, :string,
-    env: "RELEASE_NODE",
-    external: true,
-    doc: "This node's name. Must be unique across the cluster."
-  )
-
-  setting(:release_cookie, :string,
-    env: "RELEASE_COOKIE",
-    external: true,
-    secret: true,
-    doc: "Shared secret every node in the cluster must match."
-  )
-
-  setting(:erl_aflags, :string,
-    env: "ERL_AFLAGS",
-    external: true,
-    doc: "Extra BEAM flags, e.g. -proto_dist inet6_tcp for IPv6-only networking."
-  )
-
   setting(:redis_url, :string,
-    env: "REDIS_URL",
-    external: true,
     doc: "Shared fallback URL used by the cache and rate limiter when neither sets its own."
   )
 
-  setting(:fly_app_name, :string, env: "FLY_APP_NAME", external: true)
-  setting(:fly_private_ip, :string, env: "FLY_PRIVATE_IP", external: true)
-  setting(:fly_region, :string, env: "FLY_REGION", external: true)
+  @external ~w(RELEASE_DISTRIBUTION RELEASE_NODE RELEASE_COOKIE ERL_AFLAGS
+               FLY_APP_NAME FLY_PRIVATE_IP FLY_REGION)
+
+  @secret ~w(RELEASE_COOKIE)
+
+  @doc """
+  The clustering variables other software reads, with their current values,
+  for display only.
+
+  These are not settings and cannot be renamed onto our convention — the BEAM
+  and the platform read these exact names.
+  """
+  @spec environment() :: [%{name: String.t(), value: String.t() | nil, secret: boolean()}]
+  def environment do
+    for name <- @external do
+      %{name: name, value: System.get_env(name), secret: name in @secret}
+    end
+  end
 end

@@ -34,7 +34,7 @@ defmodule GameServerWeb.AdminLive.ConfigTest do
     assert html =~ "aria-expanded=\"false\""
     # Database diagnostics should render (show adapter and diagnostic keys)
     assert html =~ "Database"
-    assert html =~ "POSTGRES_HOST" or html =~ "SQLite"
+    assert html =~ "GAMEND_DB_POSTGRES_HOST" or html =~ "SQLite"
   end
 
   test "secrets are masked and DB adapter shows Postgres when env is set", %{conn: conn} do

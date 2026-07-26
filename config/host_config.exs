@@ -53,7 +53,7 @@ config :mdex_native, syntax_highlighter: :lumis
 
 # Adapter selection (compile-time). Override with GAMEND_DB_ADAPTER=postgres
 # at build time for production Postgres deployments. In dev, setting
-# POSTGRES_*/DATABASE_URL (shell or .env) makes dev.exs override this with
+# GAMEND_DB_POSTGRES_*/GAMEND_DB_URL (shell or .env) makes dev.exs override this with
 # Postgres; after changing them, recompile:
 #   mix deps.clean game_server_core game_server_web --build && mix compile
 default_adapter =
@@ -70,7 +70,7 @@ config :game_server_core, GameServer.Repo,
 # Durable background jobs (GameServer.Jobs / GameServer.Schedule). The `:engine`
 # (Basic on Postgres, Lite on SQLite) is injected at runtime from the Repo's
 # actual adapter by GameServer.Jobs.oban_config/0 — so it stays correct when
-# dev/test switch the Repo to Postgres via POSTGRES_HOST. The single per-minute
+# dev/test switch the Repo to Postgres via GAMEND_DB_POSTGRES_HOST. The single per-minute
 # Cron entry drives Schedule.TickWorker (see GameServer.Schedule).
 config :game_server_core, Oban,
   repo: GameServer.Repo,

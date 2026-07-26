@@ -6,7 +6,7 @@ defmodule GameServer.Database do
   `adapter` here is documentation and admin display rather than something a
   restart can change — the app refuses to start on a stale build and says so.
 
-  `DATABASE_URL` and the `POSTGRES_*` family are inherited names: platforms
+  `GAMEND_DB_URL` and the `POSTGRES_*` family are inherited names: platforms
   provision them, and renaming them would break every managed-database
   attachment.
   """
@@ -22,17 +22,15 @@ defmodule GameServer.Database do
   )
 
   setting(:url, :string,
-    env: "DATABASE_URL",
-    external: true,
     secret: true,
-    doc: "Full ecto:// URL. Takes precedence over the individual POSTGRES_* values."
+    doc: "Full ecto:// URL. Takes precedence over the individual postgres_* values."
   )
 
-  setting(:postgres_host, :string, env: "POSTGRES_HOST", external: true)
-  setting(:postgres_port, :integer, default: 5432, env: "POSTGRES_PORT", external: true)
-  setting(:postgres_user, :string, env: "POSTGRES_USER", external: true)
-  setting(:postgres_password, :string, env: "POSTGRES_PASSWORD", external: true, secret: true)
-  setting(:postgres_db, :string, env: "POSTGRES_DB", external: true)
+  setting(:postgres_host, :string)
+  setting(:postgres_port, :integer, default: 5432)
+  setting(:postgres_user, :string)
+  setting(:postgres_password, :string, secret: true)
+  setting(:postgres_db, :string)
 
   setting(:ipv6, :boolean,
     default: false,

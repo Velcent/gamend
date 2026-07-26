@@ -63,6 +63,11 @@ defmodule Mix.Tasks.Gamend.Settings.EnvExample do
     # is also what the admin Settings page renders. Values shown are defaults;
     # a commented line means the default applies when the variable is unset.
     #
+    # Every name is derived from its declaration as GAMEND_<GROUP>_<KEY>, with
+    # no exceptions. Variables other software reads (RELEASE_COOKIE for the
+    # release boot script, FLY_* from the platform) are not settings and are
+    # not listed here.
+    #
     # Settings can equally be configured in Elixir, which skips this file
     # entirely:
     #
@@ -105,11 +110,7 @@ defmodule Mix.Tasks.Gamend.Settings.EnvExample do
   defp annotations(definition) do
     [
       requirement_note(definition),
-      if(definition.secret, do: "# Secret — never commit a real value.\n", else: []),
-      if(definition.external,
-        do: "# Inherited: this name is defined by other software.\n",
-        else: []
-      )
+      if(definition.secret, do: "# Secret — never commit a real value.\n", else: [])
     ]
   end
 

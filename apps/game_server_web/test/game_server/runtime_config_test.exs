@@ -39,8 +39,8 @@ defmodule GameServer.RuntimeConfigTest do
     "GAMEND_RATELIMIT_REDIS_URL" => "redis://localhost:6379",
     "GAMEND_OBSERVABILITY_LOG_LEVEL" => "warning",
     "GAMEND_HTTP_ALLOWED_ORIGINS" => "//game.example.com,regex:^https://(.+\\.)?itch\\.io$",
-    "DATABASE_URL" => "ecto://user:pass@db.example.com:5432/game",
-    "PORT" => "8080"
+    "GAMEND_DB_URL" => "ecto://user:pass@db.example.com:5432/game",
+    "GAMEND_HTTP_PORT" => "8080"
   }
 
   setup context do
@@ -136,7 +136,7 @@ defmodule GameServer.RuntimeConfigTest do
   end
 
   describe "repo" do
-    test "uses the provisioned DATABASE_URL with integer pool settings", %{config: config} do
+    test "uses the provisioned GAMEND_DB_URL with integer pool settings", %{config: config} do
       repo = config[:game_server_core][GameServer.Repo]
 
       assert repo[:url] == "ecto://user:pass@db.example.com:5432/game"

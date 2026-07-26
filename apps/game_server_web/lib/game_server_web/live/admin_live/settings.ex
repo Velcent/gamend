@@ -8,7 +8,10 @@ defmodule GameServerWeb.AdminLive.Settings do
   here would promise a change it could not deliver. What this page does
   guarantee is that the list is complete: it renders `GameServer.Settings.all/0`,
   the same declaration that generates `.env.example` and derives every
-  environment variable name.
+  environment variable name — every one of them, without exception.
+
+  Variables that other software reads (`RELEASE_COOKIE`, `FLY_REGION`) are not
+  settings and are deliberately absent; the Config page reports those.
   """
 
   use GameServerWeb, :live_view
@@ -199,9 +202,6 @@ defmodule GameServerWeb.AdminLive.Settings do
                     </td>
                     <td class="align-top">
                       <div class="font-mono text-xs break-all">{row.env}</div>
-                      <span :if={row.external} class="badge badge-ghost badge-sm mt-1">
-                        inherited
-                      </span>
                     </td>
                     <td class="align-top">
                       <span class="font-mono text-sm break-all">{display_value(row)}</span>

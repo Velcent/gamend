@@ -11,7 +11,6 @@ defmodule GameServer.SettingsTest do
 
     setting(:chat_days, :integer, default: 0, doc: "Days of chat kept.")
     setting(:adapter, :atom, default: :local)
-    setting(:inherited_port, :integer, default: 4000, env: "PORT", external: true)
     setting(:api_token, :string, secret: true)
 
     setting(:bucket, :string, required: :prod, when: {[:sample, :adapter], :s3})
@@ -42,10 +41,13 @@ defmodule GameServer.SettingsTest do
       assert definition.env == "GAMEND_SAMPLE_CHAT_DAYS"
     end
 
-    test "an explicit env: overrides derivation, for inherited names" do
-      definition = definition(:inherited_port)
-      assert definition.env == "PORT"
-      assert definition.external
+    test "a name cannot be pinned — derivation is the only path" do
+      assert_raise ArgumentError, ~r/unknown option\(s\) \[:env\]/, fn ->
+        defmodule Pinned do
+          use GameServer.Settings.Provider, app: :game_server_core, group: :pinned
+          setting(:thing, :string, env: "LEGACY")
+        end
+      end
     end
   end
 

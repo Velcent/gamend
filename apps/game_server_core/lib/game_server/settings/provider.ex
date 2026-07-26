@@ -16,8 +16,13 @@ defmodule GameServer.Settings.Provider do
   The declaration is the only place a setting is written down. Its environment
   variable name is **derived** — `<ROOT>_<GROUP>_<KEY>`, e.g.
   `GAMEND_RETENTION_CHAT_MESSAGES_DAYS` — so the key and its env var can never
-  disagree. Pass `env:` only for the handful of names other software owns
-  (`PORT`, `DATABASE_URL`), which should also carry `external: true`.
+  disagree. There is no way to pin a different name: every setting follows the
+  convention, without exception.
+
+  A variable that *other* software reads (`RELEASE_COOKIE` for the release boot
+  script, `FLY_REGION` from the platform) is not a setting and does not belong
+  here — renaming our declaration would not rename what that software reads.
+  Report those separately; `GameServer.Cluster.environment/0` is the example.
 
   Values are read back with `GameServer.Settings.get/2`, which checks
   `Application.get_env(app, module)` and falls back to the compiled default. A
@@ -33,10 +38,6 @@ defmodule GameServer.Settings.Provider do
   - `:root` — first segment of the env name. Defaults to `"GAMEND"`; a plugin
     passes its own (`root: "POLYGLOT"`).
   - `:label` — display name for the group. Defaults to a capitalised `:group`.
-  - `:env_prefix` — replaces the derived `<ROOT>_<GROUP>_` prefix for every
-    setting in the provider, so `LIMIT_MAX_PAGE_SIZE` can keep its name while
-    the group is `:limits`. A transitional escape hatch for names that predate
-    the convention; a per-setting `env:` still wins over it.
 
   ## Options for `setting/3`
 
@@ -50,14 +51,11 @@ defmodule GameServer.Settings.Provider do
     them to hold.
   - `:with` — sibling keys forming a complete-or-empty group. All unset is
     silent; a partial set trips `:required`.
-  - `:env` — override the derived env var name. For inherited names only.
-  - `:external` — this name belongs to other software; the viewer files it
-    under "Inherited" rather than implying we own it.
   """
 
   @types [:string, :integer, :float, :boolean, :atom, :list, :log_level]
 
-  @setting_opts [:default, :doc, :secret, :required, :when, :with, :env, :external]
+  @setting_opts [:default, :doc, :secret, :required, :when, :with]
 
   @doc false
   defmacro __using__(opts) do
@@ -65,7 +63,6 @@ defmodule GameServer.Settings.Provider do
     group = Keyword.fetch!(opts, :group)
     root = Keyword.get(opts, :root, "GAMEND")
     label = Keyword.get(opts, :label) || group |> to_string() |> String.capitalize()
-    env_prefix = Keyword.get(opts, :env_prefix)
 
     quote do
       import GameServer.Settings.Provider, only: [setting: 2, setting: 3]
@@ -76,7 +73,6 @@ defmodule GameServer.Settings.Provider do
       @gamend_settings_group unquote(group)
       @gamend_settings_root unquote(root)
       @gamend_settings_label unquote(label)
-      @gamend_settings_env_prefix unquote(env_prefix)
 
       @before_compile GameServer.Settings.Provider
     end
@@ -98,16 +94,8 @@ defmodule GameServer.Settings.Provider do
     group = Module.get_attribute(module, :gamend_settings_group)
     root = Module.get_attribute(module, :gamend_settings_root)
     label = Module.get_attribute(module, :gamend_settings_label)
-    env_prefix = Module.get_attribute(module, :gamend_settings_env_prefix)
 
-    context = %{
-      module: module,
-      app: app,
-      group: group,
-      root: root,
-      label: label,
-      env_prefix: env_prefix
-    }
+    context = %{module: module, app: app, group: group, root: root, label: label}
 
     definitions =
       module
@@ -155,10 +143,9 @@ option(s) #{inspect(unknown)}; expected one of #{inspect(@setting_opts)}"
       label: label,
       type: type,
       default: Keyword.get(opts, :default),
-      env: Keyword.get(opts, :env) || derive_env(root, group, key, context.env_prefix),
+      env: derive_env(root, group, key),
       doc: Keyword.get(opts, :doc, ""),
       secret: Keyword.get(opts, :secret, false),
-      external: Keyword.get(opts, :external, false),
       required: required,
       when: Keyword.get(opts, :when),
       with: Keyword.get(opts, :with, [])
@@ -168,16 +155,10 @@ option(s) #{inspect(unknown)}; expected one of #{inspect(@setting_opts)}"
   @doc """
   The environment variable name for a group and key: `<ROOT>_<GROUP>_<KEY>`.
 
-  A provider-level `env_prefix` replaces the `<ROOT>_<GROUP>_` part.
+  The only way a setting gets a name. There is no override.
   """
-  @spec derive_env(String.t(), atom(), atom(), String.t() | nil) :: String.t()
-  def derive_env(root, group, key, env_prefix \\ nil)
-
-  def derive_env(_root, _group, key, env_prefix) when is_binary(env_prefix) do
-    env_prefix <> String.upcase(to_string(key))
-  end
-
-  def derive_env(root, group, key, nil) do
+  @spec derive_env(String.t(), atom(), atom()) :: String.t()
+  def derive_env(root, group, key) do
     [root, to_string(group), to_string(key)]
     |> Enum.map_join("_", &String.upcase/1)
   end

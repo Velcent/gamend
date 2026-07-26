@@ -13,9 +13,7 @@ defmodule GameServerWeb.Http do
 
   setting(:port, :integer,
     default: 4000,
-    env: "PORT",
-    external: true,
-    doc: "TCP port the HTTP listener binds. Injected by most platforms."
+    doc: "TCP port the HTTP listener binds."
   )
 
   setting(:host, :string,

@@ -1023,22 +1023,25 @@ defmodule GameServerWeb.AdminLive.Config do
                     <td class="font-mono text-sm break-all whitespace-normal">
                       <div class="mt-2 text-sm">
                         <div>
-                          DATABASE_URL:
+                          GAMEND_DB_URL:
                           <span class="font-mono">
                             {if @config.pg_database_url, do: "set", else: "<unset>"}
                           </span>
                         </div>
                         <div>
-                          POSTGRES_HOST: <span class="font-mono">{@config.pg_host || "<unset>"}</span>
+                          GAMEND_DB_POSTGRES_HOST:
+                          <span class="font-mono">{@config.pg_host || "<unset>"}</span>
                         </div>
                         <div>
-                          POSTGRES_USER: <span class="font-mono">{@config.pg_user || "<unset>"}</span>
+                          GAMEND_DB_POSTGRES_USER:
+                          <span class="font-mono">{@config.pg_user || "<unset>"}</span>
                         </div>
                         <div>
-                          POSTGRES_DB: <span class="font-mono">{@config.pg_db || "<unset>"}</span>
+                          GAMEND_DB_POSTGRES_DB:
+                          <span class="font-mono">{@config.pg_db || "<unset>"}</span>
                         </div>
                         <div>
-                          POSTGRES_PASSWORD:
+                          GAMEND_DB_POSTGRES_PASSWORD:
                           <span class="font-mono">{mask_secret(@config.pg_password)}</span>
                         </div>
 
@@ -1074,7 +1077,7 @@ defmodule GameServerWeb.AdminLive.Config do
                               </span>
                             </div>
                             <div>
-                              POSTGRES_PORT:
+                              GAMEND_DB_POSTGRES_PORT:
                               <span class="font-mono">{@config.postgres_port_env || "<unset>"}</span>
                             </div>
                             <div>
@@ -1689,15 +1692,14 @@ defmodule GameServerWeb.AdminLive.Config do
       access_log_level: GameServerWeb.endpoint().access_log_level(nil),
       access_log_level_env:
         GameServer.Settings.get(GameServerWeb.Observability, :access_log_level),
-      release_distribution_env:
-        GameServer.Settings.get(GameServer.Cluster, :release_distribution),
-      release_node_env: GameServer.Settings.get(GameServer.Cluster, :release_node),
-      release_cookie_env: GameServer.Settings.get(GameServer.Cluster, :release_cookie),
+      release_distribution_env: cluster_env("RELEASE_DISTRIBUTION"),
+      release_node_env: cluster_env("RELEASE_NODE"),
+      release_cookie_env: cluster_env("RELEASE_COOKIE"),
       dns_cluster_query_env: GameServer.Settings.get(GameServer.Cluster, :dns_query),
       release_distribution_recommended: "name",
       release_node_recommended: clustering.release_node_recommended,
       dns_cluster_query_recommended: clustering.dns_cluster_query_recommended,
-      erl_aflags_env: GameServer.Settings.get(GameServer.Cluster, :erl_aflags),
+      erl_aflags_env: cluster_env("ERL_AFLAGS"),
       erl_aflags_recommended: clustering.erl_aflags_recommended,
       node_name: node(),
       node_alive?: Node.alive?(),
@@ -1982,9 +1984,9 @@ defmodule GameServerWeb.AdminLive.Config do
   defp cache_l2_label(other), do: inspect(other)
 
   defp clustering_diagnostics do
-    fly_app_name_env = GameServer.Settings.get(GameServer.Cluster, :fly_app_name)
-    fly_private_ip_env = GameServer.Settings.get(GameServer.Cluster, :fly_private_ip)
-    fly_region_env = GameServer.Settings.get(GameServer.Cluster, :fly_region)
+    fly_app_name_env = cluster_env("FLY_APP_NAME")
+    fly_private_ip_env = cluster_env("FLY_PRIVATE_IP")
+    fly_region_env = cluster_env("FLY_REGION")
 
     fly? = fly_app_name_env != nil
 
@@ -2433,6 +2435,15 @@ defmodule GameServerWeb.AdminLive.Config do
   end
 
   defp dynamic_signature(_export), do: %{arity: :custom, signature: nil, doc: nil}
+
+  # Not settings: the BEAM and the platform read these names themselves, so
+  # they are reported rather than declared. See GameServer.Cluster.
+  defp cluster_env(name) do
+    Enum.find_value(GameServer.Cluster.environment(), fn
+      %{name: ^name, value: value} -> value
+      _ -> nil
+    end)
+  end
 
   defp detect_db_adapter do
     if AdvisoryLock.postgres?(), do: :postgres, else: :sqlite

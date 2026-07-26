@@ -1,10 +1,10 @@
 import Config
 
-if System.get_env("DATABASE_URL") ||
-     (System.get_env("POSTGRES_HOST") && System.get_env("POSTGRES_USER")) do
+if System.get_env("GAMEND_DB_URL") ||
+     (System.get_env("GAMEND_DB_POSTGRES_HOST") && System.get_env("GAMEND_DB_POSTGRES_USER")) do
   database_url =
-    System.get_env("DATABASE_URL") ||
-      "ecto://#{System.get_env("POSTGRES_USER")}:#{System.get_env("POSTGRES_PASSWORD")}@#{System.get_env("POSTGRES_HOST")}:#{System.get_env("POSTGRES_PORT", "5432")}/#{System.get_env("POSTGRES_DB", "game_server_web_dev")}"
+    System.get_env("GAMEND_DB_URL") ||
+      "ecto://#{System.get_env("GAMEND_DB_POSTGRES_USER")}:#{System.get_env("GAMEND_DB_POSTGRES_PASSWORD")}@#{System.get_env("GAMEND_DB_POSTGRES_HOST")}:#{System.get_env("GAMEND_DB_POSTGRES_PORT", "5432")}/#{System.get_env("GAMEND_DB_POSTGRES_DB", "game_server_web_dev")}"
 
   config :game_server_core, GameServer.Repo,
     url: database_url,

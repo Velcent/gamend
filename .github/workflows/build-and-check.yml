@@ -121,9 +121,8 @@ jobs:
 
           docker network create smoke-net
 
-          # POSTGRES_* are inherited names — platforms provision them, so they
-          # are the only database variables the server reads. Using a derived
-          # GAMEND_DB_POSTGRES_* name here silently configures nothing.
+          # The postgres container reads its own POSTGRES_* names to
+          # initialise; the server reads ours. They are deliberately distinct.
           {
             echo "GAMEND_AUTH_SECRET_KEY_BASE=$(head -c 48 /dev/urandom | base64 | tr -d '\n')"
             echo "GAMEND_HTTP_HOST=localhost"
@@ -143,10 +142,10 @@ jobs:
             done
 
             {
-              echo "POSTGRES_HOST=smoke-db"
-              echo "POSTGRES_USER=postgres"
-              echo "POSTGRES_PASSWORD=postgres"
-              echo "POSTGRES_DB=game_server_prod"
+              echo "GAMEND_DB_POSTGRES_HOST=smoke-db"
+              echo "GAMEND_DB_POSTGRES_USER=postgres"
+              echo "GAMEND_DB_POSTGRES_PASSWORD=postgres"
+              echo "GAMEND_DB_POSTGRES_DB=game_server_prod"
             } >> smoke.env
           fi
 

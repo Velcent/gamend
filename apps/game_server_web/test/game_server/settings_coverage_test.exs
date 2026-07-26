@@ -20,12 +20,6 @@ defmodule GameServer.SettingsCoverageTest do
 
   @definitions Settings.all()
 
-  # Names other software defines, so they do not follow the convention.
-  @inherited ~w(PORT DATABASE_URL REDIS_URL ERL_AFLAGS
-                RELEASE_DISTRIBUTION RELEASE_NODE RELEASE_COOKIE
-                FLY_APP_NAME FLY_PRIVATE_IP FLY_REGION
-                POSTGRES_HOST POSTGRES_PORT POSTGRES_USER POSTGRES_PASSWORD POSTGRES_DB)
-
   test "there is at least one declaration to check" do
     assert length(@definitions) > 200
   end
@@ -44,21 +38,24 @@ defmodule GameServer.SettingsCoverageTest do
              "two settings would read the same variable: #{inspect(duplicates)}"
     end
 
-    test "every name we own derives from its group and key" do
+    test "every name derives from its group and key, without exception" do
       wrong =
         for definition <- @definitions,
-            definition.env not in @inherited,
             expected = expected_name(definition),
             definition.env != expected,
             do: {definition.env, expected}
 
-      assert wrong == [], "hand-written names left over: #{inspect(wrong)}"
+      assert wrong == [], "names not following the convention: #{inspect(wrong)}"
     end
 
-    test "only the inherited names opt out of the convention" do
-      external = @definitions |> Enum.filter(& &1.external) |> Enum.map(& &1.env) |> Enum.sort()
-
-      assert external == Enum.sort(@inherited)
+    test "the declaration offers no way to pin a name" do
+      # `env:` and `external:` were removed so an exception cannot come back.
+      assert_raise ArgumentError, ~r/unknown option\(s\) \[:env\]/, fn ->
+        defmodule PinnedName do
+          use GameServer.Settings.Provider, app: :game_server_core, group: :pinned
+          setting(:thing, :string, env: "LEGACY_NAME")
+        end
+      end
     end
 
     test "every group has a display label" do

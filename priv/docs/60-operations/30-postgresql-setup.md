@@ -8,26 +8,26 @@ icon: hero-circle-stack
 
 ## Database URL Configuration
 
-Set the DATABASE_URL environment variable:
+Set the GAMEND_DB_URL environment variable:
 
 ```bash
-DATABASE_URL="postgresql://username:password@host:port/database"
+GAMEND_DB_URL="postgresql://username:password@host:port/database"
 # Example:
-DATABASE_URL="postgresql://myuser:mypass@localhost:5432/game_server_prod"
+GAMEND_DB_URL="postgresql://myuser:mypass@localhost:5432/game_server_prod"
 ```
 
-The app will automatically detect PostgreSQL when DATABASE_URL is set or when POSTGRES_HOST and POSTGRES_USER environment variables are configured.
+The app will automatically detect PostgreSQL when GAMEND_DB_URL is set or when GAMEND_DB_POSTGRES_HOST and GAMEND_DB_POSTGRES_USER environment variables are configured.
 
 ## Individual Environment Variables (Alternative)
 
 You can also set individual database connection variables:
 
 ```bash
-POSTGRES_HOST="your-postgres-host"
-POSTGRES_PORT="5432"
-POSTGRES_USER="your-username"
-POSTGRES_PASSWORD="your-password"
-POSTGRES_DB="your-database-name"
+GAMEND_DB_POSTGRES_HOST="your-postgres-host"
+GAMEND_DB_POSTGRES_PORT="5432"
+GAMEND_DB_POSTGRES_USER="your-username"
+GAMEND_DB_POSTGRES_PASSWORD="your-password"
+GAMEND_DB_POSTGRES_DB="your-database-name"
 ```
 
 ## Deployment Considerations

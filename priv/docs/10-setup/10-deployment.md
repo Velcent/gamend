@@ -55,7 +55,7 @@ Key variables to set:
 | Variable | Description |
 |---|---|
 | GAMEND_AUTH_SECRET_KEY_BASE | 64-byte hex secret for session signing. Generate with: mix phx.gen.secret |
-| DATABASE_URL | PostgreSQL connection string (pre-configured for the Docker Compose DB) |
+| GAMEND_DB_URL | PostgreSQL connection string (pre-configured for the Docker Compose DB) |
 | GAMEND_HTTP_HOST | Your public hostname (e.g. play.example.com) |
 | GAMEND_AUTH_GUARDIAN_SECRET_KEY | Secret for signing JWT API tokens |
 

@@ -7,7 +7,7 @@ generated: by `mix gamend.settings.guide` - do not edit by hand; edit the
 # Settings
 
 Every setting the server has, with the environment variable that sets it.
-218 settings across 19 groups.
+211 settings across 19 groups.
 
 A setting is declared in the module that owns it, so this page and
 `.env.example` are generated from the same source the server reads. The
@@ -59,15 +59,8 @@ Live values, and where each one came from, are on the
 
 | Variable | Type | Default | Notes |
 |---|---|---|---|
-| `ERL_AFLAGS` | string | - | Extra BEAM flags, e.g. -proto_dist inet6_tcp for IPv6-only networking. |
-| `FLY_APP_NAME` | string | - |  |
-| `FLY_PRIVATE_IP` | string | - |  |
-| `FLY_REGION` | string | - |  |
 | `GAMEND_CLUSTER_DNS_QUERY` | string | - | DNS name whose A/AAAA records list the other nodes, polled at boot. |
-| `REDIS_URL` | string | - | Shared fallback URL used by the cache and rate limiter when neither sets its own. |
-| `RELEASE_COOKIE` | string | - | Shared secret every node in the cluster must match. Secret - never log or commit it. |
-| `RELEASE_DISTRIBUTION` | string | - | name (long names) or sname. Read by the release boot script. |
-| `RELEASE_NODE` | string | - | This node's name. Must be unique across the cluster. |
+| `GAMEND_CLUSTER_REDIS_URL` | string | - | Shared fallback URL used by the cache and rate limiter when neither sets its own. |
 
 
 ## Content & plugins
@@ -84,11 +77,15 @@ Live values, and where each one came from, are on the
 
 | Variable | Type | Default | Notes |
 |---|---|---|---|
-| `DATABASE_URL` | string | - | Full ecto:// URL. Takes precedence over the individual POSTGRES_* values. Secret - never log or commit it. |
 | `GAMEND_DB_ADAPTER` | atom | `:sqlite` | sqlite or postgres. Compile-time; set as a build arg, not at boot. |
 | `GAMEND_DB_IPV6` | boolean | `false` | Connect over IPv6, needed on platforms with IPv6-only private networking. |
 | `GAMEND_DB_POOL_SIZE` | integer | - | Connections in the pool. Defaults to 10 on Postgres, 5 on SQLite. |
 | `GAMEND_DB_POOL_TIMEOUT` | integer | `10000` | How long a request waits to check out a connection, in milliseconds. |
+| `GAMEND_DB_POSTGRES_DB` | string | - |  |
+| `GAMEND_DB_POSTGRES_HOST` | string | - |  |
+| `GAMEND_DB_POSTGRES_PASSWORD` | string | - | Secret - never log or commit it. |
+| `GAMEND_DB_POSTGRES_PORT` | integer | `5432` |  |
+| `GAMEND_DB_POSTGRES_USER` | string | - |  |
 | `GAMEND_DB_QUERY_TIMEOUT` | integer | `15000` |  |
 | `GAMEND_DB_QUEUE_INTERVAL` | integer | `1000` |  |
 | `GAMEND_DB_QUEUE_TARGET` | integer | `10000` |  |
@@ -97,11 +94,7 @@ Live values, and where each one came from, are on the
 | `GAMEND_DB_SQLITE_PATH` | string | - | Where the SQLite file lives. Point at a mounted volume in production. |
 | `GAMEND_DB_SQLITE_SYNCHRONOUS` | atom | `:normal` | off \| normal \| full \| extra. Lower means fewer fsyncs and less durability. |
 | `GAMEND_DB_SQLITE_WAL_AUTOCHECKPOINT` | integer | `2000` |  |
-| `POSTGRES_DB` | string | - |  |
-| `POSTGRES_HOST` | string | - |  |
-| `POSTGRES_PASSWORD` | string | - | Secret - never log or commit it. |
-| `POSTGRES_PORT` | integer | `5432` |  |
-| `POSTGRES_USER` | string | - |  |
+| `GAMEND_DB_URL` | string | - | Full ecto:// URL. Takes precedence over the individual postgres_* values. Secret - never log or commit it. |
 
 
 ## Public features
@@ -124,9 +117,9 @@ Live values, and where each one came from, are on the
 |---|---|---|---|
 | `GAMEND_HTTP_ALLOWED_ORIGINS` | list | `` | Browser CORS/WebSocket origin allowlist. Empty allows any origin. Prefix an entry with `regex:` for a pattern. |
 | `GAMEND_HTTP_HOST` | string | `"localhost"` | Public hostname, used to build URLs and OAuth redirect URIs. |
+| `GAMEND_HTTP_PORT` | integer | `4000` | TCP port the HTTP listener binds. |
 | `GAMEND_HTTP_SCHEME` | string | - | http or https. Defaults to http for localhost, https otherwise. |
 | `GAMEND_HTTP_SERVER` | boolean | `false` | Start the HTTP listener. Only needed when running as a release. |
-| `PORT` | integer | `4000` | TCP port the HTTP listener binds. Injected by most platforms. |
 
 
 ## Limits

@@ -87,6 +87,19 @@ defmodule GameServerWeb.AdminLive.SettingsTest do
     {:ok, _view, html} = live(conn, ~p"/admin/settings")
 
     assert html =~ "default"
-    assert html =~ "inherited"
+    assert html =~ "config"
+  end
+
+  test "no setting escapes the naming convention", %{conn: conn} do
+    {:ok, _view, html} = live(conn, ~p"/admin/settings")
+
+    # Every declared variable is derived, so each is GAMEND_ or a plugin root.
+    for definition <- Settings.all() do
+      assert String.starts_with?(definition.env, "GAMEND_") or
+               String.starts_with?(definition.env, "POLYGLOT_"),
+             "#{definition.env} does not follow the convention"
+    end
+
+    refute html =~ "inherited"
   end
 end
