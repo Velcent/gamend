@@ -46,6 +46,24 @@ defmodule GameServerHost.PagesSmokeTest do
     end
   end
 
+  test "a post does not open by repeating its own lede" do
+    for post <- GameServer.Content.list_blog_posts(),
+        html = GameServer.Content.blog_post_html(post.slug),
+        is_binary(html) and is_binary(post.excerpt) and post.excerpt != "" do
+      # The show page renders the excerpt above the body already.
+      first_paragraph =
+        case Regex.run(~r/\A\s*<p>(.*?)<\/p>/s, html) do
+          [_, text] -> text |> String.replace(~r/<[^>]+>/, "") |> String.replace(~r/\s+/, " ")
+          _ -> nil
+        end
+
+      excerpt = post.excerpt |> String.replace(~r/\s+/, " ") |> String.trim()
+
+      refute first_paragraph == excerpt,
+             "#{post.slug} body starts with its excerpt — the page shows it twice"
+    end
+  end
+
   test "every blog post page renders, not just the index" do
     conn = get(build_conn(), "/blog")
 

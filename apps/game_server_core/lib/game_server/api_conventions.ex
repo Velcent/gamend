@@ -21,8 +21,21 @@ defmodule GameServer.ApiConventions do
           message: String.t()
         }
 
-  @core "apps/game_server_core/lib"
-  @web "apps/game_server_web/lib"
+  # The same checks run in every host repo (polyglot, the starter), where
+  # core/web live under deps and the host's own code under lib/ and
+  # modules/*/lib - so the scan roots are discovered, not hardcoded. Only
+  # directories that exist take part.
+  @schema_roots ["apps/game_server_core/lib", "lib", "modules"]
+  @source_roots ["apps/game_server_web/lib", "lib", "modules"]
+
+  defp schema_dirs, do: existing([dep_dir("game_server_core") | @schema_roots])
+  defp source_dirs, do: existing([dep_dir("game_server_web") | @source_roots])
+
+  # In a host repo core/web are deps; their code obeys the rules too, and a
+  # violation there means the host pulled a bad version - worth failing on.
+  defp dep_dir(app), do: Path.join(["deps", app, "apps", app, "lib"])
+
+  defp existing(paths), do: paths |> Enum.filter(&File.dir?/1) |> Enum.uniq()
 
   # Durations must name their unit. `_at` is for instants, not durations.
   @duration_units ~w(ms sec seconds min minutes hours days)
@@ -39,7 +52,8 @@ defmodule GameServer.ApiConventions do
        hyphenated_route_paths() ++
        nullable_string_schemas() ++
        hand_rolled_meta() ++
-       hand_rolled_page_params())
+       hand_rolled_page_params() ++
+       stale_documented_routes())
     |> Enum.sort_by(&{&1.rule, &1.file, &1.line})
   end
 
@@ -51,7 +65,10 @@ defmodule GameServer.ApiConventions do
   defp nullable_strings_not_coalesced do
     nullable = nullable_schema_fields()
 
-    for {file, line, text} <- source_lines(@web),
+    for {file, line, text} <- source_lines(source_dirs()),
+        # Only code that writes JSON responses: a `key: var.field` line in a
+        # context is usually changeset attrs, where nil is fine.
+        String.contains?(file, "_web/"),
         not live_view?(file),
         [_, key, _var, field] <- [Regex.run(~r/^\s*(\w+): ([a-z_]+)\.(\w+),?\s*$/, text)],
         Map.has_key?(nullable, field),
@@ -71,7 +88,7 @@ defmodule GameServer.ApiConventions do
   # every serializer. Such schemas encode through `GameServer.SchemaJSON`.
 
   defp derived_encoders_with_nullable_strings do
-    for {file, line, text} <- source_lines(@core),
+    for {file, line, text} <- source_lines(schema_dirs()),
         String.contains?(text, "@derive {Jason.Encoder"),
         schema_has_nullable_string?(file) do
       %{
@@ -86,7 +103,7 @@ defmodule GameServer.ApiConventions do
   # ── R3: instants are `*_at`, and nothing else is ───────────────────────────
 
   defp instants_not_suffixed do
-    for {file, line, text} <- source_lines(@core),
+    for {file, line, text} <- source_lines(schema_dirs()),
         [_, field] <- [Regex.run(~r/^\s*field :(\w+), :utc_datetime/, text)],
         not String.ends_with?(field, "_at") do
       %{
@@ -101,7 +118,7 @@ defmodule GameServer.ApiConventions do
   # ── R4: durations name their unit ──────────────────────────────────────────
 
   defp durations_without_unit do
-    for {file, line, text} <- source_lines(@core) ++ source_lines(@web),
+    for {file, line, text} <- source_lines(schema_dirs() ++ source_dirs()),
         [_, name] <- [Regex.run(~r/^\s*setting\(?:(\w+), :integer/, text)],
         duration_name?(name),
         not unit_suffixed?(name) do
@@ -124,7 +141,7 @@ defmodule GameServer.ApiConventions do
   # ── R5: route paths use underscores ────────────────────────────────────────
 
   defp hyphenated_route_paths do
-    for {file, line, text} <- source_lines(@web),
+    for {file, line, text} <- source_lines(source_dirs()),
         String.contains?(file, "router"),
         [_, verb, path] <-
           [Regex.run(~r/^\s*(get|post|put|patch|delete|live) "(\/[^"]*)"/, text)],
@@ -145,7 +162,7 @@ defmodule GameServer.ApiConventions do
   # semantic there (`ends_at: null` = permanent).
 
   defp nullable_string_schemas do
-    for {file, line, text} <- source_lines(@web),
+    for {file, line, text} <- source_lines(source_dirs()),
         String.contains?(text, "nullable: true"),
         String.contains?(text, "type: :string"),
         not String.contains?(text, "format:"),
@@ -166,7 +183,7 @@ defmodule GameServer.ApiConventions do
   # emitting three, four and six keys.
 
   defp hand_rolled_meta do
-    for {file, line, text} <- source_lines(@web),
+    for {file, line, text} <- source_lines(source_dirs()),
         controller?(file),
         Regex.match?(~r/^\s*(total_pages|has_more):/, text),
         not String.contains?(text, "%Schema{") do
@@ -185,7 +202,7 @@ defmodule GameServer.ApiConventions do
   # `min(size, 100)`, which ignored the configurable `max_page_size` limit.
 
   defp hand_rolled_page_params do
-    for {file, line, text} <- source_lines(@web),
+    for {file, line, text} <- source_lines(source_dirs()),
         controller?(file),
         String.contains?(text, ~s(params["page_size"])) or
           String.contains?(text, ~s(params["page"])) do
@@ -200,6 +217,91 @@ defmodule GameServer.ApiConventions do
 
   defp controller?(file), do: String.contains?(file, "/controllers/")
 
+  # ── R9: docs reference only routes that exist ──────────────────────────────
+  #
+  # Guides and specs name concrete `/api/v1/...` paths; a rename that misses
+  # one leaves documentation teaching a 404. Prefixes of real routes are fine
+  # ("endpoints live under /api/v1/chat"), as are file paths.
+
+  @doc_dirs ["priv/docs", "docs"]
+
+  defp stale_documented_routes do
+    case declared_route_paths() do
+      [] -> []
+      declared -> stale_documented_routes(declared)
+    end
+  end
+
+  defp stale_documented_routes(declared) do
+    for dir <- @doc_dirs,
+        file <- Path.wildcard(Path.join(dir, "**/*.md")),
+        {text, line} <- file |> File.read!() |> String.split("\n") |> Enum.with_index(1),
+        path <- documented_api_paths(text),
+        not known_or_prefix?(path, declared) do
+      %{
+        rule: "R9-doc-route",
+        file: file,
+        line: line,
+        message: "documents `#{path}`, which matches no declared route"
+      }
+    end
+  end
+
+  defp documented_api_paths(line) do
+    ~r|/api/v1/[A-Za-z0-9_\-/:{}]*[A-Za-z0-9_}]|
+    |> Regex.scan(line)
+    |> List.flatten()
+    |> Enum.reject(&(String.contains?(&1, "controller") or String.ends_with?(&1, ".ex")))
+    |> Enum.map(&normalize_path/1)
+  end
+
+  defp normalize_path(path) do
+    Regex.replace(~r/(:\w+|\{\w+\})/, path, "{}")
+  end
+
+  # A documented path is fine when a declared route matches it — params on
+  # either side are wildcards, so `/payments/validate/google` satisfies
+  # `/payments/validate/{}` — or when it is a prefix of one ("endpoints live
+  # under /api/v1/chat").
+  defp known_or_prefix?(path, declared) do
+    Enum.any?(declared, fn route ->
+      Regex.match?(wildcard_regex(route, ""), path) or
+        Regex.match?(wildcard_regex(path, "(/|$)"), route)
+    end)
+  end
+
+  defp wildcard_regex(pattern, tail) do
+    inner =
+      pattern
+      |> Regex.escape()
+      |> String.replace("\\{\\}", "[^/]+")
+
+    Regex.compile!("^" <> inner <> if(tail == "", do: "$", else: tail))
+  end
+
+  @doc """
+  Every path the compiled router serves, `:params` as `{}`.
+
+  Read from `Phoenix.Router.routes/1` rather than parsed from source — routes
+  live inside `scope` blocks, so the literal strings in the source are
+  suffixes, not full paths.
+  """
+  @spec declared_route_paths() :: [String.t()]
+  def declared_route_paths do
+    [GameServerHost.Router, GameServerWeb.Router]
+    |> Enum.find(&Code.ensure_loaded?/1)
+    |> case do
+      nil ->
+        []
+
+      router ->
+        router
+        |> Phoenix.Router.routes()
+        |> Enum.map(&normalize_path(&1.path))
+        |> Enum.uniq()
+    end
+  end
+
   # ── Shared analysis ────────────────────────────────────────────────────────
 
   @doc """
@@ -209,7 +311,7 @@ defmodule GameServer.ApiConventions do
   @spec nullable_schema_fields() :: %{String.t() => String.t()}
   def nullable_schema_fields do
     per_schema =
-      for path <- ex_files(@core),
+      for path <- ex_files(schema_dirs()),
           [_, table, body] <- [Regex.run(~r/schema "(\w+)" do(.*?)\n  end/s, File.read!(path))] do
         required = required_fields(File.read!(path))
 
@@ -271,13 +373,24 @@ defmodule GameServer.ApiConventions do
   # policy is about what crosses the wire as JSON.
   defp live_view?(file), do: String.contains?(file, "/live/")
 
-  defp source_lines(root) do
-    for path <- ex_files(root),
+  defp source_lines(roots) do
+    for path <- ex_files(roots),
         {text, line} <- Enum.with_index(String.split(File.read!(path), "\n"), 1),
         do: {path, line, text}
   end
 
-  defp ex_files(root) do
-    Path.wildcard(Path.join(root, "**/*.ex"))
+  defp ex_files(roots) when is_list(roots) do
+    roots
+    |> Enum.flat_map(fn root ->
+      # A root may itself live under deps/ (core/web pulled into a host), but
+      # anything *nested* below a root - a plugin's own deps/_build - is
+      # third-party code and not ours to lint.
+      for path <- Path.wildcard(Path.join(root, "**/*.ex")),
+          rest = String.trim_leading(path, root),
+          not String.contains?(rest, "/deps/"),
+          not String.contains?(rest, "/_build/"),
+          do: path
+    end)
+    |> Enum.uniq()
   end
 end

@@ -77,6 +77,12 @@ config :game_server_web, GameServerWeb.Plugs.RateLimiter, enabled: false
 # keep logging after the test task itself is done.
 config :game_server_core, GameServer.Accounts.StalePresenceSweeper, enabled: false
 
+# Run GameServer.Async side effects inline so assertions observe them without
+# racing, and so a fire-and-forget task can't outlive the test's DB sandbox
+# owner (that surfaced as "client #PID exited" Exqlite disconnects). Kept in
+# sync with the root config/test.exs, which only applies to umbrella runs.
+config :game_server_core, async_inline: true
+
 # Jobs run inline on demand in tests (no queues/plugins/cron). Kept in sync with
 # the root config/test.exs.
 config :game_server_core, Oban, testing: :manual

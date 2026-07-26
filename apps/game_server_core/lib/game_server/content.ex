@@ -403,7 +403,7 @@ defmodule GameServer.Content do
         post ->
           case render_markdown_file(post.path, "blog") do
             nil -> nil
-            html -> strip_first_h1(html)
+            html -> html |> strip_first_h1() |> strip_lede_paragraph(post.excerpt)
           end
       end
     end)
@@ -763,6 +763,33 @@ defmodule GameServer.Content do
   # header already displays the title separately.
   defp strip_first_h1(html) do
     Regex.replace(~r/<h1>.*?<\/h1>\s*/s, html, "", global: false)
+  end
+
+  # The show page renders the excerpt as a lede above the body, and the excerpt
+  # *is* the body's first paragraph — so that paragraph is dropped here or every
+  # post opens by repeating itself. Only an exact match is removed; an edited
+  # opening paragraph stays.
+  defp strip_lede_paragraph(html, excerpt) when is_binary(excerpt) and excerpt != "" do
+    case Regex.run(~r/\A\s*<p>(.*?)<\/p>\s*/s, html) do
+      [full, text] ->
+        if normalize_text(text) == normalize_text(excerpt) do
+          String.replace(html, full, "", global: false)
+        else
+          html
+        end
+
+      _ ->
+        html
+    end
+  end
+
+  defp strip_lede_paragraph(html, _excerpt), do: html
+
+  defp normalize_text(text) do
+    text
+    |> String.replace(~r/<[^>]+>/, "")
+    |> String.replace(~r/\s+/, " ")
+    |> String.trim()
   end
 
   # Pill tag definitions: [tag] → {css_class_suffix, display_label}

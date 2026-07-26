@@ -9,7 +9,6 @@ defmodule GameServerWeb.Api.V1.Admin.IconUploadTest do
 
   use GameServerWeb.ConnCase, async: false
 
-  alias GameServer.Accounts
   alias GameServer.Accounts.User
   alias GameServer.AccountsFixtures
   alias GameServer.Leaderboards

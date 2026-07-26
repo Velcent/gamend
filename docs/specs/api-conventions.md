@@ -151,3 +151,9 @@ Rules live in `GameServer.ApiConventions`. Adding a rule means fixing every
 existing violation in the same change — the linter has no baseline file and no
 suppression comments, deliberately: a rule with exceptions is a rule nobody
 trusts.
+
+The task ships with `game_server_core`, so **host repos run the same check**:
+polyglot and the starter call `gamend.api.lint` from their own precommits. The
+scan roots are discovered (the host's `lib/` and `modules/*/lib`, plus core/web
+whether as umbrella apps or deps), and R9 validates docs against whichever
+router the host compiled (`GameServerHost.Router` first).

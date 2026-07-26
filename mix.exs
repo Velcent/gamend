@@ -100,6 +100,7 @@ defmodule GameServerHost.MixProject do
         ["format --check-formatted", "credo --strict"] ++
           local_web_commands([web_cmd("format --check-formatted"), web_cmd("credo --strict")]),
       "deps.audit": [&prune_vendored_lockfiles/1, "deps.audit"],
+      # The inner loop: fast checks only. Generators and the web app's own
       precommit:
         [
           "compile --warning-as-errors",

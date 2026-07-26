@@ -155,7 +155,7 @@ defmodule GameServerWeb.Api.V1.TournamentControllerTest do
            |> json_response(404)
   end
 
-  test "bracket, standings and my-match after a draw", %{
+  test "bracket, standings and my_match after a draw", %{
     auth_conn: auth_conn,
     conn: conn,
     user: user,

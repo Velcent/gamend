@@ -81,7 +81,7 @@ defmodule GameServerWeb.Api.V1.Admin.EconomyControllerTest do
     assert [%{"item" => "potion", "quantity" => 3}] = items["data"]
   end
 
-  test "admin consume-item refuses to overdraw", %{conn: conn, target: target} do
+  test "admin consume_item refuses to overdraw", %{conn: conn, target: target} do
     conn =
       post(conn, "/api/v1/admin/economy/consume_item", %{
         user_id: target.id,
