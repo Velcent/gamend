@@ -8,7 +8,7 @@ Two kinds, differing only in what a "no" means and whether an answer can be
 taken back (see `GameServer.ReadyChecks`):
 
   * `"accept"` — one-shot and irrevocable; the first decline fails the whole
-    check; the deadline is mandatory.
+    check; the deadline_at is mandatory.
   * `"ready"` — a toggle; a decline just leaves the check pending.
 
 The subject is whichever of `lobby_id`/`party_id` is set — a lobby's
@@ -21,7 +21,7 @@ no lobby has been created.
 ```elixir
 @type t() :: %GameServer.ReadyChecks.Check{
   __meta__: term(),
-  deadline: term(),
+  deadline_at: term(),
   id: term(),
   inserted_at: term(),
   kind: term(),

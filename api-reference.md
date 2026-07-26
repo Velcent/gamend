@@ -1,9 +1,10 @@
-# game_server_core v1.0.1073 - API Reference
+# game_server_core v1.0.1075 - API Reference
 
 ## Modules
 
 - [GameServer](GameServer.md): GameServer keeps the contexts that define your domain
 and business logic.
+- [GameServer.ApiConventions](GameServer.ApiConventions.md): Mechanical checks for the conventions in `docs/specs/api-conventions.md`.
 - [GameServer.Cluster](GameServer.Cluster.md): Erlang distribution, needed for multi-node deployments and the partitioned
 L2 cache.
 - [GameServer.Database](GameServer.Database.md): Connection and tuning settings for `GameServer.Repo`.
@@ -95,11 +96,11 @@ reset period.
 rounds → champions. See TOURNAMENT_DESIGN.md.
   - [GameServer.Tournaments.Entry](GameServer.Tournaments.Entry.md): One side of the bracket: a leader and their tournament progress.
   - [GameServer.Tournaments.Match](GameServer.Tournaments.Match.md): A pairing plus a verdict: two entries that must produce a winner by
-`deadline`. Never a lobby — how the pairing is played is game policy;
+`deadline_at`. Never a lobby — how the pairing is played is game policy;
 `metadata` is game scratch space (runs, lobby id, ...).
 
   - [GameServer.Tournaments.Ticker](GameServer.Tournaments.Ticker.md): Periodic driver for tournament lifecycles: state transitions, match-ready
-firing, deadline sweeps and recurrence spawns (`GameServer.Tournaments.tick/0`).
+firing, deadline_at sweeps and recurrence spawns (`GameServer.Tournaments.tick/0`).
   - [GameServer.Tournaments.Tournament](GameServer.Tournaments.Tournament.md): A bracket tournament occurrence.
 
 - Economy
@@ -266,6 +267,7 @@ and booleans keep `null`, where absence is semantic.
 
 - [mix demo.seed](Mix.Tasks.Demo.Seed.md): Fills the database with enough demo data to exercise pagination and the
 list/detail pages at realistic sizes.
+- [mix gamend.api.lint](Mix.Tasks.Gamend.Api.Lint.md): Enforces the naming and serialization conventions mechanically.
 - [mix gamend.content.extract](Mix.Tasks.Gamend.Content.Extract.md): Writes `content.pot` from the titles and descriptions stored on quests,
 leaderboards and tournaments.
 - [mix gamend.content.migrate_metadata](Mix.Tasks.Gamend.Content.MigrateMetadata.md): One-shot migration for instances that stored translations in the database.

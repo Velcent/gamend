@@ -7,6 +7,7 @@ GameServer.Accounts.UserNotifier.html
 GameServer.Accounts.UserToken.html
 GameServer.Accounts.UsernameGenerator.html
 GameServer.Accounts.html
+GameServer.ApiConventions.html
 GameServer.Apple.html
 GameServer.Async.html
 GameServer.Cache.L1.html
@@ -149,6 +150,7 @@ GameServer.Types.html
 GameServer.UUIDv7.html
 GameServer.html
 Mix.Tasks.Demo.Seed.html
+Mix.Tasks.Gamend.Api.Lint.html
 Mix.Tasks.Gamend.Content.Extract.html
 Mix.Tasks.Gamend.Content.MigrateMetadata.html
 Mix.Tasks.Gamend.Settings.EnvExample.html
@@ -166,8 +168,8 @@ dist/lato-latin-700-normal-2XVSBPG4.woff2
 dist/lato-latin-ext-400-normal-N27NCBWW.woff2
 dist/lato-latin-ext-700-normal-Q2L5DVMW.woff2
 dist/remixicon-ZWU5GQ4X.woff2
-dist/search_data-169C485E.js
-dist/sidebar_items-CBC5BCCD.js
+dist/search_data-0B811161.js
+dist/sidebar_items-65CB7F35.js
 index.html
 readme.html
 search.html

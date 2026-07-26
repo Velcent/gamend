@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.1">
-    <meta name="project" content="game_server_core v1.0.1073">
+    <meta name="project" content="game_server_core v1.0.1075">
 
 
-    <title>API Reference — game_server_core v1.0.1073</title>
+    <title>API Reference — game_server_core v1.0.1075</title>
 
     <link rel="stylesheet" href="dist/html-elixir-YJO4MOOW.css" />
 
-    <script defer src="dist/sidebar_items-CBC5BCCD.js"></script>
+    <script defer src="dist/sidebar_items-65CB7F35.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-YU4BZFVS.js"></script>
 
@@ -37,7 +37,7 @@
 game_server_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1073
+          v1.0.1075
         </div>
       </div>
     </div>
@@ -92,7 +92,7 @@ game_server_core
 
 <div id="top-content">
   <div class="heading-with-actions top-heading">
-    <h1>API Reference <small class="app-vsn">game_server_core v#1.0.1073</small></h1>
+    <h1>API Reference <small class="app-vsn">game_server_core v#1.0.1075</small></h1>
 <a href="api-reference.md" title="Copy Markdown (hold Ctrl/Cmd and click it to open as Markdown)" class="copy-markdown icon-action" rel="help">
   <i class="ri-markdown-line" aria-hidden="true"></i>
   <span class="sr-only">Copy Markdown</span>
@@ -195,6 +195,15 @@ and email-change workflows.</p></div>
   </div>
 
     <div class="summary-synopsis"><p>Generates default usernames for new users.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="GameServer.ApiConventions.html" translate="no">GameServer.<wbr>ApiConventions</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Mechanical checks for the conventions in <code class="inline">docs/specs/api-conventions.md</code>.</p></div>
 
 </div>
 <div class="summary-row">
@@ -1469,7 +1478,7 @@ rounds → champions. See TOURNAMENT_DESIGN.md.</p></div>
   </div>
 
     <div class="summary-synopsis"><p>A pairing plus a verdict: two entries that must produce a winner by
-<code class="inline">deadline</code>. Never a lobby — how the pairing is played is game policy;
+<code class="inline">deadline_at</code>. Never a lobby — how the pairing is played is game policy;
 <code class="inline">metadata</code> is game scratch space (runs, lobby id, ...).</p></div>
 
 </div>
@@ -1480,7 +1489,7 @@ rounds → champions. See TOURNAMENT_DESIGN.md.</p></div>
   </div>
 
     <div class="summary-synopsis"><p>Periodic driver for tournament lifecycles: state transitions, match-ready
-firing, deadline sweeps and recurrence spawns (<a href="GameServer.Tournaments.html#tick/0"><code class="inline">GameServer.Tournaments.tick/0</code></a>).</p></div>
+firing, deadline_at sweeps and recurrence spawns (<a href="GameServer.Tournaments.html#tick/0"><code class="inline">GameServer.Tournaments.tick/0</code></a>).</p></div>
 
 </div>
 <div class="summary-row">
@@ -1526,6 +1535,15 @@ firing, deadline sweeps and recurrence spawns (<a href="GameServer.Tournaments.h
 
     <div class="summary-synopsis"><p>Fills the database with enough demo data to exercise pagination and the
 list/detail pages at realistic sizes.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="Mix.Tasks.Gamend.Api.Lint.html" translate="no">mix gamend.<wbr>api.<wbr>lint</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Enforces the naming and serialization conventions mechanically.</p></div>
 
 </div>
 <div class="summary-row">
@@ -1612,9 +1630,9 @@ commented from each setting's declaration.</p></div>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/game_server_core/1.0.1073">Hex Package</a>
+              <a href="https://hex.pm/packages/game_server_core/1.0.1075">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/game_server_core/1.0.1073">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/game_server_core/1.0.1075">Hex Preview</a>
 
             </span>
 

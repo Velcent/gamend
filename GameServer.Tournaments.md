@@ -8,7 +8,7 @@ Core owns the structure (registration, seeding, rounds, deadlines,
 advancement, recurrence). Gameplay and judgment belong to the game: when a
 match becomes playable the `tournament_match_ready` hook fires, the game
 plays it however it wants (a lobby, solo runs, anything) and reports the
-verdict with `resolve_match/2`. Unresolved matches past their deadline fire
+verdict with `resolve_match/2`. Unresolved matches past their deadline_at fire
 `tournament_match_expired` for the game to adjudicate; the tournament's
 `deadline_policy` applies only if it doesn't.
 
@@ -311,7 +311,7 @@ First write wins; anything later returns `{:error, :already_resolved}`. The
   DateTime.t()
 ```
 
-Unix-independent deadline for `round`, anchored to `starts_at`.
+Unix-independent deadline_at for `round`, anchored to `starts_at`.
 
 # `round_matches`
 
@@ -374,7 +374,7 @@ open matches).
 ```
 
 Periodic driver, called by `GameServer.Tournaments.Ticker`. Runs every
-transition, match-ready firing, deadline sweep, and recurrence spawn that is
+transition, match-ready firing, deadline_at sweep, and recurrence spawn that is
 due. Serialized cluster-wide so hooks fire once.
 
 # `update_match_metadata`

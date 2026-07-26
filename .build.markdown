@@ -6,6 +6,7 @@ GameServer.Accounts.UserNotifier.md
 GameServer.Accounts.UserToken.md
 GameServer.Accounts.UsernameGenerator.md
 GameServer.Accounts.md
+GameServer.ApiConventions.md
 GameServer.Apple.md
 GameServer.Async.md
 GameServer.Cache.L1.md
@@ -148,6 +149,7 @@ GameServer.Types.md
 GameServer.UUIDv7.md
 GameServer.md
 Mix.Tasks.Demo.Seed.md
+Mix.Tasks.Gamend.Api.Lint.md
 Mix.Tasks.Gamend.Content.Extract.md
 Mix.Tasks.Gamend.Content.MigrateMetadata.md
 Mix.Tasks.Gamend.Settings.EnvExample.md

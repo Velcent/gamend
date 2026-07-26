@@ -390,6 +390,19 @@ Subscribe to global quest events (definition changes, completions).
 
 Updates a quest definition.
 
+# `visible_categories`
+
+```elixir
+@spec visible_categories(user_id() | nil) :: [String.t()]
+```
+
+The categories that actually have something behind them for this viewer.
+
+Derived from the same visibility rule as `list_user_quests/2` rather than
+from every definition: a chain's later tiers are hidden until unlocked, so
+listing their category gives a tab that opens onto nothing. Pass `nil` for
+the signed-out catalog.
+
 ---
 
 *Consult [api-reference.md](api-reference.md) for complete listing*

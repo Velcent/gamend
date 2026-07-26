@@ -132,7 +132,7 @@ Counts checks matching the same filters as `list_checks/1`.
 @spec expire(GameServer.ReadyChecks.Check.t()) :: :ok | :noop
 ```
 
-Fails one check on its deadline. A no-op if it already resolved.
+Fails one check on its deadline_at. A no-op if it already resolved.
 
 # `expire_due`
 
@@ -140,7 +140,7 @@ Fails one check on its deadline. A no-op if it already resolved.
 @spec expire_due(DateTime.t()) :: non_neg_integer()
 ```
 
-Fails every pending check whose deadline has passed.
+Fails every pending check whose deadline_at has passed.
 
 Each still-unanswered participant becomes `timed_out`. Returns how many
 checks were expired. Idempotent, so the durable expiry job and the
@@ -279,7 +279,7 @@ opens a new one over `user_ids`.
 The one verb behind every "answers are stale now" moment: a match ended
 (rematch needs a fresh board), the game mode changed, a member joined a
 party whose board had already resolved, or the host wants everyone to
-re-confirm on a deadline ("force ready"). Same options as `open/3`.
+re-confirm on a deadline_at ("force ready"). Same options as `open/3`.
 
 # `respond`
 
