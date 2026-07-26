@@ -76,6 +76,11 @@ config :game_server_core, async_inline: true
 # ticker supervised but idle. Tests drive GameServer.Tournaments.tick/0 directly.
 config :game_server_core, GameServer.Tournaments.Ticker, enabled: false
 
+# Same for the matchmaking sweep: no sandbox connection, and on SQLite it
+# collides with the test's open write transaction ("database is locked").
+# Tests drive GameServer.Matchmaking.Worker.sweep/0 directly.
+config :game_server_core, GameServer.Matchmaking.Worker, enabled: false
+
 # Disable app-level caching in tests to avoid stale reads across assertions.
 # Still provide the multilevel configuration so the cache can start.
 config :game_server_core, GameServer.Cache,
