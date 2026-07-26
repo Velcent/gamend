@@ -11,6 +11,10 @@ The `slug` is a human-readable identifier (e.g., "weekly_kills") that can be reu
 across multiple leaderboard instances (seasons). Use the slug to always target the
 currently active leaderboard, or use the integer `id` for a specific instance.
 
+## Icon
+`icon_url` is optional; when nil, clients show their default leaderboard
+icon (the web UI uses `GameServerWeb.Icons.default(:leaderboard)`).
+
 ## Sort Order
 - `:desc` — Higher scores rank first (default)
 - `:asc` — Lower scores rank first (e.g., fastest time)
@@ -40,6 +44,7 @@ currently active leaderboard, or use the integer `id` for a specific instance.
   __meta__: term(),
   description: term(),
   ends_at: term(),
+  icon_url: term(),
   id: term(),
   inserted_at: term(),
   metadata: term(),
@@ -64,28 +69,6 @@ Changeset for creating a new leaderboard.
 # `ended?`
 
 Returns true if the leaderboard has ended.
-
-# `localized_description`
-
-Returns the localized description for the given locale.
-
-Looks up `metadata["descriptions"][locale]`, falling back to `description`.
-Works with both `%Leaderboard{}` structs and plain maps (e.g. group info).
-
-# `localized_title`
-
-Returns the localized title for the given locale.
-
-Looks up `metadata["titles"][locale]`, falling back to `title`.
-Works with both `%Leaderboard{}` structs and plain maps (e.g. group info).
-
-## Examples
-
-    iex> lb = %Leaderboard{title: "Weekly Kills", metadata: %{"titles" => %{"es" => "Muertes Semanales"}}}
-    iex> Leaderboard.localized_title(lb, "es")
-    "Muertes Semanales"
-    iex> Leaderboard.localized_title(lb, "en")
-    "Weekly Kills"
 
 # `update_changeset`
 

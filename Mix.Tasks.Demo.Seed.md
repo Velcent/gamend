@@ -20,7 +20,7 @@ again without touching real data.
   * `leaderboard` — a leaderboard with N scored records
   * `group`       — a public group with N members
   * `tournament`  — a tournament with N registered entries, still open
-  * `lobby_snapshot` — recorded runs for `/admin/lobby-snapshots`, capped at 12
+  * `lobby_snapshot` — recorded runs for `/admin/lobby_snapshots`, capped at 12
     regardless of `--count` (this set is about having something to read, not
     volume)
   * `quest` — a daily, an auto-claim achievement and a chained follow-up,

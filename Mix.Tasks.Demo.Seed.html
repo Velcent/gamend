@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.1">
-    <meta name="project" content="game_server_core v1.0.1070">
+    <meta name="project" content="game_server_core v1.0.1073">
 
 
-    <title>mix demo.seed — game_server_core v1.0.1070</title>
+    <title>mix demo.seed — game_server_core v1.0.1073</title>
 
     <link rel="stylesheet" href="dist/html-elixir-YJO4MOOW.css" />
 
-    <script defer src="dist/sidebar_items-DDE9D191.js"></script>
+    <script defer src="dist/sidebar_items-CBC5BCCD.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-YU4BZFVS.js"></script>
 
@@ -37,7 +37,7 @@
 game_server_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1070
+          v1.0.1073
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ game_server_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">mix demo.<wbr>seed</span> 
-      <small class="app-vsn" translate="no">(game_server_core v1.0.1070)</small>
+      <small class="app-vsn" translate="no">(game_server_core v1.0.1073)</small>
 
     </h1>
 
@@ -120,7 +120,7 @@ again without touching real data.</p><h2 id="module-usage" class="section-headin
 </span><span class="n">mix</span><span class="w"> </span><span class="n">demo</span><span class="o">.</span><span class="n">seed</span><span class="w"> </span><span class="o">--</span><span class="n">count</span><span class="w"> </span><span class="mi">250</span><span class="w">           </span><span class="c1"># smaller run</span><span class="w">
 </span><span class="n">mix</span><span class="w"> </span><span class="n">demo</span><span class="o">.</span><span class="n">seed</span><span class="w"> </span><span class="o">--</span><span class="n">only</span><span class="w"> </span><span class="n">leaderboard</span><span class="w">    </span><span class="c1"># one set (comma-separated)</span><span class="w">
 </span><span class="n">mix</span><span class="w"> </span><span class="n">demo</span><span class="o">.</span><span class="n">seed</span><span class="w"> </span><span class="o">--</span><span class="n">only</span><span class="w"> </span><span class="n">group</span><span class="p">,</span><span class="n">tournament</span><span class="w">
-</span><span class="n">mix</span><span class="w"> </span><span class="n">demo</span><span class="o">.</span><span class="n">seed</span><span class="w"> </span><span class="o">--</span><span class="n">clean</span><span class="w">               </span><span class="c1"># remove everything this task created</span></code></pre><h2 id="module-sets" class="section-heading"><a href="#module-sets" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Sets</span></h2><ul><li><code class="inline">leaderboard</code> — a leaderboard with N scored records</li><li><code class="inline">group</code>       — a public group with N members</li><li><code class="inline">tournament</code>  — a tournament with N registered entries, still open</li><li><code class="inline">lobby_snapshot</code> — recorded runs for <code class="inline">/admin/lobby-snapshots</code>, capped at 12
+</span><span class="n">mix</span><span class="w"> </span><span class="n">demo</span><span class="o">.</span><span class="n">seed</span><span class="w"> </span><span class="o">--</span><span class="n">clean</span><span class="w">               </span><span class="c1"># remove everything this task created</span></code></pre><h2 id="module-sets" class="section-heading"><a href="#module-sets" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Sets</span></h2><ul><li><code class="inline">leaderboard</code> — a leaderboard with N scored records</li><li><code class="inline">group</code>       — a public group with N members</li><li><code class="inline">tournament</code>  — a tournament with N registered entries, still open</li><li><code class="inline">lobby_snapshot</code> — recorded runs for <code class="inline">/admin/lobby_snapshots</code>, capped at 12
 regardless of <code class="inline">--count</code> (this set is about having something to read, not
 volume)</li><li><code class="inline">quest</code> — a daily, an auto-claim achievement and a chained follow-up,
 with per-user progress in every state (including claimable rows)</li><li><code class="inline">ready_check</code> — one check per seeded lobby in every outcome (open,
@@ -144,9 +144,9 @@ SQLite is slow. The cache is flushed afterwards so pages read the new rows.</p>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/game_server_core/1.0.1070">Hex Package</a>
+              <a href="https://hex.pm/packages/game_server_core/1.0.1073">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/game_server_core/1.0.1070">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/game_server_core/1.0.1073">Hex Preview</a>
 
             </span>
 

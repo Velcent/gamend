@@ -90,6 +90,32 @@ its target and the normal completion side effects fire (hooks, auto-claim).
 
 Delete a user's current-period progress row for a quest (admin reset).
 
+# `chain`
+
+```elixir
+@spec chain(user_id() | nil, String.t()) :: [
+  %{
+    quest: GameServer.Quests.Quest.t(),
+    progress: GameServer.Quests.QuestProgress.t() | nil,
+    claimable: boolean(),
+    locked: boolean(),
+    tier: pos_integer()
+  }
+]
+```
+
+Every quest in `quest_key`'s prerequisite chain, in tier order, each with the
+user's current-period progress.
+
+The quest list hides a tier until its prerequisite is done; this is the one
+read that shows a whole chain — earlier tiers and the ones still ahead. Each
+entry carries `:tier` (1-based), `:locked` (prerequisite not yet done for
+this user) and the usual `:progress`/`:claimable`. With a `nil` user every
+tier after the first is locked and progress is `nil`.
+
+Returns `[]` for an unknown or inactive key. A quest with no chain links
+returns just its own entry.
+
 # `change_quest`
 
 ```elixir

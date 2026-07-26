@@ -1,4 +1,4 @@
-# game_server_core v1.0.1070 - API Reference
+# game_server_core v1.0.1073 - API Reference
 
 ## Modules
 
@@ -157,9 +157,10 @@ level.
   - [GameServer.Storage.Local](GameServer.Storage.Local.md): Disk-backed storage — the default backend.
   - [GameServer.Storage.S3](GameServer.Storage.S3.md): S3-compatible storage via ExAws.
   - [GameServer.Theme](GameServer.Theme.md): Behaviour for pluggable site theming providers.
-  - [GameServer.Theme.JSONConfig](GameServer.Theme.JSONConfig.md): JSON-backed Theme provider. Reads a locale-specific JSON file from either the
-GAMEND_CONTENT_THEME_CONFIG environment variable override or the host-owned default path
-configured by the runnable host application.
+  - [GameServer.Theme.JSONConfig](GameServer.Theme.JSONConfig.md): JSON-backed Theme provider. Reads **one** config file — from the
+`GAMEND_CONTENT_THEME_CONFIG` setting or the host-owned default path — and
+translates its text through gettext at read time.
+  - [GameServer.Theme.Translatable](GameServer.Theme.Translatable.md): Which leaves of a theme config are text, and which are configuration.
 
 - Delivery
   - [GameServer.Notifications](GameServer.Notifications.md): Notifications context – create, list, and delete persisted user-to-user
@@ -254,6 +255,10 @@ aggregated from telemetry events
 - Internals
   - [GameServer.Proto.GodobufPresence](GameServer.Proto.GodobufPresence.md): Fixes proto3-optional presence checks in godobuf-generated GDScript.
   - [GameServer.Schema](GameServer.Schema.md): Shared schema base: `use GameServer.Schema` instead of `use Ecto.Schema`.
+  - [GameServer.SchemaJSON](GameServer.SchemaJSON.md): JSON encoding for Ecto schemas under the API's null policy: string fields
+encode as `""` when nil and map fields as `%{}` — game clients (Godot in
+particular) choke on `null` where they expect a string. Datetimes, numbers
+and booleans keep `null`, where absence is semantic.
   - [GameServer.Types](GameServer.Types.md): Shared types used across GameServer contexts.
   - [GameServer.UUIDv7](GameServer.UUIDv7.md): UUIDv7 Ecto type used for all primary and foreign keys.
 
@@ -261,9 +266,14 @@ aggregated from telemetry events
 
 - [mix demo.seed](Mix.Tasks.Demo.Seed.md): Fills the database with enough demo data to exercise pagination and the
 list/detail pages at realistic sizes.
+- [mix gamend.content.extract](Mix.Tasks.Gamend.Content.Extract.md): Writes `content.pot` from the titles and descriptions stored on quests,
+leaderboards and tournaments.
+- [mix gamend.content.migrate_metadata](Mix.Tasks.Gamend.Content.MigrateMetadata.md): One-shot migration for instances that stored translations in the database.
 - [mix gamend.settings.env_example](Mix.Tasks.Gamend.Settings.EnvExample.md): Writes `.env.example` from `GameServer.Settings.all/0`, grouped and
 commented from each setting's declaration.
 - [mix gamend.settings.guide](Mix.Tasks.Gamend.Settings.Guide.md): Writes the public Settings guide from `GameServer.Settings.all/0`.
+- [mix gamend.theme.extract](Mix.Tasks.Gamend.Theme.Extract.md): Writes `theme.pot` from the strings in the theme config.
+- [mix gamend.theme.migrate_locales](Mix.Tasks.Gamend.Theme.MigrateLocales.md): One-shot migration off one-JSON-file-per-locale.
 - [mix gen.sdk](Mix.Tasks.Gen.Sdk.md): Generates SDK stub modules from the real GameServer modules.
 - [mix host.proto.gen](Mix.Tasks.Host.Proto.Gen.md): Generates protobuf bindings for every target from a `.proto` file.
 

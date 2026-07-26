@@ -53,18 +53,6 @@ Three independent dimensions, so any combination is expressible:
 }
 ```
 
-# `localized_description`
-
-Returns the localized description for the given locale.
-
-Looks up `metadata["descriptions"][locale]`, falling back to `description`.
-
-# `localized_title`
-
-Returns the localized title for the given locale.
-
-Looks up `metadata["titles"][locale]`, falling back to `title`.
-
 # `resets`
 
 The valid reset cycles.

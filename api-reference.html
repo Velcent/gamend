@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.1">
-    <meta name="project" content="game_server_core v1.0.1070">
+    <meta name="project" content="game_server_core v1.0.1073">
 
 
-    <title>API Reference — game_server_core v1.0.1070</title>
+    <title>API Reference — game_server_core v1.0.1073</title>
 
     <link rel="stylesheet" href="dist/html-elixir-YJO4MOOW.css" />
 
-    <script defer src="dist/sidebar_items-DDE9D191.js"></script>
+    <script defer src="dist/sidebar_items-CBC5BCCD.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-YU4BZFVS.js"></script>
 
@@ -37,7 +37,7 @@
 game_server_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1070
+          v1.0.1073
         </div>
       </div>
     </div>
@@ -92,7 +92,7 @@ game_server_core
 
 <div id="top-content">
   <div class="heading-with-actions top-heading">
-    <h1>API Reference <small class="app-vsn">game_server_core v#1.0.1070</small></h1>
+    <h1>API Reference <small class="app-vsn">game_server_core v#1.0.1073</small></h1>
 <a href="api-reference.md" title="Copy Markdown (hold Ctrl/Cmd and click it to open as Markdown)" class="copy-markdown icon-action" rel="help">
   <i class="ri-markdown-line" aria-hidden="true"></i>
   <span class="sr-only">Copy Markdown</span>
@@ -1348,6 +1348,18 @@ each answer before something proceeds.</p></div>
 </div>
 <div class="summary-row">
   <div class="summary-signature">
+    <a href="GameServer.SchemaJSON.html" translate="no">GameServer.<wbr>SchemaJSON</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>JSON encoding for Ecto schemas under the API's null policy: string fields
+encode as <code class="inline">&quot;&quot;</code> when nil and map fields as <code class="inline">%{}</code> — game clients (Godot in
+particular) choke on <code class="inline">null</code> where they expect a string. Datetimes, numbers
+and booleans keep <code class="inline">null</code>, where absence is semantic.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
     <a href="GameServer.Settings.html" translate="no">GameServer.<wbr>Settings</a>
 
   </div>
@@ -1417,9 +1429,18 @@ level.</p></div>
 
   </div>
 
-    <div class="summary-synopsis"><p>JSON-backed Theme provider. Reads a locale-specific JSON file from either the
-GAMEND_CONTENT_THEME_CONFIG environment variable override or the host-owned default path
-configured by the runnable host application.</p></div>
+    <div class="summary-synopsis"><p>JSON-backed Theme provider. Reads <strong>one</strong> config file — from the
+<code class="inline">GAMEND_CONTENT_THEME_CONFIG</code> setting or the host-owned default path — and
+translates its text through gettext at read time.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="GameServer.Theme.Translatable.html" translate="no">GameServer.<wbr>Theme.<wbr>Translatable</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Which leaves of a theme config are text, and which are configuration.</p></div>
 
 </div>
 <div class="summary-row">
@@ -1509,6 +1530,25 @@ list/detail pages at realistic sizes.</p></div>
 </div>
 <div class="summary-row">
   <div class="summary-signature">
+    <a href="Mix.Tasks.Gamend.Content.Extract.html" translate="no">mix gamend.<wbr>content.<wbr>extract</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Writes <code class="inline">content.pot</code> from the titles and descriptions stored on quests,
+leaderboards and tournaments.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="Mix.Tasks.Gamend.Content.MigrateMetadata.html" translate="no">mix gamend.<wbr>content.<wbr>migrate_metadata</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>One-shot migration for instances that stored translations in the database.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
     <a href="Mix.Tasks.Gamend.Settings.EnvExample.html" translate="no">mix gamend.<wbr>settings.<wbr>env_example</a>
 
   </div>
@@ -1524,6 +1564,24 @@ commented from each setting's declaration.</p></div>
   </div>
 
     <div class="summary-synopsis"><p>Writes the public Settings guide from <a href="GameServer.Settings.html#all/0"><code class="inline">GameServer.Settings.all/0</code></a>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="Mix.Tasks.Gamend.Theme.Extract.html" translate="no">mix gamend.<wbr>theme.<wbr>extract</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Writes <code class="inline">theme.pot</code> from the strings in the theme config.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="Mix.Tasks.Gamend.Theme.MigrateLocales.html" translate="no">mix gamend.<wbr>theme.<wbr>migrate_locales</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>One-shot migration off one-JSON-file-per-locale.</p></div>
 
 </div>
 <div class="summary-row">
@@ -1554,9 +1612,9 @@ commented from each setting's declaration.</p></div>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/game_server_core/1.0.1070">Hex Package</a>
+              <a href="https://hex.pm/packages/game_server_core/1.0.1073">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/game_server_core/1.0.1070">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/game_server_core/1.0.1073">Hex Preview</a>
 
             </span>
 

@@ -129,6 +129,7 @@ GameServer.Repo.md
 GameServer.Retention.md
 GameServer.Schedule.md
 GameServer.Schema.md
+GameServer.SchemaJSON.md
 GameServer.Settings.Provider.md
 GameServer.Settings.md
 GameServer.Storage.Adapter.md
@@ -136,6 +137,7 @@ GameServer.Storage.Local.md
 GameServer.Storage.S3.md
 GameServer.Storage.md
 GameServer.Theme.JSONConfig.md
+GameServer.Theme.Translatable.md
 GameServer.Theme.md
 GameServer.Tournaments.Entry.md
 GameServer.Tournaments.Match.md
@@ -146,8 +148,12 @@ GameServer.Types.md
 GameServer.UUIDv7.md
 GameServer.md
 Mix.Tasks.Demo.Seed.md
+Mix.Tasks.Gamend.Content.Extract.md
+Mix.Tasks.Gamend.Content.MigrateMetadata.md
 Mix.Tasks.Gamend.Settings.EnvExample.md
 Mix.Tasks.Gamend.Settings.Guide.md
+Mix.Tasks.Gamend.Theme.Extract.md
+Mix.Tasks.Gamend.Theme.MigrateLocales.md
 Mix.Tasks.Gen.Sdk.md
 Mix.Tasks.Host.Proto.Gen.md
 api-reference.md

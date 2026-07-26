@@ -1,21 +1,23 @@
 # `GameServer.Theme.JSONConfig`
 [🔗](https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/theme/json_config.ex#L1)
 
-JSON-backed Theme provider. Reads a locale-specific JSON file from either the
-GAMEND_CONTENT_THEME_CONFIG environment variable override or the host-owned default path
-configured by the runnable host application.
+JSON-backed Theme provider. Reads **one** config file — from the
+`GAMEND_CONTENT_THEME_CONFIG` setting or the host-owned default path — and
+translates its text through gettext at read time.
 
-Only locale-suffixed files are loaded (e.g. `example_config.en.json`,
-`example_config.es.json`). The base path itself (without a locale suffix) is
-never loaded directly — it serves only as a naming template to derive
-locale-specific paths.
+There used to be one whole JSON file per locale. Two thirds of each copy was
+structure (urls, icons, layout) rather than text, and they drifted: a
+`theme_color` added to English never reached the other 29, so non-English
+visitors silently got the fallback colour. Structure now lives once, and only
+the leaves `GameServer.Theme.Translatable` names as text vary by locale —
+through the `theme` gettext domain, like every other string in the UI.
 
-When GAMEND_CONTENT_THEME_CONFIG is not set, the provider falls back to the host-owned
-default path configured under `GameServer.Theme.JSONConfig`.
+A missing translation falls back to the source string, so a config with no
+`.po` at all still renders exactly as written.
 
-Theme configs are cached in `:persistent_term` after the first read so
-subsequent requests never hit the filesystem. Call `reload/0` to clear the
-cache (e.g. after editing the JSON file at runtime).
+The decoded file is cached in `:persistent_term`; translation happens per
+read, against the caller's current locale. Call `reload/0` after editing the
+file at runtime.
 
 # `active_path`
 
@@ -28,11 +30,22 @@ otherwise falling back to the host-owned default path.
 @spec get_theme(String.t() | nil) :: map()
 ```
 
-Variant of `get_theme/0` that prefers a locale-specific GAMEND_CONTENT_THEME_CONFIG file when present.
+The theme, with its text translated into `locale` (or the caller's current
+locale when `nil`).
 
-Given a base config like `modules/example_config.json` and locale `"es"`, we will
-try `modules/example_config.es.json` first, then fall back to `.en.json`.
-The base file itself is never loaded.
+Locale fallback is gettext's, not ours: `es_ES` falls back to `es` and then
+to the source string, so this never has to hunt for a file that might exist.
+
+# `raw_theme`
+
+```elixir
+@spec raw_theme() :: map()
+```
+
+The config exactly as written, untranslated.
+
+For the extractor and for admin diagnostics, which must show what is on
+disk rather than what a viewer would see.
 
 # `runtime_path`
 

@@ -130,6 +130,7 @@ GameServer.Repo.html
 GameServer.Retention.html
 GameServer.Schedule.html
 GameServer.Schema.html
+GameServer.SchemaJSON.html
 GameServer.Settings.Provider.html
 GameServer.Settings.html
 GameServer.Storage.Adapter.html
@@ -137,6 +138,7 @@ GameServer.Storage.Local.html
 GameServer.Storage.S3.html
 GameServer.Storage.html
 GameServer.Theme.JSONConfig.html
+GameServer.Theme.Translatable.html
 GameServer.Theme.html
 GameServer.Tournaments.Entry.html
 GameServer.Tournaments.Match.html
@@ -147,8 +149,12 @@ GameServer.Types.html
 GameServer.UUIDv7.html
 GameServer.html
 Mix.Tasks.Demo.Seed.html
+Mix.Tasks.Gamend.Content.Extract.html
+Mix.Tasks.Gamend.Content.MigrateMetadata.html
 Mix.Tasks.Gamend.Settings.EnvExample.html
 Mix.Tasks.Gamend.Settings.Guide.html
+Mix.Tasks.Gamend.Theme.Extract.html
+Mix.Tasks.Gamend.Theme.MigrateLocales.html
 Mix.Tasks.Gen.Sdk.html
 Mix.Tasks.Host.Proto.Gen.html
 api-reference.html
@@ -160,8 +166,8 @@ dist/lato-latin-700-normal-2XVSBPG4.woff2
 dist/lato-latin-ext-400-normal-N27NCBWW.woff2
 dist/lato-latin-ext-700-normal-Q2L5DVMW.woff2
 dist/remixicon-ZWU5GQ4X.woff2
-dist/search_data-49C93649.js
-dist/sidebar_items-DDE9D191.js
+dist/search_data-169C485E.js
+dist/sidebar_items-CBC5BCCD.js
 index.html
 readme.html
 search.html

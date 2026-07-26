@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.1">
-    <meta name="project" content="game_server_core v1.0.1070">
+    <meta name="project" content="game_server_core v1.0.1073">
 
 
-    <title>GameServer.Notifications.Notification — game_server_core v1.0.1070</title>
+    <title>GameServer.Notifications.Notification — game_server_core v1.0.1073</title>
 
     <link rel="stylesheet" href="dist/html-elixir-YJO4MOOW.css" />
 
-    <script defer src="dist/sidebar_items-DDE9D191.js"></script>
+    <script defer src="dist/sidebar_items-CBC5BCCD.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-YU4BZFVS.js"></script>
 
@@ -37,7 +37,7 @@
 game_server_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1070
+          v1.0.1073
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ game_server_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">GameServer.<wbr>Notifications.<wbr>Notification</span> 
-      <small class="app-vsn" translate="no">(game_server_core v1.0.1070)</small>
+      <small class="app-vsn" translate="no">(game_server_core v1.0.1073)</small>
 
     </h1>
 
@@ -115,7 +115,8 @@ game_server_core
 
     <section id="moduledoc">
 <p>Ecto schema representing a notification sent from one user to another.</p><p>Notifications are persisted in the database and remain until the recipient
-explicitly deletes them. Fields:</p><ul><li><code class="inline">sender_id</code> – the user who sent the notification (must be a friend)</li><li><code class="inline">recipient_id</code> – the user who receives the notification</li><li><code class="inline">title</code> – required short summary</li><li><code class="inline">content</code> – optional longer body text</li><li><code class="inline">metadata</code> – optional arbitrary key/value map</li></ul>
+explicitly deletes them. Fields:</p><ul><li><code class="inline">sender_id</code> – the user who sent the notification (must be a friend)</li><li><code class="inline">recipient_id</code> – the user who receives the notification</li><li><code class="inline">title</code> – required short summary</li><li><code class="inline">content</code> – optional longer body text</li><li><code class="inline">metadata</code> – optional arbitrary key/value map</li><li><code class="inline">icon_url</code> – optional icon; <code class="inline">nil</code> means clients show their default
+notification icon</li></ul>
     </section>
 
 </div>
@@ -166,7 +167,7 @@ explicitly deletes them. Fields:</p><ul><li><code class="inline">sender_id</code
       <h1 class="signature" translate="no">t()</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/notifications/notification.ex#L45" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/notifications/notification.ex#L49" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -180,6 +181,7 @@ explicitly deletes them. Fields:</p><ul><li><code class="inline">sender_id</code
           <pre translate="no"><span class="attribute">@type</span> t() :: %GameServer.Notifications.Notification{
   __meta__: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
   content: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>() | nil,
+  icon_url: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>() | nil,
   id: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>() | nil,
   inserted_at: <a href="https://hexdocs.pm/elixir/DateTime.html#t:t/0">DateTime.t</a>() | nil,
   metadata: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>(),
@@ -206,9 +208,9 @@ explicitly deletes them. Fields:</p><ul><li><code class="inline">sender_id</code
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/game_server_core/1.0.1070">Hex Package</a>
+              <a href="https://hex.pm/packages/game_server_core/1.0.1073">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/game_server_core/1.0.1070">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/game_server_core/1.0.1073">Hex Preview</a>
 
             </span>
 

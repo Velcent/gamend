@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.1">
-    <meta name="project" content="game_server_core v1.0.1070">
+    <meta name="project" content="game_server_core v1.0.1073">
 
 
-    <title>GameServer.Quests — game_server_core v1.0.1070</title>
+    <title>GameServer.Quests — game_server_core v1.0.1073</title>
 
     <link rel="stylesheet" href="dist/html-elixir-YJO4MOOW.css" />
 
-    <script defer src="dist/sidebar_items-DDE9D191.js"></script>
+    <script defer src="dist/sidebar_items-CBC5BCCD.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-YU4BZFVS.js"></script>
 
@@ -37,7 +37,7 @@
 game_server_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1070
+          v1.0.1073
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ game_server_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">GameServer.<wbr>Quests</span> 
-      <small class="app-vsn" translate="no">(game_server_core v1.0.1070)</small>
+      <small class="app-vsn" translate="no">(game_server_core v1.0.1073)</small>
 
     </h1>
 
@@ -120,11 +120,11 @@ weekly / monthly / every N days), an optional <strong>window</strong>
 (<code class="inline">prerequisite_quest_key</code>). Any combination works — a biweekly quest inside
 a seasonal window that also requires an earlier quest is just those three
 fields set. Rewards pay into <a href="GameServer.Economy.html"><code class="inline">GameServer.Economy</code></a> / <a href="GameServer.Inventory.html"><code class="inline">GameServer.Inventory</code></a>
-exactly once. <code class="inline">category</code> is a free-form label for your UI only.</p><h2 id="module-reporting-progress-server-side-hooks" class="section-heading"><a href="#module-reporting-progress-server-side-hooks" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Reporting progress (server-side / hooks)</span></h2><pre><code class="makeup elixir" translate="no"><span class="nc">Quests</span><span class="o">.</span><span class="n">report_event</span><span class="p" data-group-id="7636621438-1">(</span><span class="n">user_id</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;enemy_killed&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="7636621438-2">%{</span><span class="s">&quot;map&quot;</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;desert&quot;</span><span class="p" data-group-id="7636621438-2">}</span><span class="p" data-group-id="7636621438-1">)</span></code></pre><p>Every <strong>active</strong> quest with an objective on <code class="inline">&quot;enemy_killed&quot;</code> (whose <code class="inline">params</code>
+exactly once. <code class="inline">category</code> is a free-form label for your UI only.</p><h2 id="module-reporting-progress-server-side-hooks" class="section-heading"><a href="#module-reporting-progress-server-side-hooks" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Reporting progress (server-side / hooks)</span></h2><pre><code class="makeup elixir" translate="no"><span class="nc">Quests</span><span class="o">.</span><span class="n">report_event</span><span class="p" data-group-id="1770038495-1">(</span><span class="n">user_id</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;enemy_killed&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="1770038495-2">%{</span><span class="s">&quot;map&quot;</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;desert&quot;</span><span class="p" data-group-id="1770038495-2">}</span><span class="p" data-group-id="1770038495-1">)</span></code></pre><p>Every <strong>active</strong> quest with an objective on <code class="inline">&quot;enemy_killed&quot;</code> (whose <code class="inline">params</code>
 all match the meta) advances; a quest completes when every objective meets
 its target. There is deliberately <strong>no public endpoint</strong> for this — clients
 cannot advance their own quests. Core wires common events; games call it
-from their hooks for custom events.</p><h2 id="module-claiming" class="section-heading"><a href="#module-claiming" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Claiming</span></h2><pre><code class="makeup elixir" translate="no"><span class="p" data-group-id="1095961399-1">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="1095961399-2">%{</span><span class="ss">progress</span><span class="p">:</span><span class="w"> </span><span class="n">progress</span><span class="p">,</span><span class="w"> </span><span class="ss">rewards</span><span class="p">:</span><span class="w"> </span><span class="n">rewards</span><span class="p" data-group-id="1095961399-2">}</span><span class="p" data-group-id="1095961399-1">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Quests</span><span class="o">.</span><span class="n">claim</span><span class="p" data-group-id="1095961399-3">(</span><span class="n">user_id</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;daily_win_3&quot;</span><span class="p" data-group-id="1095961399-3">)</span></code></pre><p>Claiming is gated by an atomic <code class="inline">completed → claimed</code> status transition, so a
+from their hooks for custom events.</p><h2 id="module-claiming" class="section-heading"><a href="#module-claiming" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Claiming</span></h2><pre><code class="makeup elixir" translate="no"><span class="p" data-group-id="3221101850-1">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="3221101850-2">%{</span><span class="ss">progress</span><span class="p">:</span><span class="w"> </span><span class="n">progress</span><span class="p">,</span><span class="w"> </span><span class="ss">rewards</span><span class="p">:</span><span class="w"> </span><span class="n">rewards</span><span class="p" data-group-id="3221101850-2">}</span><span class="p" data-group-id="3221101850-1">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Quests</span><span class="o">.</span><span class="n">claim</span><span class="p" data-group-id="3221101850-3">(</span><span class="n">user_id</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;daily_win_3&quot;</span><span class="p" data-group-id="3221101850-3">)</span></code></pre><p>Claiming is gated by an atomic <code class="inline">completed → claimed</code> status transition, so a
 double-tap or a concurrent claim can't double-pay. Rewards are granted after
 the transition with a per-entry idempotency key (<code class="inline">&quot;quest:&lt;progress_id&gt;:&lt;i&gt;&quot;</code>),
 so a crashed or retried grant can't double-apply either; rows that claimed
@@ -207,6 +207,17 @@ its target and the normal completion side effects fire (hooks, auto-claim).</p><
       </div>
 
         <div class="summary-synopsis"><p>Delete a user's current-period progress row for a quest (admin reset).</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#chain/2" data-no-tooltip="" translate="no">chain(user_id, quest_key)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Every quest in <code class="inline">quest_key</code>'s prerequisite chain, in tier order, each with the
+user's current-period progress.</p></div>
 
     </div>
 
@@ -559,7 +570,7 @@ lazily when they list their quests). Returns the number of rows retried.</p></di
       <h1 class="signature" translate="no">admin_claim(user_id, quest_key)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/quests.ex#L1034" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/quests.ex#L1163" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -589,7 +600,7 @@ lazily when they list their quests). Returns the number of rows retried.</p></di
       <h1 class="signature" translate="no">admin_complete(user_id, quest_key)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/quests.ex#L949" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/quests.ex#L1078" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -619,7 +630,7 @@ its target and the normal completion side effects fire (hooks, auto-claim).</p>
       <h1 class="signature" translate="no">admin_reset(user_id, quest_key)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/quests.ex#L1016" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/quests.ex#L1145" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -636,6 +647,48 @@ its target and the normal completion side effects fire (hooks, auto-claim).</p>
       </div>
 
 <p>Delete a user's current-period progress row for a quest (admin reset).</p>
+  </section>
+</section>
+<section class="detail" id="chain/2">
+
+  <div class="detail-header">
+    <a href="#chain/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">chain(user_id, quest_key)</h1>
+
+
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/quests.ex#L748" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> chain(<a href="#t:user_id/0">user_id</a>() | nil, <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()) :: [
+  %{
+    quest: <a href="GameServer.Quests.Quest.html#t:t/0">GameServer.Quests.Quest.t</a>(),
+    progress: <a href="GameServer.Quests.QuestProgress.html#t:t/0">GameServer.Quests.QuestProgress.t</a>() | nil,
+    claimable: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>(),
+    locked: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>(),
+    tier: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pos_integer</a>()
+  }
+]</pre>
+
+      </div>
+
+<p>Every quest in <code class="inline">quest_key</code>'s prerequisite chain, in tier order, each with the
+user's current-period progress.</p><p>The quest list hides a tier until its prerequisite is done; this is the one
+read that shows a whole chain — earlier tiers and the ones still ahead. Each
+entry carries <code class="inline">:tier</code> (1-based), <code class="inline">:locked</code> (prerequisite not yet done for
+this user) and the usual <code class="inline">:progress</code>/<code class="inline">:claimable</code>. With a <code class="inline">nil</code> user every
+tier after the first is locked and progress is <code class="inline">nil</code>.</p><p>Returns <code class="inline">[]</code> for an unknown or inactive key. A quest with no chain links
+returns just its own entry.</p>
   </section>
 </section>
 <section class="detail" id="change_quest/2">
@@ -712,7 +765,7 @@ its target and the normal completion side effects fire (hooks, auto-claim).</p>
       <h1 class="signature" translate="no">claimable_count(user_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/quests.ex#L859" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/quests.ex#L988" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -742,7 +795,7 @@ its target and the normal completion side effects fire (hooks, auto-claim).</p>
       <h1 class="signature" translate="no">count_progress(opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/quests.ex#L905" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/quests.ex#L1034" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -802,7 +855,7 @@ its target and the normal completion side effects fire (hooks, auto-claim).</p>
       <h1 class="signature" translate="no">count_user_completions(user_id, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/quests.ex#L840" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/quests.ex#L969" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -835,7 +888,7 @@ its target and the normal completion side effects fire (hooks, auto-claim).</p>
       <h1 class="signature" translate="no">count_user_quests(user_id, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/quests.ex#L757" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/quests.ex#L855" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -894,7 +947,7 @@ its target and the normal completion side effects fire (hooks, auto-claim).</p>
       <h1 class="signature" translate="no">dashboard_stats()</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/quests.ex#L1065" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/quests.ex#L1194" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -951,7 +1004,7 @@ its target and the normal completion side effects fire (hooks, auto-claim).</p>
       <h1 class="signature" translate="no">funnel(quest_key)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/quests.ex#L1091" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/quests.ex#L1220" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -979,7 +1032,7 @@ its target and the normal completion side effects fire (hooks, auto-claim).</p>
       <h1 class="signature" translate="no">get_progress(user_id, quest_key)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/quests.ex#L870" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/quests.ex#L999" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1065,7 +1118,7 @@ its target and the normal completion side effects fire (hooks, auto-claim).</p>
       <h1 class="signature" translate="no">list_progress(opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/quests.ex#L895" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/quests.ex#L1024" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1125,7 +1178,7 @@ its target and the normal completion side effects fire (hooks, auto-claim).</p>
       <h1 class="signature" translate="no">list_user_completions(user_id, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/quests.ex#L829" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/quests.ex#L958" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1164,7 +1217,7 @@ its target and the normal completion side effects fire (hooks, auto-claim).</p>
       <h1 class="signature" translate="no">list_user_quests(user_id, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/quests.ex#L740" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/quests.ex#L838" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1204,7 +1257,7 @@ them). Chain quests only appear once their prerequisite is met.</p><h2 id="list_
       <h1 class="signature" translate="no">period_key(quest_or_reset, now)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/quests.ex#L1114" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/quests.ex#L1243" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1263,7 +1316,7 @@ from the clock, so a reset needs nothing to fire at midnight.</p>
       <h1 class="signature" translate="no">prune_old_periods()</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/quests.ex#L1050" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/quests.ex#L1179" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1415,9 +1468,9 @@ when every param key/value is present in <code class="inline">meta</code>.</p><p
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/game_server_core/1.0.1070">Hex Package</a>
+              <a href="https://hex.pm/packages/game_server_core/1.0.1073">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/game_server_core/1.0.1070">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/game_server_core/1.0.1073">Hex Preview</a>
 
             </span>
 

@@ -12,7 +12,7 @@ zero-config `Log` provider when nothing is configured
 
 ## Usage
 
-    # Register a device (typically via POST /me/push-tokens)
+    # Register a device (typically via POST /me/push_tokens)
     {:ok, token} = Push.register_token(user_id, %{
       "token" => "fcm-registration-token",
       "platform" => "android",
@@ -22,7 +22,7 @@ zero-config `Log` provider when nothing is configured
     # List a user's devices
     tokens = Push.list_tokens(user_id, page: 1, page_size: 25)
 
-    # Remove one (DELETE /me/push-tokens/:id)
+    # Remove one (DELETE /me/push_tokens/:id)
     {:ok, _} = Push.delete_token(user_id, token.id)
 
 # `user_id`
@@ -64,7 +64,7 @@ Count a user's registered tokens (including disabled).
   {:ok, GameServer.Push.PushToken.t()} | {:error, :not_found}
 ```
 
-Remove a token row by id, scoped to `user_id` (the `DELETE /me/push-tokens/:id`
+Remove a token row by id, scoped to `user_id` (the `DELETE /me/push_tokens/:id`
 path). Returns `{:ok, %PushToken{}}` or `{:error, :not_found}`.
 
 # `disable_token`

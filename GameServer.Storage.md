@@ -67,6 +67,14 @@ and set as S3 object metadata at upload.
 @spec exists?(GameServer.Storage.Adapter.key()) :: boolean()
 ```
 
+# `extension_for`
+
+```elixir
+@spec extension_for(String.t()) :: String.t()
+```
+
+File extension for a declared image content type ("" when unknown).
+
 # `get`
 
 ```elixir

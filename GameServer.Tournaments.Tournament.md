@@ -9,6 +9,9 @@ occurrence. `team_size` is advisory — core only ever tracks entry leaders.
 A nil `starts_at` means manual start: registration stays open until an
 admin/game sets `starts_at` (the "draw now" force action does exactly that).
 
+`icon_url` is optional; when nil, clients show their default tournament
+icon (the web UI uses `GameServerWeb.Icons.default(:tournament)`).
+
 # `changeset`
 
 # `deadline_policies`

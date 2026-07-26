@@ -11,6 +11,7 @@ join-request workflows, and invitation flows.
 
 - `title` – human-readable display title (unique)
 - `description` – optional longer description
+- `icon_url` – optional icon; `nil` means clients show their default group icon
 - `type` – visibility: `"public"`, `"private"`, or `"hidden"`
 - `max_members` – maximum number of members (default 100)
 - `metadata` – arbitrary server-managed key/value map
@@ -24,6 +25,7 @@ join-request workflows, and invitation flows.
   creator: term(),
   creator_id: term(),
   description: term(),
+  icon_url: term(),
   id: term(),
   inserted_at: term(),
   max_members: term(),

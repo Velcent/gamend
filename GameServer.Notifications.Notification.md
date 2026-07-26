@@ -11,6 +11,8 @@ explicitly deletes them. Fields:
 - `title` – required short summary
 - `content` – optional longer body text
 - `metadata` – optional arbitrary key/value map
+- `icon_url` – optional icon; `nil` means clients show their default
+  notification icon
 
 # `t`
 
@@ -18,6 +20,7 @@ explicitly deletes them. Fields:
 @type t() :: %GameServer.Notifications.Notification{
   __meta__: term(),
   content: String.t() | nil,
+  icon_url: String.t() | nil,
   id: integer() | nil,
   inserted_at: DateTime.t() | nil,
   metadata: map(),
