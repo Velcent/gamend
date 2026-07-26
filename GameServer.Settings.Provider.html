@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.1">
-    <meta name="project" content="game_server_core v1.0.1068">
+    <meta name="project" content="game_server_core v1.0.1069">
 
 
-    <title>GameServer.Settings.Provider — game_server_core v1.0.1068</title>
+    <title>GameServer.Settings.Provider — game_server_core v1.0.1069</title>
 
     <link rel="stylesheet" href="dist/html-elixir-YJO4MOOW.css" />
 
-    <script defer src="dist/sidebar_items-C3112319.js"></script>
+    <script defer src="dist/sidebar_items-DDE9D191.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-YU4BZFVS.js"></script>
 
@@ -37,7 +37,7 @@
 game_server_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1068
+          v1.0.1069
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ game_server_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">GameServer.<wbr>Settings.<wbr>Provider</span> 
-      <small class="app-vsn" translate="no">(game_server_core v1.0.1068)</small>
+      <small class="app-vsn" translate="no">(game_server_core v1.0.1069)</small>
 
     </h1>
 
@@ -114,7 +114,7 @@ game_server_core
 
 
     <section id="moduledoc">
-<p>Declares a group of settings on a module.</p><pre><code class="makeup elixir" translate="no"><span class="kd">defmodule</span><span class="w"> </span><span class="nc">GameServer.Retention</span><span class="w"> </span><span class="k" data-group-id="8846011564-1">do</span><span class="w">
+<p>Declares a group of settings on a module.</p><pre><code class="makeup elixir" translate="no"><span class="kd">defmodule</span><span class="w"> </span><span class="nc">GameServer.Retention</span><span class="w"> </span><span class="k" data-group-id="7352233018-1">do</span><span class="w">
   </span><span class="kn">use</span><span class="w"> </span><span class="nc">GameServer.Settings.Provider</span><span class="p">,</span><span class="w">
     </span><span class="ss">app</span><span class="p">:</span><span class="w"> </span><span class="ss">:game_server_core</span><span class="p">,</span><span class="w">
     </span><span class="ss">group</span><span class="p">:</span><span class="w"> </span><span class="ss">:retention</span><span class="p">,</span><span class="w">
@@ -123,23 +123,22 @@ game_server_core
   </span><span class="n">setting</span><span class="w"> </span><span class="ss">:chat_messages_days</span><span class="p">,</span><span class="w"> </span><span class="ss">:integer</span><span class="p">,</span><span class="w">
     </span><span class="ss">default</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
     </span><span class="ss">doc</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Delete chat messages older than N days. 0 keeps forever.&quot;</span><span class="w">
-</span><span class="k" data-group-id="8846011564-1">end</span></code></pre><p>The declaration is the only place a setting is written down. Its environment
+</span><span class="k" data-group-id="7352233018-1">end</span></code></pre><p>The declaration is the only place a setting is written down. Its environment
 variable name is <strong>derived</strong> — <code class="inline">&lt;ROOT&gt;_&lt;GROUP&gt;_&lt;KEY&gt;</code>, e.g.
 <code class="inline">GAMEND_RETENTION_CHAT_MESSAGES_DAYS</code> — so the key and its env var can never
-disagree. Pass <code class="inline">env:</code> only for the handful of names other software owns
-(<code class="inline">PORT</code>, <code class="inline">DATABASE_URL</code>), which should also carry <code class="inline">external: true</code>.</p><p>Values are read back with <a href="GameServer.Settings.html#get/2"><code class="inline">GameServer.Settings.get/2</code></a>, which checks
+disagree. There is no way to pin a different name: every setting follows the
+convention, without exception.</p><p>A variable that <em>other</em> software reads (<code class="inline">RELEASE_COOKIE</code> for the release boot
+script, <code class="inline">FLY_REGION</code> from the platform) is not a setting and does not belong
+here — renaming our declaration would not rename what that software reads.
+Report those separately; <a href="GameServer.Cluster.html#environment/0"><code class="inline">GameServer.Cluster.environment/0</code></a> is the example.</p><p>Values are read back with <a href="GameServer.Settings.html#get/2"><code class="inline">GameServer.Settings.get/2</code></a>, which checks
 <code class="inline">Application.get_env(app, module)</code> and falls back to the compiled default. A
 host configures them the ordinary Elixir way and never needs an env var:</p><pre><code class="makeup elixir" translate="no"><span class="n">config</span><span class="w"> </span><span class="ss">:game_server_core</span><span class="p">,</span><span class="w"> </span><span class="nc">GameServer.Retention</span><span class="p">,</span><span class="w"> </span><span class="ss">chat_messages_days</span><span class="p">:</span><span class="w"> </span><span class="mi">90</span></code></pre><h2 id="module-options-for-use" class="section-heading"><a href="#module-options-for-use" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Options for <code class="inline">use</code></span></h2><ul><li><code class="inline">:app</code> (required) — the OTP app the values live under.</li><li><code class="inline">:group</code> (required) — the middle segment of the env name, and the grouping
 the admin viewer renders. One word.</li><li><code class="inline">:root</code> — first segment of the env name. Defaults to <code class="inline">&quot;GAMEND&quot;</code>; a plugin
-passes its own (<code class="inline">root: &quot;POLYGLOT&quot;</code>).</li><li><code class="inline">:label</code> — display name for the group. Defaults to a capitalised <code class="inline">:group</code>.</li><li><code class="inline">:env_prefix</code> — replaces the derived <code class="inline">&lt;ROOT&gt;_&lt;GROUP&gt;_</code> prefix for every
-setting in the provider, so <code class="inline">LIMIT_MAX_PAGE_SIZE</code> can keep its name while
-the group is <code class="inline">:limits</code>. A transitional escape hatch for names that predate
-the convention; a per-setting <code class="inline">env:</code> still wins over it.</li></ul><h2 id="module-options-for-setting-3" class="section-heading"><a href="#module-options-for-setting-3" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Options for <a href="#setting/3"><code class="inline">setting/3</code></a></span></h2><ul><li><code class="inline">:default</code> — the compiled default. Defaults to <code class="inline">nil</code>.</li><li><code class="inline">:doc</code> — one-line description, shown in the admin viewer and generated docs.</li><li><code class="inline">:secret</code> — mask the value everywhere it is displayed.</li><li><code class="inline">:required</code> — <code class="inline">:prod</code> (boot fails in prod, warns in dev) or <code class="inline">:warn</code> (logs in
+passes its own (<code class="inline">root: &quot;POLYGLOT&quot;</code>).</li><li><code class="inline">:label</code> — display name for the group. Defaults to a capitalised <code class="inline">:group</code>.</li></ul><h2 id="module-options-for-setting-3" class="section-heading"><a href="#module-options-for-setting-3" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Options for <a href="#setting/3"><code class="inline">setting/3</code></a></span></h2><ul><li><code class="inline">:default</code> — the compiled default. Defaults to <code class="inline">nil</code>.</li><li><code class="inline">:doc</code> — one-line description, shown in the admin viewer and generated docs.</li><li><code class="inline">:secret</code> — mask the value everywhere it is displayed.</li><li><code class="inline">:required</code> — <code class="inline">:prod</code> (boot fails in prod, warns in dev) or <code class="inline">:warn</code> (logs in
 prod). Omit for optional. Never enforced in test.</li><li><code class="inline">:when</code> — <code class="inline">{path, value}</code> gating the requirement on another setting, e.g.
 <code class="inline">when: {[:storage, :adapter], :s3}</code>. A list of such tuples requires all of
 them to hold.</li><li><code class="inline">:with</code> — sibling keys forming a complete-or-empty group. All unset is
-silent; a partial set trips <code class="inline">:required</code>.</li><li><code class="inline">:env</code> — override the derived env var name. For inherited names only.</li><li><code class="inline">:external</code> — this name belongs to other software; the viewer files it
-under &quot;Inherited&quot; rather than implying we own it.</li></ul>
+silent; a partial set trips <code class="inline">:required</code>.</li></ul>
     </section>
 
 </div>
@@ -158,7 +157,7 @@ under &quot;Inherited&quot; rather than implying we own it.</li></ul>
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#derive_env/4" data-no-tooltip="" translate="no">derive_env(root, group, key, env_prefix \\ nil)</a>
+        <a href="#derive_env/3" data-no-tooltip="" translate="no">derive_env(root, group, key)</a>
 
       </div>
 
@@ -190,19 +189,17 @@ under &quot;Inherited&quot; rather than implying we own it.</li></ul>
     </h2>
 
     <div class="functions-list">
-<section class="detail" id="derive_env/4">
-
-    <span id="derive_env/3"></span>
+<section class="detail" id="derive_env/3">
 
   <div class="detail-header">
-    <a href="#derive_env/4" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+    <a href="#derive_env/3" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
       <i class="ri-link-m" aria-hidden="true"></i>
     </a>
     <div class="heading-with-actions">
-      <h1 class="signature" translate="no">derive_env(root, group, key, env_prefix \\ nil)</h1>
+      <h1 class="signature" translate="no">derive_env(root, group, key)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/settings/provider.ex#L174" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/settings/provider.ex#L161" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -213,11 +210,11 @@ under &quot;Inherited&quot; rather than implying we own it.</li></ul>
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> derive_env(<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>(), <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>() | nil) :: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()</pre>
+          <pre translate="no"><span class="attribute">@spec</span> derive_env(<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>()) :: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()</pre>
 
       </div>
 
-<p>The environment variable name for a group and key: <code class="inline">&lt;ROOT&gt;_&lt;GROUP&gt;_&lt;KEY&gt;</code>.</p><p>A provider-level <code class="inline">env_prefix</code> replaces the <code class="inline">&lt;ROOT&gt;_&lt;GROUP&gt;_</code> part.</p>
+<p>The environment variable name for a group and key: <code class="inline">&lt;ROOT&gt;_&lt;GROUP&gt;_&lt;KEY&gt;</code>.</p><p>The only way a setting gets a name. There is no override.</p>
   </section>
 </section>
 <section class="detail" id="setting/3">
@@ -234,7 +231,7 @@ under &quot;Inherited&quot; rather than implying we own it.</li></ul>
         <span class="note">(macro)</span>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/settings/provider.ex#L88" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/settings/provider.ex#L84" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -255,9 +252,9 @@ under &quot;Inherited&quot; rather than implying we own it.</li></ul>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/game_server_core/1.0.1068">Hex Package</a>
+              <a href="https://hex.pm/packages/game_server_core/1.0.1069">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/game_server_core/1.0.1068">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/game_server_core/1.0.1069">Hex Preview</a>
 
             </span>
 

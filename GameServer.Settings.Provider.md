@@ -17,8 +17,13 @@ Declares a group of settings on a module.
 The declaration is the only place a setting is written down. Its environment
 variable name is **derived** — `<ROOT>_<GROUP>_<KEY>`, e.g.
 `GAMEND_RETENTION_CHAT_MESSAGES_DAYS` — so the key and its env var can never
-disagree. Pass `env:` only for the handful of names other software owns
-(`PORT`, `DATABASE_URL`), which should also carry `external: true`.
+disagree. There is no way to pin a different name: every setting follows the
+convention, without exception.
+
+A variable that *other* software reads (`RELEASE_COOKIE` for the release boot
+script, `FLY_REGION` from the platform) is not a setting and does not belong
+here — renaming our declaration would not rename what that software reads.
+Report those separately; `GameServer.Cluster.environment/0` is the example.
 
 Values are read back with `GameServer.Settings.get/2`, which checks
 `Application.get_env(app, module)` and falls back to the compiled default. A
@@ -34,10 +39,6 @@ host configures them the ordinary Elixir way and never needs an env var:
 - `:root` — first segment of the env name. Defaults to `"GAMEND"`; a plugin
   passes its own (`root: "POLYGLOT"`).
 - `:label` — display name for the group. Defaults to a capitalised `:group`.
-- `:env_prefix` — replaces the derived `<ROOT>_<GROUP>_` prefix for every
-  setting in the provider, so `LIMIT_MAX_PAGE_SIZE` can keep its name while
-  the group is `:limits`. A transitional escape hatch for names that predate
-  the convention; a per-setting `env:` still wins over it.
 
 ## Options for `setting/3`
 
@@ -51,19 +52,16 @@ host configures them the ordinary Elixir way and never needs an env var:
   them to hold.
 - `:with` — sibling keys forming a complete-or-empty group. All unset is
   silent; a partial set trips `:required`.
-- `:env` — override the derived env var name. For inherited names only.
-- `:external` — this name belongs to other software; the viewer files it
-  under "Inherited" rather than implying we own it.
 
 # `derive_env`
 
 ```elixir
-@spec derive_env(String.t(), atom(), atom(), String.t() | nil) :: String.t()
+@spec derive_env(String.t(), atom(), atom()) :: String.t()
 ```
 
 The environment variable name for a group and key: `<ROOT>_<GROUP>_<KEY>`.
 
-A provider-level `env_prefix` replaces the `<ROOT>_<GROUP>_` part.
+The only way a setting gets a name. There is no override.
 
 # `setting`
 *macro* 

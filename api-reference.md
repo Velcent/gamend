@@ -1,4 +1,4 @@
-# game_server_core v1.0.1068 - API Reference
+# game_server_core v1.0.1069 - API Reference
 
 ## Modules
 

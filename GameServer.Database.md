@@ -7,7 +7,7 @@ The adapter is chosen at **compile** time (see `config/host_config.exs`), so
 `adapter` here is documentation and admin display rather than something a
 restart can change — the app refuses to start on a stale build and says so.
 
-`DATABASE_URL` and the `POSTGRES_*` family are inherited names: platforms
+`GAMEND_DB_URL` and the `POSTGRES_*` family are inherited names: platforms
 provision them, and renaming them would break every managed-database
 attachment.
 
