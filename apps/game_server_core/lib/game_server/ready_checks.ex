@@ -107,7 +107,7 @@ defmodule GameServer.ReadyChecks do
   The one verb behind every "answers are stale now" moment: a match ended
   (rematch needs a fresh board), the game mode changed, a member joined a
   party whose board had already resolved, or the host wants everyone to
-  re-confirm on a deadline ("force ready"). Same options as `open/3`.
+  re-confirm on a deadline_at ("force ready"). Same options as `open/3`.
   """
   @spec reset(subject(), [Ecto.UUID.t()], keyword()) ::
           {:ok, Check.t()} | {:error, term()}
@@ -189,7 +189,7 @@ defmodule GameServer.ReadyChecks do
       status: "pending",
       lobby_id: lobby_id(subject),
       party_id: party_id(subject),
-      deadline: deadline_for(opts),
+      deadline_at: deadline_for(opts),
       opened_by: opened_by,
       metadata: Keyword.get(opts, :metadata, %{})
     }
@@ -239,7 +239,7 @@ defmodule GameServer.ReadyChecks do
   defp pending_for_subject(%Party{id: id}), do: pending_for_party(id)
   defp pending_for_subject(:matchmaking), do: nil
 
-  # An explicit `timeout_ms: nil` means "no deadline" whatever the kind; the
+  # An explicit `timeout_ms: nil` means "no deadline_at" whatever the kind; the
   # changeset then rejects it for an accept check, rather than this quietly
   # substituting a default the caller did not ask for.
   defp deadline_for(opts) do
@@ -529,7 +529,7 @@ defmodule GameServer.ReadyChecks do
   end
 
   @doc """
-  Fails every pending check whose deadline has passed.
+  Fails every pending check whose deadline_at has passed.
 
   Each still-unanswered participant becomes `timed_out`. Returns how many
   checks were expired. Idempotent, so the durable expiry job and the
@@ -538,12 +538,12 @@ defmodule GameServer.ReadyChecks do
   @spec expire_due(DateTime.t()) :: non_neg_integer()
   def expire_due(now \\ DateTime.utc_now()) do
     Check
-    |> where([c], c.status == "pending" and not is_nil(c.deadline) and c.deadline <= ^now)
+    |> where([c], c.status == "pending" and not is_nil(c.deadline_at) and c.deadline_at <= ^now)
     |> Repo.all()
     |> Enum.count(&(expire(&1) == :ok))
   end
 
-  @doc "Fails one check on its deadline. A no-op if it already resolved."
+  @doc "Fails one check on its deadline_at. A no-op if it already resolved."
   @spec expire(Check.t()) :: :ok | :noop
   def expire(%Check{} = check) do
     result =
@@ -571,10 +571,10 @@ defmodule GameServer.ReadyChecks do
     end
   end
 
-  defp schedule_expiry(%Check{deadline: nil}), do: :ok
+  defp schedule_expiry(%Check{deadline_at: nil}), do: :ok
 
-  defp schedule_expiry(%Check{id: id, deadline: deadline}) do
-    seconds = DateTime.diff(deadline, DateTime.utc_now())
+  defp schedule_expiry(%Check{id: id, deadline_at: deadline_at}) do
+    seconds = DateTime.diff(deadline_at, DateTime.utc_now())
     ExpiryWorker.schedule(id, max(seconds, 0))
   end
 

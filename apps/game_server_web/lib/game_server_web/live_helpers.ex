@@ -47,11 +47,11 @@ defmodule GameServerWeb.LiveHelpers do
   end
 
   defp auth_limits do
-    {setting(:auth_limit), setting(:auth_window)}
+    {setting(:auth_limit), setting(:auth_window_ms)}
   end
 
   defp general_limits do
-    {setting(:general_limit), setting(:general_window)}
+    {setting(:general_limit), setting(:general_window_ms)}
   end
 
   defp setting(key), do: GameServer.Settings.get(GameServerWeb.Plugs.RateLimiter, key)

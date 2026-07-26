@@ -7,7 +7,7 @@ defmodule GameServer.ReadyChecks.Check do
   taken back (see `GameServer.ReadyChecks`):
 
     * `"accept"` — one-shot and irrevocable; the first decline fails the whole
-      check; the deadline is mandatory.
+      check; the deadline_at is mandatory.
     * `"ready"` — a toggle; a decline just leaves the check pending.
 
   The subject is whichever of `lobby_id`/`party_id` is set — a lobby's
@@ -31,26 +31,10 @@ defmodule GameServer.ReadyChecks.Check do
   @statuses ~w(pending passed failed cancelled)
   @reasons ~w(declined timeout cancelled reset)
 
-  @derive {Jason.Encoder,
-           only: [
-             :id,
-             :kind,
-             :status,
-             :lobby_id,
-             :party_id,
-             :deadline,
-             :opened_by,
-             :reason,
-             :resolved_at,
-             :metadata,
-             :inserted_at,
-             :updated_at
-           ]}
-
   schema "ready_checks" do
     field :kind, :string
     field :status, :string, default: "pending"
-    field :deadline, :utc_datetime
+    field :deadline_at, :utc_datetime
     field :reason, :string
     field :resolved_at, :utc_datetime
     field :metadata, :map, default: %{}
@@ -73,7 +57,7 @@ defmodule GameServer.ReadyChecks.Check do
       :status,
       :lobby_id,
       :party_id,
-      :deadline,
+      :deadline_at,
       :opened_by,
       :reason,
       :resolved_at,
@@ -108,11 +92,11 @@ defmodule GameServer.ReadyChecks.Check do
     end
   end
 
-  # An accept check with no deadline would strand a whole match on one absent
-  # player, so the deadline is part of what "accept" means.
+  # An accept check with no deadline_at would strand a whole match on one absent
+  # player, so the deadline_at is part of what "accept" means.
   defp validate_accept_deadline(changeset) do
-    if get_field(changeset, :kind) == "accept" and is_nil(get_field(changeset, :deadline)) do
-      add_error(changeset, :deadline, "is required for accept checks")
+    if get_field(changeset, :kind) == "accept" and is_nil(get_field(changeset, :deadline_at)) do
+      add_error(changeset, :deadline_at, "is required for accept checks")
     else
       changeset
     end
@@ -125,4 +109,29 @@ defmodule GameServer.ReadyChecks.Check do
   @doc "The statuses a check may have."
   @spec statuses() :: [String.t()]
   def statuses, do: @statuses
+end
+
+# Hand-written rather than @derive so nil strings encode as "" (see
+# GameServer.SchemaJSON — game clients choke on null).
+defimpl Jason.Encoder, for: GameServer.ReadyChecks.Check do
+  def encode(check, opts) do
+    GameServer.SchemaJSON.encode(
+      check,
+      [
+        :id,
+        :kind,
+        :status,
+        :lobby_id,
+        :party_id,
+        :deadline_at,
+        :opened_by,
+        :reason,
+        :resolved_at,
+        :metadata,
+        :inserted_at,
+        :updated_at
+      ],
+      opts
+    )
+  end
 end

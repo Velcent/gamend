@@ -7,7 +7,7 @@ defmodule GameServer.Tournaments do
   advancement, recurrence). Gameplay and judgment belong to the game: when a
   match becomes playable the `tournament_match_ready` hook fires, the game
   plays it however it wants (a lobby, solo runs, anything) and reports the
-  verdict with `resolve_match/2`. Unresolved matches past their deadline fire
+  verdict with `resolve_match/2`. Unresolved matches past their deadline_at fire
   `tournament_match_expired` for the game to adjudicate; the tournament's
   `deadline_policy` applies only if it doesn't.
 
@@ -480,7 +480,7 @@ defmodule GameServer.Tournaments do
 
   @doc """
   Periodic driver, called by `GameServer.Tournaments.Ticker`. Runs every
-  transition, match-ready firing, deadline sweep, and recurrence spawn that is
+  transition, match-ready firing, deadline_at sweep, and recurrence spawn that is
   due. Serialized cluster-wide so hooks fire once.
   """
   @spec tick(DateTime.t()) :: :ok
@@ -587,7 +587,7 @@ defmodule GameServer.Tournaments do
           slot: slot,
           a_entry_id: a && a.id,
           b_entry_id: b && b.id,
-          deadline: round_deadline(tournament, round)
+          deadline_at: round_deadline(tournament, round)
         })
         |> Repo.insert()
     end
@@ -620,7 +620,7 @@ defmodule GameServer.Tournaments do
     end
   end
 
-  @doc "Unix-independent deadline for `round`, anchored to `starts_at`."
+  @doc "Unix-independent deadline_at for `round`, anchored to `starts_at`."
   @spec round_deadline(Tournament.t(), pos_integer()) :: DateTime.t()
   def round_deadline(%Tournament{} = tournament, round) do
     DateTime.add(tournament.starts_at, round * tournament.round_window_sec, :second)
@@ -892,12 +892,12 @@ defmodule GameServer.Tournaments do
 
   # ── Deadlines ─────────────────────────────────────────────────────────────
 
-  # Two-phase: first tick past the deadline fires tournament_match_expired
+  # Two-phase: first tick past the deadline_at fires tournament_match_expired
   # (the game adjudicates); a later tick applies deadline_policy if the match
   # is still open.
   defp sweep_deadlines(tournament, now) do
     from(m in Match,
-      where: m.tournament_id == ^tournament.id and is_nil(m.resolved_at) and m.deadline < ^now
+      where: m.tournament_id == ^tournament.id and is_nil(m.resolved_at) and m.deadline_at < ^now
     )
     |> Repo.all()
     |> Enum.each(&sweep_deadline_match(tournament, &1, now))
@@ -1130,7 +1130,7 @@ defmodule GameServer.Tournaments do
       open: Repo.aggregate(open_query, :count),
       overdue:
         open_query
-        |> where([m], m.deadline < ^DateTime.utc_now())
+        |> where([m], m.deadline_at < ^DateTime.utc_now())
         |> Repo.aggregate(:count)
     }
   end
@@ -1290,7 +1290,7 @@ defmodule GameServer.Tournaments do
       slug: tournament.slug,
       match_id: match.id,
       round: match.round,
-      deadline: match.deadline,
+      deadline_at: match.deadline_at,
       winner_entry_id: match.winner_entry_id
     }
 

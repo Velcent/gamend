@@ -359,8 +359,8 @@ defmodule GameServerWeb.AdminLive.Lobbies do
               {gettext("Ready check")}
               <span class="font-mono">{@ready_check.kind}</span>
               — {ready_summary(@ready_check)}
-              <span :if={@ready_check.deadline}>
-                · {gettext("deadline")} <.timestamp at={@ready_check.deadline} format="full" />
+              <span :if={@ready_check.deadline_at}>
+                · {gettext("deadline_at")} <.timestamp at={@ready_check.deadline_at} format="full" />
               </span>
             </span>
             <button

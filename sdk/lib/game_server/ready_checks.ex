@@ -96,7 +96,7 @@ defmodule GameServer.ReadyChecks do
   def answer_for(_check, _user_id, _ready?) do
     case Application.get_env(:game_server_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %GameServer.ReadyChecks.Check{id: "", kind: "ready", status: "pending", lobby_id: nil, deadline: nil, opened_by: nil, reason: nil, resolved_at: nil, metadata: %{}, participants: [], inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok, %GameServer.ReadyChecks.Check{id: "", kind: "ready", status: "pending", lobby_id: nil, deadline_at: nil, opened_by: nil, reason: nil, resolved_at: nil, metadata: %{}, participants: [], inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
 
       _ ->
         raise "GameServer.ReadyChecks.answer_for/3 is a stub - only available at runtime on GameServer"
@@ -112,7 +112,7 @@ defmodule GameServer.ReadyChecks do
   def cancel(_check, _reason) do
     case Application.get_env(:game_server_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %GameServer.ReadyChecks.Check{id: "", kind: "ready", status: "pending", lobby_id: nil, deadline: nil, opened_by: nil, reason: nil, resolved_at: nil, metadata: %{}, participants: [], inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok, %GameServer.ReadyChecks.Check{id: "", kind: "ready", status: "pending", lobby_id: nil, deadline_at: nil, opened_by: nil, reason: nil, resolved_at: nil, metadata: %{}, participants: [], inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
 
       _ ->
         raise "GameServer.ReadyChecks.cancel/2 is a stub - only available at runtime on GameServer"
@@ -166,7 +166,7 @@ defmodule GameServer.ReadyChecks do
 
 
   @doc ~S"""
-    Fails one check on its deadline. A no-op if it already resolved.
+    Fails one check on its deadline_at. A no-op if it already resolved.
   """
   @spec expire(GameServer.ReadyChecks.Check.t()) :: :ok | :noop
   def expire(_check) do
@@ -181,7 +181,7 @@ defmodule GameServer.ReadyChecks do
 
 
   @doc ~S"""
-    Fails every pending check whose deadline has passed.
+    Fails every pending check whose deadline_at has passed.
     
     Each still-unanswered participant becomes `timed_out`. Returns how many
     checks were expired. Idempotent, so the durable expiry job and the
@@ -213,7 +213,7 @@ defmodule GameServer.ReadyChecks do
   def for_user(_user, _scope) do
     case Application.get_env(:game_server_sdk, :stub_mode, :raise) do
       :placeholder ->
-        if :erlang.phash2(make_ref(), 2) == 0, do: nil, else: %GameServer.ReadyChecks.Check{id: "", kind: "ready", status: "pending", lobby_id: nil, deadline: nil, opened_by: nil, reason: nil, resolved_at: nil, metadata: %{}, participants: [], inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}
+        if :erlang.phash2(make_ref(), 2) == 0, do: nil, else: %GameServer.ReadyChecks.Check{id: "", kind: "ready", status: "pending", lobby_id: nil, deadline_at: nil, opened_by: nil, reason: nil, resolved_at: nil, metadata: %{}, participants: [], inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}
 
       _ ->
         raise "GameServer.ReadyChecks.for_user/2 is a stub - only available at runtime on GameServer"
@@ -228,7 +228,7 @@ defmodule GameServer.ReadyChecks do
   def get_check(_id) do
     case Application.get_env(:game_server_sdk, :stub_mode, :raise) do
       :placeholder ->
-        if :erlang.phash2(make_ref(), 2) == 0, do: nil, else: %GameServer.ReadyChecks.Check{id: "", kind: "ready", status: "pending", lobby_id: nil, deadline: nil, opened_by: nil, reason: nil, resolved_at: nil, metadata: %{}, participants: [], inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}
+        if :erlang.phash2(make_ref(), 2) == 0, do: nil, else: %GameServer.ReadyChecks.Check{id: "", kind: "ready", status: "pending", lobby_id: nil, deadline_at: nil, opened_by: nil, reason: nil, resolved_at: nil, metadata: %{}, participants: [], inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}
 
       _ ->
         raise "GameServer.ReadyChecks.get_check/1 is a stub - only available at runtime on GameServer"
@@ -297,7 +297,7 @@ defmodule GameServer.ReadyChecks do
   def open(_subject, _user_ids, _opts) do
     case Application.get_env(:game_server_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %GameServer.ReadyChecks.Check{id: "", kind: "ready", status: "pending", lobby_id: nil, deadline: nil, opened_by: nil, reason: nil, resolved_at: nil, metadata: %{}, participants: [], inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok, %GameServer.ReadyChecks.Check{id: "", kind: "ready", status: "pending", lobby_id: nil, deadline_at: nil, opened_by: nil, reason: nil, resolved_at: nil, metadata: %{}, participants: [], inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
 
       _ ->
         raise "GameServer.ReadyChecks.open/3 is a stub - only available at runtime on GameServer"
@@ -332,7 +332,7 @@ defmodule GameServer.ReadyChecks do
   def pending_for_lobby(_lobby_id) do
     case Application.get_env(:game_server_sdk, :stub_mode, :raise) do
       :placeholder ->
-        if :erlang.phash2(make_ref(), 2) == 0, do: nil, else: %GameServer.ReadyChecks.Check{id: "", kind: "ready", status: "pending", lobby_id: nil, deadline: nil, opened_by: nil, reason: nil, resolved_at: nil, metadata: %{}, participants: [], inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}
+        if :erlang.phash2(make_ref(), 2) == 0, do: nil, else: %GameServer.ReadyChecks.Check{id: "", kind: "ready", status: "pending", lobby_id: nil, deadline_at: nil, opened_by: nil, reason: nil, resolved_at: nil, metadata: %{}, participants: [], inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}
 
       _ ->
         raise "GameServer.ReadyChecks.pending_for_lobby/1 is a stub - only available at runtime on GameServer"
@@ -347,7 +347,7 @@ defmodule GameServer.ReadyChecks do
   def pending_for_party(_party_id) do
     case Application.get_env(:game_server_sdk, :stub_mode, :raise) do
       :placeholder ->
-        if :erlang.phash2(make_ref(), 2) == 0, do: nil, else: %GameServer.ReadyChecks.Check{id: "", kind: "ready", status: "pending", lobby_id: nil, deadline: nil, opened_by: nil, reason: nil, resolved_at: nil, metadata: %{}, participants: [], inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}
+        if :erlang.phash2(make_ref(), 2) == 0, do: nil, else: %GameServer.ReadyChecks.Check{id: "", kind: "ready", status: "pending", lobby_id: nil, deadline_at: nil, opened_by: nil, reason: nil, resolved_at: nil, metadata: %{}, participants: [], inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}
 
       _ ->
         raise "GameServer.ReadyChecks.pending_for_party/1 is a stub - only available at runtime on GameServer"
@@ -397,7 +397,7 @@ defmodule GameServer.ReadyChecks do
     The one verb behind every "answers are stale now" moment: a match ended
     (rematch needs a fresh board), the game mode changed, a member joined a
     party whose board had already resolved, or the host wants everyone to
-    re-confirm on a deadline ("force ready"). Same options as `open/3`.
+    re-confirm on a deadline_at ("force ready"). Same options as `open/3`.
     
   """
   @spec reset(subject(), [Ecto.UUID.t()], keyword()) ::
@@ -405,7 +405,7 @@ defmodule GameServer.ReadyChecks do
   def reset(_subject, _user_ids, _opts) do
     case Application.get_env(:game_server_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %GameServer.ReadyChecks.Check{id: "", kind: "ready", status: "pending", lobby_id: nil, deadline: nil, opened_by: nil, reason: nil, resolved_at: nil, metadata: %{}, participants: [], inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok, %GameServer.ReadyChecks.Check{id: "", kind: "ready", status: "pending", lobby_id: nil, deadline_at: nil, opened_by: nil, reason: nil, resolved_at: nil, metadata: %{}, participants: [], inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
 
       _ ->
         raise "GameServer.ReadyChecks.reset/3 is a stub - only available at runtime on GameServer"
@@ -435,7 +435,7 @@ defmodule GameServer.ReadyChecks do
   def respond(_user, _ready?, _scope) do
     case Application.get_env(:game_server_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %GameServer.ReadyChecks.Check{id: "", kind: "ready", status: "pending", lobby_id: nil, deadline: nil, opened_by: nil, reason: nil, resolved_at: nil, metadata: %{}, participants: [], inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok, %GameServer.ReadyChecks.Check{id: "", kind: "ready", status: "pending", lobby_id: nil, deadline_at: nil, opened_by: nil, reason: nil, resolved_at: nil, metadata: %{}, participants: [], inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
 
       _ ->
         raise "GameServer.ReadyChecks.respond/3 is a stub - only available at runtime on GameServer"

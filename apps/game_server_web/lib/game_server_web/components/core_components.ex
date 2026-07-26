@@ -485,12 +485,24 @@ defmodule GameServerWeb.CoreComponents do
   attr :class, :any, default: "w-6 h-6"
 
   def entity_icon(%{icon_url: url} = assigns) when is_binary(url) and url != "" do
+    case GameServerWeb.Icons.from_path(url) do
+      # One of ours: inline it rather than fetching it back over HTTP, so its
+      # `currentColor` follows the theme. In an <img> it would resolve to black
+      # and disappear against the dark theme.
+      {:ok, icon} -> assigns |> assign(:icon, icon) |> inline_icon()
+      :error -> uploaded_icon(assigns)
+    end
+  end
+
+  def entity_icon(assigns), do: inline_icon(assigns)
+
+  defp uploaded_icon(assigns) do
     ~H"""
     <img src={@icon_url} alt="" loading="lazy" decoding="async" class={[@class, "object-contain"]} />
     """
   end
 
-  def entity_icon(assigns) do
+  defp inline_icon(assigns) do
     icon = assigns.icon || GameServerWeb.Icons.default(assigns.type)
 
     # Inline SVG, not a `hero-*` class: Tailwind only generates those classes
@@ -697,8 +709,11 @@ defmodule GameServerWeb.CoreComponents do
   @doc """
   A user's avatar as a round image when they have one (`profile_url`), falling
   back to the generic person icon. Pass `class` for sizing, e.g. `"w-5 h-5"`.
-  If the image URL fails to load (provider not ready yet, expired CDN link),
-  the `onerror` handler hides the broken image and reveals the same icon.
+  If the image URL fails to load (provider not ready yet, expired CDN link,
+  rate-limited avatar CDN), `assets/js/avatar_fallback.js` hides the broken
+  image and reveals the same icon. That lives in a real script rather than an
+  `onerror` attribute because the CSP here has no `script-src 'unsafe-inline'`,
+  so an inline handler is refused and the fallback would never fire.
 
   `crossorigin="anonymous"` is load-bearing, not decoration: `/play` and
   `/game/*` are served cross-origin isolated for Godot's `SharedArrayBuffer`
@@ -722,7 +737,7 @@ defmodule GameServerWeb.CoreComponents do
       src={@avatar_url}
       alt=""
       crossorigin="anonymous"
-      onerror="this.classList.add('hidden');this.nextElementSibling.classList.remove('hidden')"
+      data-avatar-fallback
       class={["rounded-full object-cover bg-base-300", @class]}
     />
     <.icon :if={@avatar_url} name="hero-user-circle-solid" class={"hidden " <> @class} />

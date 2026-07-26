@@ -442,7 +442,7 @@ defmodule GameServerWeb.WebRTCPeer do
 
     if enabled? do
       limit = GameServer.Settings.get(GameServerWeb.Plugs.RateLimiter, :dc_limit)
-      window = GameServer.Settings.get(GameServerWeb.Plugs.RateLimiter, :dc_window)
+      window = GameServer.Settings.get(GameServerWeb.Plugs.RateLimiter, :dc_window_ms)
 
       case GameServerWeb.RateLimit.hit("dc:#{user_id}", window, limit) do
         {:allow, _count} -> true

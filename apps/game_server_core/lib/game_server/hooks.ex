@@ -172,7 +172,7 @@ defmodule GameServer.Hooks do
   # other return allows. `tournament_match_ready` is where the game starts
   # the match (create a lobby, set up a challenge, ...) and
   # `tournament_match_expired` is where it adjudicates an unresolved match at
-  # its deadline via `GameServer.Tournaments.resolve_match/2`.
+  # its deadline_at via `GameServer.Tournaments.resolve_match/2`.
   @callback before_tournament_register(User.t(), GameServer.Tournaments.Tournament.t()) ::
               hook_result(term())
   @callback after_tournament_register(User.t(), GameServer.Tournaments.Tournament.t()) :: any()

@@ -33,7 +33,7 @@ defmodule GameServerWeb.Api.V1.Admin.ChatController do
       id: %Schema{type: :string, format: :uuid},
       sender_id: %Schema{type: :string, format: :uuid},
       sender_name: %Schema{type: :string},
-      sender_email: %Schema{type: :string, nullable: true},
+      sender_email: %Schema{type: :string},
       content: %Schema{type: :string},
       metadata: %Schema{type: :object},
       chat_type: %Schema{type: :string, enum: ["lobby", "group", "friend", "party"]},
@@ -130,7 +130,7 @@ defmodule GameServerWeb.Api.V1.Admin.ChatController do
       |> maybe_put_param_filter(:chat_ref_id, params)
       |> maybe_put_param_filter(:content, params)
 
-    {page, page_size} = parse_page_params(params)
+    {page, page_size} = GameServerWeb.Pagination.params(params)
     sort_by = Map.get(params, "sort_by")
 
     messages =
@@ -174,7 +174,7 @@ defmodule GameServerWeb.Api.V1.Admin.ChatController do
       |> json(%{error: "chat_type and chat_ref_id are required"})
     else
       {deleted, _} = Chat.delete_messages(chat_type, parse_id(chat_ref_id) || 0)
-      json(conn, %{deleted: deleted})
+      json(conn, %{data: %{deleted: deleted}})
     end
   end
 

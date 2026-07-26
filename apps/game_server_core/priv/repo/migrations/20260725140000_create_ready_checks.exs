@@ -20,7 +20,7 @@ defmodule GameServer.Repo.Migrations.CreateReadyChecks do
       add :status, :string, null: false, default: "pending"
       add :lobby_id, references(:lobbies, on_delete: :delete_all)
       add :party_id, references(:parties, on_delete: :delete_all)
-      add :deadline, :utc_datetime
+      add :deadline_at, :utc_datetime
       add :opened_by, references(:users, on_delete: :nilify_all)
       add :reason, :string
       add :resolved_at, :utc_datetime
@@ -43,7 +43,7 @@ defmodule GameServer.Repo.Migrations.CreateReadyChecks do
            )
 
     # The expiry sweep reads exactly this predicate.
-    create index(:ready_checks, [:deadline], where: "status = 'pending'")
+    create index(:ready_checks, [:deadline_at], where: "status = 'pending'")
     create index(:ready_checks, [:status])
 
     create table(:ready_check_participants) do

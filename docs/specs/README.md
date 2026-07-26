@@ -7,6 +7,13 @@ in the existing codebase, and the full CONTRIBUTING checklist it must satisfy.
 Phase 0 (background jobs, object storage) is specced inline in the ROADMAP; it
 has shipped.
 
+## Conventions
+
+- [api-conventions.md](api-conventions.md) — **API conventions.** The
+  vocabulary and shapes every schema, serializer and route follows —
+  identifiers, names, time, lifecycle, the never-null policy, response shapes,
+  paths. Six rules are enforced by `mix gamend.api.lint` in precommit and CI.
+
 ## Phase 1
 
 - [push.md](push.md) — **Push: server delivery + token storage.** `push_tokens`

@@ -42,15 +42,15 @@ defmodule GameServer.ReadyChecksTest do
       assert state_of(check, ctx.alice.id) == "pending"
     end
 
-    test "defaults the deadline from the configured timeout", ctx do
+    test "defaults the deadline_at from the configured timeout", ctx do
       {:ok, check} = ReadyChecks.open(ctx.lobby, ctx.members)
 
-      assert DateTime.diff(check.deadline, DateTime.utc_now()) in 10..16
+      assert DateTime.diff(check.deadline_at, DateTime.utc_now()) in 10..16
     end
 
     test "a ready check may be open-ended", ctx do
       {:ok, check} = ReadyChecks.open(ctx.lobby, ctx.members, timeout_ms: nil)
-      assert check.deadline == nil
+      assert check.deadline_at == nil
     end
 
     test "refuses a second check while one is open", ctx do
@@ -70,7 +70,7 @@ defmodule GameServer.ReadyChecksTest do
       assert {:error, :no_participants} = ReadyChecks.open(ctx.lobby, [])
     end
 
-    test "an accept check must have a deadline", ctx do
+    test "an accept check must have a deadline_at", ctx do
       assert {:error, _} =
                ReadyChecks.open(ctx.lobby, ctx.members, kind: "accept", timeout_ms: nil)
     end
@@ -166,7 +166,7 @@ defmodule GameServer.ReadyChecksTest do
 
       # Deadline in the past rather than sleeping.
       Repo.update_all(Check,
-        set: [deadline: DateTime.add(DateTime.utc_now(), -1, :second)]
+        set: [deadline_at: DateTime.add(DateTime.utc_now(), -1, :second)]
       )
 
       assert ReadyChecks.expire_due() == 1
@@ -190,7 +190,7 @@ defmodule GameServer.ReadyChecksTest do
       {:ok, check} = ReadyChecks.open(ctx.lobby, ctx.members, opened_by: ctx.host.id)
 
       Repo.update_all(Check,
-        set: [deadline: DateTime.add(DateTime.utc_now(), -1, :second)]
+        set: [deadline_at: DateTime.add(DateTime.utc_now(), -1, :second)]
       )
 
       _ = ReadyChecks.expire_due()

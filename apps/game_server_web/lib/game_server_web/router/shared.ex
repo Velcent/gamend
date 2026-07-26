@@ -202,6 +202,10 @@ defmodule GameServerWeb.Router.Shared do
         get "/privacy", PageController, :privacy
         get "/data_deletion", PageController, :data_deletion
         get "/terms", PageController, :terms
+
+        # The typed icon set as SVG, so `icon_url` can point at an icon we
+        # already ship. Public and unauthenticated: it is static artwork.
+        get "/icons/:name", IconController, :show
       end
 
       # Serve stored objects (local backend). With S3 the object URL points at the

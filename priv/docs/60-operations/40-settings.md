@@ -80,16 +80,16 @@ Live values, and where each one came from, are on the
 | `GAMEND_DB_ADAPTER` | atom | `:sqlite` | sqlite or postgres. Compile-time; set as a build arg, not at boot. |
 | `GAMEND_DB_IPV6` | boolean | `false` | Connect over IPv6, needed on platforms with IPv6-only private networking. |
 | `GAMEND_DB_POOL_SIZE` | integer | - | Connections in the pool. Defaults to 10 on Postgres, 5 on SQLite. |
-| `GAMEND_DB_POOL_TIMEOUT` | integer | `10000` | How long a request waits to check out a connection, in milliseconds. |
+| `GAMEND_DB_POOL_TIMEOUT_MS` | integer | `10000` | How long a request waits to check out a connection, in milliseconds. |
 | `GAMEND_DB_POSTGRES_DB` | string | - |  |
 | `GAMEND_DB_POSTGRES_HOST` | string | - |  |
 | `GAMEND_DB_POSTGRES_PASSWORD` | string | - | Secret - never log or commit it. |
 | `GAMEND_DB_POSTGRES_PORT` | integer | `5432` |  |
 | `GAMEND_DB_POSTGRES_USER` | string | - |  |
-| `GAMEND_DB_QUERY_TIMEOUT` | integer | `15000` |  |
-| `GAMEND_DB_QUEUE_INTERVAL` | integer | `1000` |  |
+| `GAMEND_DB_QUERY_TIMEOUT_MS` | integer | `15000` |  |
+| `GAMEND_DB_QUEUE_INTERVAL_MS` | integer | `1000` |  |
 | `GAMEND_DB_QUEUE_TARGET` | integer | `10000` |  |
-| `GAMEND_DB_SQLITE_BUSY_TIMEOUT` | integer | `15000` | Wait this long for a lock instead of failing with "database is locked". |
+| `GAMEND_DB_SQLITE_BUSY_TIMEOUT_MS` | integer | `15000` | Wait this long for a lock instead of failing with "database is locked". |
 | `GAMEND_DB_SQLITE_CACHE_SIZE_KB` | integer | `200000` |  |
 | `GAMEND_DB_SQLITE_PATH` | string | - | Where the SQLite file lives. Point at a mounted volume in production. |
 | `GAMEND_DB_SQLITE_SYNCHRONOUS` | atom | `:normal` | off \| normal \| full \| extra. Lower means fewer fsyncs and less durability. |
@@ -295,18 +295,18 @@ Live values, and where each one came from, are on the
 | Variable | Type | Default | Notes |
 |---|---|---|---|
 | `GAMEND_RATELIMIT_AUTH_LIMIT` | integer | `10` | Max login/register requests per window, per IP. |
-| `GAMEND_RATELIMIT_AUTH_WINDOW` | integer | `60000` | Auth HTTP window, in milliseconds. |
+| `GAMEND_RATELIMIT_AUTH_WINDOW_MS` | integer | `60000` | Auth HTTP window, in milliseconds. |
 | `GAMEND_RATELIMIT_BACKEND` | atom | `:ets` | ets (per-node counters) or redis (shared across instances). |
 | `GAMEND_RATELIMIT_DC_LIMIT` | integer | `300` | Max WebRTC DataChannel messages per window, per user. |
-| `GAMEND_RATELIMIT_DC_WINDOW` | integer | `10000` | WebRTC DataChannel window, in milliseconds. |
+| `GAMEND_RATELIMIT_DC_WINDOW_MS` | integer | `10000` | WebRTC DataChannel window, in milliseconds. |
 | `GAMEND_RATELIMIT_ENABLED` | boolean | `true` | Master switch for all request/message throttling. |
 | `GAMEND_RATELIMIT_GENERAL_LIMIT` | integer | `240` | Max general HTTP requests per window, per IP. |
-| `GAMEND_RATELIMIT_GENERAL_WINDOW` | integer | `60000` | General HTTP window, in milliseconds. |
+| `GAMEND_RATELIMIT_GENERAL_WINDOW_MS` | integer | `60000` | General HTTP window, in milliseconds. |
 | `GAMEND_RATELIMIT_ICE_LIMIT` | integer | `150` | Max ICE candidate messages per window, per user. |
-| `GAMEND_RATELIMIT_ICE_WINDOW` | integer | `30000` | ICE candidate window, in milliseconds. |
+| `GAMEND_RATELIMIT_ICE_WINDOW_MS` | integer | `30000` | ICE candidate window, in milliseconds. |
 | `GAMEND_RATELIMIT_REDIS_URL` | string | - | Redis URL for shared counters. **Required in production.** |
 | `GAMEND_RATELIMIT_WS_LIMIT` | integer | `60` | Max WebSocket channel messages per window, per user. |
-| `GAMEND_RATELIMIT_WS_WINDOW` | integer | `10000` | WebSocket window, in milliseconds. |
+| `GAMEND_RATELIMIT_WS_WINDOW_MS` | integer | `10000` | WebSocket window, in milliseconds. |
 
 
 ## Realtime

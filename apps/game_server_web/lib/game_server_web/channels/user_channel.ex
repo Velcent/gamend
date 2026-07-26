@@ -706,7 +706,7 @@ defmodule GameServerWeb.UserChannel do
     if GameServer.Settings.get(GameServerWeb.Plugs.RateLimiter, :enabled) do
       user_id = socket.assigns.current_scope.user_id
       limit = GameServer.Settings.get(GameServerWeb.Plugs.RateLimiter, :ws_limit)
-      window = GameServer.Settings.get(GameServerWeb.Plugs.RateLimiter, :ws_window)
+      window = GameServer.Settings.get(GameServerWeb.Plugs.RateLimiter, :ws_window_ms)
 
       case GameServerWeb.RateLimit.hit("ws:#{user_id}", window, limit) do
         {:allow, _count} ->
@@ -737,7 +737,7 @@ defmodule GameServerWeb.UserChannel do
     if GameServer.Settings.get(GameServerWeb.Plugs.RateLimiter, :enabled) do
       user_id = socket.assigns.current_scope.user_id
       limit = GameServer.Settings.get(GameServerWeb.Plugs.RateLimiter, :ice_limit)
-      window = GameServer.Settings.get(GameServerWeb.Plugs.RateLimiter, :ice_window)
+      window = GameServer.Settings.get(GameServerWeb.Plugs.RateLimiter, :ice_window_ms)
 
       case GameServerWeb.RateLimit.hit("ice:#{user_id}", window, limit) do
         {:allow, _count} ->

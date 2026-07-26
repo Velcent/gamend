@@ -7,6 +7,7 @@ defmodule GameServerWeb.Api.V1.FriendController do
   alias GameServer.Accounts.Scope
   alias GameServer.Accounts.User
   alias GameServer.Friends
+  alias GameServerWeb.Pagination
   alias OpenApiSpex.Schema
 
   @ok_schema %Schema{type: :object}
@@ -523,7 +524,7 @@ defmodule GameServerWeb.Api.V1.FriendController do
   def blacklist(conn, params) do
     case Scope.user(conn.assigns.current_scope) do
       %User{} = user ->
-        {page, page_size} = parse_page_params(params)
+        {page, page_size} = Pagination.params(params)
 
         users = Friends.list_blocked_users(user.id, page: page, page_size: page_size)
         serialized = Enum.map(users, &serialize_user/1)
@@ -592,7 +593,7 @@ defmodule GameServerWeb.Api.V1.FriendController do
   def index(conn, params) do
     case Scope.user(conn.assigns.current_scope) do
       %User{} = user ->
-        {page, page_size} = parse_page_params(params)
+        {page, page_size} = Pagination.params(params)
 
         # include the friendship row id so clients can call delete/accept/reject by id
         friends = Friends.list_friends_with_friendship(user.id, page: page, page_size: page_size)
@@ -613,7 +614,7 @@ defmodule GameServerWeb.Api.V1.FriendController do
   def blocked(conn, params) do
     case Scope.user(conn.assigns.current_scope) do
       %User{} = user ->
-        {page, page_size} = parse_page_params(params)
+        {page, page_size} = Pagination.params(params)
 
         blocked = Friends.list_blocked_for_user(user.id, page: page, page_size: page_size)
 
@@ -664,7 +665,7 @@ defmodule GameServerWeb.Api.V1.FriendController do
   def requests(conn, params) do
     case Scope.user(conn.assigns.current_scope) do
       %User{} = user ->
-        {page, page_size} = parse_page_params(params)
+        {page, page_size} = Pagination.params(params)
 
         incoming = Friends.list_incoming_requests(user.id, page: page, page_size: page_size)
         outgoing = Friends.list_outgoing_requests(user.id, page: page, page_size: page_size)
@@ -675,22 +676,13 @@ defmodule GameServerWeb.Api.V1.FriendController do
         total_in = Friends.count_incoming_requests(user.id)
         total_out = Friends.count_outgoing_requests(user.id)
 
-        total_pages_in = if page_size > 0, do: div(total_in + page_size - 1, page_size), else: 0
-        total_pages_out = if page_size > 0, do: div(total_out + page_size - 1, page_size), else: 0
-
+        # Two collections share one window, so each gets its own standard meta
+        # rather than the response inventing a parallel-map shape of its own.
         json(conn, %{
-          incoming: inc_serialized,
-          outgoing: out_serialized,
+          data: %{incoming: inc_serialized, outgoing: out_serialized},
           meta: %{
-            page: page,
-            page_size: page_size,
-            counts: %{incoming: length(inc_serialized), outgoing: length(out_serialized)},
-            total_counts: %{incoming: total_in, outgoing: total_out},
-            total_pages: %{incoming: total_pages_in, outgoing: total_pages_out},
-            has_more: %{
-              incoming: length(inc_serialized) == page_size,
-              outgoing: length(out_serialized) == page_size
-            }
+            incoming: Pagination.meta(page, page_size, length(inc_serialized), total_in),
+            outgoing: Pagination.meta(page, page_size, length(out_serialized), total_out)
           }
         })
 

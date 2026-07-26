@@ -11,7 +11,7 @@ defmodule GameServer.ReadyChecks.Check do
   - `kind` - `"ready"` (lobby ready-up) or `"accept"` (match confirmation)
   - `status` - `"pending"`, `"passed"`, `"failed"` or `"cancelled"`
   - `lobby_id` - Lobby the check belongs to (string, nil for a matchmaking check)
-  - `deadline` - When unanswered participants time out (nil for an open-ended ready check)
+  - `deadline_at` - When unanswered participants time out (nil for an open-ended ready check)
   - `opened_by` - User who opened it (string, nil when the server did)
   - `reason` - Why it failed: `"declined"`, `"timeout"` or `"cancelled"` (nil while pending)
   - `resolved_at` - When it stopped being pending
@@ -26,7 +26,7 @@ defmodule GameServer.ReadyChecks.Check do
           kind: String.t(),
           status: String.t(),
           lobby_id: String.t() | nil,
-          deadline: DateTime.t() | nil,
+          deadline_at: DateTime.t() | nil,
           opened_by: String.t() | nil,
           reason: String.t() | nil,
           resolved_at: DateTime.t() | nil,
@@ -41,7 +41,7 @@ defmodule GameServer.ReadyChecks.Check do
     :kind,
     :status,
     :lobby_id,
-    :deadline,
+    :deadline_at,
     :opened_by,
     :reason,
     :resolved_at,

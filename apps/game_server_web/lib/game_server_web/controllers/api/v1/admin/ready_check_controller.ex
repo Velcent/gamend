@@ -2,8 +2,6 @@ defmodule GameServerWeb.Api.V1.Admin.ReadyCheckController do
   use GameServerWeb, :controller
   use OpenApiSpex.ControllerSpecs
 
-  import GameServerWeb.Helpers.ParamParser, only: [parse_page_params: 1]
-
   alias GameServer.ReadyChecks
   alias GameServerWeb.Pagination
   alias OpenApiSpex.Schema
@@ -17,7 +15,7 @@ defmodule GameServerWeb.Api.V1.Admin.ReadyCheckController do
       kind: %Schema{type: :string, enum: ["ready", "accept"]},
       status: %Schema{type: :string, enum: ["pending", "passed", "failed", "cancelled"]},
       lobby_id: %Schema{type: :string, format: :uuid, nullable: true},
-      deadline: %Schema{type: :string, format: "date-time", nullable: true},
+      deadline_at: %Schema{type: :string, format: "date-time", nullable: true},
       opened_by: %Schema{type: :string, format: :uuid, nullable: true},
       reason: %Schema{type: :string},
       resolved_at: %Schema{type: :string, format: "date-time", nullable: true},
@@ -74,7 +72,7 @@ defmodule GameServerWeb.Api.V1.Admin.ReadyCheckController do
   )
 
   def index(conn, params) do
-    {page, page_size} = parse_page_params(params)
+    {page, page_size} = GameServerWeb.Pagination.params(params)
 
     filters = [
       status: params["status"],
@@ -142,7 +140,7 @@ defmodule GameServerWeb.Api.V1.Admin.ReadyCheckController do
       kind: check.kind,
       status: check.status,
       lobby_id: check.lobby_id,
-      deadline: check.deadline,
+      deadline_at: check.deadline_at,
       opened_by: check.opened_by,
       reason: check.reason || "",
       resolved_at: check.resolved_at,

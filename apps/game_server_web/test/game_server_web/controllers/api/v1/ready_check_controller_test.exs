@@ -66,8 +66,8 @@ defmodule GameServerWeb.Api.V1.ReadyCheckControllerTest do
     test "honours an explicit timeout", ctx do
       conn = post(authed(ctx.host), "/api/v1/lobbies/ready_check", %{"timeout_ms" => 60_000})
 
-      deadline = json_response(conn, 201)["deadline"] |> NaiveDateTime.from_iso8601!()
-      assert NaiveDateTime.diff(deadline, NaiveDateTime.utc_now()) > 30
+      deadline_at = json_response(conn, 201)["deadline_at"] |> NaiveDateTime.from_iso8601!()
+      assert NaiveDateTime.diff(deadline_at, NaiveDateTime.utc_now()) > 30
     end
 
     test "requires authentication" do

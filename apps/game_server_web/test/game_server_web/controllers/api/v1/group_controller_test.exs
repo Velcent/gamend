@@ -776,7 +776,7 @@ defmodule GameServerWeb.Api.V1.GroupControllerTest do
         |> auth_conn(member)
         |> post("/api/v1/groups/#{group.id}/notify", %{content: "Hello from API!"})
 
-      assert %{"sent" => 1} = json_response(conn, 200)
+      assert %{"data" => %{"sent" => 1}} = json_response(conn, 200)
     end
 
     test "non-member gets 403", %{conn: conn} do
@@ -824,7 +824,7 @@ defmodule GameServerWeb.Api.V1.GroupControllerTest do
           title: "game_event"
         })
 
-      assert %{"sent" => 1} = json_response(conn, 200)
+      assert %{"data" => %{"sent" => 1}} = json_response(conn, 200)
     end
   end
 

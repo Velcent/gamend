@@ -308,7 +308,7 @@ defmodule GameServerWeb.AdminLive.Tournaments do
                           do: leader_of(@detail, match.winner_entry_id),
                           else: if(match.resolved_at, do: "no winner", else: "—")}
                       </td>
-                      <td class="text-xs">{match.deadline}</td>
+                      <td class="text-xs">{match.deadline_at}</td>
                       <td class="flex gap-1">
                         <button
                           :if={match.resolved_at == nil and match.a_entry_id}

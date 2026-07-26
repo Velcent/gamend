@@ -230,6 +230,9 @@ jobs:
       - name: Credo (strict)
         run: MIX_ENV=dev mix credo --strict
 
+      - name: API conventions (docs/specs/api-conventions.md)
+        run: MIX_ENV=dev mix gamend.api.lint
+
       - name: Credo (strict, web app)
         working-directory: apps/game_server_web
         run: MIX_ENV=dev mix credo --strict

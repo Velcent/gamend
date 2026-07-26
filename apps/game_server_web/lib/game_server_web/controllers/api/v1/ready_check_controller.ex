@@ -31,7 +31,7 @@ defmodule GameServerWeb.Api.V1.ReadyCheckController do
       status: %Schema{type: :string, enum: ["pending", "passed", "failed", "cancelled"]},
       lobby_id: %Schema{type: :string},
       party_id: %Schema{type: :string},
-      deadline: %Schema{type: :string, format: :"date-time", nullable: true},
+      deadline_at: %Schema{type: :string, format: :"date-time", nullable: true},
       opened_by: %Schema{type: :string},
       reason: %Schema{type: :string},
       total: %Schema{type: :integer},

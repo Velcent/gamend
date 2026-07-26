@@ -350,6 +350,9 @@ defmodule Mix.Tasks.Gen.Sdk do
        end,
        "if :erlang.phash2(make_ref(), 2) == 0, do: nil, else: #{ready_check_placeholder_expr()}"},
       {fn rt ->
+         String.contains?(rt, "GameServer.Groups.Group.t()") and String.contains?(rt, "| nil")
+       end, "if :erlang.phash2(make_ref(), 2) == 0, do: nil, else: #{group_placeholder_expr()}"},
+      {fn rt ->
          String.contains?(rt, "GameServer.Quests.Quest.t()") and String.contains?(rt, "| nil")
        end, "if :erlang.phash2(make_ref(), 2) == 0, do: nil, else: #{quest_placeholder_expr()}"},
       {fn rt ->
@@ -462,6 +465,12 @@ defmodule Mix.Tasks.Gen.Sdk do
     "%GameServer.Lobbies.Lobby{id: 0, title: \"\", host_id: nil, hostless: false, max_users: 0, is_hidden: false, is_locked: false, metadata: %{}, inserted_at: #{dt}, updated_at: #{dt}}"
   end
 
+  defp group_placeholder_expr do
+    dt = dt_placeholder_expr()
+
+    "%GameServer.Groups.Group{id: \"\", title: \"\", description: \"\", icon_url: nil, type: \"public\", max_members: 100, metadata: %{}, slowdown: 0, creator_id: nil, inserted_at: #{dt}, updated_at: #{dt}}"
+  end
+
   defp leaderboard_placeholder_expr do
     dt = dt_placeholder_expr()
 
@@ -483,13 +492,13 @@ defmodule Mix.Tasks.Gen.Sdk do
   defp tournament_match_placeholder_expr do
     dt = dt_placeholder_expr()
 
-    "%GameServer.Tournaments.Match{id: \"\", tournament_id: \"\", bracket_index: 0, round: 1, slot: 0, a_entry_id: nil, b_entry_id: nil, winner_entry_id: nil, ready_at: nil, expired_at: nil, resolved_at: nil, deadline: #{dt}, metadata: %{}, inserted_at: #{dt}, updated_at: #{dt}}"
+    "%GameServer.Tournaments.Match{id: \"\", tournament_id: \"\", bracket_index: 0, round: 1, slot: 0, a_entry_id: nil, b_entry_id: nil, winner_entry_id: nil, ready_at: nil, expired_at: nil, resolved_at: nil, deadline_at: #{dt}, metadata: %{}, inserted_at: #{dt}, updated_at: #{dt}}"
   end
 
   defp ready_check_placeholder_expr do
     dt = dt_placeholder_expr()
 
-    "%GameServer.ReadyChecks.Check{id: \"\", kind: \"ready\", status: \"pending\", lobby_id: nil, deadline: nil, opened_by: nil, reason: nil, resolved_at: nil, metadata: %{}, participants: [], inserted_at: #{dt}, updated_at: #{dt}}"
+    "%GameServer.ReadyChecks.Check{id: \"\", kind: \"ready\", status: \"pending\", lobby_id: nil, deadline_at: nil, opened_by: nil, reason: nil, resolved_at: nil, metadata: %{}, participants: [], inserted_at: #{dt}, updated_at: #{dt}}"
   end
 
   defp tournament_bracket_placeholder_expr do

@@ -113,7 +113,8 @@ defmodule GameServerHost.MixProject do
           # Theme text lives in data, so `gettext.extract` cannot see it.
           "gamend.theme.extract",
           "test",
-          "credo --strict"
+          "credo --strict",
+          "gamend.api.lint"
         ] ++
           local_web_commands([
             web_test_cmd("compile --warning-as-errors"),

@@ -6,8 +6,6 @@ defmodule GameServerWeb.Api.V1.PushTokenController do
   use GameServerWeb, :controller
   use OpenApiSpex.ControllerSpecs
 
-  import GameServerWeb.Helpers.ParamParser, only: [parse_page_params: 1]
-
   alias GameServer.Accounts.Scope
   alias GameServer.Push
   alias GameServerWeb.Pagination
@@ -104,7 +102,7 @@ defmodule GameServerWeb.Api.V1.PushTokenController do
 
   def index(conn, params) do
     user = Scope.user(conn.assigns.current_scope)
-    {page, page_size} = parse_page_params(params)
+    {page, page_size} = GameServerWeb.Pagination.params(params)
 
     tokens = Push.list_tokens(user.id, page: page, page_size: page_size)
     total = Push.count_tokens(user.id)

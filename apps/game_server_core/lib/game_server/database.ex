@@ -43,14 +43,14 @@ defmodule GameServer.Database do
     doc: "Connections in the pool. Defaults to 10 on Postgres, 5 on SQLite."
   )
 
-  setting(:pool_timeout, :integer,
+  setting(:pool_timeout_ms, :integer,
     default: 10_000,
     doc: "How long a request waits to check out a connection, in milliseconds."
   )
 
   setting(:queue_target, :integer, default: 10_000)
-  setting(:queue_interval, :integer, default: 1_000)
-  setting(:query_timeout, :integer, default: 15_000)
+  setting(:queue_interval_ms, :integer, default: 1_000)
+  setting(:query_timeout_ms, :integer, default: 15_000)
 
   setting(:sqlite_path, :string,
     doc: "Where the SQLite file lives. Point at a mounted volume in production."
@@ -63,7 +63,7 @@ defmodule GameServer.Database do
 
   setting(:sqlite_cache_size_kb, :integer, default: 200_000)
 
-  setting(:sqlite_busy_timeout, :integer,
+  setting(:sqlite_busy_timeout_ms, :integer,
     default: 15_000,
     doc: "Wait this long for a lock instead of failing with \"database is locked\"."
   )

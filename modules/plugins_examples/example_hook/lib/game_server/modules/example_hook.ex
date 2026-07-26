@@ -33,6 +33,12 @@ defmodule GameServer.Modules.ExampleHook do
   @tournament_slug "example-weekly-cup"
   @quest_prefix "example_"
   @group_title "Example Guild"
+  @group_icon "/icons/user-group.svg"
+
+  # Icons are URLs into the server's own typed icon set (`GET /icons/<name>.svg`,
+  # the heroicons the UI already ships), so a sample needs no hosted artwork and
+  # renders in the reader's theme. A game with its own art uploads it instead —
+  # see the two-step icon upload in the admin API — and stores that URL here.
   @welcome_kv_key "example_welcome"
 
   @impl true
@@ -70,14 +76,24 @@ defmodule GameServer.Modules.ExampleHook do
         Leaderboards.create_leaderboard(%{
           slug: @login_leaderboard,
           title: "Logins",
+          icon_url: "/icons/chart-bar.svg",
           description: "How many times each player has logged in.",
           sort_order: :desc,
           operator: :incr
         })
 
-      _existing ->
-        :ok
+      existing ->
+        sync_icon(existing, "/icons/chart-bar.svg", &Leaderboards.update_leaderboard/2)
     end
+  end
+
+  # Only the icon is reconciled on entities that outlive a deploy: their title
+  # and schedule belong to whatever the server (or an admin) has done with them
+  # since. Quests are different — they are pure definitions, so they are synced
+  # whole.
+  defp sync_icon(entity, icon, update) do
+    if Map.get(entity, :icon_url) != icon, do: update.(entity, %{icon_url: icon})
+    :ok
   end
 
   @impl true
@@ -109,6 +125,7 @@ defmodule GameServer.Modules.ExampleHook do
     [
       %{
         key: "first_login",
+        icon_url: "/icons/hand-raised.svg",
         title: "Welcome aboard",
         description: "Log in for the first time.",
         category: "Achievements",
@@ -118,6 +135,7 @@ defmodule GameServer.Modules.ExampleHook do
       },
       %{
         key: "daily_login",
+        icon_url: "/icons/calendar-days.svg",
         title: "Daily check-in",
         description: "Log in today.",
         category: "Daily",
@@ -126,6 +144,7 @@ defmodule GameServer.Modules.ExampleHook do
       },
       %{
         key: "weekly_regular",
+        icon_url: "/icons/calendar.svg",
         title: "Weekly regular",
         description: "Log in on five different days this week.",
         category: "Weekly",
@@ -134,6 +153,7 @@ defmodule GameServer.Modules.ExampleHook do
       },
       %{
         key: "monthly_devotee",
+        icon_url: "/icons/calendar-date-range.svg",
         title: "Monthly devotee",
         description: "Log in twenty times this month.",
         category: "Monthly",
@@ -144,6 +164,7 @@ defmodule GameServer.Modules.ExampleHook do
       # rather than on a calendar boundary.
       %{
         key: "recurring_visit",
+        icon_url: "/icons/arrow-path.svg",
         title: "Stop by again",
         description: "Log in. Becomes available again three days later.",
         category: "Recurring",
@@ -154,6 +175,7 @@ defmodule GameServer.Modules.ExampleHook do
       # Chained: stays locked until its prerequisite is completed.
       %{
         key: "loyal_veteran",
+        icon_url: "/icons/shield-check.svg",
         title: "Loyal veteran",
         description: "Log in fifty times, once you have said hello.",
         category: "Chained",
@@ -164,6 +186,7 @@ defmodule GameServer.Modules.ExampleHook do
       # Hidden quests stay a teaser in the catalog until they are earned.
       %{
         key: "night_owl",
+        icon_url: "/icons/moon.svg",
         title: "Night owl",
         description: "Some things are found rather than announced.",
         category: "Secrets",
@@ -175,6 +198,7 @@ defmodule GameServer.Modules.ExampleHook do
       # runs while the event is on.
       %{
         key: "launch_festival",
+        icon_url: "/icons/sparkles.svg",
         title: "Launch festival",
         description: "A daily that only counts while the festival is running.",
         category: "Events",
@@ -187,10 +211,14 @@ defmodule GameServer.Modules.ExampleHook do
     |> Enum.each(fn attrs ->
       key = @quest_prefix <> attrs.key
 
-      # Created only when missing, so restarts and plugin reloads are safe and
-      # a host's own edits are never overwritten.
-      if is_nil(GameServer.Quests.get_quest_by_key(key)) do
-        GameServer.Quests.create_quest(Map.put(attrs, :key, key))
+      attrs = Map.put(attrs, :key, key)
+
+      # Reconciled on every boot rather than only created: these quests are
+      # *defined* here, so editing one (a new icon, a reworded description) has
+      # to reach the rows a previous deploy already made.
+      case GameServer.Quests.get_quest_by_key(key) do
+        nil -> GameServer.Quests.create_quest(attrs)
+        quest -> GameServer.Quests.update_quest(quest, Map.delete(attrs, :key))
       end
     end)
 
@@ -223,12 +251,20 @@ defmodule GameServer.Modules.ExampleHook do
   end
 
   defp ensure_group(user) do
-    if is_nil(Groups.get_group_by_title(@group_title)) do
-      Groups.create_group(user.id, %{
-        title: @group_title,
-        description: "A public group created by the example plugin.",
-        type: "public"
-      })
+    case Groups.get_group_by_title(@group_title) do
+      nil ->
+        Groups.create_group(user.id, %{
+          title: @group_title,
+          icon_url: @group_icon,
+          description: "A public group created by the example plugin.",
+          type: "public"
+        })
+
+      existing ->
+        # Players can rename a group they belong to, so only the icon is synced.
+        sync_icon(existing, @group_icon, fn group, attrs ->
+          Groups.update_group(user.id, group.id, attrs)
+        end)
     end
 
     :ok
@@ -249,6 +285,7 @@ defmodule GameServer.Modules.ExampleHook do
     Notifications.admin_create_notification(user.id, user.id, %{
       "title" => "Welcome!",
       "content" => "Thanks for joining. Register for the Weekly Cup to get started.",
+      "icon_url" => "/icons/bell.svg",
       "metadata" => %{"type" => "example_welcome"}
     })
 
@@ -266,6 +303,7 @@ defmodule GameServer.Modules.ExampleHook do
         Tournaments.create_tournament(%{
           slug: @tournament_slug,
           title: "Weekly Cup",
+          icon_url: "/icons/trophy.svg",
           description: "Register any time; the bracket is drawn every Monday.",
           starts_at: next_monday(),
           recur: "0 0 * * 1",
@@ -273,8 +311,8 @@ defmodule GameServer.Modules.ExampleHook do
           round_window_sec: 24 * 3600
         })
 
-      _existing ->
-        :ok
+      existing ->
+        sync_icon(existing, "/icons/trophy.svg", &Tournaments.update_tournament/2)
     end
   end
 

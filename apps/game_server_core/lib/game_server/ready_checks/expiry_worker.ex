@@ -1,10 +1,10 @@
 defmodule GameServer.ReadyChecks.ExpiryWorker do
   @moduledoc false
-  # Fails a ready check when its deadline arrives.
+  # Fails a ready check when its deadline_at arrives.
   #
   # One durable job per check rather than a bespoke GenServer tick: it survives
   # a node restart (a `Process.send_after` would not) and fires within Oban's
-  # poll interval of the deadline. `ReadyChecks.expire/1` is idempotent, so a
+  # poll interval of the deadline_at. `ReadyChecks.expire/1` is idempotent, so a
   # check that already resolved makes this a no-op, and the matchmaking sweep's
   # backstop can safely run the same expiry for a job that was lost.
 

@@ -178,7 +178,7 @@ defmodule GameServerWeb.QuestsLive do
       end
 
     socket
-    |> assign(:categories, categories_of(active))
+    |> assign(:categories, [nil | Quests.visible_categories(user && user.id)])
     # Titles and descriptions are stored in the source language; translate on
     # the way to the page. Admin pages deliberately show the stored string.
     |> assign(:entries, ContentText.translate(entries))
@@ -250,14 +250,6 @@ defmodule GameServerWeb.QuestsLive do
 
   defp chain_root(key, _prereq_by_key, _hops), do: key
 
-  # Tabs come from the data — games label their own categories.
-  defp categories_of(quests) do
-    [
-      nil
-      | quests |> Enum.map(& &1.category) |> Enum.reject(&is_nil/1) |> Enum.uniq() |> Enum.sort()
-    ]
-  end
-
   defp anonymous_catalog(active, category, page, page_size) do
     now = DateTime.utc_now(:second)
 
@@ -294,6 +286,27 @@ defmodule GameServerWeb.QuestsLive do
       {first, rest} -> String.upcase(first) <> rest
       nil -> category
     end
+  end
+
+  # A green badge for anything the player has finished, mirroring the Active
+  # badge on leaderboards and tournaments; neutral for work still to do.
+  defp card_status_class(%{claimable: true}), do: "badge-success"
+  defp card_status_class(%{claimed?: true}), do: "badge-success"
+  defp card_status_class(%{done?: true}), do: "badge-success"
+  defp card_status_class(_assigns), do: "badge-neutral"
+
+  defp card_status_label(%{claimable: true}), do: gettext("Ready to claim")
+  defp card_status_label(%{claimed?: true}), do: gettext("Claimed")
+  defp card_status_label(%{done?: true}), do: gettext("Completed")
+  defp card_status_label(%{progress: %{}}), do: gettext("In progress")
+  defp card_status_label(_assigns), do: gettext("Not started")
+
+  # "Daily check-in / Daily / Daily" — the category and the reset cadence often
+  # say the same thing, so only show the cadence when it adds something.
+  defp same_as_category?(%Quest{category: nil}), do: false
+
+  defp same_as_category?(%Quest{} = quest) do
+    String.downcase(to_string(quest.category)) == String.downcase(reset_label(quest))
   end
 
   defp reset_label(%Quest{reset: "daily"}), do: gettext("Daily")
@@ -608,77 +621,69 @@ defmodule GameServerWeb.QuestsLive do
       phx-value-key={@chain_position && @quest.key}
       title={@chain_position && gettext("View quest chain")}
     >
-      <div class="card-body p-4">
-        <div class="flex items-start gap-3">
-          <div class={[
-            "flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center text-2xl",
-            if(@done?, do: "bg-success/20 text-success", else: "bg-base-300 text-base-content/40")
-          ]}>
-            <%!-- A secret quest must not leak its icon, so the state icon wins. --%>
+      <div class="card-body">
+        <div class="flex items-start justify-between gap-2">
+          <h3 class="card-title text-lg">
+            <%!-- A secret quest keeps its icon; only its wording is withheld. --%>
             <.entity_icon
-              icon_url={if @secret?, do: nil, else: @quest.icon_url}
+              icon_url={@quest.icon_url}
               type={:quest}
-              icon={
-                cond do
-                  @secret? -> :question_mark_circle
-                  @done? -> :trophy
-                  true -> :map
-                end
-              }
-              class={["w-8 h-8", if(!@done?, do: "opacity-60")]}
+              class="w-6 h-6 shrink-0 text-base-content/60"
             />
-          </div>
+            {@localized_title}
+          </h3>
 
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center gap-2">
-              <h3 class={[
-                "font-semibold text-sm leading-tight truncate",
-                if(!@done?, do: "text-base-content/80")
-              ]}>
-                {@localized_title}
-              </h3>
-              <span :if={@quest.category} class="badge badge-xs badge-outline flex-shrink-0">
-                {@quest.category}
-              </span>
-              <span :if={@quest.reset != "never"} class="badge badge-xs badge-ghost flex-shrink-0">
-                {reset_label(@quest)}
-              </span>
-              <span
-                :if={@chain_position}
-                class="badge badge-xs badge-ghost flex-shrink-0 gap-0.5"
-                title={gettext("Quests")}
-              >
-                <.icon name="hero-link" class="w-3 h-3" />
-                {elem(@chain_position, 0)}/{elem(@chain_position, 1)}
-              </span>
-            </div>
-
-            <p class="text-xs mt-1 line-clamp-2 text-base-content/60">
-              {@localized_desc}
-            </p>
-
-            <%!-- Rewards --%>
-            <%= if @quest.rewards != [] && not @secret? do %>
-              <div class="flex flex-wrap gap-1 mt-2">
-                <span :for={reward <- @quest.rewards} class="badge badge-sm badge-ghost gap-1">
-                  <.icon
-                    name={
-                      if reward.type == "currency",
-                        do: "hero-currency-dollar",
-                        else: "hero-cube"
-                    }
-                    class="w-3 h-3"
-                  />
-                  {reward.amount} {reward.code}
-                </span>
-              </div>
-            <% end %>
+          <div class="flex flex-col items-end gap-1 shrink-0">
+            <%!-- Progress is a property of the viewer, not the quest, so a
+                  signed-out visitor gets no status badge — seven cards all
+                  reading "Not started" is noise, and it crowds the title. --%>
+            <span :if={@logged_in} class={["badge text-nowrap", card_status_class(assigns)]}>
+              {card_status_label(assigns)}
+            </span>
+            <span :if={@quest.category} class="badge badge-ghost badge-sm text-nowrap">
+              {@quest.category}
+            </span>
+            <span
+              :if={@quest.reset != "never" and not same_as_category?(@quest)}
+              class="badge badge-ghost badge-sm text-nowrap"
+            >
+              {reset_label(@quest)}
+            </span>
+            <span
+              :if={@chain_position}
+              class="badge badge-ghost badge-sm gap-0.5 text-nowrap"
+              title={gettext("View quest chain")}
+            >
+              <.icon name="hero-link" class="w-3 h-3" />
+              {elem(@chain_position, 0)}/{elem(@chain_position, 1)}
+            </span>
           </div>
         </div>
 
+        <p class="text-sm text-base-content/70 line-clamp-2">
+          {@localized_desc}
+        </p>
+
+        <%!-- Rewards --%>
+        <%= if @quest.rewards != [] && not @secret? do %>
+          <div class="flex flex-wrap gap-1">
+            <span :for={reward <- @quest.rewards} class="badge badge-sm badge-ghost gap-1">
+              <.icon
+                name={
+                  if reward.type == "currency",
+                    do: "hero-currency-dollar",
+                    else: "hero-cube"
+                }
+                class="w-3 h-3"
+              />
+              {reward.amount} {reward.code}
+            </span>
+          </div>
+        <% end %>
+
         <%!-- Countdown --%>
         <%= if @left do %>
-          <div class="flex items-center gap-1.5 mt-2 text-base-content/40">
+          <div class="flex items-center gap-1.5 text-base-content/40">
             <.icon name="hero-clock" class="w-3.5 h-3.5" />
             <span class="text-xs">
               <%= if @quest.ends_at do %>

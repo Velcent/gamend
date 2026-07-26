@@ -3,6 +3,7 @@ defmodule GameServerWeb.Api.V1.Admin.QuestController do
   use OpenApiSpex.ControllerSpecs
 
   alias GameServer.Quests
+  alias GameServerWeb.Pagination
   alias GameServerWeb.Uploads
   alias OpenApiSpex.Schema
 
@@ -135,8 +136,7 @@ defmodule GameServerWeb.Api.V1.Admin.QuestController do
   )
 
   def index(conn, params) do
-    page = parse_int(params["page"], 1)
-    page_size = parse_int(params["page_size"], 25)
+    {page, page_size} = Pagination.params(params)
 
     opts = [
       page: page,
@@ -147,19 +147,8 @@ defmodule GameServerWeb.Api.V1.Admin.QuestController do
 
     quests = Quests.list_quests(opts)
     total_count = Quests.count_quests(category: params["category"], search: params["search"])
-    total_pages = max(ceil(total_count / page_size), 1)
 
-    json(conn, %{
-      data: quests,
-      meta: %{
-        page: page,
-        page_size: page_size,
-        count: length(quests),
-        total_count: total_count,
-        total_pages: total_pages,
-        has_more: page < total_pages
-      }
-    })
+    json(conn, Pagination.envelope(quests, page, page_size, total_count))
   end
 
   # ---------------------------------------------------------------------------
@@ -337,8 +326,7 @@ defmodule GameServerWeb.Api.V1.Admin.QuestController do
   )
 
   def progress(conn, params) do
-    page = parse_int(params["page"], 1)
-    page_size = parse_int(params["page_size"], 25)
+    {page, page_size} = Pagination.params(params)
 
     opts = [
       page: page,
@@ -350,19 +338,8 @@ defmodule GameServerWeb.Api.V1.Admin.QuestController do
 
     rows = Quests.list_progress(opts)
     total_count = Quests.count_progress(opts)
-    total_pages = max(ceil(total_count / page_size), 1)
 
-    json(conn, %{
-      data: rows,
-      meta: %{
-        page: page,
-        page_size: page_size,
-        count: length(rows),
-        total_count: total_count,
-        total_pages: total_pages,
-        has_more: page < total_pages
-      }
-    })
+    json(conn, Pagination.envelope(rows, page, page_size, total_count))
   end
 
   operation(:grant,
@@ -487,18 +464,6 @@ defmodule GameServerWeb.Api.V1.Admin.QuestController do
   defp changeset_errors(changeset) do
     Ecto.Changeset.traverse_errors(changeset, fn {msg, _opts} -> msg end)
   end
-
-  defp parse_int(nil, default), do: default
-
-  defp parse_int(val, default) when is_binary(val) do
-    case Integer.parse(val) do
-      {int, ""} -> max(int, 1)
-      _ -> default
-    end
-  end
-
-  defp parse_int(val, _default) when is_integer(val), do: max(val, 1)
-  defp parse_int(_, default), do: default
 
   defp with_quest(conn, id, fun) do
     case Quests.get_quest(id) do

@@ -55,11 +55,11 @@ defmodule GameServer.DataCase do
   # first tears the connection down under them, which disconnects the pooled
   # connection and fails the query. Draining is iterative because a running
   # task can enqueue further async work.
-  defp drain_async_tasks(deadline) do
-    if System.monotonic_time(:millisecond) < deadline do
+  defp drain_async_tasks(deadline_at) do
+    if System.monotonic_time(:millisecond) < deadline_at do
       case running_tasks() do
         pending when map_size(pending) == 0 -> :ok
-        pending -> if await_down(pending, deadline), do: drain_async_tasks(deadline)
+        pending -> if await_down(pending, deadline_at), do: drain_async_tasks(deadline_at)
       end
     end
   end
@@ -71,15 +71,15 @@ defmodule GameServer.DataCase do
     end
   end
 
-  # Returns true when everything went down before the deadline.
+  # Returns true when everything went down before the deadline_at.
   defp await_down(pending, _deadline) when map_size(pending) == 0, do: true
 
-  defp await_down(pending, deadline) do
+  defp await_down(pending, deadline_at) do
     receive do
       {:DOWN, ref, :process, _pid, _reason} when is_map_key(pending, ref) ->
-        await_down(Map.delete(pending, ref), deadline)
+        await_down(Map.delete(pending, ref), deadline_at)
     after
-      max(deadline - System.monotonic_time(:millisecond), 0) ->
+      max(deadline_at - System.monotonic_time(:millisecond), 0) ->
         Enum.each(pending, fn {ref, _pid} -> Process.demonitor(ref, [:flush]) end)
         false
     end

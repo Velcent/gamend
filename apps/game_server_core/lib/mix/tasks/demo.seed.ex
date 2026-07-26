@@ -503,7 +503,7 @@ defmodule Mix.Tasks.Demo.Seed do
           kind: if(rem(i, 3) == 0, do: "accept", else: "ready"),
           status: status,
           lobby_id: lobby.id,
-          deadline: DateTime.add(now, 15, :second),
+          deadline_at: DateTime.add(now, 15, :second),
           opened_by: host_id,
           reason: reason,
           resolved_at: if(status != "pending", do: now),

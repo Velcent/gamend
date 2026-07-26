@@ -124,7 +124,7 @@ defmodule GameServerWeb.EventCodec do
          slug: get(p, :slug) || "",
          match_id: get(p, :match_id),
          round: get(p, :round),
-         deadline_ms: ms(p, :deadline),
+         deadline_ms: ms(p, :deadline_at),
          winner_entry_id: get(p, :winner_entry_id) || ""
        }
 
@@ -245,7 +245,7 @@ defmodule GameServerWeb.EventCodec do
       status: get(p, :status),
       lobby_id: get(p, :lobby_id) || "",
       party_id: get(p, :party_id) || "",
-      deadline_ms: ms(p, :deadline) || 0,
+      deadline_ms: ms(p, :deadline_at) || 0,
       total: get(p, :total) || 0,
       ready_count: get(p, :ready_count) || 0,
       your_state: get(p, :your_state) || "",

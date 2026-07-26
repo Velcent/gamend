@@ -153,7 +153,7 @@ defmodule GameServerWeb.Api.V1.Admin.NotificationController do
   # ---------------------------------------------------------------------------
 
   def index(conn, params) do
-    {page, page_size} = parse_page_params(params)
+    {page, page_size} = GameServerWeb.Pagination.params(params)
 
     filters =
       %{}

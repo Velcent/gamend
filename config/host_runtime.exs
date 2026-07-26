@@ -343,10 +343,10 @@ if config_env() == :prod do
   # NOTE: Increasing queue_target/interval makes requests wait longer (can increase memory under load).
   # Default to more forgiving backpressure in prod to avoid dropping requests too quickly
   # under bursty load. These can still be overridden via env vars.
-  repo_pool_timeout = setting.(GameServer.Database, :pool_timeout)
+  repo_pool_timeout = setting.(GameServer.Database, :pool_timeout_ms)
   repo_queue_target = setting.(GameServer.Database, :queue_target)
-  repo_queue_interval = setting.(GameServer.Database, :queue_interval)
-  repo_query_timeout = setting.(GameServer.Database, :query_timeout)
+  repo_queue_interval = setting.(GameServer.Database, :queue_interval_ms)
+  repo_query_timeout = setting.(GameServer.Database, :query_timeout_ms)
 
   if has_postgres_config do
     # Use PostgreSQL when configured
@@ -396,7 +396,7 @@ if config_env() == :prod do
       end
 
     sqlite_cache_size_kb = setting.(GameServer.Database, :sqlite_cache_size_kb)
-    sqlite_busy_timeout_ms = setting.(GameServer.Database, :sqlite_busy_timeout)
+    sqlite_busy_timeout_ms = setting.(GameServer.Database, :sqlite_busy_timeout_ms)
     sqlite_wal_autocheckpoint = setting.(GameServer.Database, :sqlite_wal_autocheckpoint)
 
     # Ensure Ecto/DBConnection timeout does not fire before SQLite's busy timeout.

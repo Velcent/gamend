@@ -25,20 +25,6 @@ defmodule GameServer.Push.PushToken do
   # FCM documents no hard cap; real tokens are ~160 bytes, APNs 64 hex chars.
   @max_token_length 4096
 
-  @derive {Jason.Encoder,
-           only: [
-             :id,
-             :user_id,
-             :token,
-             :platform,
-             :provider,
-             :device_id,
-             :disabled_at,
-             :last_used_at,
-             :metadata,
-             :inserted_at
-           ]}
-
   schema "push_tokens" do
     belongs_to :user, User
 
@@ -88,5 +74,28 @@ defmodule GameServer.Push.PushToken do
     |> GameServer.Limits.validate_metadata_size(:metadata)
     |> unique_constraint(:token)
     |> unique_constraint([:user_id, :device_id])
+  end
+end
+
+# Hand-written rather than @derive so nil strings encode as "" (see
+# GameServer.SchemaJSON — game clients choke on null).
+defimpl Jason.Encoder, for: GameServer.Push.PushToken do
+  def encode(token, opts) do
+    GameServer.SchemaJSON.encode(
+      token,
+      [
+        :id,
+        :user_id,
+        :token,
+        :platform,
+        :provider,
+        :device_id,
+        :disabled_at,
+        :last_used_at,
+        :metadata,
+        :inserted_at
+      ],
+      opts
+    )
   end
 end

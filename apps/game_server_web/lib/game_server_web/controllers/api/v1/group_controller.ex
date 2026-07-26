@@ -848,7 +848,7 @@ defmodule GameServerWeb.Api.V1.GroupController do
         param_value(params, "metadata_value", :metadata_value)
       )
 
-    {page, page_size} = parse_page_params(params)
+    {page, page_size} = GameServerWeb.Pagination.params(params)
     sort_by = Map.get(params, "sort_by")
 
     groups =
@@ -1152,7 +1152,7 @@ defmodule GameServerWeb.Api.V1.GroupController do
             conn |> put_status(:not_found) |> json(%{error: "not_found"})
 
           _group ->
-            {page, page_size} = parse_page_params(params)
+            {page, page_size} = GameServerWeb.Pagination.params(params)
 
             members =
               Groups.get_group_members_paginated(group_id, page: page, page_size: page_size)
@@ -1246,7 +1246,7 @@ defmodule GameServerWeb.Api.V1.GroupController do
           conn |> put_status(:not_found) |> json(%{error: "not_found"})
 
         group_id ->
-          {page, page_size} = parse_page_params(params)
+          {page, page_size} = GameServerWeb.Pagination.params(params)
 
           case Groups.list_join_requests(user.id, group_id, page: page, page_size: page_size) do
             {:ok, requests} ->
@@ -1438,7 +1438,7 @@ defmodule GameServerWeb.Api.V1.GroupController do
 
   def invitations(conn, params) do
     with_auth(conn, fn user ->
-      {page, page_size} = parse_page_params(params)
+      {page, page_size} = GameServerWeb.Pagination.params(params)
       invites = Groups.list_invitations(user.id, page: page, page_size: page_size)
       count = length(invites)
       total_count = Groups.count_invitations(user.id)
@@ -1452,7 +1452,7 @@ defmodule GameServerWeb.Api.V1.GroupController do
 
   def my_groups(conn, params) do
     with_auth(conn, fn user ->
-      {page, page_size} = parse_page_params(params)
+      {page, page_size} = GameServerWeb.Pagination.params(params)
       groups = Groups.list_user_groups(user.id, page: page, page_size: page_size)
       member_counts = Groups.batch_member_counts(Enum.map(groups, & &1.id))
       serialized = Enum.map(groups, &serialize_group(&1, member_counts))
@@ -1468,7 +1468,7 @@ defmodule GameServerWeb.Api.V1.GroupController do
 
   def sent_invitations(conn, params) do
     with_auth(conn, fn user ->
-      {page, page_size} = parse_page_params(params)
+      {page, page_size} = GameServerWeb.Pagination.params(params)
       invites = Groups.list_sent_invitations(user.id, page: page, page_size: page_size)
       count = length(invites)
       total_count = Groups.count_sent_invitations(user.id)
@@ -1522,7 +1522,7 @@ defmodule GameServerWeb.Api.V1.GroupController do
 
           case Groups.notify_group(user.id, group_id, content, metadata) do
             {:ok, sent} ->
-              json(conn, %{sent: sent})
+              json(conn, %{data: %{sent: sent}})
 
             {:error, :not_found} ->
               conn |> put_status(:not_found) |> json(%{error: "not_found"})

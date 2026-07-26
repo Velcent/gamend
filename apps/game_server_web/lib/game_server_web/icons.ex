@@ -81,4 +81,45 @@ defmodule GameServerWeb.Icons do
   @doc "Every typed icon atom, for pickers and docs."
   @spec list() :: [icon()]
   def list, do: @svgs |> Map.keys() |> Enum.sort()
+
+  @doc """
+  The URL an icon is served at, for storing in an entity's `icon_url`.
+
+      iex> GameServerWeb.Icons.path(:trophy)
+      "/icons/trophy.svg"
+
+  Storing a URL rather than an atom keeps `icon_url` one kind of thing: a game
+  client fetches it like any other icon, while the web UI recognises its own
+  route and inlines the SVG instead (see `GameServerWeb.CoreComponents.entity_icon/1`),
+  so `currentColor` still follows the theme.
+  """
+  @spec path(icon()) :: String.t()
+  def path(icon) when is_map_key(@svgs, icon), do: "/icons/" <> dasherize(icon) <> ".svg"
+
+  @doc """
+  The icon a `path/1` URL refers to, or `:error` for anything else — an
+  uploaded image, a CDN URL, a name we do not ship.
+  """
+  @spec from_path(String.t()) :: {:ok, icon()} | :error
+  def from_path("/icons/" <> file) do
+    with true <- String.ends_with?(file, ".svg"),
+         name <- file |> String.replace_suffix(".svg", "") |> String.replace("-", "_"),
+         # `to_existing_atom` keeps an arbitrary URL from creating atoms.
+         {:ok, icon} <- safe_atom(name),
+         true <- is_map_key(@svgs, icon) do
+      {:ok, icon}
+    else
+      _ -> :error
+    end
+  end
+
+  def from_path(_url), do: :error
+
+  defp safe_atom(name) do
+    {:ok, String.to_existing_atom(name)}
+  rescue
+    ArgumentError -> :error
+  end
+
+  defp dasherize(icon), do: icon |> Atom.to_string() |> String.replace("_", "-")
 end

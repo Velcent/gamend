@@ -1727,10 +1727,10 @@ defmodule GameServerWeb.AdminLive.Config do
       cache_l2_module: cache.cache_l2_module,
       cache_l2_opts: cache.cache_l2_opts,
       db_pool_size_env: GameServer.Settings.get(GameServer.Database, :pool_size),
-      db_pool_timeout_env: GameServer.Settings.get(GameServer.Database, :pool_timeout),
+      db_pool_timeout_env: GameServer.Settings.get(GameServer.Database, :pool_timeout_ms),
       db_queue_target_env: GameServer.Settings.get(GameServer.Database, :queue_target),
-      db_queue_interval_env: GameServer.Settings.get(GameServer.Database, :queue_interval),
-      db_query_timeout_env: GameServer.Settings.get(GameServer.Database, :query_timeout),
+      db_queue_interval_env: GameServer.Settings.get(GameServer.Database, :queue_interval_ms),
+      db_query_timeout_env: GameServer.Settings.get(GameServer.Database, :query_timeout_ms),
       postgres_port_env: GameServer.Settings.get(GameServer.Database, :postgres_port),
       ecto_ipv6_env: GameServer.Settings.get(GameServer.Database, :ipv6),
       ecto_ipv6_recommended: clustering.ecto_ipv6_recommended,
@@ -1802,7 +1802,7 @@ defmodule GameServerWeb.AdminLive.Config do
       rate_limit_general_window:
         Keyword.get(
           Application.get_env(:game_server_web, GameServerWeb.Plugs.RateLimiter, []),
-          :general_window,
+          :general_window_ms,
           60_000
         ),
       rate_limit_auth_limit:
@@ -1814,7 +1814,7 @@ defmodule GameServerWeb.AdminLive.Config do
       rate_limit_auth_window:
         Keyword.get(
           Application.get_env(:game_server_web, GameServerWeb.Plugs.RateLimiter, []),
-          :auth_window,
+          :auth_window_ms,
           60_000
         ),
       rate_limit_ws_limit:
@@ -1826,7 +1826,7 @@ defmodule GameServerWeb.AdminLive.Config do
       rate_limit_ws_window:
         Keyword.get(
           Application.get_env(:game_server_web, GameServerWeb.Plugs.RateLimiter, []),
-          :ws_window,
+          :ws_window_ms,
           10_000
         ),
       rate_limit_dc_limit:
@@ -1838,7 +1838,7 @@ defmodule GameServerWeb.AdminLive.Config do
       rate_limit_dc_window:
         Keyword.get(
           Application.get_env(:game_server_web, GameServerWeb.Plugs.RateLimiter, []),
-          :dc_window,
+          :dc_window_ms,
           10_000
         ),
       rate_limit_ice_limit:
@@ -1850,7 +1850,7 @@ defmodule GameServerWeb.AdminLive.Config do
       rate_limit_ice_window:
         Keyword.get(
           Application.get_env(:game_server_web, GameServerWeb.Plugs.RateLimiter, []),
-          :ice_window,
+          :ice_window_ms,
           30_000
         ),
       webrtc_max_channels: 1,

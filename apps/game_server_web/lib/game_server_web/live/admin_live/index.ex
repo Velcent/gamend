@@ -245,7 +245,7 @@ defmodule GameServerWeb.AdminLive.Index do
                     Matches: {@tournament_stats.matches.open} open / {@tournament_stats.matches.total}
                   </div>
                   <div :if={@tournament_stats.matches.overdue > 0} class="text-warning">
-                    Past deadline: {@tournament_stats.matches.overdue}
+                    Past deadline_at: {@tournament_stats.matches.overdue}
                   </div>
                 </div>
               </div>

@@ -434,7 +434,7 @@ defmodule GameServerWeb.Api.V1.LobbyController do
         param_value(params, "metadata_value", :metadata_value)
       )
 
-    {page, page_size} = parse_page_params(params)
+    {page, page_size} = GameServerWeb.Pagination.params(params)
 
     lobbies = Lobbies.list_lobbies(filters, page: page, page_size: page_size)
     serialized = Enum.map(lobbies, &serialize_lobby/1)

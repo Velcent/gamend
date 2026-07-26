@@ -6,8 +6,6 @@ defmodule GameServerWeb.Api.V1.Admin.PushController do
   use GameServerWeb, :controller
   use OpenApiSpex.ControllerSpecs
 
-  import GameServerWeb.Helpers.ParamParser, only: [parse_page_params: 1]
-
   alias GameServer.Push
   alias GameServerWeb.Pagination
   alias OpenApiSpex.Schema
@@ -21,7 +19,7 @@ defmodule GameServerWeb.Api.V1.Admin.PushController do
     properties: %{
       id: %Schema{type: :string, format: :uuid},
       user_id: %Schema{type: :string, format: :uuid},
-      user_name: %Schema{type: :string, nullable: true},
+      user_name: %Schema{type: :string},
       token: %Schema{type: :string},
       platform: %Schema{type: :string, enum: ["android", "ios", "web"]},
       provider: %Schema{type: :string, enum: ["fcm", "apns"]},
@@ -71,7 +69,7 @@ defmodule GameServerWeb.Api.V1.Admin.PushController do
   )
 
   def index(conn, params) do
-    {page, page_size} = parse_page_params(params)
+    {page, page_size} = GameServerWeb.Pagination.params(params)
     filters = Map.take(params, ["user_id", "platform", "provider", "status"])
 
     tokens = Push.list_all_tokens(filters, page: page, page_size: page_size)

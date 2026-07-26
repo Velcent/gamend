@@ -35,30 +35,6 @@ defmodule GameServer.Quests.Quest do
 
   @resets ~w(never daily weekly monthly interval)
 
-  @derive {Jason.Encoder,
-           only: [
-             :id,
-             :key,
-             :title,
-             :description,
-             :icon_url,
-             :sort_order,
-             :hidden,
-             :reset,
-             :reset_interval_days,
-             :category,
-             :objectives,
-             :rewards,
-             :auto_claim,
-             :prerequisite_quest_key,
-             :starts_at,
-             :ends_at,
-             :active,
-             :metadata,
-             :inserted_at,
-             :updated_at
-           ]}
-
   schema "quests" do
     field :key, :string
     field :title, :string
@@ -176,5 +152,38 @@ defmodule GameServer.Quests.Quest do
     else
       changeset
     end
+  end
+end
+
+# Hand-written rather than @derive so nil strings encode as "" (see
+# GameServer.SchemaJSON — game clients choke on null).
+defimpl Jason.Encoder, for: GameServer.Quests.Quest do
+  def encode(quest, opts) do
+    GameServer.SchemaJSON.encode(
+      quest,
+      [
+        :id,
+        :key,
+        :title,
+        :description,
+        :icon_url,
+        :sort_order,
+        :hidden,
+        :reset,
+        :reset_interval_days,
+        :category,
+        :objectives,
+        :rewards,
+        :auto_claim,
+        :prerequisite_quest_key,
+        :starts_at,
+        :ends_at,
+        :active,
+        :metadata,
+        :inserted_at,
+        :updated_at
+      ],
+      opts
+    )
   end
 end

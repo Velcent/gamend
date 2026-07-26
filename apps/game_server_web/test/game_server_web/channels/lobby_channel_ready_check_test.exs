@@ -57,7 +57,7 @@ defmodule GameServerWeb.LobbyChannelReadyCheckTest do
     assert_push "ready_check_started", _
 
     GameServer.Repo.update_all(Check,
-      set: [deadline: DateTime.add(DateTime.utc_now(), -1, :second)]
+      set: [deadline_at: DateTime.add(DateTime.utc_now(), -1, :second)]
     )
 
     assert ReadyChecks.expire(ReadyChecks.get_check(check.id)) == :ok

@@ -857,6 +857,36 @@ defmodule GameServer.Quests do
     length(visible_quests(user_id, now, opts))
   end
 
+  @doc """
+  The categories that actually have something behind them for this viewer.
+
+  Derived from the same visibility rule as `list_user_quests/2` rather than
+  from every definition: a chain's later tiers are hidden until unlocked, so
+  listing their category gives a tab that opens onto nothing. Pass `nil` for
+  the signed-out catalog.
+  """
+  @spec visible_categories(user_id() | nil) :: [String.t()]
+  def visible_categories(user_id \\ nil)
+
+  def visible_categories(nil) do
+    now = DateTime.utc_now(:second)
+
+    active_quests()
+    |> Enum.filter(&(within_window?(&1, now) and is_nil(&1.prerequisite_quest_key)))
+    |> category_names()
+  end
+
+  def visible_categories(user_id) when is_binary(user_id) do
+    user_id
+    |> visible_quests(DateTime.utc_now(:second), [])
+    |> Enum.map(& &1.quest)
+    |> category_names()
+  end
+
+  defp category_names(quests) do
+    quests |> Enum.map(& &1.category) |> Enum.reject(&is_nil/1) |> Enum.uniq() |> Enum.sort()
+  end
+
   # Definitions are few (capped by max_quests) and cached, so visibility and
   # pagination are resolved in memory; the user's rows come from one query.
   defp visible_quests(user_id, now, opts) do

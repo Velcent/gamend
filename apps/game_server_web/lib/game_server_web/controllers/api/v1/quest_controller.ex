@@ -3,6 +3,7 @@ defmodule GameServerWeb.Api.V1.QuestController do
   use OpenApiSpex.ControllerSpecs
 
   alias GameServer.Quests
+  alias GameServerWeb.Pagination
   alias OpenApiSpex.Schema
 
   tags(["Quests"])
@@ -156,8 +157,7 @@ defmodule GameServerWeb.Api.V1.QuestController do
   def me(conn, params) do
     case conn.assigns[:current_scope] do
       %{user_id: user_id} ->
-        page = parse_int(params["page"], 1)
-        page_size = parse_int(params["page_size"], 25)
+        {page, page_size} = Pagination.params(params)
         opts = [page: page, page_size: page_size, category: params["category"]]
 
         entries = Quests.list_user_quests(user_id, opts)
@@ -165,7 +165,7 @@ defmodule GameServerWeb.Api.V1.QuestController do
 
         json(conn, %{
           data: Enum.map(entries, &serialize_entry/1),
-          meta: meta(page, page_size, length(entries), total_count)
+          meta: Pagination.meta(page, page_size, length(entries), total_count)
         })
 
       _ ->
@@ -274,8 +274,7 @@ defmodule GameServerWeb.Api.V1.QuestController do
         me(conn, params)
 
       _ ->
-        page = parse_int(params["page"], 1)
-        page_size = parse_int(params["page_size"], 25)
+        {page, page_size} = Pagination.params(params)
         now = DateTime.utc_now(:second)
 
         visible =
@@ -292,7 +291,7 @@ defmodule GameServerWeb.Api.V1.QuestController do
 
         json(conn, %{
           data: Enum.map(entries, &serialize_entry/1),
-          meta: meta(page, page_size, length(entries), length(visible))
+          meta: Pagination.meta(page, page_size, length(entries), length(visible))
         })
     end
   end
@@ -336,8 +335,7 @@ defmodule GameServerWeb.Api.V1.QuestController do
   def user_quests(conn, %{"user_id" => user_id_str} = params) do
     case Ecto.UUID.cast(user_id_str) do
       {:ok, user_id} ->
-        page = parse_int(params["page"], 1)
-        page_size = parse_int(params["page_size"], 25)
+        {page, page_size} = Pagination.params(params)
         category = params["category"] || "achievement"
         opts = [page: page, page_size: page_size, category: category]
 
@@ -349,7 +347,7 @@ defmodule GameServerWeb.Api.V1.QuestController do
             Enum.map(entries, fn %{quest: quest, progress: progress} ->
               serialize_entry(%{quest: quest, progress: progress, claimable: false})
             end),
-          meta: meta(page, page_size, length(entries), total_count)
+          meta: Pagination.meta(page, page_size, length(entries), total_count)
         })
 
       _ ->
@@ -430,29 +428,4 @@ defmodule GameServerWeb.Api.V1.QuestController do
       claimed_at: progress.claimed_at
     }
   end
-
-  defp meta(page, page_size, count, total_count) do
-    total_pages = max(ceil(total_count / page_size), 1)
-
-    %{
-      page: page,
-      page_size: page_size,
-      count: count,
-      total_count: total_count,
-      total_pages: total_pages,
-      has_more: page < total_pages
-    }
-  end
-
-  defp parse_int(nil, default), do: default
-
-  defp parse_int(val, default) when is_binary(val) do
-    case Integer.parse(val) do
-      {int, ""} -> max(int, 1)
-      _ -> default
-    end
-  end
-
-  defp parse_int(val, _default) when is_integer(val), do: max(val, 1)
-  defp parse_int(_, default), do: default
 end

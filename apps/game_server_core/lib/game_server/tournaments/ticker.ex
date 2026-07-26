@@ -1,7 +1,7 @@
 defmodule GameServer.Tournaments.Ticker do
   @moduledoc """
   Periodic driver for tournament lifecycles: state transitions, match-ready
-  firing, deadline sweeps and recurrence spawns (`GameServer.Tournaments.tick/0`).
+  firing, deadline_at sweeps and recurrence spawns (`GameServer.Tournaments.tick/0`).
 
   Safe in multi-instance deployments: the tick body is serialized cluster-wide
   via `GameServer.Lock`.

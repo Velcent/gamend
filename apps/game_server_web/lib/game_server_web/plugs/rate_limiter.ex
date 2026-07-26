@@ -39,7 +39,7 @@ defmodule GameServerWeb.Plugs.RateLimiter do
     doc: "Max general HTTP requests per window, per IP."
   )
 
-  setting(:general_window, :integer,
+  setting(:general_window_ms, :integer,
     default: 60_000,
     doc: "General HTTP window, in milliseconds."
   )
@@ -49,7 +49,7 @@ defmodule GameServerWeb.Plugs.RateLimiter do
     doc: "Max login/register requests per window, per IP."
   )
 
-  setting(:auth_window, :integer,
+  setting(:auth_window_ms, :integer,
     default: 60_000,
     doc: "Auth HTTP window, in milliseconds."
   )
@@ -59,7 +59,7 @@ defmodule GameServerWeb.Plugs.RateLimiter do
     doc: "Max WebSocket channel messages per window, per user."
   )
 
-  setting(:ws_window, :integer,
+  setting(:ws_window_ms, :integer,
     default: 10_000,
     doc: "WebSocket window, in milliseconds."
   )
@@ -69,7 +69,7 @@ defmodule GameServerWeb.Plugs.RateLimiter do
     doc: "Max WebRTC DataChannel messages per window, per user."
   )
 
-  setting(:dc_window, :integer,
+  setting(:dc_window_ms, :integer,
     default: 10_000,
     doc: "WebRTC DataChannel window, in milliseconds."
   )
@@ -80,7 +80,7 @@ defmodule GameServerWeb.Plugs.RateLimiter do
     doc: "Max ICE candidate messages per window, per user."
   )
 
-  setting(:ice_window, :integer,
+  setting(:ice_window_ms, :integer,
     default: 30_000,
     doc: "ICE candidate window, in milliseconds."
   )
@@ -167,11 +167,11 @@ defmodule GameServerWeb.Plugs.RateLimiter do
   end
 
   defp bucket_for(_conn, ip) do
-    {"general:#{ip}", setting(:general_window), setting(:general_limit)}
+    {"general:#{ip}", setting(:general_window_ms), setting(:general_limit)}
   end
 
   defp auth_bucket(ip) do
-    {"auth:#{ip}", setting(:auth_window), setting(:auth_limit)}
+    {"auth:#{ip}", setting(:auth_window_ms), setting(:auth_limit)}
   end
 
   defp setting(key), do: GameServer.Settings.get(__MODULE__, key)

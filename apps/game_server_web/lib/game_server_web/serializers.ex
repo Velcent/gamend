@@ -50,7 +50,7 @@ defmodule GameServerWeb.Serializers do
       status: check.status,
       lobby_id: check.lobby_id || "",
       party_id: check.party_id || "",
-      deadline: check.deadline,
+      deadline_at: check.deadline_at,
       opened_by: check.opened_by || "",
       reason: check.reason || "",
       metadata: check.metadata || %{},

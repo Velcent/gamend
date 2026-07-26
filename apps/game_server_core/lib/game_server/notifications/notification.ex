@@ -19,19 +19,6 @@ defmodule GameServer.Notifications.Notification do
   alias GameServer.Accounts.User
   alias GameServer.Notifications.Types
 
-  @derive {Jason.Encoder,
-           only: [
-             :id,
-             :sender_id,
-             :recipient_id,
-             :title,
-             :content,
-             :metadata,
-             :icon_url,
-             :read,
-             :inserted_at
-           ]}
-
   schema "notifications" do
     belongs_to :sender, User
     belongs_to :recipient, User
@@ -88,5 +75,27 @@ defmodule GameServer.Notifications.Notification do
       _ ->
         changeset
     end
+  end
+end
+
+# Hand-written rather than @derive so nil strings encode as "" (see
+# GameServer.SchemaJSON — game clients choke on null).
+defimpl Jason.Encoder, for: GameServer.Notifications.Notification do
+  def encode(notification, opts) do
+    GameServer.SchemaJSON.encode(
+      notification,
+      [
+        :id,
+        :sender_id,
+        :recipient_id,
+        :title,
+        :content,
+        :metadata,
+        :icon_url,
+        :read,
+        :inserted_at
+      ],
+      opts
+    )
   end
 end

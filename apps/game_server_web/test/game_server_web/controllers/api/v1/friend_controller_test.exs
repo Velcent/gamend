@@ -71,18 +71,18 @@ defmodule GameServerWeb.Api.V1.FriendControllerTest do
     resp = get(conn_b, "/api/v1/me/friend_requests") |> json_response(200)
 
     # Expect exactly one incoming and zero outgoing requests
-    assert [_] = resp["incoming"]
-    assert [] = resp["outgoing"]
+    assert [_] = resp["data"]["incoming"]
+    assert [] = resp["data"]["outgoing"]
 
-    incoming = hd(resp["incoming"])
+    incoming = hd(resp["data"]["incoming"])
     refute Map.has_key?(incoming["requester"], "email")
     refute Map.has_key?(incoming["target"], "email")
     assert incoming["requester"]["last_seen_at"] == "1970-01-01T00:00:00Z"
     assert incoming["target"]["last_seen_at"] == "1970-01-01T00:00:00Z"
 
     # meta total counts and pages should be present
-    assert resp["meta"]["total_counts"]["incoming"] == 1
-    assert resp["meta"]["total_counts"]["outgoing"] == 0
+    assert resp["meta"]["incoming"]["total_count"] == 1
+    assert resp["meta"]["outgoing"]["total_count"] == 0
     assert resp["meta"]["total_pages"]["incoming"] == 1
     assert resp["meta"]["total_pages"]["outgoing"] == 0
   end

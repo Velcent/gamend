@@ -1,6 +1,6 @@
 defmodule GameServer.ReadyChecksEdgeCasesTest do
   @moduledoc """
-  The awkward orderings: answers that arrive after a check resolved, a deadline
+  The awkward orderings: answers that arrive after a check resolved, a deadline_at
   racing a last-second ready, membership changing under an open check.
 
   The property every one of these asserts is the same: **a check resolves
@@ -29,7 +29,7 @@ defmodule GameServer.ReadyChecksEdgeCasesTest do
 
   defp expire_now(check) do
     Repo.update_all(from(c in Check, where: c.id == ^check.id),
-      set: [deadline: DateTime.add(DateTime.utc_now(), -1, :second)]
+      set: [deadline_at: DateTime.add(DateTime.utc_now(), -1, :second)]
     )
 
     ReadyChecks.expire_due()
@@ -133,7 +133,7 @@ defmodule GameServer.ReadyChecksEdgeCasesTest do
       {:ok, check} = ReadyChecks.open(ctx.lobby, ctx.members, opened_by: ctx.host.id)
 
       Repo.update_all(from(c in Check, where: c.id == ^check.id),
-        set: [deadline: DateTime.add(DateTime.utc_now(), -1, :second)]
+        set: [deadline_at: DateTime.add(DateTime.utc_now(), -1, :second)]
       )
 
       # Resolve it first, then expire the row the sweep already selected.
@@ -161,15 +161,15 @@ defmodule GameServer.ReadyChecksEdgeCasesTest do
                Enum.sort([ctx.alice.id, ctx.bob.id])
     end
 
-    test "a check with no deadline is never expired", ctx do
+    test "a check with no deadline_at is never expired", ctx do
       {:ok, check} = ReadyChecks.open(ctx.lobby, ctx.members, timeout_ms: nil)
-      assert check.deadline == nil
+      assert check.deadline_at == nil
 
       assert ReadyChecks.expire_due() == 0
       assert ReadyChecks.get_check(check.id).status == "pending"
     end
 
-    test "a deadline in the future is not expired early", ctx do
+    test "a deadline_at in the future is not expired early", ctx do
       {:ok, check} = ReadyChecks.open(ctx.lobby, ctx.members, timeout_ms: 60_000)
 
       assert ReadyChecks.expire_due() == 0

@@ -55,6 +55,16 @@
   and the `/admin/rate-limiting` and `/admin/lobby-snapshots` pages. **Update
   any external registration of `/data-deletion`** (Meta/Facebook app settings),
   and note that confirmation links already emailed under the old path will 404.
+- [added] **The typed icon set is served as SVG** at `GET /icons/<name>.svg`
+  (324 heroicons), so an entity's `icon_url` can point at an icon the server
+  already ships instead of artwork someone has to host. The web UI recognises
+  its own URLs and inlines them, so `currentColor` follows the reader's theme —
+  in an `<img>` a heroicon renders black and disappears on the dark theme.
+- [fixed] SDK structs had drifted from core: `Group`, `Tournament` and
+  `Leaderboard` were missing `icon_url`, and `ReadyChecks.Check` /
+  `Tournaments.Match` still carried `deadline` after core renamed it to
+  `deadline_at` — which broke `mix compile` for any plugin. `mix gen.sdk` now
+  also emits a non-nil placeholder for `Group.t() | nil` lookups.
 - [added] **Two-step icon upload for tournaments, leaderboards and quests**
   (admins), matching the flow groups and avatars already had:
   `POST .../icon/upload_url` returns a presigned ticket, the client PUTs the
@@ -67,6 +77,19 @@
   same immutable one-year `Cache-Control` as `avatars/` — every icon key is
   content-unique (`Storage.build_key/3`), so revalidating one on each page load
   was pure waste.
+- [added] **API conventions are enforced.** `docs/specs/api-conventions.md`
+  writes down the naming and serialization rules (identifiers, names, time,
+  lifecycle, the null policy, response shapes, paths); `mix gamend.api.lint`
+  checks six of them mechanically in precommit and CI. It found six schemas
+  encoding `null` through `@derive Jason.Encoder`, three OpenAPI schemas
+  contradicting their serializers, and eleven fields whose names hid their
+  unit or type.
+- [breaking] **`deadline` is `deadline_at`** on ready checks and tournament
+  matches — instants are `*_at` everywhere else.
+- [breaking] **Duration settings name their unit.** `GAMEND_DB_POOL_TIMEOUT`,
+  `_QUEUE_INTERVAL`, `_QUERY_TIMEOUT`, `_SQLITE_BUSY_TIMEOUT` and the five
+  `GAMEND_RATELIMIT_*_WINDOW` variables gain an `_MS` suffix. All were
+  milliseconds; none said so.
 - [added] **Settings**: one declared config surface.
 - [changed] **Guides are markdown files.** `/docs/setup`
 - [changed] **Times are shown in the reader's timezone.**
