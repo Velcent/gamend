@@ -42,11 +42,27 @@ An upload ticket handed to a client so it can upload bytes directly to the
 backend (S3/R2) or to the local upload endpoint — the client flow is identical
 either way.
 
+# `stat`
+
+```elixir
+@type stat() :: %{size: non_neg_integer(), content_type: String.t() | nil}
+```
+
+What the backend reports about a stored object without fetching it.
+
 # `delete`
 
 ```elixir
 @callback delete(key()) :: :ok | {:error, term()}
 ```
+
+# `delete_prefix`
+
+```elixir
+@callback delete_prefix(String.t()) :: {:ok, non_neg_integer()} | {:error, term()}
+```
+
+Deletes every object under `prefix`. Returns how many were removed.
 
 # `exists?`
 
@@ -82,6 +98,17 @@ One page of objects. Opts: `:prefix`, `:offset`, `:limit`.
 ```elixir
 @callback put(key(), iodata(), keyword()) :: {:ok, key()} | {:error, term()}
 ```
+
+# `stat`
+
+```elixir
+@callback stat(key()) :: {:ok, stat()} | {:error, term()}
+```
+
+Size and stored content type of one object, without downloading it.
+
+`content_type` is whatever the backend recorded; the local adapter keeps no
+per-object metadata and always reports `nil`.
 
 # `url`
 

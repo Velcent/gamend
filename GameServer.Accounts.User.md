@@ -48,6 +48,18 @@ The public user struct used across the application.
 
 A user changeset for admin updates.
 
+# `anonymous?`
+
+```elixir
+@spec anonymous?(t()) :: boolean()
+```
+
+True when nothing but a device id backs this account.
+
+Such an account is created by `POST /api/v1/login/device` with no proof of
+anything, costs an attacker one request, and cannot be emailed - which is why
+it is the tier that gets the tighter quotas and the shorter retention window.
+
 # `apple_oauth_changeset`
 
 A user changeset for Apple OAuth registration.

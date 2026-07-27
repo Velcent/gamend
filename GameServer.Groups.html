@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.1">
-    <meta name="project" content="game_server_core v1.0.1079">
+    <meta name="project" content="game_server_core v1.0.1082">
 
 
-    <title>GameServer.Groups — game_server_core v1.0.1079</title>
+    <title>GameServer.Groups — game_server_core v1.0.1082</title>
 
     <link rel="stylesheet" href="dist/html-elixir-YJO4MOOW.css" />
 
-    <script defer src="dist/sidebar_items-6CE18EDE.js"></script>
+    <script defer src="dist/sidebar_items-A91C806B.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-YU4BZFVS.js"></script>
 
@@ -37,7 +37,7 @@
 game_server_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1079
+          v1.0.1082
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ game_server_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">GameServer.<wbr>Groups</span> 
-      <small class="app-vsn" translate="no">(game_server_core v1.0.1079)</small>
+      <small class="app-vsn" translate="no">(game_server_core v1.0.1082)</small>
 
     </h1>
 
@@ -117,19 +117,19 @@ game_server_core
 <p>Context module for group management: creating, updating, listing, joining,
 leaving, kicking, promoting/demoting members, and handling join requests.</p><p>Groups are persistent communities (unlike ephemeral lobbies). They support
 three visibility types:</p><ul><li><strong>public</strong> – anyone can join directly</li><li><strong>private</strong> – anyone can request to join; an admin must approve</li><li><strong>hidden</strong> – only invited users can join (via notifications / invite API)</li></ul><h2 id="module-usage" class="section-heading"><a href="#module-usage" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Usage</span></h2><pre><code class="makeup elixir" translate="no"><span class="c1"># Create a group (creator becomes admin)</span><span class="w">
-</span><span class="p" data-group-id="6596136165-1">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">group</span><span class="p" data-group-id="6596136165-1">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Groups</span><span class="o">.</span><span class="n">create_group</span><span class="p" data-group-id="6596136165-2">(</span><span class="n">user_id</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="6596136165-3">%{</span><span class="s">&quot;title&quot;</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;Cool Group&quot;</span><span class="p" data-group-id="6596136165-3">}</span><span class="p" data-group-id="6596136165-2">)</span><span class="w">
+</span><span class="p" data-group-id="9555037930-1">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">group</span><span class="p" data-group-id="9555037930-1">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Groups</span><span class="o">.</span><span class="n">create_group</span><span class="p" data-group-id="9555037930-2">(</span><span class="n">user_id</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="9555037930-3">%{</span><span class="s">&quot;title&quot;</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;Cool Group&quot;</span><span class="p" data-group-id="9555037930-3">}</span><span class="p" data-group-id="9555037930-2">)</span><span class="w">
 
 </span><span class="c1"># List public/private groups (hidden excluded)</span><span class="w">
-</span><span class="n">groups</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Groups</span><span class="o">.</span><span class="n">list_groups</span><span class="p" data-group-id="6596136165-4">(</span><span class="p" data-group-id="6596136165-5">%{</span><span class="p" data-group-id="6596136165-5">}</span><span class="p">,</span><span class="w"> </span><span class="ss">page</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="ss">page_size</span><span class="p">:</span><span class="w"> </span><span class="mi">25</span><span class="p" data-group-id="6596136165-4">)</span><span class="w">
+</span><span class="n">groups</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Groups</span><span class="o">.</span><span class="n">list_groups</span><span class="p" data-group-id="9555037930-4">(</span><span class="p" data-group-id="9555037930-5">%{</span><span class="p" data-group-id="9555037930-5">}</span><span class="p">,</span><span class="w"> </span><span class="ss">page</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="ss">page_size</span><span class="p">:</span><span class="w"> </span><span class="mi">25</span><span class="p" data-group-id="9555037930-4">)</span><span class="w">
 
 </span><span class="c1"># Join a public group</span><span class="w">
-</span><span class="p" data-group-id="6596136165-6">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">member</span><span class="p" data-group-id="6596136165-6">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Groups</span><span class="o">.</span><span class="n">join_group</span><span class="p" data-group-id="6596136165-7">(</span><span class="n">user_id</span><span class="p">,</span><span class="w"> </span><span class="n">group</span><span class="o">.</span><span class="n">id</span><span class="p" data-group-id="6596136165-7">)</span><span class="w">
+</span><span class="p" data-group-id="9555037930-6">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">member</span><span class="p" data-group-id="9555037930-6">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Groups</span><span class="o">.</span><span class="n">join_group</span><span class="p" data-group-id="9555037930-7">(</span><span class="n">user_id</span><span class="p">,</span><span class="w"> </span><span class="n">group</span><span class="o">.</span><span class="n">id</span><span class="p" data-group-id="9555037930-7">)</span><span class="w">
 
 </span><span class="c1"># Request to join a private group</span><span class="w">
-</span><span class="p" data-group-id="6596136165-8">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">request</span><span class="p" data-group-id="6596136165-8">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Groups</span><span class="o">.</span><span class="n">request_join</span><span class="p" data-group-id="6596136165-9">(</span><span class="n">user_id</span><span class="p">,</span><span class="w"> </span><span class="n">group</span><span class="o">.</span><span class="n">id</span><span class="p" data-group-id="6596136165-9">)</span><span class="w">
+</span><span class="p" data-group-id="9555037930-8">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">request</span><span class="p" data-group-id="9555037930-8">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Groups</span><span class="o">.</span><span class="n">request_join</span><span class="p" data-group-id="9555037930-9">(</span><span class="n">user_id</span><span class="p">,</span><span class="w"> </span><span class="n">group</span><span class="o">.</span><span class="n">id</span><span class="p" data-group-id="9555037930-9">)</span><span class="w">
 
 </span><span class="c1"># Admin approves a join request</span><span class="w">
-</span><span class="p" data-group-id="6596136165-10">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">member</span><span class="p" data-group-id="6596136165-10">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Groups</span><span class="o">.</span><span class="n">approve_join_request</span><span class="p" data-group-id="6596136165-11">(</span><span class="n">admin_id</span><span class="p">,</span><span class="w"> </span><span class="n">request</span><span class="o">.</span><span class="n">id</span><span class="p" data-group-id="6596136165-11">)</span></code></pre><h2 id="module-pubsub-events" class="section-heading"><a href="#module-pubsub-events" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">PubSub Events</span></h2><ul><li><p><code class="inline">&quot;groups&quot;</code> topic:</p><ul><li><code class="inline">{:group_created, group}</code></li><li><code class="inline">{:group_updated, group}</code></li><li><code class="inline">{:group_deleted, group_id}</code></li></ul></li><li><p><code class="inline">&quot;group:&lt;group_id&gt;&quot;</code> topic:</p><ul><li><code class="inline">{:member_joined, group_id, user_id}</code></li><li><code class="inline">{:member_left, group_id, user_id}</code></li><li><code class="inline">{:member_kicked, group_id, user_id}</code></li><li><code class="inline">{:member_promoted, group_id, user_id}</code></li><li><code class="inline">{:member_demoted, group_id, user_id}</code></li><li><code class="inline">{:group_updated, group}</code></li><li><code class="inline">{:join_request_created, group_id, user_id}</code></li><li><code class="inline">{:join_request_approved, group_id, user_id}</code></li><li><code class="inline">{:join_request_rejected, group_id, user_id}</code></li><li><code class="inline">{:group_notification, group_id, sender_id}</code></li></ul></li></ul>
+</span><span class="p" data-group-id="9555037930-10">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">member</span><span class="p" data-group-id="9555037930-10">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Groups</span><span class="o">.</span><span class="n">approve_join_request</span><span class="p" data-group-id="9555037930-11">(</span><span class="n">admin_id</span><span class="p">,</span><span class="w"> </span><span class="n">request</span><span class="o">.</span><span class="n">id</span><span class="p" data-group-id="9555037930-11">)</span></code></pre><h2 id="module-pubsub-events" class="section-heading"><a href="#module-pubsub-events" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">PubSub Events</span></h2><ul><li><p><code class="inline">&quot;groups&quot;</code> topic:</p><ul><li><code class="inline">{:group_created, group}</code></li><li><code class="inline">{:group_updated, group}</code></li><li><code class="inline">{:group_deleted, group_id}</code></li></ul></li><li><p><code class="inline">&quot;group:&lt;group_id&gt;&quot;</code> topic:</p><ul><li><code class="inline">{:member_joined, group_id, user_id}</code></li><li><code class="inline">{:member_left, group_id, user_id}</code></li><li><code class="inline">{:member_kicked, group_id, user_id}</code></li><li><code class="inline">{:member_promoted, group_id, user_id}</code></li><li><code class="inline">{:member_demoted, group_id, user_id}</code></li><li><code class="inline">{:group_updated, group}</code></li><li><code class="inline">{:join_request_created, group_id, user_id}</code></li><li><code class="inline">{:join_request_approved, group_id, user_id}</code></li><li><code class="inline">{:join_request_rejected, group_id, user_id}</code></li><li><code class="inline">{:group_notification, group_id, sender_id}</code></li></ul></li></ul>
     </section>
 
 </div>
@@ -732,7 +732,7 @@ Cannot lower max_members below current member count.</p></div>
       <h1 class="signature" translate="no">accept_invite(user_id, invite_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/groups.ex#L1285" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/groups.ex#L1292" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -847,7 +847,7 @@ Cannot lower max_members below current member count.</p></div>
       <h1 class="signature" translate="no">approve_join_request(admin_id, request_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/groups.ex#L1258" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/groups.ex#L1265" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -934,7 +934,7 @@ Cannot lower max_members below current member count.</p></div>
       <h1 class="signature" translate="no">cancel_invite(user_id, invite_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/groups.ex#L1293" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/groups.ex#L1300" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -962,7 +962,7 @@ Cannot lower max_members below current member count.</p></div>
       <h1 class="signature" translate="no">cancel_join_request(user_id, request_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/groups.ex#L1268" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/groups.ex#L1275" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1168,7 +1168,7 @@ Cannot lower max_members below current member count.</p></div>
       <h1 class="signature" translate="no">count_invitations(user_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/groups.ex#L1305" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/groups.ex#L1312" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1196,7 +1196,7 @@ Cannot lower max_members below current member count.</p></div>
       <h1 class="signature" translate="no">count_join_requests(group_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/groups.ex#L1253" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/groups.ex#L1260" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1254,7 +1254,7 @@ Cannot lower max_members below current member count.</p></div>
       <h1 class="signature" translate="no">count_sent_invitations(user_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/groups.ex#L1309" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/groups.ex#L1316" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1367,7 +1367,7 @@ Cannot lower max_members below current member count.</p></div>
       <h1 class="signature" translate="no">decline_invite(user_id, invite_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/groups.ex#L1289" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/groups.ex#L1296" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1687,7 +1687,7 @@ without running the admin-transfer / empty-group logic).</p>
       <h1 class="signature" translate="no">invite_to_group(admin_id, group_id, target_user_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/groups.ex#L1281" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/groups.ex#L1288" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1877,7 +1877,7 @@ without running the admin-transfer / empty-group logic).</p>
       <h1 class="signature" translate="no">list_invitations(user_id, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/groups.ex#L1297" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/groups.ex#L1304" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1910,7 +1910,7 @@ without running the admin-transfer / empty-group logic).</p>
       <h1 class="signature" translate="no">list_join_requests(admin_id, group_id, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/groups.ex#L1249" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/groups.ex#L1256" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1941,7 +1941,7 @@ without running the admin-transfer / empty-group logic).</p>
       <h1 class="signature" translate="no">list_sent_invitations(user_id, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/groups.ex#L1301" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/groups.ex#L1308" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -2035,7 +2035,7 @@ without running the admin-transfer / empty-group logic).</p>
       <h1 class="signature" translate="no">list_user_pending_requests(user_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/groups.ex#L1272" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/groups.ex#L1279" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -2095,7 +2095,7 @@ without running the admin-transfer / empty-group logic).</p>
       <h1 class="signature" translate="no">notify_group(sender_id, group_id, content, metadata \\ %{})</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/groups.ex#L1030" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/groups.ex#L1037" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -2111,9 +2111,14 @@ without running the admin-transfer / empty-group logic).</p>
 
       </div>
 
-<p>Send a notification to all members of a group (except the sender).</p><p>Any group member can send a notification. The notification is created for
-each member using a direct insert (bypassing the friends-only check).
-The <code class="inline">group_id</code> / <code class="inline">group_name</code> are stored in metadata so the client can
+<p>Send a notification to all members of a group (except the sender).</p><p><strong>Server-side only.</strong> There is deliberately no player-facing endpoint for
+this: one call writes a row, a cache invalidation and a PubSub push <em>per
+member</em>, so with <code class="inline">max_group_members</code> at 10,000 an ordinary member could turn
+one request into ~10,000 of each. Members talk to a group through group chat,
+which costs one row and one topic broadcast and is throttled per group. This
+function is the announcement primitive for plugins and hooks - callers are
+trusted, so it skips both the friends-only check and the per-recipient
+notification cap that <code class="inline">Notifications.send_notification/2</code> enforces.</p><p>The <code class="inline">group_id</code> / <code class="inline">group_name</code> are stored in metadata so the client can
 recognise and route it.</p><h2 id="notify_group/4-options" class="section-heading"><a href="#notify_group/4-options" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Options</span></h2><ul><li><code class="inline">title</code> – notification title string (default: <code class="inline">&quot;Group Notification&quot;</code>).
 The title is part of the unique constraint <code class="inline">(sender_id, recipient_id, title)</code>,
 so different titles create separate notification slots.</li></ul><p>Because of the unique constraint on <code class="inline">(sender_id, recipient_id, title)</code>, a
@@ -2161,7 +2166,7 @@ message.</p><p>Returns <code class="inline">{:ok, count}</code> with the number 
       <h1 class="signature" translate="no">reject_join_request(admin_id, request_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/groups.ex#L1263" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/groups.ex#L1270" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -2190,7 +2195,7 @@ message.</p><p>Returns <code class="inline">{:ok, count}</code> with the number 
       <h1 class="signature" translate="no">request_join(user_id, group_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/groups.ex#L1244" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/groups.ex#L1251" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -2388,9 +2393,9 @@ Cannot lower max_members below current member count.</p>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/game_server_core/1.0.1079">Hex Package</a>
+              <a href="https://hex.pm/packages/game_server_core/1.0.1082">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/game_server_core/1.0.1079">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/game_server_core/1.0.1082">Hex Preview</a>
 
             </span>
 

@@ -1,4 +1,4 @@
-# game_server_core v1.0.1079 - Table of Contents
+# game_server_core v1.0.1082 - Table of Contents
 
 Core functionality for Gamend GameServer, including user management, authentication, friends, matchmaking, and more.
 
@@ -16,12 +16,15 @@ and business logic.
 L2 cache.
 - [GameServer.Database](GameServer.Database.md): Connection and tuning settings for `GameServer.Repo`.
 - [GameServer.Mail](GameServer.Mail.md): Outbound email transport.
+- [GameServer.Time](GameServer.Time.md): The server's wall clock, in milliseconds since the epoch, for sending to
+clients.
 
 - Accounts
   - [GameServer.Accounts](GameServer.Accounts.md): The Accounts context.
   - [GameServer.Accounts.AvatarMirror](GameServer.Accounts.AvatarMirror.md): Oban worker that mirrors a user's external (OAuth provider) avatar into our
 own object storage, so avatars render from our storage/CDN instead of
 hotlinking the provider.
+  - [GameServer.Accounts.InactivityNotifier](GameServer.Accounts.InactivityNotifier.md): Warns a user their account is about to be deleted for inactivity.
   - [GameServer.Accounts.Scope](GameServer.Accounts.Scope.md): Defines the scope of the caller to be used throughout the app.
   - [GameServer.Accounts.StalePresenceSweeper](GameServer.Accounts.StalePresenceSweeper.md): Periodically sweeps users whose `is_online` flag is `true` but whose
 `last_seen_at` timestamp is older than a configurable threshold.
@@ -253,6 +256,8 @@ aggregated from telemetry events
   - [GameServer.Jobs](GameServer.Jobs.md): Durable background jobs, backed by Oban.
   - [GameServer.Limits](GameServer.Limits.md): Central module for configurable validation limits.
   - [GameServer.Lock](GameServer.Lock.md): Serialized execution using database-level advisory locks.
+  - [GameServer.Lock.Local](GameServer.Lock.Local.md): Reentrant, cluster-wide keyed mutex — the non-Postgres half of
+`GameServer.Lock.serialize/3`.
   - [GameServer.Mailer](GameServer.Mailer.md)
   - [GameServer.Repo](GameServer.Repo.md)
   - [GameServer.Repo.AdvisoryLock](GameServer.Repo.AdvisoryLock.md): Advisory locking for protecting TOCTOU (Time-of-Check-Time-of-Use) patterns.

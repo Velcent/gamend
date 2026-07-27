@@ -1,8 +1,7 @@
 # July 2026
 
-- [breaking] **One theme file**, translated via gettext; the 30 per-locale JSON copies are gone (`mix gamend.theme.migrate_locales`).
-- [breaking] **DB text is source-language only** — per-locale quest/leaderboard metadata and its admin editor removed (`mix gamend.content.migrate_metadata`); gettext translates at render.
-- [added] **Translation pipeline**: `mix gamend.theme.extract`, `mix gamend.content.extract`, CSV round-trip covering both gettext trees.
+- [breaking] **One theme file**
+- [added] **Translation pipeline**
 - [added] All **30 locales fully translated** (machine-translated, pending review).
 - [added] **Icons everywhere** — `icon_url` on notifications, tournaments, groups and leaderboards;
 - [added] **Quest chains** are browsable; a chain lists as one quest.

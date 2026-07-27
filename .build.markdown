@@ -1,4 +1,5 @@
 GameServer.Accounts.AvatarMirror.md
+GameServer.Accounts.InactivityNotifier.md
 GameServer.Accounts.Scope.md
 GameServer.Accounts.StalePresenceSweeper.md
 GameServer.Accounts.User.md
@@ -67,6 +68,7 @@ GameServer.LobbySnapshots.Event.md
 GameServer.LobbySnapshots.Snapshot.md
 GameServer.LobbySnapshots.Writer.md
 GameServer.LobbySnapshots.md
+GameServer.Lock.Local.md
 GameServer.Lock.md
 GameServer.Mail.md
 GameServer.Mailer.md
@@ -140,6 +142,7 @@ GameServer.Storage.md
 GameServer.Theme.JSONConfig.md
 GameServer.Theme.Translatable.md
 GameServer.Theme.md
+GameServer.Time.md
 GameServer.Tournaments.Entry.md
 GameServer.Tournaments.Match.md
 GameServer.Tournaments.Ticker.md

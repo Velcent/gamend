@@ -15,7 +15,7 @@ whether an answer can be taken back:
 
 `"ready"` is the lobby's ready-up and the party's standing ready board;
 `"accept"` is matchmaking's match confirmation (see
-`docs/specs/ready-check.md`).
+the moduledoc below).
 
 ## Two lanes
 

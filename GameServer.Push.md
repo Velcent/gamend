@@ -8,7 +8,7 @@ Devices register their FCM registration token or APNs device token against
 the authenticated user; a user has many devices. Delivery routes **per
 token** off the `provider` column (`"fcm"` | `"apns"`), falling back to the
 zero-config `Log` provider when nothing is configured
-(see `docs/specs/push.md`).
+(see the moduledoc below).
 
 ## Usage
 

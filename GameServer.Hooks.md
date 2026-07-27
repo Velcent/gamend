@@ -13,18 +13,21 @@ A module implementing this behaviour can be configured with
 The default implementation is a no-op.
 
 # `after_startup`
+*optional* 
 
 ```elixir
 @callback after_startup() :: any()
 ```
 
 # `before_stop`
+*optional* 
 
 ```elixir
 @callback before_stop() :: any()
 ```
 
 # `on_custom_hook`
+*optional* 
 
 ```elixir
 @callback on_custom_hook(String.t(), list()) :: any()
@@ -39,42 +42,49 @@ exported Elixir functions on the hooks module.
 Receives the function name and the argument list.
 
 # `after_user_deleted`
+*optional* 
 
 ```elixir
 @callback after_user_deleted(GameServer.Accounts.User.t()) :: any()
 ```
 
 # `after_user_logged_in`
+*optional* 
 
 ```elixir
 @callback after_user_logged_in(GameServer.Accounts.User.t()) :: any()
 ```
 
 # `after_user_offline`
+*optional* 
 
 ```elixir
 @callback after_user_offline(GameServer.Accounts.User.t()) :: any()
 ```
 
 # `after_user_online`
+*optional* 
 
 ```elixir
 @callback after_user_online(GameServer.Accounts.User.t()) :: any()
 ```
 
 # `after_user_register`
+*optional* 
 
 ```elixir
 @callback after_user_register(GameServer.Accounts.User.t()) :: any()
 ```
 
 # `after_user_updated`
+*optional* 
 
 ```elixir
 @callback after_user_updated(GameServer.Accounts.User.t()) :: any()
 ```
 
 # `before_user_register`
+*optional* 
 
 ```elixir
 @callback before_user_register(
@@ -107,30 +117,35 @@ to the player:
     def before_user_update(_user, attrs), do: {:ok, attrs}
 
 # `before_user_update`
+*optional* 
 
 ```elixir
 @callback before_user_update(GameServer.Accounts.User.t(), map()) :: hook_result(map())
 ```
 
 # `after_lobby_create`
+*optional* 
 
 ```elixir
 @callback after_lobby_create(GameServer.Lobbies.Lobby.t()) :: any()
 ```
 
 # `after_lobby_deleted`
+*optional* 
 
 ```elixir
 @callback after_lobby_deleted(GameServer.Lobbies.Lobby.t()) :: any()
 ```
 
 # `after_lobby_host_change`
+*optional* 
 
 ```elixir
 @callback after_lobby_host_change(GameServer.Lobbies.Lobby.t(), String.t()) :: any()
 ```
 
 # `after_lobby_join`
+*optional* 
 
 ```elixir
 @callback after_lobby_join(GameServer.Accounts.User.t(), GameServer.Lobbies.Lobby.t()) ::
@@ -138,6 +153,7 @@ to the player:
 ```
 
 # `after_lobby_kick`
+*optional* 
 
 ```elixir
 @callback after_lobby_kick(
@@ -148,6 +164,7 @@ to the player:
 ```
 
 # `after_lobby_leave`
+*optional* 
 
 ```elixir
 @callback after_lobby_leave(GameServer.Accounts.User.t(), GameServer.Lobbies.Lobby.t()) ::
@@ -163,18 +180,21 @@ to the player:
 ```
 
 # `after_lobby_updated`
+*optional* 
 
 ```elixir
 @callback after_lobby_updated(GameServer.Lobbies.Lobby.t()) :: any()
 ```
 
 # `before_lobby_create`
+*optional* 
 
 ```elixir
 @callback before_lobby_create(map()) :: hook_result(map())
 ```
 
 # `before_lobby_delete`
+*optional* 
 
 ```elixir
 @callback before_lobby_delete(GameServer.Lobbies.Lobby.t()) ::
@@ -182,6 +202,7 @@ to the player:
 ```
 
 # `before_lobby_join`
+*optional* 
 
 ```elixir
 @callback before_lobby_join(
@@ -195,6 +216,7 @@ to the player:
 ```
 
 # `before_lobby_kick`
+*optional* 
 
 ```elixir
 @callback before_lobby_kick(
@@ -225,54 +247,63 @@ to the player:
 ```
 
 # `before_lobby_update`
+*optional* 
 
 ```elixir
 @callback before_lobby_update(GameServer.Lobbies.Lobby.t(), map()) :: hook_result(map())
 ```
 
 # `after_group_create`
+*optional* 
 
 ```elixir
 @callback after_group_create(GameServer.Groups.Group.t()) :: any()
 ```
 
 # `after_group_deleted`
+*optional* 
 
 ```elixir
 @callback after_group_deleted(GameServer.Groups.Group.t()) :: any()
 ```
 
 # `after_group_join`
+*optional* 
 
 ```elixir
 @callback after_group_join(String.t(), GameServer.Groups.Group.t()) :: any()
 ```
 
 # `after_group_kick`
+*optional* 
 
 ```elixir
 @callback after_group_kick(String.t(), String.t(), String.t()) :: any()
 ```
 
 # `after_group_leave`
+*optional* 
 
 ```elixir
 @callback after_group_leave(String.t(), String.t()) :: any()
 ```
 
 # `after_group_updated`
+*optional* 
 
 ```elixir
 @callback after_group_updated(GameServer.Groups.Group.t()) :: any()
 ```
 
 # `before_group_create`
+*optional* 
 
 ```elixir
 @callback before_group_create(GameServer.Accounts.User.t(), map()) :: hook_result(map())
 ```
 
 # `before_group_delete`
+*optional* 
 
 ```elixir
 @callback before_group_delete(GameServer.Groups.Group.t()) ::
@@ -280,6 +311,7 @@ to the player:
 ```
 
 # `before_group_join`
+*optional* 
 
 ```elixir
 @callback before_group_join(
@@ -293,6 +325,7 @@ to the player:
 ```
 
 # `before_group_kick`
+*optional* 
 
 ```elixir
 @callback before_group_kick(String.t(), String.t(), String.t()) ::
@@ -300,24 +333,28 @@ to the player:
 ```
 
 # `before_group_update`
+*optional* 
 
 ```elixir
 @callback before_group_update(GameServer.Groups.Group.t(), map()) :: hook_result(map())
 ```
 
 # `after_party_create`
+*optional* 
 
 ```elixir
 @callback after_party_create(GameServer.Parties.Party.t()) :: any()
 ```
 
 # `after_party_disband`
+*optional* 
 
 ```elixir
 @callback after_party_disband(GameServer.Parties.Party.t()) :: any()
 ```
 
 # `after_party_join`
+*optional* 
 
 ```elixir
 @callback after_party_join(GameServer.Accounts.User.t(), GameServer.Parties.Party.t()) ::
@@ -325,6 +362,7 @@ to the player:
 ```
 
 # `after_party_kick`
+*optional* 
 
 ```elixir
 @callback after_party_kick(
@@ -335,24 +373,28 @@ to the player:
 ```
 
 # `after_party_leave`
+*optional* 
 
 ```elixir
 @callback after_party_leave(GameServer.Accounts.User.t(), String.t()) :: any()
 ```
 
 # `after_party_updated`
+*optional* 
 
 ```elixir
 @callback after_party_updated(GameServer.Parties.Party.t()) :: any()
 ```
 
 # `before_party_create`
+*optional* 
 
 ```elixir
 @callback before_party_create(GameServer.Accounts.User.t(), map()) :: hook_result(map())
 ```
 
 # `before_party_join`
+*optional* 
 
 ```elixir
 @callback before_party_join(GameServer.Accounts.User.t(), GameServer.Parties.Party.t()) ::
@@ -360,6 +402,7 @@ to the player:
 ```
 
 # `before_party_kick`
+*optional* 
 
 ```elixir
 @callback before_party_kick(
@@ -374,18 +417,21 @@ to the player:
 ```
 
 # `before_party_update`
+*optional* 
 
 ```elixir
 @callback before_party_update(GameServer.Parties.Party.t(), map()) :: hook_result(map())
 ```
 
 # `after_chat_message`
+*optional* 
 
 ```elixir
 @callback after_chat_message(GameServer.Chat.Message.t()) :: any()
 ```
 
 # `before_chat_message`
+*optional* 
 
 ```elixir
 @callback before_chat_message(GameServer.Accounts.User.t(), map()) :: hook_result(map())
@@ -417,6 +463,7 @@ to the player:
 ```
 
 # `after_score_submitted`
+*optional* 
 
 ```elixir
 @callback after_score_submitted(GameServer.Leaderboards.Record.t()) :: any()
@@ -607,6 +654,7 @@ to the player:
 ```
 
 # `before_kv_get`
+*optional* 
 
 ```elixir
 @callback before_kv_get(String.t(), kv_opts()) :: kv_access_result()

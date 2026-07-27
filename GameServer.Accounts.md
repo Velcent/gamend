@@ -73,6 +73,14 @@ Call after writes that update the user row outside this module (e.g. lobby
 or party membership) so subsequent `get_user/1` reads stay warm and
 consistent instead of serving the pre-write struct until the TTL expires.
 
+# `can_upload_avatar?`
+
+```elixir
+@spec can_upload_avatar?(GameServer.Accounts.User.t()) :: boolean()
+```
+
+Whether `user` may upload an avatar, per `anonymous_can_upload_avatar`.
+
 # `change_user_display_name`
 
 ```elixir
@@ -255,6 +263,17 @@ Returns `{:ok, user}` on success or `{:error, changeset}` on failure.
 ```
 
 Deletes the signed token with the given context.
+
+# `delete_user_storage`
+
+```elixir
+@spec delete_user_storage(Ecto.UUID.t()) :: :ok
+```
+
+Removes every stored object belonging to `user_id`.
+
+Best-effort, like `prune_user_avatars/2`: a storage backend that is down must
+not block an account deletion that has already happened at the database level.
 
 # `deliver_login_instructions`
 

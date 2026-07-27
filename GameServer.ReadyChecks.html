@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.1">
-    <meta name="project" content="game_server_core v1.0.1079">
+    <meta name="project" content="game_server_core v1.0.1082">
 
 
-    <title>GameServer.ReadyChecks — game_server_core v1.0.1079</title>
+    <title>GameServer.ReadyChecks — game_server_core v1.0.1082</title>
 
     <link rel="stylesheet" href="dist/html-elixir-YJO4MOOW.css" />
 
-    <script defer src="dist/sidebar_items-6CE18EDE.js"></script>
+    <script defer src="dist/sidebar_items-A91C806B.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-YU4BZFVS.js"></script>
 
@@ -37,7 +37,7 @@
 game_server_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1079
+          v1.0.1082
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ game_server_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">GameServer.<wbr>ReadyChecks</span> 
-      <small class="app-vsn" translate="no">(game_server_core v1.0.1079)</small>
+      <small class="app-vsn" translate="no">(game_server_core v1.0.1082)</small>
 
     </h1>
 
@@ -117,14 +117,14 @@ game_server_core
 <p>Ready checks: <em>these players must each answer before this proceeds</em>.</p><p>One primitive, two kinds — the only differences are what a &quot;no&quot; means and
 whether an answer can be taken back:</p><table><thead><tr><th style="text-align: left;"></th><th style="text-align: left;"><code class="inline">&quot;accept&quot;</code></th><th style="text-align: left;"><code class="inline">&quot;ready&quot;</code></th></tr></thead><tbody><tr><td style="text-align: left;">Answer</td><td style="text-align: left;">one-shot, irrevocable</td><td style="text-align: left;">a toggle</td></tr><tr><td style="text-align: left;">A &quot;no&quot;</td><td style="text-align: left;">fails the check for everyone</td><td style="text-align: left;">leaves it pending</td></tr><tr><td style="text-align: left;">Deadline</td><td style="text-align: left;">mandatory</td><td style="text-align: left;">optional</td></tr><tr><td style="text-align: left;">On timeout</td><td style="text-align: left;">fails</td><td style="text-align: left;">fails, naming who stalled</td></tr></tbody></table><p><code class="inline">&quot;ready&quot;</code> is the lobby's ready-up and the party's standing ready board;
 <code class="inline">&quot;accept&quot;</code> is matchmaking's match confirmation (see
-<code class="inline">docs/specs/ready-check.md</code>).</p><h2 id="module-two-lanes" class="section-heading"><a href="#module-two-lanes" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Two lanes</span></h2><p>A player can be in at most one open check <em>per lane</em>: the match lane (lobby
+the moduledoc below).</p><h2 id="module-two-lanes" class="section-heading"><a href="#module-two-lanes" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Two lanes</span></h2><p>A player can be in at most one open check <em>per lane</em>: the match lane (lobby
 ready or matchmaking accept — one match at a time) and the party lane. The
 lanes are independent, so a party's standing board never blocks the party's
 lobby from opening its own check.</p><h2 id="module-what-core-does-not-do" class="section-heading"><a href="#module-what-core-does-not-do" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">What core does <em>not</em> do</span></h2><p>A failed check kicks nobody, deletes no lobby and moves no lobby state. Core
 records who did not answer (<a href="#not_ready/1"><code class="inline">not_ready/1</code></a>); the host — or the game, in
-<code class="inline">after_ready_check_failed</code> — decides what that is worth.</p><h2 id="module-usage" class="section-heading"><a href="#module-usage" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Usage</span></h2><pre><code class="makeup elixir" translate="no"><span class="p" data-group-id="2877363731-1">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">check</span><span class="p" data-group-id="2877363731-1">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">ReadyChecks</span><span class="o">.</span><span class="n">open</span><span class="p" data-group-id="2877363731-2">(</span><span class="n">lobby</span><span class="p">,</span><span class="w"> </span><span class="n">member_ids</span><span class="p">,</span><span class="w"> </span><span class="ss">opened_by</span><span class="p">:</span><span class="w"> </span><span class="n">host</span><span class="o">.</span><span class="n">id</span><span class="p" data-group-id="2877363731-2">)</span><span class="w">
-</span><span class="p" data-group-id="2877363731-3">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">check</span><span class="p" data-group-id="2877363731-3">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">ReadyChecks</span><span class="o">.</span><span class="n">respond</span><span class="p" data-group-id="2877363731-4">(</span><span class="n">user</span><span class="p">,</span><span class="w"> </span><span class="no">true</span><span class="p" data-group-id="2877363731-4">)</span><span class="w">
-</span><span class="nc">ReadyChecks</span><span class="o">.</span><span class="n">passed?</span><span class="p" data-group-id="2877363731-5">(</span><span class="n">lobby</span><span class="p" data-group-id="2877363731-5">)</span></code></pre><h2 id="module-concurrency" class="section-heading"><a href="#module-concurrency" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Concurrency</span></h2><p>Answering is a single-row write, so no two players can lose each other's
+<code class="inline">after_ready_check_failed</code> — decides what that is worth.</p><h2 id="module-usage" class="section-heading"><a href="#module-usage" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Usage</span></h2><pre><code class="makeup elixir" translate="no"><span class="p" data-group-id="4201961451-1">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">check</span><span class="p" data-group-id="4201961451-1">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">ReadyChecks</span><span class="o">.</span><span class="n">open</span><span class="p" data-group-id="4201961451-2">(</span><span class="n">lobby</span><span class="p">,</span><span class="w"> </span><span class="n">member_ids</span><span class="p">,</span><span class="w"> </span><span class="ss">opened_by</span><span class="p">:</span><span class="w"> </span><span class="n">host</span><span class="o">.</span><span class="n">id</span><span class="p" data-group-id="4201961451-2">)</span><span class="w">
+</span><span class="p" data-group-id="4201961451-3">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">check</span><span class="p" data-group-id="4201961451-3">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">ReadyChecks</span><span class="o">.</span><span class="n">respond</span><span class="p" data-group-id="4201961451-4">(</span><span class="n">user</span><span class="p">,</span><span class="w"> </span><span class="no">true</span><span class="p" data-group-id="4201961451-4">)</span><span class="w">
+</span><span class="nc">ReadyChecks</span><span class="o">.</span><span class="n">passed?</span><span class="p" data-group-id="4201961451-5">(</span><span class="n">lobby</span><span class="p" data-group-id="4201961451-5">)</span></code></pre><h2 id="module-concurrency" class="section-heading"><a href="#module-concurrency" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Concurrency</span></h2><p>Answering is a single-row write, so no two players can lose each other's
 flag. <em>Evaluating</em> the result is the part that races: two players answering
 at once can each count the other as still pending, and nobody passes. So
 <a href="#respond/3"><code class="inline">respond/3</code></a> holds a per-check advisory lock (<code class="inline">:ready_check</code>) around
@@ -1198,9 +1198,9 @@ numbers on the admin page.</p>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/game_server_core/1.0.1079">Hex Package</a>
+              <a href="https://hex.pm/packages/game_server_core/1.0.1082">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/game_server_core/1.0.1079">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/game_server_core/1.0.1082">Hex Preview</a>
 
             </span>
 

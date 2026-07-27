@@ -26,7 +26,8 @@ Retention is configured per table in days via env vars (see
   tournaments and the wallet/inventory ledgers. Both default to `0`: they
   are history an operator may be required to keep.
 - `RETENTION_ABANDONED_LOBBY_MINUTES` (15) — lobbies nobody has been seen in
-  for N minutes, in minutes rather than days. See `prune_lobbies/0`.
+  for N minutes, in minutes rather than days. The same window releases a lobby
+  seat held by a long-offline player and disbands a party everyone abandoned.
 
 Expired IP bans, OAuth sessions older than a day, and user tokens past their
 own context's validity are always removed (independent of the env vars

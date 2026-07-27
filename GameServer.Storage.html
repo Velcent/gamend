@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.1">
-    <meta name="project" content="game_server_core v1.0.1079">
+    <meta name="project" content="game_server_core v1.0.1082">
 
 
-    <title>GameServer.Storage — game_server_core v1.0.1079</title>
+    <title>GameServer.Storage — game_server_core v1.0.1082</title>
 
     <link rel="stylesheet" href="dist/html-elixir-YJO4MOOW.css" />
 
-    <script defer src="dist/sidebar_items-6CE18EDE.js"></script>
+    <script defer src="dist/sidebar_items-A91C806B.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-YU4BZFVS.js"></script>
 
@@ -37,7 +37,7 @@
 game_server_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1079
+          v1.0.1082
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ game_server_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">GameServer.<wbr>Storage</span> 
-      <small class="app-vsn" translate="no">(game_server_core v1.0.1079)</small>
+      <small class="app-vsn" translate="no">(game_server_core v1.0.1082)</small>
 
     </h1>
 
@@ -117,12 +117,26 @@ game_server_core
 <p>Object storage for user uploads (avatars, and future user-generated content).</p><p>A thin facade over a configured backend so game code never depends on where
 bytes live:</p><ul><li><a href="GameServer.Storage.Local.html"><code class="inline">GameServer.Storage.Local</code></a> — local disk, the default (great for dev and
 single-node deploys).</li><li><a href="GameServer.Storage.S3.html"><code class="inline">GameServer.Storage.S3</code></a> — any S3-compatible service (AWS S3, Cloudflare
-R2, Backblaze B2, MinIO, DigitalOcean Spaces).</li></ul><p>Select the backend with <code class="inline">STORAGE_ADAPTER</code> (<code class="inline">local</code> | <code class="inline">s3</code>); see the deployment
-docs for the full <code class="inline">STORAGE_*</code> variable list.</p><h2 id="module-direct-uploads" class="section-heading"><a href="#module-direct-uploads" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Direct uploads</span></h2><p>Clients never stream bytes through the app. The server issues an upload ticket
-and the client uploads straight to the backend:</p><pre><code class="makeup elixir" translate="no"><span class="n">key</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Storage</span><span class="o">.</span><span class="n">build_key</span><span class="p" data-group-id="4237492269-1">(</span><span class="s">&quot;avatars&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;me.png&quot;</span><span class="p" data-group-id="4237492269-1">)</span><span class="w">
-</span><span class="p" data-group-id="4237492269-2">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">ticket</span><span class="p" data-group-id="4237492269-2">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Storage</span><span class="o">.</span><span class="n">presigned_upload</span><span class="p" data-group-id="4237492269-3">(</span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="ss">content_type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;image/png&quot;</span><span class="p" data-group-id="4237492269-3">)</span><span class="w">
+R2, Backblaze B2, MinIO, DigitalOcean Spaces).</li></ul><p>Select the backend with <code class="inline">GAMEND_STORAGE_ADAPTER</code> (<code class="inline">local</code> | <code class="inline">s3</code>); see the
+settings docs for the full <code class="inline">GAMEND_STORAGE_*</code> variable list.</p><h2 id="module-what-may-be-stored" class="section-heading"><a href="#module-what-may-be-stored" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">What may be stored</span></h2><p>Uploaded bytes come from users, so nothing about them is trusted:</p><ul><li>the <em>key</em> is server-chosen (<a href="#build_key/3"><code class="inline">build_key/3</code></a>), never taken from the client -
+that is what fixes the extension, and with it the content type the object
+is served as;</li><li>the declared content type must be in the allow-list (<a href="#validate_upload/3"><code class="inline">validate_upload/3</code></a>),
+and the bytes must actually be that format (<a href="#sniff_content_type/1"><code class="inline">sniff_content_type/1</code></a>);</li><li>size is capped per object (<code class="inline">max_upload_bytes</code>) and per owner prefix
+(<code class="inline">max_upload_bytes_per_owner</code>).</li></ul><p>We never decode an image server-side, so there is no image-parser attack
+surface here; the risk being defended against is serving attacker-chosen bytes
+under an attacker-chosen type from our own origin.</p><h2 id="module-direct-uploads" class="section-heading"><a href="#module-direct-uploads" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Direct uploads</span></h2><p>Clients never stream bytes through the app. The server issues an upload ticket
+and the client uploads straight to the backend:</p><pre><code class="makeup elixir" translate="no"><span class="n">key</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Storage</span><span class="o">.</span><span class="n">build_key</span><span class="p" data-group-id="9856134723-1">(</span><span class="s">&quot;avatars&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;me.png&quot;</span><span class="p" data-group-id="9856134723-1">)</span><span class="w">
+</span><span class="p" data-group-id="9856134723-2">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">ticket</span><span class="p" data-group-id="9856134723-2">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Storage</span><span class="o">.</span><span class="n">presigned_upload</span><span class="p" data-group-id="9856134723-3">(</span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="ss">content_type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;image/png&quot;</span><span class="p" data-group-id="9856134723-3">)</span><span class="w">
 </span><span class="c1"># -&gt; client PUTs the file to ticket.url, then tells the server `key` is ready</span></code></pre><p>The ticket shape is identical for local disk and S3, so the client code does
-not change between environments.</p>
+not change between environments.</p><h2 id="module-what-is-checked-and-where" class="section-heading"><a href="#module-what-is-checked-and-where" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">What is checked, and where</span></h2><p>The two backends do not offer the same guarantees at upload time, so the
+checks are deliberately split:</p><ul><li><strong>At ticket time</strong> (both backends) the declared content type must be one
+we accept, and the key - including its extension - is server-chosen.</li><li><strong>At upload time</strong> (local only) the size cap, the owner quota and
+<a href="#sniff_content_type/1"><code class="inline">sniff_content_type/1</code></a> all run, because the bytes pass through us.</li><li><strong>At confirm time</strong> (both backends) size and magic bytes are re-checked
+against the <em>stored</em> object, and a failing one is deleted.</li></ul><p>That last step is not redundant. An S3 presigned PUT goes straight to the
+bucket, so nothing in this application sees those bytes and ExAws does not
+sign the content type - confirm is the only point at which the server can
+still refuse. Anything that persists an object's URL must therefore go through
+<code class="inline">GameServerWeb.Uploads.confirm/5</code> rather than trusting a key it was handed.</p>
     </section>
 
 </div>
@@ -176,6 +190,16 @@ and set as S3 object metadata at upload.</p></div>
         <a href="#delete/1" data-no-tooltip="" translate="no">delete(key)</a>
 
       </div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#delete_prefix/1" data-no-tooltip="" translate="no">delete_prefix(prefix)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Deletes every object under <code class="inline">prefix</code>. Returns how many were removed.</p></div>
 
     </div>
 
@@ -235,6 +259,27 @@ and set as S3 object metadata at upload.</p></div>
 
     <div class="summary-row">
       <div class="summary-signature">
+        <a href="#sniff_content_type/1" data-no-tooltip="" translate="no">sniff_content_type(data)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>The image content type <code class="inline">data</code> actually is, read from its magic bytes
+(<code class="inline">nil</code> when it is not one of the formats we accept).</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#stat/1" data-no-tooltip="" translate="no">stat(key)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Size and stored content type of <code class="inline">key</code>, without downloading it.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
         <a href="#url/2" data-no-tooltip="" translate="no">url(key, opts \\ [])</a>
 
       </div>
@@ -287,7 +332,7 @@ and set as S3 object metadata at upload.</p></div>
       <h1 class="signature" translate="no">adapter()</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/storage.ex#L64" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/storage.ex#L98" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -315,7 +360,7 @@ and set as S3 object metadata at upload.</p></div>
       <h1 class="signature" translate="no">build_key(namespace, owner_id, filename)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/storage.ex#L126" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/storage.ex#L168" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -344,7 +389,7 @@ server-chosen so a client can't overwrite another object.</p>
       <h1 class="signature" translate="no">cache_control(key)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/storage.ex#L75" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/storage.ex#L109" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -374,7 +419,7 @@ and set as S3 object metadata at upload.</p>
       <h1 class="signature" translate="no">delete(key)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/storage.ex#L97" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/storage.ex#L131" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -392,6 +437,34 @@ and set as S3 object metadata at upload.</p>
 
   </section>
 </section>
+<section class="detail" id="delete_prefix/1">
+
+  <div class="detail-header">
+    <a href="#delete_prefix/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">delete_prefix(prefix)</h1>
+
+
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/storage.ex#L159" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> delete_prefix(<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()) :: {:ok, <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>()} | {:error, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}</pre>
+
+      </div>
+
+<p>Deletes every object under <code class="inline">prefix</code>. Returns how many were removed.</p>
+  </section>
+</section>
 <section class="detail" id="exists?/1">
 
   <div class="detail-header">
@@ -402,7 +475,7 @@ and set as S3 object metadata at upload.</p>
       <h1 class="signature" translate="no">exists?(key)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/storage.ex#L100" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/storage.ex#L134" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -430,7 +503,7 @@ and set as S3 object metadata at upload.</p>
       <h1 class="signature" translate="no">extension_for(arg1)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/storage.ex#L134" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/storage.ex#L176" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -458,7 +531,7 @@ and set as S3 object metadata at upload.</p>
       <h1 class="signature" translate="no">get(key)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/storage.ex#L94" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/storage.ex#L128" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -488,7 +561,7 @@ and set as S3 object metadata at upload.</p>
       <h1 class="signature" translate="no">list_objects(opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/storage.ex#L113" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/storage.ex#L147" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -518,7 +591,7 @@ and set as S3 object metadata at upload.</p>
       <h1 class="signature" translate="no">presigned_upload(key, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/storage.ex#L109" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/storage.ex#L143" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -551,7 +624,7 @@ and set as S3 object metadata at upload.</p>
       <h1 class="signature" translate="no">put(key, data, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/storage.ex#L86" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/storage.ex#L120" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -570,6 +643,64 @@ and set as S3 object metadata at upload.</p>
 
   </section>
 </section>
+<section class="detail" id="sniff_content_type/1">
+
+  <div class="detail-header">
+    <a href="#sniff_content_type/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">sniff_content_type(data)</h1>
+
+
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/storage.ex#L189" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> sniff_content_type(<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">binary</a>()) :: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>() | nil</pre>
+
+      </div>
+
+<p>The image content type <code class="inline">data</code> actually is, read from its magic bytes
+(<code class="inline">nil</code> when it is not one of the formats we accept).</p><p>A declared <code class="inline">Content-Type</code> is only a header; this is what the bytes say.</p>
+  </section>
+</section>
+<section class="detail" id="stat/1">
+
+  <div class="detail-header">
+    <a href="#stat/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">stat(key)</h1>
+
+
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/storage.ex#L155" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> stat(<a href="GameServer.Storage.Adapter.html#t:key/0">GameServer.Storage.Adapter.key</a>()) ::
+  {:ok, <a href="GameServer.Storage.Adapter.html#t:stat/0">GameServer.Storage.Adapter.stat</a>()} | {:error, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}</pre>
+
+      </div>
+
+<p>Size and stored content type of <code class="inline">key</code>, without downloading it.</p>
+  </section>
+</section>
 <section class="detail" id="url/2">
 
     <span id="url/1"></span>
@@ -582,7 +713,7 @@ and set as S3 object metadata at upload.</p>
       <h1 class="signature" translate="no">url(key, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/storage.ex#L104" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/storage.ex#L138" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -615,7 +746,7 @@ and set as S3 object metadata at upload.</p>
       <h1 class="signature" translate="no">usage(opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/storage.ex#L117" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/storage.ex#L151" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -645,7 +776,7 @@ and set as S3 object metadata at upload.</p>
       <h1 class="signature" translate="no">validate_upload(content_type, size, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/storage.ex#L148" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/storage.ex#L204" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -674,9 +805,9 @@ and set as S3 object metadata at upload.</p>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/game_server_core/1.0.1079">Hex Package</a>
+              <a href="https://hex.pm/packages/game_server_core/1.0.1082">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/game_server_core/1.0.1079">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/game_server_core/1.0.1082">Hex Preview</a>
 
             </span>
 

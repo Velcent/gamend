@@ -152,6 +152,19 @@ Returns `{:error, :already_in_party}` if the user is already in a party.
 
 Decline a party invite. Marks the invite as declined.
 
+# `disband`
+
+```elixir
+@spec disband(GameServer.Parties.Party.t()) :: {:ok, term()} | {:error, term()}
+```
+
+Disband a party outright: clears every member's `party_id`, cancels pending
+invites, deletes the row, and broadcasts as a leader-initiated disband would.
+
+For callers acting on the party rather than on behalf of a member — the
+retention sweep for parties everyone has abandoned. Members leaving is
+`leave_party/1`.
+
 # `get_party`
 
 ```elixir

@@ -13,6 +13,14 @@ Silently returns `{:ok, :no_email}` if the user has no email address.
 
 # `deliver_confirmation_instructions`
 
+# `deliver_inactivity_warning`
+
+Warn a user that their account will be deleted after `days` of inactivity.
+
+Sent by `GameServer.Accounts.InactivityNotifier` ahead of the retention
+sweep; signing in resets the clock, so the action the mail asks for is just
+"log in".
+
 # `deliver_login_instructions`
 
 Deliver instructions to log in with a magic link.

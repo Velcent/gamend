@@ -493,8 +493,15 @@ Check if user is a member (any role) of the group.
 
 Send a notification to all members of a group (except the sender).
 
-Any group member can send a notification. The notification is created for
-each member using a direct insert (bypassing the friends-only check).
+**Server-side only.** There is deliberately no player-facing endpoint for
+this: one call writes a row, a cache invalidation and a PubSub push *per
+member*, so with `max_group_members` at 10,000 an ordinary member could turn
+one request into ~10,000 of each. Members talk to a group through group chat,
+which costs one row and one topic broadcast and is throttled per group. This
+function is the announcement primitive for plugins and hooks - callers are
+trusted, so it skips both the friends-only check and the per-recipient
+notification cap that `Notifications.send_notification/2` enforces.
+
 The `group_id` / `group_name` are stored in metadata so the client can
 recognise and route it.
 

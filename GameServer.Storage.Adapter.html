@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.1">
-    <meta name="project" content="game_server_core v1.0.1079">
+    <meta name="project" content="game_server_core v1.0.1082">
 
 
-    <title>GameServer.Storage.Adapter — game_server_core v1.0.1079</title>
+    <title>GameServer.Storage.Adapter — game_server_core v1.0.1082</title>
 
     <link rel="stylesheet" href="dist/html-elixir-YJO4MOOW.css" />
 
-    <script defer src="dist/sidebar_items-6CE18EDE.js"></script>
+    <script defer src="dist/sidebar_items-A91C806B.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-YU4BZFVS.js"></script>
 
@@ -37,7 +37,7 @@
 game_server_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1079
+          v1.0.1082
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ game_server_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">GameServer.<wbr>Storage.<wbr>Adapter</span> <small>behaviour</small>
-      <small class="app-vsn" translate="no">(game_server_core v1.0.1079)</small>
+      <small class="app-vsn" translate="no">(game_server_core v1.0.1082)</small>
 
     </h1>
 
@@ -164,6 +164,16 @@ either way.</p></div>
 
     </div>
 
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#t:stat/0" data-no-tooltip="" translate="no">stat()</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>What the backend reports about a stored object without fetching it.</p></div>
+
+    </div>
+
 </div>
 <div class="summary-callbacks summary">
   <h3>
@@ -175,6 +185,16 @@ either way.</p></div>
         <a href="#c:delete/1" data-no-tooltip="" translate="no">delete(key)</a>
 
       </div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#c:delete_prefix/1" data-no-tooltip="" translate="no">delete_prefix(t)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Deletes every object under <code class="inline">prefix</code>. Returns how many were removed.</p></div>
 
     </div>
 
@@ -217,6 +237,16 @@ either way.</p></div>
         <a href="#c:put/3" data-no-tooltip="" translate="no">put(key, iodata, keyword)</a>
 
       </div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#c:stat/1" data-no-tooltip="" translate="no">stat(key)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Size and stored content type of one object, without downloading it.</p></div>
 
     </div>
 
@@ -348,6 +378,34 @@ backend (S3/R2) or to the local upload endpoint — the client flow is identical
 either way.</p>
   </section>
 </section>
+<section class="detail" id="t:stat/0">
+
+  <div class="detail-header">
+    <a href="#t:stat/0" class="detail-link" data-no-tooltip="" aria-label="Link to this type">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">stat()</h1>
+
+
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/storage/adapter.ex#L34" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@type</span> stat() :: %{size: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>(), content_type: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>() | nil}</pre>
+
+      </div>
+
+<p>What the backend reports about a stored object without fetching it.</p>
+  </section>
+</section>
 
     </div>
   </section>
@@ -371,7 +429,7 @@ either way.</p>
       <h1 class="signature" translate="no">delete(key)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/storage/adapter.ex#L35" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/storage/adapter.ex#L38" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -389,6 +447,34 @@ either way.</p>
 
   </section>
 </section>
+<section class="detail" id="c:delete_prefix/1">
+
+  <div class="detail-header">
+    <a href="#c:delete_prefix/1" class="detail-link" data-no-tooltip="" aria-label="Link to this callback">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">delete_prefix(t)</h1>
+
+
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/storage/adapter.ex#L58" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@callback</span> delete_prefix(<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()) :: {:ok, <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>()} | {:error, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}</pre>
+
+      </div>
+
+<p>Deletes every object under <code class="inline">prefix</code>. Returns how many were removed.</p>
+  </section>
+</section>
 <section class="detail" id="c:exists?/1">
 
   <div class="detail-header">
@@ -399,7 +485,7 @@ either way.</p>
       <h1 class="signature" translate="no">exists?(key)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/storage/adapter.ex#L36" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/storage/adapter.ex#L39" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -427,7 +513,7 @@ either way.</p>
       <h1 class="signature" translate="no">get(key)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/storage/adapter.ex#L34" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/storage/adapter.ex#L37" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -455,7 +541,7 @@ either way.</p>
       <h1 class="signature" translate="no">list(keyword)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/storage/adapter.ex#L41" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/storage/adapter.ex#L44" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -483,7 +569,7 @@ either way.</p>
       <h1 class="signature" translate="no">presigned_upload(key, keyword)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/storage/adapter.ex#L38" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/storage/adapter.ex#L41" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -514,7 +600,7 @@ either way.</p>
       <h1 class="signature" translate="no">put(key, iodata, keyword)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/storage/adapter.ex#L33" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/storage/adapter.ex#L36" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -532,6 +618,35 @@ either way.</p>
 
   </section>
 </section>
+<section class="detail" id="c:stat/1">
+
+  <div class="detail-header">
+    <a href="#c:stat/1" class="detail-link" data-no-tooltip="" aria-label="Link to this callback">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">stat(key)</h1>
+
+
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/storage/adapter.ex#L55" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@callback</span> stat(<a href="#t:key/0">key</a>()) :: {:ok, <a href="#t:stat/0">stat</a>()} | {:error, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}</pre>
+
+      </div>
+
+<p>Size and stored content type of one object, without downloading it.</p><p><code class="inline">content_type</code> is whatever the backend recorded; the local adapter keeps no
+per-object metadata and always reports <code class="inline">nil</code>.</p>
+  </section>
+</section>
 <section class="detail" id="c:url/2">
 
   <div class="detail-header">
@@ -542,7 +657,7 @@ either way.</p>
       <h1 class="signature" translate="no">url(key, keyword)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/storage/adapter.ex#L37" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/storage/adapter.ex#L40" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -573,7 +688,7 @@ either way.</p>
       <h1 class="signature" translate="no">usage(keyword)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/storage/adapter.ex#L44" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/storage/adapter.ex#L47" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -600,9 +715,9 @@ either way.</p>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/game_server_core/1.0.1079">Hex Package</a>
+              <a href="https://hex.pm/packages/game_server_core/1.0.1082">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/game_server_core/1.0.1079">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/game_server_core/1.0.1082">Hex Preview</a>
 
             </span>
 
