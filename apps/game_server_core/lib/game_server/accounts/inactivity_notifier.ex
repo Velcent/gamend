@@ -1,17 +1,10 @@
 defmodule GameServer.Accounts.InactivityNotifier do
   @moduledoc """
-  Oban worker that warns a user their account is about to be deleted for
-  inactivity.
+  Warns a user their account is about to be deleted for inactivity.
 
-  Enqueued by `GameServer.Retention` once an account crosses
-  `RETENTION_INACTIVE_USERS_DAYS - RETENTION_INACTIVE_USERS_WARN_DAYS`, so the
-  notice arrives before the deletion date rather than with it.
-
-  The `retention_warned_at` stamp is written **after** a successful send, not at
-  enqueue time. That ordering is the safety property: a mail outage leaves the
-  account un-warned, and an un-warned account is one the sweep refuses to
-  delete. Failing to send therefore postpones a deletion rather than performing
-  a silent one.
+  `retention_warned_at` is stamped **after** a successful send, not at enqueue:
+  an un-warned account is one the sweep refuses to delete, so a mail outage
+  postpones a deletion rather than performing a silent one.
   """
   use Oban.Worker,
     queue: :mailers,
@@ -28,8 +21,7 @@ defmodule GameServer.Accounts.InactivityNotifier do
   def perform(%Oban.Job{args: %{"user_id" => user_id, "delete_after_days" => days}}) do
     case Accounts.get_user(user_id) do
       %User{email: email} = user when is_binary(email) -> warn(user, days)
-      # Gone, or linked an identity that has no address since the sweep ran.
-      _ -> :ok
+      _gone_or_no_address -> :ok
     end
   end
 

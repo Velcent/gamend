@@ -244,6 +244,27 @@ defmodule GameServer.Parties do
 
 
   @doc ~S"""
+    Disband a party outright: clears every member's `party_id`, cancels pending
+    invites, deletes the row, and broadcasts as a leader-initiated disband would.
+    
+    For callers acting on the party rather than on behalf of a member — the
+    retention sweep for parties everyone has abandoned. Members leaving is
+    `leave_party/1`.
+    
+  """
+  @spec disband(GameServer.Parties.Party.t()) :: {:ok, term()} | {:error, term()}
+  def disband(_party) do
+    case Application.get_env(:game_server_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        {:ok, nil}
+
+      _ ->
+        raise "GameServer.Parties.disband/1 is a stub - only available at runtime on GameServer"
+    end
+  end
+
+
+  @doc ~S"""
     Get a party by ID. Returns nil if not found.
   """
   @spec get_party(Ecto.UUID.t()) :: GameServer.Parties.Party.t() | nil

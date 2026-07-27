@@ -265,6 +265,7 @@ defmodule GameServerWeb.Router.Shared do
         pipe_through :api
 
         get "/health", HealthController, :index
+        get "/time", TimeController, :show
         post "/login", SessionController, :create
         post "/login/device", SessionController, :create_device
         post "/refresh", SessionController, :refresh

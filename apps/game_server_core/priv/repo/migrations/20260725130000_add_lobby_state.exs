@@ -1,6 +1,6 @@
 defmodule GameServer.Repo.Migrations.AddLobbyState do
   @moduledoc """
-  Server-owned lobby lifecycle field (see docs/specs/lobby-state.md).
+  Server-owned lobby lifecycle field (see GameServer.Lobbies.States).
 
   `state` carries a game-defined vocabulary — core only sets `"created"` on
   insert and validates against core defaults plus what a plugin declares. It is

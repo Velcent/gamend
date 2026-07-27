@@ -159,36 +159,41 @@ defmodule GameServerWeb.Api.V1.HookController do
         # Typed hooks (registered <FnName>Request/<FnName>Reply schemas) accept
         # a single JSON object argument and reply with a JSON map; untyped
         # hooks pass through unchanged.
-        case HookSchemas.call(plugin, fn_name, {:list, args}, :map, caller: user) do
-          {:ok, res} ->
-            json(conn, %{data: res})
-
-          {:error, :not_implemented} ->
-            conn |> put_status(:bad_request) |> json(%{error: :not_implemented})
-
-          {:error, :not_found} ->
-            conn |> put_status(:bad_request) |> json(%{error: :plugin_not_found})
-
-          {:error, :missing_hooks_module} ->
-            conn |> put_status(:bad_request) |> json(%{error: :missing_hooks_module})
-
-          {:error, :timeout} ->
-            conn |> put_status(:bad_request) |> json(%{error: :timeout})
-
-          {:error, reason} ->
-            Logger.warning(
-              "hooks/call failed plugin=#{plugin} fn=#{fn_name} reason=#{inspect(reason)}"
-            )
-
-            conn
-            |> put_status(:bad_request)
-            |> json(normalize_hook_error(reason))
-        end
+        reply_to_hook_call(
+          conn,
+          HookSchemas.call(plugin, fn_name, {:list, args}, :map, caller: user)
+        )
     end
   end
 
   def invoke(conn, _params) do
     conn |> put_status(:bad_request) |> json(%{error: :invalid_request})
+  end
+
+  defp reply_to_hook_call(conn, result) do
+    case result do
+      {:ok, res} ->
+        json(conn, %{data: res})
+
+      {:error, :not_implemented} ->
+        conn |> put_status(:bad_request) |> json(%{error: :not_implemented})
+
+      {:error, :not_found} ->
+        conn |> put_status(:bad_request) |> json(%{error: :plugin_not_found})
+
+      {:error, :missing_hooks_module} ->
+        conn |> put_status(:bad_request) |> json(%{error: :missing_hooks_module})
+
+      {:error, :timeout} ->
+        conn |> put_status(:bad_request) |> json(%{error: :timeout})
+
+      {:error, reason} ->
+        Logger.warning("hooks/call failed: #{inspect(reason)}")
+
+        conn
+        |> put_status(:bad_request)
+        |> json(normalize_hook_error(reason))
+    end
   end
 
   defp reserved_hook_name?(fn_name) when is_binary(fn_name) do

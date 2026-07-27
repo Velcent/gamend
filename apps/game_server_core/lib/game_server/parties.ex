@@ -922,6 +922,17 @@ defmodule GameServer.Parties do
   end
 
   @doc """
+  Disband a party outright: clears every member's `party_id`, cancels pending
+  invites, deletes the row, and broadcasts as a leader-initiated disband would.
+
+  For callers acting on the party rather than on behalf of a member — the
+  retention sweep for parties everyone has abandoned. Members leaving is
+  `leave_party/1`.
+  """
+  @spec disband(Party.t()) :: {:ok, term()} | {:error, term()}
+  def disband(%Party{} = party), do: disband_party(party)
+
+  @doc """
   Kick a member from the party. Only the leader can kick.
   """
   @spec kick_member(User.t(), Ecto.UUID.t()) :: {:ok, User.t()} | {:error, term()}

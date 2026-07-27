@@ -479,6 +479,59 @@ defmodule GameServer.Hooks do
     end
   end
 
+  # Every hook is optional. A plugin implements the handful it cares about, and
+  # declaring `@behaviour GameServer.Hooks` must never oblige it to stub the
+  # other seventy — nor start warning when core grows a new one. `use
+  # GameServer.Hooks` still injects no-op defaults for anyone who wants them.
+  @optional_callbacks after_chat_message: 1,
+                      after_group_create: 1,
+                      after_group_deleted: 1,
+                      after_group_join: 2,
+                      after_group_kick: 3,
+                      after_group_leave: 2,
+                      after_group_updated: 1,
+                      after_lobby_create: 1,
+                      after_lobby_deleted: 1,
+                      after_lobby_host_change: 2,
+                      after_lobby_join: 2,
+                      after_lobby_kick: 3,
+                      after_lobby_leave: 2,
+                      after_lobby_updated: 1,
+                      after_party_create: 1,
+                      after_party_disband: 1,
+                      after_party_join: 2,
+                      after_party_kick: 3,
+                      after_party_leave: 2,
+                      after_party_updated: 1,
+                      after_score_submitted: 1,
+                      after_startup: 0,
+                      after_user_deleted: 1,
+                      after_user_logged_in: 1,
+                      after_user_offline: 1,
+                      after_user_online: 1,
+                      after_user_register: 1,
+                      after_user_updated: 1,
+                      before_chat_message: 2,
+                      before_group_create: 2,
+                      before_group_delete: 1,
+                      before_group_join: 3,
+                      before_group_kick: 3,
+                      before_group_update: 2,
+                      before_kv_get: 2,
+                      before_lobby_create: 1,
+                      before_lobby_delete: 1,
+                      before_lobby_join: 3,
+                      before_lobby_kick: 3,
+                      before_lobby_update: 2,
+                      before_party_create: 2,
+                      before_party_join: 2,
+                      before_party_kick: 3,
+                      before_party_update: 2,
+                      before_stop: 0,
+                      before_user_register: 2,
+                      before_user_update: 2,
+                      on_custom_hook: 2
+
   @doc "Returns the set of internal lifecycle hook names that are not callable\n  through the public RPC interface."
   @spec internal_hooks() :: MapSet.t(atom())
   def internal_hooks do

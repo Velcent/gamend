@@ -2,7 +2,7 @@ defmodule GameServer.Repo.Migrations.CreateQuestTables do
   @moduledoc """
   Quests/progression engine tables, folding achievements in as permanent
   (`reset: "never"`) quests categorised `"achievement"`
-  (see docs/specs/quests-progression.md):
+  (see GameServer.Quests):
 
   - `quests` — definitions (reset cycle, optional window, optional prerequisite).
   - `quest_progress` — per user per quest per reset period.

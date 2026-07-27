@@ -98,7 +98,13 @@ defmodule GameServerWeb.LobbyChannel do
     end
   end
 
+  # The channel twin of `GET /api/v1/time`. A connected client should not have
+  # to fall back to HTTP to resynchronise its clock.
   @impl true
+  def handle_in("get_server_time", _payload, socket) do
+    {:reply, {:ok, %{server_now: GameServer.Time.now_ms()}}, socket}
+  end
+
   def handle_in(_event, _payload, socket),
     do: {:stop, :normal, {:error, %{error: "unknown_event"}}, socket}
 

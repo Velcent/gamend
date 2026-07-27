@@ -846,6 +846,12 @@ func authorize():
 func health_index() -> GamendResult:
 	return await _call_api(HealthApi.new(_config), "index")
 
+## Server clock, for rendering in server-time space.
+## Sample a few times and average to estimate the offset; never trust a single
+## reading, since it includes one-way network latency.
+func time_get_server_time() -> GamendResult:
+	return await _call_api(TimeApi.new(_config), "get_server_time")
+
 ### HOOKS
 
 ## Invoke a hook function via HTTP

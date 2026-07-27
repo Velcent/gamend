@@ -1,7 +1,7 @@
 defmodule GameServer.Repo.Migrations.CreateReadyChecks do
   @moduledoc """
   Ready checks — "these players must each answer before this proceeds"
-  (see docs/specs/ready-check.md).
+  (see GameServer.ReadyChecks).
 
   Participants are rows rather than a map on the check, so one answer is one
   single-row write: no read-modify-write, so two players answering in the same
@@ -9,7 +9,7 @@ defmodule GameServer.Repo.Migrations.CreateReadyChecks do
 
   `lobby_id` is nullable because a matchmaking check has no lobby yet — the
   group exists only as its tickets. `party_id` is the second subject: a party
-  keeps a standing ready board (see docs/specs/ready-check.md). At most one of
+  keeps a standing ready board (see GameServer.ReadyChecks). At most one of
   the two is set; both nil means a matchmaking check.
   """
   use Ecto.Migration

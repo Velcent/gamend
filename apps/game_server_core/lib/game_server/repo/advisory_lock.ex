@@ -6,8 +6,16 @@ defmodule GameServer.Repo.AdvisoryLock do
   `pg_advisory_xact_lock(namespace, resource_id)`. The lock is automatically
   released when the enclosing `Repo.transaction` commits or rolls back.
 
-  On SQLite, this is a no-op — SQLite serializes all writes at the
-  database level, so advisory locks are unnecessary.
+  On SQLite, this function is a no-op, because SQLite has no advisory locks.
+  That is a fact about *this function*, not a claim that locking is unnecessary
+  there: SQLite serializes each write, which is not the same as serializing a
+  read-modify-write spanning statements, and does nothing at all for a critical
+  section held over ETS or process state.
+
+  Callers should not use this module directly for that reason. Go through
+  `GameServer.Lock.serialize/3`, which picks this on Postgres and a keyed
+  `:global` mutex (`GameServer.Lock.Local`) everywhere else, so the guarantee
+  holds on both adapters.
 
   ## Usage
 
@@ -71,7 +79,7 @@ defmodule GameServer.Repo.AdvisoryLock do
   extra serialization, never lost mutual exclusion).
 
   Must be called inside a `Repo.transaction`. On PostgreSQL, blocks until
-  the lock is available. On SQLite, returns immediately.
+  the lock is available. On SQLite, returns immediately — see the moduledoc.
   """
   @spec lock(atom() | String.t(), String.t()) :: :ok
   def lock(namespace, resource_id)

@@ -103,7 +103,7 @@ Economy.regen_state(user_id, "lives")
 `regen_state/2` is the client contract: `next_at` drives the "next life in
 04:12" countdown and `full_at` the "full in 34:12" one, and `server_now` lets
 the client correct its own clock skew (see
-[netcode-sync.md](netcode-sync.md), same field, same meaning).
+the rejected netcode-sync spec, same field, same meaning - see README.md).
 
 Overspend safety is unchanged: `debit/4` keeps its atomic
 `balance = balance - x WHERE balance >= x`, applied to the folded value in the

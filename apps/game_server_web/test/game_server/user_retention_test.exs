@@ -1,11 +1,6 @@
 defmodule GameServer.UserRetentionTest do
   @moduledoc """
-  Account retention.
-
-  An anonymous account costs one unauthenticated request to create, so without a
-  sweep the only bound on how much a bot can accumulate is how long it keeps
-  asking. These cover both windows and, more importantly, the accounts the sweep
-  must never touch.
+  Account retention: both windows, and the accounts the sweep must never touch.
   """
   use GameServer.DataCase, async: false
   use Oban.Testing, repo: GameServer.Repo
@@ -40,9 +35,8 @@ defmodule GameServer.UserRetentionTest do
     AccountsFixtures.user_fixture() |> backdate(last_seen_days_ago)
   end
 
-  # `is_admin` is forced off because the very first account in a fresh database
-  # is auto-promoted, which would otherwise silently exempt every fixture here
-  # from the sweep it is meant to exercise.
+  # `is_admin` forced off: the first account in a fresh database is auto-promoted
+  # and would be silently exempt from the sweep.
   defp backdate(user, days) do
     at = DateTime.add(DateTime.utc_now(:second), -days, :day)
 
@@ -165,9 +159,8 @@ defmodule GameServer.UserRetentionTest do
   end
 
   describe "storage" do
-    # Object storage has no foreign key to cascade, so a deleted account used to
-    # leave its avatars behind indefinitely - which defeats both the sweep above
-    # and an erasure request.
+    # Storage has no foreign key to cascade, so avatars used to outlive the
+    # account indefinitely.
     test "deleting an account removes its stored objects" do
       dir =
         Path.join(System.tmp_dir!(), "gs_retention_storage_#{System.unique_integer([:positive])}")
@@ -235,9 +228,8 @@ defmodule GameServer.UserRetentionTest do
       refute exists?(user)
     end
 
-    # Warned, came back, went quiet again. That old warning was notice of a
-    # deletion the sign-in cancelled, so it must not license the next one - the
-    # user is entitled to a fresh warning first.
+    # Warned, came back, went quiet again: that old warning was notice of a
+    # deletion the sign-in cancelled, so it must not license the next one.
     test "a warning older than the last sign-in does not count" do
       configure(inactive_users_days: 730, inactive_users_warn_days: 30)
 

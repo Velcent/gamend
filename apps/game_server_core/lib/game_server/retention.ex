@@ -25,7 +25,8 @@ defmodule GameServer.Retention do
     tournaments and the wallet/inventory ledgers. Both default to `0`: they
     are history an operator may be required to keep.
   - `RETENTION_ABANDONED_LOBBY_MINUTES` (15) — lobbies nobody has been seen in
-    for N minutes, in minutes rather than days. See `prune_lobbies/0`.
+    for N minutes, in minutes rather than days. The same window releases a lobby
+    seat held by a long-offline player and disbands a party everyone abandoned.
 
   Expired IP bans, OAuth sessions older than a day, and user tokens past their
   own context's validity are always removed (independent of the env vars
@@ -45,6 +46,8 @@ defmodule GameServer.Retention do
   alias GameServer.Lobbies
   alias GameServer.Lobbies.Lobby
   alias GameServer.LobbySnapshots.{Blob, Event, Snapshot}
+  alias GameServer.Parties
+  alias GameServer.Parties.Party
   alias GameServer.Payments.{Entitlement, Purchase}
   alias GameServer.Repo
 
@@ -167,6 +170,7 @@ defmodule GameServer.Retention do
         lobby_snapshots: &prune_lobby_snapshots/0,
         lobby_snapshot_blobs: &prune_lobby_snapshot_blobs/0,
         offline_lobby_memberships: &release_offline_lobby_memberships/0,
+        abandoned_parties: &disband_abandoned_parties/0,
         lobbies: &prune_lobbies/0,
         resolved_invites: &prune_resolved_invites/0,
         matchmaking_tickets: &prune_stale_tickets/0,
@@ -284,16 +288,12 @@ defmodule GameServer.Retention do
 
   # ── Accounts ────────────────────────────────────────────
   #
-  # Every other class here is a bulk `delete_all`. Accounts cannot be: deleting
-  # a user has to disband their party, hand over their groups, drop their
-  # storage prefix and fire `after_user_deleted`, none of which a DELETE reaches.
-  # So these iterate `Accounts.delete_user/1` in batches and stay slow on
-  # purpose.
+  # Iterate `Accounts.delete_user/1` rather than `delete_all`: deleting a user
+  # disbands their party, hands over their groups, drops their storage prefix
+  # and fires `after_user_deleted`, none of which a DELETE reaches.
   #
-  # Two things are never swept regardless of age: admins, and anyone holding a
-  # purchase or entitlement. A player who paid is not garbage no matter how long
-  # they have been away, and the purchase record is very likely something the
-  # operator is required to keep.
+  # Never swept at any age: admins, and anyone holding a purchase or
+  # entitlement.
 
   defp prune_anonymous_users do
     case config(:anonymous_users_days) do
@@ -318,9 +318,8 @@ defmodule GameServer.Retention do
     end
   end
 
-  # Warns the accounts approaching the cutoff rather than the ones past it, so a
-  # warning arrives `inactive_users_warn_days` before the deletion date rather
-  # than alongside it.
+  # Warns accounts approaching the cutoff, not past it, so the notice arrives
+  # `inactive_users_warn_days` before the deletion date.
   defp warn_inactive_users do
     days = config(:inactive_users_days)
     warn_days = config(:inactive_users_warn_days)
@@ -335,11 +334,9 @@ defmodule GameServer.Retention do
     end
   end
 
-  # A warning only counts if it was issued *after* the user's last activity:
-  # otherwise someone warned a year ago, who signed in since and went quiet
-  # again, would be deleted on the next sweep with no fresh notice. Accounts
-  # with no address cannot be warned at all, so for them the cutoff is the
-  # notice.
+  # Only a warning issued *after* the user's last activity counts, or someone
+  # warned a year ago who has signed in since would be deleted with no fresh
+  # notice. Accounts with no address cannot be warned, so the cutoff is it.
   defp warned?(%User{email: nil}), do: true
 
   defp warned?(%User{} = user) do
@@ -364,9 +361,8 @@ defmodule GameServer.Retention do
   defp last_active_at(%User{last_seen_at: nil, inserted_at: inserted_at}), do: inserted_at
   defp last_active_at(%User{last_seen_at: last_seen_at}), do: last_seen_at
 
-  # `last_seen_at` is null for an account that has never connected, so fall back
-  # to when it was created - otherwise a bot that registers and never returns is
-  # the one thing the sweep can't reach.
+  # `last_seen_at` is null for an account that never connected; fall back to
+  # `inserted_at`, or a bot that registers and never returns is unreachable.
   defp deletable_users(kind, days) do
     cutoff = cutoff(days)
 
@@ -381,9 +377,8 @@ defmodule GameServer.Retention do
     |> Repo.all()
   end
 
-  # Built as one dynamic rather than chained `where`/`or_where`: an `or_where`
-  # ORs against everything before it, which would quietly hand back admins and
-  # paying users.
+  # One dynamic, not chained `or_where` — that ORs against everything before it
+  # and would quietly hand back admins and paying users.
   defp identity_condition(:anonymous) do
     Enum.reduce(User.identity_fields(), dynamic(true), fn field, acc ->
       dynamic([u], ^acc and is_nil(field(u, ^field)))
@@ -456,6 +451,52 @@ defmodule GameServer.Retention do
         "retention failed to release lobby membership for #{user.id}: #{Exception.message(error)}"
       )
 
+      false
+  end
+
+  # A party outlives its members' sessions: nothing clears `users.party_id` on
+  # disconnect (deliberately - a player who reconnects rejoins their party), so
+  # a group that stops playing leaves the party row and every member's
+  # `party_id` set forever. Disband once every member has been gone past the
+  # same window the lobby rules use.
+  #
+  # Same window, same reason as the lobby rules: silence is the only signal,
+  # and a party whose members are merely disconnected must survive long enough
+  # for them to come back.
+  defp disband_abandoned_parties do
+    minutes = config(:abandoned_lobby_minutes)
+
+    if minutes > 0, do: do_disband_abandoned_parties(minutes), else: 0
+  end
+
+  defp do_disband_abandoned_parties(minutes) do
+    cutoff = DateTime.add(DateTime.utc_now(:second), -minutes, :minute)
+
+    from(p in Party,
+      as: :party,
+      where:
+        not exists(
+          from(u in User,
+            where:
+              u.party_id == parent_as(:party).id and
+                (u.is_online or u.last_seen_at > ^cutoff),
+            select: 1
+          )
+        ),
+      order_by: [asc: p.id],
+      limit: @batch
+    )
+    |> Repo.all()
+    |> Enum.count(&disband_party/1)
+  end
+
+  # An empty party (every member already gone) is abandoned by the same rule -
+  # the NOT EXISTS above matches it too, so it is cleaned up here as well.
+  defp disband_party(%Party{} = party) do
+    match?({:ok, _}, Parties.disband(party))
+  rescue
+    error ->
+      Logger.error("retention failed to disband party #{party.id}: #{Exception.message(error)}")
       false
   end
 
@@ -659,6 +700,11 @@ defmodule GameServer.Retention do
     doc:
       "Delete lobbies nobody has been seen in for N minutes, and release the " <>
         "seat of a player offline that long in a lobby still in use. 0 disables both."
+  )
+
+  setting(:abandoned_party_minutes, :integer,
+    default: 15,
+    doc: "Disband parties nobody has been seen in for N minutes. 0 disables."
   )
 
   setting(:invites_days, :integer,

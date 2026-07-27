@@ -122,7 +122,7 @@ else
 end
 
 # ── Push notifications ──────────────────────────────────────────────────────
-# (docs/specs/push.md) With nothing set, neither dispatcher is configured, so
+# (see GameServer.Push) With nothing set, neither dispatcher is configured, so
 # GameServer.Push.Supervisor starts no children and every delivery routes to
 # the Log provider. Credentials are parse-validated here so a bad value
 # degrades to that Log fallback with one loud error instead of handing the

@@ -7,6 +7,8 @@ defmodule GameServer.RetentionTest do
   alias GameServer.Lobbies
   alias GameServer.Lobbies.Lobby
   alias GameServer.Matchmaking.Ticket
+  alias GameServer.Parties
+  alias GameServer.Parties.Party
   alias GameServer.Repo
   alias GameServer.Retention
 
@@ -599,6 +601,68 @@ defmodule GameServer.RetentionTest do
       assert results =~ "retention class"
       assert_received %{chat_messages: 1, resolved_invites: 0}
       refute Repo.get(GameServer.Chat.Message, old.id)
+    end
+  end
+
+  describe "abandoned parties" do
+    defp party_with(members, opts) do
+      [leader | rest] = members
+      {:ok, party} = Parties.create_party(leader, %{})
+
+      for u <- [leader | rest] do
+        Repo.update_all(from(x in User, where: x.id == ^u.id),
+          set: [
+            party_id: party.id,
+            is_online: Keyword.get(opts, :online, false),
+            last_seen_at: Keyword.get(opts, :last_seen)
+          ]
+        )
+      end
+
+      party
+    end
+
+    # Nothing clears party_id on disconnect (a reconnecting player rejoins
+    # their party), so without this the row and every member's party_id
+    # outlive the group forever.
+    test "disbands a party every member abandoned" do
+      Application.put_env(:game_server_core, GameServer.Retention, abandoned_lobby_minutes: 15)
+
+      gone = DateTime.add(DateTime.utc_now(:second), -60, :minute)
+      a = AccountsFixtures.user_fixture()
+      b = AccountsFixtures.user_fixture()
+      party = party_with([a, b], online: false, last_seen: gone)
+
+      Retention.prune_all()
+
+      refute Repo.get(Party, party.id)
+      assert Repo.get(User, a.id).party_id == nil
+      assert Repo.get(User, b.id).party_id == nil
+    end
+
+    test "keeps a party with anyone still around" do
+      Application.put_env(:game_server_core, GameServer.Retention, abandoned_lobby_minutes: 15)
+
+      a = AccountsFixtures.user_fixture()
+      b = AccountsFixtures.user_fixture()
+      party = party_with([a, b], online: true, last_seen: DateTime.utc_now(:second))
+
+      Retention.prune_all()
+
+      assert Repo.get(Party, party.id)
+      assert Repo.get(User, a.id).party_id == party.id
+    end
+
+    test "0 disables party disbanding" do
+      Application.put_env(:game_server_core, GameServer.Retention, abandoned_lobby_minutes: 0)
+
+      gone = DateTime.add(DateTime.utc_now(:second), -600, :minute)
+      a = AccountsFixtures.user_fixture()
+      party = party_with([a], online: false, last_seen: gone)
+
+      Retention.prune_all()
+
+      assert Repo.get(Party, party.id)
     end
   end
 end

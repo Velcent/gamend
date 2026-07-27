@@ -1,6 +1,6 @@
 defmodule GameServer.Repo.Migrations.CreatePushTokens do
   @moduledoc """
-  Device push tokens (see docs/specs/push.md): one row per registered device,
+  Device push tokens (see GameServer.Push): one row per registered device,
   routed per row via `provider` ("fcm" | "apns"). Dead tokens are soft-disabled
   (`disabled_at`), never hard-deleted by delivery — only the user or retention
   removes rows.

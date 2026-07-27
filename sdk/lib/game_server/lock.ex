@@ -12,18 +12,35 @@ defmodule GameServer.Lock do
   
   ## How it works
   
-  On **PostgreSQL**, the lock is acquired via `pg_advisory_xact_lock` and is
-  automatically released when the transaction commits or rolls back. Other
-  callers with the same key block until the lock is available.
+  Serialized on **both** adapters, per key, by different mechanisms:
   
-  On **SQLite** (dev/test), advisory locks are a no-op because SQLite already
-  serializes all writes at the database level.
+    * **PostgreSQL** — `pg_advisory_xact_lock` inside the transaction.
+    * **SQLite** — `GameServer.Lock.Local`, a `:global` mutex taken *around* the
+      transaction, since SQLite has no advisory locks and its single-writer rule
+      covers neither a read-modify-write across statements nor a critical
+      section that never touches the database.
+  
+  `default_transaction_mode: :immediate` is a backstop for callers who forget
+  this function, not the mechanism — it does nothing for ETS or process state.
+  
+  ## Nesting
+  
+  Take the lock at the outermost point. A `serialize/3` reached inside an open
+  transaction cannot take the mutex — the caller holds the write lock, so
+  waiting on a mutex whose holder wants that lock deadlocks — so it runs under
+  the outer transaction and relies on the outer lock.
+  
+  ## Prefer an atomic write
+  
+  Prefer an atomic write where one exists: `Economy.debit/3` does
+  `balance = balance - x where balance >= x` in one statement, which needs no
+  lock at all.
   
   ## Multi-node safety
   
-  Because the lock lives in the database, it works correctly across multiple
-  application nodes — all nodes share the same Postgres instance, so the lock
-  is globally consistent.
+  Both paths are cluster-wide: the Postgres lock lives in the shared database,
+  and `:global.trans` coordinates across connected nodes. A netsplit can produce
+  two holders on either path, which is why value operations must also be atomic.
   
   ## Namespace conventions
   
