@@ -45,7 +45,6 @@ defmodule GameServerWeb.UserLive.Settings.GroupsTab do
     |> assign(:group_editing, false)
     |> assign(:group_edit_form, nil)
     |> assign(:group_join_requests, [])
-    |> assign(:group_notify_form, to_form(%{"content" => "", "title" => ""}, as: :notify))
     |> reload_groups()
   end
 
@@ -1235,30 +1234,6 @@ defmodule GameServerWeb.UserLive.Settings.GroupsTab do
 
       {:error, reason} ->
         {:noreply, put_flash(socket, :error, gettext("Failed") <> ": " <> inspect(reason))}
-    end
-  end
-
-  def handle_event("group_notify", %{"notify" => notify_params}, socket) do
-    user = Shared.current_user(socket)
-    group = socket.assigns.group_detail
-    content = String.trim(Map.get(notify_params, "content", ""))
-    title = String.trim(Map.get(notify_params, "title", ""))
-
-    if group && content != "" do
-      metadata = if title != "", do: %{"title" => title}, else: %{}
-
-      case Groups.notify_group(user.id, group.id, content, metadata) do
-        {:ok, _sent} ->
-          {:noreply,
-           socket
-           |> put_flash(:info, gettext("Success."))
-           |> assign(:group_notify_form, to_form(%{"content" => "", "title" => ""}, as: :notify))}
-
-        {:error, reason} ->
-          {:noreply, put_flash(socket, :error, gettext("Failed") <> ": " <> inspect(reason))}
-      end
-    else
-      {:noreply, put_flash(socket, :error, gettext("Cannot be empty."))}
     end
   end
 

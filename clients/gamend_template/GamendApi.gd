@@ -1353,14 +1353,6 @@ func groups_list_sent_invitations(
 	pageSize = null,):
 	return await _call_api(GroupsApi.new(_config), "list_sent_invitations", [page, pageSize])
 
-## Send a notification to all group members
-func groups_notify_group(
-	# id: int   Eg: 56
-	# Group ID
-	id: String,
-	notifyGroupRequest: NotifyGroupRequest):
-	return await _call_api(GroupsApi.new(_config), "notify_group", [id, notifyGroupRequest])
-
 ## Promote member to admin
 func groups_promote_group_member(
 	# id: int   Eg: 56

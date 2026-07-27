@@ -776,63 +776,6 @@ defmodule GameServerWeb.Api.V1.GroupController do
     ]
   )
 
-  operation(:notify_group,
-    operation_id: "notify_group",
-    summary: "Send a notification to all group members",
-    description:
-      "Broadcasts a notification to every member of the group (except the sender). " <>
-        "Any group member can send. Sending again from the same user with the same title " <>
-        "replaces the previous notification (upsert, prevents spam).",
-    security: [%{"authorization" => []}],
-    parameters: [
-      id: [
-        in: :path,
-        type: :string,
-        description: "Group ID",
-        required: true
-      ]
-    ],
-    request_body:
-      {"Notification payload", "application/json",
-       %Schema{
-         type: :object,
-         required: [:content],
-         properties: %{
-           content: %Schema{type: :string, description: "Notification message text"},
-           title: %Schema{
-             type: :string,
-             description:
-               "Notification title (default: \"Group Notification\"). " <>
-                 "Different titles create separate notification slots per sender/recipient."
-           },
-           metadata: %Schema{
-             type: :object,
-             description:
-               "Optional extra metadata (group_id and group_name are added automatically)",
-             additionalProperties: true
-           }
-         }
-       }},
-    responses: [
-      ok:
-        {"Notifications sent", "application/json",
-         %Schema{
-           type: :object,
-           properties: %{
-             data: %Schema{
-               type: :object,
-               properties: %{
-                 sent: %Schema{type: :integer, description: "Number of notifications delivered"}
-               }
-             }
-           }
-         }},
-      forbidden: {"Not a member", "application/json", @error_schema},
-      not_found: {"Group not found", "application/json", @error_schema},
-      unauthorized: {"Not authenticated", "application/json", @error_schema}
-    ]
-  )
-
   # ---------------------------------------------------------------------------
   # Actions
   # ---------------------------------------------------------------------------
@@ -1501,39 +1444,6 @@ defmodule GameServerWeb.Api.V1.GroupController do
 
             {:error, :not_owner} ->
               conn |> put_status(:forbidden) |> json(%{error: "not_owner"})
-          end
-      end
-    end)
-  end
-
-  def notify_group(conn, %{"id" => id} = params) do
-    with_auth(conn, fn user ->
-      case parse_id(id) do
-        nil ->
-          conn |> put_status(:not_found) |> json(%{error: "not_found"})
-
-        group_id ->
-          content = Map.get(params, "content") || Map.get(params, :content) || ""
-          title = Map.get(params, "title") || Map.get(params, :title)
-          extra_metadata = Map.get(params, "metadata") || Map.get(params, :metadata) || %{}
-
-          # Pass the title through metadata so the domain function can extract it
-          metadata =
-            if title do
-              Map.put(extra_metadata, "title", title)
-            else
-              extra_metadata
-            end
-
-          case Groups.notify_group(user.id, group_id, content, metadata) do
-            {:ok, sent} ->
-              json(conn, %{data: %{sent: sent}})
-
-            {:error, :not_found} ->
-              conn |> put_status(:not_found) |> json(%{error: "not_found"})
-
-            {:error, :not_member} ->
-              conn |> put_status(:forbidden) |> json(%{error: "not_member"})
           end
       end
     end)

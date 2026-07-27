@@ -322,7 +322,7 @@ Live values, and where each one came from, are on the
 
 | Variable | Type | Default | Notes |
 |---|---|---|---|
-| `GAMEND_RETENTION_ABANDONED_LOBBY_MINUTES` | integer | `15` | Delete lobbies nobody has been seen in for N minutes. 0 disables. |
+| `GAMEND_RETENTION_ABANDONED_LOBBY_MINUTES` | integer | `15` | Delete lobbies nobody has been seen in for N minutes, and release the seat of a player offline that long in a lobby still in use. 0 disables both. |
 | `GAMEND_RETENTION_ANONYMOUS_USERS_DAYS` | integer | `90` | Delete device-only accounts inactive for N days. 0 keeps forever. These accounts cost one unauthenticated request to create, so they are the tier that actually needs a sweep. |
 | `GAMEND_RETENTION_CHAT_MESSAGES_DAYS` | integer | `0` | Delete chat messages older than N days. 0 keeps forever. |
 | `GAMEND_RETENTION_INACTIVE_USERS_DAYS` | integer | `0` | Delete accounts with a real identity after N days of inactivity. 0 (the default) keeps forever - deleting a player who comes back is worse than the storage. 730 matches what Google and Microsoft use if you turn it on. |

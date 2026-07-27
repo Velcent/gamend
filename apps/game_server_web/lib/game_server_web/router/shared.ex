@@ -487,7 +487,6 @@ defmodule GameServerWeb.Router.Shared do
         post "/groups/:id/join_requests/:request_id/reject", GroupController, :reject_request
         delete "/groups/:id/join_requests/:request_id", GroupController, :cancel_request
         post "/groups/:id/invite", GroupController, :invite
-        post "/groups/:id/notify", GroupController, :notify_group
         post "/groups/:id/icon/upload_url", GroupController, :icon_upload_url
         post "/groups/:id/icon", GroupController, :set_icon
       end

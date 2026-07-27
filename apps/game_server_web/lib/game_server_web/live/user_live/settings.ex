@@ -45,7 +45,7 @@ defmodule GameServerWeb.UserLive.Settings do
                     group_view_detail group_close_detail group_toggle_edit
                     group_validate_edit group_save_edit group_kick group_promote
                     group_demote group_members_prev group_members_next group_invite_search
-                    group_invite_user group_notify)
+                    group_invite_user)
 
   @impl true
   def render(assigns) do
