@@ -46,6 +46,13 @@ defmodule GameServer.Limits do
     doc: "Max size of a single uploaded object (avatars/UGC). 5 MiB."
   )
 
+  setting(:max_upload_bytes_per_owner, :integer,
+    default: 52_428_800,
+    doc:
+      "Max total bytes one owner may hold under an upload prefix. " <>
+        "Caps the orphans left by tickets a client requests but never confirms. 50 MiB."
+  )
+
   # ── User ────────────────────────────────────────────────
   setting(:max_display_name, :integer, default: 80)
   setting(:min_username, :integer, default: 3)

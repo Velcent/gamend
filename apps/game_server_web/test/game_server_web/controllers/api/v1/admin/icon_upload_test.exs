@@ -18,6 +18,9 @@ defmodule GameServerWeb.Api.V1.Admin.IconUploadTest do
   alias GameServer.Tournaments
   alias GameServerWeb.Auth.Guardian
 
+  # Smallest thing that passes a PNG magic-byte check.
+  @png <<0x89, "PNG\r\n", 0x1A, "\n", "rest-of-the-file">>
+
   setup %{conn: conn} do
     admin =
       AccountsFixtures.user_fixture()
@@ -80,6 +83,30 @@ defmodule GameServerWeb.Api.V1.Admin.IconUploadTest do
     end
   end
 
+  # The local backend receives icon PUTs on our own endpoint, so a ticket for a
+  # non-avatar prefix has to be accepted there too.
+  test "a ticket round-trips through the local upload endpoint", %{conn: conn} do
+    for {segment, id, _prefix} <- targets() do
+      %{"key" => key, "token" => token} =
+        conn
+        |> post(~p"/api/v1/admin/#{segment}/#{id}/icon/upload_url", %{
+          "content_type" => "image/png"
+        })
+        |> json_response(200)
+
+      up =
+        conn
+        |> put_req_header("content-type", "image/png")
+        |> put(
+          "/api/v1/storage/upload?key=#{URI.encode_www_form(key)}&token=#{URI.encode_www_form(token)}",
+          @png
+        )
+
+      assert json_response(up, 200)["key"] == key, "#{segment} could not upload its icon"
+      assert Storage.exists?(key)
+    end
+  end
+
   test "an unsupported content type is refused", %{conn: conn} do
     [{segment, id, _} | _] = targets()
 
@@ -93,7 +120,7 @@ defmodule GameServerWeb.Api.V1.Admin.IconUploadTest do
   test "confirming a real upload sets icon_url", %{conn: conn} do
     for {segment, id, prefix} <- targets() do
       key = Storage.build_key(prefix, id, "icon.png")
-      {:ok, _} = Storage.put(key, "not-really-a-png")
+      {:ok, _} = Storage.put(key, @png)
 
       resp =
         conn
@@ -104,11 +131,43 @@ defmodule GameServerWeb.Api.V1.Admin.IconUploadTest do
     end
   end
 
+  # With the S3 backend the client PUTs straight to the bucket, so none of the
+  # upload-endpoint checks ever run against the bytes. Confirm is the only place
+  # left that can catch it, so it has to.
+  test "confirming an object that is not an image is refused and the object dropped", %{
+    conn: conn
+  } do
+    [{segment, id, prefix} | _] = targets()
+
+    key = Storage.build_key(prefix, id, "icon.png")
+    {:ok, _} = Storage.put(key, "<script>alert(document.domain)</script>")
+
+    assert conn
+           |> post(~p"/api/v1/admin/#{segment}/#{id}/icon", %{"key" => key})
+           |> json_response(415)
+
+    refute Storage.exists?(key)
+  end
+
+  test "confirming an oversized object is refused and the object dropped", %{conn: conn} do
+    [{segment, id, prefix} | _] = targets()
+
+    key = Storage.build_key(prefix, id, "icon.png")
+    oversized = @png <> :binary.copy("x", GameServer.Limits.get(:max_upload_bytes))
+    {:ok, _} = Storage.put(key, oversized)
+
+    assert conn
+           |> post(~p"/api/v1/admin/#{segment}/#{id}/icon", %{"key" => key})
+           |> json_response(413)
+
+    refute Storage.exists?(key)
+  end
+
   test "a key belonging to another entity is refused", %{conn: conn} do
     [{segment, id, prefix}, {_, other_id, _} | _] = targets()
 
     stolen = Storage.build_key(prefix, other_id, "icon.png")
-    {:ok, _} = Storage.put(stolen, "bytes")
+    {:ok, _} = Storage.put(stolen, @png)
 
     assert conn
            |> post(~p"/api/v1/admin/#{segment}/#{id}/icon", %{"key" => stolen})

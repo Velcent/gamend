@@ -75,6 +75,28 @@ defmodule GameServer.Storage.Local do
     %{count: length(objects), bytes: Enum.reduce(objects, 0, &(&1.size + &2))}
   end
 
+  @impl true
+  def stat(key) do
+    case File.stat(path_for(key)) do
+      {:ok, %File.Stat{type: :regular, size: size}} -> {:ok, %{size: size, content_type: nil}}
+      {:ok, _not_a_file} -> {:error, :enoent}
+      {:error, reason} -> {:error, reason}
+    end
+  end
+
+  @impl true
+  def delete_prefix(prefix) do
+    # Enumerated rather than `rm_rf` on the directory: a prefix is not required
+    # to land on a directory boundary, and this keeps the meaning identical to
+    # `list/1` and `usage/1`.
+    deleted =
+      prefix
+      |> all_objects()
+      |> Enum.count(fn %{key: key} -> delete(key) == :ok end)
+
+    {:ok, deleted}
+  end
+
   defp all_objects(prefix) do
     root = root_dir()
 

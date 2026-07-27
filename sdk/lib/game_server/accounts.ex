@@ -121,6 +121,22 @@ defmodule GameServer.Accounts do
 
 
   @doc ~S"""
+    Whether `user` may upload an avatar, per `anonymous_can_upload_avatar`.
+    
+  """
+  @spec can_upload_avatar?(GameServer.Accounts.User.t()) :: boolean()
+  def can_upload_avatar?(_user) do
+    case Application.get_env(:game_server_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        :erlang.phash2(make_ref(), 2) == 0
+
+      _ ->
+        raise "GameServer.Accounts.can_upload_avatar?/1 is a stub - only available at runtime on GameServer"
+    end
+  end
+
+
+  @doc ~S"""
     Returns an `%Ecto.Changeset{}` for changing the user display_name.
     
   """
@@ -585,6 +601,25 @@ defmodule GameServer.Accounts do
 
       _ ->
         raise "GameServer.Accounts.delete_user_session_token/1 is a stub - only available at runtime on GameServer"
+    end
+  end
+
+
+  @doc ~S"""
+    Removes every stored object belonging to `user_id`.
+    
+    Best-effort, like `prune_user_avatars/2`: a storage backend that is down must
+    not block an account deletion that has already happened at the database level.
+    
+  """
+  @spec delete_user_storage(Ecto.UUID.t()) :: :ok
+  def delete_user_storage(_user_id) do
+    case Application.get_env(:game_server_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        :ok
+
+      _ ->
+        raise "GameServer.Accounts.delete_user_storage/1 is a stub - only available at runtime on GameServer"
     end
   end
 

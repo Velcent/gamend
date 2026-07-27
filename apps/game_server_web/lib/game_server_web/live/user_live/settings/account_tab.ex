@@ -23,6 +23,7 @@ defmodule GameServerWeb.UserLive.Settings.AccountTab do
     |> assign(:username_form, to_form(Accounts.change_username(user)))
     |> assign(:password_form, to_form(password_changeset))
     |> assign(:trigger_submit, false)
+    |> assign(:can_upload_avatar, Accounts.can_upload_avatar?(user))
     |> allow_upload(:avatar,
       accept: ~w(.png .jpg .jpeg .webp .gif),
       max_entries: 1,
@@ -40,7 +41,11 @@ defmodule GameServerWeb.UserLive.Settings.AccountTab do
 
           <div class="flex items-center gap-4 mt-3">
             <.user_avatar user={@user} class="w-16 h-16" />
+            <p :if={!@can_upload_avatar} class="text-xs text-base-content/60 max-w-xs">
+              {gettext("Link an email or a sign-in provider to set a custom avatar.")}
+            </p>
             <form
+              :if={@can_upload_avatar}
               phx-change="validate_avatar"
               phx-submit="save_avatar"
               id="avatar_form"
@@ -482,35 +487,9 @@ defmodule GameServerWeb.UserLive.Settings.AccountTab do
   def handle_event("save_avatar", _params, socket) do
     user = Shared.current_user(socket)
 
-    uploads =
-      consume_uploaded_entries(socket, :avatar, fn %{path: path}, entry ->
-        key = Storage.build_key("avatars", user.id, entry.client_name)
-        {:ok, _} = Storage.put(key, File.read!(path), content_type: entry.client_type)
-        {:ok, {key, Storage.url(key)}}
-      end)
-
-    case uploads do
-      [{key, url} | _] ->
-        case Accounts.update_user_avatar(user, url) do
-          {:ok, updated} ->
-            # Drop the previous avatar object(s) now that the new one is live.
-            _ = Accounts.prune_user_avatars(user.id, key)
-
-            # The navbar reads its user via `Scope.user/1`, which re-fetches by id;
-            # `update_user_avatar` invalidated the cache, so it picks up the new
-            # avatar on this re-render without touching the scope.
-            {:noreply,
-             socket
-             |> put_flash(:info, gettext("Avatar updated."))
-             |> assign(:user, updated)}
-
-          {:error, _} ->
-            {:noreply, put_flash(socket, :error, gettext("Could not update avatar."))}
-        end
-
-      [] ->
-        {:noreply, put_flash(socket, :error, gettext("Please choose an image first."))}
-    end
+    if Accounts.can_upload_avatar?(user),
+      do: save_avatar(socket, user),
+      else: {:noreply, put_flash(socket, :error, gettext("Avatar uploads are not available."))}
   end
 
   def handle_event("validate_password", %{"user" => user_params}, socket) do
@@ -582,6 +561,52 @@ defmodule GameServerWeb.UserLive.Settings.AccountTab do
 
       _ ->
         {:noreply, put_flash(socket, :error, gettext("Not found"))}
+    end
+  end
+
+  defp save_avatar(socket, user) do
+    uploads =
+      consume_uploaded_entries(socket, :avatar, fn %{path: path}, _entry ->
+        data = File.read!(path)
+
+        # `accept:` only screens the filename and the browser-declared type. Take
+        # the extension from what the bytes actually are, so nothing but a real
+        # image is ever stored under an image extension.
+        case Storage.sniff_content_type(data) do
+          nil ->
+            {:ok, :not_an_image}
+
+          content_type ->
+            key = Storage.build_key("avatars", user.id, Storage.extension_for(content_type))
+            {:ok, _} = Storage.put(key, data, content_type: content_type)
+            {:ok, {key, Storage.url(key)}}
+        end
+      end)
+
+    case uploads do
+      [:not_an_image | _] ->
+        {:noreply, put_flash(socket, :error, gettext("That file is not a valid image."))}
+
+      [{key, url} | _] ->
+        case Accounts.update_user_avatar(user, url) do
+          {:ok, updated} ->
+            # Drop the previous avatar object(s) now that the new one is live.
+            _ = Accounts.prune_user_avatars(user.id, key)
+
+            # The navbar reads its user via `Scope.user/1`, which re-fetches by id;
+            # `update_user_avatar` invalidated the cache, so it picks up the new
+            # avatar on this re-render without touching the scope.
+            {:noreply,
+             socket
+             |> put_flash(:info, gettext("Avatar updated."))
+             |> assign(:user, updated)}
+
+          {:error, _} ->
+            {:noreply, put_flash(socket, :error, gettext("Could not update avatar."))}
+        end
+
+      [] ->
+        {:noreply, put_flash(socket, :error, gettext("Please choose an image first."))}
     end
   end
 

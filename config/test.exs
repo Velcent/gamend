@@ -122,3 +122,8 @@ config :game_server_core, Oban, testing: :manual
 # secret it demonstrably has.
 config :game_server_core, GameServer.Accounts,
   secret_key_base: "dJoNJZBOt08JlBREyPV5xvuOdwgHPORxK9WHp/k3Cs+g0R9ctyheJ8/CMeg/AdI1"
+
+# Uploads land in the system tmp dir, not priv/, so a test run leaves no
+# objects behind in the checkout.
+config :game_server_core, GameServer.Storage.Local,
+  dir: Path.join(System.tmp_dir!(), "gamend_test_storage")

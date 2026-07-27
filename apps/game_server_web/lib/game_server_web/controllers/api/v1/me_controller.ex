@@ -2,6 +2,7 @@ defmodule GameServerWeb.Api.V1.MeController do
   use GameServerWeb, :controller
   use OpenApiSpex.ControllerSpecs
 
+  alias GameServer.Accounts
   alias GameServer.Accounts.Scope
   alias GameServer.Accounts.User
   alias GameServerWeb.Uploads
@@ -283,7 +284,19 @@ defmodule GameServerWeb.Api.V1.MeController do
 
   def avatar_upload_url(conn, params) do
     user = Scope.user(conn.assigns.current_scope)
-    Uploads.ticket(conn, "avatars", user.id, "avatar", Uploads.content_type(params))
+
+    if Accounts.can_upload_avatar?(user) do
+      Uploads.ticket(conn, "avatars", user.id, "avatar", Uploads.content_type(params))
+    else
+      avatar_forbidden(conn)
+    end
+  end
+
+  # Refused at both ends: the ticket is where a well-behaved client stops, and
+  # confirm is where an old ticket or a direct-to-S3 upload would otherwise slip
+  # a stored object onto the account.
+  defp avatar_forbidden(conn) do
+    conn |> put_status(:forbidden) |> json(%{error: "anonymous_avatar_disabled"})
   end
 
   operation(:set_avatar,
@@ -307,6 +320,12 @@ defmodule GameServerWeb.Api.V1.MeController do
   def set_avatar(conn, params) do
     user = Scope.user(conn.assigns.current_scope)
 
+    if Accounts.can_upload_avatar?(user),
+      do: do_set_avatar(conn, user, params),
+      else: avatar_forbidden(conn)
+  end
+
+  defp do_set_avatar(conn, user, params) do
     Uploads.confirm(conn, "avatars", user.id, params["key"], fn url ->
       case GameServer.Accounts.update_user_avatar(user, url) do
         {:ok, updated} -> json(conn, %{ok: true, profile_url: updated.profile_url})

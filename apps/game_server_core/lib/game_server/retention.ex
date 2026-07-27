@@ -40,10 +40,12 @@ defmodule GameServer.Retention do
 
   require Logger
 
+  alias GameServer.Accounts
   alias GameServer.Accounts.{User, UserToken}
   alias GameServer.Lobbies
   alias GameServer.Lobbies.Lobby
   alias GameServer.LobbySnapshots.{Blob, Event, Snapshot}
+  alias GameServer.Payments.{Entitlement, Purchase}
   alias GameServer.Repo
 
   # First run shortly after boot, then every 6 hours.
@@ -164,6 +166,7 @@ defmodule GameServer.Retention do
         expired_user_tokens: &prune_expired_user_tokens/0,
         lobby_snapshots: &prune_lobby_snapshots/0,
         lobby_snapshot_blobs: &prune_lobby_snapshot_blobs/0,
+        offline_lobby_memberships: &release_offline_lobby_memberships/0,
         lobbies: &prune_lobbies/0,
         resolved_invites: &prune_resolved_invites/0,
         matchmaking_tickets: &prune_stale_tickets/0,
@@ -171,7 +174,10 @@ defmodule GameServer.Retention do
         ledger_entries: &prune_ledgers/0,
         quest_periods: &GameServer.Quests.prune_old_periods/0,
         quest_reward_recoveries: &GameServer.Quests.recover_pending_rewards/0,
-        push_tokens: &prune_push_tokens/0
+        push_tokens: &prune_push_tokens/0,
+        anonymous_users: &prune_anonymous_users/0,
+        inactive_user_warnings: &warn_inactive_users/0,
+        inactive_users: &prune_inactive_users/0
       }
       |> Map.new(fn {class, fun} -> {class, run_class(class, fun)} end)
 
@@ -276,6 +282,124 @@ defmodule GameServer.Retention do
     end
   end
 
+  # ── Accounts ────────────────────────────────────────────
+  #
+  # Every other class here is a bulk `delete_all`. Accounts cannot be: deleting
+  # a user has to disband their party, hand over their groups, drop their
+  # storage prefix and fire `after_user_deleted`, none of which a DELETE reaches.
+  # So these iterate `Accounts.delete_user/1` in batches and stay slow on
+  # purpose.
+  #
+  # Two things are never swept regardless of age: admins, and anyone holding a
+  # purchase or entitlement. A player who paid is not garbage no matter how long
+  # they have been away, and the purchase record is very likely something the
+  # operator is required to keep.
+
+  defp prune_anonymous_users do
+    case config(:anonymous_users_days) do
+      days when is_integer(days) and days > 0 ->
+        :anonymous |> deletable_users(days) |> delete_users()
+
+      _ ->
+        0
+    end
+  end
+
+  defp prune_inactive_users do
+    case config(:inactive_users_days) do
+      days when is_integer(days) and days > 0 ->
+        :identified
+        |> deletable_users(days)
+        |> Enum.filter(&warned?/1)
+        |> delete_users()
+
+      _ ->
+        0
+    end
+  end
+
+  # Warns the accounts approaching the cutoff rather than the ones past it, so a
+  # warning arrives `inactive_users_warn_days` before the deletion date rather
+  # than alongside it.
+  defp warn_inactive_users do
+    days = config(:inactive_users_days)
+    warn_days = config(:inactive_users_warn_days)
+
+    if is_integer(days) and days > 0 and is_integer(warn_days) and warn_days > 0 do
+      :identified
+      |> deletable_users(max(days - warn_days, 0))
+      |> Enum.reject(&(is_nil(&1.email) or warned?(&1)))
+      |> Enum.count(&enqueue_warning(&1, days))
+    else
+      0
+    end
+  end
+
+  # A warning only counts if it was issued *after* the user's last activity:
+  # otherwise someone warned a year ago, who signed in since and went quiet
+  # again, would be deleted on the next sweep with no fresh notice. Accounts
+  # with no address cannot be warned at all, so for them the cutoff is the
+  # notice.
+  defp warned?(%User{email: nil}), do: true
+
+  defp warned?(%User{} = user) do
+    case user.metadata do
+      %{"retention_warned_at" => warned_at} when is_binary(warned_at) ->
+        case DateTime.from_iso8601(warned_at) do
+          {:ok, at, _} -> DateTime.compare(at, last_active_at(user)) == :gt
+          _ -> false
+        end
+
+      _ ->
+        config(:inactive_users_warn_days) in [0, nil]
+    end
+  end
+
+  defp enqueue_warning(user, days) do
+    job = Accounts.InactivityNotifier.new(%{"user_id" => user.id, "delete_after_days" => days})
+
+    match?({:ok, _}, Oban.insert(job))
+  end
+
+  defp last_active_at(%User{last_seen_at: nil, inserted_at: inserted_at}), do: inserted_at
+  defp last_active_at(%User{last_seen_at: last_seen_at}), do: last_seen_at
+
+  # `last_seen_at` is null for an account that has never connected, so fall back
+  # to when it was created - otherwise a bot that registers and never returns is
+  # the one thing the sweep can't reach.
+  defp deletable_users(kind, days) do
+    cutoff = cutoff(days)
+
+    from(u in User,
+      where: coalesce(u.last_seen_at, u.inserted_at) < ^cutoff,
+      where: not u.is_admin,
+      where: u.id not in subquery(from(p in Purchase, select: p.user_id)),
+      where: u.id not in subquery(from(e in Entitlement, select: e.user_id)),
+      where: ^identity_condition(kind),
+      limit: @batch
+    )
+    |> Repo.all()
+  end
+
+  # Built as one dynamic rather than chained `where`/`or_where`: an `or_where`
+  # ORs against everything before it, which would quietly hand back admins and
+  # paying users.
+  defp identity_condition(:anonymous) do
+    Enum.reduce(User.identity_fields(), dynamic(true), fn field, acc ->
+      dynamic([u], ^acc and is_nil(field(u, ^field)))
+    end)
+  end
+
+  defp identity_condition(:identified) do
+    Enum.reduce(User.identity_fields(), dynamic(false), fn field, acc ->
+      dynamic([u], ^acc or not is_nil(field(u, ^field)))
+    end)
+  end
+
+  defp delete_users(users) do
+    Enum.count(users, fn user -> match?({:ok, _}, Accounts.delete_user(user)) end)
+  end
+
   defp prune_expired_ip_bans do
     now = DateTime.utc_now(:second)
 
@@ -287,6 +411,52 @@ defmodule GameServer.Retention do
       )
 
     count
+  end
+
+  # Releases the seat of a player who has been offline past the window while
+  # their lobby is still alive. `prune_lobbies` below only fires once EVERY
+  # member has gone quiet, so without this a single player who disconnects and
+  # never returns keeps `users.lobby_id` set for as long as their teammates
+  # keep playing - and `join_lobby/3` and `create_lobby/2` both refuse with
+  # `:already_in_lobby`, so that player is locked out of starting or joining
+  # anything until the old lobby happens to die.
+  #
+  # Deliberately the same window as the abandoned-lobby sweep: releasing
+  # sooner would drop the last member that makes a paused lobby look alive to
+  # `prune_lobbies`, letting it delete a game under players who are merely
+  # disconnected.
+  #
+  # Through `leave_lobby/1` rather than a bulk update, so host migration, ready
+  # checks, lobby-scoped KV, cache invalidation and broadcasts all still run.
+  defp release_offline_lobby_memberships do
+    minutes = config(:abandoned_lobby_minutes)
+
+    if minutes > 0, do: do_release_offline_lobby_memberships(minutes), else: 0
+  end
+
+  defp do_release_offline_lobby_memberships(minutes) do
+    cutoff = DateTime.add(DateTime.utc_now(:second), -minutes, :minute)
+
+    from(u in User,
+      where: not is_nil(u.lobby_id),
+      where: u.is_online == false,
+      where: is_nil(u.last_seen_at) or u.last_seen_at <= ^cutoff,
+      order_by: [asc: u.id],
+      limit: @batch
+    )
+    |> Repo.all()
+    |> Enum.count(&release_membership/1)
+  end
+
+  defp release_membership(%User{} = user) do
+    match?({:ok, _}, Lobbies.leave_lobby(user))
+  rescue
+    error ->
+      Logger.error(
+        "retention failed to release lobby membership for #{user.id}: #{Exception.message(error)}"
+      )
+
+      false
   end
 
   # The one class that is not "delete rows older than N", and the one where
@@ -486,7 +656,9 @@ defmodule GameServer.Retention do
 
   setting(:abandoned_lobby_minutes, :integer,
     default: 15,
-    doc: "Delete lobbies nobody has been seen in for N minutes. 0 disables."
+    doc:
+      "Delete lobbies nobody has been seen in for N minutes, and release the " <>
+        "seat of a player offline that long in a lobby still in use. 0 disables both."
   )
 
   setting(:invites_days, :integer,
@@ -502,6 +674,29 @@ defmodule GameServer.Retention do
   setting(:tournaments_days, :integer,
     default: 0,
     doc: "Delete finished tournaments older than N days. 0 keeps forever."
+  )
+
+  setting(:anonymous_users_days, :integer,
+    default: 90,
+    doc:
+      "Delete device-only accounts inactive for N days. 0 keeps forever. These accounts " <>
+        "cost one unauthenticated request to create, so they are the tier that actually " <>
+        "needs a sweep."
+  )
+
+  setting(:inactive_users_days, :integer,
+    default: 0,
+    doc:
+      "Delete accounts with a real identity after N days of inactivity. 0 (the default) " <>
+        "keeps forever - deleting a player who comes back is worse than the storage. " <>
+        "730 matches what Google and Microsoft use if you turn it on."
+  )
+
+  setting(:inactive_users_warn_days, :integer,
+    default: 30,
+    doc:
+      "Email a warning this many days before an inactive account is deleted. 0 deletes " <>
+        "with no warning. Accounts with no email address cannot be warned."
   )
 
   setting(:ledger_days, :integer,

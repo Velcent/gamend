@@ -935,7 +935,7 @@ defmodule GameServerWeb.Api.V1.GroupControllerTest do
 
     test "confirming an uploaded key sets icon_url", %{conn: conn, owner: owner, group: group} do
       key = "icons/groups/#{group.id}/icon.png"
-      {:ok, _} = GameServer.Storage.put(key, "PNGBYTES", content_type: "image/png")
+      {:ok, _} = GameServer.Storage.put(key, png(), content_type: "image/png")
 
       conn =
         conn
@@ -953,7 +953,7 @@ defmodule GameServerWeb.Api.V1.GroupControllerTest do
     } do
       {:ok, other} = Groups.create_group(create_user().id, %{"title" => "Other"})
       key = "icons/groups/#{other.id}/icon.png"
-      {:ok, _} = GameServer.Storage.put(key, "PNG", content_type: "image/png")
+      {:ok, _} = GameServer.Storage.put(key, png(), content_type: "image/png")
 
       conn =
         conn
@@ -974,4 +974,8 @@ defmodule GameServerWeb.Api.V1.GroupControllerTest do
       assert json_response(conn, 400)["error"] == "object_not_found"
     end
   end
+
+  # Confirm re-checks the stored bytes, so a placeholder string is no longer an
+  # image as far as the server is concerned.
+  defp png, do: <<0x89, "PNG\r\n", 0x1A, "\n", "rest-of-the-file">>
 end

@@ -55,6 +55,39 @@ defmodule GameServer.StorageTest do
     assert ticket.url =~ "/storage/upload?key="
   end
 
+  test "sniff_content_type reads the format from the bytes, not the extension" do
+    assert Storage.sniff_content_type(<<0x89, "PNG\r\n", 0x1A, "\n", "x">>) == "image/png"
+    assert Storage.sniff_content_type(<<0xFF, 0xD8, 0xFF, "x">>) == "image/jpeg"
+    assert Storage.sniff_content_type("GIF89a...") == "image/gif"
+    assert Storage.sniff_content_type(<<"RIFF", 0::32, "WEBP", "x">>) == "image/webp"
+
+    # An SVG is a script-capable document, so it is deliberately not an image here.
+    assert Storage.sniff_content_type(~s(<svg xmlns="http://www.w3.org/2000/svg"/>)) == nil
+    assert Storage.sniff_content_type("<script>alert(1)</script>") == nil
+    assert Storage.sniff_content_type("PK\x03\x04") == nil
+    assert Storage.sniff_content_type("") == nil
+  end
+
+  test "stat reports size without reading the object" do
+    key = Storage.build_key("avatars", "user-9", "x.png")
+    {:ok, _} = Storage.put(key, "12345")
+
+    assert {:ok, %{size: 5}} = Storage.stat(key)
+    assert {:error, _} = Storage.stat("avatars/user-9/missing.png")
+  end
+
+  test "delete_prefix removes an owner's objects and leaves everyone else's" do
+    {:ok, _} = Storage.put("avatars/user-a/1.png", "x")
+    {:ok, _} = Storage.put("avatars/user-a/2.png", "y")
+    {:ok, _} = Storage.put("avatars/user-b/1.png", "z")
+
+    assert {:ok, 2} = Storage.delete_prefix("avatars/user-a/")
+
+    refute Storage.exists?("avatars/user-a/1.png")
+    refute Storage.exists?("avatars/user-a/2.png")
+    assert Storage.exists?("avatars/user-b/1.png")
+  end
+
   test "path traversal in a key cannot escape the storage root" do
     # A crafted key with .. segments resolves inside the root, not above it.
     key = "avatars/../../etc/passwd"

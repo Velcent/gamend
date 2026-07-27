@@ -361,6 +361,86 @@ defmodule GameServer.RetentionTest do
 
       refute Repo.get(Lobby, lobby.id)
     end
+
+    # A lobby its remaining players are still using is never reaped, so
+    # without releasing the seat the absent player keeps `lobby_id` set for as
+    # long as the game runs — and join_lobby/create_lobby both refuse with
+    # :already_in_lobby, locking them out of playing at all.
+    test "releases the seat of a long-offline player in a lobby still in use" do
+      Application.put_env(:game_server_core, GameServer.Retention, abandoned_lobby_minutes: 15)
+
+      lobby = lobby_fixture()
+      gone = AccountsFixtures.user_fixture()
+      playing = AccountsFixtures.user_fixture()
+
+      put_member(lobby, gone,
+        online: false,
+        last_seen: DateTime.add(DateTime.utc_now(:second), -60, :minute)
+      )
+
+      put_member(lobby, playing, online: true, last_seen: DateTime.utc_now(:second))
+
+      Retention.prune_all()
+
+      assert Repo.get(Lobby, lobby.id), "the lobby is still in use and must survive"
+      assert Repo.get(User, gone.id).lobby_id == nil
+      assert Repo.get(User, playing.id).lobby_id == lobby.id
+    end
+
+    test "keeps the seat of a player offline inside the window" do
+      Application.put_env(:game_server_core, GameServer.Retention, abandoned_lobby_minutes: 60)
+
+      lobby = lobby_fixture()
+      recent = AccountsFixtures.user_fixture()
+
+      put_member(lobby, recent,
+        online: false,
+        last_seen: DateTime.add(DateTime.utc_now(:second), -20, :minute)
+      )
+
+      Retention.prune_all()
+
+      assert Repo.get(User, recent.id).lobby_id == lobby.id
+    end
+
+    # The two rules have to compose: releasing seats must not leave a lobby
+    # nobody is in sitting around, and reaping a lobby must not leave its
+    # members pointing at a row that no longer exists. Whichever fires,
+    # everyone ends up free and no orphan is left behind.
+    test "a lobby everyone abandoned is gone and leaves nobody holding a seat" do
+      Application.put_env(:game_server_core, GameServer.Retention, abandoned_lobby_minutes: 15)
+
+      lobby = lobby_fixture()
+      gone = DateTime.add(DateTime.utc_now(:second), -60, :minute)
+      one = AccountsFixtures.user_fixture()
+      two = AccountsFixtures.user_fixture()
+
+      put_member(lobby, one, online: false, last_seen: gone)
+      put_member(lobby, two, online: false, last_seen: gone)
+      age_lobby(lobby, 60)
+
+      Retention.prune_all()
+
+      refute Repo.get(Lobby, lobby.id)
+      assert Repo.get(User, one.id).lobby_id == nil
+      assert Repo.get(User, two.id).lobby_id == nil
+    end
+
+    test "0 disables seat release along with lobby reaping" do
+      Application.put_env(:game_server_core, GameServer.Retention, abandoned_lobby_minutes: 0)
+
+      lobby = lobby_fixture()
+      gone = AccountsFixtures.user_fixture()
+
+      put_member(lobby, gone,
+        online: false,
+        last_seen: DateTime.add(DateTime.utc_now(:second), -600, :minute)
+      )
+
+      Retention.prune_all()
+
+      assert Repo.get(User, gone.id).lobby_id == lobby.id
+    end
   end
 
   describe "user tokens" do

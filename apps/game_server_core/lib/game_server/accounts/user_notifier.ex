@@ -58,6 +58,32 @@ defmodule GameServer.Accounts.UserNotifier do
   end
 
   @doc """
+  Warn a user that their account will be deleted after `days` of inactivity.
+
+  Sent by `GameServer.Accounts.InactivityNotifier` ahead of the retention
+  sweep; signing in resets the clock, so the action the mail asks for is just
+  "log in".
+  """
+  def deliver_inactivity_warning(%User{} = user, days) do
+    deliver(user.email, "Your account is scheduled for deletion", """
+
+    ==============================
+
+    Hi #{user.email},
+
+    Your account has been inactive for a while. Accounts untouched for #{days} days
+    are deleted along with everything in them.
+
+    To keep it, just sign in - that resets the clock and no further action is
+    needed.
+
+    If you would rather the account went away, you can ignore this email.
+
+    ==============================
+    """)
+  end
+
+  @doc """
   Deliver instructions to update a user email.
   """
   def deliver_update_email_instructions(user, url) do

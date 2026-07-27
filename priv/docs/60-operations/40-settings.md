@@ -7,7 +7,7 @@ generated: by `mix gamend.settings.guide` - do not edit by hand; edit the
 # Settings
 
 Every setting the server has, with the environment variable that sets it.
-211 settings across 19 groups.
+216 settings across 19 groups.
 
 A setting is declared in the module that owns it, so this page and
 `.env.example` are generated from the same source the server reads. The
@@ -37,6 +37,7 @@ Live values, and where each one came from, are on the
 
 | Variable | Type | Default | Notes |
 |---|---|---|---|
+| `GAMEND_AUTH_ANONYMOUS_CAN_UPLOAD_AVATAR` | boolean | `false` | Allow device-only accounts to upload an avatar. Off by default: an anonymous account costs one request to create, so this is the cheapest way for a bot to burn object storage. |
 | `GAMEND_AUTH_DEVICE_AUTH_ENABLED` | boolean | `true` | Allow POST /api/v1/login/device. When on, any unknown device_id creates an anonymous account. |
 | `GAMEND_AUTH_GUARDIAN_SECRET_KEY` | string | - | JWT signing key. Defaults to secret_key_base when unset. Secret - never log or commit it. |
 | `GAMEND_AUTH_MIN_PASSWORD_LENGTH` | integer | `8` | Minimum password length enforced at registration and change. |
@@ -184,6 +185,7 @@ Live values, and where each one came from, are on the
 | `GAMEND_LIMITS_MAX_TOURNAMENT_SLUG` | integer | `100` |  |
 | `GAMEND_LIMITS_MAX_TOURNAMENT_TITLE` | integer | `255` |  |
 | `GAMEND_LIMITS_MAX_UPLOAD_BYTES` | integer | `5242880` | Max size of a single uploaded object (avatars/UGC). 5 MiB. |
+| `GAMEND_LIMITS_MAX_UPLOAD_BYTES_PER_OWNER` | integer | `52428800` | Max total bytes one owner may hold under an upload prefix. Caps the orphans left by tickets a client requests but never confirms. 50 MiB. |
 | `GAMEND_LIMITS_MAX_USERNAME` | integer | `32` |  |
 | `GAMEND_LIMITS_MIN_USERNAME` | integer | `3` |  |
 | `GAMEND_LIMITS_READY_CHECK_TIMEOUT_MS` | integer | `15000` | Default answering window. Overridable per check by the caller. |
@@ -321,7 +323,10 @@ Live values, and where each one came from, are on the
 | Variable | Type | Default | Notes |
 |---|---|---|---|
 | `GAMEND_RETENTION_ABANDONED_LOBBY_MINUTES` | integer | `15` | Delete lobbies nobody has been seen in for N minutes. 0 disables. |
+| `GAMEND_RETENTION_ANONYMOUS_USERS_DAYS` | integer | `90` | Delete device-only accounts inactive for N days. 0 keeps forever. These accounts cost one unauthenticated request to create, so they are the tier that actually needs a sweep. |
 | `GAMEND_RETENTION_CHAT_MESSAGES_DAYS` | integer | `0` | Delete chat messages older than N days. 0 keeps forever. |
+| `GAMEND_RETENTION_INACTIVE_USERS_DAYS` | integer | `0` | Delete accounts with a real identity after N days of inactivity. 0 (the default) keeps forever - deleting a player who comes back is worse than the storage. 730 matches what Google and Microsoft use if you turn it on. |
+| `GAMEND_RETENTION_INACTIVE_USERS_WARN_DAYS` | integer | `30` | Email a warning this many days before an inactive account is deleted. 0 deletes with no warning. Accounts with no email address cannot be warned. |
 | `GAMEND_RETENTION_INVITES_DAYS` | integer | `30` | Delete resolved invites and join requests N days after resolution. |
 | `GAMEND_RETENTION_LEDGER_DAYS` | integer | `0` | Delete wallet/inventory ledger entries older than N days. 0 keeps forever. |
 | `GAMEND_RETENTION_LOBBY_SNAPSHOTS_DAYS` | integer | `30` | Delete lobby snapshots, events and blobs older than N days. |

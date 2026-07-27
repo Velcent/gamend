@@ -10,8 +10,24 @@ defmodule GameServer.Storage do
     * `GameServer.Storage.S3` — any S3-compatible service (AWS S3, Cloudflare
       R2, Backblaze B2, MinIO, DigitalOcean Spaces).
 
-  Select the backend with `STORAGE_ADAPTER` (`local` | `s3`); see the deployment
-  docs for the full `STORAGE_*` variable list.
+  Select the backend with `GAMEND_STORAGE_ADAPTER` (`local` | `s3`); see the
+  settings docs for the full `GAMEND_STORAGE_*` variable list.
+
+  ## What may be stored
+
+  Uploaded bytes come from users, so nothing about them is trusted:
+
+    * the *key* is server-chosen (`build_key/3`), never taken from the client -
+      that is what fixes the extension, and with it the content type the object
+      is served as;
+    * the declared content type must be in the allow-list (`validate_upload/3`),
+      and the bytes must actually be that format (`sniff_content_type/1`);
+    * size is capped per object (`max_upload_bytes`) and per owner prefix
+      (`max_upload_bytes_per_owner`).
+
+  We never decode an image server-side, so there is no image-parser attack
+  surface here; the risk being defended against is serving attacker-chosen bytes
+  under an attacker-chosen type from our own origin.
 
   ## Direct uploads
 
@@ -24,6 +40,24 @@ defmodule GameServer.Storage do
 
   The ticket shape is identical for local disk and S3, so the client code does
   not change between environments.
+
+  ## What is checked, and where
+
+  The two backends do not offer the same guarantees at upload time, so the
+  checks are deliberately split:
+
+    * **At ticket time** (both backends) the declared content type must be one
+      we accept, and the key - including its extension - is server-chosen.
+    * **At upload time** (local only) the size cap, the owner quota and
+      `sniff_content_type/1` all run, because the bytes pass through us.
+    * **At confirm time** (both backends) size and magic bytes are re-checked
+      against the *stored* object, and a failing one is deleted.
+
+  That last step is not redundant. An S3 presigned PUT goes straight to the
+  bucket, so nothing in this application sees those bytes and ExAws does not
+  sign the content type - confirm is the only point at which the server can
+  still refuse. Anything that persists an object's URL must therefore go through
+  `GameServerWeb.Uploads.confirm/5` rather than trusting a key it was handed.
   """
 
   alias GameServer.Storage.Adapter
@@ -116,6 +150,14 @@ defmodule GameServer.Storage do
   @spec usage(keyword()) :: %{count: non_neg_integer(), bytes: non_neg_integer()}
   def usage(opts \\ []), do: adapter().usage(opts)
 
+  @doc "Size and stored content type of `key`, without downloading it."
+  @spec stat(Adapter.key()) :: {:ok, Adapter.stat()} | {:error, term()}
+  def stat(key), do: adapter().stat(key)
+
+  @doc "Deletes every object under `prefix`. Returns how many were removed."
+  @spec delete_prefix(String.t()) :: {:ok, non_neg_integer()} | {:error, term()}
+  def delete_prefix(prefix), do: adapter().delete_prefix(prefix)
+
   @doc """
   Build a collision-resistant object key: `<namespace>/<owner_id>/<random><ext>`.
 
@@ -136,6 +178,20 @@ defmodule GameServer.Storage do
   def extension_for("image/webp"), do: ".webp"
   def extension_for("image/gif"), do: ".gif"
   def extension_for(_content_type), do: ""
+
+  @doc """
+  The image content type `data` actually is, read from its magic bytes
+  (`nil` when it is not one of the formats we accept).
+
+  A declared `Content-Type` is only a header; this is what the bytes say.
+  """
+  @spec sniff_content_type(binary()) :: String.t() | nil
+  def sniff_content_type(<<0x89, "PNG\r\n", 0x1A, "\n", _::binary>>), do: "image/png"
+  def sniff_content_type(<<0xFF, 0xD8, 0xFF, _::binary>>), do: "image/jpeg"
+  def sniff_content_type(<<"GIF87a", _::binary>>), do: "image/gif"
+  def sniff_content_type(<<"GIF89a", _::binary>>), do: "image/gif"
+  def sniff_content_type(<<"RIFF", _size::32, "WEBP", _::binary>>), do: "image/webp"
+  def sniff_content_type(data) when is_binary(data), do: nil
 
   @doc """
   Validate an upload's content type and size before issuing a ticket.

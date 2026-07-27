@@ -30,6 +30,9 @@ defmodule GameServer.Storage.Adapter do
           last_modified: DateTime.t() | nil
         }
 
+  @typedoc "What the backend reports about a stored object without fetching it."
+  @type stat :: %{size: non_neg_integer(), content_type: String.t() | nil}
+
   @callback put(key(), iodata(), keyword()) :: {:ok, key()} | {:error, term()}
   @callback get(key()) :: {:ok, binary()} | {:error, term()}
   @callback delete(key()) :: :ok | {:error, term()}
@@ -42,4 +45,15 @@ defmodule GameServer.Storage.Adapter do
 
   @doc "Total object count and byte size. Opts: `:prefix`."
   @callback usage(keyword()) :: %{count: non_neg_integer(), bytes: non_neg_integer()}
+
+  @doc """
+  Size and stored content type of one object, without downloading it.
+
+  `content_type` is whatever the backend recorded; the local adapter keeps no
+  per-object metadata and always reports `nil`.
+  """
+  @callback stat(key()) :: {:ok, stat()} | {:error, term()}
+
+  @doc "Deletes every object under `prefix`. Returns how many were removed."
+  @callback delete_prefix(String.t()) :: {:ok, non_neg_integer()} | {:error, term()}
 end

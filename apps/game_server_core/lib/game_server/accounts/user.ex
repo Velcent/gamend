@@ -56,6 +56,27 @@ defmodule GameServer.Accounts.User do
     timestamps(type: :utc_datetime)
   end
 
+  # Every identity column a user can be reached or recovered by. A device id is
+  # not one of them: it is a string the client made up, so an account holding
+  # only that is disposable by construction.
+  @identity_fields [:email, :discord_id, :apple_id, :steam_id, :google_id, :facebook_id]
+
+  @doc """
+  True when nothing but a device id backs this account.
+
+  Such an account is created by `POST /api/v1/login/device` with no proof of
+  anything, costs an attacker one request, and cannot be emailed - which is why
+  it is the tier that gets the tighter quotas and the shorter retention window.
+  """
+  @spec anonymous?(t()) :: boolean()
+  def anonymous?(%__MODULE__{} = user) do
+    Enum.all?(@identity_fields, &is_nil(Map.fetch!(user, &1)))
+  end
+
+  @doc false
+  @spec identity_fields() :: [atom()]
+  def identity_fields, do: @identity_fields
+
   @doc """
   A user changeset for registering a new user.
   """

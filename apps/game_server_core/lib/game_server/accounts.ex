@@ -1169,6 +1169,15 @@ defmodule GameServer.Accounts do
   end
 
   @doc """
+  Whether `user` may upload an avatar, per `anonymous_can_upload_avatar`.
+  """
+  @spec can_upload_avatar?(User.t()) :: boolean()
+  def can_upload_avatar?(%User{} = user) do
+    not User.anonymous?(user) or
+      GameServer.Settings.get(__MODULE__, :anonymous_can_upload_avatar)
+  end
+
+  @doc """
   Attach a device_id to an existing user record. Returns {:ok, user} or
   {:error, changeset} if the device_id is already used.
   """
@@ -1197,6 +1206,14 @@ defmodule GameServer.Accounts do
     default: true,
     doc:
       "Allow POST /api/v1/login/device. When on, any unknown device_id creates an anonymous account."
+  )
+
+  setting(:anonymous_can_upload_avatar, :boolean,
+    default: false,
+    doc:
+      "Allow device-only accounts to upload an avatar. Off by default: an anonymous " <>
+        "account costs one request to create, so this is the cheapest way for a bot " <>
+        "to burn object storage."
   )
 
   setting(:require_activation, :boolean,
@@ -2018,6 +2035,10 @@ defmodule GameServer.Accounts do
         # Notify plugins the user is gone so they can refresh derived state that
         # does not cascade at the DB level (e.g. maintained aggregate counters).
         # Cascaded rows (kv_entries, plugin FK tables) are already removed here.
+        # Storage does not cascade: without this the user's avatars outlive the
+        # account indefinitely, which defeats both retention and erasure requests.
+        delete_user_storage(user.id)
+
         _ = GameServer.Hooks.internal_call(:after_user_deleted, [user])
 
         ok
@@ -2243,6 +2264,27 @@ defmodule GameServer.Accounts do
       err ->
         err
     end
+  end
+
+  @doc """
+  Removes every stored object belonging to `user_id`.
+
+  Best-effort, like `prune_user_avatars/2`: a storage backend that is down must
+  not block an account deletion that has already happened at the database level.
+  """
+  @spec delete_user_storage(Ecto.UUID.t()) :: :ok
+  def delete_user_storage(user_id) when is_binary(user_id) do
+    case GameServer.Storage.delete_prefix("avatars/#{user_id}/") do
+      {:ok, _count} -> :ok
+      {:error, reason} -> log_storage_cleanup_failure(user_id, reason)
+    end
+  rescue
+    e -> log_storage_cleanup_failure(user_id, e)
+  end
+
+  defp log_storage_cleanup_failure(user_id, reason) do
+    Logger.warning("storage cleanup failed user=#{user_id}: #{inspect(reason)}")
+    :ok
   end
 
   @doc """

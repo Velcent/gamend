@@ -99,6 +99,48 @@ defmodule GameServer.Storage.S3 do
     end)
   end
 
+  @impl true
+  def stat(key) do
+    case bucket() |> S3.head_object(key) |> request() do
+      {:ok, %{headers: headers}} ->
+        {:ok,
+         %{
+           size: headers |> header("content-length") |> to_size(),
+           content_type: header(headers, "content-type")
+         }}
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
+  @impl true
+  def delete_prefix(prefix) do
+    keys = prefix |> object_stream() |> Enum.map(& &1.key)
+
+    case bucket() |> S3.delete_all_objects(keys) |> ExAws.request(aws_config_overrides()) do
+      {:ok, _} -> {:ok, length(keys)}
+      {:error, reason} -> {:error, reason}
+    end
+  end
+
+  # ExAws returns headers as a list of tuples, and header names are
+  # case-insensitive per RFC 9110.
+  defp header(headers, name) do
+    Enum.find_value(headers, fn {k, v} ->
+      if String.downcase(k) == name, do: v
+    end)
+  end
+
+  defp to_size(nil), do: 0
+
+  defp to_size(value) do
+    case Integer.parse(value) do
+      {size, _} -> size
+      :error -> 0
+    end
+  end
+
   defp object_stream(prefix) do
     bucket()
     |> S3.list_objects(prefix: prefix)
