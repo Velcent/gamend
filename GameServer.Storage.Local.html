@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.1">
-    <meta name="project" content="game_server_core v1.0.1078">
+    <meta name="project" content="game_server_core v1.0.1079">
 
 
-    <title>GameServer.Storage.Local — game_server_core v1.0.1078</title>
+    <title>GameServer.Storage.Local — game_server_core v1.0.1079</title>
 
     <link rel="stylesheet" href="dist/html-elixir-YJO4MOOW.css" />
 
-    <script defer src="dist/sidebar_items-C8081AB0.js"></script>
+    <script defer src="dist/sidebar_items-6CE18EDE.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-YU4BZFVS.js"></script>
 
@@ -37,7 +37,7 @@
 game_server_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1078
+          v1.0.1079
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ game_server_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">GameServer.<wbr>Storage.<wbr>Local</span> 
-      <small class="app-vsn" translate="no">(game_server_core v1.0.1078)</small>
+      <small class="app-vsn" translate="no">(game_server_core v1.0.1079)</small>
 
     </h1>
 
@@ -123,15 +123,86 @@ token — an S3 presigned <code class="inline">PUT</code> simply ignores the ext
 
 </div>
 
+  <section id="summary" class="details-list">
+    <h2 class="section-heading">
+      <a class="hover-link" href="#summary">
+        <i class="ri-link-m" aria-hidden="true"></i>
+      </a>
+      <span class="text">Summary</span>
+    </h2>
+<div class="summary-functions summary">
+  <h3>
+    <a href="#functions">Functions</a>
+  </h3>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#root_dir/0" data-no-tooltip="" translate="no">root_dir()</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Directory objects are written to.</p></div>
+
+    </div>
+
+</div>
+
+  </section>
+
+
+  <section id="functions" class="details-list">
+    <h2 class="section-heading">
+      <a class="hover-link" href="#functions">
+        <i class="ri-link-m" aria-hidden="true"></i>
+      </a>
+      <span class="text">Functions</span>
+    </h2>
+
+    <div class="functions-list">
+<section class="detail" id="root_dir/0">
+
+  <div class="detail-header">
+    <a href="#root_dir/0" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">root_dir()</h1>
+
+
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/storage/local.ex#L133" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> root_dir() :: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()</pre>
+
+      </div>
+
+<p>Directory objects are written to.</p><p>Reads the declared <code class="inline">:dir</code> setting, so <code class="inline">GAMEND_STORAGE_DIR</code> and the documented
+default are the single source of truth. The previous fallback here pointed at
+the <em>application's</em> priv directory, which is a different path from the
+declared <code class="inline">priv/storage</code> default — and inside a release it is a versioned
+directory that a deploy replaces, silently taking every stored object with it.</p>
+  </section>
+</section>
+
+    </div>
+  </section>
 
     <footer class="footer">
 
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/game_server_core/1.0.1078">Hex Package</a>
+              <a href="https://hex.pm/packages/game_server_core/1.0.1079">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/game_server_core/1.0.1078">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/game_server_core/1.0.1079">Hex Preview</a>
 
             </span>
 
