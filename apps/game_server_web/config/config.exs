@@ -1,5 +1,13 @@
 import Config
 
+# `mix cmd` (how host precommits run this app's tasks) pipes child output, so
+# this BEAM boots with ANSI off even when the invoking terminal supports
+# color. The parent sets FORCE_ANSI=true only when its own stdout is a TTY,
+# so CI logs stay escape-free.
+if System.get_env("FORCE_ANSI") == "true" do
+  config :elixir, :ansi_enabled, true
+end
+
 config :game_server_web, :scopes,
   user: [
     default: true,

@@ -39,12 +39,55 @@ defmodule GameServerHost.Application do
       jwt_info(),
       oauth_info(),
       clustering_info(),
+      storage_info(),
       plugins_info(),
       channels_info(),
       endpoint_info()
     ]
 
     Logger.info(Enum.join(lines, "\n  "))
+  end
+
+  # Local storage inside the release is a trap: a deploy replaces that directory
+  # and every uploaded or mirrored object goes with it, while the URLs stored in
+  # the database keep pointing at files that no longer exist. Say so at boot
+  # rather than letting it be discovered as an empty admin page months later.
+  defp storage_info do
+    adapter = GameServer.Storage.adapter() |> inspect() |> String.split(".") |> List.last()
+
+    case adapter do
+      "Local" ->
+        dir = GameServer.Storage.Local.root_dir()
+
+        "  Storage: local disk at #{dir}" <> ephemeral_warning(dir)
+
+      other ->
+        "  Storage: #{other}"
+    end
+  end
+
+  defp ephemeral_warning(dir) do
+    release? = System.get_env("RELEASE_NAME") != nil
+
+    inside_release? =
+      String.starts_with?(
+        Path.expand(dir),
+        Path.expand(to_string(:code.lib_dir(:game_server_core)))
+      )
+
+    if release? and (inside_release? or not absolute_and_outside_app?(dir)) do
+      " [WARNING: this path is replaced on every deploy — stored objects will be" <>
+        " lost. Set GAMEND_STORAGE_DIR to a mounted volume, or use the S3 adapter]"
+    else
+      ""
+    end
+  end
+
+  # A relative path resolves against the release's working directory, which is
+  # inside the image; only an absolute path can be a mounted volume.
+  defp absolute_and_outside_app?(dir) do
+    Path.type(dir) == :absolute and
+      not String.starts_with?(dir, Path.expand(to_string(:code.root_dir())))
   end
 
   defp database_info do

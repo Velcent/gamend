@@ -7,6 +7,9 @@ primary_region = "ams"
 [env]
   GAMEND_HTTP_PORT = "4000"
   GAMEND_DB_SQLITE_PATH = "/data/game_server_prod.db"
+  # Uploads and mirrored avatars, on the same volume as the database. The
+  # default lives inside the release image, which every deploy replaces.
+  GAMEND_STORAGE_DIR = "/data/storage"
 
 [http_service]
   internal_port = 4000

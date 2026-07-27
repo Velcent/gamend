@@ -340,7 +340,7 @@ Live values, and where each one came from, are on the
 | `GAMEND_STORAGE_ACCESS_KEY_ID` | string | - | **Required in production.** Secret - never log or commit it. |
 | `GAMEND_STORAGE_ADAPTER` | atom | `:local` | Backend for avatars and uploads: local \| s3 (any S3-compatible service). |
 | `GAMEND_STORAGE_BUCKET` | string | - | **Required in production.** |
-| `GAMEND_STORAGE_DIR` | string | `"priv/storage"` | Directory the local adapter writes objects to. |
+| `GAMEND_STORAGE_DIR` | string | `"priv/storage"` | Directory the local adapter writes objects to. Point this at persistent storage (a mounted volume) in production — the default lives with the app and does not survive a redeploy. |
 | `GAMEND_STORAGE_ENDPOINT` | string | - | Custom endpoint, e.g. https://<account>.r2.cloudflarestorage.com. |
 | `GAMEND_STORAGE_PUBLIC_URL` | string | - | CDN or base URL serving stored objects, whichever backend is behind it. |
 | `GAMEND_STORAGE_REGION` | string | `"auto"` | Region, or "auto" for services that do not use one (R2, MinIO). |

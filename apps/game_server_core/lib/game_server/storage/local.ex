@@ -120,9 +120,19 @@ defmodule GameServer.Storage.Local do
     Path.join(root_dir(), safe)
   end
 
-  defp root_dir do
+  @doc """
+  Directory objects are written to.
+
+  Reads the declared `:dir` setting, so `GAMEND_STORAGE_DIR` and the documented
+  default are the single source of truth. The previous fallback here pointed at
+  the *application's* priv directory, which is a different path from the
+  declared `priv/storage` default — and inside a release it is a versioned
+  directory that a deploy replaces, silently taking every stored object with it.
+  """
+  @spec root_dir() :: String.t()
+  def root_dir do
     case config()[:dir] do
-      nil -> Path.join(to_string(:code.priv_dir(:game_server_core)), "storage")
+      nil -> GameServer.Settings.get(__MODULE__, :dir)
       dir -> dir
     end
   end
@@ -137,7 +147,10 @@ defmodule GameServer.Storage.Local do
 
   setting(:dir, :string,
     default: "priv/storage",
-    doc: "Directory the local adapter writes objects to."
+    doc:
+      "Directory the local adapter writes objects to. Point this at persistent " <>
+        "storage (a mounted volume) in production — the default lives with the " <>
+        "app and does not survive a redeploy."
   )
 
   defp base_url, do: GameServer.Settings.get(GameServer.Storage, :public_url) || ""

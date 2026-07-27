@@ -143,8 +143,16 @@ defmodule GameServerHost.MixProject do
     |> Enum.each(&File.rm/1)
   end
 
-  defp web_cmd(task), do: "cmd --cd #{web_app_path()} mix #{task}"
-  defp web_test_cmd(task), do: "cmd --cd #{web_app_path()} env MIX_ENV=test mix #{task}"
+  # `mix cmd` pipes the child's stdio, so the child BEAM boots with ANSI off
+  # and cmd-wrapped steps lose color even on a TTY. Forward this process's own
+  # color state; the web app's config.exs honors FORCE_ANSI. On CI (no TTY)
+  # nothing is set and logs stay escape-free.
+  defp force_ansi, do: if(IO.ANSI.enabled?(), do: "FORCE_ANSI=true ", else: "")
+
+  defp web_cmd(task), do: "cmd --cd #{web_app_path()} env #{force_ansi()}mix #{task}"
+
+  defp web_test_cmd(task),
+    do: "cmd --cd #{web_app_path()} env MIX_ENV=test #{force_ansi()}mix #{task}"
 
   defp local_web_commands(commands) do
     if local_web_source?(), do: commands, else: []
