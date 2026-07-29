@@ -1,4 +1,4 @@
-# game_server_core v1.0.1083 - API Reference
+# game_server_core v1.0.1084 - API Reference
 
 ## Modules
 
@@ -9,6 +9,8 @@ and business logic.
 L2 cache.
 - [GameServer.Database](GameServer.Database.md): Connection and tuning settings for `GameServer.Repo`.
 - [GameServer.Mail](GameServer.Mail.md): Outbound email transport.
+- [GameServer.Signaling](GameServer.Signaling.md): Public API for the WebRTC signaling server.
+- [GameServer.Signaling.Server](GameServer.Signaling.Server.md): Signaling relay for WebRTC user-to-user and client-server topologies.
 - [GameServer.Time](GameServer.Time.md): The server's wall clock, in milliseconds since the epoch, for sending to
 clients.
 

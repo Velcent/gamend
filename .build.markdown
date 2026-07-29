@@ -135,6 +135,8 @@ GameServer.Schema.md
 GameServer.SchemaJSON.md
 GameServer.Settings.Provider.md
 GameServer.Settings.md
+GameServer.Signaling.Server.md
+GameServer.Signaling.md
 GameServer.Storage.Adapter.md
 GameServer.Storage.Local.md
 GameServer.Storage.S3.md

@@ -136,6 +136,8 @@ GameServer.Schema.html
 GameServer.SchemaJSON.html
 GameServer.Settings.Provider.html
 GameServer.Settings.html
+GameServer.Signaling.Server.html
+GameServer.Signaling.html
 GameServer.Storage.Adapter.html
 GameServer.Storage.Local.html
 GameServer.Storage.S3.html
@@ -171,8 +173,8 @@ dist/lato-latin-700-normal-2XVSBPG4.woff2
 dist/lato-latin-ext-400-normal-N27NCBWW.woff2
 dist/lato-latin-ext-700-normal-Q2L5DVMW.woff2
 dist/remixicon-ZWU5GQ4X.woff2
-dist/search_data-74F07A72.js
-dist/sidebar_items-A91C806B.js
+dist/search_data-D28C4B68.js
+dist/sidebar_items-0FCA2368.js
 index.html
 readme.html
 search.html
