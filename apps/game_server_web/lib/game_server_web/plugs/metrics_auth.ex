@@ -6,18 +6,24 @@ defmodule GameServerWeb.Plugs.MetricsAuth do
 
   1. **Loopback** (127.x, ::1) — always allowed without auth.
 
-  2. **Bearer token** — if `METRICS_AUTH_TOKEN` is set, every non-loopback
-     request must include `Authorization: Bearer <token>`, including
-     private/Docker-internal IPs. (Trusting a private source IP is unsafe behind
-     a proxy that can be made to leave `remote_ip` as its own private address.)
+  2. **Bearer token** — if `GAMEND_OBSERVABILITY_METRICS_TOKEN` is set, every
+     non-loopback request must include `Authorization: Bearer <token>`,
+     including private/Docker-internal IPs. (Trusting a private source IP is
+     unsafe behind a proxy that can be made to leave `remote_ip` as its own
+     private address.)
 
   3. **No token configured** — private/Docker-internal IPs are allowed without
      auth (dev/compose convenience); all requests are allowed.
 
   ## Configuration
 
+  Like push credentials, the setting accepts inline contents or a path to a
+  file holding them (e.g. a docker secret):
+
       # In production — set this to restrict external access
-      METRICS_AUTH_TOKEN=my-secret-prometheus-token
+      GAMEND_OBSERVABILITY_METRICS_TOKEN=my-secret-prometheus-token
+      # or, sharing a docker secret with Prometheus's credentials_file:
+      GAMEND_OBSERVABILITY_METRICS_TOKEN=/run/secrets/metrics_token
 
   Prometheus scrape config with token:
 
@@ -84,8 +90,29 @@ defmodule GameServerWeb.Plugs.MetricsAuth do
 
   defp required_token do
     case GameServerWeb.Observability.get(:metrics_token) do
-      token when is_binary(token) and token != "" -> token
+      token when is_binary(token) and token != "" -> resolve_token(token)
       _ -> nil
+    end
+  end
+
+  # The setting accepts inline contents or a path to a file holding them
+  # (docker secret / mounted credential), same as the push-credential
+  # settings. Trimmed because secret files routinely end in a newline the
+  # scraper's bearer token does not carry.
+  defp resolve_token(token) do
+    if File.regular?(token) do
+      case File.read(token) do
+        {:ok, contents} ->
+          case String.trim(contents) do
+            "" -> nil
+            trimmed -> trimmed
+          end
+
+        {:error, _} ->
+          nil
+      end
+    else
+      token
     end
   end
 end

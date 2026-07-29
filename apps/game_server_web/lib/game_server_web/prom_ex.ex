@@ -20,7 +20,8 @@ defmodule GameServerWeb.PromEx do
 
   The `/metrics` endpoint is public by design (Prometheus scrapes it).
   In production, restrict access at the network/firewall level or via
-  the `METRICS_AUTH_TOKEN` env var (Bearer token check).
+  the `GAMEND_OBSERVABILITY_METRICS_TOKEN` setting (Bearer token check;
+  accepts inline contents or a path to a secret file).
   """
 
   use PromEx, otp_app: :game_server_web

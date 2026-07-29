@@ -78,6 +78,12 @@ defmodule GameServerWeb.PresentationPage do
                 <h1 class="text-4xl font-extrabold tracking-normal sm:text-5xl lg:text-6xl">
                   {Map.get(@hero, "title", "")}
                 </h1>
+                <p
+                  :if={kicker(@hero)}
+                  class="text-sm font-semibold uppercase tracking-widest text-base-content/60 sm:text-base"
+                >
+                  {kicker(@hero)}
+                </p>
                 <div class="max-w-2xl text-base leading-relaxed text-base-content/75 sm:text-lg lg:text-xl">
                   {rich_text(Map.get(@hero, "text", ""))}
                 </div>
@@ -192,6 +198,7 @@ defmodule GameServerWeb.PresentationPage do
     assigns =
       assign(assigns,
         image: image,
+        video: video_config(assigns.item),
         icon: Map.get(assigns.item, "icon"),
         size: media_size(assigns.item, assigns.variant)
       )
@@ -199,21 +206,46 @@ defmodule GameServerWeb.PresentationPage do
     ~H"""
     <div class="flex w-full items-center justify-center">
       <div class={media_shell_class()}>
-        <.media_visual image={@image} icon={@icon} variant={@variant} size={@size} />
+        <.media_visual
+          image={@image}
+          video={@video}
+          icon={@icon}
+          variant={@variant}
+          size={@size}
+        />
       </div>
     </div>
     """
   end
 
   attr :image, :map, default: %{}
+  attr :video, :map, default: %{}
   attr :icon, :string, default: nil
   attr :variant, :string, default: "section"
   attr :size, :string, default: "section"
 
   def media_visual(assigns) do
+    # `media_visual/1` is public and callable without a `video` attr, whose
+    # default is a bare `%{}` — merge over the full shape so the template can
+    # read `@video.src` unconditionally.
+    assigns = assign(assigns, :video, Map.merge(empty_video_config(), assigns.video))
+
     ~H"""
+    <video
+      :if={@video.src}
+      src={@video.src}
+      poster={@video.poster}
+      width={@video.width}
+      height={@video.height}
+      aria-label={@video.alt}
+      preload={@video.preload}
+      muted={@video.muted}
+      controls
+      playsinline
+      class={media_video_class(@size)}
+    ></video>
     <img
-      :if={@image.light && !@image.dark}
+      :if={!@video.src && @image.light && !@image.dark}
       src={@image.light}
       alt={@image.alt}
       width={@image.width}
@@ -223,7 +255,7 @@ defmodule GameServerWeb.PresentationPage do
       decoding="async"
       class={media_class(@size)}
     />
-    <div :if={@image.light && @image.dark} class="contents">
+    <div :if={!@video.src && @image.light && @image.dark} class="contents">
       <img
         src={@image.light}
         alt={@image.alt}
@@ -246,7 +278,7 @@ defmodule GameServerWeb.PresentationPage do
       />
     </div>
     <div
-      :if={!@image.light && @icon}
+      :if={!@video.src && !@image.light && @icon}
       class="grid aspect-square w-full max-w-48 place-items-center rounded-lg bg-base-100/70 text-base-content/70 shadow-sm"
     >
       <.dynamic_icon name={@icon} class="size-16" />
@@ -416,8 +448,55 @@ defmodule GameServerWeb.PresentationPage do
     end
   end
 
+  # Short qualifier line under the hero title ("Strategy Card Game • Free to
+  # Play" style). Plain text only — it renders inside `{}` so HTML never
+  # reaches the page.
+  defp kicker(hero) when is_map(hero), do: non_empty_string(Map.get(hero, "kicker"))
+  defp kicker(_hero), do: nil
+
+  # A `"video"` item renders in place of `"image"`, so the same slot in a hero
+  # or section holds either. `src` and `poster` go through `image_src/1` for
+  # the content-hashed `?v=` query — static responses are served
+  # `immutable, max-age=1y`, so an unversioned path would pin a recut trailer
+  # in browser caches for a year.
+  defp video_config(item) do
+    case Map.get(item, "video") do
+      video when is_map(video) ->
+        poster = non_empty_string(Map.get(video, "poster"))
+        {natural_width, natural_height} = image_dimensions(poster)
+
+        %{
+          src: image_src(non_empty_string(Map.get(video, "src"))),
+          poster: image_src(poster),
+          alt: Map.get(video, "alt", ""),
+          width: positive_int(Map.get(video, "width")) || natural_width,
+          height: positive_int(Map.get(video, "height")) || natural_height,
+          preload: video_preload(Map.get(video, "preload")),
+          muted: Map.get(video, "muted", true) != false
+        }
+
+      _ ->
+        empty_video_config()
+    end
+  end
+
+  defp empty_video_config do
+    %{
+      src: nil,
+      poster: nil,
+      alt: "",
+      width: nil,
+      height: nil,
+      preload: "metadata",
+      muted: true
+    }
+  end
+
+  defp video_preload(value) when value in ["none", "metadata", "auto"], do: value
+  defp video_preload(_value), do: "metadata"
+
   defp section_text_frame_class(section) do
-    if image_config(section).light do
+    if image_config(section).light || video_config(section).src do
       "md:min-h-[min(42dvh,24rem)]"
     else
       "md:min-h-48"
@@ -548,6 +627,15 @@ defmodule GameServerWeb.PresentationPage do
 
   defp media_class("section"),
     do: "block aspect-square max-h-[42dvh] w-full rounded-lg object-contain"
+
+  # No `aspect-square` here, unlike `media_class/1` — video is natively
+  # widescreen and squaring the box would letterbox it into a fraction of the
+  # slot.
+  defp media_video_class("hero"),
+    do: "block max-h-[58dvh] w-full rounded-lg object-contain"
+
+  defp media_video_class("section"),
+    do: "block max-h-[42dvh] w-full rounded-lg object-contain"
 
   defp media_shell_class,
     do: "flex w-full items-center justify-center"

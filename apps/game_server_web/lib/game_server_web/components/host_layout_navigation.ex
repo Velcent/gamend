@@ -46,34 +46,51 @@ defmodule GameServerWeb.HostLayoutNavigation do
         <.nav_divider />
 
         <li>
-          <.link
-            href={~p"/users/log_in"}
-            class={[
-              "btn",
-              if(String.starts_with?(@current_path, "/users/log_in"),
+          <details class="dropdown dropdown-end" data-navbar-dropdown>
+            <summary class={[
+              "btn gap-1 list-none",
+              if(
+                String.starts_with?(@current_path, "/users/log_in") or
+                  String.starts_with?(@current_path, "/users/register"),
                 do: "btn-primary",
                 else: "btn-outline"
               )
-            ]}
-          >
-            <.icon name="hero-arrow-right-on-rectangle-solid" class="w-4 h-4" />
-            {GameServerWeb.HostLayouts.translate("Log in")}
-          </.link>
-        </li>
-        <li>
-          <.link
-            href={~p"/users/register"}
-            class={[
-              "btn",
-              if(String.starts_with?(@current_path, "/users/register"),
-                do: "btn-primary",
-                else: "btn-outline"
-              )
-            ]}
-          >
-            <.icon name="hero-user-plus-solid" class="w-4 h-4" />
-            {GameServerWeb.HostLayouts.translate("Register")}
-          </.link>
+            ]}>
+              <.icon name="hero-user-circle-solid" class="w-4 h-4" />
+              {GameServerWeb.HostLayouts.translate("Account")}
+              <.icon name="hero-chevron-down-solid" class="w-3 h-3" />
+            </summary>
+            <ul class="menu menu-sm dropdown-content mt-2 z-[1] p-2 shadow-lg bg-base-100 rounded-box w-56">
+              <li>
+                <.link
+                  href={~p"/users/log_in"}
+                  class={[
+                    if(String.starts_with?(@current_path, "/users/log_in"),
+                      do: "menu-active",
+                      else: ""
+                    )
+                  ]}
+                >
+                  <.icon name="hero-arrow-right-on-rectangle-solid" class="w-4 h-4" />
+                  {GameServerWeb.HostLayouts.translate("Log in")}
+                </.link>
+              </li>
+              <li>
+                <.link
+                  href={~p"/users/register"}
+                  class={[
+                    if(String.starts_with?(@current_path, "/users/register"),
+                      do: "menu-active",
+                      else: ""
+                    )
+                  ]}
+                >
+                  <.icon name="hero-user-plus-solid" class="w-4 h-4" />
+                  {GameServerWeb.HostLayouts.translate("Register")}
+                </.link>
+              </li>
+            </ul>
+          </details>
         </li>
       <% end %>
 

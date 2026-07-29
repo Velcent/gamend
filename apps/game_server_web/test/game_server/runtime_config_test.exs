@@ -144,6 +144,32 @@ defmodule GameServer.RuntimeConfigTest do
       assert is_integer(repo[:pool_size])
       assert is_integer(repo[:timeout])
     end
+
+    # SQLite options must be top-level repo options: ecto_sqlite3 has no
+    # `pragmas:` key and silently ignored one for months, leaving prod at the
+    # 2000ms default busy timeout while GAMEND_DB_SQLITE_BUSY_TIMEOUT_MS
+    # appeared configurable. The synchronous setting is a declared :atom — a
+    # case on "off"/"full" strings never matched and forced :normal.
+    @tag env: %{
+           "GAMEND_DB_URL" => "",
+           "GAMEND_AUTH_SECRET_KEY_BASE" => String.duplicate("a", 64),
+           "GAMEND_DB_SQLITE_PATH" => "/tmp/runtime_config_test.db",
+           "GAMEND_DB_SQLITE_BUSY_TIMEOUT_MS" => "7000",
+           "GAMEND_DB_SQLITE_SYNCHRONOUS" => "full"
+         }
+    test "sqlite settings land as top-level options the adapter reads", %{config: config} do
+      repo = config[:game_server_core][GameServer.Repo]
+
+      assert repo[:adapter] == Ecto.Adapters.SQLite3
+      assert repo[:database] == "/tmp/runtime_config_test.db"
+      assert repo[:default_transaction_mode] == :immediate
+      assert repo[:journal_mode] == :wal
+      assert repo[:busy_timeout] == 7000
+      assert repo[:synchronous] == :full
+      refute Keyword.has_key?(repo, :pragmas)
+      # DBConnection's query timeout must outlast the busy wait.
+      assert repo[:timeout] >= repo[:busy_timeout] + 5_000
+    end
   end
 
   describe "storage and rate limiting" do

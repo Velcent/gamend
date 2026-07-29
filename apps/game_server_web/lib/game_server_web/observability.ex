@@ -43,7 +43,9 @@ defmodule GameServerWeb.Observability do
 
   setting(:metrics_token, :string,
     secret: true,
-    doc: "When set, every non-loopback /metrics scrape must send `Authorization: Bearer <token>`."
+    doc:
+      "When set, every non-loopback /metrics scrape must send `Authorization: Bearer <token>`. " <>
+        "Accepts the token inline or a path to a file holding it (e.g. a docker secret)."
   )
 
   setting(:grafana_url, :string,
