@@ -288,6 +288,88 @@ defmodule GameServerWeb.PresentationPage do
 
   attr :section, :map, required: true
 
+  # `"media_layout": "cover"` uses the image as the section's cover: it fills
+  # the whole section (object-cover behind a scrim) with the title, text and
+  # buttons overlaid in the center. Pair with `"height": "full"` for a
+  # one-per-viewport banner.
+  def section(%{section: %{"media_layout" => "cover"}} = assigns) do
+    assigns = assign(assigns, image: image_config(assigns.section))
+
+    ~H"""
+    <section class={[
+      "relative flex w-full items-center justify-center overflow-hidden rounded-lg",
+      section_height_class(@section)
+    ]}>
+      <img
+        :if={@image.light}
+        src={@image.light}
+        alt={@image.alt}
+        width={@image.width}
+        height={@image.height}
+        loading="lazy"
+        decoding="async"
+        class={[
+          "absolute inset-0 h-full w-full object-cover",
+          @image.dark && "[[data-theme=dark]_&]:hidden"
+        ]}
+      />
+      <img
+        :if={@image.dark}
+        src={@image.dark}
+        alt={@image.alt}
+        width={@image.width}
+        height={@image.height}
+        loading="lazy"
+        decoding="async"
+        class="absolute inset-0 hidden h-full w-full object-cover [[data-theme=dark]_&]:block"
+      />
+      <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/10"></div>
+      <div class="relative z-10 flex w-full flex-col items-center gap-4 px-6 py-10 text-center">
+        <.dynamic_icon
+          :if={non_empty_string(Map.get(@section, "icon"))}
+          name={Map.get(@section, "icon")}
+          class="size-12 text-white/90"
+        />
+        <h2 class="text-2xl font-bold tracking-normal text-white drop-shadow sm:text-3xl">
+          {Map.get(@section, "title", "")}
+        </h2>
+        <div class="max-w-3xl text-base leading-relaxed text-white/85 drop-shadow">
+          {rich_text(Map.get(@section, "text", ""))}
+        </div>
+        <div :if={has_buttons?(@section)} class="pt-1">
+          <.buttons buttons={Map.get(@section, "buttons", [])} />
+        </div>
+      </div>
+    </section>
+    """
+  end
+
+  # `"media_layout": "full"` stacks the section: media across the whole width
+  # (16:9 art keeps its shape — no aspect-square box), then centered text and
+  # buttons. Media stays optional, so full-layout also covers text-only or
+  # icon-only sections.
+  def section(%{section: %{"media_layout" => "full"}} = assigns) do
+    ~H"""
+    <section class={[
+      "flex w-full flex-col items-center justify-center gap-6",
+      section_height_class(@section)
+    ]}>
+      <.media :if={has_media?(@section)} item={@section} variant="full" />
+      <div class="flex w-full flex-col items-center gap-4 text-center">
+        <h2 class="text-2xl font-bold tracking-normal sm:text-3xl">
+          {Map.get(@section, "title", "")}
+        </h2>
+        <div class="max-w-3xl text-base leading-relaxed text-base-content/75">
+          {rich_text(Map.get(@section, "text", ""))}
+        </div>
+        <div :if={has_buttons?(@section)} class="pt-1">
+          <.buttons buttons={Map.get(@section, "buttons", [])} />
+        </div>
+      </div>
+    </section>
+    """
+  end
+
   def section(assigns) do
     ~H"""
     <section class={[
@@ -354,16 +436,21 @@ defmodule GameServerWeb.PresentationPage do
     end
   end
 
+  # `svh`, not `dvh`: section heights set the page's total height, and `dvh`
+  # re-resolves whenever the dynamic viewport changes (mobile URL bar showing
+  # or hiding, chrome settling during load). That moves every section, so a
+  # scroll position the browser restores on reload lands at the wrong offset
+  # and visibly jumps once layout settles. `svh` is fixed for the session.
   defp section_height_class(section) do
     case section_height(section) do
       value when value in ["compact", "sm", "small"] ->
         "py-8"
 
       value when value in ["half", "50", "50%"] ->
-        "min-h-[calc(50dvh-2.5rem)] py-8"
+        "min-h-[calc(50svh-2.5rem)] py-8"
 
       value when value in ["full", "screen", "100", "100%"] ->
-        "min-h-[calc(100dvh-5rem)] py-12"
+        "min-h-[calc(100svh-5rem)] py-12"
 
       _ ->
         "py-8"
@@ -503,6 +590,13 @@ defmodule GameServerWeb.PresentationPage do
     end
   end
 
+  # Only reachable from the full-layout section clause, whose pattern already
+  # guarantees a map.
+  defp has_media?(item) do
+    image_config(item).light != nil or video_config(item).src != nil or
+      non_empty_string(Map.get(item, "icon")) != nil
+  end
+
   defp has_buttons?(item) when is_map(item) do
     item
     |> Map.get("buttons", [])
@@ -625,6 +719,8 @@ defmodule GameServerWeb.PresentationPage do
 
   defp media_class("hero"), do: "block max-h-[58dvh] w-full rounded-lg object-contain"
 
+  defp media_class("full"), do: "block max-h-[70dvh] w-full rounded-lg object-contain"
+
   defp media_class("section"),
     do: "block aspect-square max-h-[42dvh] w-full rounded-lg object-contain"
 
@@ -633,6 +729,9 @@ defmodule GameServerWeb.PresentationPage do
   # slot.
   defp media_video_class("hero"),
     do: "block max-h-[58dvh] w-full rounded-lg object-contain"
+
+  defp media_video_class("full"),
+    do: "block max-h-[70dvh] w-full rounded-lg object-contain"
 
   defp media_video_class("section"),
     do: "block max-h-[42dvh] w-full rounded-lg object-contain"

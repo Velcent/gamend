@@ -25,7 +25,7 @@ defmodule HandleWebRTC.WebRTCLobbyHook do
       shared_dep(:game_server_sdk, "../../../sdk"),
       shared_dep(:game_server_plugin_tools, "../../../sdk_tools"),
       {:bunt, "~> 1.0"},
-      {:phoenix, "~> 1.8.3"},
+      {:phoenix, "~> 1.8.3"}
     ]
   end
 

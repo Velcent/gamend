@@ -4,7 +4,7 @@ defmodule GameServerWeb.SignalingChannel do
 
   Topic: `signaling:<room_id>`
 
-  Rooms are created by the `WebRTCLobbyHook` through `Server.create_room/3`.
+  Rooms are the lobby: `GameServer.Signaling` derives them from lobby metadata.
   The allowed-user list is populated by the hook, so this channel does not
   need to query the lobby system. The topology and host are fixed at room
   creation; clients cannot choose their role.
@@ -42,7 +42,8 @@ defmodule GameServerWeb.SignalingChannel do
   import GameServerWeb.ChannelPush
   require Logger
 
-  alias GameServer.Signaling.Server
+  alias GameServer.Presence
+  alias GameServer.Signaling
 
   # WebSocket message rate limits (per user) — defaults, overridden by config
   @default_ws_rate_limit 300
@@ -64,15 +65,18 @@ defmodule GameServerWeb.SignalingChannel do
 
       {:error, %{reason: "unauthorized"}}
     else
-      case Server.join_room(room_id, user_id, self(), %{}) do
+      case Signaling.authorize(room_id, user_id) do
         {:ok, role} ->
           Logger.info("SignalingChannel: join ok room=#{room_id} user=#{user_id} role=#{role}")
+
+          send(self(), :after_signaling_join)
 
           {:ok, %{user_id: user_id, role: role},
            assign(socket,
              signaling_room: room_id,
              signaling_user_id: user_id,
-             signaling_role: role
+             signaling_role: role,
+             pending_leaves: %{}
            )}
 
         {:error, :room_not_found} ->
@@ -88,13 +92,6 @@ defmodule GameServerWeb.SignalingChannel do
           )
 
           {:error, %{reason: "not_allowed"}}
-
-        {:error, reason} ->
-          Logger.warning(
-            "SignalingChannel: join failed reason=#{reason} room=#{room_id} user=#{user_id}"
-          )
-
-          {:error, %{reason: to_string(reason)}}
       end
     end
   end
@@ -107,7 +104,7 @@ defmodule GameServerWeb.SignalingChannel do
       room = socket.assigns.signaling_room
       from = socket.assigns.signaling_user_id
 
-      case Server.relay_message(room, from, target, :offer, %{sdp: sdp}) do
+      case Signaling.relay(room, from, target, :offer, %{sdp: sdp}) do
         :ok ->
           {:reply, {:ok, %{}}, socket}
 
@@ -141,7 +138,7 @@ defmodule GameServerWeb.SignalingChannel do
       room = socket.assigns.signaling_room
       from = socket.assigns.signaling_user_id
 
-      case Server.relay_message(room, from, target, :answer, %{sdp: sdp}) do
+      case Signaling.relay(room, from, target, :answer, %{sdp: sdp}) do
         :ok ->
           {:reply, {:ok, %{}}, socket}
 
@@ -175,7 +172,7 @@ defmodule GameServerWeb.SignalingChannel do
       room = socket.assigns.signaling_room
       from = socket.assigns.signaling_user_id
 
-      case Server.relay_message(room, from, target, :ice, %{candidate: candidate}) do
+      case Signaling.relay(room, from, target, :ice, %{candidate: candidate}) do
         :ok ->
           {:reply, {:ok, %{}}, socket}
 
@@ -206,7 +203,7 @@ defmodule GameServerWeb.SignalingChannel do
       room = socket.assigns.signaling_room
       from = socket.assigns.signaling_user_id
 
-      case Server.broadcast_message(room, from, :offer, %{sdp: sdp, from_user_id: from}) do
+      case Signaling.broadcast(room, from, :offer, %{sdp: sdp, from_user_id: from}) do
         :ok ->
           {:reply, {:ok, %{}}, socket}
 
@@ -232,13 +229,11 @@ defmodule GameServerWeb.SignalingChannel do
     with :ok <- check_ws_rate_limit(socket) do
       room = socket.assigns.signaling_room
 
-      case Server.list_users(room) do
-        users when is_map(users) ->
-          {:reply, {:ok, %{users: users}}, socket}
-
-        {:error, :room_not_found} ->
-          Logger.warning("SignalingChannel: list_users failed room_not_found room=#{room}")
-          {:stop, :normal, {:error, %{error: "room_not_found"}}, socket}
+      if Signaling.enabled?(room) do
+        {:reply, {:ok, %{users: Signaling.peers(room)}}, socket}
+      else
+        Logger.warning("SignalingChannel: list_users failed room_not_found room=#{room}")
+        {:stop, :normal, {:error, %{error: "room_not_found"}}, socket}
       end
     end
   end
@@ -250,6 +245,60 @@ defmodule GameServerWeb.SignalingChannel do
     )
 
     {:reply, {:error, %{error: "unknown_event"}}, socket}
+  end
+
+  # ── Presence ─────────────────────────────────────────────────────────────
+
+  # Tracking happens after join so `Presence.track/3` sees a joined channel.
+  # Subscribing to our own inbox is what makes relays work across nodes: the
+  # sender broadcasts to `signaling:<room>:<user>` and whichever node holds
+  # that socket delivers it.
+  @impl true
+  def handle_info(:after_signaling_join, socket) do
+    %{signaling_room: room, signaling_user_id: user_id, signaling_role: role} = socket.assigns
+
+    {:ok, _ref} =
+      Presence.track(self(), Signaling.topic(room), user_id, %{
+        role: role,
+        joined_at: System.system_time(:second)
+      })
+
+    Phoenix.PubSub.subscribe(GameServer.PubSub, Signaling.inbox(room, user_id))
+    Phoenix.PubSub.subscribe(GameServer.PubSub, Signaling.topic(room))
+
+    # Seed the newcomer with everyone already here so it can start connecting.
+    for {other_id, other_role} <- Signaling.peers(room), other_id != user_id do
+      push_event(socket, "user_joined", %{user_id: other_id, role: other_role})
+    end
+
+    {:noreply, socket}
+  end
+
+  # Presence diffs carry the cluster-wide view. Translated into this channel's
+  # existing event names so the client protocol is unchanged.
+  @impl true
+  def handle_info(%Phoenix.Socket.Broadcast{event: "presence_diff", payload: diff}, socket) do
+    socket =
+      socket
+      |> announce_joins(diff.joins)
+      |> schedule_leaves(diff.leaves)
+
+    {:noreply, socket}
+  end
+
+  # A leave is only real if the peer is still gone once the grace has passed —
+  # otherwise it was a reconnect, and tearing the WebRTC session down for a
+  # two-second blip is exactly what `reconnect_timeout` exists to prevent.
+  @impl true
+  def handle_info({:confirm_leave, user_id}, socket) do
+    room = socket.assigns.signaling_room
+    socket = update_in(socket.assigns.pending_leaves, &Map.delete(&1, user_id))
+
+    if is_nil(Signaling.peer_role(room, user_id)) do
+      push_event(socket, "user_left", %{user_id: user_id})
+    end
+
+    {:noreply, socket}
   end
 
   # ── Server relay messages ────────────────────────────────────────────────
@@ -299,9 +348,8 @@ defmodule GameServerWeb.SignalingChannel do
         "SignalingChannel: terminating reason=#{inspect(reason)} room=#{room_id} user=#{user_id}"
       )
 
-      # Do NOT call Server.leave here. The server's DOWN handler
-      # starts a grace period so the same user_id can reconnect and keep
-      # its role. Explicit leave is only used for intentional removal.
+      # Presence untracks on process exit, and peers debounce the leave for
+      # `reconnect_timeout` before reporting it, so a reconnect is invisible.
     else
       Logger.debug("SignalingChannel: terminating without room/user reason=#{inspect(reason)}")
     end
@@ -318,6 +366,47 @@ defmodule GameServerWeb.SignalingChannel do
   defp relay_event_name(:user_rejoined), do: "user_rejoined"
   defp relay_event_name(:user_left), do: "user_left"
   defp relay_event_name(:room_closed), do: "room_closed"
+
+  defp announce_joins(socket, joins) do
+    me = socket.assigns.signaling_user_id
+
+    Enum.reduce(joins, socket, fn {user_id, %{metas: metas}}, acc ->
+      if user_id == me do
+        acc
+      else
+        role = metas |> List.first() |> Map.get(:role, :user)
+        {timer, pending} = Map.pop(acc.assigns.pending_leaves, user_id)
+
+        # A join while a leave is pending is a reconnect, not a new peer.
+        event = if timer, do: "user_rejoined", else: "user_joined"
+        if timer, do: Process.cancel_timer(timer)
+
+        push_event(acc, event, %{user_id: user_id, role: role})
+        put_in(acc.assigns.pending_leaves, pending)
+      end
+    end)
+  end
+
+  defp schedule_leaves(socket, leaves) do
+    me = socket.assigns.signaling_user_id
+    grace = reconnect_timeout(socket.assigns.signaling_room)
+
+    Enum.reduce(leaves, socket, fn {user_id, _}, acc ->
+      if user_id == me do
+        acc
+      else
+        timer = Process.send_after(self(), {:confirm_leave, user_id}, grace)
+        put_in(acc.assigns.pending_leaves, Map.put(acc.assigns.pending_leaves, user_id, timer))
+      end
+    end)
+  end
+
+  defp reconnect_timeout(room) do
+    case Signaling.config(room) do
+      {:ok, %{reconnect_timeout: ms}} -> ms
+      _ -> 0
+    end
+  end
 
   # ── WebSocket rate limiting ─────────────────────────────────────────────
 

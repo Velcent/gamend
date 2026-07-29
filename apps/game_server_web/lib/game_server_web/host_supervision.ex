@@ -98,7 +98,6 @@ defmodule GameServerWeb.HostSupervision do
       # Load persisted IP bans and mirror ban events from other instances
       GameServerWeb.IpBanSync,
       {GameServerWeb.RateLimit, clean_period: :timer.minutes(5)},
-      GameServer.Lobbies.SpectatorTracker,
       GameServerWeb.AdminLogBuffer,
       # Periodic cleanup of old geo-country minute buckets
       GameServerWeb.GeoCountryCleaner
@@ -125,7 +124,7 @@ defmodule GameServerWeb.HostSupervision do
         # only one node runs it and start_link returns :ignore on the others.
         GameServer.LobbySnapshots.Writer,
         # Signaling relay for WebRTC user-to-user and client-server topologies
-        GameServer.Signaling.Server
+        GameServer.Presence
       ] ++
       extra
   end

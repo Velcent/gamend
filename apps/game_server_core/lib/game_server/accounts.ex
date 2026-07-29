@@ -1360,6 +1360,12 @@ defmodule GameServer.Accounts do
   # job for that user forever, leaving the avatar hotlinked to the provider for
   # good. Excluding them lets the next sign-in try again, while a job still
   # in flight or already completed keeps the dedupe.
+  #
+  # `source_url` is part of the key on purpose: enqueueing is already gated on
+  # "avatar is not one of our stored objects", so a completed job only blocks
+  # re-mirroring the *same* URL. Without it, an account healed after storage
+  # loss (see `dangling_stored_avatar?/1`) could never mirror its fresh
+  # provider URL — the years-old completed job would swallow it.
   @mirror_dedupe_states [:available, :scheduled, :executing, :retryable, :completed]
 
   defp maybe_mirror_avatar(%User{profile_url: url} = user) when is_binary(url) and url != "" do
@@ -1368,7 +1374,11 @@ defmodule GameServer.Accounts do
         Oban.insert(
           AvatarMirror.new(
             %{"user_id" => user.id, "source_url" => url},
-            unique: [keys: [:user_id], period: :infinity, states: @mirror_dedupe_states]
+            unique: [
+              keys: [:user_id, :source_url],
+              period: :infinity,
+              states: @mirror_dedupe_states
+            ]
           )
         )
     end
@@ -1383,6 +1393,33 @@ defmodule GameServer.Accounts do
   # previously mirrored) — anything else is an external provider link.
   defp our_stored_avatar?(%User{id: id, profile_url: url}),
     do: is_binary(url) and String.contains?(url, "avatars/#{id}")
+
+  # True when the profile URL points at our own avatar storage but the object
+  # is gone. Storage errors count as "not dangling": healing on uncertainty
+  # would overwrite a stored avatar just because the backend blipped.
+  defp dangling_stored_avatar?(%User{} = user) do
+    with true <- our_stored_avatar?(user),
+         key when is_binary(key) <- stored_avatar_key(user) do
+      not GameServer.Storage.exists?(key)
+    else
+      _ -> false
+    end
+  rescue
+    _ -> false
+  end
+
+  defp stored_avatar_key(%User{id: id, profile_url: url}) do
+    case :binary.match(url, "avatars/#{id}") do
+      {pos, _len} ->
+        url
+        |> binary_part(pos, byte_size(url) - pos)
+        |> String.split("?", parts: 2)
+        |> hd()
+
+      :nomatch ->
+        nil
+    end
+  end
 
   defp create_user_from_provider(attrs, changeset_fn) do
     is_first_user = first_user?()
@@ -1431,15 +1468,19 @@ defmodule GameServer.Accounts do
         attrs
       end
 
-    # Only set provider avatar if user doesn't already have one
+    # Only set provider avatar if user doesn't already have one — unless the
+    # one they "have" is a mirrored/uploaded avatar whose storage object no
+    # longer exists (wiped volume, pruned bucket). A dangling stored URL would
+    # otherwise block the provider avatar on every future sign-in, leaving the
+    # account with a permanently broken image nothing can heal.
     # Store provider profile images/URLs in the generic `profile_url` field.
     provider_avatar_key = :profile_url
 
     attrs =
-      if Map.get(user, provider_avatar_key) && Map.get(user, provider_avatar_key) != "" do
-        Map.delete(attrs, provider_avatar_key)
-      else
-        attrs
+      cond do
+        Map.get(user, provider_avatar_key) in [nil, ""] -> attrs
+        dangling_stored_avatar?(user) -> attrs
+        true -> Map.delete(attrs, provider_avatar_key)
       end
 
     # Also avoid overwriting an existing explicit display_name set by the user.
@@ -2307,6 +2348,49 @@ defmodule GameServer.Accounts do
     e ->
       Logger.warning("avatar prune failed user=#{user_id}: #{inspect(e)}")
       :ok
+  end
+
+  @doc """
+  Merges `patch` into the user's metadata, leaving untouched every key it does
+  not mention.
+
+  The counterpart to `GameServer.Lobbies.merge_metadata/2`, and for the same
+  reason: `metadata` is one shared map, so a writer that replaces it wipes keys
+  belonging to code it has never heard of. Top-level merge, serialized so two
+  concurrent merges cannot lose each other.
+  """
+  @spec merge_metadata(User.t(), map()) :: {:ok, User.t()} | {:error, term()}
+  def merge_metadata(%User{} = user, patch) when is_map(patch) do
+    result =
+      GameServer.Lock.serialize("user_metadata", user.id, fn ->
+        case Repo.get(User, user.id) do
+          nil ->
+            {:error, :not_found}
+
+          current ->
+            merged =
+              Map.merge(
+                current.metadata || %{},
+                Map.new(patch, fn {k, v} -> {to_string(k), v} end)
+              )
+
+            current
+            |> Ecto.Changeset.change(metadata: merged)
+            |> Repo.update()
+        end
+      end)
+
+    case result do
+      {:ok, {:ok, updated}} ->
+        invalidate_user_cache(updated)
+        {:ok, updated}
+
+      {:ok, other} ->
+        other
+
+      {:error, reason} ->
+        {:error, reason}
+    end
   end
 
   @doc """

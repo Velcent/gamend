@@ -713,6 +713,33 @@ defmodule GameServer.Lobbies do
 
 
   @doc ~S"""
+    Merges `patch` into the lobby's metadata, leaving untouched every key it does
+    not mention.
+    
+    `update_lobby/2` replaces `metadata` wholesale, so a caller writing its own
+    key silently wipes everyone else's — which is why a plugin's configuration
+    must not live there. This merges at the top level, and serializes the
+    read-modify-write so two concurrent merges cannot lose each other.
+    
+    Top-level only: a nested map is replaced, not merged into. Deep merge has no
+    obvious answer for deleting a key or combining a list, and a rule nobody can
+    predict is worse than one they can.
+    
+  """
+  @spec merge_metadata(GameServer.Lobbies.Lobby.t(), map()) ::
+  {:ok, GameServer.Lobbies.Lobby.t()} | {:error, term()}
+  def merge_metadata(_lobby, _patch) do
+    case Application.get_env(:game_server_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        {:ok, %GameServer.Lobbies.Lobby{id: 0, title: "", host_id: nil, hostless: false, max_users: 0, is_hidden: false, is_locked: false, metadata: %{}, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+
+      _ ->
+        raise "GameServer.Lobbies.merge_metadata/2 is a stub - only available at runtime on GameServer"
+    end
+  end
+
+
+  @doc ~S"""
     Attempt to find an open lobby matching the given criteria and join it, or
     create a new lobby if none matches.
     
@@ -972,6 +999,26 @@ defmodule GameServer.Lobbies do
 
       _ ->
         raise "GameServer.Lobbies.update_lobby_by_host/3 is a stub - only available at runtime on GameServer"
+    end
+  end
+
+
+  @doc ~S"""
+    Writes the server-owned `webrtc_*` columns.
+    
+    Not castable through `update_lobby/2`, so a client `PATCH` cannot reach them.
+    Go through `GameServer.Signaling.configure/2` rather than calling this.
+    
+  """
+  @spec write_webrtc_config(GameServer.Lobbies.Lobby.t(), map()) ::
+  {:ok, GameServer.Lobbies.Lobby.t()} | {:error, Ecto.Changeset.t()}
+  def write_webrtc_config(_lobby, _changes) do
+    case Application.get_env(:game_server_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        {:ok, %GameServer.Lobbies.Lobby{id: 0, title: "", host_id: nil, hostless: false, max_users: 0, is_hidden: false, is_locked: false, metadata: %{}, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+
+      _ ->
+        raise "GameServer.Lobbies.write_webrtc_config/2 is a stub - only available at runtime on GameServer"
     end
   end
 

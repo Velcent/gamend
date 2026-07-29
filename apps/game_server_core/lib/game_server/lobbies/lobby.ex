@@ -29,6 +29,15 @@ defmodule GameServer.Lobbies.Lobby do
     field :state, :string, default: "created"
     field :state_changed_at, :utc_datetime
 
+    # Signaling configuration, server-owned for the same reason. It lived in
+    # `metadata` before, where any writer replaced it wholesale and the lobby
+    # host could PATCH the topology to grant everyone broadcast rights. Only
+    # `GameServer.Signaling.configure/2` writes these.
+    field :webrtc_enabled, :boolean, default: false
+    field :webrtc_topology, :string
+    field :webrtc_late_join, :boolean, default: true
+    field :webrtc_reconnect_timeout_ms, :integer, default: 30_000
+
     belongs_to :host, User
 
     has_many :memberships, User, foreign_key: :lobby_id

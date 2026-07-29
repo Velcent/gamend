@@ -266,7 +266,15 @@ defmodule GameServerWeb.UserChannel do
 
   @impl true
   def handle_info({:after_join, %User{} = user}, socket) do
-    # Mark user online in DB
+    # Presence is the source of truth for "connected"; `users.is_online` is a
+    # projection it writes (see GameServer.Presence). Tracking here rather than
+    # setting the flag directly is what makes a second socket on another node
+    # count.
+    {:ok, _ref} =
+      GameServer.Presence.track(self(), GameServer.Presence.users_topic(), user.id, %{
+        online_at: System.system_time(:second)
+      })
+
     socket =
       case Accounts.set_user_online(user.id) do
         {:ok, updated_user} ->
@@ -528,17 +536,16 @@ defmodule GameServerWeb.UserChannel do
       # Cancel matchmaking tickets
       GameServer.Matchmaking.cancel(user_id)
 
-      # Only mark offline if no other user_channel processes remain for this user
-      # (excludes self, which is still registered until this process fully exits).
-      other_channels = GameServerWeb.ConnectionTracker.count_other_user_channels(user_id)
-
-      if other_channels == 0 do
+      # Presence untracks on exit and its diff clears `is_online` once this was
+      # the user's last socket anywhere in the cluster — the old per-node
+      # registry count could not see a socket on another node.
+      # Cluster-wide, unlike the per-node registry count this replaces: that one
+      # could not see a second socket on another node, and marked the user
+      # offline while they were still connected.
+      if GameServer.Presence.last_socket?(user_id) do
         case Accounts.set_user_offline(user_id) do
-          {:ok, _} ->
-            broadcast_member_presence(user_id, false)
-
-          _ ->
-            :ok
+          {:ok, _} -> broadcast_member_presence(user_id, false)
+          _ -> :ok
         end
       end
     end

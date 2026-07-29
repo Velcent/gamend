@@ -881,11 +881,8 @@ defmodule GameServerWeb.HostLayoutNavigation do
   """
   @spec entry_visible?(map(), map() | nil) :: boolean()
   def entry_visible?(entry, current_scope) do
-    link_visible?(entry, auth_level(scope_user(current_scope)), "any")
+    link_visible?(entry, auth_level(Scope.user(current_scope)), "any")
   end
-
-  defp scope_user(%{user: user}), do: user
-  defp scope_user(_scope), do: nil
 
   defp link_visible?(link, auth_level, default_auth) do
     required = required_auth(link, default_auth)

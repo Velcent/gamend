@@ -28,10 +28,10 @@ defmodule GameServerWeb.TestSupport.Runtime do
       GameServer.Cache.Stats,
       {Task.Supervisor, name: GameServer.TaskSupervisor, max_children: 200},
       {Phoenix.PubSub, name: GameServer.PubSub},
+      GameServer.Presence,
       GameServer.Cache.Sync,
       GameServerWeb.ConnectionTracker,
       {GameServerWeb.RateLimit, clean_period: :timer.minutes(5)},
-      GameServer.Lobbies.SpectatorTracker,
       GameServerWeb.AdminLogBuffer,
       PluginManager,
       {Oban, GameServer.Jobs.oban_config()}

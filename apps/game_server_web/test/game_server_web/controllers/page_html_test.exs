@@ -97,10 +97,10 @@ defmodule GameServerWeb.PresentationPageTest do
           full_bleed_hero: false
         )
 
-      assert html =~ "min-h-[calc(50dvh-2.5rem)]"
+      assert html =~ "min-h-[calc(50svh-2.5rem)]"
 
       assert html =~
-               ~s|class="grid w-full gap-6 md:gap-x-8 md:gap-y-4 items-center min-h-[calc(50dvh-2.5rem)] py-8 md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]"|
+               ~s|class="grid w-full gap-6 md:gap-x-8 md:gap-y-4 items-center min-h-[calc(50svh-2.5rem)] py-8 md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]"|
 
       assert html =~
                ~s|class="flex flex-col gap-4 md:justify-center md:gap-5 md:pt-6 md:min-h-48 order-2 md:order-2 text-center items-center"|
@@ -126,7 +126,7 @@ defmodule GameServerWeb.PresentationPageTest do
       assert html =~
                ~s|class="grid w-full gap-6 md:gap-x-8 md:gap-y-4 items-center py-8 md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]"|
 
-      refute html =~ "min-h-[calc(100dvh-5rem)]"
+      refute html =~ "min-h-[calc(100svh-5rem)]"
     end
 
     test "renders background icons behind whole page content" do
@@ -307,7 +307,7 @@ defmodule GameServerWeb.PresentationPageTest do
           full_bleed_hero: false
         )
 
-      assert html =~ "min-h-[calc(100dvh-5rem)] py-12"
+      assert html =~ "min-h-[calc(100svh-5rem)] py-12"
     end
   end
 end

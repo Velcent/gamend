@@ -246,7 +246,7 @@ Live values, and where each one came from, are on the
 | `GAMEND_OBSERVABILITY_LOG_FILE_MAX_FILES` | integer | `5` | How many rotated files to keep. With the default size, ~50MB of disk. |
 | `GAMEND_OBSERVABILITY_LOG_FILE_PATH` | string | - | Write a rotating log file alongside stdout. Unset disables the file handler. |
 | `GAMEND_OBSERVABILITY_LOG_LEVEL` | log_level | `:info` | Application log level: debug \| info \| warning \| error. |
-| `GAMEND_OBSERVABILITY_METRICS_TOKEN` | string | - | When set, every non-loopback /metrics scrape must send `Authorization: Bearer <token>`. Secret - never log or commit it. |
+| `GAMEND_OBSERVABILITY_METRICS_TOKEN` | string | - | When set, every non-loopback /metrics scrape must send `Authorization: Bearer <token>`. Accepts the token inline or a path to a file holding it (e.g. a docker secret). Secret - never log or commit it. |
 
 
 ## Payments

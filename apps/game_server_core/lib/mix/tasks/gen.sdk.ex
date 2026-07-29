@@ -36,7 +36,12 @@ defmodule Mix.Tasks.Gen.Sdk do
     {GameServer.KV, "kv.ex"},
     {GameServer.Lock, "lock.ex"},
     {GameServer.Tournaments, "tournaments.ex"},
-    {GameServer.ReadyChecks, "ready_checks.ex"}
+    {GameServer.ReadyChecks, "ready_checks.ex"},
+    # The WebRTC lobby plugin drives rooms off lobby lifecycle hooks.
+    {GameServer.Signaling, "signaling.ex"},
+    # Without this a plugin cannot push a custom event and reaches for
+    # `GameServerWeb.Endpoint` instead, coupling itself to the web app.
+    {GameServer.Realtime, "realtime.ex"}
   ]
 
   @impl Mix.Task
@@ -276,6 +281,15 @@ defmodule Mix.Tasks.Gen.Sdk do
       # typing warnings. Generate a placeholder that exercises both branches.
       {fn rt -> String.contains?(rt, "{:ok, payload()}") and String.contains?(rt, ":error") end,
        "if :erlang.phash2(make_ref(), 2) == 0, do: :error, else: {:ok, %{value: %{}, metadata: %{}}}"},
+      # `Signaling.config/1` returns a named map type, so no struct rule matches
+      # and the default `{:ok, nil}` makes a plugin's `{:ok, %{topology: :star}}`
+      # clause look unreachable. Cover both branches with a real shape.
+      {fn rt -> String.contains?(rt, "{:ok, config()}") end,
+       "if :erlang.phash2(make_ref(), 2) == 0, " <>
+         "do: {:error, :room_not_found}, " <>
+         "else: {:ok, %{topology: :star, " <>
+         "host_user_id: Enum.random([nil, \"00000000-0000-0000-0000-000000000000\"]), " <>
+         "late_join: true, reconnect_timeout: 30_000}}"},
       {fn rt -> String.contains?(rt, "{:ok, GameServer.Accounts.User.t()}") end,
        "{:ok, #{user_placeholder_expr()}}"},
       {fn rt -> String.contains?(rt, "{:ok, GameServer.Lobbies.Lobby.t()}") end,

@@ -26,12 +26,14 @@ import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"
 import {hooks as colocatedHooks} from "phoenix-colocated/game_server_web"
 import "./lobbies"
+import {Captcha} from "./captcha"
 import {LocalDatetimeInput, startLocalTime} from "./local_time"
 import {startAvatarFallback} from "./avatar_fallback"
 import topbar from "../vendor/topbar"
 
 // Custom hooks
 const Hooks = {
+  Captcha,
   LocalDatetimeInput,
 
   /**

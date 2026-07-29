@@ -111,13 +111,40 @@ defmodule GameServer.Jobs do
     # and the Oban engine.
     adapter = Application.get_env(:game_server_core, GameServer.Repo)[:adapter]
 
-    engine =
-      if adapter == Ecto.Adapters.Postgres,
-        do: Oban.Engines.Basic,
-        else: Oban.Engines.Lite
+    postgres? = adapter == Ecto.Adapters.Postgres
+    engine = if postgres?, do: Oban.Engines.Basic, else: Oban.Engines.Lite
 
     :game_server_core
     |> Application.fetch_env!(Oban)
     |> Keyword.put(:engine, engine)
+    |> then(&if postgres?, do: &1, else: throttle_for_sqlite(&1))
+  end
+
+  # Queue concurrency is sized for Postgres, which runs writers in parallel.
+  # SQLite takes a single database-wide write lock, so that same configuration
+  # only converts parallelism into lock contention: dozens of concurrent jobs
+  # plus the Stager's own per-second transaction can hold the write lock past
+  # `busy_timeout`, and the loser dies with "database is locked" (Oban.Stager
+  # crashing is the usual symptom). Scale the queues down and stage less often
+  # — SQLite hosts get the same throughput, just without the pile-up.
+  @sqlite_max_queue_concurrency 2
+  @sqlite_stage_interval :timer.seconds(5)
+
+  defp throttle_for_sqlite(opts) do
+    opts
+    |> Keyword.update(:queues, [], fn
+      queues when is_list(queues) ->
+        Enum.map(queues, fn
+          {name, limit} when is_integer(limit) ->
+            {name, min(limit, @sqlite_max_queue_concurrency)}
+
+          other ->
+            other
+        end)
+
+      other ->
+        other
+    end)
+    |> Keyword.put_new(:stage_interval, @sqlite_stage_interval)
   end
 end

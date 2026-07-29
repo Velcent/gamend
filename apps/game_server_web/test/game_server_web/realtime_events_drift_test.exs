@@ -10,13 +10,15 @@ defmodule GameServerWeb.RealtimeEventsDriftTest do
 
   @channels_glob Path.expand("../../lib/game_server_web/channels/*.ex", __DIR__)
 
-  # Events forwarded with a variable event name (the literal lives in core or
-  # in a constants module rather than at the push site).
+  # Events forwarded with a variable event name (the literal lives in core, in a
+  # constants module, or behind a dispatcher like
+  # `SignalingChannel.relay_event_name/1`, rather than at the push site).
   @indirect ~w(
     match_found
     user_online user_offline
     tournament_updated tournament_finished tournament_match_ready tournament_match_resolved
     ready_check_started ready_check_updated ready_check_passed ready_check_failed
+    user_rejoined offer answer ice
   )
 
   defp pushed_literals do

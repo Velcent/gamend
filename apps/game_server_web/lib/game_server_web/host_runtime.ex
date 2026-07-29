@@ -542,10 +542,10 @@ defmodule GameServerWeb.HostRuntime do
         setting.(GameServer.Cache.Settings, :redis_url) ||
           setting.(GameServer.Cluster, :redis_url)
 
-      if shared_redis not in [nil, ""] do
-        [{:game_server_web, GameServerWeb.RateLimit, [redis_url: shared_redis]}]
-      else
+      if shared_redis in [nil, ""] do
         []
+      else
+        [{:game_server_web, GameServerWeb.RateLimit, [redis_url: shared_redis]}]
       end
     else
       []
@@ -590,10 +590,11 @@ defmodule GameServerWeb.HostRuntime do
     [
       # Expose these choices via application config so endpoint/plug can pick
       # them up.
-      {:game_server_web, :cors_allowed_origins, cors_allowed_origins}
-    ] ++
-      acme_entries(setting) ++
-      [{:game_server_web, GameServerWeb.Endpoint, endpoint_config}]
+      {:game_server_web, :cors_allowed_origins, cors_allowed_origins},
+      # `acme_entries/1` sets `:acme_webroot`, a different key, so trailing it
+      # here does not shadow the endpoint config.
+      {:game_server_web, GameServerWeb.Endpoint, endpoint_config}
+    ] ++ acme_entries(setting)
   end
 
   defp normalize_origin(<<"regex:", pattern::binary>>), do: Regex.compile!(pattern)

@@ -54,7 +54,6 @@ defmodule GameServer.Lobbies do
   alias GameServer.KV
   alias GameServer.KV.Entry, as: KVEntry
   alias GameServer.Lobbies.Lobby
-  alias GameServer.Lobbies.SpectatorTracker
   alias GameServer.Lobbies.States
   alias GameServer.Repo
   alias GameServer.Repo.AdvisoryLock
@@ -837,6 +836,66 @@ defmodule GameServer.Lobbies do
   end
 
   @doc """
+  Writes the server-owned `webrtc_*` columns.
+
+  Not castable through `update_lobby/2`, so a client `PATCH` cannot reach them.
+  Go through `GameServer.Signaling.configure/2` rather than calling this.
+  """
+  @spec write_webrtc_config(Lobby.t(), map()) :: {:ok, Lobby.t()} | {:error, Ecto.Changeset.t()}
+  def write_webrtc_config(%Lobby{} = lobby, changes) when is_map(changes) do
+    lobby
+    |> Ecto.Changeset.change(changes)
+    |> Repo.update()
+    |> case do
+      {:ok, updated} = ok ->
+        _ = invalidate_lobby_cache(updated.id)
+        broadcast_lobby(updated.id, {:lobby_updated, updated})
+        ok
+
+      {:error, changeset} = error ->
+        Logger.warning(
+          "webrtc config write failed lobby=#{lobby.id}: #{inspect(changeset.errors)}"
+        )
+
+        error
+    end
+  end
+
+  @doc """
+  Merges `patch` into the lobby's metadata, leaving untouched every key it does
+  not mention.
+
+  `update_lobby/2` replaces `metadata` wholesale, so a caller writing its own
+  key silently wipes everyone else's — which is why a plugin's configuration
+  must not live there. This merges at the top level, and serializes the
+  read-modify-write so two concurrent merges cannot lose each other.
+
+  Top-level only: a nested map is replaced, not merged into. Deep merge has no
+  obvious answer for deleting a key or combining a list, and a rule nobody can
+  predict is worse than one they can.
+  """
+  @spec merge_metadata(Lobby.t(), map()) :: {:ok, Lobby.t()} | {:error, term()}
+  def merge_metadata(%Lobby{} = lobby, patch) when is_map(patch) do
+    result =
+      GameServer.Lock.serialize(:lobby, lobby.id, fn ->
+        case get_lobby(lobby.id) do
+          nil ->
+            {:error, :not_found}
+
+          current ->
+            merged = Map.merge(current.metadata || %{}, stringify_keys(patch))
+            update_lobby(current, %{metadata: merged})
+        end
+      end)
+
+    with {:ok, inner} <- result, do: inner
+  end
+
+  defp stringify_keys(map) do
+    Map.new(map, fn {k, v} -> {to_string(k), v} end)
+  end
+
+  @doc """
   Updates an existing lobby.
 
   ## Attributes
@@ -1003,8 +1062,6 @@ defmodule GameServer.Lobbies do
             end)
 
             Enum.each(member_ids, &invalidate_accounts_user_cache/1)
-
-            SpectatorTracker.untrack_all(deleted.id)
 
             _ = invalidate_lobby_cache(deleted.id)
             broadcast_lobbies({:lobby_deleted, deleted.id})

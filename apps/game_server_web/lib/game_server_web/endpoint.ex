@@ -27,12 +27,22 @@ defmodule GameServerWeb.Endpoint do
   plug :serve_web_font_static
   plug GameServerWeb.HostContentStatic
 
+  # Two separate guards, deliberately. `Phoenix.CodeReloader` ships with
+  # :phoenix, but `Phoenix.LiveReloader` is a `only: :dev` dependency — and
+  # Mix never loads `only:` deps OF a dependency. So when a host app compiles
+  # this app as a dep, `ensure_loaded?(Phoenix.LiveReloader)` is false, and a
+  # single combined guard silently dropped code reloading too: every change,
+  # host or plugin, needed a full server restart to take effect.
+  if code_reloading? do
+    plug Phoenix.CodeReloader
+    plug Phoenix.Ecto.CheckRepoStatus, otp_app: :game_server_web
+  end
+
+  # Browser auto-refresh is the part that genuinely needs the dev dependency.
   if code_reloading? and Code.ensure_loaded?(Phoenix.LiveReloader) and
        Code.ensure_loaded?(Phoenix.LiveReloader.Socket) do
     socket "/phoenix/live_reload/socket", Phoenix.LiveReloader.Socket
     plug Phoenix.LiveReloader
-    plug Phoenix.CodeReloader
-    plug Phoenix.Ecto.CheckRepoStatus, otp_app: :game_server_web
   end
 
   plug Phoenix.LiveDashboard.RequestLogger,

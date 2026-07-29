@@ -1294,6 +1294,29 @@ defmodule GameServer.Accounts do
 
 
   @doc ~S"""
+    Merges `patch` into the user's metadata, leaving untouched every key it does
+    not mention.
+    
+    The counterpart to `GameServer.Lobbies.merge_metadata/2`, and for the same
+    reason: `metadata` is one shared map, so a writer that replaces it wipes keys
+    belonging to code it has never heard of. Top-level merge, serialized so two
+    concurrent merges cannot lose each other.
+    
+  """
+  @spec merge_metadata(GameServer.Accounts.User.t(), map()) ::
+  {:ok, GameServer.Accounts.User.t()} | {:error, term()}
+  def merge_metadata(_user, _patch) do
+    case Application.get_env(:game_server_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        {:ok, %GameServer.Accounts.User{id: 0, email: "", display_name: nil, metadata: %{}, is_admin: false, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+
+      _ ->
+        raise "GameServer.Accounts.merge_metadata/2 is a stub - only available at runtime on GameServer"
+    end
+  end
+
+
+  @doc ~S"""
     Delete a user's stored avatar objects except `keep_key`.
     
     Each new avatar gets a fresh random key (`avatars/<user_id>/<rand><ext>`), so
