@@ -1,16 +1,18 @@
-# game_server_core v1.0.1084 - API Reference
+# game_server_core v1.0.1086 - API Reference
 
 ## Modules
 
 - [GameServer](GameServer.md): GameServer keeps the contexts that define your domain
 and business logic.
 - [GameServer.ApiConventions](GameServer.ApiConventions.md): Mechanical checks for the conventions in `docs/specs/api-conventions.md`.
+- [GameServer.Captcha](GameServer.Captcha.md): Human verification for the unauthenticated browser forms, via
+[Cloudflare Turnstile](https://developers.cloudflare.com/turnstile/).
 - [GameServer.Cluster](GameServer.Cluster.md): Erlang distribution, needed for multi-node deployments and the partitioned
 L2 cache.
 - [GameServer.Database](GameServer.Database.md): Connection and tuning settings for `GameServer.Repo`.
 - [GameServer.Mail](GameServer.Mail.md): Outbound email transport.
-- [GameServer.Signaling](GameServer.Signaling.md): Public API for the WebRTC signaling server.
-- [GameServer.Signaling.Server](GameServer.Signaling.Server.md): Signaling relay for WebRTC user-to-user and client-server topologies.
+- [GameServer.Presence](GameServer.Presence.md): Cluster-wide tracking of who is connected where.
+- [GameServer.Signaling](GameServer.Signaling.md): WebRTC signaling: who is in a room, and relaying offers between them.
 - [GameServer.Time](GameServer.Time.md): The server's wall clock, in milliseconds since the epoch, for sending to
 clients.
 
@@ -33,14 +35,14 @@ and email-change workflows.
   - [GameServer.Apple](GameServer.Apple.md): Apple OAuth client secret generation for Ueberauth.
   - [GameServer.OAuth.Exchanger](GameServer.OAuth.Exchanger.md): Default implementation for exchanging OAuth codes with providers.
   - [GameServer.OAuth.GoogleIDToken](GameServer.OAuth.GoogleIDToken.md): Verifies Google OpenID Connect `id_token`s for native/mobile sign-in flows.
-  - [GameServer.OAuth.Providers](GameServer.OAuth.Providers.md): Credentials for the social sign-in providers.
+  - [GameServer.OAuth.Providers](GameServer.OAuth.Providers.md): Credentials and availability for the social sign-in providers.
   - [GameServer.OAuthSession](GameServer.OAuthSession.md): Simple Ecto schema for OAuth session polling used by client SDKs.
   - [GameServer.OAuthSessions](GameServer.OAuthSessions.md): Helpers for creating and retrieving short-lived OAuth sessions.
 
 - Lobbies
   - [GameServer.Lobbies](GameServer.Lobbies.md): Context module for lobby management: creating, updating, listing and searching lobbies.
   - [GameServer.Lobbies.Lobby](GameServer.Lobbies.Lobby.md): Ecto schema for the `lobbies` table and changeset helpers.
-  - [GameServer.Lobbies.SpectatorTracker](GameServer.Lobbies.SpectatorTracker.md): Lightweight ETS-based tracker for lobby spectators.
+  - [GameServer.Lobbies.SpectatorTracker](GameServer.Lobbies.SpectatorTracker.md): Who is watching a lobby without being a member.
   - [GameServer.Lobbies.States](GameServer.Lobbies.States.md): The vocabulary a lobby's `state` commonly uses.
   - [GameServer.LobbySnapshots](GameServer.LobbySnapshots.md): Durable record of how a lobby's state evolved during a run.
   - [GameServer.LobbySnapshots.Blob](GameServer.LobbySnapshots.Blob.md): Content-addressed storage for one snapshot section.

@@ -300,6 +300,25 @@ Includes the user's own lobby even if it's hidden.
 @spec list_memberships_for_lobby(Ecto.UUID.t()) :: [GameServer.Accounts.User.t()]
 ```
 
+# `merge_metadata`
+
+```elixir
+@spec merge_metadata(GameServer.Lobbies.Lobby.t(), map()) ::
+  {:ok, GameServer.Lobbies.Lobby.t()} | {:error, term()}
+```
+
+Merges `patch` into the lobby's metadata, leaving untouched every key it does
+not mention.
+
+`update_lobby/2` replaces `metadata` wholesale, so a caller writing its own
+key silently wipes everyone else's — which is why a plugin's configuration
+must not live there. This merges at the top level, and serializes the
+read-modify-write so two concurrent merges cannot lose each other.
+
+Top-level only: a nested map is replaced, not merged into. Deep merge has no
+obvious answer for deleting a key or combining a list, and a rule nobody can
+predict is worse than one they can.
+
 # `quick_join`
 
 ```elixir
@@ -433,6 +452,18 @@ Allowed only for the **host of a host-managed lobby**. **Hostless** lobbies
 could otherwise rewrite `metadata`, `max_users`, `password_hash` and the
 visibility flags of a ranked match they merely happen to be in. Server-side
 code (hooks, jobs, matchmaking, admin) uses `update_lobby/2` instead.
+
+# `write_webrtc_config`
+
+```elixir
+@spec write_webrtc_config(GameServer.Lobbies.Lobby.t(), map()) ::
+  {:ok, GameServer.Lobbies.Lobby.t()} | {:error, Ecto.Changeset.t()}
+```
+
+Writes the server-owned `webrtc_*` columns.
+
+Not castable through `update_lobby/2`, so a client `PATCH` cannot reach them.
+Go through `GameServer.Signaling.configure/2` rather than calling this.
 
 ---
 

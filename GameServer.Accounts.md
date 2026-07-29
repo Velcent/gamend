@@ -680,6 +680,21 @@ There are three cases to consider:
    source of security pitfalls. See the "Mixing magic link and password registration" section of
    `mix help phx.gen.auth`.
 
+# `merge_metadata`
+
+```elixir
+@spec merge_metadata(GameServer.Accounts.User.t(), map()) ::
+  {:ok, GameServer.Accounts.User.t()} | {:error, term()}
+```
+
+Merges `patch` into the user's metadata, leaving untouched every key it does
+not mention.
+
+The counterpart to `GameServer.Lobbies.merge_metadata/2`, and for the same
+reason: `metadata` is one shared map, so a writer that replaces it wipes keys
+belonging to code it has never heard of. Top-level merge, serialized so two
+concurrent merges cannot lose each other.
+
 # `prune_user_avatars`
 
 ```elixir

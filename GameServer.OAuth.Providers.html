@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.1">
-    <meta name="project" content="game_server_core v1.0.1084">
+    <meta name="project" content="game_server_core v1.0.1086">
 
 
-    <title>GameServer.OAuth.Providers — game_server_core v1.0.1084</title>
+    <title>GameServer.OAuth.Providers — game_server_core v1.0.1086</title>
 
     <link rel="stylesheet" href="dist/html-elixir-YJO4MOOW.css" />
 
-    <script defer src="dist/sidebar_items-0FCA2368.js"></script>
+    <script defer src="dist/sidebar_items-DE34AC41.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-YU4BZFVS.js"></script>
 
@@ -37,7 +37,7 @@
 game_server_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1084
+          v1.0.1086
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ game_server_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">GameServer.<wbr>OAuth.<wbr>Providers</span> 
-      <small class="app-vsn" translate="no">(game_server_core v1.0.1084)</small>
+      <small class="app-vsn" translate="no">(game_server_core v1.0.1086)</small>
 
     </h1>
 
@@ -114,22 +114,205 @@ game_server_core
 
 
     <section id="moduledoc">
-<p>Credentials for the social sign-in providers.</p><p>Each provider is opt-in: with nothing set, its buttons simply do not work.
-The id and secret are declared as a pair, so half-configuring one is a
+<p>Credentials and availability for the social sign-in providers.</p><p>A provider is live when its credentials are set and its <code class="inline">&lt;provider&gt;_enabled</code>
+setting has not been switched off. <a href="#enabled/0"><code class="inline">enabled/0</code></a> drives everything that varies
+by provider — the sign-in buttons, the <code class="inline">/auth/:provider</code> routes, and the
+<code class="inline">GET /api/v1/auth/providers</code> listing — so they can never disagree.</p><p>The id and secret are declared as a pair, so half-configuring one is a
 warning rather than a silent failure at the first login attempt.</p>
     </section>
 
 </div>
 
+  <section id="summary" class="details-list">
+    <h2 class="section-heading">
+      <a class="hover-link" href="#summary">
+        <i class="ri-link-m" aria-hidden="true"></i>
+      </a>
+      <span class="text">Summary</span>
+    </h2>
+<div class="summary-functions summary">
+  <h3>
+    <a href="#functions">Functions</a>
+  </h3>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#all/0" data-no-tooltip="" translate="no">all()</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Every provider this server knows, in display order.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#configured?/1" data-no-tooltip="" translate="no">configured?(provider)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Whether <code class="inline">provider</code> has credentials set.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#enabled/0" data-no-tooltip="" translate="no">enabled()</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>The providers a player may currently sign in with.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#enabled?/1" data-no-tooltip="" translate="no">enabled?(provider)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Whether <code class="inline">provider</code> is configured and switched on.</p></div>
+
+    </div>
+
+</div>
+
+  </section>
+
+
+  <section id="functions" class="details-list">
+    <h2 class="section-heading">
+      <a class="hover-link" href="#functions">
+        <i class="ri-link-m" aria-hidden="true"></i>
+      </a>
+      <span class="text">Functions</span>
+    </h2>
+
+    <div class="functions-list">
+<section class="detail" id="all/0">
+
+  <div class="detail-header">
+    <a href="#all/0" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">all()</h1>
+
+
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/oauth/providers.ex#L93" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> all() :: [<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>()]</pre>
+
+      </div>
+
+<p>Every provider this server knows, in display order.</p>
+  </section>
+</section>
+<section class="detail" id="configured?/1">
+
+  <div class="detail-header">
+    <a href="#configured?/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">configured?(provider)</h1>
+
+
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/oauth/providers.ex#L110" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> configured?(<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>()) :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()</pre>
+
+      </div>
+
+<p>Whether <code class="inline">provider</code> has credentials set.</p>
+  </section>
+</section>
+<section class="detail" id="enabled/0">
+
+  <div class="detail-header">
+    <a href="#enabled/0" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">enabled()</h1>
+
+
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/oauth/providers.ex#L97" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> enabled() :: [<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>()]</pre>
+
+      </div>
+
+<p>The providers a player may currently sign in with.</p>
+  </section>
+</section>
+<section class="detail" id="enabled?/1">
+
+  <div class="detail-header">
+    <a href="#enabled?/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">enabled?(provider)</h1>
+
+
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/oauth/providers.ex#L101" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> enabled?(<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>()) :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()</pre>
+
+      </div>
+
+<p>Whether <code class="inline">provider</code> is configured and switched on.</p>
+  </section>
+</section>
+
+    </div>
+  </section>
 
     <footer class="footer">
 
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/game_server_core/1.0.1084">Hex Package</a>
+              <a href="https://hex.pm/packages/game_server_core/1.0.1086">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/game_server_core/1.0.1084">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/game_server_core/1.0.1086">Hex Preview</a>
 
             </span>
 

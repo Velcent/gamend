@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.1">
-    <meta name="project" content="game_server_core v1.0.1084">
+    <meta name="project" content="game_server_core v1.0.1086">
 
 
-    <title>API Reference — game_server_core v1.0.1084</title>
+    <title>API Reference — game_server_core v1.0.1086</title>
 
     <link rel="stylesheet" href="dist/html-elixir-YJO4MOOW.css" />
 
-    <script defer src="dist/sidebar_items-0FCA2368.js"></script>
+    <script defer src="dist/sidebar_items-DE34AC41.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-YU4BZFVS.js"></script>
 
@@ -37,7 +37,7 @@
 game_server_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1084
+          v1.0.1086
         </div>
       </div>
     </div>
@@ -92,7 +92,7 @@ game_server_core
 
 <div id="top-content">
   <div class="heading-with-actions top-heading">
-    <h1>API Reference <small class="app-vsn">game_server_core v#1.0.1084</small></h1>
+    <h1>API Reference <small class="app-vsn">game_server_core v#1.0.1086</small></h1>
 <a href="api-reference.md" title="Copy Markdown (hold Ctrl/Cmd and click it to open as Markdown)" class="copy-markdown icon-action" rel="help">
   <i class="ri-markdown-line" aria-hidden="true"></i>
   <span class="sr-only">Copy Markdown</span>
@@ -305,6 +305,16 @@ aggregated from telemetry events</p></div>
   </div>
 
     <div class="summary-synopsis"><p>Applies cache invalidations broadcast by other app instances.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="GameServer.Captcha.html" translate="no">GameServer.<wbr>Captcha</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Human verification for the unauthenticated browser forms, via
+<a href="https://developers.cloudflare.com/turnstile/">Cloudflare Turnstile</a>.</p></div>
 
 </div>
 <div class="summary-row">
@@ -714,7 +724,7 @@ Carries the <code class="inline">idempotency_key</code> that makes item grants s
 
   </div>
 
-    <div class="summary-synopsis"><p>Lightweight ETS-based tracker for lobby spectators.</p></div>
+    <div class="summary-synopsis"><p>Who is watching a lobby without being a member.</p></div>
 
 </div>
 <div class="summary-row">
@@ -922,7 +932,7 @@ notifications.</p></div>
 
   </div>
 
-    <div class="summary-synopsis"><p>Credentials for the social sign-in providers.</p></div>
+    <div class="summary-synopsis"><p>Credentials and availability for the social sign-in providers.</p></div>
 
 </div>
 <div class="summary-row">
@@ -1095,6 +1105,15 @@ Server Notifications V2).</p></div>
   </div>
 
     <div class="summary-synopsis"><p>Store credentials, per provider.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="GameServer.Presence.html" translate="no">GameServer.<wbr>Presence</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Cluster-wide tracking of who is connected where.</p></div>
 
 </div>
 <div class="summary-row">
@@ -1412,16 +1431,7 @@ level.</p></div>
 
   </div>
 
-    <div class="summary-synopsis"><p>Public API for the WebRTC signaling server.</p></div>
-
-</div>
-<div class="summary-row">
-  <div class="summary-signature">
-    <a href="GameServer.Signaling.Server.html" translate="no">GameServer.<wbr>Signaling.<wbr>Server</a>
-
-  </div>
-
-    <div class="summary-synopsis"><p>Signaling relay for WebRTC user-to-user and client-server topologies.</p></div>
+    <div class="summary-synopsis"><p>WebRTC signaling: who is in a room, and relaying offers between them.</p></div>
 
 </div>
 <div class="summary-row">
@@ -1677,9 +1687,9 @@ commented from each setting's declaration.</p></div>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/game_server_core/1.0.1084">Hex Package</a>
+              <a href="https://hex.pm/packages/game_server_core/1.0.1086">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/game_server_core/1.0.1084">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/game_server_core/1.0.1086">Hex Preview</a>
 
             </span>
 

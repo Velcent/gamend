@@ -1,17 +1,14 @@
 # `GameServer.Lobbies.SpectatorTracker`
 [🔗](https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/lobbies/spectator_tracker.ex#L1)
 
-Lightweight ETS-based tracker for lobby spectators.
+Who is watching a lobby without being a member.
 
-Spectators are users connected to a lobby channel who are not members.
-This module tracks them in-memory (no persistence) so we can show spectator
-counts in admin panels and API responses.
+Backed by `GameServer.Presence`, so counts are cluster-wide. The previous ETS
+version was node-local: with more than one node every lobby undercounted,
+silently and by an amount nobody could see.
 
-# `child_spec`
-
-Returns a specification to start this module under a supervisor.
-
-See `Supervisor`.
+Entries follow the watching channel process, so a disconnect — or a whole
+node going down — removes them with no cleanup path to forget.
 
 # `count`
 
@@ -19,15 +16,13 @@ See `Supervisor`.
 @spec count(Ecto.UUID.t()) :: non_neg_integer()
 ```
 
-Count spectators in a lobby.
-
 # `counts`
 
 ```elixir
 @spec counts([Ecto.UUID.t()]) :: %{required(Ecto.UUID.t()) =&gt; non_neg_integer()}
 ```
 
-Count spectators for multiple lobbies at once. Returns `%{lobby_id => count}`.
+Spectator counts for several lobbies, as `%{lobby_id => count}`.
 
 # `list`
 
@@ -35,33 +30,21 @@ Count spectators for multiple lobbies at once. Returns `%{lobby_id => count}`.
 @spec list(Ecto.UUID.t()) :: [Ecto.UUID.t()]
 ```
 
-List spectator user IDs for a lobby.
-
-# `start_link`
-
 # `track`
 
 ```elixir
-@spec track(Ecto.UUID.t(), Ecto.UUID.t()) :: true
+@spec track(Ecto.UUID.t(), Ecto.UUID.t()) :: :ok
 ```
 
-Track a spectator joining a lobby.
+Tracks the calling process as a spectator.
+
+Call from the channel process: presence follows that process's lifetime.
 
 # `untrack`
 
 ```elixir
-@spec untrack(Ecto.UUID.t(), Ecto.UUID.t()) :: true
+@spec untrack(Ecto.UUID.t(), Ecto.UUID.t()) :: :ok
 ```
-
-Remove a spectator from a lobby.
-
-# `untrack_all`
-
-```elixir
-@spec untrack_all(Ecto.UUID.t()) :: true
-```
-
-Remove all spectators for a given lobby (e.g. when lobby is deleted).
 
 ---
 

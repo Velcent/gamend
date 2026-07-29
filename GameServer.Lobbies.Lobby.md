@@ -27,7 +27,11 @@ visibility, lock/password and arbitrary metadata).
   state_changed_at: term(),
   title: term(),
   updated_at: term(),
-  users: term()
+  users: term(),
+  webrtc_enabled: term(),
+  webrtc_late_join: term(),
+  webrtc_reconnect_timeout_ms: term(),
+  webrtc_topology: term()
 }
 ```
 

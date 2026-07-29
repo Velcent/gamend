@@ -18,6 +18,7 @@ GameServer.Cache.Settings.md
 GameServer.Cache.Stats.md
 GameServer.Cache.Sync.md
 GameServer.Cache.md
+GameServer.Captcha.md
 GameServer.Chat.Message.md
 GameServer.Chat.ReadCursor.md
 GameServer.Chat.md
@@ -104,6 +105,7 @@ GameServer.Payments.Purchase.md
 GameServer.Payments.ReconciliationCursor.md
 GameServer.Payments.Settings.md
 GameServer.Payments.md
+GameServer.Presence.md
 GameServer.Proto.GodobufPresence.md
 GameServer.Push.APNSDispatcher.md
 GameServer.Push.DeliveryWorker.md
@@ -135,7 +137,6 @@ GameServer.Schema.md
 GameServer.SchemaJSON.md
 GameServer.Settings.Provider.md
 GameServer.Settings.md
-GameServer.Signaling.Server.md
 GameServer.Signaling.md
 GameServer.Storage.Adapter.md
 GameServer.Storage.Local.md

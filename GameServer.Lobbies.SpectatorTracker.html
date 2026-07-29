@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.1">
-    <meta name="project" content="game_server_core v1.0.1084">
+    <meta name="project" content="game_server_core v1.0.1086">
 
 
-    <title>GameServer.Lobbies.SpectatorTracker — game_server_core v1.0.1084</title>
+    <title>GameServer.Lobbies.SpectatorTracker — game_server_core v1.0.1086</title>
 
     <link rel="stylesheet" href="dist/html-elixir-YJO4MOOW.css" />
 
-    <script defer src="dist/sidebar_items-0FCA2368.js"></script>
+    <script defer src="dist/sidebar_items-DE34AC41.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-YU4BZFVS.js"></script>
 
@@ -37,7 +37,7 @@
 game_server_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1084
+          v1.0.1086
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ game_server_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">GameServer.<wbr>Lobbies.<wbr>SpectatorTracker</span> 
-      <small class="app-vsn" translate="no">(game_server_core v1.0.1084)</small>
+      <small class="app-vsn" translate="no">(game_server_core v1.0.1086)</small>
 
     </h1>
 
@@ -114,9 +114,10 @@ game_server_core
 
 
     <section id="moduledoc">
-<p>Lightweight ETS-based tracker for lobby spectators.</p><p>Spectators are users connected to a lobby channel who are not members.
-This module tracks them in-memory (no persistence) so we can show spectator
-counts in admin panels and API responses.</p>
+<p>Who is watching a lobby without being a member.</p><p>Backed by <a href="GameServer.Presence.html"><code class="inline">GameServer.Presence</code></a>, so counts are cluster-wide. The previous ETS
+version was node-local: with more than one node every lobby undercounted,
+silently and by an amount nobody could see.</p><p>Entries follow the watching channel process, so a disconnect — or a whole
+node going down — removes them with no cleanup path to forget.</p>
     </section>
 
 </div>
@@ -135,21 +136,9 @@ counts in admin panels and API responses.</p>
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#child_spec/1" data-no-tooltip="" translate="no">child_spec(init_arg)</a>
-
-      </div>
-
-        <div class="summary-synopsis"><p>Returns a specification to start this module under a supervisor.</p></div>
-
-    </div>
-
-    <div class="summary-row">
-      <div class="summary-signature">
         <a href="#count/1" data-no-tooltip="" translate="no">count(lobby_id)</a>
 
       </div>
-
-        <div class="summary-synopsis"><p>Count spectators in a lobby.</p></div>
 
     </div>
 
@@ -159,23 +148,13 @@ counts in admin panels and API responses.</p>
 
       </div>
 
-        <div class="summary-synopsis"><p>Count spectators for multiple lobbies at once. Returns <code class="inline">%{lobby_id =&gt; count}</code>.</p></div>
+        <div class="summary-synopsis"><p>Spectator counts for several lobbies, as <code class="inline">%{lobby_id =&gt; count}</code>.</p></div>
 
     </div>
 
     <div class="summary-row">
       <div class="summary-signature">
         <a href="#list/1" data-no-tooltip="" translate="no">list(lobby_id)</a>
-
-      </div>
-
-        <div class="summary-synopsis"><p>List spectator user IDs for a lobby.</p></div>
-
-    </div>
-
-    <div class="summary-row">
-      <div class="summary-signature">
-        <a href="#start_link/1" data-no-tooltip="" translate="no">start_link(opts)</a>
 
       </div>
 
@@ -187,7 +166,7 @@ counts in admin panels and API responses.</p>
 
       </div>
 
-        <div class="summary-synopsis"><p>Track a spectator joining a lobby.</p></div>
+        <div class="summary-synopsis"><p>Tracks the calling process as a spectator.</p></div>
 
     </div>
 
@@ -196,18 +175,6 @@ counts in admin panels and API responses.</p>
         <a href="#untrack/2" data-no-tooltip="" translate="no">untrack(lobby_id, user_id)</a>
 
       </div>
-
-        <div class="summary-synopsis"><p>Remove a spectator from a lobby.</p></div>
-
-    </div>
-
-    <div class="summary-row">
-      <div class="summary-signature">
-        <a href="#untrack_all/1" data-no-tooltip="" translate="no">untrack_all(lobby_id)</a>
-
-      </div>
-
-        <div class="summary-synopsis"><p>Remove all spectators for a given lobby (e.g. when lobby is deleted).</p></div>
 
     </div>
 
@@ -225,28 +192,6 @@ counts in admin panels and API responses.</p>
     </h2>
 
     <div class="functions-list">
-<section class="detail" id="child_spec/1">
-
-  <div class="detail-header">
-    <a href="#child_spec/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
-      <i class="ri-link-m" aria-hidden="true"></i>
-    </a>
-    <div class="heading-with-actions">
-      <h1 class="signature" translate="no">child_spec(init_arg)</h1>
-
-
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/lobbies/spectator_tracker.ex#L9" class="icon-action" rel="help" aria-label="View Source">
-          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
-        </a>
-
-    </div>
-  </div>
-
-  <section class="docstring">
-
-<p>Returns a specification to start this module under a supervisor.</p><p>See <a href="https://hexdocs.pm/elixir/Supervisor.html"><code class="inline">Supervisor</code></a>.</p>
-  </section>
-</section>
 <section class="detail" id="count/1">
 
   <div class="detail-header">
@@ -257,7 +202,7 @@ counts in admin panels and API responses.</p>
       <h1 class="signature" translate="no">count(lobby_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/lobbies/spectator_tracker.ex#L35" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/lobbies/spectator_tracker.ex#L36" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -272,7 +217,7 @@ counts in admin panels and API responses.</p>
 
       </div>
 
-<p>Count spectators in a lobby.</p>
+
   </section>
 </section>
 <section class="detail" id="counts/1">
@@ -285,7 +230,7 @@ counts in admin panels and API responses.</p>
       <h1 class="signature" translate="no">counts(lobby_ids)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/lobbies/spectator_tracker.ex#L41" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/lobbies/spectator_tracker.ex#L40" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -300,7 +245,7 @@ counts in admin panels and API responses.</p>
 
       </div>
 
-<p>Count spectators for multiple lobbies at once. Returns <code class="inline">%{lobby_id =&gt; count}</code>.</p>
+<p>Spectator counts for several lobbies, as <code class="inline">%{lobby_id =&gt; count}</code>.</p>
   </section>
 </section>
 <section class="detail" id="list/1">
@@ -313,7 +258,7 @@ counts in admin panels and API responses.</p>
       <h1 class="signature" translate="no">list(lobby_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/lobbies/spectator_tracker.ex#L47" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/lobbies/spectator_tracker.ex#L45" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -328,28 +273,6 @@ counts in admin panels and API responses.</p>
 
       </div>
 
-<p>List spectator user IDs for a lobby.</p>
-  </section>
-</section>
-<section class="detail" id="start_link/1">
-
-  <div class="detail-header">
-    <a href="#start_link/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
-      <i class="ri-link-m" aria-hidden="true"></i>
-    </a>
-    <div class="heading-with-actions">
-      <h1 class="signature" translate="no">start_link(opts)</h1>
-
-
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/lobbies/spectator_tracker.ex#L13" class="icon-action" rel="help" aria-label="View Source">
-          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
-        </a>
-
-    </div>
-  </div>
-
-  <section class="docstring">
-
 
   </section>
 </section>
@@ -363,7 +286,7 @@ counts in admin panels and API responses.</p>
       <h1 class="signature" translate="no">track(lobby_id, user_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/lobbies/spectator_tracker.ex#L23" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/lobbies/spectator_tracker.ex#L25" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -374,11 +297,11 @@ counts in admin panels and API responses.</p>
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> track(<a href="https://hexdocs.pm/ecto/3.13.6/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>(), <a href="https://hexdocs.pm/ecto/3.13.6/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) :: true</pre>
+          <pre translate="no"><span class="attribute">@spec</span> track(<a href="https://hexdocs.pm/ecto/3.13.6/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>(), <a href="https://hexdocs.pm/ecto/3.13.6/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) :: :ok</pre>
 
       </div>
 
-<p>Track a spectator joining a lobby.</p>
+<p>Tracks the calling process as a spectator.</p><p>Call from the channel process: presence follows that process's lifetime.</p>
   </section>
 </section>
 <section class="detail" id="untrack/2">
@@ -391,7 +314,7 @@ counts in admin panels and API responses.</p>
       <h1 class="signature" translate="no">untrack(lobby_id, user_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/lobbies/spectator_tracker.ex#L29" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/lobbies/spectator_tracker.ex#L33" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -402,39 +325,11 @@ counts in admin panels and API responses.</p>
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> untrack(<a href="https://hexdocs.pm/ecto/3.13.6/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>(), <a href="https://hexdocs.pm/ecto/3.13.6/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) :: true</pre>
+          <pre translate="no"><span class="attribute">@spec</span> untrack(<a href="https://hexdocs.pm/ecto/3.13.6/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>(), <a href="https://hexdocs.pm/ecto/3.13.6/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) :: :ok</pre>
 
       </div>
 
-<p>Remove a spectator from a lobby.</p>
-  </section>
-</section>
-<section class="detail" id="untrack_all/1">
 
-  <div class="detail-header">
-    <a href="#untrack_all/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
-      <i class="ri-link-m" aria-hidden="true"></i>
-    </a>
-    <div class="heading-with-actions">
-      <h1 class="signature" translate="no">untrack_all(lobby_id)</h1>
-
-
-        <a href="https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/lobbies/spectator_tracker.ex#L53" class="icon-action" rel="help" aria-label="View Source">
-          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
-        </a>
-
-    </div>
-  </div>
-
-  <section class="docstring">
-
-      <div class="specs">
-
-          <pre translate="no"><span class="attribute">@spec</span> untrack_all(<a href="https://hexdocs.pm/ecto/3.13.6/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) :: true</pre>
-
-      </div>
-
-<p>Remove all spectators for a given lobby (e.g. when lobby is deleted).</p>
   </section>
 </section>
 
@@ -446,9 +341,9 @@ counts in admin panels and API responses.</p>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/game_server_core/1.0.1084">Hex Package</a>
+              <a href="https://hex.pm/packages/game_server_core/1.0.1086">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/game_server_core/1.0.1084">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/game_server_core/1.0.1086">Hex Preview</a>
 
             </span>
 

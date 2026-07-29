@@ -1,36 +1,195 @@
 # `GameServer.Signaling`
 [🔗](https://github.com/appsinacup/game_server/blob/v1.0.7/lib/game_server/signaling.ex#L1)
 
-Public API for the WebRTC signaling server.
+WebRTC signaling: who is in a room, and relaying offers between them.
 
-This module delegates to `GameServer.Signaling.Server`, which is the
-GenServer that actually manages rooms and relays messages.
+A "room" is a lobby. There is no room record and no room process — the
+configuration lives in the lobby's own `webrtc_*` columns, membership lives
+in `GameServer.Presence`, and relayed messages travel over `Phoenix.PubSub`.
+All three are cluster-wide, so a peer on one node can signal a peer on
+another.
 
-# `allow_user`
+That is the reason for this shape. The previous version kept rooms in a
+GenServer registered under a plain local name, so a room created on one node
+did not exist on any other, and every player whose socket landed elsewhere
+failed to join with `:room_not_found`.
 
-# `broadcast_message`
+## Configuration
 
-# `close_room`
+Read from the lobby, never mirrored:
 
-# `create_room`
+    Signaling.configure(lobby, enabled: true, topology: :star)
 
-# `disallow_user`
+Held in server-owned `lobbies.webrtc_*` columns, written only by
+`configure/2`. It lived in `metadata` once, which was wrong twice over: that
+map is replaced wholesale by any writer, so a game storing match state wiped
+it, and the lobby host can `PATCH` it, so a player could flip the topology and
+hand everyone the right to broadcast. The star host is always
+`lobby.host_id` and is not settable.
 
-# `exists_room?`
+## Topology
 
-# `get_room`
+  * `:mesh` — any peer may signal any other.
+  * `:star` — every exchange must involve the host, and only the host may
+    broadcast.
 
-# `join_room`
+# `config`
 
-# `leave_room`
+```elixir
+@type config() :: %{
+  topology: topology(),
+  host_user_id: user_id() | nil,
+  late_join: boolean(),
+  reconnect_timeout: non_neg_integer()
+}
+```
 
-# `list_users`
+# `message_type`
 
-# `relay_message`
+```elixir
+@type message_type() :: :offer | :answer | :ice
+```
 
-# `room_host?`
+# `role`
 
-# `update_room_host`
+```elixir
+@type role() :: :host | :user
+```
+
+# `room_id`
+
+```elixir
+@type room_id() :: String.t()
+```
+
+# `topology`
+
+```elixir
+@type topology() :: :mesh | :star
+```
+
+# `user_id`
+
+```elixir
+@type user_id() :: String.t()
+```
+
+# `authorize`
+
+```elixir
+@spec authorize(room_id(), user_id()) ::
+  {:ok, role()} | {:error, :room_not_found | :not_allowed}
+```
+
+The role `user_id` may join with, or `{:error, :not_allowed}`.
+
+Membership comes from the lobby. `late_join` decides whether a non-member may
+connect at all; the host of a star room is whoever the lobby says it is.
+
+# `broadcast`
+
+```elixir
+@spec broadcast(room_id(), user_id(), message_type(), map()) ::
+  :ok | {:error, :room_not_found | :user_not_found | :not_allowed}
+```
+
+Sends `payload` to every other peer in the room.
+
+Only the host may broadcast in a star room.
+
+# `close`
+
+```elixir
+@spec close(room_id()) :: :ok
+```
+
+Tells every connected peer the room is over, so their channels stop.
+
+# `config`
+
+```elixir
+@spec config(room_id()) :: {:ok, config()} | {:error, :room_not_found}
+```
+
+The room's configuration, derived from the lobby.
+
+`{:error, :room_not_found}` when the lobby is gone or WebRTC is not enabled
+on it — deliberately indistinguishable to a caller.
+
+# `configure`
+
+```elixir
+@spec configure(
+  GameServer.Lobbies.Lobby.t() | room_id(),
+  keyword()
+) :: {:ok, GameServer.Lobbies.Lobby.t()} | {:error, term()}
+```
+
+Turns signaling on or off for a lobby, and sets how it behaves.
+
+The only writer of the `webrtc_*` columns. Options: `:enabled`, `:topology`
+(`:star` | `:mesh`), `:late_join`, `:reconnect_timeout`.
+
+Deliberately not part of the lobby changeset — a client `PATCH` must not be
+able to reach any of it. The star host is not settable at all; it is always
+the lobby host.
+
+# `enabled?`
+
+```elixir
+@spec enabled?(room_id()) :: boolean()
+```
+
+Whether the lobby has WebRTC enabled.
+
+# `inbox`
+
+```elixir
+@spec inbox(room_id(), user_id()) :: String.t()
+```
+
+PubSub topic one peer listens on for messages addressed to it.
+
+# `peer_role`
+
+```elixir
+@spec peer_role(room_id(), user_id()) :: role() | nil
+```
+
+The role `user_id` is connected with, or `nil`.
+
+# `peers`
+
+```elixir
+@spec peers(room_id()) :: %{required(user_id()) =&gt; role()}
+```
+
+Everyone currently connected to the room, as `%{user_id => role}`.
+
+The role is computed from the lobby on every read rather than read back from
+the presence meta it was tracked with. Otherwise a host change leaves the new
+host tracked as `:user` and the old one still holding `:host` until they
+happen to reconnect.
+
+# `relay`
+
+```elixir
+@spec relay(room_id(), user_id(), user_id(), message_type(), map()) ::
+  :ok | {:error, :room_not_found | :user_not_found | :not_allowed}
+```
+
+Sends `payload` to one peer.
+
+In a star room every exchange must involve the host; in a mesh room any pair
+may talk.
+
+# `topic`
+
+```elixir
+@spec topic(room_id()) :: String.t()
+```
+
+PubSub topic carrying a room's presence.
 
 ---
 

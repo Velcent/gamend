@@ -1,5 +1,6 @@
 # July 2026
 
+- [added] **Captcha** on the register and magic-link forms
 - [breaking] **One theme file**
 - [added] **Translation pipeline**
 - [added] All **30 locales fully translated** (machine-translated, pending review).
