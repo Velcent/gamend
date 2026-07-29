@@ -9,6 +9,7 @@ defmodule GameServerWeb.UserLive.Settings.AccountTab do
   import Phoenix.LiveView
 
   alias GameServer.Accounts
+  alias GameServer.OAuth.Providers
   alias GameServer.Storage
   alias GameServerWeb.UserLive.Settings.Shared
 
@@ -198,152 +199,34 @@ defmodule GameServerWeb.UserLive.Settings.AccountTab do
               end
             ) %>
 
-          <div class="flex items-center justify-between">
+          <div
+            :for={{provider, linked_id} <- provider_rows(@user)}
+            class="flex items-center justify-between"
+          >
             <div>
-              <strong>{"Discord"}</strong>
+              <strong>{provider |> Atom.to_string() |> String.capitalize()}</strong>
               <div class="text-sm text-base-content/70">
                 {gettext("Log in")}
               </div>
             </div>
             <div class="flex items-center gap-2">
-              <%= if @user.discord_id do %>
-                <%= if provider_count > 1 do %>
+              <%= cond do %>
+                <% linked_id && provider_count > 1 -> %>
                   <button
                     phx-click="unlink_provider"
-                    phx-value-provider="discord"
+                    phx-value-provider={provider}
                     class="btn btn-outline btn-sm"
                   >
                     {gettext("Remove")}
                   </button>
-                <% else %>
+                <% linked_id -> %>
                   <button class="btn btn-disabled btn-sm" disabled aria-disabled>
                     {gettext("Remove")}
                   </button>
-                <% end %>
-              <% else %>
-                <.link href={~p"/auth/discord"} class="btn btn-primary btn-sm">
-                  {gettext("Link")}
-                </.link>
-              <% end %>
-            </div>
-          </div>
-
-          <div class="flex items-center justify-between">
-            <div>
-              <strong>{"Google"}</strong>
-              <div class="text-sm text-base-content/70">
-                {gettext("Log in")}
-              </div>
-            </div>
-            <div class="flex items-center gap-2">
-              <%= if @user.google_id do %>
-                <%= if provider_count > 1 do %>
-                  <button
-                    phx-click="unlink_provider"
-                    phx-value-provider="google"
-                    class="btn btn-outline btn-sm"
-                  >
-                    {gettext("Remove")}
-                  </button>
-                <% else %>
-                  <button class="btn btn-disabled btn-sm" disabled aria-disabled>
-                    {gettext("Remove")}
-                  </button>
-                <% end %>
-              <% else %>
-                <.link href={~p"/auth/google"} class="btn btn-primary btn-sm">
-                  {gettext("Link")}
-                </.link>
-              <% end %>
-            </div>
-          </div>
-
-          <div class="flex items-center justify-between">
-            <div>
-              <strong>{"Facebook"}</strong>
-              <div class="text-sm text-base-content/70">
-                {gettext("Log in")}
-              </div>
-            </div>
-            <div class="flex items-center gap-2">
-              <%= if @user.facebook_id do %>
-                <%= if provider_count > 1 do %>
-                  <button
-                    phx-click="unlink_provider"
-                    phx-value-provider="facebook"
-                    class="btn btn-outline btn-sm"
-                  >
-                    {gettext("Remove")}
-                  </button>
-                <% else %>
-                  <button class="btn btn-disabled btn-sm" disabled aria-disabled>
-                    {gettext("Remove")}
-                  </button>
-                <% end %>
-              <% else %>
-                <.link href={~p"/auth/facebook"} class="btn btn-primary btn-sm">
-                  {gettext("Link")}
-                </.link>
-              <% end %>
-            </div>
-          </div>
-
-          <div class="flex items-center justify-between">
-            <div>
-              <strong>Apple</strong>
-              <div class="text-sm text-base-content/70">
-                {gettext("Log in")}
-              </div>
-            </div>
-            <div class="flex items-center gap-2">
-              <%= if @user.apple_id do %>
-                <%= if provider_count > 1 do %>
-                  <button
-                    phx-click="unlink_provider"
-                    phx-value-provider="apple"
-                    class="btn btn-outline btn-sm"
-                  >
-                    {gettext("Remove")}
-                  </button>
-                <% else %>
-                  <button class="btn btn-disabled btn-sm" disabled aria-disabled>
-                    {gettext("Remove")}
-                  </button>
-                <% end %>
-              <% else %>
-                <.link href={~p"/auth/apple"} class="btn btn-primary btn-sm">
-                  {gettext("Link")}
-                </.link>
-              <% end %>
-            </div>
-          </div>
-
-          <div class="flex items-center justify-between">
-            <div>
-              <strong>{"Steam"}</strong>
-              <div class="text-sm text-base-content/70">
-                {gettext("Log in")}
-              </div>
-            </div>
-            <div class="flex items-center gap-2">
-              <%= if @user.steam_id do %>
-                <%= if provider_count > 1 do %>
-                  <button
-                    phx-click="unlink_provider"
-                    phx-value-provider="steam"
-                    class="btn btn-outline btn-sm"
-                  >
-                    {gettext("Remove")}
-                  </button>
-                <% else %>
-                  <button class="btn btn-disabled btn-sm" disabled aria-disabled>
-                    {gettext("Remove")}
-                  </button>
-                <% end %>
-              <% else %>
-                <.link href={~p"/auth/steam"} class="btn btn-primary btn-sm">
-                  {gettext("Link")}
-                </.link>
+                <% true -> %>
+                  <.link href={"/auth/#{provider}"} class="btn btn-primary btn-sm">
+                    {gettext("Link")}
+                  </.link>
               <% end %>
             </div>
           </div>
@@ -639,6 +522,23 @@ defmodule GameServerWeb.UserLive.Settings.AccountTab do
 
       {:error, _} ->
         {:noreply, put_flash(socket, :error, gettext("Failed"))}
+    end
+  end
+
+  # Rows in the Account card: every linked provider (a disabled one must stay
+  # unlinkable) plus every enabled one.
+  defp provider_rows(user) do
+    Providers.all()
+    |> Enum.map(&{&1, linked_provider_id(user, &1)})
+    |> Enum.filter(fn {provider, linked_id} ->
+      linked_id || Providers.enabled?(provider)
+    end)
+  end
+
+  defp linked_provider_id(user, provider) do
+    case Map.fetch!(user, :"#{provider}_id") do
+      value when value in [nil, ""] -> nil
+      value -> value
     end
   end
 end

@@ -171,23 +171,12 @@ defmodule GameServerHost.Application do
   end
 
   defp oauth_info do
-    providers =
-      [
-        {"Discord", :discord_client_id},
-        {"Apple", :apple_client_id},
-        {"Google", :google_client_id},
-        {"Facebook", :facebook_client_id},
-        {"Steam", :steam_api_key}
-      ]
-      |> Enum.filter(fn {_name, key} ->
-        GameServer.Settings.get(GameServer.OAuth.Providers, key) not in [nil, ""]
-      end)
-      |> Enum.map(fn {name, _} -> name end)
+    case GameServer.OAuth.Providers.enabled() do
+      [] ->
+        "OAuth: none configured"
 
-    if providers == [] do
-      "OAuth: none configured"
-    else
-      "OAuth: #{Enum.join(providers, ", ")}"
+      providers ->
+        "OAuth: #{Enum.map_join(providers, ", ", &String.capitalize(Atom.to_string(&1)))}"
     end
   end
 

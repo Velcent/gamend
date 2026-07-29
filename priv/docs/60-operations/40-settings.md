@@ -7,7 +7,7 @@ generated: by `mix gamend.settings.guide` - do not edit by hand; edit the
 # Settings
 
 Every setting the server has, with the environment variable that sets it.
-217 settings across 19 groups.
+226 settings across 20 groups.
 
 A setting is declared in the module that owns it, so this page and
 `.env.example` are generated from the same source the server reads. The
@@ -54,6 +54,16 @@ Live values, and where each one came from, are on the
 | `GAMEND_CACHE_MODE` | atom | `:single` | single (L1 local only) or multi (L1 + a shared L2). |
 | `GAMEND_CACHE_REDIS_POOL_SIZE` | integer | `10` |  |
 | `GAMEND_CACHE_REDIS_URL` | string | - | Redis URL for the shared L2. **Required in production.** |
+
+
+## Captcha
+
+| Variable | Type | Default | Notes |
+|---|---|---|---|
+| `GAMEND_CAPTCHA_ENABLED` | boolean | `false` | Require a captcha on the register and magic-link forms. |
+| `GAMEND_CAPTCHA_SECRET_KEY` | string | - | Turnstile secret key, for server-side verification. **Required in production.** Secret - never log or commit it. |
+| `GAMEND_CAPTCHA_SITE_KEY` | string | - | Turnstile sitekey (public, rendered into the page). Warns when unset. |
+| `GAMEND_CAPTCHA_TIMEOUT_MS` | integer | `5000` | How long to wait for Cloudflare before giving up on a verification. |
 
 
 ## Clustering
@@ -220,19 +230,24 @@ Live values, and where each one came from, are on the
 | Variable | Type | Default | Notes |
 |---|---|---|---|
 | `GAMEND_OAUTH_APPLE_CLIENT_ID` | string | - | Services id (web audience) for Sign in with Apple. Warns when unset. |
+| `GAMEND_OAUTH_APPLE_ENABLED` | boolean | `true` | Offer apple sign-in. Only takes effect once its credentials are set. |
 | `GAMEND_OAUTH_APPLE_IOS_CLIENT_ID` | string | - | Bundle id (iOS audience) used when verifying Apple ID tokens. |
 | `GAMEND_OAUTH_APPLE_KEY_ID` | string | - | Key id of the Sign in with Apple auth key (Apple Developer -> Keys). Warns when unset. |
 | `GAMEND_OAUTH_APPLE_PRIVATE_KEY` | string | - | Contents of the Sign in with Apple .p8 key. Warns when unset. Secret - never log or commit it. |
 | `GAMEND_OAUTH_APPLE_TEAM_ID` | string | - | Warns when unset. |
 | `GAMEND_OAUTH_DISCORD_CLIENT_ID` | string | - | Warns when unset. |
 | `GAMEND_OAUTH_DISCORD_CLIENT_SECRET` | string | - | Warns when unset. Secret - never log or commit it. |
+| `GAMEND_OAUTH_DISCORD_ENABLED` | boolean | `true` | Offer discord sign-in. Only takes effect once its credentials are set. |
 | `GAMEND_OAUTH_FACEBOOK_CLIENT_ID` | string | - | Warns when unset. |
 | `GAMEND_OAUTH_FACEBOOK_CLIENT_SECRET` | string | - | Warns when unset. Secret - never log or commit it. |
+| `GAMEND_OAUTH_FACEBOOK_ENABLED` | boolean | `true` | Offer facebook sign-in. Only takes effect once its credentials are set. |
 | `GAMEND_OAUTH_GOOGLE_CLIENT_ID` | string | - | Warns when unset. |
 | `GAMEND_OAUTH_GOOGLE_CLIENT_SECRET` | string | - | Warns when unset. Secret - never log or commit it. |
+| `GAMEND_OAUTH_GOOGLE_ENABLED` | boolean | `true` | Offer google sign-in. Only takes effect once its credentials are set. |
 | `GAMEND_OAUTH_GOOGLE_WEB_CLIENT_ID` | string | - | Native-app client id used to verify Google ID tokens from SDK sign-in. |
 | `GAMEND_OAUTH_STEAM_API_KEY` | string | - | Steam Web API key, used for OpenID sign-in. Secret - never log or commit it. |
 | `GAMEND_OAUTH_STEAM_APP_ID` | string | - |  |
+| `GAMEND_OAUTH_STEAM_ENABLED` | boolean | `true` | Offer steam sign-in. Only takes effect once its credentials are set. |
 
 
 ## Observability

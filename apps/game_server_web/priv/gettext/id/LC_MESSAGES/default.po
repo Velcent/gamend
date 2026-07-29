@@ -1652,3 +1652,18 @@ msgstr "Siap diklaim"
 #, elixir-autogen, elixir-format
 msgid "View quest chain"
 msgstr "Lihat rantai misi"
+
+#: lib/game_server_web/live_helpers.ex:96
+#, elixir-autogen, elixir-format
+msgid "Captcha check failed. Please try again."
+msgstr "Pemeriksaan captcha gagal. Coba lagi."
+
+#: lib/game_server_web/live_helpers.ex:99
+#, elixir-autogen, elixir-format
+msgid "Could not reach the captcha service. Please try again."
+msgstr "Tidak dapat menghubungi layanan captcha. Coba lagi."
+
+#: lib/game_server_web/live_helpers.ex:92
+#, elixir-autogen, elixir-format
+msgid "Please complete the captcha."
+msgstr "Harap selesaikan captcha."

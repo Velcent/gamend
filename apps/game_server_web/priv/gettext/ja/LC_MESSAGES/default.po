@@ -1652,3 +1652,18 @@ msgstr "受け取り可能"
 #, elixir-autogen, elixir-format
 msgid "View quest chain"
 msgstr "クエストチェーンを見る"
+
+#: lib/game_server_web/live_helpers.ex:96
+#, elixir-autogen, elixir-format
+msgid "Captcha check failed. Please try again."
+msgstr "CAPTCHA認証に失敗しました。もう一度お試しください。"
+
+#: lib/game_server_web/live_helpers.ex:99
+#, elixir-autogen, elixir-format
+msgid "Could not reach the captcha service. Please try again."
+msgstr "CAPTCHAサービスに接続できませんでした。もう一度お試しください。"
+
+#: lib/game_server_web/live_helpers.ex:92
+#, elixir-autogen, elixir-format
+msgid "Please complete the captcha."
+msgstr "CAPTCHAを完了してください。"

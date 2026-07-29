@@ -1652,3 +1652,18 @@ msgstr "Klaar om te claimen"
 #, elixir-autogen, elixir-format
 msgid "View quest chain"
 msgstr "Questreeks bekijken"
+
+#: lib/game_server_web/live_helpers.ex:96
+#, elixir-autogen, elixir-format
+msgid "Captcha check failed. Please try again."
+msgstr "Captcha-controle mislukt. Probeer het opnieuw."
+
+#: lib/game_server_web/live_helpers.ex:99
+#, elixir-autogen, elixir-format
+msgid "Could not reach the captcha service. Please try again."
+msgstr "Kan de captcha-service niet bereiken. Probeer het opnieuw."
+
+#: lib/game_server_web/live_helpers.ex:92
+#, elixir-autogen, elixir-format
+msgid "Please complete the captcha."
+msgstr "Vul de captcha in."

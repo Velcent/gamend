@@ -15,6 +15,16 @@ defmodule GameServerWeb.AuthControllerTest do
     end)
   end
 
+  # Provider routes 404 unless the provider is configured; the tests below
+  # assume these are.
+  setup do
+    put_provider_setting(:discord_client_id, "test-discord-id")
+    put_provider_setting(:google_client_id, "test-google-id")
+    put_provider_setting(:facebook_client_id, "test-facebook-id")
+    put_provider_setting(:steam_api_key, "test-steam-key")
+    :ok
+  end
+
   test "request redirects to provider (discord)", %{conn: conn} do
     put_provider_setting(:discord_client_id, "cid-123")
 

@@ -1,8 +1,12 @@
 defmodule GameServer.OAuth.Providers do
   @moduledoc """
-  Credentials for the social sign-in providers.
+  Credentials and availability for the social sign-in providers.
 
-  Each provider is opt-in: with nothing set, its buttons simply do not work.
+  A provider is live when its credentials are set and its `<provider>_enabled`
+  setting has not been switched off. `enabled/0` drives everything that varies
+  by provider — the sign-in buttons, the `/auth/:provider` routes, and the
+  `GET /api/v1/auth/providers` listing — so they can never disagree.
+
   The id and secret are declared as a pair, so half-configuring one is a
   warning rather than a silent failure at the first login attempt.
   """
@@ -11,6 +15,25 @@ defmodule GameServer.OAuth.Providers do
     app: :game_server_core,
     group: :oauth,
     label: "OAuth providers"
+
+  @providers [:discord, :google, :apple, :facebook, :steam]
+
+  # One key marks a provider as configured; its partner keys are enforced by
+  # the `with:` groups below.
+  @presence_key %{
+    discord: :discord_client_id,
+    google: :google_client_id,
+    apple: :apple_client_id,
+    facebook: :facebook_client_id,
+    steam: :steam_api_key
+  }
+
+  for provider <- @providers do
+    setting(:"#{provider}_enabled", :boolean,
+      default: true,
+      doc: "Offer #{provider} sign-in. Only takes effect once its credentials are set."
+    )
+  end
 
   for provider <- [:discord, :google, :facebook] do
     id_key = :"#{provider}_client_id"
@@ -64,4 +87,29 @@ defmodule GameServer.OAuth.Providers do
   )
 
   setting(:steam_app_id, :string)
+
+  @doc "Every provider this server knows, in display order."
+  @spec all() :: [atom()]
+  def all, do: @providers
+
+  @doc "The providers a player may currently sign in with."
+  @spec enabled() :: [atom()]
+  def enabled, do: Enum.filter(@providers, &enabled?/1)
+
+  @doc "Whether `provider` is configured and switched on."
+  @spec enabled?(atom()) :: boolean()
+  def enabled?(provider) when provider in @providers do
+    configured?(provider) and
+      GameServer.Settings.get(__MODULE__, :"#{provider}_enabled") != false
+  end
+
+  def enabled?(_provider), do: false
+
+  @doc "Whether `provider` has credentials set."
+  @spec configured?(atom()) :: boolean()
+  def configured?(provider) when provider in @providers do
+    GameServer.Settings.get(__MODULE__, Map.fetch!(@presence_key, provider)) not in [nil, ""]
+  end
+
+  def configured?(_provider), do: false
 end

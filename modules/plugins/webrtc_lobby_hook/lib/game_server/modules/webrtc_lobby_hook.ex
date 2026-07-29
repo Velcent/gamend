@@ -1,33 +1,28 @@
 defmodule GameServer.Modules.WebRTCLobbyHook do
   @moduledoc """
-  Keeps a WebRTC signaling room in sync with a lobby.
+  Turns WebRTC signaling on for every lobby, and tells a star host when to
+  connect.
 
-  This is the only module that connects the lobby system to the WebRTC
-  signaling layer. When a lobby has `metadata.webrtc.enabled = true`, a
-  signaling room with the same id as the lobby is created automatically.
-  The room is closed when the lobby is deleted, and the allowed-user list
-  is kept in sync with lobby joins and leaves.
+  A room *is* a lobby: `GameServer.Signaling` reads configuration from the
+  lobby's `webrtc_*` columns, membership from presence, and relays over PubSub,
+  so this plugin mirrors no state. It sets policy and sends one notification:
 
-  When a star-topology room is created, the designated host is notified on
-  its user channel (`user:<host_user_id>`) with a `webrtc:room_ready` event
-  so a headless server can connect automatically.
+    * `after_lobby_create/1` — enables star signaling on the new lobby.
+    * `after_lobby_updated/1` — closes the room if WebRTC was switched off,
+      since peers would otherwise stay connected, unable to relay, never told
+      why.
+    * `after_lobby_deleted/1` — closes the room.
+    * `after_lobby_host_change/2` — re-notifies the new star host.
+      `Signaling.config/1` reads the host off the lobby, so the next join
+      already sees the new one.
 
-  Configuration is read from `lobby.metadata.webrtc`:
+  The star host is notified on its user channel with `webrtc:room_ready`,
+  carrying the topic to join, so a headless server-as-host connects on its own.
 
-      %{
-        "enabled" => true,
-        "topology" => "star" | "mesh",
-        "late_join" => true,
-        "reconnect_timeout" => 30_000,
-        "host_user_id" => "optional-server-user-id"
-      }
-
-  In `:star` mode the host is resolved in this order:
-    1. `metadata.webrtc.host_user_id`
-    2. `lobby.host_id`
-
-  The allowed-user list is seeded from the lobby members at creation time.
-  Late joiners are added via `after_lobby_join/2`.
+  Configuration goes through `GameServer.Signaling.configure/2` (see its docs);
+  the star host is always `lobby.host_id`. Drop this plugin to drive
+  `configure/2` yourself — for mesh rooms, or to enable signaling only once a
+  match actually starts.
   """
 
   use GameServer.Hooks

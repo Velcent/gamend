@@ -1652,3 +1652,18 @@ msgstr "Redo att hämtas"
 #, elixir-autogen, elixir-format
 msgid "View quest chain"
 msgstr "Visa uppdragskedjan"
+
+#: lib/game_server_web/live_helpers.ex:96
+#, elixir-autogen, elixir-format
+msgid "Captcha check failed. Please try again."
+msgstr "Captcha-kontrollen misslyckades. Försök igen."
+
+#: lib/game_server_web/live_helpers.ex:99
+#, elixir-autogen, elixir-format
+msgid "Could not reach the captcha service. Please try again."
+msgstr "Kunde inte nå captcha-tjänsten. Försök igen."
+
+#: lib/game_server_web/live_helpers.ex:92
+#, elixir-autogen, elixir-format
+msgid "Please complete the captcha."
+msgstr "Fyll i captchan."

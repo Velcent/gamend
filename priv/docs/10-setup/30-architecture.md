@@ -21,27 +21,27 @@ High-level overview of how the platform is structured — from clients down to t
   │                     GAME SERVER                             │
   │                                                             │
   │  ┌───────────────────── Web Layer ───────────────────────┐  │
-  │  │  REST API (/api/v1)  │  WebSocket Channels  │  Admin  │  │
-  │  │  (Controllers +      │  (Lobby, User,       │  UI     │  │
-  │  │   OpenApiSpex)       │   other channels)    │  (Live) │  │
-  │  └──────────┬───────────┴──────────┬───────────┴────┬────┘  │
-  │             │                      │                │       │
+  │  │  REST API (/api/v1) │ WS Channels + WebRTC │ Admin    │  │
+  │  │  (Controllers +     │ (Lobby, User,        │ UI       │  │
+  │  │   OpenApiSpex)      │  Signaling, …)       │ (Live)   │  │
+  │  └─────────────────────┴──────────────────────┴──────────┘  │
+  │                        │                      │             │
   │  ┌──────── Auth ──────────────────────────────────────────┐ │
-  │  │  Guardian (JWT)  │  Sessions  │  Ueberauth (OAuth)     │ │
-  │  └──────────┬───────┴──────┬─────┴──────────┬─────────────┘ │
+  │  │  Guardian (JWT) │ Sessions │ Ueberauth │ Captcha (opt) │ │
+  │  └──────────┬──────┴───────┬──┴───────────┴─┬─────────────┘ │
   │             │              │                │               │
   │  ┌───────── Business Layer (Contexts) ────────────────────┐ │
   │  │                                                        │ │
-  │  │  Accounts  │  Lobbies       │  Parties  │  Friends     │ │
-  │  │  Groups    │  Leaderboards  │  Notifications │ Push    │ │
-  │  │  Quests    │ Chat  │  Economy  │  Inventory        │ │
-  │  │  KV Storage │ Hooks (server scripting)                 │ │
+  │  │  Accounts │ Lobbies │ Parties │ Friends │ Groups       │ │
+  │  │  Leaderboards │ Tournaments │ Matchmaking │ Ready      │ │
+  │  │  Quests │ Chat │ Economy │ Inventory │ Payments        │ │
+  │  │  KV │ Storage │ Signaling │ Push │ Jobs │ Hooks        │ │
   │  │                                                        │ │
   │  └──────────┬─────────────────────┬───────────────────────┘ │
   │             │                     │                         │
   │  ┌──────── Infrastructure ────────┴───────────────────────┐ │
-  │  │  PubSub (real-time)  │  Cache (Nebulex)  │  Scheduler  │ │
-  │  └──────────┬───────────┴──────────┬────────┴─────────────┘ │
+  │  │  PubSub (real-time) │ Cache (Nebulex) │ Oban (cron)    │ │
+  │  └──────────┬──────────┴───────────┬─────┴────────────────┘ │
   └─────────────┼──────────────────────┼────────────────────────┘
                 │                      │
   ┌─────────────┼──────────────────────┼───────────────────────┐
@@ -99,12 +99,24 @@ High-level overview of how the platform is structured — from clients down to t
   KV module        ──────►  "kv:{scope}:{key}"           ──►  UserChannel (kv:subscribe)
   Tournaments      ──────►  "tournaments:user:{id}"      ──►  UserChannel
   Payments module  ──────►  "user:{id}"                  ──►  LiveViews (purchases/entitlements)
+  Signaling module ──────►  "signaling:{lobby_id}"       ──►  SignalingChannel (presence)
+  Signaling module ──────►  "signaling:{lobby_id}:{uid}" ──►  SignalingChannel (one peer's
+                                                              inbox: relayed offer/answer/ice)
 ```
+
+Signaling has no room process and no room record — configuration is read from
+the lobby's `webrtc_*` columns, membership is presence, and relay is PubSub. All
+three are cluster-wide, so two peers whose sockets land on different nodes can
+still signal each other.
 
 ## Entity relationships (simplified)
 
 ```text
   users ─────┬──── lobby_id ──────────► lobbies
+             │                            ├── webrtc_* columns
+             │                            │   (the WebRTC signaling room IS
+             │                            │    the lobby; server-owned, not
+             │                            │    castable, star host = host_id)
              │                            │
              ├──── party_id ──────────► parties
              │                              └── party_invites table
@@ -171,7 +183,7 @@ These projects live in one repository, but the runtime split is intentional: cor
   │   ├── game_server_core/    # Shared domain: contexts, schemas, migrations
   │   └── game_server_web/     # Shared web package: controllers, LiveViews,
   │                            #   channels, components, frontend source
-  ├── modules/                 # Runtime hook scripts (server scripting)
+  ├── modules/plugins/         # Hook plugins, as OTP apps (server scripting)
   ├── clients/                 # Godot SDK, JS SDK
   └── sdk/                     # Elixir SDK stubs for hooks
 ```
@@ -199,6 +211,10 @@ values are documented in the
 | Wallets and inventory | [`GameServer.Economy`](https://appsinacup.com/game_server/GameServer.Economy.html) |
 | Payments | [`GameServer.Payments`](https://appsinacup.com/game_server/GameServer.Payments.html) |
 | Key-value store | [`GameServer.KV`](https://appsinacup.com/game_server/GameServer.KV.html) |
+| Object storage | [`GameServer.Storage`](https://appsinacup.com/game_server/GameServer.Storage.html) |
+| WebRTC signaling rooms | [`GameServer.Signaling`](https://appsinacup.com/game_server/GameServer.Signaling.html) |
+| Ready checks | [`GameServer.ReadyChecks`](https://appsinacup.com/game_server/GameServer.ReadyChecks.html) |
+| Background and cron jobs | [`GameServer.Jobs`](https://appsinacup.com/game_server/GameServer.Jobs.html), [`GameServer.Schedule`](https://appsinacup.com/game_server/GameServer.Schedule.html) |
 | Plugin hooks | [`GameServer.Hooks`](https://appsinacup.com/game_server/GameServer.Hooks.html) |
 
 ## Key technologies
@@ -207,10 +223,10 @@ values are documented in the
 - **Language:** Elixir 1.20 / Erlang OTP
 - **HTTP server:** Bandit (native HTTPS, no reverse proxy needed)
 - **Database:** SQLite3 (default) / PostgreSQL (optional)
-- **Real-time:** Phoenix Channels + PubSub; WebRTC DataChannels (ex_webrtc)
-- **Auth:** Guardian (JWT), Ueberauth (OAuth), Sessions
+- **Real-time:** Phoenix Channels + PubSub; WebRTC DataChannels (ex_webrtc) and peer-to-peer signaling
+- **Auth:** Guardian (JWT), Ueberauth (OAuth), Sessions, optional Cloudflare Turnstile captcha
 - **Cache:** Nebulex (L1 local, optional L2 Redis/partitioned)
-- **Scheduling:** Quantum (cron-like)
+- **Jobs and scheduling:** Oban (durable queues + cron)
 - **API docs:** OpenApiSpex (Swagger UI)
 - **CSS:** Tailwind CSS 4
 - **Monitoring:** Telemetry + PromEx

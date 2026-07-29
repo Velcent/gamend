@@ -1653,3 +1653,18 @@ msgstr "Átvehető"
 #, elixir-autogen, elixir-format
 msgid "View quest chain"
 msgstr "Küldetéslánc megtekintése"
+
+#: lib/game_server_web/live_helpers.ex:96
+#, elixir-autogen, elixir-format
+msgid "Captcha check failed. Please try again."
+msgstr "A captcha-ellenőrzés sikertelen. Próbáld újra."
+
+#: lib/game_server_web/live_helpers.ex:99
+#, elixir-autogen, elixir-format
+msgid "Could not reach the captcha service. Please try again."
+msgstr "A captcha-szolgáltatás nem érhető el. Próbáld újra."
+
+#: lib/game_server_web/live_helpers.ex:92
+#, elixir-autogen, elixir-format
+msgid "Please complete the captcha."
+msgstr "Kérjük, töltsd ki a captchát."

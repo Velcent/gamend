@@ -1652,3 +1652,18 @@ msgstr "수령 가능"
 #, elixir-autogen, elixir-format
 msgid "View quest chain"
 msgstr "퀘스트 체인 보기"
+
+#: lib/game_server_web/live_helpers.ex:96
+#, elixir-autogen, elixir-format
+msgid "Captcha check failed. Please try again."
+msgstr "캡차 확인에 실패했습니다. 다시 시도하세요."
+
+#: lib/game_server_web/live_helpers.ex:99
+#, elixir-autogen, elixir-format
+msgid "Could not reach the captcha service. Please try again."
+msgstr "캡차 서비스에 연결할 수 없습니다. 다시 시도하세요."
+
+#: lib/game_server_web/live_helpers.ex:92
+#, elixir-autogen, elixir-format
+msgid "Please complete the captcha."
+msgstr "캡차를 완료해 주세요."

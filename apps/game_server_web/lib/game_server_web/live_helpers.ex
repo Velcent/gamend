@@ -3,6 +3,10 @@ defmodule GameServerWeb.LiveHelpers do
   Shared helpers for LiveViews.
   """
 
+  use Gettext, backend: GameServerWeb.Gettext
+
+  alias GameServer.Captcha
+
   @doc """
   Extract the client IP from a LiveView socket's `connect_info`.
 
@@ -55,6 +59,44 @@ defmodule GameServerWeb.LiveHelpers do
   end
 
   defp setting(key), do: GameServer.Settings.get(GameServerWeb.Plugs.RateLimiter, key)
+
+  @doc """
+  Verify the captcha token carried by a `phx-submit`'s params.
+
+  Returns `:ok` — including whenever the captcha is disabled, so a call site
+  needs no `enabled?/0` branch of its own — or `{:error, socket}` with the
+  failure already handled: a flash explaining which way it failed, and a reset
+  pushed to the widget. The reset is not optional. A token Cloudflare rejected
+  is spent, so without it the form would resubmit the same dead token forever
+  and the player could never recover without a reload.
+
+  Pair it with `<.captcha>` in the form (see `GameServerWeb.CoreComponents`),
+  and read `:client_ip` off the socket, which both auth LiveViews assign at
+  mount.
+  """
+  @spec check_captcha(Phoenix.LiveView.Socket.t(), map()) ::
+          :ok | {:error, Phoenix.LiveView.Socket.t()}
+  def check_captcha(socket, params) when is_map(params) do
+    case Captcha.verify(params["cf-turnstile-response"], socket.assigns[:client_ip]) do
+      :ok ->
+        :ok
+
+      {:error, reason} ->
+        {:error,
+         socket
+         |> Phoenix.LiveView.put_flash(:error, captcha_error(reason))
+         |> Phoenix.LiveView.push_event("captcha:reset", %{})}
+    end
+  end
+
+  defp captcha_error(:missing), do: gettext("Please complete the captcha.")
+
+  # Split from :missing so a player who did complete it is not told to do the
+  # thing they just did.
+  defp captcha_error(:invalid), do: gettext("Captcha check failed. Please try again.")
+
+  defp captcha_error(:unavailable),
+    do: gettext("Could not reach the captcha service. Please try again.")
 
   @doc """
   Put a standard success flash on a LiveView socket.

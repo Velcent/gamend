@@ -64,6 +64,10 @@ These hold everywhere, so the tables below list only what is specific to them:
 | `state` | string | Lifecycle word. Core sets `created`; the game owns the vocabulary (enforced in `before_lobby_state_change`) |
 | `state_changed_at` | utc_datetime | When `state` last changed |
 | `slowdown` | integer | Chat slow-mode seconds, 0 = off |
+| `webrtc_enabled` | boolean | Doubles as the WebRTC signaling room switch. Default `false` |
+| `webrtc_topology` | string | `star` or `mesh`; nullable |
+| `webrtc_late_join` | boolean | Whether a non-member may connect to the room. Default `true` |
+| `webrtc_reconnect_timeout_ms` | integer | Grace period before a dropped peer is announced gone. Default 30 000 |
 | `metadata` | map | Searchable in lobby listings |
 
 Membership lives on `users.lobby_id`, not a join table — a user is in at most
@@ -72,6 +76,11 @@ host may set it on a host-managed lobby via `POST /lobbies/state`, hostless
 lobbies are server-only, and a plain lobby update can never write it. Core
 validates only that the word is 1-64 bytes and enforces no ordering, so a game
 that wants a closed vocabulary rejects the move in `before_lobby_state_change`.
+
+The `webrtc_*` columns are the WebRTC signaling room: a room *is* a lobby, with
+no separate record. Like `state` they are server-owned — only
+`GameServer.Signaling.configure/2` writes them. The star host is always
+`host_id`. See the [WebRTC](/docs/setup?guide=webrtc) guide.
 
 ## parties
 

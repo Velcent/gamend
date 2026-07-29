@@ -1654,3 +1654,18 @@ msgstr "Έτοιμο για παραλαβή"
 #, elixir-autogen, elixir-format
 msgid "View quest chain"
 msgstr "Δείτε την αλυσίδα αποστολών"
+
+#: lib/game_server_web/live_helpers.ex:96
+#, elixir-autogen, elixir-format
+msgid "Captcha check failed. Please try again."
+msgstr "Ο έλεγχος captcha απέτυχε. Προσπαθήστε ξανά."
+
+#: lib/game_server_web/live_helpers.ex:99
+#, elixir-autogen, elixir-format
+msgid "Could not reach the captcha service. Please try again."
+msgstr "Δεν ήταν δυνατή η σύνδεση με την υπηρεσία captcha. Προσπαθήστε ξανά."
+
+#: lib/game_server_web/live_helpers.ex:92
+#, elixir-autogen, elixir-format
+msgid "Please complete the captcha."
+msgstr "Παρακαλώ συμπληρώστε το captcha."

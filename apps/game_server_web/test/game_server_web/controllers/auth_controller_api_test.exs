@@ -1,6 +1,28 @@
 defmodule GameServerWeb.AuthControllerApiTest do
   use GameServerWeb.ConnCase, async: false
 
+  alias GameServer.SettingsHelpers
+
+  # Provider routes 404 unless the provider is configured, so mark them all
+  # configured for the whole file.
+  setup do
+    orig_oauth = Application.get_env(:game_server_core, GameServer.OAuth.Providers)
+
+    for key <- [:discord_client_id, :google_client_id, :apple_client_id, :steam_api_key] do
+      SettingsHelpers.put(:game_server_core, GameServer.OAuth.Providers, key, "test-#{key}")
+    end
+
+    on_exit(fn ->
+      if is_nil(orig_oauth) do
+        Application.delete_env(:game_server_core, GameServer.OAuth.Providers)
+      else
+        Application.put_env(:game_server_core, GameServer.OAuth.Providers, orig_oauth)
+      end
+    end)
+
+    :ok
+  end
+
   setup do
     # allow tests to inject a mock exchanger
     orig = Application.get_env(:game_server_web, :oauth_exchanger)
@@ -31,19 +53,15 @@ defmodule GameServerWeb.AuthControllerApiTest do
       assert json_response(conn, 404)["error"] == "session_not_found"
     end
 
-    test "empty session path returns 400 (router)", %{conn: conn} do
-      resp = get(conn, "/api/v1/auth/session/")
-
-      assert resp.status == 400
+    test "empty session path is a 404", %{conn: conn} do
+      # Matches the :provider route with "session", which no provider is.
+      assert_error_sent 404, fn -> get(conn, "/api/v1/auth/session/") end
     end
   end
 
   describe "GET /api/v1/auth/:provider API request" do
-    test "unknown provider returns 400", %{conn: conn} do
-      conn = get(conn, ~p"/api/v1/auth/invalid-provider")
-
-      assert conn.status == 400
-      assert json_response(conn, 400)["error"] == "invalid_provider"
+    test "unknown provider is a 404", %{conn: conn} do
+      assert_error_sent 404, fn -> get(conn, ~p"/api/v1/auth/invalid-provider") end
     end
 
     test "steam returns OpenID URL and session id", %{conn: conn} do

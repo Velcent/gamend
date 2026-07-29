@@ -1646,3 +1646,18 @@ msgstr "Listo para reclamar"
 #, elixir-autogen, elixir-format
 msgid "View quest chain"
 msgstr "Ver la cadena de misiones"
+
+#: lib/game_server_web/live_helpers.ex:96
+#, elixir-autogen, elixir-format
+msgid "Captcha check failed. Please try again."
+msgstr "La verificación del captcha ha fallado. Inténtalo de nuevo."
+
+#: lib/game_server_web/live_helpers.ex:99
+#, elixir-autogen, elixir-format
+msgid "Could not reach the captcha service. Please try again."
+msgstr "No se pudo conectar con el servicio de captcha. Inténtalo de nuevo."
+
+#: lib/game_server_web/live_helpers.ex:92
+#, elixir-autogen, elixir-format
+msgid "Please complete the captcha."
+msgstr "Por favor, completa el captcha."

@@ -2,234 +2,142 @@
 icon: hero-video-camera
 ---
 
-# WebRTC DataChannels
+# WebRTC
 
-WebRTC DataChannel support provides low-latency, optionally unreliable data transport alongside the existing WebSocket. The server acts as a WebRTC peer (not peer-to-peer between clients). Both transports coexist — WebSocket handles signaling, notifications, and chat while WebRTC handles high-frequency game data.
+Two independent features; pick by where the game simulation runs. A game can use
+either, both, or neither.
 
-**Rust required:** ex_sctp compiles a Rust NIF, so a Rust toolchain is required. Local dev needs rustup installed. Docker/CI images must include the Rust toolchain.
+| | **Server as peer** | **Peer-to-peer signaling** |
+|---|---|---|
+| Who talks to whom | Client ⇄ server | Client ⇄ client |
+| The server is | A WebRTC peer terminating DataChannels | An SDP/ICE relay; no media path |
+| Room identity | The user (`user:<id>` channel) | A **lobby** (`signaling:<lobby_id>` channel) |
+| Use it for | Low-latency hook RPC and state to an authoritative server | Player-hosted matches, voice, direct state exchange |
+| Client SDK | `GameWebRTC` (JS) / `GamendWebRTC` (Godot) | None yet — join the channel directly |
+| Rust toolchain | Required (`ex_sctp` NIF), locally and in Docker/CI | Not needed |
 
-## Architecture overview
+## Server as peer
+
+SDP/ICE is exchanged over the already-authenticated `user:<id>` channel, so
+there is no separate WebRTC auth. One PeerConnection per user, spawned on the
+first `webrtc:offer` and linked to the channel process, so it dies with the
+WebSocket. Both transports coexist — WS keeps notifications and chat, WebRTC
+carries high-frequency game data.
 
 ```text
 Client                           Server (ex_webrtc)
-  │                                    │
-  │── WS connect (JWT auth) ──────────>│  existing flow
-  │── WS join "user:<id>"  ───────────>│  existing flow
-  │                                    │
-  │── WS push "webrtc:offer"  ────────>│  Server creates PeerConnection
-  │<── WS push "webrtc:answer"  ───────│  Server sends SDP answer
-  │── WS push "webrtc:ice"  ──────────>│  ICE candidate exchange
-  │<── WS push "webrtc:ice"  ──────────│  ICE candidate exchange
-  │                                    │
-  │══ DataChannel "events"  ═══════════│  reliable, ordered
+  │── WS push "webrtc:offer"  ────────>│  creates PeerConnection
+  │<── WS push "webrtc:answer" ────────│
+  │<─► WS push "webrtc:ice"   ────────►│  ICE exchange
+  │══ DataChannel "events" ════════════│  reliable, ordered
   │══ DataChannel "state"  ════════════│  unreliable, unordered
-  │                                    │
-  │── WS still open  ─────────────────>│  notifications, chat, etc.
 ```
 
-## Key design decisions
+| Channel label | Ordered | Reliable | Use case |
+|---|---|---|---|
+| `"events"` | Yes | Yes | Game events, hook RPC |
+| `"state"` | No | No | High-frequency state (positions) |
 
-- **Signaling over existing UserChannel** — No new channel needed. SDP/ICE exchange happens via the already-authenticated WebSocket.
-- **Auth inherited from WebSocket** — The PeerConnection is created inside the authenticated channel process. No separate WebRTC auth.
-- **One PeerConnection per user** — Spawned on first "webrtc:offer". Linked to the channel process (auto-terminates when WS disconnects).
-- **WebSocket stays open** — Both transports coexist. Client chooses which to use for game data.
-
-## Setup
-
-Dependencies are included in mix.exs:
-
-```text
-# In apps/game_server_web/mix.exs
-{:ex_webrtc, "~> 0.16.0"},
-{:ex_sctp, "~> 0.1.2"}   # Requires Rust toolchain
-```
-
-Configure ICE servers in the root host config under config/:
+Configure ICE in the host config (`enabled: false` rejects offers at runtime):
 
 ```text
 config :game_server_web, :webrtc,
   enabled: true,
   ice_servers: [%{urls: "stun:stun.l.google.com:19302"}]
-
-  # Optional TURN for restrictive NATs:
-  # ice_servers: [
-  #   %{urls: "stun:stun.l.google.com:19302"},
-  #   %{urls: "turn:your-server:3478", username: "u", credential: "p"}
-  # ]
+  # add a TURN entry for restrictive NATs
 ```
 
-## DataChannel strategy
+### UserChannel signaling events
 
-| Channel label | Ordered | Reliable | Use case |
-|---|---|---|---|
-| `"events"` | Yes | Yes | Important game events (scores, spawns, deaths) |
-| `"state"` | No | No | High-frequency state sync (positions, rotations) |
+| Direction | Event | Payload |
+|---|---|---|
+| C → S | `webrtc:offer` / S → C `webrtc:answer` | `{sdp, type}` |
+| Both | `webrtc:ice` | `{candidate, sdpMid, sdpMLineIndex}` |
+| C → S | `webrtc:send`, `webrtc:close` | `{channel, data}`, `{}` |
+| S → C | `webrtc:data` | `{channel, data}` |
+| S → C | `webrtc:state`, `webrtc:channel_open`, `webrtc:channel_closed` | `{state}`, `{channel}`, `{}` |
 
-## RPC format: JSON (default) or Protobuf
+### Hook RPC
 
-Hook RPC on the "events" DataChannel speaks JSON by default. A channel opts into protobuf by setting the standard DataChannel protocol field when it is created — the server reads the negotiated protocol per channel, so JSON and protobuf channels can coexist on the same peer. The envelope is defined in proto/gamend_realtime.proto (RtcEnvelope).
+Messages on `"events"` with `{"type": "call_hook", "plugin": ..., "fn": ..., "args": [...]}`
+invoke plugin hooks without an HTTP round-trip; the reply (`hook_reply` /
+`hook_error`) arrives on the same channel. The `"state"` channel stays an opaque
+byte pipe.
+
+JSON is the default; a channel opts into protobuf via the DataChannel protocol
+field (envelope: `RtcEnvelope` in `proto/gamend_realtime.proto`). **Prefer
+protobuf here**: DataChannels have no compression, and protobuf calls carry a
+request id so concurrent calls to the same function are correlated safely —
+JSON matches replies by plugin+fn and needs caller-side serialization.
+
+Typed hooks: define `<FnName>Request` / `<FnName>Reply` protobuf messages in
+your plugin's proto and the pair registers automatically; the plugin function
+receives the decoded struct and returns a reply struct, callable from every
+transport (`callHookRaw` / `call_hook_raw` for binary). Regenerate bindings for
+all targets with `mix host.proto.gen`.
+
+### Clients
 
 ```javascript
-// JavaScript SDK — negotiates protocol: "protobuf" on the DataChannels
 const webrtc = new GameWebRTC(userChannel, { format: 'protobuf' })
 await webrtc.connect()
+webrtc.send("events", JSON.stringify({ type: "move", x: 10 }))
 const result = await webrtc.callHook('my_plugin', 'my_func', [1, 2])
+```
 
-# Godot SDK
-var webrtc = GamendWebRTC.new(user_channel, format": "protobuf)
+```gdscript
+var webrtc := GamendWebRTC.new(user_channel, {})
+add_child(webrtc)
 webrtc.connect_webrtc()
 var result = await webrtc.call_hook("my_plugin", "my_func", [1, 2])
 ```
 
-- **Request ids** — protobuf RPC calls carry an id echoed in the reply, so concurrent calls — including to the same function — are correlated safely. The JSON protocol, which is the default, matches replies by plugin+fn instead, so concurrent calls to the same function must be serialized by the caller.
-- **Wire size** — DataChannels have no compression, so protobuf's smaller payloads (35–84% below JSON in the encoding benchmark) are realized in full on this transport.
-- **Custom game data** — the "state" channel remains an opaque byte pipe in both modes; send whatever encoding your game defines.
+Deployment: Rust toolchain in the image, UDP ports open, TURN recommended;
+on Fly.io `ExWebRTC.ICE.FlyIpFilter` handles public IP binding.
 
-**Which to choose:** prefer protobuf for WebRTC — unlike the WebSocket there is no compression here, and the request-id correlation makes concurrent hook calls safe. Use JSON only when wire debuggability matters more than bandwidth or when a client platform lacks protobuf support.
+## Peer-to-peer signaling
 
-### Typed hooks (game-defined schemas)
+The server relays SDP/ICE between clients and enforces who may talk to whom;
+media and game data never touch it. **A room is a lobby** — same id, no room
+record or process. Configuration lives in the lobby's server-owned `webrtc_*`
+columns, membership in presence, relay over PubSub; all cluster-wide, so peers
+on different nodes signal fine.
 
-Define request/reply messages in your plugin's proto file using the
-`<FnName>Request` / `<FnName>Reply` convention (`hello_proto` gives
-`HelloProtoRequest` / `HelloProtoReply`); the pair registers the hook's schema
-when the plugin loads.
-
-The plugin function receives the decoded request struct and returns a reply
-struct, and the server converts at the boundary. One hook is therefore callable
-from every transport and format:
-
-- binary protobuf on protobuf DataChannels (`callHookRaw` / `call_hook_raw`)
-- plain JSON objects on JSON DataChannels and the WebSocket `call_hook`
-- the admin hook tester
-
-Clients can switch format at runtime without touching call sites. Binary calls
-need the schema; without one the call falls back to JSON.
+Configure through `GameServer.Signaling.configure/2`, the only writer of those
+server-owned columns; the star host is always `lobby.host_id`:
 
 ```elixir
-# Plugin (Elixir) — bundles its own generated modules;
-# receives the decoded request, returns the reply struct.
-def hello_proto(%MyGame.V1.HelloProtoRequest{} = req) do
-  %MyGame.V1.HelloProtoReply{greeting: "Hello, #{req.name}!"}
-end
-
-// JavaScript client
-const req = HelloProtoRequest.encode({ name: 'gamend' }).finish()
-const reply = HelloProtoReply.decode(await webrtc.callHookRaw('my_game', 'hello_proto', req))
-
-# Godot client
-var req = MyGamePb.HelloProtoRequest.new()
-req.set_name("gamend")
-var result = await webrtc.call_hook_raw("my_game", "hello_proto", req.to_bytes())
-var reply = MyGamePb.HelloProtoReply.new()
-reply.from_bytes(result.data)
+GameServer.Signaling.configure(lobby, enabled: true, topology: :star)
+# options: :enabled (false), :topology (:star | :mesh),
+#          :late_join (true), :reconnect_timeout (30_000 ms)
 ```
 
-### Regenerating client bindings
+| Topology | Rule |
+|---|---|
+| `:mesh` | Any peer may signal any other |
+| `:star` | Every exchange involves the host; only the host may broadcast |
 
-Whenever a proto file changes — the built-in realtime schema on upgrade, or your own game schema — regenerate the bindings and ship them with the game. One mix task drives all three generators, and the server is compiled from the same file, so everything stays in lock-step:
+Roles (`:host` / `:user`) are assigned by the server in the join reply and
+recomputed from the lobby on every read, so a host change applies immediately.
 
-```bash
-# One task, every target — ships with game_server_core,
-# so downstream games can run it too.
-mix host.proto.gen                    # every .proto it discovers
-mix host.proto.gen my_game.proto      # just this one
-
-# Restrict targets, or override an output path:
-mix host.proto.gen --only elixir,js my_game.proto
-mix host.proto.gen --godot-out godot/my_game_pb.gd my_game.proto
-
-# Elixir needs protoc + protoc-gen-elixir; JS needs npx; Godot needs
-# GODOT_BIN and GODOBUF_DIR. Missing toolchains are skipped, not fatal.
-```
-
-## Signaling events
+### Channel events — topic `signaling:<lobby_id>`
 
 | Direction | Event | Payload |
 |---|---|---|
-| Client → Server | `"webrtc:offer"` | sdp": "...", "type": "offer |
-| Server → Client | `"webrtc:answer"` | sdp": "...", "type": "answer |
-| Both | `"webrtc:ice"` | candidate": "...", "sdpMid": "...", "sdpMLineIndex": 0} |
-| Client → Server | `"webrtc:send"` | {"channel": "events", "data": "... |
-| Server → Client | `"webrtc:data"` | channel": "events", "data": "... |
-| Client → Server | `"webrtc:close"` | {} |
-| Server → Client | `"webrtc:state"` | state": "connected\|failed\|closed |
-| Server → Client | `"webrtc:channel_open"` | channel": "events |
-| Server → Client | `"webrtc:channel_closed"` | {} |
+| C → S | `offer` / `answer` / `ice` | `{target, sdp}` / `{target, candidate}` |
+| C → S | `broadcast_offer` | `{sdp}` — star host only |
+| C → S | `list_users` | `{}` |
+| S → C | `offer` / `answer` / `ice` | `{sdp \| candidate, from_user_id}` |
+| S → C | `user_joined` / `user_rejoined` / `user_left` | `{user_id, role}` |
+| S → C | `room_closed` | `{}` |
 
-## Hook RPC over the events channel
+On join the server pushes one `user_joined` per peer already connected. Rate
+limits per user: 300 msgs / 10 s overall, plus a separate 150 / 30 s budget for
+ICE so candidate bursts cannot starve offers. `webrtc:*` and signaling events
+stay JSON even on protobuf sockets.
 
-Messages sent on the "events" DataChannel with a call_hook type invoke server-side plugin hooks, avoiding an HTTP round-trip. The reply arrives on the same channel:
-
-```text
-# Client → Server (on the "events" DataChannel)
-type": "call_hook", "plugin": "my_plugin", "fn": "my_func", "args": [1, 2]} # Server → Client {"type": "hook_reply", "plugin": "my_plugin", "fn": "my_func", "data": ...} # or, on failure (including results that are not JSON-encodable) {"type": "hook_error", "plugin": "my_plugin", "fn": "my_func", "error": "reason
-```
-
-## JavaScript client
-
-Import GameWebRTC from assets/js/webrtc.js:
-
-```javascript
-import { GameWebRTC } from "./webrtc"
-import { _ensureSocket } from "./lobbies"
-
-const socket = _ensureSocket()
-const userChannel = socket.channel("user:123", {token: myToken})
-userChannel.join()
-
-const webrtc = new GameWebRTC(userChannel, {
-  dataChannels: [
-    { label: "events", ordered: true },
-    { label: "state",  ordered: false, maxRetransmits: 0 },
-  ],
-  onData: (label, data) => {
-    console.log(`Received on ${label}:`, data)
-  },
-  onChannelOpen: (label) => console.log(`Channel ${label} open`),
-  onStateChange: (state) => console.log(`WebRTC state: ${state}`),
-})
-
-await webrtc.connect()
-webrtc.send("events", JSON.stringify({ type: "move", x: 10, y: 20 }))
-webrtc.close()
-```
-
-## Godot client
-
-Use GamendWebRTC.gd from the gamend_template:
-
-```gdscript
-var realtime := GamendRealtime.new(token)
-var user_channel := realtime.add_channel("user:%s" % user_id)  # ids are UUID strings
-# wait for join...
-
-var webrtc := GamendWebRTC.new(user_channel, {
-    "enable_logs": true
-})
-add_child(webrtc)
-webrtc.data_received.connect(_on_data)
-webrtc.connected.connect(_on_connected)
-webrtc.connect_webrtc()
-
-func _on_data(label: String, data: PackedByteArray):
-    print("Recv on %s: %s" % [label, data.get_string_from_utf8()])
-
-func _on_connected():
-    webrtc.send_text("events", '{"type":"move","x":10,"y":20}')
-```
-
-## Server-side components
-
-- **WebRTCPeer** — GenServer managing ExWebRTC.PeerConnection per user. Handles SDP negotiation, ICE exchange, and DataChannel lifecycle.
-- **UserChannel** — Extended with WebRTC signaling handlers. Handles webrtc:offer, webrtc:ice, webrtc:send, and webrtc:close events.
-
-## Deployment
-
-- Docker: Add Rust toolchain to Dockerfile (ex_sctp compiles a Rust NIF).
-- Server needs UDP ports accessible for WebRTC media/data transport.
-- Fly.io: ex_webrtc includes ExWebRTC.ICE.FlyIpFilter for correct public IP binding.
-- TURN server recommended for clients behind restrictive NATs/firewalls.
-
-## Disabling WebRTC at runtime
-
-Set enabled: false in config to reject offers at runtime. The server will continue to work normally with WebSocket only.
+The bundled `webrtc_lobby_hook` plugin enables star signaling on every lobby,
+closes rooms on delete, and pushes `webrtc:room_ready` (with the topic to join)
+to the host's `user:<id>` channel so a headless host connects on its own. Drop
+it to call `Signaling.configure/2` yourself — e.g. mesh rooms, or signaling only
+once a match starts.

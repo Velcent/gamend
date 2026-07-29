@@ -133,10 +133,16 @@ defmodule GameServer.Captcha do
   end
 
   defp post(form) do
-    Req.post(@verify_url,
-      form: form,
-      receive_timeout: GameServer.Settings.get(__MODULE__, :timeout_ms),
-      retry: false
+    # `:captcha_req_options` lets tests inject a Req.Test plug; empty in prod.
+    req_opts = Application.get_env(:game_server_core, :captcha_req_options, [])
+
+    Req.post(
+      @verify_url,
+      [
+        form: form,
+        receive_timeout: GameServer.Settings.get(__MODULE__, :timeout_ms),
+        retry: false
+      ] ++ req_opts
     )
   rescue
     e -> {:error, e}

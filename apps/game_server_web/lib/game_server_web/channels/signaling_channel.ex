@@ -4,18 +4,19 @@ defmodule GameServerWeb.SignalingChannel do
 
   Topic: `signaling:<room_id>`
 
-  Rooms are the lobby: `GameServer.Signaling` derives them from lobby metadata.
-  The allowed-user list is populated by the hook, so this channel does not
-  need to query the lobby system. The topology and host are fixed at room
-  creation; clients cannot choose their role.
+  A room is a lobby: `GameServer.Signaling` derives everything from the lobby's
+  server-owned `webrtc_*` columns, so this channel keeps no membership list of
+  its own and nothing here can drift from the lobby.
 
   ## Lifecycle
 
-  On join the authenticated `user_id` is used directly as the user identity.
-  The server assigns the role (`:host` or `:client` for `:star`, `:user` for
-  `:mesh`) based on the room's configuration. If the same user_id reconnects
-  within the configured grace period, the existing user is preserved and a
-  `user_rejoined` event is broadcast.
+  On join the authenticated `user_id` is used directly as the user identity, and
+  `Signaling.authorize/2` decides both whether the join is allowed and which
+  role it gets — `:host` or `:user`. Clients cannot ask for a role. In a `:star`
+  room the host is always `lobby.host_id`; a `:mesh` room has no host.
+
+  If the same user_id reconnects within the configured grace period, the
+  existing user is preserved and a `user_rejoined` event is broadcast.
 
   ## Messages
 
@@ -24,15 +25,16 @@ defmodule GameServerWeb.SignalingChannel do
       push("offer", %{target: "user-uuid", sdp: "..."})
       push("answer", %{target: "user-uuid", sdp: "..."})
       push("ice", %{target: "user-uuid", candidate: "..."})
-      push("broadcast_offer", %{sdp: "..."})
+      push("broadcast_offer", %{sdp: "..."})   # star host only
+      push("list_users", %{})
 
   Outbound events (to client):
 
       "offer"         — %{sdp: "...", from_user_id: "..."}
       "answer"        — %{sdp: "...", from_user_id: "..."}
       "ice"           — %{candidate: "...", from_user_id: "..."}
-      "user_joined"   — %{user_id: "...", role: :host | :client | :user}
-      "user_rejoined" — %{user_id: "...", role: :host | :client | :user}
+      "user_joined"   — %{user_id: "...", role: :host | :user}
+      "user_rejoined" — %{user_id: "...", role: :host | :user}
       "user_left"     — %{user_id: "..."}
       "room_closed"   — %{}
   """

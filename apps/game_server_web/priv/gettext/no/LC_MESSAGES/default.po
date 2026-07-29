@@ -1652,3 +1652,18 @@ msgstr "Klar til å hentes"
 #, elixir-autogen, elixir-format
 msgid "View quest chain"
 msgstr "Se oppdragskjeden"
+
+#: lib/game_server_web/live_helpers.ex:96
+#, elixir-autogen, elixir-format
+msgid "Captcha check failed. Please try again."
+msgstr "Captcha-sjekken mislyktes. Prøv igjen."
+
+#: lib/game_server_web/live_helpers.ex:99
+#, elixir-autogen, elixir-format
+msgid "Could not reach the captcha service. Please try again."
+msgstr "Fikk ikke kontakt med captcha-tjenesten. Prøv igjen."
+
+#: lib/game_server_web/live_helpers.ex:92
+#, elixir-autogen, elixir-format
+msgid "Please complete the captcha."
+msgstr "Fyll ut captchaen."

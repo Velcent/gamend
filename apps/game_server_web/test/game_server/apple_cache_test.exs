@@ -29,6 +29,13 @@ defmodule GameServer.AppleCacheTest do
       _ -> :ets.delete(:apple_oauth_cache)
     end
 
+    old_client_id =
+      GameServer.SettingsHelpers.get(
+        :game_server_core,
+        GameServer.OAuth.Providers,
+        :apple_client_id
+      )
+
     GameServer.SettingsHelpers.put(
       :game_server_core,
       GameServer.OAuth.Providers,
@@ -49,12 +56,23 @@ defmodule GameServer.AppleCacheTest do
       :apple_private_key
     )
 
+    # Restore rather than delete: test_helper.exs sets a baseline
+    # apple_client_id that later tests rely on.
     on_exit(fn ->
-      GameServer.SettingsHelpers.delete(
-        :game_server_core,
-        GameServer.OAuth.Providers,
-        :apple_client_id
-      )
+      if old_client_id do
+        GameServer.SettingsHelpers.put(
+          :game_server_core,
+          GameServer.OAuth.Providers,
+          :apple_client_id,
+          old_client_id
+        )
+      else
+        GameServer.SettingsHelpers.delete(
+          :game_server_core,
+          GameServer.OAuth.Providers,
+          :apple_client_id
+        )
+      end
 
       if old,
         do:

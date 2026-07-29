@@ -91,6 +91,7 @@ defmodule GameServerWeb.Router.Shared do
         plug :put_root_layout, html: {GameServerWeb.Layouts, :root}
         plug :protect_from_forgery
         plug :put_secure_browser_headers, RouterShared.browser_headers()
+        plug GameServerWeb.Plugs.CaptchaCsp
         plug GameServerWeb.Plugs.ColorMode
         plug :fetch_current_scope_for_user
       end
@@ -106,6 +107,7 @@ defmodule GameServerWeb.Router.Shared do
         plug :fetch_live_flash
         plug :put_root_layout, html: {GameServerWeb.Layouts, :root}
         plug :put_secure_browser_headers, RouterShared.browser_headers()
+        plug GameServerWeb.Plugs.CaptchaCsp
         plug GameServerWeb.Plugs.ColorMode
         plug :fetch_current_scope_for_user
       end
@@ -660,6 +662,8 @@ defmodule GameServerWeb.Router.Shared do
       scope "/api/v1/auth", GameServerWeb do
         pipe_through :api
 
+        # Before "/:provider", which would otherwise capture it.
+        get "/providers", AuthController, :api_providers
         get "/:provider", AuthController, :api_request
         post "/:provider/callback", AuthController, :api_callback
         post "/apple/ios/callback", AuthController, :api_apple_ios_callback

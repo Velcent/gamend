@@ -2,6 +2,9 @@ defmodule GameServerWeb.AuthController do
   use GameServerWeb, :controller
   use OpenApiSpex.ControllerSpecs
 
+  # Before Ueberauth, so a disabled Steam is 404'd ahead of its request phase.
+  plug :ensure_provider_enabled
+
   # Only use Ueberauth for Steam (OpenID), other providers use custom implementation
   plug Ueberauth, only: [:request, :callback], providers: [:steam]
 
@@ -9,12 +12,39 @@ defmodule GameServerWeb.AuthController do
   alias GameServer.Accounts.Scope
   alias GameServer.Accounts.User
   alias GameServer.OAuth.GoogleIDToken
+  alias GameServer.OAuth.Providers
   alias GameServer.OAuthSessions
   alias GameServerWeb.Auth.Guardian
   alias GameServerWeb.Schemas.OAuthSessionData
   alias GameServerWeb.UserAuth
 
   @browser_state_prefix "browser:"
+
+  @provider_atom %{
+    "discord" => :discord,
+    "google" => :google,
+    "apple" => :apple,
+    "facebook" => :facebook,
+    "steam" => :steam
+  }
+
+  # 404s every provider-specific action for a provider that is disabled or
+  # unknown, so a switched-off provider looks like it does not exist. Actions
+  # without a :provider param derive it from what they verify.
+  defp ensure_provider_enabled(conn, _opts) do
+    provider =
+      case Phoenix.Controller.action_name(conn) do
+        :api_apple_ios_callback -> :apple
+        :api_google_id_token -> :google
+        _action -> @provider_atom[conn.params["provider"]]
+      end
+
+    cond do
+      is_nil(conn.params["provider"]) and provider == nil -> conn
+      Providers.enabled?(provider) -> conn
+      true -> raise GameServerWeb.NotFoundError
+    end
+  end
 
   # ── Browser OAuth CSRF helpers ──────────────────────────────────────────
 
@@ -1299,6 +1329,36 @@ defmodule GameServerWeb.AuthController do
   defp apple_ios_client_id do
     GameServer.Settings.get(GameServer.OAuth.Providers, :apple_ios_client_id) ||
       raise "GAMEND_OAUTH_APPLE_IOS_CLIENT_ID is not set"
+  end
+
+  operation(:api_providers,
+    operation_id: "list_auth_providers",
+    summary: "List sign-in providers",
+    description: "The OAuth providers a player may currently sign in with.",
+    tags: ["Authentication"],
+    responses: [
+      ok: {
+        "Enabled providers",
+        "application/json",
+        %OpenApiSpex.Schema{
+          type: :object,
+          properties: %{
+            data: %OpenApiSpex.Schema{
+              type: :array,
+              items: %OpenApiSpex.Schema{
+                type: :string,
+                enum: ["discord", "google", "apple", "facebook", "steam"]
+              }
+            }
+          },
+          example: %{data: ["discord", "steam"]}
+        }
+      }
+    ]
+  )
+
+  def api_providers(conn, _params) do
+    json(conn, %{data: Enum.map(Providers.enabled(), &Atom.to_string/1)})
   end
 
   operation(:api_session_status,

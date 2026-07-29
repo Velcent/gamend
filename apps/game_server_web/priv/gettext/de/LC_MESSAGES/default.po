@@ -1652,3 +1652,18 @@ msgstr "Bereit zum Abholen"
 #, elixir-autogen, elixir-format
 msgid "View quest chain"
 msgstr "Questreihe ansehen"
+
+#: lib/game_server_web/live_helpers.ex:96
+#, elixir-autogen, elixir-format
+msgid "Captcha check failed. Please try again."
+msgstr "Captcha-Prüfung fehlgeschlagen. Bitte versuche es erneut."
+
+#: lib/game_server_web/live_helpers.ex:99
+#, elixir-autogen, elixir-format
+msgid "Could not reach the captcha service. Please try again."
+msgstr "Captcha-Dienst nicht erreichbar. Bitte versuche es erneut."
+
+#: lib/game_server_web/live_helpers.ex:92
+#, elixir-autogen, elixir-format
+msgid "Please complete the captcha."
+msgstr "Bitte fülle das Captcha aus."
