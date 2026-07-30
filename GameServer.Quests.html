@@ -5,10 +5,10 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.1">
-    <meta name="project" content="game_server_core v1.0.1086">
+    <meta name="project" content="game_server_core v1.0.1087">
 
 
-    <title>GameServer.Quests — game_server_core v1.0.1086</title>
+    <title>GameServer.Quests — game_server_core v1.0.1087</title>
 
     <link rel="stylesheet" href="dist/html-elixir-YJO4MOOW.css" />
 
@@ -37,7 +37,7 @@
 game_server_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1086
+          v1.0.1087
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ game_server_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">GameServer.<wbr>Quests</span> 
-      <small class="app-vsn" translate="no">(game_server_core v1.0.1086)</small>
+      <small class="app-vsn" translate="no">(game_server_core v1.0.1087)</small>
 
     </h1>
 
@@ -120,11 +120,11 @@ weekly / monthly / every N days), an optional <strong>window</strong>
 (<code class="inline">prerequisite_quest_key</code>). Any combination works — a biweekly quest inside
 a seasonal window that also requires an earlier quest is just those three
 fields set. Rewards pay into <a href="GameServer.Economy.html"><code class="inline">GameServer.Economy</code></a> / <a href="GameServer.Inventory.html"><code class="inline">GameServer.Inventory</code></a>
-exactly once. <code class="inline">category</code> is a free-form label for your UI only.</p><h2 id="module-reporting-progress-server-side-hooks" class="section-heading"><a href="#module-reporting-progress-server-side-hooks" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Reporting progress (server-side / hooks)</span></h2><pre><code class="makeup elixir" translate="no"><span class="nc">Quests</span><span class="o">.</span><span class="n">report_event</span><span class="p" data-group-id="7045270628-1">(</span><span class="n">user_id</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;enemy_killed&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="7045270628-2">%{</span><span class="s">&quot;map&quot;</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;desert&quot;</span><span class="p" data-group-id="7045270628-2">}</span><span class="p" data-group-id="7045270628-1">)</span></code></pre><p>Every <strong>active</strong> quest with an objective on <code class="inline">&quot;enemy_killed&quot;</code> (whose <code class="inline">params</code>
+exactly once. <code class="inline">category</code> is a free-form label for your UI only.</p><h2 id="module-reporting-progress-server-side-hooks" class="section-heading"><a href="#module-reporting-progress-server-side-hooks" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Reporting progress (server-side / hooks)</span></h2><pre><code class="makeup elixir" translate="no"><span class="nc">Quests</span><span class="o">.</span><span class="n">report_event</span><span class="p" data-group-id="6479605400-1">(</span><span class="n">user_id</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;enemy_killed&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="6479605400-2">%{</span><span class="s">&quot;map&quot;</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;desert&quot;</span><span class="p" data-group-id="6479605400-2">}</span><span class="p" data-group-id="6479605400-1">)</span></code></pre><p>Every <strong>active</strong> quest with an objective on <code class="inline">&quot;enemy_killed&quot;</code> (whose <code class="inline">params</code>
 all match the meta) advances; a quest completes when every objective meets
 its target. There is deliberately <strong>no public endpoint</strong> for this — clients
 cannot advance their own quests. Core wires common events; games call it
-from their hooks for custom events.</p><h2 id="module-claiming" class="section-heading"><a href="#module-claiming" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Claiming</span></h2><pre><code class="makeup elixir" translate="no"><span class="p" data-group-id="9635529853-1">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="9635529853-2">%{</span><span class="ss">progress</span><span class="p">:</span><span class="w"> </span><span class="n">progress</span><span class="p">,</span><span class="w"> </span><span class="ss">rewards</span><span class="p">:</span><span class="w"> </span><span class="n">rewards</span><span class="p" data-group-id="9635529853-2">}</span><span class="p" data-group-id="9635529853-1">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Quests</span><span class="o">.</span><span class="n">claim</span><span class="p" data-group-id="9635529853-3">(</span><span class="n">user_id</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;daily_win_3&quot;</span><span class="p" data-group-id="9635529853-3">)</span></code></pre><p>Claiming is gated by an atomic <code class="inline">completed → claimed</code> status transition, so a
+from their hooks for custom events.</p><h2 id="module-claiming" class="section-heading"><a href="#module-claiming" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Claiming</span></h2><pre><code class="makeup elixir" translate="no"><span class="p" data-group-id="9513586956-1">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="9513586956-2">%{</span><span class="ss">progress</span><span class="p">:</span><span class="w"> </span><span class="n">progress</span><span class="p">,</span><span class="w"> </span><span class="ss">rewards</span><span class="p">:</span><span class="w"> </span><span class="n">rewards</span><span class="p" data-group-id="9513586956-2">}</span><span class="p" data-group-id="9513586956-1">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Quests</span><span class="o">.</span><span class="n">claim</span><span class="p" data-group-id="9513586956-3">(</span><span class="n">user_id</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;daily_win_3&quot;</span><span class="p" data-group-id="9513586956-3">)</span></code></pre><p>Claiming is gated by an atomic <code class="inline">completed → claimed</code> status transition, so a
 double-tap or a concurrent claim can't double-pay. Rewards are granted after
 the transition with a per-entry idempotency key (<code class="inline">&quot;quest:&lt;progress_id&gt;:&lt;i&gt;&quot;</code>),
 so a crashed or retried grant can't double-apply either; rows that claimed
@@ -1511,9 +1511,9 @@ the signed-out catalog.</p>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/game_server_core/1.0.1086">Hex Package</a>
+              <a href="https://hex.pm/packages/game_server_core/1.0.1087">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/game_server_core/1.0.1086">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/game_server_core/1.0.1087">Hex Preview</a>
 
             </span>
 
