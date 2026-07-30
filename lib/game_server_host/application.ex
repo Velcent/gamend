@@ -4,6 +4,7 @@ defmodule GameServerHost.Application do
   use Application
 
   alias GameServer.Hooks.PluginManager
+  alias GameServer.OAuth.Providers
   alias GameServer.Repo.AdvisoryLock
 
   @impl true
@@ -171,7 +172,7 @@ defmodule GameServerHost.Application do
   end
 
   defp oauth_info do
-    case GameServer.OAuth.Providers.enabled() do
+    case Providers.enabled() do
       [] ->
         "OAuth: none configured"
 

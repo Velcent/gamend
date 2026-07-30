@@ -78,12 +78,6 @@ defmodule GameServerWeb.PresentationPage do
                 <h1 class="text-4xl font-extrabold tracking-normal sm:text-5xl lg:text-6xl">
                   {Map.get(@hero, "title", "")}
                 </h1>
-                <p
-                  :if={kicker(@hero)}
-                  class="text-sm font-semibold uppercase tracking-widest text-base-content/60 sm:text-base"
-                >
-                  {kicker(@hero)}
-                </p>
                 <div class="max-w-2xl text-base leading-relaxed text-base-content/75 sm:text-lg lg:text-xl">
                   {rich_text(Map.get(@hero, "text", ""))}
                 </div>
@@ -534,12 +528,6 @@ defmodule GameServerWeb.PresentationPage do
         %{light: nil, dark: nil, alt: "", width: nil, height: nil}
     end
   end
-
-  # Short qualifier line under the hero title ("Strategy Card Game • Free to
-  # Play" style). Plain text only — it renders inside `{}` so HTML never
-  # reaches the page.
-  defp kicker(hero) when is_map(hero), do: non_empty_string(Map.get(hero, "kicker"))
-  defp kicker(_hero), do: nil
 
   # A `"video"` item renders in place of `"image"`, so the same slot in a hero
   # or section holds either. `src` and `poster` go through `image_src/1` for

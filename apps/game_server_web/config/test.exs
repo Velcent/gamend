@@ -37,13 +37,14 @@ else
     queue_target: 10_000,
     queue_interval: 1_000,
     timeout: 15_000,
-    pragmas: [
-      foreign_keys: :on,
-      journal_mode: :wal,
-      synchronous: :normal,
-      temp_store: :memory,
-      busy_timeout: 10_000
-    ]
+    # Top-level options, not a `pragmas:` list — ecto_sqlite3 has no such key
+    # and silently ignores it, so this suite ran without WAL and with exqlite's
+    # 2000ms busy_timeout default. That is the "Database busy" flakiness.
+    foreign_keys: :on,
+    journal_mode: :wal,
+    synchronous: :normal,
+    temp_store: :memory,
+    busy_timeout: 10_000
 end
 
 config :game_server_web, GameServerWeb.Endpoint,
