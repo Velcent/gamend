@@ -249,9 +249,6 @@ jobs:
   dialyzer:
     name: Dialyzer
     runs-on: ubuntu-latest
-    # Advisory while the existing warning backlog is triaged; flip to blocking
-    # (remove continue-on-error) once `mix dialyzer` is clean.
-    continue-on-error: true
 
     container:
       image: elixir:1.20.1-otp-29
@@ -294,7 +291,18 @@ jobs:
           restore-keys: |
             plt-${{ runner.os }}-
 
+      # The root project is a thin wrapper: analysing only it covers ~11
+      # modules. The domain code lives in the two umbrella apps, so each must
+      # be analysed in its own right or the job is green by vacuity.
       - name: Run dialyzer
+        run: MIX_ENV=dev mix dialyzer --format github
+
+      - name: Run dialyzer (gamend_core)
+        working-directory: apps/gamend_core
+        run: MIX_ENV=dev mix dialyzer --format github
+
+      - name: Run dialyzer (gamend_web)
+        working-directory: apps/gamend_web
         run: MIX_ENV=dev mix dialyzer --format github
 
   check-outdated:
@@ -804,3 +812,7 @@ jobs:
           publish_dir: ./doc
           # keep history to allow diffs in gh-pages
           publish_branch: gh-pages
+          # GitHub wrote CNAME into gh-pages when the custom domain was set, but
+          # ExDoc's output does not contain one — publishing without this would
+          # delete it on the next push and take docs.gamend.org down.
+          cname: docs.gamend.org

@@ -87,5 +87,5 @@ Resets need no scheduled job — the current period is derived from the clock, s
 ## Reference
 
 - **HTTP API:** [/api/docs](/api/docs) - every endpoint, parameter and response, generated from the spec.
-- **Elixir API:** [`Gamend.Quests`](https://appsinacup.com/gamend/Gamend.Quests.html) - the functions a plugin calls, with their
+- **Elixir API:** [`Gamend.Quests`](https://docs.gamend.org/Gamend.Quests.html) - the functions a plugin calls, with their
   signatures and docs.

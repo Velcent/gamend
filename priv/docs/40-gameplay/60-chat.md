@@ -149,5 +149,5 @@ Message listings are cached using Nebulex with version-based invalidation. When 
 ## Reference
 
 - **HTTP API:** [/api/docs](/api/docs) - every endpoint, parameter and response, generated from the spec.
-- **Elixir API:** [`Gamend.Chat`](https://appsinacup.com/gamend/Gamend.Chat.html) - the functions a plugin calls, with their
+- **Elixir API:** [`Gamend.Chat`](https://docs.gamend.org/Gamend.Chat.html) - the functions a plugin calls, with their
   signatures and docs.

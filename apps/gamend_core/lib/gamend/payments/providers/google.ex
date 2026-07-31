@@ -9,7 +9,9 @@ defmodule Gamend.Payments.Providers.Google do
 
   @androidpublisher_scope "https://www.googleapis.com/auth/androidpublisher"
   @token_url "https://oauth2.googleapis.com/token"
+
   alias Gamend.Payments.ProviderConfig
+  require Logger
 
   @publisher_base_url "https://androidpublisher.googleapis.com/androidpublisher/v3"
 
@@ -263,7 +265,11 @@ defmodule Gamend.Payments.Providers.Google do
       {:ok, assertion}
     end
   rescue
-    _ -> {:error, :invalid_google_service_account_key}
+    e ->
+      # A malformed service-account key is a config problem; without this the
+      # admin only ever sees the opaque atom.
+      Logger.error("Google payments: could not sign assertion: #{Exception.message(e)}")
+      {:error, :invalid_google_service_account_key}
   end
 
   defp service_account_json do

@@ -6,6 +6,7 @@ defmodule Gamend.Payments.Providers.Apple do
   transaction id that can be fetched from App Store Server API.
   """
 
+  require Logger
   alias Gamend.Payments.ProviderConfig
 
   @production_base_url "https://api.storekit.itunes.apple.com/inApps/v1"
@@ -175,7 +176,11 @@ defmodule Gamend.Payments.Providers.Apple do
       {:ok, jwt}
     end
   rescue
-    _ -> {:error, :invalid_apple_private_key}
+    e ->
+      # A malformed .p8 is a config problem; without this the admin only ever
+      # sees the opaque atom.
+      Logger.error("Apple payments: could not sign JWT: #{Exception.message(e)}")
+      {:error, :invalid_apple_private_key}
   end
 
   defp private_key do

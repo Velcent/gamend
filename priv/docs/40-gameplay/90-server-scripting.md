@@ -4,7 +4,7 @@ icon: hero-command-line
 
 # Server-side scripting & hooks
 
-[Scripting Interface](https://appsinacup.com/gamend/Gamend.Hooks.html)
+[Scripting Interface](https://docs.gamend.org/Gamend.Hooks.html)
 
 The application exposes a lightweight server-side scripting surface via the `Gamend.Hooks` behaviour. Hooks let you run custom code on lifecycle events (eg. user register/login, lobby create/update) and optionally expose RPC functions.
 
@@ -262,6 +262,6 @@ change is committed and its return value is ignored.
 | Push | `before_push_send` | `after_push_sent` |
 
 Each callback's exact signature, arguments and return contract is in the
-[`Gamend.Hooks` docs](https://appsinacup.com/gamend/Gamend.Hooks.html). The
+[`Gamend.Hooks` docs](https://docs.gamend.org/Gamend.Hooks.html). The
 [admin runtime page](/admin/runtime) shows the same list for *your* server,
 including which plugin implements what.

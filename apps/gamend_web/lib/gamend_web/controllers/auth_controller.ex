@@ -483,10 +483,16 @@ defmodule GamendWeb.AuthController do
     "#{GamendWeb.endpoint().url()}/auth/#{provider}/callback"
   end
 
+  # Without the log this surfaces only as Apple's opaque `invalid_client`: a
+  # nil secret and a genuinely rejected one look identical from the outside.
   defp apple_client_secret(client_id) do
     Gamend.Apple.client_secret(client_id: client_id)
   rescue
-    _ -> nil
+    error ->
+      require Logger
+
+      Logger.error("Apple OAuth: could not build client secret: #{Exception.message(error)}")
+      nil
   end
 
   defp oauth_user_params("discord", %{"id" => discord_id, "email" => email} = response) do

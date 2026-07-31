@@ -9,7 +9,7 @@ Two companions to this page:
 
 - [**Admin runtime**](/admin/runtime) - a live ER diagram of every table,
   generated from the running schema.
-- [**Elixir API**](https://appsinacup.com/gamend/api-reference.html) - each
+- [**Elixir API**](https://docs.gamend.org/api-reference.html) - each
   schema module with its `t:t/0` type and changesets.
 
 The field lists below are curated: they cover the columns you will actually
@@ -28,7 +28,7 @@ These hold everywhere, so the tables below list only what is specific to them:
 
 ## users
 
-[`Gamend.Accounts.User`](https://appsinacup.com/gamend/Gamend.Accounts.User.html)
+[`Gamend.Accounts.User`](https://docs.gamend.org/Gamend.Accounts.User.html)
 
 | Column | Type | Notes |
 |---|---|---|
@@ -50,7 +50,7 @@ These hold everywhere, so the tables below list only what is specific to them:
 
 ## lobbies
 
-[`Gamend.Lobbies.Lobby`](https://appsinacup.com/gamend/Gamend.Lobbies.Lobby.html)
+[`Gamend.Lobbies.Lobby`](https://docs.gamend.org/Gamend.Lobbies.Lobby.html)
 
 | Column | Type | Notes |
 |---|---|---|
@@ -95,7 +95,7 @@ notifications, so deleting the notification does not cancel the invite.
 
 ## friendships
 
-[`Gamend.Friends.Friendship`](https://appsinacup.com/gamend/Gamend.Friends.Friendship.html)
+[`Gamend.Friends.Friendship`](https://docs.gamend.org/Gamend.Friends.Friendship.html)
 
 | Column | Type | Notes |
 |---|---|---|
@@ -177,7 +177,7 @@ are UTC.
 
 ## leaderboards and leaderboard_records
 
-[`Gamend.Leaderboards.Leaderboard`](https://appsinacup.com/gamend/Gamend.Leaderboards.Leaderboard.html)
+[`Gamend.Leaderboards.Leaderboard`](https://docs.gamend.org/Gamend.Leaderboards.Leaderboard.html)
 
 | leaderboards | Type | Notes |
 |---|---|---|

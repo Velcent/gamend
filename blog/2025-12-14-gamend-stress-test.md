@@ -1,4 +1,4 @@
-# Game Server Stress Test
+# Gamend Stress Test
 
 Ok so I started to **stress test** my game server (Using k6, a great server stress tool).
 

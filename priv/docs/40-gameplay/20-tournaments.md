@@ -88,5 +88,5 @@ the API returns `""` so game clients can apply their own.
 ## Reference
 
 - **HTTP API:** [/api/docs](/api/docs) - every endpoint, parameter and response, generated from the spec.
-- **Elixir API:** [`Gamend.Tournaments`](https://appsinacup.com/gamend/Gamend.Tournaments.html) - the functions a plugin calls, with their
+- **Elixir API:** [`Gamend.Tournaments`](https://docs.gamend.org/Gamend.Tournaments.html) - the functions a plugin calls, with their
   signatures and docs.

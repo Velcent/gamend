@@ -116,5 +116,5 @@ Connect to the UserChannel to receive notifications in real-time. Notifications 
 ## Reference
 
 - **HTTP API:** [/api/docs](/api/docs) - every endpoint, parameter and response, generated from the spec.
-- **Elixir API:** [`Gamend.Notifications`](https://appsinacup.com/gamend/Gamend.Notifications.html) - the functions a plugin calls, with their
+- **Elixir API:** [`Gamend.Notifications`](https://docs.gamend.org/Gamend.Notifications.html) - the functions a plugin calls, with their
   signatures and docs.

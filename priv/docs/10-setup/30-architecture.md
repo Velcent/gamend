@@ -18,7 +18,7 @@ High-level overview of how the platform is structured — from clients down to t
             │ REST + WS       │ REST + WS       │ HTTP
             ▼                 ▼                 ▼
   ┌─────────────────────────────────────────────────────────────┐
-  │                     GAME SERVER                             │
+  │                         GAMEND                              │
   │                                                             │
   │  ┌───────────────────── Web Layer ───────────────────────┐  │
   │  │  REST API (/api/v1) │ WS Channels + WebRTC │ Admin    │  │
@@ -193,29 +193,29 @@ These projects live in one repository, but the runtime split is intentional: cor
 Business logic lives in context modules under `gamend_core`, each owning
 one domain and callable from a plugin. Their functions, arguments and return
 values are documented in the
-[Elixir API reference](https://appsinacup.com/gamend/api-reference.html):
+[Elixir API reference](https://docs.gamend.org/api-reference.html):
 
 | Domain | Module |
 |---|---|
-| Accounts, auth, presence | [`Gamend.Accounts`](https://appsinacup.com/gamend/Gamend.Accounts.html) |
-| Lobbies | [`Gamend.Lobbies`](https://appsinacup.com/gamend/Gamend.Lobbies.html) |
-| Parties | [`Gamend.Parties`](https://appsinacup.com/gamend/Gamend.Parties.html) |
-| Groups | [`Gamend.Groups`](https://appsinacup.com/gamend/Gamend.Groups.html) |
-| Friends and blacklist | [`Gamend.Friends`](https://appsinacup.com/gamend/Gamend.Friends.html) |
-| Chat | [`Gamend.Chat`](https://appsinacup.com/gamend/Gamend.Chat.html) |
-| Quests | [`Gamend.Quests`](https://appsinacup.com/gamend/Gamend.Quests.html) |
-| Leaderboards | [`Gamend.Leaderboards`](https://appsinacup.com/gamend/Gamend.Leaderboards.html) |
-| Tournaments | [`Gamend.Tournaments`](https://appsinacup.com/gamend/Gamend.Tournaments.html) |
-| Matchmaking | [`Gamend.Matchmaking`](https://appsinacup.com/gamend/Gamend.Matchmaking.html) |
-| Notifications | [`Gamend.Notifications`](https://appsinacup.com/gamend/Gamend.Notifications.html) |
-| Wallets and inventory | [`Gamend.Economy`](https://appsinacup.com/gamend/Gamend.Economy.html) |
-| Payments | [`Gamend.Payments`](https://appsinacup.com/gamend/Gamend.Payments.html) |
-| Key-value store | [`Gamend.KV`](https://appsinacup.com/gamend/Gamend.KV.html) |
-| Object storage | [`Gamend.Storage`](https://appsinacup.com/gamend/Gamend.Storage.html) |
-| WebRTC signaling rooms | [`Gamend.Signaling`](https://appsinacup.com/gamend/Gamend.Signaling.html) |
-| Ready checks | [`Gamend.ReadyChecks`](https://appsinacup.com/gamend/Gamend.ReadyChecks.html) |
-| Background and cron jobs | [`Gamend.Jobs`](https://appsinacup.com/gamend/Gamend.Jobs.html), [`Gamend.Schedule`](https://appsinacup.com/gamend/Gamend.Schedule.html) |
-| Plugin hooks | [`Gamend.Hooks`](https://appsinacup.com/gamend/Gamend.Hooks.html) |
+| Accounts, auth, presence | [`Gamend.Accounts`](https://docs.gamend.org/Gamend.Accounts.html) |
+| Lobbies | [`Gamend.Lobbies`](https://docs.gamend.org/Gamend.Lobbies.html) |
+| Parties | [`Gamend.Parties`](https://docs.gamend.org/Gamend.Parties.html) |
+| Groups | [`Gamend.Groups`](https://docs.gamend.org/Gamend.Groups.html) |
+| Friends and blacklist | [`Gamend.Friends`](https://docs.gamend.org/Gamend.Friends.html) |
+| Chat | [`Gamend.Chat`](https://docs.gamend.org/Gamend.Chat.html) |
+| Quests | [`Gamend.Quests`](https://docs.gamend.org/Gamend.Quests.html) |
+| Leaderboards | [`Gamend.Leaderboards`](https://docs.gamend.org/Gamend.Leaderboards.html) |
+| Tournaments | [`Gamend.Tournaments`](https://docs.gamend.org/Gamend.Tournaments.html) |
+| Matchmaking | [`Gamend.Matchmaking`](https://docs.gamend.org/Gamend.Matchmaking.html) |
+| Notifications | [`Gamend.Notifications`](https://docs.gamend.org/Gamend.Notifications.html) |
+| Wallets and inventory | [`Gamend.Economy`](https://docs.gamend.org/Gamend.Economy.html) |
+| Payments | [`Gamend.Payments`](https://docs.gamend.org/Gamend.Payments.html) |
+| Key-value store | [`Gamend.KV`](https://docs.gamend.org/Gamend.KV.html) |
+| Object storage | [`Gamend.Storage`](https://docs.gamend.org/Gamend.Storage.html) |
+| WebRTC signaling rooms | [`Gamend.Signaling`](https://docs.gamend.org/Gamend.Signaling.html) |
+| Ready checks | [`Gamend.ReadyChecks`](https://docs.gamend.org/Gamend.ReadyChecks.html) |
+| Background and cron jobs | [`Gamend.Jobs`](https://docs.gamend.org/Gamend.Jobs.html), [`Gamend.Schedule`](https://docs.gamend.org/Gamend.Schedule.html) |
+| Plugin hooks | [`Gamend.Hooks`](https://docs.gamend.org/Gamend.Hooks.html) |
 
 ## Key technologies
 

@@ -18,8 +18,14 @@ defmodule Gamend.Apple do
   @spec client_secret(keyword) :: String.t()
   def client_secret(opts \\ []) do
     client_id = resolve_client_id!(opts)
+    key_id = Gamend.Settings.get(Gamend.OAuth.Providers, :apple_key_id)
+    team_id = Gamend.Settings.get(Gamend.OAuth.Providers, :apple_team_id)
 
-    case get_client_secret_from_cache(client_id) do
+    if is_nil(key_id) or is_nil(team_id) do
+      raise "GAMEND_OAUTH_APPLE_KEY_ID / GAMEND_OAUTH_APPLE_TEAM_ID is not set"
+    end
+
+    case get_client_secret_from_cache(client_id, key_id, team_id) do
       {:ok, secret} ->
         secret
 
@@ -28,7 +34,7 @@ defmodule Gamend.Apple do
         private_key_raw = Gamend.Settings.get(Gamend.OAuth.Providers, :apple_private_key)
 
         if is_nil(private_key_raw) do
-          raise "APPLE_PRIVATE_KEY environment variable is not set"
+          raise "GAMEND_OAUTH_APPLE_PRIVATE_KEY is not set"
         end
 
         # Handle different formats:
@@ -42,14 +48,14 @@ defmodule Gamend.Apple do
         secret_attrs = %{
           client_id: client_id,
           expires_in: @expiration_sec,
-          key_id: Gamend.Settings.get(Gamend.OAuth.Providers, :apple_key_id),
-          team_id: Gamend.Settings.get(Gamend.OAuth.Providers, :apple_team_id),
+          key_id: key_id,
+          team_id: team_id,
           private_key: private_key
         }
 
         secret = UeberauthApple.generate_client_secret(secret_attrs)
 
-        put_client_secret_in_cache(client_id, secret, @expiration_sec)
+        put_client_secret_in_cache(client_id, key_id, team_id, secret, @expiration_sec)
         secret
     end
   end
@@ -105,9 +111,14 @@ defmodule Gamend.Apple do
     end
   end
 
+  # Keyed on every credential the JWT is signed from, not just the client id:
+  # rotating the .p8 key or moving team would otherwise keep serving a secret
+  # Apple now rejects, for the rest of the six-month TTL.
+  defp cache_key(client_id, key_id, team_id), do: {:client_secret, client_id, key_id, team_id}
+
   # Simple cache implementation using ETS
-  defp get_client_secret_from_cache(client_id) do
-    cache_key = {:client_secret, client_id}
+  defp get_client_secret_from_cache(client_id, key_id, team_id) do
+    cache_key = cache_key(client_id, key_id, team_id)
 
     case :ets.lookup(:apple_oauth_cache, cache_key) do
       [{^cache_key, secret, expires_at}] ->
@@ -124,7 +135,7 @@ defmodule Gamend.Apple do
     _ -> {:error, :not_found}
   end
 
-  defp put_client_secret_in_cache(client_id, secret, ttl_seconds) do
+  defp put_client_secret_in_cache(client_id, key_id, team_id, secret, ttl_seconds) do
     # Ensure ETS table exists
     case :ets.info(:apple_oauth_cache) do
       :undefined ->
@@ -136,7 +147,6 @@ defmodule Gamend.Apple do
 
     expires_at = System.system_time(:second) + ttl_seconds
 
-    cache_key = {:client_secret, client_id}
-    :ets.insert(:apple_oauth_cache, {cache_key, secret, expires_at})
+    :ets.insert(:apple_oauth_cache, {cache_key(client_id, key_id, team_id), secret, expires_at})
   end
 end

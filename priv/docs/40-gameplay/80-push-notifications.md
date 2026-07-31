@@ -67,5 +67,5 @@ The /admin/push page lists registered devices (filter by user, platform, provide
 ## Reference
 
 - **HTTP API:** [/api/docs](/api/docs) - every endpoint, parameter and response, generated from the spec.
-- **Elixir API:** [`Gamend.Push`](https://appsinacup.com/gamend/Gamend.Push.html) - the functions a plugin calls, with their
+- **Elixir API:** [`Gamend.Push`](https://docs.gamend.org/Gamend.Push.html) - the functions a plugin calls, with their
   signatures and docs.

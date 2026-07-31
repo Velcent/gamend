@@ -17,7 +17,7 @@ Go to [Certificates, Identifiers & Profiles](https://developer.apple.com/account
 1. Click the "+" button to create a new identifier
 2. Select "App IDs" and click Continue
 3. Select "App" type and click Continue
-4. Enter a description (e.g., "Game Server")
+4. Enter a description (e.g., "Gamend")
 5. Enter a Bundle ID (e.g., com.yourcompany.gameserver)
 6. Scroll down and check "Sign in with Apple"
 7. Click Continue and Register
@@ -28,7 +28,7 @@ Back in Certificates, Identifiers & Profiles:
 
 1. Click "+" to create new identifier
 2. Select "Services IDs" and click Continue
-3. Enter description (e.g., "Game Server Web")
+3. Enter description (e.g., "Gamend Web")
 4. Enter identifier (e.g., com.yourcompany.gameserver.web) - This is your CLIENT_ID
 5. Check "Sign in with Apple"
 6. Click "Configure" next to Sign in with Apple
@@ -44,7 +44,7 @@ com.yourcompany.gameserver.web
 In Certificates, Identifiers & Profiles, go to Keys:
 
 1. Click "+" to create a new key
-2. Enter a name (e.g., "Game Server Sign in with Apple Key")
+2. Enter a name (e.g., "Gamend Sign in with Apple Key")
 3. Check "Sign in with Apple"
 4. Click "Configure" next to Sign in with Apple
 5. Select your App ID as the Primary App ID

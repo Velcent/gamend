@@ -62,5 +62,5 @@ the web UI shows the shared default leaderboard icon and the API returns
 ## Reference
 
 - **HTTP API:** [/api/docs](/api/docs) - every endpoint, parameter and response, generated from the spec.
-- **Elixir API:** [`Gamend.Leaderboards`](https://appsinacup.com/gamend/Gamend.Leaderboards.html) - the functions a plugin calls, with their
+- **Elixir API:** [`Gamend.Leaderboards`](https://docs.gamend.org/Gamend.Leaderboards.html) - the functions a plugin calls, with their
   signatures and docs.

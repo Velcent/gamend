@@ -4,7 +4,7 @@ icon: hero-cloud-arrow-up
 
 # Deployment
 
-Deploy your own game server instance using the starter repository. The quickest path is Docker Compose — clone, configure, and run. If you want a full Elixir host app that you can edit directly, see the Elixir App Starter guide below.
+Deploy your own gamend instance using the starter repository. The quickest path is Docker Compose — clone, configure, and run. If you want a full Elixir host app that you can edit directly, see the Elixir App Starter guide below.
 
 Two supported starting paths
 

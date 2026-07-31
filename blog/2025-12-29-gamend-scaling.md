@@ -1,6 +1,6 @@
 # Server Scaling
 
-Tutorial on how to scale the game server cluster to multiple instances.
+Tutorial on how to scale the Gamend cluster to multiple instances.
 
 Both the running instance of gamend, which can be found at [https://gamend.org](https://gamend.org) and the [README.md](https://github.com/appsinacup/gamend_starter?tab=readme-ov-file#multi-node-local-deployment) now have information about how to deploy the app at scale.
 

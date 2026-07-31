@@ -3,6 +3,7 @@ defmodule GamendWeb.UserLive.Login do
 
   alias Gamend.Accounts
   alias Gamend.Accounts.Scope
+  require Logger
 
   @impl true
   def render(assigns) do
@@ -126,10 +127,7 @@ defmodule GamendWeb.UserLive.Login do
     with :ok <- GamendWeb.LiveHelpers.check_rate_limit(socket.assigns.client_ip, :auth),
          :ok <- GamendWeb.LiveHelpers.check_captcha(socket, params) do
       if user = Accounts.get_user_by_email(email) do
-        Accounts.deliver_login_instructions(
-          user,
-          &url(~p"/users/log_in/#{&1}")
-        )
+        deliver_magic_link(user)
       end
 
       info = gettext("Success.")
@@ -146,6 +144,25 @@ defmodule GamendWeb.UserLive.Login do
         {:noreply,
          put_flash(socket, :error, gettext("Too many attempts. Please try again later."))}
     end
+  end
+
+  # The player is always told "Success." so this cannot be used to probe which
+  # emails exist — which also means a failure here is invisible unless it is
+  # logged. A raise (a locked database, an unreachable relay) would otherwise
+  # only kill the event and look like the button did nothing.
+  defp deliver_magic_link(user) do
+    case Accounts.deliver_login_instructions(user, &url(~p"/users/log_in/#{&1}")) do
+      {:ok, _email} ->
+        :ok
+
+      {:error, reason} ->
+        Logger.error("magic link delivery failed user=#{user.id}: #{inspect(reason)}")
+        :error
+    end
+  rescue
+    e ->
+      Logger.error("magic link delivery crashed user=#{user.id}: #{Exception.message(e)}")
+      :error
   end
 
   # Only show the local-mailbox helper in development builds.

@@ -146,5 +146,5 @@ Tuning: GAMEND_LIMITS_READY_CHECK_TIMEOUT_MS (default 15s answering window; a ho
 ## Reference
 
 - **HTTP API:** [/api/docs](/api/docs) - every endpoint, parameter and response, generated from the spec.
-- **Elixir API:** [`Gamend.Matchmaking`](https://appsinacup.com/gamend/Gamend.Matchmaking.html) - the functions a plugin calls, with their
+- **Elixir API:** [`Gamend.Matchmaking`](https://docs.gamend.org/Gamend.Matchmaking.html) - the functions a plugin calls, with their
   signatures and docs.

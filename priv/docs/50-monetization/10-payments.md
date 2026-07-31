@@ -227,5 +227,5 @@ Use these hooks for analytics, custom fulfillment, notifications, or external sy
 ## Reference
 
 - **HTTP API:** [/api/docs](/api/docs) - every endpoint, parameter and response, generated from the spec.
-- **Elixir API:** [`Gamend.Payments`](https://appsinacup.com/gamend/Gamend.Payments.html) - the functions a plugin calls, with their
+- **Elixir API:** [`Gamend.Payments`](https://docs.gamend.org/Gamend.Payments.html) - the functions a plugin calls, with their
   signatures and docs.

@@ -138,5 +138,5 @@ Turnstile is unreachable, means leaving this off and relying on the rate limits.
 ## Reference
 
 - **HTTP API:** [/api/docs](/api/docs) - every endpoint, parameter and response, generated from the spec.
-- **Elixir API:** [`Gamend.Accounts`](https://appsinacup.com/gamend/Gamend.Accounts.html) - the functions a plugin calls, with their
+- **Elixir API:** [`Gamend.Accounts`](https://docs.gamend.org/Gamend.Accounts.html) - the functions a plugin calls, with their
   signatures and docs.

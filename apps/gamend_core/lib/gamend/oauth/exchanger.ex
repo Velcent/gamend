@@ -6,6 +6,8 @@ defmodule Gamend.OAuth.Exchanger do
   Tests may replace the exchanger via application config for easier stubbing.
   """
 
+  require Logger
+
   @apple_jwks_url "https://appleid.apple.com/auth/keys"
   @apple_issuer "https://appleid.apple.com"
   @apple_allowed_algs ["RS256"]
@@ -36,11 +38,13 @@ defmodule Gamend.OAuth.Exchanger do
           {:ok, %{status: 200, body: user_info}} ->
             {:ok, user_info}
 
-          _ ->
+          other ->
+            log_oauth_failure("Discord", "user info", other)
             {:error, "Failed to get user info"}
         end
 
-      _ ->
+      other ->
+        log_oauth_failure("Discord", "token exchange", other)
         {:error, "Failed to exchange code"}
     end
   end
@@ -68,7 +72,8 @@ defmodule Gamend.OAuth.Exchanger do
           google_handle_full(body)
         end
 
-      _ ->
+      other ->
+        log_oauth_failure("Google", "token exchange", other)
         {:error, "Failed to exchange code"}
     end
   end
@@ -101,11 +106,16 @@ defmodule Gamend.OAuth.Exchanger do
         auth_headers = [{"Authorization", "Bearer #{access_token}"}]
 
         case http_client().get(user_url, headers: auth_headers) do
-          {:ok, %{status: 200, body: user_info}} -> {:ok, user_info}
-          _ -> {:error, "Failed to get user info"}
+          {:ok, %{status: 200, body: user_info}} ->
+            {:ok, user_info}
+
+          other ->
+            log_oauth_failure("Google", "user info", other)
+            {:error, "Failed to get user info"}
         end
 
-      _ ->
+      other ->
+        log_oauth_failure("Google", "token response", other)
         {:error, "Failed to exchange code"}
     end
   end
@@ -144,11 +154,13 @@ defmodule Gamend.OAuth.Exchanger do
               _ -> {:error, "Failed to parse user info"}
             end
 
-          _ ->
+          other ->
+            log_oauth_failure("Facebook", "user info", other)
             {:error, "Failed to get user info"}
         end
 
-      _ ->
+      other ->
+        log_oauth_failure("Facebook", "token exchange", other)
         {:error, "Failed to exchange code"}
     end
   end
@@ -471,6 +483,23 @@ defmodule Gamend.OAuth.Exchanger do
       {:error, :no_api_key}
     else
       steam_profile_for(api_key, steamid)
+    end
+  end
+
+  # Apple already logged its failures; the other providers returned a bare
+  # string, so an admin saw nothing about *why* the provider said no.
+  defp log_oauth_failure(provider, stage, result) do
+    case result do
+      {:ok, %{status: status, body: body}} ->
+        Logger.error(
+          "#{provider} OAuth: #{stage} failed with status #{status}. Body: #{inspect(body)}"
+        )
+
+      {:error, error} ->
+        Logger.error("#{provider} OAuth: #{stage} request failed: #{inspect(error)}")
+
+      other ->
+        Logger.error("#{provider} OAuth: #{stage} failed: #{inspect(other)}")
     end
   end
 end

@@ -11,7 +11,7 @@ icon: hero-chat-bubble-left-right
 Go to the [Discord Developer Portal](https://discord.com/developers/applications)
 
 1. Click "New Application" in the top right
-2. Give your app a name (e.g., "Game Server")
+2. Give your app a name (e.g., "Gamend")
 3. Go to the "OAuth2" → "General" tab
 
 ## Configure Redirect URIs

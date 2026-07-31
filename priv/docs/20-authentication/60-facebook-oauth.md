@@ -16,7 +16,7 @@ Go to the [Facebook Developers Portal](https://developers.facebook.com/)
 4. Click "Next"
 5. Select app type (usually "Business" for most web apps, or "None" if available)
 6. Click "Next"
-7. Enter app name (e.g., "Game Server")
+7. Enter app name (e.g., "Gamend")
 8. Enter contact email
 9. Click "Create App"
 

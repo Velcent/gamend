@@ -9,6 +9,7 @@ defmodule Gamend.Accounts.UserNotifier do
 
   alias Gamend.Accounts.User
   alias Gamend.Mailer
+  require Logger
 
   # Delivers the email using the application mailer.
   defp deliver(recipient, subject, body) do
@@ -22,18 +23,24 @@ defmodule Gamend.Accounts.UserNotifier do
     # Always protect delivery attempts so a missing/invalid Mailer or
     # transport doesn't crash live processes. Return {:ok, email} on
     # success and {:error, reason} otherwise.
+    #
+    # Log every failure here: most callers ignore the return value, so a
+    # rejected relay or unverified sender domain is otherwise invisible.
     try do
       case Mailer.deliver(email) do
         {:ok, _metadata} -> {:ok, email}
-        other -> {:error, other}
+        other -> failed(subject, other)
       end
     rescue
-      e ->
-        {:error, {:exception, e}}
+      e -> failed(subject, {:exception, e})
     catch
-      kind, reason ->
-        {:error, {kind, reason}}
+      kind, reason -> failed(subject, {kind, reason})
     end
+  end
+
+  defp failed(subject, reason) do
+    Logger.error("mail delivery failed subject=#{inspect(subject)}: #{inspect(reason)}")
+    {:error, reason}
   end
 
   # Build the sender {name, email} tuple from env or app config

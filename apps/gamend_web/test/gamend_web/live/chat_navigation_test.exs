@@ -7,6 +7,7 @@ defmodule GamendWeb.ChatNavigationTest do
 
   import Phoenix.LiveViewTest
 
+  alias Gamend.Chat
   alias Gamend.Groups
 
   setup :register_and_log_in_user
@@ -48,6 +49,29 @@ defmodule GamendWeb.ChatNavigationTest do
 
     assert html =~ ~s(href="/chat?type=group&amp;id=#{group.id}")
     assert html =~ "Open chat"
+  end
+
+  # A message that arrives while its conversation is already open must advance
+  # the read cursor too — otherwise it renders but still counts as unread the
+  # next time the sidebar is built. Opening a chat goes through handle_params,
+  # which marks read unconditionally; this arrival path went through a guard
+  # that still expected integer ids, so it silently did nothing.
+  test "a message arriving in the open conversation marks it read", %{conn: conn, user: user} do
+    group = own_group(user)
+    sender = Gamend.AccountsFixtures.user_fixture()
+    {:ok, _} = Groups.join_group(sender.id, group.id)
+
+    {:ok, view, _html} = live(conn, ~p"/chat?#{[type: "group", id: group.id]}")
+
+    {:ok, _msg} =
+      Chat.send_message(%{user: sender}, %{
+        "chat_type" => "group",
+        "chat_ref_id" => group.id,
+        "content" => "while you watch"
+      })
+
+    assert render(view) =~ "while you watch"
+    assert Chat.count_unread(user.id, "group", group.id) == 0
   end
 
   test "the group page shows no chat link to non-members", %{user: user} do

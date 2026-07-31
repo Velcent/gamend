@@ -80,5 +80,5 @@ A custom matchmaking_form_matches/2 hook does not need to check blocks itself: w
 ## Reference
 
 - **HTTP API:** [/api/docs](/api/docs) - every endpoint, parameter and response, generated from the spec.
-- **Elixir API:** [`Gamend.Friends`](https://appsinacup.com/gamend/Gamend.Friends.html) - the functions a plugin calls, with their
+- **Elixir API:** [`Gamend.Friends`](https://docs.gamend.org/Gamend.Friends.html) - the functions a plugin calls, with their
   signatures and docs.
