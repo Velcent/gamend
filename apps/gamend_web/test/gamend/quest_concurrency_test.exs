@@ -28,6 +28,7 @@ defmodule Gamend.QuestConcurrencyTest do
     %{quest: quest}
   end
 
+  @tag :sqlite_only
   test "the repo opens transactions in IMMEDIATE mode" do
     assert Keyword.get(
              Application.get_env(:gamend_core, Gamend.Repo),

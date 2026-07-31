@@ -208,12 +208,18 @@ defmodule Gamend.UserRetentionTest do
 
       assert exists?(user)
 
-      assert Repo.exists?(
-               from(j in Oban.Job,
-                 where: j.worker == "Gamend.Accounts.InactivityNotifier",
-                 where: fragment("json_extract(?, '$.user_id')", j.args) == ^user.id
-               )
-             )
+      # Filter args in Elixir: JSON-path SQL differs per adapter (json_extract
+      # vs ->>), while Oban.Job decodes args to a map on both.
+      warned_user_ids =
+        Repo.all(
+          from(j in Oban.Job,
+            where: j.worker == "Gamend.Accounts.InactivityNotifier",
+            select: j.args
+          )
+        )
+        |> Enum.map(& &1["user_id"])
+
+      assert user.id in warned_user_ids
     end
 
     test "is deleted once the warning has been delivered" do

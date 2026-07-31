@@ -950,11 +950,15 @@ defmodule GamendWeb.CoreComponents do
     assigns = assign(assigns, :avatar_url, avatar_url(assigns.user))
 
     ~H"""
+    <%!-- no-referrer: Google's avatar CDN (lh3) rate-limits requests carrying
+          an unrecognized Referer far more aggressively — localhost dev hits
+          429s within a few reloads. Without the header it serves normally. --%>
     <img
       :if={@avatar_url}
       src={@avatar_url}
       alt=""
       crossorigin="anonymous"
+      referrerpolicy="no-referrer"
       data-avatar-fallback
       class={["rounded-full object-cover bg-base-300", @class]}
     />

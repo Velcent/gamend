@@ -37,7 +37,8 @@ defmodule GamendWeb.UserLive.SettingsTest do
     test "friends panel shows and can accept incoming requests", %{conn: conn} do
       # a will accept b's request
       a = user_fixture()
-      b = user_fixture(%{email: unique_user_email(), display_name: "B-User"})
+      b = user_fixture(%{email: unique_user_email()})
+      {:ok, b} = Accounts.update_user_display_name(b, %{"display_name" => "B-User"})
 
       {:ok, _} = Friends.create_request(b.id, a.id)
 
@@ -50,8 +51,12 @@ defmodule GamendWeb.UserLive.SettingsTest do
       |> element(~s(button[phx-click="settings_tab"][phx-value-tab="friends"]))
       |> render_click()
 
-      # incoming should be present
-      assert render(view) =~ "Incoming requests"
+      # incoming should be present, labeled with name + @username (no raw id)
+      html = render(view)
+      assert html =~ "Incoming requests"
+      assert html =~ "B-User"
+      assert html =~ "@#{b.username}"
+      refute html =~ "(id: #{b.id})"
 
       f =
         Repo.one(
@@ -255,10 +260,12 @@ defmodule GamendWeb.UserLive.SettingsTest do
       search_el = element(lv, "form[phx-change=\"search_users\"]")
       render_change(search_el, %{"q" => "FriendSearch"})
 
-      # search results should include our user
+      # search results should include our user with @username, not the raw id
       html = render(lv)
       assert html =~ b.display_name
+      assert html =~ "@#{b.username}"
       refute html =~ b.email
+      refute html =~ "(id: #{b.id})"
 
       # send request using button for the search result
       send_btn = element(lv, "#search-#{b.id} button", "Send")

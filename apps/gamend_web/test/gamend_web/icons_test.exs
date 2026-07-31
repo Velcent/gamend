@@ -38,12 +38,18 @@ defmodule GamendWeb.IconsTest do
     end
 
     test "an unknown name cannot leak new atoms into the VM" do
-      before = :erlang.system_info(:atom_count)
+      # The global atom count can move under concurrent tests (Postgres runs
+      # without max_cases: 1). A real leak adds an atom on *every* attempt —
+      # each name is unique — so one clean attempt proves the negative.
+      assert Enum.any?(1..10, fn _ ->
+               before = :erlang.system_info(:atom_count)
 
-      assert Icons.from_path("/icons/definitely_not_an_atom_#{System.unique_integer()}.svg") ==
-               :error
+               assert Icons.from_path(
+                        "/icons/definitely_not_an_atom_#{System.unique_integer()}.svg"
+                      ) == :error
 
-      assert :erlang.system_info(:atom_count) == before
+               :erlang.system_info(:atom_count) == before
+             end)
     end
   end
 

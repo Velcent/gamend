@@ -2,6 +2,10 @@ repo_config = Application.get_env(:gamend_core, Gamend.Repo, [])
 
 if repo_config[:adapter] == Ecto.Adapters.SQLite3 do
   ExUnit.configure(max_cases: 1)
+else
+  # Tests pinning SQLite-only repo options (e.g. IMMEDIATE transactions) are
+  # meaningless against Postgres.
+  ExUnit.configure(exclude: [:sqlite_only])
 end
 
 GamendWeb.TestSupport.Runtime.ensure_started()

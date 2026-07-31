@@ -12,6 +12,7 @@ defmodule GamendWeb.LeaderboardsLive do
   alias Gamend.Leaderboards
   alias Gamend.Leaderboards.Leaderboard
   alias GamendWeb.ContentText
+  alias GamendWeb.LiveHelpers
   alias GamendWeb.Plugs.FeatureGate
 
   @impl true
@@ -331,8 +332,7 @@ defmodule GamendWeb.LeaderboardsLive do
                     <span class={[
                       record.user_id != nil && record.user_id == @current_user_id && "font-bold"
                     ]}>
-                      {record.label || (record.user && record.user.display_name) ||
-                        "User #{record.user_id}"}
+                      {record.label || LiveHelpers.public_user_name(record.user || record.user_id)}
                     </span>
                     <%= if record.user_id != nil and record.user_id == @current_user_id do %>
                       <span class="badge badge-primary badge-sm">{gettext("You")}</span>

@@ -152,6 +152,11 @@ defmodule Gamend.RuntimeConfigTest do
     # case on "off"/"full" strings never matched and forced :normal.
     @tag env: %{
            "GAMEND_DB_URL" => "",
+           # Cleared explicitly: when the suite itself runs against Postgres
+           # (CI's test-postgres job) these are set in the ambient env and
+           # would flip the built config away from the SQLite branch.
+           "GAMEND_DB_POSTGRES_HOST" => "",
+           "GAMEND_DB_POSTGRES_USER" => "",
            "GAMEND_AUTH_SECRET_KEY_BASE" => String.duplicate("a", 64),
            "GAMEND_DB_SQLITE_PATH" => "/tmp/runtime_config_test.db",
            "GAMEND_DB_SQLITE_BUSY_TIMEOUT_MS" => "7000",

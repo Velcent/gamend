@@ -273,7 +273,17 @@ jobs:
           mix local.hex --force
           mix local.rebar --force
 
+      # Each app is analysed as a standalone project below, and a standalone
+      # project resolves its own deps/ — the root fetch does not reach them.
       - name: Install dependencies
+        run: MIX_ENV=dev mix deps.get
+
+      - name: Install dependencies (gamend_core)
+        working-directory: apps/gamend_core
+        run: MIX_ENV=dev mix deps.get
+
+      - name: Install dependencies (gamend_web)
+        working-directory: apps/gamend_web
         run: MIX_ENV=dev mix deps.get
 
       # The umbrella apps are path deps, so they land in the *deps* PLT. Its
@@ -282,11 +292,15 @@ jobs:
       # dialyxir report "PLT is up to date" and skip revalidation, and every
       # module added since the cache was written would look like it does not
       # exist. Without the hash it revalidates and updates the PLT in place.
+      #
+      # Each standalone app build keeps its own PLT, so all three are cached.
       - name: Cache PLTs
         uses: actions/cache@v4
         with:
           path: |
             _build/dev/*.plt
+            apps/gamend_core/_build/dev/*.plt
+            apps/gamend_web/_build/dev/*.plt
           key: plt-${{ runner.os }}-${{ hashFiles('mix.lock') }}
           restore-keys: |
             plt-${{ runner.os }}-
@@ -414,11 +428,13 @@ jobs:
     container:
       image: elixir:1.20.1-otp-29
 
+    # config/test.exs switches to Postgres on GAMEND_DB_POSTGRES_*; the old
+    # POSTGRES_* names matched nothing, so this job silently tested SQLite.
     env:
-      POSTGRES_HOST: postgres
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: gamend_test
+      GAMEND_DB_POSTGRES_HOST: postgres
+      GAMEND_DB_POSTGRES_USER: postgres
+      GAMEND_DB_POSTGRES_PASSWORD: postgres
+      GAMEND_DB_POSTGRES_DB: gamend_test
 
     steps:
       - name: Checkout

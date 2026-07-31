@@ -56,9 +56,10 @@ defmodule GamendWeb.UserLive.Settings.FriendsTab do
                 class="p-2 border rounded mt-2"
               >
                 <div class="text-sm">
-                  {(req.requester && req.requester.display_name) ||
-                    "User " <> to_string(req.requester_id)}
-                  <span class="text-xs text-base-content/60 ml-2">(id: {req.requester_id})</span>
+                  {LiveHelpers.public_user_name(req.requester || req.requester_id)}
+                  <span class="text-xs text-base-content/60 ml-2">
+                    {LiveHelpers.public_user_handle(req.requester)}
+                  </span>
                 </div>
                 <div class="flex gap-2 mt-2">
                   <button
@@ -102,7 +103,10 @@ defmodule GamendWeb.UserLive.Settings.FriendsTab do
                 class="p-2 border rounded mt-2"
               >
                 <div class="text-sm">
-                  {(req.target && req.target.display_name) || "User " <> to_string(req.target_id)}
+                  {LiveHelpers.public_user_name(req.target || req.target_id)}
+                  <span class="text-xs text-base-content/60 ml-2">
+                    {LiveHelpers.public_user_handle(req.target)}
+                  </span>
                 </div>
                 <div class="flex gap-2 mt-2">
                   <button phx-click="cancel_friend" phx-value-id={req.id} class="btn btn-sm btn-error">
@@ -140,7 +144,9 @@ defmodule GamendWeb.UserLive.Settings.FriendsTab do
                       title={if(u.is_online, do: "Online", else: "Offline")}
                     />
                     {LiveHelpers.public_user_name(u)}
-                    <span class="text-xs text-base-content/60">(id: {u.id})</span>
+                    <span class="text-xs text-base-content/60">
+                      {LiveHelpers.public_user_handle(u)}
+                    </span>
                   </div>
                   <div class="flex gap-1">
                     <button
@@ -178,8 +184,10 @@ defmodule GamendWeb.UserLive.Settings.FriendsTab do
                 class="p-2 border rounded mt-2 flex items-center justify-between"
               >
                 <div class="text-sm">
-                  {(b.requester && b.requester.display_name) || "User " <> to_string(b.requester_id)}
-                  <span class="text-xs text-base-content/60 ml-2">(id: {b.requester_id})</span>
+                  {LiveHelpers.public_user_name(b.requester || b.requester_id)}
+                  <span class="text-xs text-base-content/60 ml-2">
+                    {LiveHelpers.public_user_handle(b.requester)}
+                  </span>
                 </div>
                 <div>
                   <button
@@ -225,7 +233,9 @@ defmodule GamendWeb.UserLive.Settings.FriendsTab do
                 <div class="p-2 border rounded bg-base-100 flex items-center justify-between">
                   <div class="text-sm">
                     {LiveHelpers.public_user_name(s)}
-                    <span class="text-xs text-base-content/60 ml-2">(id: {s.id})</span>
+                    <span class="text-xs text-base-content/60 ml-2">
+                      {LiveHelpers.public_user_handle(s)}
+                    </span>
                   </div>
                   <div :if={s.id != @current_scope.user_id}>
                     <button
