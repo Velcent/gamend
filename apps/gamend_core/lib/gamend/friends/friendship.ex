@@ -34,9 +34,9 @@ defmodule Gamend.Friends.Friendship do
 
   @typedoc "A friendship/request record between two users."
   @type t :: %__MODULE__{
-          id: integer() | nil,
-          requester_id: integer() | nil,
-          target_id: integer() | nil,
+          id: Ecto.UUID.t() | nil,
+          requester_id: Ecto.UUID.t() | nil,
+          target_id: Ecto.UUID.t() | nil,
           status: String.t()
         }
 

@@ -2,6 +2,8 @@ defmodule Gamend.Tournaments.Bracket do
   @moduledoc false
 
   use Gamend.Schema
+
+  @type t :: %__MODULE__{}
   import Ecto.Changeset
 
   schema "tournament_brackets" do

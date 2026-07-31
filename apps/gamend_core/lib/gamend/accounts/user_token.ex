@@ -31,12 +31,12 @@ defmodule Gamend.Accounts.UserToken do
   end
 
   @type t :: %__MODULE__{
-          id: integer() | nil,
+          id: Ecto.UUID.t() | nil,
           token: binary() | nil,
           context: String.t() | nil,
           sent_to: String.t() | nil,
           authenticated_at: DateTime.t() | nil,
-          user_id: integer() | nil,
+          user_id: Ecto.UUID.t() | nil,
           user: Gamend.Accounts.User.t() | Ecto.Association.NotLoaded.t() | nil,
           inserted_at: DateTime.t() | nil
         }

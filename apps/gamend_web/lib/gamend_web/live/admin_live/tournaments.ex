@@ -585,7 +585,6 @@ defmodule GamendWeb.AdminLive.Tournaments do
     end
   end
 
-  defp ceil_div(_num, 0), do: 0
   defp ceil_div(num, den), do: div(num + den - 1, den)
 
   defp refresh_detail(socket) do

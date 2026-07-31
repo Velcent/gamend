@@ -544,8 +544,8 @@ defmodule GamendWeb.ChatLive do
     user = Scope.user(socket.assigns.current_scope)
 
     case {socket.assigns.chat_type, socket.assigns.chat_target} do
-      {"friend", fid} when is_integer(fid) -> mark_friend_chat_read(user.id, fid)
-      {"group", gid} when is_integer(gid) -> mark_group_chat_read(user.id, gid)
+      {"friend", fid} when is_binary(fid) -> mark_friend_chat_read(user.id, fid)
+      {"group", gid} when is_binary(gid) -> mark_group_chat_read(user.id, gid)
       _ -> :ok
     end
   end

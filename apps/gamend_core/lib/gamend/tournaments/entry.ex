@@ -7,6 +7,8 @@ defmodule Gamend.Tournaments.Entry do
   """
 
   use Gamend.Schema
+
+  @type t :: %__MODULE__{}
   import Ecto.Changeset
 
   @states ~w(registered active eliminated winner)

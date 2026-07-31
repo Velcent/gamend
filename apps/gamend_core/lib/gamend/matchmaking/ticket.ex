@@ -12,6 +12,8 @@ defmodule Gamend.Matchmaking.Ticket do
 
   use Gamend.Schema
 
+  @type t :: %__MODULE__{}
+
   import Ecto.Changeset
 
   alias Gamend.Accounts.User

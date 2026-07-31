@@ -154,8 +154,6 @@ defmodule GamendWeb.RuntimeIntrospection do
     Enum.sort_by(declared ++ plugin, & &1.name)
   end
 
-  defp env_row({name, default, desc, section}), do: env_row({name, default, desc, section, nil})
-
   defp env_row({name, default, desc, section, type}) do
     value = System.get_env(name)
 

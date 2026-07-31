@@ -71,9 +71,10 @@ defmodule Gamend.Cache do
   can collide with version values whose data entries are still inside a TTL,
   while a bump is monotonic per node.
   """
-  @spec bump_version(term()) :: integer()
+  @spec bump_version(term()) :: :ok
   def bump_version(key) do
-    new = incr(key, 1, default: 1)
+    # Nebulex returns {:ok, counter} | {:error, t}; no caller wants either.
+    _ = incr(key, 1, default: 1)
 
     Phoenix.PubSub.broadcast(
       Gamend.PubSub,
@@ -81,7 +82,7 @@ defmodule Gamend.Cache do
       {:cache_bump_version, key, Node.self()}
     )
 
-    new
+    :ok
   end
 
   @doc "PubSub topic that `invalidate/1` broadcasts on."

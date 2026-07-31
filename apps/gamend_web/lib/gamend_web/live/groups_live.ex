@@ -370,7 +370,6 @@ defmodule GamendWeb.GroupsLive do
     end
   end
 
-  defp ceil_div(_num, 0), do: 0
   defp ceil_div(num, den), do: div(num + den - 1, den)
 
   defp maybe_refresh_selected(socket, group_id) do

@@ -622,7 +622,10 @@ defmodule Gamend.Leaderboards do
     Returns records with `rank` field populated.
     
   """
-  @spec list_records(String.t(), Gamend.Types.pagination_opts()) :: [Gamend.Leaderboards.Record.t()]
+  @spec list_records(
+  String.t(),
+  keyword()
+) :: [Gamend.Leaderboards.Record.t()]
   def list_records(_leaderboard_id, _opts) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->

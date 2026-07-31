@@ -13,6 +13,8 @@ defmodule Gamend.Tournaments.Tournament do
   """
 
   use Gamend.Schema
+
+  @type t :: %__MODULE__{}
   import Ecto.Changeset
 
   @states ~w(scheduled registration running finished cancelled)

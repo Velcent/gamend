@@ -890,7 +890,7 @@ defmodule Gamend.Leaderboards do
   Returns records with `rank` field populated.
   """
   @spec list_records(String.t()) :: [Record.t()]
-  @spec list_records(String.t(), Types.pagination_opts()) :: [Record.t()]
+  @spec list_records(String.t(), keyword()) :: [Record.t()]
   def list_records(leaderboard_id, opts \\ []) when is_binary(leaderboard_id) do
     case get_leaderboard(leaderboard_id) do
       nil ->

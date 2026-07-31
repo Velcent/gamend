@@ -34,9 +34,9 @@ defmodule Gamend.Notifications.Notification do
 
   @typedoc "A notification record."
   @type t :: %__MODULE__{
-          id: integer() | nil,
-          sender_id: integer() | nil,
-          recipient_id: integer() | nil,
+          id: Ecto.UUID.t() | nil,
+          sender_id: Ecto.UUID.t() | nil,
+          recipient_id: Ecto.UUID.t() | nil,
           title: String.t() | nil,
           content: String.t() | nil,
           metadata: map(),

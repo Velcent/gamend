@@ -135,7 +135,7 @@ defmodule Gamend.KV do
     Returns `:ok` whether or not the entry existed.
     
   """
-  @spec delete_entry(pos_integer()) :: :ok
+  @spec delete_entry(Ecto.UUID.t()) :: :ok
   def delete_entry(_id) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -366,7 +366,7 @@ defmodule Gamend.KV do
     Returns `{:ok, entry}`, `{:error, :not_found}` if missing, or `{:error, changeset}` on validation error.
     
   """
-  @spec update_entry(pos_integer(), attrs()) ::
+  @spec update_entry(Ecto.UUID.t(), attrs()) ::
   {:ok, Gamend.KV.Entry.t()} | {:error, :not_found} | {:error, Ecto.Changeset.t()}
   def update_entry(_id, _attrs) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do

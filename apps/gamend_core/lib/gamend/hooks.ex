@@ -25,6 +25,12 @@ defmodule Gamend.Hooks do
 
   @type hook_result(attrs_or_user) :: {:ok, attrs_or_user} | {:error, term()}
 
+  @typedoc """
+  A veto-only hook: `{:error, reason}` rejects, anything else allows. The
+  return never rewrites the args, so a bare `:ok` is the usual "allow".
+  """
+  @type veto_result :: :ok | hook_result(term())
+
   @type kv_access ::
           :public
           | :owner_only
@@ -156,7 +162,7 @@ defmodule Gamend.Hooks do
               String.t(),
               Gamend.Quests.Quest.t(),
               Gamend.Quests.QuestProgress.t()
-            ) :: hook_result(term())
+            ) :: veto_result()
   @callback after_quest_completed(Gamend.Quests.QuestProgress.t()) :: any()
   @callback after_quest_claimed(Gamend.Quests.QuestProgress.t()) :: any()
   @optional_callbacks before_quest_claim: 3,
@@ -267,7 +273,7 @@ defmodule Gamend.Hooks do
   # the game's — core only sets "created" — so `before_lobby_state_change` is
   # where a game enforces its own ordering or entry conditions. Veto-only: the
   # return never rewrites the args.
-  @callback before_lobby_state_change(Lobby.t(), String.t(), String.t()) :: hook_result(term())
+  @callback before_lobby_state_change(Lobby.t(), String.t(), String.t()) :: veto_result()
   @callback after_lobby_state_changed(Lobby.t(), String.t(), String.t()) :: any()
   @optional_callbacks before_lobby_state_change: 3, after_lobby_state_changed: 3
 
@@ -283,7 +289,7 @@ defmodule Gamend.Hooks do
               Gamend.Lobbies.Lobby.t() | Gamend.Parties.Party.t() | :matchmaking,
               [String.t()]
             ) ::
-              hook_result(term())
+              veto_result()
   @callback after_ready_check_passed(Gamend.ReadyChecks.Check.t()) :: any()
   @callback after_ready_check_failed(Gamend.ReadyChecks.Check.t(), String.t(), [map()]) ::
               any()

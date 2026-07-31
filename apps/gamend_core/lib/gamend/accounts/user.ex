@@ -8,15 +8,16 @@ defmodule Gamend.Accounts.User do
   """
   @typedoc "The public user struct used across the application."
   @type t :: %__MODULE__{
-          id: Ecto.UUID.t() | integer() | nil,
+          id: Ecto.UUID.t() | nil,
           email: String.t() | nil,
           hashed_password: String.t() | nil,
           confirmed_at: DateTime.t() | nil,
           username: String.t() | nil,
           display_name: String.t() | nil,
-          metadata: map(),
-          lobby_id: integer() | nil,
-          party_id: integer() | nil,
+          # Nil for rows written before the column had a default.
+          metadata: map() | nil,
+          lobby_id: Ecto.UUID.t() | nil,
+          party_id: Ecto.UUID.t() | nil,
           is_online: boolean(),
           last_seen_at: DateTime.t() | nil
         }

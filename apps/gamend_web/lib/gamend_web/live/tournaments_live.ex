@@ -403,7 +403,6 @@ defmodule GamendWeb.TournamentsLive do
     end
   end
 
-  defp ceil_div(_num, 0), do: 0
   defp ceil_div(num, den), do: div(num + den - 1, den)
 
   # ── Render ────────────────────────────────────────────────────────────────

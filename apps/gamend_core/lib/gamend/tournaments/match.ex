@@ -6,6 +6,8 @@ defmodule Gamend.Tournaments.Match do
   """
 
   use Gamend.Schema
+
+  @type t :: %__MODULE__{}
   import Ecto.Changeset
 
   schema "tournament_matches" do
