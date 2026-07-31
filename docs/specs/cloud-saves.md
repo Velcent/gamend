@@ -2,7 +2,7 @@
 
 Design spec for the Phase 2 **Cloud saves** item in
 [ROADMAP.md](../../ROADMAP.md). Depends on **Object storage** (Phase 0, shipped)
-— this is a thin, versioned context layered on `GameServer.Storage`.
+— this is a thin, versioned context layered on `Gamend.Storage`.
 
 Goal: let a player's progress follow them across devices — named **save slots**,
 each holding a **versioned** blob, with **conflict detection** so two devices
@@ -11,7 +11,7 @@ metadata lives in the database.
 
 ## Why (Storage moves bytes; it doesn't version them)
 
-`GameServer.Storage` already does direct client uploads (presigned PUT straight
+`Gamend.Storage` already does direct client uploads (presigned PUT straight
 to disk/S3/R2) and `KV` already stores small JSON maps — but neither gives a
 save the three things a save needs: **slots** (multiple named saves per game),
 **versions** (rollback + "which is newer?"), and **conflict detection** (device
@@ -74,7 +74,7 @@ A small-save convenience (inline base64 through the app, capped at a low
 `max_inline_save_bytes`) is offered for tiny saves so trivial games skip the
 three-step dance; anything larger must use the presigned flow.
 
-## `GameServer.CloudSaves` — the context
+## `Gamend.CloudSaves` — the context
 
 ```elixir
 CloudSaves.put_slot(user_id, slot, %{key: ..., base_version: 5, size: ..., checksum: ...})
@@ -95,7 +95,7 @@ CloudSaves.delete_slot(user_id, slot)              # removes row + all version b
 Both dispatched after commit, never inside the update; RPC-blocked;
 SDK-mirrored in all six places.
 
-## Limits (`GameServer.Limits`, auto `LIMIT_*`, `@limit_categories`)
+## Limits (`Gamend.Limits`, auto `LIMIT_*`, `@limit_categories`)
 
 `max_save_slots_per_user`, `max_save_bytes`, `max_inline_save_bytes`,
 `max_save_versions_kept`.

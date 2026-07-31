@@ -46,18 +46,18 @@ A tournament match is a pairing plus a verdict: two entries that must produce a 
 # fires when both slots are filled and the round window is open
 def tournament_match_ready(match) do
   # create a lobby via the SDK, set up the challenge, notify players ...
-  # scratch space: GameServer.Tournaments.update_match_metadata(match.id, map)
+  # scratch space: Gamend.Tournaments.update_match_metadata(match.id, map)
   :ok
 end
 
 # report the verdict (first write wins; :no_winner = double forfeit)
-GameServer.Tournaments.resolve_match(match_id, winner_entry_id)
-GameServer.Tournaments.resolve_match(match_id, :no_winner)
+Gamend.Tournaments.resolve_match(match_id, winner_entry_id)
+Gamend.Tournaments.resolve_match(match_id, :no_winner)
 
 # deadline passed and still unresolved: adjudicate here, or the
 # tournament's deadline_policy applies (forfeit_both / advance_first_slot / random)
 def tournament_match_expired(match) do
-  GameServer.Tournaments.resolve_match(match.id, pick_winner(match))
+  Gamend.Tournaments.resolve_match(match.id, pick_winner(match))
 end
 ```
 
@@ -88,5 +88,5 @@ the API returns `""` so game clients can apply their own.
 ## Reference
 
 - **HTTP API:** [/api/docs](/api/docs) - every endpoint, parameter and response, generated from the spec.
-- **Elixir API:** [`GameServer.Tournaments`](https://appsinacup.com/game_server/GameServer.Tournaments.html) - the functions a plugin calls, with their
+- **Elixir API:** [`Gamend.Tournaments`](https://appsinacup.com/gamend/Gamend.Tournaments.html) - the functions a plugin calls, with their
   signatures and docs.

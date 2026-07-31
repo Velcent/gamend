@@ -9,7 +9,7 @@ Two companions to this page:
 
 - [**Admin runtime**](/admin/runtime) - a live ER diagram of every table,
   generated from the running schema.
-- [**Elixir API**](https://appsinacup.com/game_server/api-reference.html) - each
+- [**Elixir API**](https://appsinacup.com/gamend/api-reference.html) - each
   schema module with its `t:t/0` type and changesets.
 
 The field lists below are curated: they cover the columns you will actually
@@ -28,7 +28,7 @@ These hold everywhere, so the tables below list only what is specific to them:
 
 ## users
 
-[`GameServer.Accounts.User`](https://appsinacup.com/game_server/GameServer.Accounts.User.html)
+[`Gamend.Accounts.User`](https://appsinacup.com/gamend/Gamend.Accounts.User.html)
 
 | Column | Type | Notes |
 |---|---|---|
@@ -50,7 +50,7 @@ These hold everywhere, so the tables below list only what is specific to them:
 
 ## lobbies
 
-[`GameServer.Lobbies.Lobby`](https://appsinacup.com/game_server/GameServer.Lobbies.Lobby.html)
+[`Gamend.Lobbies.Lobby`](https://appsinacup.com/gamend/Gamend.Lobbies.Lobby.html)
 
 | Column | Type | Notes |
 |---|---|---|
@@ -79,7 +79,7 @@ that wants a closed vocabulary rejects the move in `before_lobby_state_change`.
 
 The `webrtc_*` columns are the WebRTC signaling room: a room *is* a lobby, with
 no separate record. Like `state` they are server-owned — only
-`GameServer.Signaling.configure/2` writes them. The star host is always
+`Gamend.Signaling.configure/2` writes them. The star host is always
 `host_id`. See the [WebRTC](/docs/setup?guide=webrtc) guide.
 
 ## parties
@@ -95,7 +95,7 @@ notifications, so deleting the notification does not cancel the invite.
 
 ## friendships
 
-[`GameServer.Friends.Friendship`](https://appsinacup.com/game_server/GameServer.Friends.Friendship.html)
+[`Gamend.Friends.Friendship`](https://appsinacup.com/gamend/Gamend.Friends.Friendship.html)
 
 | Column | Type | Notes |
 |---|---|---|
@@ -177,7 +177,7 @@ are UTC.
 
 ## leaderboards and leaderboard_records
 
-[`GameServer.Leaderboards.Leaderboard`](https://appsinacup.com/game_server/GameServer.Leaderboards.Leaderboard.html)
+[`Gamend.Leaderboards.Leaderboard`](https://appsinacup.com/gamend/Gamend.Leaderboards.Leaderboard.html)
 
 | leaderboards | Type | Notes |
 |---|---|---|

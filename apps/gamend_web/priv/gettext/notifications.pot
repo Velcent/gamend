@@ -1,0 +1,38 @@
+## This file is a PO Template file.
+##
+## "msgid"s here are often extracted from source code.
+## Add new messages manually only if they're dynamic
+## messages that can't be statically extracted.
+##
+## Run "mix gettext.extract" to bring this file up to
+## date. Leave "msgstr"s empty as changing them here has no
+## effect: edit them in PO (.po) files instead.
+#
+msgid ""
+msgstr ""
+
+#: lib/gamend_web/live/notifications_live.ex:287
+#, elixir-autogen, elixir-format
+msgid "Achievement Unlocked: %{name}"
+msgstr ""
+
+#: lib/gamend_web/live/notifications_live.ex:281
+#, elixir-autogen, elixir-format
+msgid "New message in party"
+msgstr ""
+
+#: lib/gamend_web/live/notifications_live.ex:295
+#: lib/gamend_web/live/notifications_live.ex:300
+#, elixir-autogen, elixir-format
+msgid "New messages from %{name}"
+msgstr ""
+
+#: lib/gamend_web/live/notifications_live.ex:279
+#, elixir-autogen, elixir-format
+msgid "New messages from friends"
+msgstr ""
+
+#: lib/gamend_web/live/notifications_live.ex:289
+#, elixir-autogen, elixir-format
+msgid "Quest completed: %{name}"
+msgstr ""

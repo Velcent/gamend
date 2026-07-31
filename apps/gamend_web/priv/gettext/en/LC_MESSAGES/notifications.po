@@ -1,0 +1,38 @@
+#  "msgid"s in this file come from POT (.pot) files.
+# #
+# # Do not add, change, or remove "msgid"s manually here as
+# # they're tied to the ones in the corresponding POT file
+# # (with the same domain).
+# #
+# # Use "mix gettext.extract --merge" or "mix gettext.merge"
+# # to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: en\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: lib/gamend_web/live/notifications_live.ex:287
+#, elixir-autogen, elixir-format
+msgid "Achievement Unlocked: %{name}"
+msgstr "Achievement Unlocked: %{name}"
+
+#: lib/gamend_web/live/notifications_live.ex:281
+#, elixir-autogen, elixir-format
+msgid "New message in party"
+msgstr "New message in party"
+
+#: lib/gamend_web/live/notifications_live.ex:295
+#: lib/gamend_web/live/notifications_live.ex:300
+#, elixir-autogen, elixir-format
+msgid "New messages from %{name}"
+msgstr "New messages from %{name}"
+
+#: lib/gamend_web/live/notifications_live.ex:279
+#, elixir-autogen, elixir-format
+msgid "New messages from friends"
+msgstr "New messages from friends"
+
+#: lib/gamend_web/live/notifications_live.ex:289
+#, elixir-autogen, elixir-format
+msgid "Quest completed: %{name}"
+msgstr "Quest completed: %{name}"

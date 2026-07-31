@@ -1,12 +1,12 @@
-defmodule GameServerPluginTools.MixProject do
+defmodule GamendPluginTools.MixProject do
   use Mix.Project
 
   @version "1.0.26"
-  @source_url "https://github.com/appsinacup/game_server"
+  @source_url "https://github.com/appsinacup/gamend"
 
   def project do
     [
-      app: :game_server_plugin_tools,
+      app: :gamend_plugin_tools,
       version: System.get_env("APP_VERSION") || @version,
       elixir: "~> 1.20",
       start_permanent: Mix.env() == :prod,
@@ -32,13 +32,13 @@ defmodule GameServerPluginTools.MixProject do
 
   defp description do
     """
-    Tools for building GameServer plugins (hooks).
+    Tools for building Gamend plugins (hooks).
     """
   end
 
   defp package do
     [
-      name: "game_server_plugin_tools",
+      name: "gamend_plugin_tools",
       licenses: ["MIT"],
       links: %{
         "GitHub" => @source_url,

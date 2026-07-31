@@ -2,8 +2,8 @@
 
 I am working on a new open source game server with authentication, users, lobbies, payments, server scripting and admin portal, built with Elixir.
 
-- [Github](https://github.com/appsinacup/game_server)
-- [Guides](https://gamend.appsinacup.com/docs/setup)
+- [Github](https://github.com/appsinacup/gamend)
+- [Guides](https://gamend.org/docs/setup)
 
 
 # Competition

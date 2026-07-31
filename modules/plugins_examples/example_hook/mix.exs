@@ -14,7 +14,7 @@ defmodule ExampleHook.MixProject do
   def application do
     [
       extra_applications: [:logger],
-      env: [hooks_module: GameServer.Modules.ExampleHook]
+      env: [hooks_module: Gamend.Modules.ExampleHook]
     ]
   end
 
@@ -22,8 +22,8 @@ defmodule ExampleHook.MixProject do
   # in-repo SDK via a path dependency.
   defp deps do
     [
-      {:game_server_sdk, path: "../../../sdk", runtime: false, optional: true},
-      {:game_server_plugin_tools, path: "../../../sdk_tools", runtime: false},
+      {:gamend_sdk, path: "../../../sdk", runtime: false, optional: true},
+      {:gamend_plugin_tools, path: "../../../sdk_tools", runtime: false},
       {:bunt, "~> 1.0"},
       # Typed hook payloads (see proto/example_hook.proto).
       {:protobuf, "~> 0.17"}

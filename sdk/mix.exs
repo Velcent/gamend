@@ -1,12 +1,12 @@
-defmodule GameServerSdk.MixProject do
+defmodule GamendSdk.MixProject do
   use Mix.Project
 
   @version "1.0.26"
-  @source_url "https://github.com/appsinacup/game_server"
+  @source_url "https://github.com/appsinacup/gamend"
 
   def project do
     [
-      app: :game_server_sdk,
+      app: :gamend_sdk,
       version: System.get_env("APP_VERSION") || @version,
       elixir: "~> 1.20",
       start_permanent: Mix.env() == :prod,
@@ -32,14 +32,14 @@ defmodule GameServerSdk.MixProject do
 
   defp description do
     """
-    SDK for GameServer hooks development. Provides type specs, documentation,
-    and IDE autocomplete for GameServer modules without requiring the full server.
+    SDK for Gamend hooks development. Provides type specs, documentation,
+    and IDE autocomplete for Gamend modules without requiring the full server.
     """
   end
 
   defp package do
     [
-      name: "game_server_sdk",
+      name: "gamend_sdk",
       licenses: ["MIT"],
       links: %{
         "GitHub" => @source_url,
@@ -54,7 +54,7 @@ defmodule GameServerSdk.MixProject do
       main: "readme",
       source_ref: "v#{@version}",
       extras: ["README.md"],
-      # Group the GameServer.Hooks callbacks by entity so the docs read grouped
+      # Group the Gamend.Hooks callbacks by entity so the docs read grouped
       # (User / Lobby / Group / …) instead of one long alphabetical list. Keyed
       # by name via the same classifier the admin runtime page uses.
       groups_for_docs: hook_doc_groups()
@@ -70,7 +70,7 @@ defmodule GameServerSdk.MixProject do
     end
   end
 
-  # Mirror of GameServerWeb.RuntimeIntrospection.hook_group/1 (kept in sync by
+  # Mirror of GamendWeb.RuntimeIntrospection.hook_group/1 (kept in sync by
   # hand — both are tiny and this one runs at doc-build time with no app loaded).
   defp hook_group(name) do
     cond do

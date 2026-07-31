@@ -20,7 +20,7 @@ a plugin calls the context directly. Ids are UUIDv7 strings.
 
 ```elixir
 {:ok, board} =
-  GameServer.Leaderboards.create_leaderboard(%{
+  Gamend.Leaderboards.create_leaderboard(%{
     slug: "weekly_score_2024_w48",
     title: "Weekly High Scores",
     sort_order: :desc,
@@ -30,18 +30,18 @@ a plugin calls the context directly. Ids are UUIDv7 strings.
   })
 
 # Resolve the live season by slug, then submit against its id.
-if board = GameServer.Leaderboards.get_active_leaderboard_by_slug("weekly_score_2024_w48") do
-  GameServer.Leaderboards.submit_score(board.id, user_id, 9500, %{"level" => 15})
+if board = Gamend.Leaderboards.get_active_leaderboard_by_slug("weekly_score_2024_w48") do
+  Gamend.Leaderboards.submit_score(board.id, user_id, 9500, %{"level" => 15})
 end
 ```
 
 Reading back:
 
 ```elixir
-GameServer.Leaderboards.list_records(board.id, page: 1, page_size: 25)
-GameServer.Leaderboards.get_user_record(board.id, user_id)
-GameServer.Leaderboards.list_records_around_user(board.id, user_id, limit: 5)
-GameServer.Leaderboards.end_leaderboard(board)
+Gamend.Leaderboards.list_records(board.id, page: 1, page_size: 25)
+Gamend.Leaderboards.get_user_record(board.id, user_id)
+Gamend.Leaderboards.list_records_around_user(board.id, user_id, limit: 5)
+Gamend.Leaderboards.end_leaderboard(board)
 ```
 
 ## Icons
@@ -62,5 +62,5 @@ the web UI shows the shared default leaderboard icon and the API returns
 ## Reference
 
 - **HTTP API:** [/api/docs](/api/docs) - every endpoint, parameter and response, generated from the spec.
-- **Elixir API:** [`GameServer.Leaderboards`](https://appsinacup.com/game_server/GameServer.Leaderboards.html) - the functions a plugin calls, with their
+- **Elixir API:** [`Gamend.Leaderboards`](https://appsinacup.com/gamend/Gamend.Leaderboards.html) - the functions a plugin calls, with their
   signatures and docs.

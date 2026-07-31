@@ -13,7 +13,7 @@ Set the GAMEND_DB_URL environment variable:
 ```bash
 GAMEND_DB_URL="postgresql://username:password@host:port/database"
 # Example:
-GAMEND_DB_URL="postgresql://myuser:mypass@localhost:5432/game_server_prod"
+GAMEND_DB_URL="postgresql://myuser:mypass@localhost:5432/gamend_prod"
 ```
 
 The app will automatically detect PostgreSQL when GAMEND_DB_URL is set or when GAMEND_DB_POSTGRES_HOST and GAMEND_DB_POSTGRES_USER environment variables are configured.

@@ -4,9 +4,9 @@ icon: hero-command-line
 
 # Server-side scripting & hooks
 
-[Scripting Interface](https://appsinacup.com/game_server/GameServer.Hooks.html)
+[Scripting Interface](https://appsinacup.com/gamend/Gamend.Hooks.html)
 
-The application exposes a lightweight server-side scripting surface via the `GameServer.Hooks` behaviour. Hooks let you run custom code on lifecycle events (eg. user register/login, lobby create/update) and optionally expose RPC functions.
+The application exposes a lightweight server-side scripting surface via the `Gamend.Hooks` behaviour. Hooks let you run custom code on lifecycle events (eg. user register/login, lobby create/update) and optionally expose RPC functions.
 
 ## Add a lifecycle callback
 
@@ -16,12 +16,12 @@ Implement the behaviour in a hooks module:
 # your_hook_module.ex
 
 defmodule MyApp.HooksImpl do
-    @behaviour GameServer.Hooks
+    @behaviour Gamend.Hooks
 
     @impl true
     def after_user_register(user) do
         # safe database update (non-blocking in hooks is recommended)
-        GameServer.Accounts.update_user(user, %{metadata: Map.put(user.metadata || %{}, "from_hook", true)})
+        Gamend.Accounts.update_user(user, %{metadata: Map.put(user.metadata || %{}, "from_hook", true)})
     :ok
     end
 
@@ -83,19 +83,19 @@ end
 
 # The type comes from the default, so reads are already coerced —
 # no String.to_integer/1 or == "true" at each call site.
-GameServer.Config.get("MYGAME_MAX_BOTS")   # 8 (integer)
-GameServer.Config.get("MYGAME_TUTORIAL")   # true (boolean)
+Gamend.Config.get("MYGAME_MAX_BOTS")   # 8 (integer)
+Gamend.Config.get("MYGAME_TUTORIAL")   # true (boolean)
 
 # Pushing a declared event to one player — rides the existing
 # user:<id> channel, so the client needs no new subscription.
-GameServer.Realtime.push_to_user(user.id, "quest_progress", %{id: 7, step: 2})
+Gamend.Realtime.push_to_user(user.id, "quest_progress", %{id: 7, step: 2})
 ```
 
 Codes and event names are global: if two plugins declare the same one, the first in name order wins and the loser is logged. See example_hook for a working set.
 
 ### Quest hooks
 
-before_quest_claim/3 can veto a player's claim (return an error tuple to reject; anything else allows — it never rewrites its args, and auto_claim quests skip it). after_quest_completed/1 and after_quest_claimed/1 observe the progress row asynchronously — chain the next quest, feed analytics, or push a custom notification. Report custom gameplay events from any hook with GameServer.Quests.report_event/4:
+before_quest_claim/3 can veto a player's claim (return an error tuple to reject; anything else allows — it never rewrites its args, and auto_claim quests skip it). after_quest_completed/1 and after_quest_claimed/1 observe the progress row asynchronously — chain the next quest, feed analytics, or push a custom notification. Report custom gameplay events from any hook with Gamend.Quests.report_event/4:
 
 ```elixir
 @impl true
@@ -118,16 +118,16 @@ end
 
 # From any hook: count a custom event toward matching quests
 def on_enemy_killed(user_id, map) do
-  GameServer.Quests.report_event(user_id, "enemy_killed", 1, %{"map" => map})
+  Gamend.Quests.report_event(user_id, "enemy_killed", 1, %{"map" => map})
 end
 ```
 
 ### Push hooks
 
-before_push_send/2 runs once per recipient before any delivery job is enqueued. It receives the user id and the message as a string-keyed map; return {:ok, message} to allow (optionally rewritten — the result is re-validated against the push limits) or {:error, reason} to drop the push for that user. It is where per-user opt-out, quiet hours, or moderation belong. after_push_sent/3 observes each device's final outcome — "delivered", "invalid" (token disabled), or "failed". Send a push from any hook with GameServer.Push.send_to_user/2 — delivery is queued, retried, and never blocks the caller:
+before_push_send/2 runs once per recipient before any delivery job is enqueued. It receives the user id and the message as a string-keyed map; return {:ok, message} to allow (optionally rewritten — the result is re-validated against the push limits) or {:error, reason} to drop the push for that user. It is where per-user opt-out, quiet hours, or moderation belong. after_push_sent/3 observes each device's final outcome — "delivered", "invalid" (token disabled), or "failed". Send a push from any hook with Gamend.Push.send_to_user/2 — delivery is queued, retried, and never blocks the caller:
 
 ```elixir
-@impl true def before_push_send(user_id, message) do # Example: respect a per-user mute stored in KV case GameServer.KV.get("push_muted", user_id: user_id) do {:ok, %{value: %{"muted" => true}}} -> {:error, :muted} _ -> {:ok, message} end end # From any hook: ping an offline player def on_turn_ready(user_id, match_id) do GameServer.Push.send_to_user(user_id, %{ "title" => "Your move!", "body" => "It is your turn.", "data" => %{"match_id" => match_id}, "collapse_key" => "turn-#{match_id})
+@impl true def before_push_send(user_id, message) do # Example: respect a per-user mute stored in KV case Gamend.KV.get("push_muted", user_id: user_id) do {:ok, %{value: %{"muted" => true}}} -> {:error, :muted} _ -> {:ok, message} end end # From any hook: ping an offline player def on_turn_ready(user_id, match_id) do Gamend.Push.send_to_user(user_id, %{ "title" => "Your move!", "body" => "It is your turn.", "data" => %{"match_id" => match_id}, "collapse_key" => "turn-#{match_id})
 end
 ```
 
@@ -138,18 +138,18 @@ before_ready_check_open/2 can veto a check before it opens (veto-only: it never 
 ```elixir
 @impl true
 def after_ready_check_passed(%{lobby_id: lobby_id}) when is_binary(lobby_id) do
-  GameServer.Lobbies.transition_state(GameServer.Lobbies.get_lobby(lobby_id), "starting")
+  Gamend.Lobbies.transition_state(Gamend.Lobbies.get_lobby(lobby_id), "starting")
 end
 
 # Refuse to start until the last check passed
 @impl true
 def before_lobby_state_change(lobby, _from, "playing") do
-  if GameServer.ReadyChecks.passed?(lobby), do: :ok, else: {:error, :not_ready}
+  if Gamend.ReadyChecks.passed?(lobby), do: :ok, else: {:error, :not_ready}
 end
 
 # Bots cannot press a button — answer for them
 def ready_up_bots(check, bot_ids) do
-  Enum.each(bot_ids, &GameServer.ReadyChecks.answer_for(check, &1, true))
+  Enum.each(bot_ids, &Gamend.ReadyChecks.answer_for(check, &1, true))
 end
 ```
 
@@ -159,7 +159,7 @@ Hooks modules can also export arbitrary functions:
 
 ```elixir
 defmodule MyApp.HooksImpl do
-  @behaviour GameServer.Hooks
+  @behaviour Gamend.Hooks
 
   def hello_world(name) do
     {:ok, "Hello, #{name}!"}
@@ -170,7 +170,7 @@ end
 You can now call this function via the API (or better yet from the client SDK's), eg:
 
 ```bash
-curl -X POST https://your-game-server.com/api/v1/hooks/call \
+curl -X POST https://your-gamend.com/api/v1/hooks/call \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"plugin":"polyglot_hook","fn":"hello_world","args":["Alice"]}'
@@ -181,7 +181,7 @@ curl -X POST https://your-game-server.com/api/v1/hooks/call \
 A few domain functions accept options that the HTTP and channel surfaces never pass, so they are reachable only from server-side code. The main one is seating a player in a locked lobby:
 
 ```elixir
-# Join succeeds even though the lobby is locked GameServer.Lobbies.join_lobby(user, lobby_id, %{bypass_lock: true})
+# Join succeeds even though the lobby is locked Gamend.Lobbies.join_lobby(user, lobby_id, %{bypass_lock: true})
 ```
 
 Useful for reconnects, admin tooling, or seating a late player into a match already in progress. Capacity and blacklist checks still apply — bypass_lock only skips the lock, so it cannot be used to overfill a lobby or to put two players who blocked each other together.
@@ -191,13 +191,13 @@ Useful for reconnects, admin tooling, or seating a late player into a match alre
 For work that must survive a restart, retry on failure, or run later, enqueue a hook as a durable background job instead of doing it inline. Args are stored as JSON, so callbacks receive a string-keyed map:
 
 ```elixir
-# Run now, retried with backoff on failure GameServer.Jobs.enqueue_hook(:on_welcome_email, %{"user_id" => user.id}) # Run in 24 hours GameServer.Jobs.enqueue_in(24 * 60 * 60, :on_trial_reminder, %{"user_id" => user.id}) def on_welcome_email(%{"user_id" => user_id}), do: :ok
+# Run now, retried with backoff on failure Gamend.Jobs.enqueue_hook(:on_welcome_email, %{"user_id" => user.id}) # Run in 24 hours Gamend.Jobs.enqueue_in(24 * 60 * 60, :on_trial_reminder, %{"user_id" => user.id}) def on_welcome_email(%{"user_id" => user_id}), do: :ok
 ```
 
 For recurring work, register cron-like schedules from your after_startup hook. These are durable and distributed-safe — exactly one instance runs each job per period:
 
 ```elixir
-def after_startup do GameServer.Schedule.hourly(:on_hourly) GameServer.Schedule.daily(:on_morning_report, hour: 9) GameServer.Schedule.cron(:sweep, "*/15 * * * *", :on_every_15m) :ok end
+def after_startup do Gamend.Schedule.hourly(:on_hourly) Gamend.Schedule.daily(:on_morning_report, hour: 9) Gamend.Schedule.cron(:sweep, "*/15 * * * *", :on_every_15m) :ok end
 ```
 
 ### Virtual economy (wallets)
@@ -205,14 +205,14 @@ def after_startup do GameServer.Schedule.hourly(:on_hourly) GameServer.Schedule.
 Grant and spend virtual currency from hooks. Currencies are free-form codes; every change is atomic and recorded in a ledger, so two concurrent spends can never overspend:
 
 ```elixir
-# On match win, reward the player GameServer.Economy.grant(user_id, "gold", 100, reason: "match_reward") # Charge for a store item — refuses to go negative case GameServer.Economy.spend(user_id, "gold", 30, reason: "store_purchase") do {:ok, balance} -> {:ok, %{"gold" => balance}} {:error, :insufficient_funds} -> {:error, "not enough gold
+# On match win, reward the player Gamend.Economy.grant(user_id, "gold", 100, reason: "match_reward") # Charge for a store item — refuses to go negative case Gamend.Economy.spend(user_id, "gold", 30, reason: "store_purchase") do {:ok, balance} -> {:ok, %{"gold" => balance}} {:error, :insufficient_funds} -> {:error, "not enough gold
 end
 
-GameServer.Economy.balances(user_id)   # => %{"gold" => 70}
+Gamend.Economy.balances(user_id)   # => %{"gold" => 70}
 
-# Items work the same way, via GameServer.Inventory
-GameServer.Inventory.grant_item(user_id, "health_potion", 3)
-GameServer.Inventory.consume_item(user_id, "health_potion", 1)  # {:error, :insufficient_items} if empty
+# Items work the same way, via Gamend.Inventory
+Gamend.Inventory.grant_item(user_id, "health_potion", 3)
+Gamend.Inventory.consume_item(user_id, "health_potion", 1)  # {:error, :insufficient_items} if empty
 ```
 
 Pass idempotency_key: so an at-least-once job or a client retry can't double-apply. These are server-authoritative — clients only read their wallet (GET /me/wallet).
@@ -232,7 +232,7 @@ end
 - When returning values from lifecycle hooks, prefer a `{:ok, map}` shape for "before" hooks that may modify attrs. Return `{:error, reason}` to reject flows; domain code will convert to `{:hook_rejected, reason}`.
 - Do not return structs as hook results intended to be used as params — always return plain maps when you intend to pass modified params into changesets.
 - Tests that modify global plugin configuration (eg. `GAMEND_CONTENT_PLUGINS_DIR` ) should run serially (`async: false`) and restore env via `on_exit` to avoid cross-test races.
-- Be careful modifying user or lobby data from hooks — reuse high-level domain functions (eg. `GameServer.Accounts.update_user/2`, `GameServer.Lobbies.update_lobby/2` ) so changes are validated and broadcast consistently.
+- Be careful modifying user or lobby data from hooks — reuse high-level domain functions (eg. `Gamend.Accounts.update_user/2`, `Gamend.Lobbies.update_lobby/2` ) so changes are validated and broadcast consistently.
 
 ## Every hook
 
@@ -262,6 +262,6 @@ change is committed and its return value is ignored.
 | Push | `before_push_send` | `after_push_sent` |
 
 Each callback's exact signature, arguments and return contract is in the
-[`GameServer.Hooks` docs](https://appsinacup.com/game_server/GameServer.Hooks.html). The
+[`Gamend.Hooks` docs](https://appsinacup.com/gamend/Gamend.Hooks.html). The
 [admin runtime page](/admin/runtime) shows the same list for *your* server,
 including which plugin implements what.

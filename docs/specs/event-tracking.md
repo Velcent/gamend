@@ -39,7 +39,7 @@ the eventual ClickHouse/PostHog step is a sink swap, not a rewrite.
 - The server **overwrites** the trusted fields: `user_id` from the auth token
   (never the body), `inserted_at` server-side, `context.country` from the request
   IP. A client cannot attribute events to another user or backdate them.
-- **Batched writes:** a supervised `GameServer.Events.Writer` GenServer buffers
+- **Batched writes:** a supervised `Gamend.Events.Writer` GenServer buffers
   incoming events and flushes with a single `Repo.insert_all` every N ms or M
   rows — turning an ingest burst into one round-trip (the same coalescing logic
   that motivates `realtime_debounce_ms`). Added to the host supervision tree
@@ -49,7 +49,7 @@ the eventual ClickHouse/PostHog step is a sink swap, not a rewrite.
 
 ## Retention — mandatory, or the table eats the disk
 
-A durable `GameServer.Schedule` job prunes events older than
+A durable `Gamend.Schedule` job prunes events older than
 `event_retention_days` (config, default e.g. 90). This is not optional: an
 analytics table without retention grows unbounded. Pruning is a ranged
 `DELETE ... WHERE inserted_at < cutoff` on the time index.

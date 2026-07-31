@@ -19,23 +19,23 @@ my_game/
     my_game/
       application.ex
       router.ex
-    game_server_web/
+    gamend_web/
       endpoint.ex
       components/
       live/
 
 # Your app owns the host/runtime layer.
-# Shared functionality comes from game_server_core and game_server_web deps.
+# Shared functionality comes from gamend_core and gamend_web deps.
 ```
 
 ## Dependency boundary
 
-A new starter app should depend on game_server_core and game_server_web, while keeping its own host code, endpoint, router, assets, config, and branding files in the new repository.
+A new starter app should depend on gamend_core and gamend_web, while keeping its own host code, endpoint, router, assets, config, and branding files in the new repository.
 
 | Keep in your app | Pull from dependencies |
 |---|---|
-| Host router and endpoint | Domain logic from game_server_core |
-| Host-owned layouts, pages, branding, and runtime config | Reusable controllers, LiveViews, channels, and plugs from game_server_web |
+| Host router and endpoint | Domain logic from gamend_core |
+| Host-owned layouts, pages, branding, and runtime config | Reusable controllers, LiveViews, channels, and plugs from gamend_web |
 | Host app assets/config plus release and deploy files | Schema/context updates from upstream releases |
 
 ## Minimal mix.exs shape
@@ -46,8 +46,8 @@ The starter app should be a normal Mix project, not another umbrella root. Repla
 defp deps do
   [
     # Use Hex versions once published, or path/git deps while bootstrapping
-    {:game_server_core, "~> 1.0"},
-    {:game_server_web, "~> 1.0"},
+    {:gamend_core, "~> 1.0"},
+    {:gamend_web, "~> 1.0"},
     {:heroicons,
      github: "tailwindlabs/heroicons",
      tag: "v2.2.0",
@@ -70,7 +70,7 @@ If you create a starter repository, keep the runtime shell small. Copy the host 
 
 ## How to remove or add product surface
 
-Do not think of game_server_web as something you trim file-by-file inside the dependency. If you want less product surface, remove routes, links, and host-owned pages from your starter app. If you want more, add host routes and new app code alongside the shared modules.
+Do not think of gamend_web as something you trim file-by-file inside the dependency. If you want less product surface, remove routes, links, and host-owned pages from your starter app. If you want more, add host routes and new app code alongside the shared modules.
 
 ### Recommended long-term setup
 

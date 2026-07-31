@@ -6,7 +6,7 @@ published so the client can run the same countdown.
 
 ## Why core
 
-`GameServer.Economy` already models balances, atomic spends and a ledger, and
+`Gamend.Economy` already models balances, atomic spends and a ledger, and
 its own moduledoc names `"energy"` as an example currency — but a wallet only
 ever changes when something writes to it. Every free-to-play game then bolts a
 regenerating resource on the side.
@@ -27,7 +27,7 @@ free-roll counters are all the same three numbers — **amount, interval, cap**.
 Currencies are free-form strings today (`wallets.currency`), which stays true —
 a game can keep writing `"gold"` with no declaration. Regen needs configuration,
 so it rides the existing plugin-declaration mechanism
-(`GameServer.Hooks.Declarations`, alongside `notification_types/0`):
+(`Gamend.Hooks.Declarations`, alongside `notification_types/0`):
 
 ```elixir
 def currencies do

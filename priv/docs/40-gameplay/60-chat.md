@@ -70,36 +70,36 @@ Notifications use upsert semantics — multiple messages from the same sender up
 The Chat context module provides functions for server-side chat operations:
 
 ```text
- # Send a message (validates access, runs hook pipeline, broadcasts, notifies) GameServer.Chat.send_message(%{user: user}, %{ "chat_type" => "lobby", "chat_ref_id" => lobby_id, "content" => "Hello!", "metadata" => %{"color" => "blue
+ # Send a message (validates access, runs hook pipeline, broadcasts, notifies) Gamend.Chat.send_message(%{user: user}, %{ "chat_type" => "lobby", "chat_ref_id" => lobby_id, "content" => "Hello!", "metadata" => %{"color" => "blue
 })
 
 # List messages (paginated, cached with 60s TTL)
-GameServer.Chat.list_messages("lobby", lobby_id, page: 1, page_size: 50)
+Gamend.Chat.list_messages("lobby", lobby_id, page: 1, page_size: 50)
 
 # List friend messages (bidirectional)
-GameServer.Chat.list_friend_messages(user_a_id, user_b_id, page: 1)
+Gamend.Chat.list_friend_messages(user_a_id, user_b_id, page: 1)
 
 # Get a single message
-GameServer.Chat.get_message(message_id)
+Gamend.Chat.get_message(message_id)
 
 # Update your own message (ownership enforced)
-GameServer.Chat.update_message(user_id, message_id, %{"content" => "edited"})
+Gamend.Chat.update_message(user_id, message_id, %{"content" => "edited"})
 
 # Delete your own message (ownership enforced)
-GameServer.Chat.delete_own_message(user_id, message_id)
+Gamend.Chat.delete_own_message(user_id, message_id)
 
 # Mark messages as read (upsert cursor)
-GameServer.Chat.mark_read(user_id, "lobby", lobby_id, last_message_id)
+Gamend.Chat.mark_read(user_id, "lobby", lobby_id, last_message_id)
 
 # Count unread messages
-GameServer.Chat.count_unread(user_id, "lobby", lobby_id)
+Gamend.Chat.count_unread(user_id, "lobby", lobby_id)
 
 # Count unread friend DMs
-GameServer.Chat.count_unread_friend(user_id, friend_id)
+Gamend.Chat.count_unread_friend(user_id, friend_id)
 
 # Batch unread counts for all friends/groups
-GameServer.Chat.count_unread_friends_batch(user_id, friend_ids)
-GameServer.Chat.count_unread_groups_batch(user_id, group_ids)
+Gamend.Chat.count_unread_friends_batch(user_id, friend_ids)
+Gamend.Chat.count_unread_groups_batch(user_id, group_ids)
 ```
 
 ## Hook Pipeline (Moderation)
@@ -107,7 +107,7 @@ GameServer.Chat.count_unread_groups_batch(user_id, group_ids)
 Chat messages pass through the hook pipeline before being persisted. Use the before_chat_message hook to filter, transform, or reject messages — ideal for profanity filters, rate limiting, or content moderation.
 
 ```elixir
-# In your hooks module (implements GameServer.Hooks behaviour)
+# In your hooks module (implements Gamend.Hooks behaviour)
 @impl true
 def before_chat_message(user, attrs) do
   content = attrs["content"] || ""
@@ -149,5 +149,5 @@ Message listings are cached using Nebulex with version-based invalidation. When 
 ## Reference
 
 - **HTTP API:** [/api/docs](/api/docs) - every endpoint, parameter and response, generated from the spec.
-- **Elixir API:** [`GameServer.Chat`](https://appsinacup.com/game_server/GameServer.Chat.html) - the functions a plugin calls, with their
+- **Elixir API:** [`Gamend.Chat`](https://appsinacup.com/gamend/Gamend.Chat.html) - the functions a plugin calls, with their
   signatures and docs.

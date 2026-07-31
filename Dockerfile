@@ -33,8 +33,8 @@ ENV GAMEND_CONTENT_PLUGINS_DIR=${GAMEND_CONTENT_PLUGINS_DIR}
 COPY mix.exs mix.lock ./
 
 # Umbrella apps: include their mix.exs files so deps can be resolved in a cached layer
-COPY apps/game_server_web/mix.exs apps/game_server_web/mix.exs
-COPY apps/game_server_core/mix.exs apps/game_server_core/mix.exs
+COPY apps/gamend_web/mix.exs apps/gamend_web/mix.exs
+COPY apps/gamend_core/mix.exs apps/gamend_core/mix.exs
 
 # Install dependencies
 RUN mix deps.get
@@ -77,7 +77,7 @@ RUN mix assets.deploy
 # The cost of declaring it here is that the compiled OTP `vsn` keeps mix.exs's
 # default. That is only a fallback: the reported version comes from the
 # `content.app_version` setting, which this ENV supplies at runtime and which
-# takes precedence (see GameServerWeb.ApiSpec.api_version/0).
+# takes precedence (see GamendWeb.ApiSpec.api_version/0).
 ARG GAMEND_CONTENT_APP_VERSION=1.0.0
 ENV GAMEND_CONTENT_APP_VERSION=${GAMEND_CONTENT_APP_VERSION}
 RUN echo -n "${GAMEND_CONTENT_APP_VERSION}" > /app/VERSION
@@ -86,4 +86,4 @@ RUN echo -n "${GAMEND_CONTENT_APP_VERSION}" > /app/VERSION
 EXPOSE 4000 443
 
 # Default command - create DB (if needed), run migrations, and start server
-CMD ["sh", "-c", "mix ecto.create --quiet -r GameServer.Repo 2>/dev/null; mix db.migrate && mix phx.server"]
+CMD ["sh", "-c", "mix ecto.create --quiet -r Gamend.Repo 2>/dev/null; mix db.migrate && mix phx.server"]

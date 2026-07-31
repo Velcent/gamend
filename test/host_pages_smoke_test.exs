@@ -1,4 +1,4 @@
-defmodule GameServerHost.PagesSmokeTest do
+defmodule GamendHost.PagesSmokeTest do
   @moduledoc """
   Every public page the host serves must at least render.
 
@@ -13,7 +13,7 @@ defmodule GameServerHost.PagesSmokeTest do
 
   import Phoenix.ConnTest
 
-  @endpoint GameServerWeb.Endpoint
+  @endpoint GamendWeb.Endpoint
 
   @pages [
     "/",
@@ -47,8 +47,8 @@ defmodule GameServerHost.PagesSmokeTest do
   end
 
   test "a post does not open by repeating its own lede" do
-    for post <- GameServer.Content.list_blog_posts(),
-        html = GameServer.Content.blog_post_html(post.slug),
+    for post <- Gamend.Content.list_blog_posts(),
+        html = Gamend.Content.blog_post_html(post.slug),
         is_binary(html) and is_binary(post.excerpt) and post.excerpt != "" do
       # The show page renders the excerpt above the body already.
       first_paragraph =

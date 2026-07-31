@@ -56,7 +56,7 @@ Spec deleted; the code, its moduledocs and the CHANGELOG are the record.
 | Economy / inventory | currencies, atomic wallet, idempotent ledger |
 | Quests / progression | one event-driven engine; achievements folded in |
 | Push (server) | `push_tokens` + fan-out on the Oban `push` queue, FCM + APNs |
-| Ready checks | `GameServer.ReadyChecks` |
+| Ready checks | `Gamend.ReadyChecks` |
 | Lobby state | server-owned lifecycle column with legal transitions |
 | i18n | one theme config plus a `theme` PO domain; content translated at render |
 | Locking on SQLite | `Lock.serialize/3` per-key on both adapters, via a `:global` mutex |
@@ -68,7 +68,7 @@ removed, and the reason is the point.
 
 - **Lobby session** (one writer process per lobby). Its "why core" premise was
   false: plugins are OTP applications and supervise their own trees —
-  `gamend_polyglot` already does exactly this with `BoatGameServer`.
+  `gamend_polyglot` already does exactly this with `BoatGamend`.
   `Lock.serialize/3` covers the lost-update problem it opened with. Before
   reviving: check that a plugin genuinely *cannot* do it, and that more than one
   game has written the duplicate.
@@ -80,7 +80,7 @@ removed, and the reason is the point.
   document* polyglot never implemented rather than from code it had already
   written — that was the tell.
 - **Disconnect grace** (`after_user_absent/1` on a durable timer). Half shipped:
-  the abandoned-party sweep in `GameServer.Retention` is the part that mattered.
+  the abandoned-party sweep in `Gamend.Retention` is the part that mattered.
   The grace timer was removed — it generalised "polyglot delays a party
   disband" into "games need a delayed presence signal", but the delay belonged
   to the *disband*. The one candidate game pauses on disconnect and wants that

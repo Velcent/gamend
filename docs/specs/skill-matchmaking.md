@@ -1,7 +1,7 @@
 # Skill matchmaking — rating + widening bands + hook override
 
 Design spec for the Phase 2 **Skill matchmaking** item in
-[ROADMAP.md](../../ROADMAP.md). Extends the existing `GameServer.Matchmaking`
+[ROADMAP.md](../../ROADMAP.md). Extends the existing `Gamend.Matchmaking`
 (matcher) — it does **not** replace it.
 
 Goal: match players of **similar skill**, while **widening** the acceptable
@@ -10,7 +10,7 @@ whole thing overridable by a game that wants its own logic.
 
 ## Why (matching today is skill-blind)
 
-`GameServer.Matchmaking` is ticket-based: `join/4` writes a ticket with a
+`Gamend.Matchmaking` is ticket-based: `join/4` writes a ticket with a
 `match_params` map, the periodic `Matchmaking.Worker` sweeps queued tickets that
 share **identical** `match_params`, and the pure `Matchmaking.Matcher.form_matches/2`
 packs whole party-groups FIFO until a bucket hits `min/max_players` or the oldest
@@ -39,7 +39,7 @@ still fully replaceable.
   `rating` (integer, e.g. Glicko-2 μ scaled), `deviation` (RD — uncertainty),
   `games_played`, `updated_at`. `unique_index([:user_id, :mode])`;
   `index([:mode, :rating])` for distribution/admin queries.
-- **Algorithm** lives in `GameServer.Matchmaking.Rating` (default **Glicko-2** —
+- **Algorithm** lives in `Gamend.Matchmaking.Rating` (default **Glicko-2** —
   its rating *deviation* naturally seeds the starting band width and grows with
   inactivity, which Elo can't express). A new/unrated player starts at a
   configured default rating with a high deviation. The module is small and
@@ -79,7 +79,7 @@ Matchmaking.record_result(match_id, %{winners: [...], losers: [...]}, opts)
 ```
 
 - Updates each participant's `player_ratings` row via `Rating.update/…` inside a
-  `GameServer.Lock.serialize(:rating, user_id_or_mode, …)` (read-modify-write —
+  `Gamend.Lock.serialize(:rating, user_id_or_mode, …)` (read-modify-write —
   next free advisory-lock namespace after `matchmaking_sweep: 8`).
 - The sweep itself already serializes cluster-wide under `:matchmaking_sweep`, so
   the *matching* side needs no new lock; only result-recording does.
@@ -100,7 +100,7 @@ Matchmaking.record_result(match_id, %{winners: [...], losers: [...]}, opts)
 ## Limits / config
 
 `mm_base_band`, `mm_band_growth_per_sec`, `mm_max_band`, `mm_default_rating`,
-`mm_default_deviation` in `GameServer.Limits`/config (auto `LIMIT_*` where they're
+`mm_default_deviation` in `Gamend.Limits`/config (auto `LIMIT_*` where they're
 caps), `@limit_categories`. `skill_matchmaking_enabled` toggle.
 
 ## Web / API

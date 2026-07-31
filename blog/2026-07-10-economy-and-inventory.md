@@ -17,4 +17,4 @@ end
 
 ![](economy/wallets.png)
 
-- [Github](https://github.com/appsinacup/game_server)
+- [Github](https://github.com/appsinacup/gamend)

@@ -15,7 +15,7 @@ import { Trend, Counter, Rate } from 'k6/metrics';
  *
  * Prerequisites:
  *  - Server running with example_hook plugin loaded:
- *      GAME_SERVER_PLUGINS_DIR=modules/plugins_examples ./start.sh
+ *      GAMEND_CONTENT_PLUGINS_DIR=modules/plugins_examples ./start.sh
  *  - Or against deployed instance with the plugin
  *
  * Usage:
@@ -28,7 +28,7 @@ import { Trend, Counter, Rate } from 'k6/metrics';
  *      BASE_URL=http://localhost:4000 VUS=50 DURATION=60s k6 run benchmark.js
  *
  *      # Against production
- *      BASE_URL=https://gamend.appsinacup.com VUS=20 DURATION=30s k6 run benchmark.js
+ *      BASE_URL=https://gamend.org VUS=20 DURATION=30s k6 run benchmark.js
  *
  *      # Single scenario only (e.g. just KV read)
  *      k6 run benchmark.js --scenario rpc_kv_read

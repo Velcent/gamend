@@ -1,0 +1,223 @@
+defmodule GamendWeb.GroupChannel do
+  @moduledoc """
+  Channel for per-group realtime events.
+
+  Topic: "group:<group_id>"
+
+  Only users who are members of the group may join this channel.
+
+  ## Events pushed to clients
+
+  - `"member_joined"` - A user joined the group. Payload: `%{group_id, user_id}`
+  - `"member_left"` - A user left the group. Payload: `%{group_id, user_id}`
+  - `"member_kicked"` - A user was kicked. Payload: `%{group_id, user_id}`
+  - `"member_promoted"` - A user was promoted to admin. Payload: `%{group_id, user_id}`
+  - `"member_demoted"` - A user was demoted to member. Payload: `%{group_id, user_id}`
+  - `"updated"` - Group settings were updated. Payload: group object
+  - `"join_request_approved"` - A join request was approved. Payload: `%{group_id, user_id}`
+  - `"join_request_rejected"` - A join request was rejected. Payload: `%{group_id, user_id}`
+  - `"chat_message_created"` - A new chat message. Payload: chat message object
+  - `"chat_message_updated"` - A chat message was updated. Payload: chat message object
+  - `"chat_message_deleted"` - A chat message was deleted. Payload: `%{id: integer}`
+  - `"member_updated"` - A group member was updated. Payload: user brief object
+  - `"member_online"` - A group member came online. Payload: `%{user_id, is_online: true}`
+  - `"member_offline"` - A group member went offline. Payload: `%{user_id, is_online: false}`
+  """
+
+  use Phoenix.Channel
+
+  import GamendWeb.ChannelPush
+
+  alias Gamend.Accounts
+  alias Gamend.Accounts.Scope
+  alias Gamend.Accounts.User
+  alias Gamend.Chat
+  alias Gamend.Groups
+  alias GamendWeb.ChannelUpdates
+  alias GamendWeb.Serializers
+
+  @impl true
+  def join("group:" <> group_id_str, _payload, socket) do
+    current_scope = Map.get(socket.assigns, :current_scope)
+
+    with {:ok, group_id} <- Ecto.UUID.cast(group_id_str),
+         %Scope{user_id: user_id} <- current_scope,
+         true <- Groups.member?(group_id, user_id) do
+      # Unsubscribe first to avoid duplicate subscriptions on reconnect
+      Groups.unsubscribe_group(group_id)
+      Groups.subscribe_group(group_id)
+      Chat.subscribe_group_chat(group_id)
+
+      GamendWeb.ConnectionTracker.register(:group_channel, %{
+        group_id: group_id,
+        user_id: user_id
+      })
+
+      group = Groups.get_group!(group_id)
+      send(self(), {:after_join, group})
+
+      {:ok, assign(socket, :group_id, group_id)}
+    else
+      _ ->
+        {:error, %{reason: "not_a_member_or_invalid"}}
+    end
+  end
+
+  @impl true
+  def handle_in(_event, _payload, socket),
+    do: {:stop, :normal, {:error, %{error: "unknown_event"}}, socket}
+
+  # ── PubSub → WebSocket ────────────────────────────────────────────────────
+
+  @impl true
+  def handle_info({:after_join, group}, socket) do
+    payload = Serializers.serialize_group(group)
+    push_event(socket, "updated", payload)
+    {:noreply, ChannelUpdates.remember(socket, "updated", :group, payload)}
+  end
+
+  @impl true
+  def handle_info({:group_updated, group}, socket) do
+    payload = Serializers.serialize_group(group)
+    {:noreply, ChannelUpdates.push(socket, "updated", :group, payload)}
+  end
+
+  @impl true
+  def handle_info({:member_joined, group_id, user_id}, socket) do
+    push_event(socket, "member_joined", %{
+      group_id: group_id,
+      user_id: user_id,
+      display_name: Serializers.display_name(user_id)
+    })
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info({:member_left, group_id, user_id}, socket) do
+    push_event(socket, "member_left", %{
+      group_id: group_id,
+      user_id: user_id,
+      display_name: Serializers.display_name(user_id)
+    })
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info({:member_kicked, group_id, user_id}, socket) do
+    push_event(socket, "member_kicked", %{
+      group_id: group_id,
+      user_id: user_id,
+      display_name: Serializers.display_name(user_id)
+    })
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info({:member_promoted, group_id, user_id}, socket) do
+    push_event(socket, "member_promoted", %{
+      group_id: group_id,
+      user_id: user_id,
+      display_name: Serializers.display_name(user_id)
+    })
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info({:member_demoted, group_id, user_id}, socket) do
+    push_event(socket, "member_demoted", %{
+      group_id: group_id,
+      user_id: user_id,
+      display_name: Serializers.display_name(user_id)
+    })
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info({:join_request_approved, group_id, user_id}, socket) do
+    push_event(socket, "join_request_approved", %{
+      group_id: group_id,
+      user_id: user_id,
+      display_name: Serializers.display_name(user_id)
+    })
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info({:join_request_rejected, group_id, user_id}, socket) do
+    push_event(socket, "join_request_rejected", %{
+      group_id: group_id,
+      user_id: user_id,
+      display_name: Serializers.display_name(user_id)
+    })
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info({:chat_message_created, message}, socket) do
+    push_event(socket, "chat_message_created", Serializers.serialize_chat_message(message))
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info({:chat_message_updated, message}, socket) do
+    push_event(socket, "chat_message_updated", Serializers.serialize_chat_message(message))
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info({:chat_message_deleted, message}, socket) do
+    push_event(socket, "chat_message_deleted", %{id: message.id})
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info({:member_updated, user_id}, socket) do
+    user = Accounts.get_user(user_id)
+
+    if user do
+      payload = User.serialize_brief(user) |> Map.put(:user_id, user_id)
+      {:noreply, ChannelUpdates.push(socket, "member_updated", user_id, payload)}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  @impl true
+  def handle_info({:member_online, user_id}, socket) do
+    push_event(socket, "member_online", %{user_id: user_id, is_online: true})
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info({:member_offline, user_id}, socket) do
+    push_event(socket, "member_offline", %{user_id: user_id, is_online: false})
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info({:channel_updates_flush, _}, socket),
+    do: {:noreply, ChannelUpdates.flush(socket)}
+
+  @impl true
+  def handle_info(_msg, socket), do: {:noreply, socket}
+
+  @impl true
+  def terminate(_reason, socket) do
+    case socket.assigns do
+      %{group_id: group_id} when is_binary(group_id) ->
+        Groups.unsubscribe_group(group_id)
+        Chat.unsubscribe_group_chat(group_id)
+        :ok
+
+      _ ->
+        :ok
+    end
+  end
+end

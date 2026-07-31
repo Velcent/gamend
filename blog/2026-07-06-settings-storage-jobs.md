@@ -28,5 +28,5 @@ Background work — push fan-out, mailers, webhooks, pruning — runs on Oban, w
 
 ![](ops/oban.png)
 
-- [Settings reference](https://gamend.appsinacup.com/docs/setup)
-- [Github](https://github.com/appsinacup/game_server)
+- [Settings reference](https://gamend.org/docs/setup)
+- [Github](https://github.com/appsinacup/gamend)

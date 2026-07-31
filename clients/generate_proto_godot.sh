@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Thin wrapper kept for muscle memory: the real implementation is the shared
-# `mix host.proto.gen` task in game_server_core, which downstream games can run
+# `mix host.proto.gen` task in gamend_core, which downstream games can run
 # too (this script is not shipped with the package).
 #
 # Requires GODOT_BIN and GODOBUF_DIR (see the task's docs).

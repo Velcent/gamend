@@ -1,4 +1,4 @@
-## GamendWebRTC — Godot WebRTC DataChannel client for game_server.
+## GamendWebRTC — Godot WebRTC DataChannel client for gamend.
 ##
 ## Uses an existing PhoenixChannel (UserChannel) for SDP/ICE signaling.
 ## Once connected, named DataChannels carry game data alongside the WebSocket.

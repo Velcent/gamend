@@ -3,7 +3,7 @@ const { default: open } = require('open');
 const { Socket: PhoenixSocket } = require('phoenix');
 const { RTCPeerConnection, RTCSessionDescription, RTCIceCandidate } = require('node-datachannel/polyfill');
 const basePath = 'http://localhost:4000';
-//const basePath = 'https://gamend.appsinacup.com';
+//const basePath = 'https://gamend.org';
 async function testSDK() {
   try {
     console.log('Testing SDK health check...');

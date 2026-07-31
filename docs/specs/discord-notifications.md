@@ -28,8 +28,8 @@ delivery adapter under it.
 One settings provider; every env name derives from the declaration:
 
 ```elixir
-defmodule GameServer.Discord do
-  use GameServer.Settings.Provider, app: :game_server_core, group: :discord
+defmodule Gamend.Discord do
+  use Gamend.Settings.Provider, app: :gamend_core, group: :discord
 
   setting :webhook_url, :string, secret: true,
     doc: "Channel webhook URL. Unset leaves the whole feature inert."
@@ -42,14 +42,14 @@ end
 → `GAMEND_DISCORD_WEBHOOK_URL` (masked everywhere it is displayed),
 `GAMEND_DISCORD_USERNAME`, `GAMEND_DISCORD_EVENTS`, `GAMEND_DISCORD_MIN_LEVEL`.
 
-This is also the shape [issue #29](https://github.com/appsinacup/game_server/issues/29)
+This is also the shape [issue #29](https://github.com/appsinacup/gamend/issues/29)
 asked for, and the settings system that shipped in July 2026 already delivers
 it: the URL is `secret: true` and belongs in the environment, while the event
 list, username and level are ordinary configuration a host can set in
 `config/` and never touch an env var —
 
 ```elixir
-config :game_server_core, GameServer.Discord, events: ["payment_succeeded", "plugin_crashed"]
+config :gamend_core, Gamend.Discord, events: ["payment_succeeded", "plugin_crashed"]
 ```
 
 ## What core sends
@@ -149,7 +149,7 @@ building a message that would be dropped.
 
 ## Definition of done (CONTRIBUTING)
 
-- [ ] `GameServer.Discord` + `Discord.Worker` on the `notifications` queue; no
+- [ ] `Gamend.Discord` + `Discord.Worker` on the `notifications` queue; no
       new table, no new queue.
 - [ ] Inert with `GAMEND_DISCORD_WEBHOOK_URL` unset — no jobs enqueued, no
       warnings.
@@ -163,7 +163,7 @@ building a message that would be dropped.
       `configured?/0` exposed.
 - [ ] Admin card with status, last error, 24 h counts and a working test-send;
       API parity; `admin_pages_render_test`.
-- [ ] Settings declared with `GameServer.Settings.Provider` (group `:discord`,
+- [ ] Settings declared with `Gamend.Settings.Provider` (group `:discord`,
       URL `secret: true`), rendered on the admin Settings page; `.env.example`
       regenerated with `mix gamend.settings.env_example`; docs page section;
       `api_spec.ex`; CHANGELOG; i18n.

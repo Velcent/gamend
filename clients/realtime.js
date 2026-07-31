@@ -1,12 +1,12 @@
 /**
- * GameRealtime — Phoenix WebSocket client for game_server.
+ * GameRealtime — Phoenix WebSocket client for gamend.
  *
- * Wraps Phoenix.Socket to provide helpers for common game_server channel topics.
+ * Wraps Phoenix.Socket to provide helpers for common gamend channel topics.
  * The `phoenix` npm package is included as a dependency.
  *
  * Usage (browser / Node.js with bundler):
  *
- *   import { GameRealtime } from '@ughuuu/game_server'
+ *   import { GameRealtime } from '@ughuuu/gamend'
  *
  *   const realtime = new GameRealtime('https://your-server.com', accessToken)
  *
@@ -21,7 +21,7 @@
  *
  *   realtime.disconnect()
  *
- * Dependency: `phoenix` (bundled with @ughuuu/game_server)
+ * Dependency: `phoenix` (bundled with @ughuuu/gamend)
  */
 
 import { Socket } from 'phoenix'

@@ -1,0 +1,81 @@
+defmodule GamendWeb.AdminLive.IndexTest do
+  use GamendWeb.ConnCase, async: true
+  import Phoenix.LiveViewTest
+  alias Gamend.Accounts.User
+  alias Gamend.AccountsFixtures
+  alias Gamend.KV
+  alias Gamend.Repo
+
+  test "admin dashboard shows lobbies count in the quick links", %{conn: conn} do
+    admin = AccountsFixtures.user_fixture()
+
+    {:ok, admin} =
+      admin
+      |> User.admin_changeset(%{"is_admin" => true})
+      |> Repo.update()
+
+    # create two lobbies so count will be 2
+    Gamend.Lobbies.create_lobby(%{title: "dash-1", hostless: true})
+    Gamend.Lobbies.create_lobby(%{title: "dash-2", hostless: true})
+
+    {:ok, _view, html} = conn |> log_in_user(admin) |> live(~p"/admin")
+
+    assert html =~ "Lobbies (2)"
+  end
+
+  test "admin overview shows user/provider and leaderboard stats", %{conn: conn} do
+    admin = AccountsFixtures.user_fixture()
+
+    {:ok, admin} =
+      admin
+      |> User.admin_changeset(%{"is_admin" => true})
+      |> Repo.update()
+
+    # create users with providers and passwords
+    u1 = AccountsFixtures.user_fixture()
+    u2 = AccountsFixtures.user_fixture()
+
+    Repo.update!(Ecto.Changeset.change(u1, %{google_id: "g-1"}))
+    Repo.update!(Ecto.Changeset.change(u2, %{discord_id: "d-1"}))
+
+    # give u2 a password
+    AccountsFixtures.set_password(u2)
+
+    # create leaderboard and submit two scores
+    {:ok, lb} =
+      Gamend.Leaderboards.create_leaderboard(%{
+        slug: "admin_stats",
+        title: "Admin Stats",
+        sort_order: :desc,
+        operator: :incr
+      })
+
+    {:ok, _} = Gamend.Leaderboards.submit_score(lb.id, u1.id, 10)
+    {:ok, _} = Gamend.Leaderboards.submit_score(lb.id, u2.id, 20)
+
+    {:ok, _view, html} = conn |> log_in_user(admin) |> live(~p"/admin")
+
+    assert html =~ "Users"
+    assert html =~ "Google: 1"
+    assert html =~ "Discord: 1"
+    assert html =~ "With email: 1"
+    assert html =~ "Leaderboards"
+    assert html =~ "Scores total: 2"
+  end
+
+  test "admin dashboard shows kv count in the quick links", %{conn: conn} do
+    admin = AccountsFixtures.user_fixture()
+
+    {:ok, admin} =
+      admin
+      |> User.admin_changeset(%{"is_admin" => true})
+      |> Repo.update()
+
+    {:ok, _} = KV.put("dash-kv-1", %{v: 1}, %{"m" => "a"})
+    {:ok, _} = KV.put("dash-kv-2", %{v: 2}, %{"m" => "b"})
+
+    {:ok, _view, html} = conn |> log_in_user(admin) |> live(~p"/admin")
+
+    assert html =~ "KV (2)"
+  end
+end

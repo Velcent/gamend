@@ -34,14 +34,14 @@
 @import "tailwindcss" source(none);
 @source "../css";
 /* Monorepo layout (apps/): */
-@source "../../apps/game_server_web/assets/js";
-@source "../../apps/game_server_web/lib";
+@source "../../apps/gamend_web/assets/js";
+@source "../../apps/gamend_web/lib";
 /* Starter/fork layout (deps/): Tailwind v4 silently skips paths that don't exist,
    so both sets are safe to keep — only the one that resolves will be scanned. */
-@source "../../deps/game_server_web/assets/js";
-@source "../../deps/game_server_web/lib";
-@source "../../deps/game_server_web/apps/game_server_web/assets/js";
-@source "../../deps/game_server_web/apps/game_server_web/lib";
+@source "../../deps/gamend_web/assets/js";
+@source "../../deps/gamend_web/lib";
+@source "../../deps/gamend_web/apps/gamend_web/assets/js";
+@source "../../deps/gamend_web/apps/gamend_web/lib";
 @source "../../lib";
 /* Guides name their own heroicon in front matter, so the class never appears
    in Elixir or JS - without this the icons generate no CSS and render blank. */
@@ -66,7 +66,7 @@
 /* Navbar auto-hide toggle button styling is handled in app.js NavbarAutohide hook */
 
 /* Stable host-side wrappers in assets/vendor resolve shared Tailwind plugins
-   from either apps/game_server_web or deps/game_server_web. */
+   from either apps/gamend_web or deps/gamend_web. */
 @plugin "../vendor/heroicons";
 @plugin "../vendor/flag-icons";
 

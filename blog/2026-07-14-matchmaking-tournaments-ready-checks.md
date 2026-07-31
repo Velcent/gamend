@@ -23,4 +23,4 @@ Stages:
 
 ![](matchmaking/tournaments.png)
 
-- [Github](https://github.com/appsinacup/game_server)
+- [Github](https://github.com/appsinacup/gamend)

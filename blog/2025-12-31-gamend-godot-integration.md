@@ -5,7 +5,7 @@ Gamend now has a module that connects to Godot so it's possible to write server 
 
 ```text
   +--------------------+
-  | GameServer/Gamend  |
+  | Gamend/Gamend  |
   +--------------------+
             |
             | calls hooks (WebSocket)

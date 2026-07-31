@@ -1,4 +1,4 @@
-// E2E: JS client in protobuf mode against the live game_server.
+// E2E: JS client in protobuf mode against the live gamend.
 // 1. GameRealtime format=protobuf: join user channel, decoded "updated" event.
 // 2. GameWebRTC protocol=protobuf: callHook round-trip with request ids.
 import { readFileSync } from 'fs'

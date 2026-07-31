@@ -1,5 +1,5 @@
 /**
- * GameWebRTC — Browser WebRTC DataChannel client for game_server.
+ * GameWebRTC — Browser WebRTC DataChannel client for gamend.
  *
  * Uses an existing Phoenix channel (e.g. from GameRealtime.joinUserChannel)
  * for SDP/ICE signaling. Once connected, named DataChannels carry game data
@@ -10,7 +10,7 @@
  *
  * Usage:
  *
- *   import { GameRealtime, GameWebRTC } from '@ughuuu/game_server'
+ *   import { GameRealtime, GameWebRTC } from '@ughuuu/gamend'
  *
  *   const realtime = new GameRealtime('https://your-server.com', token)
  *   const userChannel = realtime.joinUserChannel(userId)

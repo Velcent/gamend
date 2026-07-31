@@ -54,7 +54,7 @@ add `name` to a schema; it says nothing the three above don't say better.
 should never have to open the docs to learn whether `1000` is a second or a
 second and a half.
 
-Timestamps are `inserted_at`/`updated_at` (from `GameServer.Schema`), UTC,
+Timestamps are `inserted_at`/`updated_at` (from `Gamend.Schema`), UTC,
 serialized ISO 8601.
 
 ## Lifecycle and enums
@@ -91,13 +91,13 @@ serialized.
 
 **[R2]** A schema with nullable string/map fields must not use
 `@derive Jason.Encoder` — that emits raw values, bypassing every serializer.
-Encode through `GameServer.SchemaJSON`, which reads each field's Ecto type and
+Encode through `Gamend.SchemaJSON`, which reads each field's Ecto type and
 coalesces:
 
 ```elixir
 defimpl Jason.Encoder, for: MySchema do
   def encode(struct, opts) do
-    GameServer.SchemaJSON.encode(struct, [:id, :title, :icon_url], opts)
+    Gamend.SchemaJSON.encode(struct, [:id, :title, :icon_url], opts)
   end
 end
 ```
@@ -115,7 +115,7 @@ Reads return `data`, plus `meta` when paginated:
                          "total_count": 130, "total_pages": 6, "has_more": true}}
 ```
 
-All six meta keys, always, via `GameServerWeb.Pagination.meta/4`. Mutations
+All six meta keys, always, via `GamendWeb.Pagination.meta/4`. Mutations
 return `data` with the affected resource, or `{"ok": true}` when there is
 nothing to return. Errors return `{"error": "snake_case_reason"}` with a
 matching HTTP status.
@@ -137,7 +137,7 @@ verb segment on the member: `/groups/:id/join`.
 
 Two steps, never bytes through the app server:
 `POST .../icon/upload_url` returns a presigned ticket, the client PUTs to
-storage, `POST .../icon` confirms the key. `GameServerWeb.Uploads` owns the
+storage, `POST .../icon` confirms the key. `GamendWeb.Uploads` owns the
 mechanism and confines a client-supplied key to its own entity's prefix.
 
 ## Running the checks
@@ -147,13 +147,13 @@ mix gamend.api.lint          # report violations, exit 1 if any
 mix gamend.api.lint --list   # the rules
 ```
 
-Rules live in `GameServer.ApiConventions`. Adding a rule means fixing every
+Rules live in `Gamend.ApiConventions`. Adding a rule means fixing every
 existing violation in the same change — the linter has no baseline file and no
 suppression comments, deliberately: a rule with exceptions is a rule nobody
 trusts.
 
-The task ships with `game_server_core`, so **host repos run the same check**:
+The task ships with `gamend_core`, so **host repos run the same check**:
 polyglot and the starter call `gamend.api.lint` from their own precommits. The
 scan roots are discovered (the host's `lib/` and `modules/*/lib`, plus core/web
 whether as umbrella apps or deps), and R9 validates docs against whichever
-router the host compiled (`GameServerHost.Router` first).
+router the host compiled (`GamendHost.Router` first).

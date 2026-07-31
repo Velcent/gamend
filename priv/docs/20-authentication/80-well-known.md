@@ -9,8 +9,8 @@ icon: hero-link
 Place them under the web app's static folder so they are served at the web root:
 
 ```text
-apps/game_server_web/priv/static/.well-known/assetlinks.json
-apps/game_server_web/priv/static/.well-known/apple-app-site-association
+apps/gamend_web/priv/static/.well-known/assetlinks.json
+apps/gamend_web/priv/static/.well-known/apple-app-site-association
 ```
 
 Example files are included in the repo with a .example suffix.

@@ -1,22 +1,22 @@
-defmodule GameServerHost.ThemeTranslationTest do
+defmodule GamendHost.ThemeTranslationTest do
   @moduledoc """
   The end-to-end guarantee behind the one-config-file design: the site renders
   in the visitor's language without a second copy of the theme.
 
-  This lives in the host suite rather than in `game_server_web` because the
-  `theme` gettext domain is the host's — `apps/game_server_web` is a standalone
-  library and cannot load `GameServerHost.Gettext`, so its tests can only prove
+  This lives in the host suite rather than in `gamend_web` because the
+  `theme` gettext domain is the host's — `apps/gamend_web` is a standalone
+  library and cannot load `GamendHost.Gettext`, so its tests can only prove
   that the locale is passed through.
   """
 
   use ExUnit.Case, async: false
 
-  alias GameServer.Theme.JSONConfig
+  alias Gamend.Theme.JSONConfig
 
   setup do
-    previous = Application.get_env(:game_server_core, GameServer.ContentSettings)
+    previous = Application.get_env(:gamend_core, Gamend.ContentSettings)
 
-    Application.put_env(:game_server_core, GameServer.ContentSettings,
+    Application.put_env(:gamend_core, Gamend.ContentSettings,
       theme_config: Path.join(__DIR__, "../theme/config.json") |> Path.expand()
     )
 
@@ -24,8 +24,8 @@ defmodule GameServerHost.ThemeTranslationTest do
 
     on_exit(fn ->
       if previous,
-        do: Application.put_env(:game_server_core, GameServer.ContentSettings, previous),
-        else: Application.delete_env(:game_server_core, GameServer.ContentSettings)
+        do: Application.put_env(:gamend_core, Gamend.ContentSettings, previous),
+        else: Application.delete_env(:gamend_core, Gamend.ContentSettings)
 
       JSONConfig.reload()
     end)
@@ -55,7 +55,7 @@ defmodule GameServerHost.ThemeTranslationTest do
   test "configuration is identical in every locale" do
     raw = JSONConfig.raw_theme()
 
-    for locale <- Gettext.known_locales(GameServerHost.Gettext) do
+    for locale <- Gettext.known_locales(GamendHost.Gettext) do
       theme = JSONConfig.get_theme(locale)
 
       assert Map.get(theme, "theme_color") == Map.get(raw, "theme_color"),
@@ -69,7 +69,7 @@ defmodule GameServerHost.ThemeTranslationTest do
     raw = JSONConfig.raw_theme()
 
     untranslated =
-      for locale <- Gettext.known_locales(GameServerHost.Gettext),
+      for locale <- Gettext.known_locales(GamendHost.Gettext),
           locale != "en",
           nav_label(JSONConfig.get_theme(locale)) == nav_label(raw),
           do: locale

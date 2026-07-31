@@ -47,7 +47,7 @@ GAMEND_PUSH_APNS_ENV=production           # or sandbox
 There is no public send endpoint — pushes originate server-side. Delivery is queued per device with retries; dead tokens the provider reports are disabled automatically. Friend/chat/system notifications already bridge to push on their own: an offline recipient with a registered device gets pinged without any extra code. before_push_send/2 lets a plugin veto or rewrite any push per recipient (opt-out, quiet hours); after_push_sent/3 observes per-device outcomes — see Server-side scripting.
 
 ```elixir
-GameServer.Push.send_to_user(user_id, %{
+Gamend.Push.send_to_user(user_id, %{
   "title" => "Your move!",
   "body" => "Ada played BRIDGE for 24 points.",
   # `data` arrives in the app
@@ -57,7 +57,7 @@ GameServer.Push.send_to_user(user_id, %{
 })
 
 # Broadcasts fan out through the job queue in chunks.
-GameServer.Push.send_to_users(user_ids, %{"title" => "Event starts now!"})
+Gamend.Push.send_to_users(user_ids, %{"title" => "Event starts now!"})
 ```
 
 ### Operations
@@ -67,5 +67,5 @@ The /admin/push page lists registered devices (filter by user, platform, provide
 ## Reference
 
 - **HTTP API:** [/api/docs](/api/docs) - every endpoint, parameter and response, generated from the spec.
-- **Elixir API:** [`GameServer.Push`](https://appsinacup.com/game_server/GameServer.Push.html) - the functions a plugin calls, with their
+- **Elixir API:** [`Gamend.Push`](https://appsinacup.com/gamend/Gamend.Push.html) - the functions a plugin calls, with their
   signatures and docs.

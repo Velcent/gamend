@@ -1,8 +1,10 @@
+# The app name and the database filename predate the Gamend rename. Changing
+# either creates a new Fly app / an empty database instead of reusing the volume.
 app = "game-server-uro"
 primary_region = "ams"
 
 [build]
-  image = "ghcr.io/appsinacup/game_server:latest"
+  image = "ghcr.io/appsinacup/gamend:latest"
 
 [env]
   GAMEND_HTTP_PORT = "4000"
@@ -36,5 +38,5 @@ primary_region = "ams"
   size = "shared-cpu-4x"
 
 [[mounts]]
-  source = "game_server_data"
+  source = "gamend_data"
   destination = "/data"

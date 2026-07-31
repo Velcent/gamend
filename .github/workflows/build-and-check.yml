@@ -133,7 +133,7 @@ jobs:
             docker run -d --name smoke-db --network smoke-net \
               -e POSTGRES_PASSWORD=postgres \
               -e POSTGRES_USER=postgres \
-              -e POSTGRES_DB=game_server_prod \
+              -e POSTGRES_DB=gamend_prod \
               postgres:15
 
             for _ in $(seq 1 30); do
@@ -145,7 +145,7 @@ jobs:
               echo "GAMEND_DB_POSTGRES_HOST=smoke-db"
               echo "GAMEND_DB_POSTGRES_USER=postgres"
               echo "GAMEND_DB_POSTGRES_PASSWORD=postgres"
-              echo "GAMEND_DB_POSTGRES_DB=game_server_prod"
+              echo "GAMEND_DB_POSTGRES_DB=gamend_prod"
             } >> smoke.env
           fi
 
@@ -176,7 +176,7 @@ jobs:
         run: |
           set -euo pipefail
           adapter=$(docker exec gamend-smoke sh -c \
-            'mix run --no-start -e "IO.puts(inspect(GameServer.Repo.__adapter__()))"' | tail -1)
+            'mix run --no-start -e "IO.puts(inspect(Gamend.Repo.__adapter__()))"' | tail -1)
           echo "compiled adapter: $adapter"
           case "${{ matrix.adapter }}" in
             postgres) echo "$adapter" | grep -q "Ecto.Adapters.Postgres" ;;
@@ -221,7 +221,7 @@ jobs:
         run: MIX_ENV=dev mix deps.get
 
       - name: Install web dependencies
-        working-directory: apps/game_server_web
+        working-directory: apps/gamend_web
         run: MIX_ENV=dev mix deps.get
 
       - name: Check code formatting
@@ -234,7 +234,7 @@ jobs:
         run: MIX_ENV=dev mix gamend.api.lint
 
       - name: Credo (strict, web app)
-        working-directory: apps/game_server_web
+        working-directory: apps/gamend_web
         run: MIX_ENV=dev mix credo --strict
 
       - name: Settings docs are in sync with the declarations
@@ -377,7 +377,7 @@ jobs:
         run: MIX_ENV=test mix deps.get
 
       - name: Install web test dependencies
-        working-directory: apps/game_server_web
+        working-directory: apps/gamend_web
         run: MIX_ENV=test mix deps.get
 
       - name: Compile
@@ -396,7 +396,7 @@ jobs:
         env:
           POSTGRES_PASSWORD: postgres
           POSTGRES_USER: postgres
-          POSTGRES_DB: game_server_test
+          POSTGRES_DB: gamend_test
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -410,7 +410,7 @@ jobs:
       POSTGRES_HOST: postgres
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: game_server_test
+      POSTGRES_DB: gamend_test
 
     steps:
       - name: Checkout
@@ -436,7 +436,7 @@ jobs:
         run: MIX_ENV=test mix deps.get
 
       - name: Install web test dependencies
-        working-directory: apps/game_server_web
+        working-directory: apps/gamend_web
         run: MIX_ENV=test mix deps.get
 
       - name: Compile
@@ -547,12 +547,12 @@ jobs:
 
       - name: Prepare database (app boot requires a migrated DB)
         run: |
-          mix ecto.create --quiet -r GameServer.Repo
+          mix ecto.create --quiet -r Gamend.Repo
           mix db.migrate
 
       - name: Regenerate OpenAPI JSON
         run: |
-          mix openapi.spec.json --spec GameServerWeb.ApiSpec --filename clients/javascript/openapi.json --pretty=true
+          mix openapi.spec.json --spec GamendWeb.ApiSpec --filename clients/javascript/openapi.json --pretty=true
 
       - name: Generate JS client artifacts
         run: |
@@ -565,9 +565,9 @@ jobs:
           cp LICENSE clients/javascript/LICENSE
           jq '.license = "MIT"' clients/javascript/package.json > clients/javascript/package.json.tmp && mv clients/javascript/package.json.tmp clients/javascript/package.json
 
-      - name: Update package.json with repository field (https://github.com/appsinacup/game_server.git)
+      - name: Update package.json with repository field (https://github.com/appsinacup/gamend.git)
         run: |
-          REPO_FIELD='"repository": { "type": "git", "url": "git+https://github.com/appsinacup/game_server.git" },'
+          REPO_FIELD='"repository": { "type": "git", "url": "git+https://github.com/appsinacup/gamend.git" },'
           jq ". + { $REPO_FIELD }" clients/javascript/package.json > clients/javascript/package.json.tmp && mv clients/javascript/package.json.tmp clients/javascript/package.json
 
       - name: Add phoenix as a dependency
@@ -632,7 +632,7 @@ jobs:
 
       - name: Prepare database (app boot requires a migrated DB)
         run: |
-          mix ecto.create --quiet -r GameServer.Repo
+          mix ecto.create --quiet -r Gamend.Repo
           mix db.migrate
 
       - name: Run Godot generation script
@@ -706,40 +706,40 @@ jobs:
           mix local.hex --force
           mix local.rebar --force
 
-      - name: Publish game_server_sdk
+      - name: Publish gamend_sdk
         working-directory: sdk
         run: |
           mix deps.get
-          mix hex.publish --yes 2>&1 || echo "⚠️ game_server_sdk: already published or failed"
+          mix hex.publish --yes 2>&1 || echo "⚠️ gamend_sdk: already published or failed"
 
-      - name: Publish game_server_plugin_tools
+      - name: Publish gamend_plugin_tools
         working-directory: sdk_tools
         run: |
           mix deps.get
-          mix hex.publish --yes 2>&1 || echo "⚠️ game_server_plugin_tools: already published or failed"
+          mix hex.publish --yes 2>&1 || echo "⚠️ gamend_plugin_tools: already published or failed"
 
       - name: Rewrite in_umbrella deps and stamp version for core/web
         run: |
-          sed -i "s|{:game_server_core, in_umbrella: true}|{:game_server_core, \"~> 1.0\"}|g" \
-            apps/game_server_web/mix.exs
+          sed -i "s|{:gamend_core, in_umbrella: true}|{:gamend_core, \"~> 1.0\"}|g" \
+            apps/gamend_web/mix.exs
           # Remove heroicons GitHub dep for Hex packaging (Hex only allows Hex deps).
           # Host/consumer apps must provide icon CSS generation for `hero-*` classes.
-          sed -i '/{:heroicons/,/depth: 1}/d' apps/game_server_web/mix.exs
+          sed -i '/{:heroicons/,/depth: 1}/d' apps/gamend_web/mix.exs
           sed -i "s|@version \"[^\"]*\"|@version \"${APP_VERSION}\"|g" \
-            apps/game_server_core/mix.exs \
-            apps/game_server_web/mix.exs
+            apps/gamend_core/mix.exs \
+            apps/gamend_web/mix.exs
 
-      - name: Publish game_server_core
-        working-directory: apps/game_server_core
+      - name: Publish gamend_core
+        working-directory: apps/gamend_core
         run: |
           mix deps.get
-          mix hex.publish --yes 2>&1 || echo "⚠️ game_server_core: already published or failed"
+          mix hex.publish --yes 2>&1 || echo "⚠️ gamend_core: already published or failed"
 
-      - name: Publish game_server_web
-        working-directory: apps/game_server_web
+      - name: Publish gamend_web
+        working-directory: apps/gamend_web
         run: |
           mix deps.get
-          mix hex.publish --yes 2>&1 || echo "⚠️ game_server_web: already published or failed"
+          mix hex.publish --yes 2>&1 || echo "⚠️ gamend_web: already published or failed"
 
   docs:
     runs-on: ubuntu-latest
@@ -780,16 +780,16 @@ jobs:
           mix local.rebar --force
 
       - name: Install dependencies
-        working-directory: apps/game_server_core
+        working-directory: apps/gamend_core
         run: |
           mix deps.get
 
-      # Docs are generated from game_server_core: it holds the public API
-      # (GameServer.* domain modules, hooks). The root :game_server_host is a
+      # Docs are generated from gamend_core: it holds the public API
+      # (Gamend.* domain modules, hooks). The root :gamend_host is a
       # thin wrapper, so building docs there yields an almost-empty reference.
       # Output to the repo-root ./doc so the publish step below finds it.
       - name: Generate docs
-        working-directory: apps/game_server_core
+        working-directory: apps/gamend_core
         env:
           APP_VERSION: ${{ env.APP_VERSION }}
         run: |

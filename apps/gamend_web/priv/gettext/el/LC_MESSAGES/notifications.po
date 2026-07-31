@@ -1,0 +1,38 @@
+#  "msgid"s in this file come from POT (.pot) files.
+# #
+# # Do not add, change, or remove "msgid"s manually here as
+# # they're tied to the ones in the corresponding POT file
+# # (with the same domain).
+# #
+# # Use "mix gettext.extract --merge" or "mix gettext.merge"
+# # to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: el\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: lib/gamend_web/live/notifications_live.ex:287
+#, elixir-autogen, elixir-format
+msgid "Achievement Unlocked: %{name}"
+msgstr "Νέο Επίτευγμα! %{name}"
+
+#: lib/gamend_web/live/notifications_live.ex:281
+#, elixir-autogen, elixir-format
+msgid "New message in party"
+msgstr "Νέο μήνυμα απο παρέα"
+
+#: lib/gamend_web/live/notifications_live.ex:295
+#: lib/gamend_web/live/notifications_live.ex:300
+#, elixir-autogen, elixir-format
+msgid "New messages from %{name}"
+msgstr "Νέα μηνύματα απο %{name}"
+
+#: lib/gamend_web/live/notifications_live.ex:279
+#, elixir-autogen, elixir-format
+msgid "New messages from friends"
+msgstr "Νέα μηνύματα απο φίλους"
+
+#: lib/gamend_web/live/notifications_live.ex:289
+#, elixir-autogen, elixir-format
+msgid "Quest completed: %{name}"
+msgstr "Η αποστολή ολοκληρώθηκε: %{name}"

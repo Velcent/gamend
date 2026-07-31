@@ -17,13 +17,13 @@ The repository is split by responsibility. Treat host as the runtime shell you c
 
 | Project | Owns | Typical changes |
 |---|---|---|
-| game_server_core | Shared domain logic, Ecto schemas, contexts, and upstream migrations | New shared features, shared data model changes, reusable business rules |
-| game_server_web | Shared controllers, LiveViews, channels, components, and shared frontend source | Reusable API/UI behavior that multiple hosts should inherit |
-| game_server_host | The runnable app: router, endpoint boot, supervision tree, env/config, branding, docs, startup scripts, and host-only migrations | Routes you add or remove, deployment policy, assets, host-owned pages, integrations, and data that only your host needs |
+| gamend_core | Shared domain logic, Ecto schemas, contexts, and upstream migrations | New shared features, shared data model changes, reusable business rules |
+| gamend_web | Shared controllers, LiveViews, channels, components, and shared frontend source | Reusable API/UI behavior that multiple hosts should inherit |
+| gamend_host | The runnable app: router, endpoint boot, supervision tree, env/config, branding, docs, startup scripts, and host-only migrations | Routes you add or remove, deployment policy, assets, host-owned pages, integrations, and data that only your host needs |
 
 ## Host-only migrations
 
-Put upstream shared schema changes in game_server_core, but put host-specific tables or columns in priv/repo/migrations at the repository root. The host migration command runs both core and host paths together.
+Put upstream shared schema changes in gamend_core, but put host-specific tables or columns in priv/repo/migrations at the repository root. The host migration command runs both core and host paths together.
 
 ```bash
 mix ecto.gen.migration add_custom_host_table

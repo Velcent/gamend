@@ -55,7 +55,7 @@ tier; once every tier is claimed the final one stands for the chain. On the
 web quests page, clicking the chained card opens the whole chain — earlier
 tiers and locked ones ahead alike (hidden quests stay `???` until earned).
 Plugins can read the same view with
-`GameServer.Quests.chain(user_id, quest_key)`.
+`Gamend.Quests.chain(user_id, quest_key)`.
 
 Quests also carry an optional `icon_url`; when unset, the web UI shows the
 shared default quest icon and the API returns an empty value so game clients
@@ -66,7 +66,7 @@ can apply their own.
 Clients cannot advance their own quests — there is no endpoint for it. Core reports login, chat_message, score_submitted, lobby_joined and match_won; your game reports the rest from hooks:
 
 ```elixir
-GameServer.Quests.report_event(user_id, "enemy_killed", 1, %{"map" => "desert"})
+Gamend.Quests.report_event(user_id, "enemy_killed", 1, %{"map" => "desert"})
 ```
 
 Every active quest with a matching objective advances (an objective's params must all match the event meta). Rewards pay into Economy/Inventory exactly once: auto_claim quests on completion, others on claim.
@@ -87,5 +87,5 @@ Resets need no scheduled job — the current period is derived from the clock, s
 ## Reference
 
 - **HTTP API:** [/api/docs](/api/docs) - every endpoint, parameter and response, generated from the spec.
-- **Elixir API:** [`GameServer.Quests`](https://appsinacup.com/game_server/GameServer.Quests.html) - the functions a plugin calls, with their
+- **Elixir API:** [`Gamend.Quests`](https://appsinacup.com/gamend/Gamend.Quests.html) - the functions a plugin calls, with their
   signatures and docs.

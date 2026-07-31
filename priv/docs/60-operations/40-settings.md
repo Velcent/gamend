@@ -17,14 +17,14 @@ Environment variables are one *input method*. A host can configure the
 ordinary Elixir way instead, and everything ends at `Application` config:
 
 ```elixir
-config :game_server_core, GameServer.Retention, chat_messages_days: 90
+config :gamend_core, Gamend.Retention, chat_messages_days: 90
 ```
 
 To feed the variables below in, a host adds one line to
 `config/runtime.exs`:
 
 ```elixir
-for {app, module, opts} <- GameServer.Settings.from_env() do
+for {app, module, opts} <- Gamend.Settings.from_env() do
   config app, module, opts
 end
 ```
@@ -215,7 +215,7 @@ Live values, and where each one came from, are on the
 | Variable | Type | Default | Notes |
 |---|---|---|---|
 | `GAMEND_MAIL_SMTP_FROM_EMAIL` | string | - |  |
-| `GAMEND_MAIL_SMTP_FROM_NAME` | string | `"Game Server"` |  |
+| `GAMEND_MAIL_SMTP_FROM_NAME` | string | `"Gamend"` |  |
 | `GAMEND_MAIL_SMTP_PASSWORD` | string | - | SMTP password, or the provider's API key. Warns when unset. Secret - never log or commit it. |
 | `GAMEND_MAIL_SMTP_PORT` | integer | `465` |  |
 | `GAMEND_MAIL_SMTP_RELAY` | string | - | SMTP host, e.g. smtp.resend.com. Warns when unset. |

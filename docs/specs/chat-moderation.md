@@ -12,7 +12,7 @@ party leader, group admin).
 
 ## Why (chat exists; moderation doesn't)
 
-`GameServer.Chat` already carries lobby/group/friend/party messages with a
+`Gamend.Chat` already carries lobby/group/friend/party messages with a
 `before_chat_message/2` **pipeline hook** and an `after_chat_message/1` hook, and
 persists to `chat_messages`. What's missing is any way to stop abuse: today a
 plugin *could* hand-roll a filter in `before_chat_message`, but there's no
@@ -47,7 +47,7 @@ write, so they add no contention.
   for dev only. Loaded into an ETS set at boot and kept fresh via PubSub on edit
   — the `IpBans` shape (durable table = source of truth, ETS = hot path, PubSub
   = cluster sync), but owned by a core `Chat.Moderation.Cache` GenServer:
-  IpBans keeps its ETS in the web plug (`GameServerWeb.Plugs.IpBan`), while this
+  IpBans keeps its ETS in the web plug (`GamendWeb.Plugs.IpBan`), while this
   check runs in core, so the cache lives there too.
 - **Bundled default lists (opt-in):** vendor the LDNOOBW lists unmodified under
   `priv/chat_filter/<lang>.txt` (CC-BY-4.0, attribution on the admin page).
@@ -57,7 +57,7 @@ write, so they add no contention.
   sized to fit all bundled lists).
 - **Normalization** before matching: lower-case, collapse repeated chars
   (`heeeello`→`helo`), strip zero-width/diacritics, map common leetspeak
-  (`@→a`, `3→e`, `1→i`). Kept in `GameServer.Chat.Moderation.Normalizer` so the
+  (`@→a`, `3→e`, `1→i`). Kept in `Gamend.Chat.Moderation.Normalizer` so the
   admin "test this phrase" tool and the runtime path share one implementation.
 - **Actions** by severity: `block` rejects (`{:error, :blocked_content}`);
   `mask` replaces the hit with `***` and lets the (masked) message through;
@@ -66,7 +66,7 @@ write, so they add no contention.
   yet, so `flag` only marks the attrs; the report row is inserted after the
   message commits, on the same deferred post-persist path as
   `after_chat_message`.
-- Config caps in `GameServer.Limits`: `max_chat_filter_words`,
+- Config caps in `Gamend.Limits`: `max_chat_filter_words`,
   `max_chat_filter_word_len`.
 
 ## 2. Report queue
@@ -82,7 +82,7 @@ write, so they add no contention.
   this user"; `unique_index([:reporter_id, :message_id])` so a player can't
   spam-report one message.
 - **Endpoint** `POST /chat/messages/:id/report {reason}` — auth'd, rate-limited
-  via `max_chat_reports_per_user_per_day` (`GameServer.Limits`, same rolling-24h
+  via `max_chat_reports_per_user_per_day` (`Gamend.Limits`, same rolling-24h
   pattern as `max_chat_messages_per_day`). Auto-flag from the word filter files a
   report with `reporter_id = nil` (system).
 - **Context:** `Chat.report_message/3`, `Chat.list_reports/2` + `count_reports/1`
@@ -129,13 +129,13 @@ callbacks so plugins can react (auto-escalate, notify moderators, tally strikes)
 - **`after_chat_message_reported(report)`**
 - **`after_user_muted(mute)`**
 
-Each in all six places: `@callback` + `@optional_callbacks` in `GameServer.Hooks`,
+Each in all six places: `@callback` + `@optional_callbacks` in `Gamend.Hooks`,
 `internal_hooks()` (RPC-blocked), no-op in `Hooks.Default`, SDK mirror
 (`@callback`, `@optional_callbacks`, `__using__` default, **and `defoverridable`**),
 Server-scripting docs. Both are fire-and-forget after commit (deferred, never in
 the insert transaction).
 
-## Limits (`GameServer.Limits`, auto `LIMIT_*`, listed in `@limit_categories`)
+## Limits (`Gamend.Limits`, auto `LIMIT_*`, listed in `@limit_categories`)
 
 `max_chat_filter_words`, `max_chat_filter_word_len`, `max_report_reason` (len),
 `max_chat_reports_per_user_per_day`, `max_mute_reason` (len).

@@ -1,0 +1,116 @@
+#  "msgid"s in this file come from POT (.pot) files.
+# #
+# # Do not add, change, or remove "msgid"s manually here as
+# # they're tied to the ones in the corresponding POT file
+# # (with the same domain).
+# #
+# # Use "mix gettext.extract --merge" or "mix gettext.merge"
+# # to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: id\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+msgid "can't be blank"
+msgstr "tidak boleh kosong"
+
+#: lib/gamend_web/i18n/errors_catalog.ex:21
+#, elixir-autogen
+msgid "has already been taken"
+msgstr "sudah digunakan"
+
+msgid "is invalid"
+msgstr "tidak valid"
+
+msgid "must be accepted"
+msgstr "harus diterima"
+
+msgid "has invalid format"
+msgstr "formatnya tidak valid"
+
+msgid "has an invalid entry"
+msgstr "berisi entri yang tidak valid"
+
+msgid "is reserved"
+msgstr "sudah dipesan"
+
+msgid "does not match confirmation"
+msgstr "tidak cocok dengan konfirmasi"
+
+msgid "is still associated with this entry"
+msgstr "masih terkait dengan entri ini"
+
+msgid "are still associated with this entry"
+msgstr "masih terkait dengan entri ini"
+
+msgid "should have %{count} item(s)"
+msgstr "harus memiliki %{count} item"
+
+msgid "should be %{count} character(s)"
+msgstr "harus sepanjang %{count} karakter"
+
+msgid "should be %{count} byte(s)"
+msgstr "harus sebesar %{count} byte"
+
+msgid "should have at least %{count} item(s)"
+msgstr "harus memiliki setidaknya %{count} item"
+
+msgid "should be at least %{count} character(s)"
+msgstr "harus sepanjang setidaknya %{count} karakter"
+
+msgid "should be at least %{count} byte(s)"
+msgstr "harus sebesar setidaknya %{count} byte"
+
+msgid "should have at most %{count} item(s)"
+msgstr "harus memiliki paling banyak %{count} item"
+
+msgid "should be at most %{count} character(s)"
+msgstr "harus sepanjang paling banyak %{count} karakter"
+
+msgid "should be at most %{count} byte(s)"
+msgstr "harus sebesar paling banyak %{count} byte"
+
+msgid "must be less than %{number}"
+msgstr "harus kurang dari %{number}"
+
+msgid "must be greater than %{number}"
+msgstr "harus lebih dari %{number}"
+
+msgid "must be less than or equal to %{number}"
+msgstr "harus kurang dari atau sama dengan %{number}"
+
+msgid "must be greater than or equal to %{number}"
+msgstr "harus lebih dari atau sama dengan %{number}"
+
+msgid "must be equal to %{number}"
+msgstr "harus sama dengan %{number}"
+
+#: lib/gamend_web/i18n/errors_catalog.ex:18
+#, elixir-autogen, elixir-format
+msgid "cannot friend yourself"
+msgstr "tidak bisa berteman dengan diri sendiri"
+
+#: lib/gamend_web/i18n/errors_catalog.ex:19
+#, elixir-autogen, elixir-format
+msgid "did not change"
+msgstr "tidak berubah"
+
+#: lib/gamend_web/i18n/errors_catalog.ex:20
+#, elixir-autogen, elixir-format
+msgid "does not exist"
+msgstr "tidak ada"
+
+#: lib/gamend_web/i18n/errors_catalog.ex:24
+#, elixir-autogen, elixir-format
+msgid "does not match password"
+msgstr "tidak cocok dengan kata sandi"
+
+#: lib/gamend_web/i18n/errors_catalog.ex:22
+#, elixir-autogen, elixir-format
+msgid "must be lowercase alphanumeric with underscores"
+msgstr "harus huruf kecil alfanumerik dengan garis bawah"
+
+#: lib/gamend_web/i18n/errors_catalog.ex:23
+#, elixir-autogen, elixir-format
+msgid "must have the @ sign and no spaces"
+msgstr "harus berisi tanda @ dan tanpa spasi"

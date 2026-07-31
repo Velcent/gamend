@@ -4,7 +4,7 @@
 // (WebSocket `?format=protobuf`, WebRTC DataChannels with
 // `protocol: "protobuf"`). The JSON format remains the default; every
 // message here mirrors the corresponding JSON payload produced by
-// `GameServerWeb.Serializers` with two deliberate transforms:
+// `GamendWeb.Serializers` with two deliberate transforms:
 //
 //   * timestamps are `int64` unix milliseconds (JSON sends ISO 8601 strings)
 //   * arbitrary JSON values (metadata, KV data, hook args) are `bytes`

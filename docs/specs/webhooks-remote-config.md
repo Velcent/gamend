@@ -21,7 +21,7 @@ trust them.
 
 The roadmap lists "reliable webhooks" as a headline justification for the job
 queue: a webhook must survive a restart and shrug off a receiver's transient
-5xx. `GameServer.Async` can't promise that; Oban can. Webhooks turn the server's
+5xx. `Gamend.Async` can't promise that; Oban can. Webhooks turn the server's
 internal hook/event stream into an integration surface a host's own backend can
 subscribe to without polling.
 
@@ -95,7 +95,7 @@ client update** — feature flags, tunables, seasonal toggles, balance numbers.
 
 ## Why (none of the existing config layers fit)
 
-Three config-ish things already exist and none is this: `GameServer.Config` reads
+Three config-ish things already exist and none is this: `Gamend.Config` reads
 plugin **env vars** (server-side, boot-time), `KV` is generic per-user/lobby
 **storage**, and `Theme` is **site** theming. Remote config is the missing one:
 a small, admin-curated, **client-read-only** key/value set delivered over the API

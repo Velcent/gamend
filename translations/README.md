@@ -9,7 +9,7 @@ These files are **not committed** — they are working files for translators.
 
 Both gettext trees are exported into the one CSV: the host's `priv/gettext`
 (which owns `theme` and `content`) and the library's
-`apps/game_server_web/priv/gettext`. A msgid that appears in both is one row,
+`apps/gamend_web/priv/gettext`. A msgid that appears in both is one row,
 and importing writes it back to both.
 
 `theme` is the site copy from `theme/config.json` — refresh it with

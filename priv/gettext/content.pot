@@ -3,7 +3,7 @@
 ##
 ## Titles and descriptions of quests, leaderboards and tournaments. Whatever
 ## created them — a plugin, a seed, or an admin — the stored string is the
-## msgid, and GameServerWeb.ContentText translates it per viewer.
+## msgid, and GamendWeb.ContentText translates it per viewer.
 msgid ""
 msgstr ""
 "Language: en\n"

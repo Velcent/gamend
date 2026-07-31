@@ -1,0 +1,116 @@
+#  "msgid"s in this file come from POT (.pot) files.
+# #
+# # Do not add, change, or remove "msgid"s manually here as
+# # they're tied to the ones in the corresponding POT file
+# # (with the same domain).
+# #
+# # Use "mix gettext.extract --merge" or "mix gettext.merge"
+# # to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: pt_BR\n"
+"Plural-Forms: nplurals=2; plural=(n>1);\n"
+
+msgid "can't be blank"
+msgstr "não pode estar em branco"
+
+#: lib/gamend_web/i18n/errors_catalog.ex:21
+#, elixir-autogen
+msgid "has already been taken"
+msgstr "já está em uso"
+
+msgid "is invalid"
+msgstr "é inválido"
+
+msgid "must be accepted"
+msgstr "deve ser aceito"
+
+msgid "has invalid format"
+msgstr "tem um formato inválido"
+
+msgid "has an invalid entry"
+msgstr "contém uma entrada inválida"
+
+msgid "is reserved"
+msgstr "está reservado"
+
+msgid "does not match confirmation"
+msgstr "não corresponde à confirmação"
+
+msgid "is still associated with this entry"
+msgstr "ainda está associado a esta entrada"
+
+msgid "are still associated with this entry"
+msgstr "ainda estão associados a esta entrada"
+
+msgid "should have %{count} item(s)"
+msgstr "deve ter %{count} item(ns)"
+
+msgid "should be %{count} character(s)"
+msgstr "deve ter %{count} caractere(s)"
+
+msgid "should be %{count} byte(s)"
+msgstr "deve ter %{count} byte(s)"
+
+msgid "should have at least %{count} item(s)"
+msgstr "deve ter pelo menos %{count} item(ns)"
+
+msgid "should be at least %{count} character(s)"
+msgstr "deve ter pelo menos %{count} caractere(s)"
+
+msgid "should be at least %{count} byte(s)"
+msgstr "deve ter pelo menos %{count} byte(s)"
+
+msgid "should have at most %{count} item(s)"
+msgstr "deve ter no máximo %{count} item(ns)"
+
+msgid "should be at most %{count} character(s)"
+msgstr "deve ter no máximo %{count} caractere(s)"
+
+msgid "should be at most %{count} byte(s)"
+msgstr "deve ter no máximo %{count} byte(s)"
+
+msgid "must be less than %{number}"
+msgstr "deve ser menor que %{number}"
+
+msgid "must be greater than %{number}"
+msgstr "deve ser maior que %{number}"
+
+msgid "must be less than or equal to %{number}"
+msgstr "deve ser menor ou igual a %{number}"
+
+msgid "must be greater than or equal to %{number}"
+msgstr "deve ser maior ou igual a %{number}"
+
+msgid "must be equal to %{number}"
+msgstr "deve ser igual a %{number}"
+
+#: lib/gamend_web/i18n/errors_catalog.ex:18
+#, elixir-autogen, elixir-format
+msgid "cannot friend yourself"
+msgstr "você não pode adicionar a si mesmo como amigo"
+
+#: lib/gamend_web/i18n/errors_catalog.ex:19
+#, elixir-autogen, elixir-format
+msgid "did not change"
+msgstr "não foi alterado"
+
+#: lib/gamend_web/i18n/errors_catalog.ex:20
+#, elixir-autogen, elixir-format
+msgid "does not exist"
+msgstr "não existe"
+
+#: lib/gamend_web/i18n/errors_catalog.ex:24
+#, elixir-autogen, elixir-format
+msgid "does not match password"
+msgstr "não corresponde à senha"
+
+#: lib/gamend_web/i18n/errors_catalog.ex:22
+#, elixir-autogen, elixir-format
+msgid "must be lowercase alphanumeric with underscores"
+msgstr "deve ser alfanumérico em minúsculas com underscores"
+
+#: lib/gamend_web/i18n/errors_catalog.ex:23
+#, elixir-autogen, elixir-format
+msgid "must have the @ sign and no spaces"
+msgstr "deve conter o sinal @ e nenhum espaço"

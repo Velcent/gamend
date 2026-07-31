@@ -2,7 +2,7 @@
 
 Turns WebRTC signaling on for every lobby, and tells a star host when to connect.
 
-A signaling room **is** a lobby — same id. `GameServer.Signaling` reads
+A signaling room **is** a lobby — same id. `Gamend.Signaling` reads
 configuration from the lobby's server-owned `webrtc_*` columns, membership from
 presence, and relays over PubSub, all cluster-wide. This plugin only sets policy
 and sends one notification.
@@ -30,11 +30,11 @@ star host is always `lobby.host_id`.
 
 ## Configuration
 
-Through `GameServer.Signaling.configure/2`, the only writer of the `webrtc_*`
+Through `Gamend.Signaling.configure/2`, the only writer of the `webrtc_*`
 columns:
 
 ```elixir
-GameServer.Signaling.configure(lobby, enabled: true, topology: :star)
+Gamend.Signaling.configure(lobby, enabled: true, topology: :star)
 ```
 
 | Option | Default | Meaning |

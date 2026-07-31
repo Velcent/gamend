@@ -22,7 +22,7 @@ import { Trend } from 'k6/metrics';
  *    by default), /api/v1/me will return 401 and the script will re-login next iteration.
  */
 
-const BASE_URL = __ENV.BASE_URL || 'https://gamend.appsinacup.com';
+const BASE_URL = __ENV.BASE_URL || 'https://gamend.org';
 // const BASE_URL = 'http://localhost:4000';
 const TARGET_VUS = Number.parseInt(__ENV.TARGET_VUS || '5000', 10);
 const STAGE_DURATION = __ENV.STAGE_DURATION || '600s';

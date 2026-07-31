@@ -10,9 +10,9 @@ if System.get_env("GAMEND_DB_URL") ||
   # Use PostgreSQL when configured
   database_url =
     System.get_env("GAMEND_DB_URL") ||
-      "ecto://#{System.get_env("GAMEND_DB_POSTGRES_USER")}:#{System.get_env("GAMEND_DB_POSTGRES_PASSWORD")}@#{System.get_env("GAMEND_DB_POSTGRES_HOST")}:#{System.get_env("GAMEND_DB_POSTGRES_PORT", "5432")}/#{System.get_env("GAMEND_DB_POSTGRES_DB", "game_server_test")}"
+      "ecto://#{System.get_env("GAMEND_DB_POSTGRES_USER")}:#{System.get_env("GAMEND_DB_POSTGRES_PASSWORD")}@#{System.get_env("GAMEND_DB_POSTGRES_HOST")}:#{System.get_env("GAMEND_DB_POSTGRES_PORT", "5432")}/#{System.get_env("GAMEND_DB_POSTGRES_DB", "gamend_test")}"
 
-  config :game_server_core, GameServer.Repo,
+  config :gamend_core, Gamend.Repo,
     url: database_url,
     adapter: Ecto.Adapters.Postgres,
     pool: Ecto.Adapters.SQL.Sandbox,
@@ -31,7 +31,7 @@ else
 
   File.mkdir_p!(Path.dirname(database_path))
 
-  config :game_server_core, GameServer.Repo,
+  config :gamend_core, Gamend.Repo,
     database: database_path,
     adapter: Ecto.Adapters.SQLite3,
     # Match production: see the note in config/host_runtime.exs.
@@ -56,13 +56,13 @@ end
 
 # We don't run a server during test. If one is required,
 # you can enable the server option below.
-config :game_server_web, GameServerWeb.Endpoint,
+config :gamend_web, GamendWeb.Endpoint,
   http: [ip: {127, 0, 0, 1}, port: 4002],
   secret_key_base: "dJoNJZBOt08JlBREyPV5xvuOdwgHPORxK9WHp/k3Cs+g0R9ctyheJ8/CMeg/AdI1",
   server: false
 
 # In test we don't send emails
-config :game_server_core, GameServer.Mailer, adapter: Swoosh.Adapters.Test
+config :gamend_core, Gamend.Mailer, adapter: Swoosh.Adapters.Test
 
 # Disable swoosh api client as it is only required for production adapters
 config :swoosh, :api_client, false
@@ -70,26 +70,26 @@ config :swoosh, :api_client, false
 # Print only warnings and errors during test
 config :logger, level: :warning
 
-# Run GameServer.Async side effects inline so assertions observe them without
+# Run Gamend.Async side effects inline so assertions observe them without
 # racing, and so a task can't outlive the test's DB sandbox owner.
-config :game_server_core, async_inline: true
+config :gamend_core, async_inline: true
 
 # The periodic tournament tick has no sandbox connection in tests; leave the
-# ticker supervised but idle. Tests drive GameServer.Tournaments.tick/0 directly.
-config :game_server_core, GameServer.Tournaments.Ticker, enabled: false
+# ticker supervised but idle. Tests drive Gamend.Tournaments.tick/0 directly.
+config :gamend_core, Gamend.Tournaments.Ticker, enabled: false
 
 # Same for the matchmaking sweep: no sandbox connection, and on SQLite it
 # collides with the test's open write transaction ("database is locked").
-# Tests drive GameServer.Matchmaking.Worker.sweep/0 directly.
-config :game_server_core, GameServer.Matchmaking.Worker, enabled: false
+# Tests drive Gamend.Matchmaking.Worker.sweep/0 directly.
+config :gamend_core, Gamend.Matchmaking.Worker, enabled: false
 
 # Disable app-level caching in tests to avoid stale reads across assertions.
 # Still provide the multilevel configuration so the cache can start.
-config :game_server_core, GameServer.Cache,
+config :gamend_core, Gamend.Cache,
   bypass_mode: true,
   inclusion_policy: :inclusive,
   levels: [
-    {GameServer.Cache.L1, []}
+    {Gamend.Cache.L1, []}
   ]
 
 # Initialize plugs at runtime for faster test compilation
@@ -100,30 +100,30 @@ config :phoenix_live_view,
   enable_expensive_runtime_checks: true
 
 # Configure Guardian for testing
-config :game_server_web, GameServerWeb.Auth.Guardian,
-  issuer: "game_server",
+config :gamend_web, GamendWeb.Auth.Guardian,
+  issuer: "gamend",
   secret_key: "dJoNJZBOt08JlBREyPV5xvuOdwgHPORxK9WHp/k3Cs+g0R9ctyheJ8/CMeg/AdI1",
   ttl: {15, :minutes}
 
 # Disable rate limiting in tests
-config :game_server_web, GameServerWeb.Plugs.RateLimiter, enabled: false
+config :gamend_web, GamendWeb.Plugs.RateLimiter, enabled: false
 
 # Background presence sweeping fights with sandbox ownership in tests and can
 # keep logging after the test task itself is done.
-config :game_server_core, GameServer.Accounts.StalePresenceSweeper, enabled: false
+config :gamend_core, Gamend.Accounts.StalePresenceSweeper, enabled: false
 
 # Jobs run inline on demand in tests (no queues/plugins/cron); assert with
 # Oban.Testing helpers and drain explicitly. Keeps the Cron tick from firing
 # against the Sandbox.
-config :game_server_core, Oban, testing: :manual
+config :gamend_core, Oban, testing: :manual
 
-# The declared setting, not just the endpoint's copy: GameServer.Settings
+# The declared setting, not just the endpoint's copy: Gamend.Settings
 # validates `auth.secret_key_base` at boot, and dev should not warn about a
 # secret it demonstrably has.
-config :game_server_core, GameServer.Accounts,
+config :gamend_core, Gamend.Accounts,
   secret_key_base: "dJoNJZBOt08JlBREyPV5xvuOdwgHPORxK9WHp/k3Cs+g0R9ctyheJ8/CMeg/AdI1"
 
 # Uploads land in the system tmp dir, not priv/, so a test run leaves no
 # objects behind in the checkout.
-config :game_server_core, GameServer.Storage.Local,
+config :gamend_core, Gamend.Storage.Local,
   dir: Path.join(System.tmp_dir!(), "gamend_test_storage")

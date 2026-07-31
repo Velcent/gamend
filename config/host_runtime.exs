@@ -10,16 +10,16 @@ import Config
 # (Code.require_file is a no-op when the file was already required.)
 if config_env() == :dev do
   Code.require_file("dotenv.exs", __DIR__)
-  GameServer.Dotenv.load(Path.expand("../.env", __DIR__))
+  Gamend.Dotenv.load(Path.expand("../.env", __DIR__))
 end
 
 # Every runtime derivation — declared settings read from the environment plus
 # the translation into the shapes Phoenix, Ecto, Bandit, Swoosh and Pigeon
-# expect — ships with GameServerWeb.HostRuntime so host repos share one
+# expect — ships with GamendWeb.HostRuntime so host repos share one
 # implementation instead of forking this file. Host-specific runtime config
 # goes below the loop.
 for entry <-
-      GameServerWeb.HostRuntime.config(config_env(), host_root: Path.expand("..", __DIR__)) do
+      GamendWeb.HostRuntime.config(config_env(), host_root: Path.expand("..", __DIR__)) do
   case entry do
     {app, opts} -> config app, opts
     {app, key, value} -> config app, key, value

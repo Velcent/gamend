@@ -41,7 +41,7 @@ Client                           Server (ex_webrtc)
 Configure ICE in the host config (`enabled: false` rejects offers at runtime):
 
 ```text
-config :game_server_web, :webrtc,
+config :gamend_web, :webrtc,
   enabled: true,
   ice_servers: [%{urls: "stun:stun.l.google.com:19302"}]
   # add a TURN entry for restrictive NATs
@@ -103,11 +103,11 @@ record or process. Configuration lives in the lobby's server-owned `webrtc_*`
 columns, membership in presence, relay over PubSub; all cluster-wide, so peers
 on different nodes signal fine.
 
-Configure through `GameServer.Signaling.configure/2`, the only writer of those
+Configure through `Gamend.Signaling.configure/2`, the only writer of those
 server-owned columns; the star host is always `lobby.host_id`:
 
 ```elixir
-GameServer.Signaling.configure(lobby, enabled: true, topology: :star)
+Gamend.Signaling.configure(lobby, enabled: true, topology: :star)
 # options: :enabled (false), :topology (:star | :mesh),
 #          :late_join (true), :reconnect_timeout (30_000 ms)
 ```

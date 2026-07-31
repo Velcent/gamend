@@ -55,18 +55,18 @@ blocked user, regardless of who sent any earlier request.
 
 ```elixir
 # Blacklist a player from server-side code
-GameServer.Friends.block_user(user, other_user_id)
-GameServer.Friends.unblock_user(user, other_user_id)
+Gamend.Friends.block_user(user, other_user_id)
+Gamend.Friends.unblock_user(user, other_user_id)
 
 # Read the blacklist
-GameServer.Friends.list_blocked_users(user_id, page: 1, page_size: 25)
+Gamend.Friends.list_blocked_users(user_id, page: 1, page_size: 25)
 
 # Is this pair blocked, in either direction?
-GameServer.Friends.blocked?(user_a_id, user_b_id)
+Gamend.Friends.blocked?(user_a_id, user_b_id)
 
 # Resolve a whole group at once (one query) — used by the matcher
-GameServer.Friends.blocked_pairs(user_ids)
-GameServer.Friends.any_blocked?(user_id, other_ids)
+Gamend.Friends.blocked_pairs(user_ids)
+Gamend.Friends.any_blocked?(user_id, other_ids)
 ```
 
 A custom matchmaking_form_matches/2 hook does not need to check blocks itself: whatever groups it returns are validated against the block list before any lobby is created, and a group pairing blocked players is dropped.
@@ -80,5 +80,5 @@ A custom matchmaking_form_matches/2 hook does not need to check blocks itself: w
 ## Reference
 
 - **HTTP API:** [/api/docs](/api/docs) - every endpoint, parameter and response, generated from the spec.
-- **Elixir API:** [`GameServer.Friends`](https://appsinacup.com/game_server/GameServer.Friends.html) - the functions a plugin calls, with their
+- **Elixir API:** [`Gamend.Friends`](https://appsinacup.com/gamend/Gamend.Friends.html) - the functions a plugin calls, with their
   signatures and docs.

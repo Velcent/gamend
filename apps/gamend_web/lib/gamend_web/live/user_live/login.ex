@@ -1,0 +1,167 @@
+defmodule GamendWeb.UserLive.Login do
+  use GamendWeb, :live_view
+
+  alias Gamend.Accounts
+  alias Gamend.Accounts.Scope
+
+  @impl true
+  def render(assigns) do
+    ~H"""
+    <Layouts.app flash={@flash} current_scope={@current_scope} current_path={assigns[:current_path]}>
+      <div class="mx-auto max-w-sm lg:max-w-4xl space-y-4">
+        <div class="text-center">
+          <h1 class="text-3xl font-bold">{gettext("Log in")}</h1>
+          <p class="text-sm text-base-content/70 mt-2">
+            <%= if @current_scope do %>
+              {gettext("Confirm")}
+            <% else %>
+              <.link
+                navigate={~p"/users/register"}
+                class="font-semibold text-brand hover:underline"
+              >
+                {gettext("Register")}
+              </.link>
+            <% end %>
+          </p>
+        </div>
+
+        <div :if={local_mail_adapter?()} class="alert alert-info">
+          <div>
+            <p>You are running the local mail adapter.</p>
+            <p>
+              To see sent emails, visit <.link href="/dev/mailbox" class="underline">the mailbox page</.link>.
+            </p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <.form
+            :let={f}
+            for={@form}
+            id="login_form_magic"
+            action={~p"/users/log_in"}
+            phx-submit="submit_magic"
+          >
+            <.input
+              readonly={!!@current_scope}
+              field={f[:email]}
+              type="email"
+              label={gettext("Email")}
+              autocomplete="username"
+              required
+              phx-mounted={JS.focus()}
+            />
+            <.captcha id="login_magic_captcha" />
+            <.button class="btn btn-primary w-full">
+              {gettext("Send magic link")} <span aria-hidden="true">→</span>
+            </.button>
+          </.form>
+
+          <div class="divider lg:hidden">{gettext("or")}</div>
+
+          <.form
+            :let={f}
+            for={@form}
+            id="login_form_password"
+            action={~p"/users/log_in"}
+            phx-submit="submit_password"
+            phx-trigger-action={@trigger_submit}
+          >
+            <.input
+              readonly={!!@current_scope}
+              field={f[:email]}
+              type="email"
+              label={gettext("Email")}
+              autocomplete="username"
+              required
+            />
+            <.input
+              field={@form[:password]}
+              type="password"
+              label={gettext("Password")}
+              autocomplete="current-password"
+            />
+            <.button class="btn btn-primary w-full" name={@form[:remember_me].name} value="true">
+              {gettext("Log in and remember me")} <span aria-hidden="true">→</span>
+            </.button>
+            <.button class="btn btn-primary btn-soft w-full mt-2">
+              {gettext("Log in")}
+            </.button>
+          </.form>
+        </div>
+
+        <.oauth_buttons label={gettext("Log in")} />
+      </div>
+    </Layouts.app>
+    """
+  end
+
+  @impl true
+  def mount(_params, _session, socket) do
+    current_user = Scope.user(socket.assigns[:current_scope])
+
+    email =
+      Phoenix.Flash.get(socket.assigns.flash, :email) ||
+        (current_user && current_user.email)
+
+    form = to_form(%{"email" => email}, as: "user")
+
+    client_ip = GamendWeb.LiveHelpers.client_ip(socket)
+
+    {:ok,
+     assign(socket,
+       form: form,
+       trigger_submit: false,
+       page_title: gettext("Log in"),
+       client_ip: client_ip
+     )}
+  end
+
+  @impl true
+  def handle_event("submit_password", _params, socket) do
+    {:noreply, assign(socket, :trigger_submit, true)}
+  end
+
+  def handle_event("submit_magic", %{"user" => %{"email" => email}} = params, socket) do
+    with :ok <- GamendWeb.LiveHelpers.check_rate_limit(socket.assigns.client_ip, :auth),
+         :ok <- GamendWeb.LiveHelpers.check_captcha(socket, params) do
+      if user = Accounts.get_user_by_email(email) do
+        Accounts.deliver_login_instructions(
+          user,
+          &url(~p"/users/log_in/#{&1}")
+        )
+      end
+
+      info = gettext("Success.")
+
+      {:noreply,
+       socket
+       |> put_flash(:info, info)
+       |> push_navigate(to: ~p"/users/log_in")}
+    else
+      {:error, %Phoenix.LiveView.Socket{} = socket} ->
+        {:noreply, socket}
+
+      {:error, _retry_after} ->
+        {:noreply,
+         put_flash(socket, :error, gettext("Too many attempts. Please try again later."))}
+    end
+  end
+
+  # Only show the local-mailbox helper in development builds.
+  # In production we may use Swoosh.Local when no SMTP is configured, but we
+  # don't want the UI to advertise that to end users.
+  defp local_mail_adapter? do
+    adapter_is_local? =
+      Application.get_env(:gamend_core, Gamend.Mailer)[:adapter] == Swoosh.Adapters.Local
+
+    mailbox_preview_enabled? =
+      GamendWeb.Features.enabled?(:mailbox_preview)
+
+    adapter_is_local? and (dev_env?() or mailbox_preview_enabled?)
+  end
+
+  defp dev_env? do
+    Application.get_env(:gamend_web, :environment, :prod) == :dev
+  end
+end

@@ -34,4 +34,4 @@ Quests.create_quest(%{
 
 Game code would then do: `Quests.report_event(user_id, "login")`
 
-- [Github](https://github.com/appsinacup/game_server)
+- [Github](https://github.com/appsinacup/gamend)

@@ -1,7 +1,7 @@
 /**
- * GamendProto — protobuf event decoding for game_server realtime transports.
+ * GamendProto — protobuf event decoding for gamend realtime transports.
  *
- * Mirrors the server's `GameServerWeb.EventCodec` mapping (single wire
+ * Mirrors the server's `GamendWeb.EventCodec` mapping (single wire
  * contract: proto/gamend_realtime.proto). Used by GameRealtime when
  * constructed with `format: 'protobuf'` and by GameWebRTC DataChannels
  * negotiated with `protocol: 'protobuf'`.

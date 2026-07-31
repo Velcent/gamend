@@ -3,8 +3,8 @@ extends RefCounted
 
 ## Protobuf event decoding for gamend realtime transports.
 ##
-## Mirrors the server's `GameServerWeb.EventCodec` mapping (wire contract:
-## proto/gamend_realtime.proto in the game_server repo). Used by
+## Mirrors the server's `GamendWeb.EventCodec` mapping (wire contract:
+## proto/gamend_realtime.proto in the gamend repo). Used by
 ## GamendRealtime when constructed with format "protobuf" and by
 ## GamendWebRTC DataChannels negotiated with protocol "protobuf".
 ##

@@ -6,7 +6,7 @@ a plugin has to loop over by hand.
 
 ## Why core
 
-`GameServer.KV.list_entries/1` is an **admin list endpoint** that plugins have
+`Gamend.KV.list_entries/1` is an **admin list endpoint** that plugins have
 been pressed into using as a data access path. Three problems, all structural:
 
 1. **`:key` is a substring filter, not a prefix.** `%key%` cannot use an index,
@@ -110,7 +110,7 @@ makes the retention conversation possible at all.
 ## Definition of done (CONTRIBUTING)
 
 - [ ] `list_by_prefix/2`, `stream_by_prefix/2`, `count_by_prefix/2`,
-      `delete_by_prefix/2` on `GameServer.KV`, scoped by the existing options.
+      `delete_by_prefix/2` on `Gamend.KV`, scoped by the existing options.
 - [ ] Prefix uses escaped left-anchored `LIKE` with `ESCAPE '\'`; a key
       containing `%` or `_` matches literally (test).
 - [ ] Keyset cursor ordered by `key`; a walk under concurrent writes returns

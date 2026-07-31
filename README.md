@@ -1,4 +1,4 @@
-![gamend banner](https://github.com/appsinacup/game_server/blob/main/priv/static/images/banner.png?raw=true)
+![gamend banner](https://github.com/appsinacup/gamend/blob/main/priv/static/images/banner.png?raw=true)
 
 # Gamend
 
@@ -6,7 +6,7 @@
 
 Game + Backend = Gamend
 
-[Discord](https://discord.com/invite/v649emcpAu) | [Guides](https://gamend.appsinacup.com/docs/setup) | [API Docs](https://gamend.appsinacup.com/api/docs) | [Elixir Docs](https://appsinacup.github.io/game_server/) | [Starter Template](https://github.com/appsinacup/gamend_starter)
+[Discord](https://discord.com/invite/v649emcpAu) | [Guides](https://gamend.org/docs/setup) | [API Docs](https://gamend.org/api/docs) | [Elixir Docs](https://appsinacup.github.io/gamend/) | [Starter Template](https://github.com/appsinacup/gamend_starter)
 
 ## Features
 
@@ -31,7 +31,7 @@ Game + Backend = Gamend
 
 ## Client SDKs
 
-- [JavaScript SDK](https://www.npmjs.com/package/@ughuuu/game_server)
+- [JavaScript SDK](https://www.npmjs.com/package/@ughuuu/gamend)
 - [Godot SDK](https://godotengine.org/asset-library/asset/4510)
 - [Elixir SDK](sdk/) — Stub modules for IDE autocomplete in custom hooks
 
@@ -41,7 +41,7 @@ Game + Backend = Gamend
 
 - **Elixir 1.20 & Erlang/OTP 29** — see [`.tool-versions`](.tool-versions); with [asdf](https://asdf-vm.com/) just run `asdf install`
 - **Rust** ([rustup](https://rustup.rs/)) — required to build the WebRTC native dependency (`ex_sctp`)
-- **PostgreSQL** — optional. Dev uses SQLite by default; set `POSTGRES_*` or `DATABASE_URL` in `.env` to use Postgres instead. The adapter is chosen at compile time, so after changing these run `mix deps.clean game_server_core game_server_web --build` and recompile. (Docker: use the `-postgres` image tag or build with `GAMEND_DB_ADAPTER=postgres`.)
+- **PostgreSQL** — optional. Dev uses SQLite by default; set `POSTGRES_*` or `DATABASE_URL` in `.env` to use Postgres instead. The adapter is chosen at compile time, so after changing these run `mix deps.clean gamend_core gamend_web --build` and recompile. (Docker: use the `-postgres` image tag or build with `GAMEND_DB_ADAPTER=postgres`.)
 
 ### First run
 

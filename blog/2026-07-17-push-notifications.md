@@ -16,4 +16,4 @@ Notifications.admin_create_notification(user.id, user.id, %{
 })
 ```
 
-- [Github](https://github.com/appsinacup/game_server)
+- [Github](https://github.com/appsinacup/gamend)

@@ -14,7 +14,7 @@ defmodule HandleWebRTC.WebRTCLobbyHook do
   def application do
     [
       extra_applications: [:logger],
-      env: [hooks_module: GameServer.Modules.WebRTCLobbyHook]
+      env: [hooks_module: Gamend.Modules.WebRTCLobbyHook]
     ]
   end
 
@@ -22,8 +22,8 @@ defmodule HandleWebRTC.WebRTCLobbyHook do
   # in-repo SDK via a path dependency.
   defp deps do
     [
-      shared_dep(:game_server_sdk, "../../../sdk"),
-      shared_dep(:game_server_plugin_tools, "../../../sdk_tools"),
+      shared_dep(:gamend_sdk, "../../../sdk"),
+      shared_dep(:gamend_plugin_tools, "../../../sdk_tools"),
       {:bunt, "~> 1.0"},
       {:phoenix, "~> 1.8.3"}
     ]
@@ -33,7 +33,7 @@ defmodule HandleWebRTC.WebRTCLobbyHook do
     if File.dir?(local_path) do
       {app, path: local_path, runtime: false}
     else
-      {app, github: "appsinacup/game_server", override: true, runtime: false}
+      {app, github: "appsinacup/gamend", override: true, runtime: false}
     end
   end
 end

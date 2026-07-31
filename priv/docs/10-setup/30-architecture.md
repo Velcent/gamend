@@ -175,13 +175,13 @@ still signal each other.
 These projects live in one repository, but the runtime split is intentional: core and web are reusable packages, while host is the runnable shell you own.
 
 ```text
-  game_server/                 # The runnable host app itself
-  ├── lib/game_server_host/    # Router, supervision tree, boot config, branding
-  ├── lib/game_server_web/     # Host-owned pages (docs, blog, presentation)
+  gamend/                 # The runnable host app itself
+  ├── lib/gamend_host/    # Router, supervision tree, boot config, branding
+  ├── lib/gamend_web/     # Host-owned pages (docs, blog, presentation)
   ├── priv/docs/               # These guides, as markdown
   ├── apps/
-  │   ├── game_server_core/    # Shared domain: contexts, schemas, migrations
-  │   └── game_server_web/     # Shared web package: controllers, LiveViews,
+  │   ├── gamend_core/    # Shared domain: contexts, schemas, migrations
+  │   └── gamend_web/     # Shared web package: controllers, LiveViews,
   │                            #   channels, components, frontend source
   ├── modules/plugins/         # Hook plugins, as OTP apps (server scripting)
   ├── clients/                 # Godot SDK, JS SDK
@@ -190,32 +190,32 @@ These projects live in one repository, but the runtime split is intentional: cor
 
 ## The contexts
 
-Business logic lives in context modules under `game_server_core`, each owning
+Business logic lives in context modules under `gamend_core`, each owning
 one domain and callable from a plugin. Their functions, arguments and return
 values are documented in the
-[Elixir API reference](https://appsinacup.com/game_server/api-reference.html):
+[Elixir API reference](https://appsinacup.com/gamend/api-reference.html):
 
 | Domain | Module |
 |---|---|
-| Accounts, auth, presence | [`GameServer.Accounts`](https://appsinacup.com/game_server/GameServer.Accounts.html) |
-| Lobbies | [`GameServer.Lobbies`](https://appsinacup.com/game_server/GameServer.Lobbies.html) |
-| Parties | [`GameServer.Parties`](https://appsinacup.com/game_server/GameServer.Parties.html) |
-| Groups | [`GameServer.Groups`](https://appsinacup.com/game_server/GameServer.Groups.html) |
-| Friends and blacklist | [`GameServer.Friends`](https://appsinacup.com/game_server/GameServer.Friends.html) |
-| Chat | [`GameServer.Chat`](https://appsinacup.com/game_server/GameServer.Chat.html) |
-| Quests | [`GameServer.Quests`](https://appsinacup.com/game_server/GameServer.Quests.html) |
-| Leaderboards | [`GameServer.Leaderboards`](https://appsinacup.com/game_server/GameServer.Leaderboards.html) |
-| Tournaments | [`GameServer.Tournaments`](https://appsinacup.com/game_server/GameServer.Tournaments.html) |
-| Matchmaking | [`GameServer.Matchmaking`](https://appsinacup.com/game_server/GameServer.Matchmaking.html) |
-| Notifications | [`GameServer.Notifications`](https://appsinacup.com/game_server/GameServer.Notifications.html) |
-| Wallets and inventory | [`GameServer.Economy`](https://appsinacup.com/game_server/GameServer.Economy.html) |
-| Payments | [`GameServer.Payments`](https://appsinacup.com/game_server/GameServer.Payments.html) |
-| Key-value store | [`GameServer.KV`](https://appsinacup.com/game_server/GameServer.KV.html) |
-| Object storage | [`GameServer.Storage`](https://appsinacup.com/game_server/GameServer.Storage.html) |
-| WebRTC signaling rooms | [`GameServer.Signaling`](https://appsinacup.com/game_server/GameServer.Signaling.html) |
-| Ready checks | [`GameServer.ReadyChecks`](https://appsinacup.com/game_server/GameServer.ReadyChecks.html) |
-| Background and cron jobs | [`GameServer.Jobs`](https://appsinacup.com/game_server/GameServer.Jobs.html), [`GameServer.Schedule`](https://appsinacup.com/game_server/GameServer.Schedule.html) |
-| Plugin hooks | [`GameServer.Hooks`](https://appsinacup.com/game_server/GameServer.Hooks.html) |
+| Accounts, auth, presence | [`Gamend.Accounts`](https://appsinacup.com/gamend/Gamend.Accounts.html) |
+| Lobbies | [`Gamend.Lobbies`](https://appsinacup.com/gamend/Gamend.Lobbies.html) |
+| Parties | [`Gamend.Parties`](https://appsinacup.com/gamend/Gamend.Parties.html) |
+| Groups | [`Gamend.Groups`](https://appsinacup.com/gamend/Gamend.Groups.html) |
+| Friends and blacklist | [`Gamend.Friends`](https://appsinacup.com/gamend/Gamend.Friends.html) |
+| Chat | [`Gamend.Chat`](https://appsinacup.com/gamend/Gamend.Chat.html) |
+| Quests | [`Gamend.Quests`](https://appsinacup.com/gamend/Gamend.Quests.html) |
+| Leaderboards | [`Gamend.Leaderboards`](https://appsinacup.com/gamend/Gamend.Leaderboards.html) |
+| Tournaments | [`Gamend.Tournaments`](https://appsinacup.com/gamend/Gamend.Tournaments.html) |
+| Matchmaking | [`Gamend.Matchmaking`](https://appsinacup.com/gamend/Gamend.Matchmaking.html) |
+| Notifications | [`Gamend.Notifications`](https://appsinacup.com/gamend/Gamend.Notifications.html) |
+| Wallets and inventory | [`Gamend.Economy`](https://appsinacup.com/gamend/Gamend.Economy.html) |
+| Payments | [`Gamend.Payments`](https://appsinacup.com/gamend/Gamend.Payments.html) |
+| Key-value store | [`Gamend.KV`](https://appsinacup.com/gamend/Gamend.KV.html) |
+| Object storage | [`Gamend.Storage`](https://appsinacup.com/gamend/Gamend.Storage.html) |
+| WebRTC signaling rooms | [`Gamend.Signaling`](https://appsinacup.com/gamend/Gamend.Signaling.html) |
+| Ready checks | [`Gamend.ReadyChecks`](https://appsinacup.com/gamend/Gamend.ReadyChecks.html) |
+| Background and cron jobs | [`Gamend.Jobs`](https://appsinacup.com/gamend/Gamend.Jobs.html), [`Gamend.Schedule`](https://appsinacup.com/gamend/Gamend.Schedule.html) |
+| Plugin hooks | [`Gamend.Hooks`](https://appsinacup.com/gamend/Gamend.Hooks.html) |
 
 ## Key technologies
 
