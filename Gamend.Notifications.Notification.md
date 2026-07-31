@@ -21,14 +21,14 @@ explicitly deletes them. Fields:
   __meta__: term(),
   content: String.t() | nil,
   icon_url: String.t() | nil,
-  id: integer() | nil,
+  id: Ecto.UUID.t() | nil,
   inserted_at: DateTime.t() | nil,
   metadata: map(),
   read: boolean(),
   recipient: term(),
-  recipient_id: integer() | nil,
+  recipient_id: Ecto.UUID.t() | nil,
   sender: term(),
-  sender_id: integer() | nil,
+  sender_id: Ecto.UUID.t() | nil,
   title: String.t() | nil,
   updated_at: term()
 }

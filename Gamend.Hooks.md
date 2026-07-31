@@ -236,7 +236,7 @@ to the player:
 
 ```elixir
 @callback before_lobby_state_change(Gamend.Lobbies.Lobby.t(), String.t(), String.t()) ::
-  hook_result(term())
+  veto_result()
 ```
 
 # `before_lobby_update`
@@ -446,7 +446,7 @@ to the player:
   String.t(),
   Gamend.Quests.Quest.t(),
   Gamend.Quests.QuestProgress.t()
-) :: hook_result(term())
+) :: veto_result()
 ```
 
 # `after_score_submitted`
@@ -584,7 +584,7 @@ to the player:
 @callback before_ready_check_open(
   Gamend.Lobbies.Lobby.t() | Gamend.Parties.Party.t() | :matchmaking,
   [String.t()]
-) :: hook_result(term())
+) :: veto_result()
 ```
 
 # `after_entitlement_changed`
@@ -693,6 +693,15 @@ Options passed to hooks that accept an options map/keyword list.
 
 Common keys include `:user_id`, `:lobby_id`, and other domain-specific options.
 Hooks may accept either a map or keyword list for convenience.
+
+# `veto_result`
+
+```elixir
+@type veto_result() :: :ok | hook_result(term())
+```
+
+A veto-only hook: `{:error, reason}` rejects, anything else allows. The
+return never rewrites the args, so a bare `:ok` is the usual "allow".
 
 # `call`
 

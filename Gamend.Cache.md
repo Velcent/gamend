@@ -13,7 +13,7 @@ This cache uses a 2-level (near-cache) topology via
 # `bump_version`
 
 ```elixir
-@spec bump_version(term()) :: integer()
+@spec bump_version(term()) :: :ok
 ```
 
 Increments the version counter at `key` and broadcasts the bump so every

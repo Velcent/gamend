@@ -118,7 +118,7 @@ Pass `user_id: id` or `lobby_id: id` in `opts` to delete a scoped key. Returns `
 # `delete_entry`
 
 ```elixir
-@spec delete_entry(pos_integer()) :: :ok
+@spec delete_entry(Ecto.UUID.t()) :: :ok
 ```
 
 Delete an entry by its `id`.
@@ -220,7 +220,7 @@ Unsubscribe the current process from changes for a specific key/scope.
 # `update_entry`
 
 ```elixir
-@spec update_entry(pos_integer(), attrs()) ::
+@spec update_entry(Ecto.UUID.t(), attrs()) ::
   {:ok, Gamend.KV.Entry.t()}
   | {:error, :not_found}
   | {:error, Ecto.Changeset.t()}

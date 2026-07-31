@@ -15,12 +15,12 @@ queries for verification and convenient builders used throughout the app.
   __meta__: term(),
   authenticated_at: DateTime.t() | nil,
   context: String.t() | nil,
-  id: integer() | nil,
+  id: Ecto.UUID.t() | nil,
   inserted_at: DateTime.t() | nil,
   sent_to: String.t() | nil,
   token: binary() | nil,
   user: Gamend.Accounts.User.t() | Ecto.Association.NotLoaded.t() | nil,
-  user_id: integer() | nil
+  user_id: Ecto.UUID.t() | nil
 }
 ```
 

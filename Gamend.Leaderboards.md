@@ -278,9 +278,10 @@ Lists all leaderboards with the given slug (all seasons), ordered by end date.
 # `list_records`
 
 ```elixir
-@spec list_records(String.t(), Gamend.Types.pagination_opts()) :: [
-  Gamend.Leaderboards.Record.t()
-]
+@spec list_records(
+  String.t(),
+  keyword()
+) :: [Gamend.Leaderboards.Record.t()]
 ```
 
 Lists records for a leaderboard, ordered by rank.

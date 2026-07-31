@@ -12,6 +12,33 @@ admin/game sets `starts_at` (the "draw now" force action does exactly that).
 `icon_url` is optional; when nil, clients show their default tournament
 icon (the web UI uses `GamendWeb.Icons.default(:tournament)`).
 
+# `t`
+
+```elixir
+@type t() :: %Gamend.Tournaments.Tournament{
+  __meta__: term(),
+  bracket_size: term(),
+  deadline_policy: term(),
+  description: term(),
+  ends_at: term(),
+  entries: term(),
+  icon_url: term(),
+  id: term(),
+  inserted_at: term(),
+  max_entries: term(),
+  metadata: term(),
+  recur: term(),
+  registration_opens_at: term(),
+  round_window_sec: term(),
+  slug: term(),
+  starts_at: term(),
+  state: term(),
+  team_size: term(),
+  title: term(),
+  updated_at: term()
+}
+```
+
 # `changeset`
 
 # `deadline_policies`

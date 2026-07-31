@@ -12,13 +12,13 @@ a status field which can be "pending", "accepted", "rejected" or
 ```elixir
 @type t() :: %Gamend.Friends.Friendship{
   __meta__: term(),
-  id: integer() | nil,
+  id: Ecto.UUID.t() | nil,
   inserted_at: term(),
   requester: term(),
-  requester_id: integer() | nil,
+  requester_id: Ecto.UUID.t() | nil,
   status: String.t(),
   target: term(),
-  target_id: integer() | nil,
+  target_id: Ecto.UUID.t() | nil,
   updated_at: term()
 }
 ```
