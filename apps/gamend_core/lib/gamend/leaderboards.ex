@@ -621,9 +621,12 @@ defmodule Gamend.Leaderboards do
     Gamend.Async.run(fn ->
       Gamend.Hooks.internal_call(:after_score_submitted, [record])
 
-      Gamend.Quests.report_event(record.user_id, "score_submitted", 1, %{
-        "leaderboard_id" => record.leaderboard_id
-      })
+      # Label entries carry no user — there is no one to advance a quest for.
+      if is_binary(record.user_id) do
+        Gamend.Quests.report_event(record.user_id, "score_submitted", 1, %{
+          "leaderboard_id" => record.leaderboard_id
+        })
+      end
     end)
 
     result

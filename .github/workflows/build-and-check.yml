@@ -491,7 +491,9 @@ jobs:
 
   publish-js-sdk:
     name: Publish JS SDK
-    if: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
+    # Disable it temporarily
+    if: false
+    #if: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
