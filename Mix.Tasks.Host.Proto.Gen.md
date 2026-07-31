@@ -1,5 +1,5 @@
 # `mix host.proto.gen`
-[🔗](https://github.com/appsinacup/game_server/blob/v1.0.7/lib/mix/tasks/host.proto.gen.ex#L1)
+[🔗](https://github.com/appsinacup/gamend/blob/v1.0.7/lib/mix/tasks/host.proto.gen.ex#L1)
 
 Generates protobuf bindings for every target from a `.proto` file.
 
@@ -7,7 +7,7 @@ A gamend protobuf schema is consumed by three runtimes — the Elixir plugin,
 the JavaScript client and the Godot client — each with its own generator.
 Running them by hand means three commands with different flag conventions,
 and a downstream game has no copy of this repo's shell scripts. This task
-ships with `game_server_core`, so any host application or plugin can run it.
+ships with `gamend_core`, so any host application or plugin can run it.
 
 ## Usage
 

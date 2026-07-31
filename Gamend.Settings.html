@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.40.1">
+    <meta name="project" content="gamend_core v1.0.1088">
+
+
+    <title>Gamend.Settings — gamend_core v1.0.1088</title>
+
+    <link rel="stylesheet" href="dist/html-elixir-YJO4MOOW.css" />
+
+    <script defer src="dist/sidebar_items-B2D06903.js"></script>
+    <script defer src="docs_config.js"></script>
+    <script defer src="dist/html-YU4BZFVS.js"></script>
+
+  </head>
+  <body>
+    <script>(()=>{var t="ex_doc:settings",e="dark";var o="dark",s="light";var E="sidebar_state",n="closed";var r="sidebar_width";var a="sidebar-open";var i=new URLSearchParams(window.location.search),S=i.get("theme")||JSON.parse(localStorage.getItem(t)||"{}").theme;(S===o||S!==s&&window.matchMedia("(prefers-color-scheme: dark)").matches)&&document.body.classList.add(e);var d=sessionStorage.getItem(E),A=d!==n&&!window.matchMedia(`screen and (max-width: ${768}px)`).matches;document.body.classList.toggle(a,A);var c=sessionStorage.getItem(r);c&&document.body.style.setProperty("--sidebarWidth",`${c}px`);var p=/(Macintosh|iPhone|iPad|iPod)/.test(window.navigator.userAgent);document.documentElement.classList.toggle("apple-os",p);})();
+</script>
+
+<div class="body-wrapper">
+
+<button id="sidebar-menu" class="sidebar-button sidebar-toggle" aria-label="toggle sidebar" aria-controls="sidebar">
+  <i class="ri-menu-line ri-lg" title="Collapse/expand sidebar"></i>
+</button>
+
+<nav id="sidebar" class="sidebar">
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectInfo">
+
+      <div>
+        <a href="readme.html" class="sidebar-projectName" translate="no">
+gamend_core
+        </a>
+        <div class="sidebar-projectVersion" translate="no">
+          v1.0.1088
+        </div>
+      </div>
+    </div>
+    <ul id="sidebar-list-nav" class="sidebar-list-nav" role="tablist" data-extras="Pages"></ul>
+  </div>
+</nav>
+
+<output role="status" id="toast"></output>
+
+<main class="content page-module" id="main" data-type="modules">
+  <div id="content" class="content-inner">
+    <div class="top-search">
+      <div class="search-settings">
+        <form class="search-bar" action="search.html">
+          <label class="search-label">
+            <span class="sr-only">Search documentation of gamend_core</span>
+            <div class="search-input-wrapper">
+              <input name="q" type="text" class="search-input" placeholder="Press / to search" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+              <button type="button" tabindex="-1" class="search-close-button" aria-hidden="true">
+                <i class="ri-close-line ri-lg" title="Cancel search"></i>
+              </button>
+            </div>
+          </label>
+        </form>
+        <div class="autocomplete">
+        </div>
+        <div class="engine-selector" data-multiple="false">
+          <button type="button" class="engine-button" aria-label="Select search engine" aria-haspopup="true" aria-expanded="false">
+            <i class="ri-search-2-line" aria-hidden="true"></i>
+            <span class="engine-name">Default</span>
+            <i class="ri-arrow-down-s-line" aria-hidden="true"></i>
+          </button>
+          <div class="engine-dropdown" hidden role="menu">
+
+              <button type="button"
+                      class="engine-option"
+                      data-engine-url="search.html?q="
+                      role="menuitemradio"
+                      aria-checked="true">
+                <span class="name">Default</span>
+                <span class="help">In-browser search</span>
+              </button>
+
+          </div>
+        </div>
+        <button class="icon-settings display-settings">
+          <i class="ri-settings-3-line"></i>
+          <span class="sr-only">Settings</span>
+        </button>
+      </div>
+    </div>
+
+<div id="top-content">
+  <div class="heading-with-actions top-heading">
+    <h1>
+      <span translate="no">Gamend.<wbr>Settings</span> 
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1088)</small>
+
+    </h1>
+
+<a href="Gamend.Settings.md" title="Copy Markdown (hold Ctrl/Cmd and click it to open as Markdown)" class="copy-markdown icon-action" rel="help">
+  <i class="ri-markdown-line" aria-hidden="true"></i>
+  <span class="sr-only">Copy Markdown</span>
+</a>
+
+
+
+      <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/settings.ex#L1" title="View Source" class="icon-action" rel="help">
+        <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        <span class="sr-only">View Source</span>
+      </a>
+
+  </div>
+
+
+    <section id="moduledoc">
+<p>The declared configuration surface: every setting core, the host and its
+plugins expose, with its type, default, group, env var name and required
+level.</p><p>Settings are declared with <a href="Gamend.Settings.Provider.html"><code class="inline">Gamend.Settings.Provider</code></a> and read with
+<a href="#get/2"><code class="inline">get/2</code></a>, which checks <code class="inline">Application.get_env(app, module)</code> and falls back to
+the compiled default. That means a host configures the ordinary Elixir way:</p><pre><code class="makeup elixir" translate="no"><span class="n">config</span><span class="w"> </span><span class="ss">:gamend_core</span><span class="p">,</span><span class="w"> </span><span class="nc">Gamend.Retention</span><span class="p">,</span><span class="w"> </span><span class="ss">chat_messages_days</span><span class="p">:</span><span class="w"> </span><span class="mi">90</span></code></pre><p>Environment variables are one <em>input method</em> into that, not a second source.
+A host that wants them writes one line in <code class="inline">config/runtime.exs</code>:</p><pre><code class="makeup elixir" translate="no"><span class="k">for</span><span class="w"> </span><span class="p" data-group-id="0507724934-1">{</span><span class="n">app</span><span class="p">,</span><span class="w"> </span><span class="n">module</span><span class="p">,</span><span class="w"> </span><span class="n">opts</span><span class="p" data-group-id="0507724934-1">}</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nc">Gamend.Settings</span><span class="o">.</span><span class="n">from_env</span><span class="p" data-group-id="0507724934-2">(</span><span class="p" data-group-id="0507724934-2">)</span><span class="w"> </span><span class="k" data-group-id="0507724934-3">do</span><span class="w">
+  </span><span class="n">config</span><span class="w"> </span><span class="n">app</span><span class="p">,</span><span class="w"> </span><span class="n">module</span><span class="p">,</span><span class="w"> </span><span class="n">opts</span><span class="w">
+</span><span class="k" data-group-id="0507724934-3">end</span></code></pre><p>A host that prefers a JSON file, or plain Elixir, writes its own equivalent.
+Every route ends at <a href="https://hexdocs.pm/elixir/Application.html"><code class="inline">Application</code></a> config, so no two sources compete.</p><h2 id="module-discovery" class="section-heading"><a href="#module-discovery" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Discovery</span></h2><p>Providers are found by scanning the modules of <a href="#apps/0"><code class="inline">apps/0</code></a> for <code class="inline">__settings__/0</code>
+and cached in <code class="inline">:persistent_term</code>. Plugins load after config is resolved, so
+<a href="Gamend.Hooks.PluginManager.html"><code class="inline">Gamend.Hooks.PluginManager</code></a> registers theirs on load via <a href="#add_app/1"><code class="inline">add_app/1</code></a>.</p>
+    </section>
+
+</div>
+
+  <section id="summary" class="details-list">
+    <h2 class="section-heading">
+      <a class="hover-link" href="#summary">
+        <i class="ri-link-m" aria-hidden="true"></i>
+      </a>
+      <span class="text">Summary</span>
+    </h2>
+<div class="summary-types summary">
+  <h3>
+    <a href="#types">Types</a>
+  </h3>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#t:definition/0" data-no-tooltip="" translate="no">definition()</a>
+
+      </div>
+
+    </div>
+
+</div>
+<div class="summary-functions summary">
+  <h3>
+    <a href="#functions">Functions</a>
+  </h3>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#add_app/1" data-no-tooltip="" translate="no">add_app(app)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Registers another app's providers — the host application, or a plugin loaded
+after boot. Clears the cache so the next read picks them up.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#add_provider/1" data-no-tooltip="" translate="no">add_provider(module)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Registers one provider module directly, for code that is not in a scanned
+app's module list — a plugin compiled at runtime, or a test.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#all/0" data-no-tooltip="" translate="no">all()</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Every declared setting, across every registered app.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#apps/0" data-no-tooltip="" translate="no">apps()</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Apps scanned for providers.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#cast/2" data-no-tooltip="" translate="no">cast(raw, atom)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Casts a raw string to a declared type. Returns <code class="inline">:error</code> when it does not
+parse, so the caller decides whether that is fatal.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#describe/1" data-no-tooltip="" translate="no">describe(definition)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>A setting's declaration, with its effective value and where that came from:
+<code class="inline">:config</code> when the host set one, <code class="inline">:default</code> otherwise.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#env_name/3" data-no-tooltip="" translate="no">env_name(root, group, key)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>The env var name a group/key derives to. Exposed for docs and the
+<code class="inline">.env.example</code> generator.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#from_env/0" data-no-tooltip="" translate="no">from_env()</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Reads every declared setting from the environment, as <code class="inline">{app, module, opts}</code>
+ready to splat into <code class="inline">config/2</code>.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#get/2" data-no-tooltip="" translate="no">get(module, key)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>The current value of a setting: the host's <a href="https://hexdocs.pm/elixir/Application.html"><code class="inline">Application</code></a> config if it set
+one, otherwise the compiled default.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#group/1" data-no-tooltip="" translate="no">group(name)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Declared settings for one group.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#groups/0" data-no-tooltip="" translate="no">groups()</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Every group, as <code class="inline">{group, label}</code>, in display order.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#providers/0" data-no-tooltip="" translate="no">providers()</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Provider modules, discovered once and cached.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#reload/0" data-no-tooltip="" translate="no">reload()</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Drops the cached provider list. Call after loading code that declares settings.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#remove_provider/1" data-no-tooltip="" translate="no">remove_provider(module)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Undoes <a href="#add_provider/1"><code class="inline">add_provider/1</code></a>.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#resolve/0" data-no-tooltip="" translate="no">resolve()</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Every setting's resolved value, keyed by <code class="inline">{module, key}</code>: the environment
+when it is set, the compiled default otherwise.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#validate/1" data-no-tooltip="" translate="no">validate(env)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Checks every declared requirement against the resolved configuration.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#validate!/1" data-no-tooltip="" translate="no">validate!(env)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Runs <a href="#validate/1"><code class="inline">validate/1</code></a>, logging warnings and raising on failures.</p></div>
+
+    </div>
+
+</div>
+
+  </section>
+
+
+  <section id="types" class="details-list">
+    <h2 class="section-heading">
+      <a class="hover-link" href="#types">
+        <i class="ri-link-m" aria-hidden="true"></i>
+      </a>
+      <span class="text">Types</span>
+    </h2>
+
+    <div class="types-list">
+<section class="detail" id="t:definition/0">
+
+  <div class="detail-header">
+    <a href="#t:definition/0" class="detail-link" data-no-tooltip="" aria-label="Link to this type">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">definition()</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/settings.ex#L38" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@type</span> definition() :: %{
+  key: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>(),
+  module: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>(),
+  app: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>(),
+  group: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>(),
+  label: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(),
+  type: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>(),
+  default: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+  env: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(),
+  doc: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(),
+  secret: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>(),
+  external: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>(),
+  required: :prod | :warn | nil,
+  when: {[<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>()], <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()} | nil,
+  with: [<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>()]
+}</pre>
+
+      </div>
+
+
+  </section>
+</section>
+
+    </div>
+  </section>
+
+  <section id="functions" class="details-list">
+    <h2 class="section-heading">
+      <a class="hover-link" href="#functions">
+        <i class="ri-link-m" aria-hidden="true"></i>
+      </a>
+      <span class="text">Functions</span>
+    </h2>
+
+    <div class="functions-list">
+<section class="detail" id="add_app/1">
+
+  <div class="detail-header">
+    <a href="#add_app/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">add_app(app)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/settings.ex#L381" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> add_app(<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>()) :: :ok</pre>
+
+      </div>
+
+<p>Registers another app's providers — the host application, or a plugin loaded
+after boot. Clears the cache so the next read picks them up.</p>
+  </section>
+</section>
+<section class="detail" id="add_provider/1">
+
+  <div class="detail-header">
+    <a href="#add_provider/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">add_provider(module)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/settings.ex#L388" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> add_provider(<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>()) :: :ok</pre>
+
+      </div>
+
+<p>Registers one provider module directly, for code that is not in a scanned
+app's module list — a plugin compiled at runtime, or a test.</p>
+  </section>
+</section>
+<section class="detail" id="all/0">
+
+  <div class="detail-header">
+    <a href="#all/0" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">all()</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/settings.ex#L76" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> all() :: [<a href="#t:definition/0">definition</a>()]</pre>
+
+      </div>
+
+<p>Every declared setting, across every registered app.</p>
+  </section>
+</section>
+<section class="detail" id="apps/0">
+
+  <div class="detail-header">
+    <a href="#apps/0" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">apps()</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/settings.ex#L371" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> apps() :: [<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>()]</pre>
+
+      </div>
+
+<p>Apps scanned for providers.</p>
+  </section>
+</section>
+<section class="detail" id="cast/2">
+
+  <div class="detail-header">
+    <a href="#cast/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">cast(raw, atom)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/settings.ex#L199" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> cast(<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>()) :: {:ok, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()} | :error</pre>
+
+      </div>
+
+<p>Casts a raw string to a declared type. Returns <code class="inline">:error</code> when it does not
+parse, so the caller decides whether that is fatal.</p>
+  </section>
+</section>
+<section class="detail" id="describe/1">
+
+  <div class="detail-header">
+    <a href="#describe/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">describe(definition)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/settings.ex#L103" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> describe(<a href="#t:definition/0">definition</a>()) :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()</pre>
+
+      </div>
+
+<p>A setting's declaration, with its effective value and where that came from:
+<code class="inline">:config</code> when the host set one, <code class="inline">:default</code> otherwise.</p><p>The admin viewer renders this; <code class="inline">:env</code> never appears as a source because env
+vars are resolved into <a href="https://hexdocs.pm/elixir/Application.html"><code class="inline">Application</code></a> config at boot rather than read live.</p>
+  </section>
+</section>
+<section class="detail" id="env_name/3">
+
+  <div class="detail-header">
+    <a href="#env_name/3" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">env_name(root, group, key)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/settings.ex#L495" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> env_name(<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>()) :: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()</pre>
+
+      </div>
+
+<p>The env var name a group/key derives to. Exposed for docs and the
+<code class="inline">.env.example</code> generator.</p>
+  </section>
+</section>
+<section class="detail" id="from_env/0">
+
+  <div class="detail-header">
+    <a href="#from_env/0" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">from_env()</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/settings.ex#L130" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> from_env() :: [{<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">keyword</a>()}]</pre>
+
+      </div>
+
+<p>Reads every declared setting from the environment, as <code class="inline">{app, module, opts}</code>
+ready to splat into <code class="inline">config/2</code>.</p><p>Only variables that are actually set contribute; the rest fall through to
+the compiled default. A value that does not parse as its declared type is
+skipped with a warning rather than taking the boot down.</p>
+  </section>
+</section>
+<section class="detail" id="get/2">
+
+  <div class="detail-header">
+    <a href="#get/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">get(module, key)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/settings.ex#L65" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> get(<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>()) :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()</pre>
+
+      </div>
+
+<p>The current value of a setting: the host's <a href="https://hexdocs.pm/elixir/Application.html"><code class="inline">Application</code></a> config if it set
+one, otherwise the compiled default.</p><p>Raises for a key the module does not declare — an undeclared read is a bug,
+not a runtime condition.</p>
+  </section>
+</section>
+<section class="detail" id="group/1">
+
+  <div class="detail-header">
+    <a href="#group/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">group(name)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/settings.ex#L84" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> group(<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>()) :: [<a href="#t:definition/0">definition</a>()]</pre>
+
+      </div>
+
+<p>Declared settings for one group.</p>
+  </section>
+</section>
+<section class="detail" id="groups/0">
+
+  <div class="detail-header">
+    <a href="#groups/0" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">groups()</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/settings.ex#L88" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> groups() :: [{<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>(), <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()}]</pre>
+
+      </div>
+
+<p>Every group, as <code class="inline">{group, label}</code>, in display order.</p>
+  </section>
+</section>
+<section class="detail" id="providers/0">
+
+  <div class="detail-header">
+    <a href="#providers/0" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">providers()</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/settings.ex#L425" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> providers() :: [<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>()]</pre>
+
+      </div>
+
+<p>Provider modules, discovered once and cached.</p>
+  </section>
+</section>
+<section class="detail" id="reload/0">
+
+  <div class="detail-header">
+    <a href="#reload/0" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">reload()</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/settings.ex#L418" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> reload() :: :ok</pre>
+
+      </div>
+
+<p>Drops the cached provider list. Call after loading code that declares settings.</p>
+  </section>
+</section>
+<section class="detail" id="remove_provider/1">
+
+  <div class="detail-header">
+    <a href="#remove_provider/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">remove_provider(module)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/settings.ex#L392" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> remove_provider(<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>()) :: :ok</pre>
+
+      </div>
+
+<p>Undoes <a href="#add_provider/1"><code class="inline">add_provider/1</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="resolve/0">
+
+  <div class="detail-header">
+    <a href="#resolve/0" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">resolve()</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/settings.ex#L158" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> resolve() :: %{required({<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>()}) =&gt; <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}</pre>
+
+      </div>
+
+<p>Every setting's resolved value, keyed by <code class="inline">{module, key}</code>: the environment
+when it is set, the compiled default otherwise.</p><p>For <code class="inline">config/runtime.exs</code>, which needs values <em>while</em> it is still building the
+configuration. <code class="inline">config/2</code> only applies after the whole file is evaluated, so
+<a href="#get/2"><code class="inline">get/2</code></a> cannot see what <a href="#from_env/0"><code class="inline">from_env/0</code></a> just contributed — this can.</p>
+  </section>
+</section>
+<section class="detail" id="validate/1">
+
+  <div class="detail-header">
+    <a href="#validate/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">validate(env)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/settings.ex#L269" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> validate(<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>()) :: {[<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()], [<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()]}</pre>
+
+      </div>
+
+<p>Checks every declared requirement against the resolved configuration.</p><p>Returns <code class="inline">{failures, warnings}</code>, each a list of human-readable lines. Nothing
+is raised here — <a href="#validate!/1"><code class="inline">validate!/1</code></a> decides what is fatal, so a caller that wants
+to render the state instead (the admin viewer) can.</p><p>Severity by environment:</p><table><thead><tr><th style="text-align: left;">Level</th><th style="text-align: left;"><code class="inline">:prod</code></th><th style="text-align: left;"><code class="inline">:dev</code></th><th style="text-align: left;"><code class="inline">:test</code></th></tr></thead><tbody><tr><td style="text-align: left;"><code class="inline">required: :prod</code></td><td style="text-align: left;">failure</td><td style="text-align: left;">warning</td><td style="text-align: left;">silent</td></tr><tr><td style="text-align: left;"><code class="inline">required: :warn</code></td><td style="text-align: left;">warning</td><td style="text-align: left;">silent</td><td style="text-align: left;">silent</td></tr></tbody></table><p>The dev warning on a prod requirement is deliberate: it says the deployment
+will not boot in production while the developer is still at the keyboard.
+Test is silent because the suite boots hundreds of times.</p>
+  </section>
+</section>
+<section class="detail" id="validate!/1">
+
+  <div class="detail-header">
+    <a href="#validate!/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">validate!(env)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/settings.ex#L288" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> validate!(<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>()) :: :ok</pre>
+
+      </div>
+
+<p>Runs <a href="#validate/1"><code class="inline">validate/1</code></a>, logging warnings and raising on failures.</p><p>Called once at boot. Returns <code class="inline">:ok</code> when nothing is fatal.</p>
+  </section>
+</section>
+
+    </div>
+  </section>
+
+    <footer class="footer">
+
+        <p>
+
+            <span class="line">
+              <a href="https://hex.pm/packages/gamend_core/1.0.1088">Hex Package</a>
+
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1088">Hex Preview</a>
+
+            </span>
+
+          <span class="line">
+            <button class="a-main footer-button display-quick-switch" title="Go to package docs">
+              Go to package docs
+            </button>
+
+              <a href="llms.txt" target="_blank">
+                View llms.txt
+              </a>
+
+
+              <a href="gamend_core.epub">
+                Download ePub version
+              </a>
+
+          </span>
+        </p>
+
+        <p class="built-using">
+          Built using
+          <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener" translate="no">ExDoc</a> (v0.40.1) for the
+
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank" translate="no">Elixir programming language</a>
+
+        </p>
+
+
+    </footer>
+  </div>
+</main>
+</div>
+
+  </body>
+</html>

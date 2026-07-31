@@ -1,12 +1,12 @@
-# GameServer Core
+# Gamend Core
 
-The domain layer of [Gamend](https://gamend.appsinacup.com) — an open-source
+The domain layer of [Gamend](https://gamend.org) — an open-source
 Elixir game server for real-time multiplayer games. This package holds the
-contexts, schemas and migrations; `game_server_web` adds the REST API,
+contexts, schemas and migrations; `gamend_web` adds the REST API,
 WebSocket channels, LiveView admin and the generated client SDKs.
 
 You call these modules from a **plugin**: a small OTP application the server
-loads at boot, implementing the `GameServer.Hooks` behaviour. That is the
+loads at boot, implementing the `Gamend.Hooks` behaviour. That is the
 supported way to add game-specific rules without forking anything.
 
 ## What it gives you
@@ -32,22 +32,22 @@ Everything runs on **SQLite or PostgreSQL** — the same migrations target both.
 ```elixir
 def deps do
   [
-    {:game_server_core, "~> 1.0.0"}
+    {:gamend_core, "~> 1.0.0"}
   ]
 end
 ```
 
 ## Where to start
 
-- **[Guides](https://gamend.appsinacup.com/docs/setup)** — deployment, OAuth
+- **[Guides](https://gamend.org/docs/setup)** — deployment, OAuth
   provider setup, client SDKs and a walkthrough of each subsystem.
-- **[HTTP API](https://gamend.appsinacup.com/api/docs)** — every endpoint,
+- **[HTTP API](https://gamend.org/api/docs)** — every endpoint,
   generated from the OpenAPI spec.
-- **`GameServer.Hooks`** — the plugin behaviour. Every callback is optional;
+- **`Gamend.Hooks`** — the plugin behaviour. Every callback is optional;
   `before_*` may veto an operation, `after_*` observes one that already
   committed.
 
-Each domain has one context module as its entry point, so `GameServer.Lobbies`,
-`GameServer.Quests` and `GameServer.Economy` are the first three worth reading.
-The schema modules beneath them (`GameServer.Lobbies.Lobby` and so on) carry the
+Each domain has one context module as its entry point, so `Gamend.Lobbies`,
+`Gamend.Quests` and `Gamend.Economy` are the first three worth reading.
+The schema modules beneath them (`Gamend.Lobbies.Lobby` and so on) carry the
 field types and changesets.

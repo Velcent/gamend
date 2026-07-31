@@ -1,5 +1,5 @@
 # `mix gamend.content.extract`
-[🔗](https://github.com/appsinacup/game_server/blob/v1.0.7/lib/mix/tasks/gamend.content.extract.ex#L1)
+[🔗](https://github.com/appsinacup/gamend/blob/v1.0.7/lib/mix/tasks/gamend.content.extract.ex#L1)
 
 Writes `content.pot` from the titles and descriptions stored on quests,
 leaderboards and tournaments.
@@ -26,7 +26,7 @@ an admin adds content, then `mix gettext.merge` and translate.
 
 Text still reaches the database as the **source** string — never wrap a title
 in `gettext/1` at creation, or you freeze one locale in for every user.
-`GameServerWeb.ContentText` translates per viewer at render.
+`GamendWeb.ContentText` translates per viewer at render.
 
 ---
 

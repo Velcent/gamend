@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.40.1">
+    <meta name="project" content="gamend_core v1.0.1088">
+
+
+    <title>Gamend.ReadyChecks — gamend_core v1.0.1088</title>
+
+    <link rel="stylesheet" href="dist/html-elixir-YJO4MOOW.css" />
+
+    <script defer src="dist/sidebar_items-B2D06903.js"></script>
+    <script defer src="docs_config.js"></script>
+    <script defer src="dist/html-YU4BZFVS.js"></script>
+
+  </head>
+  <body>
+    <script>(()=>{var t="ex_doc:settings",e="dark";var o="dark",s="light";var E="sidebar_state",n="closed";var r="sidebar_width";var a="sidebar-open";var i=new URLSearchParams(window.location.search),S=i.get("theme")||JSON.parse(localStorage.getItem(t)||"{}").theme;(S===o||S!==s&&window.matchMedia("(prefers-color-scheme: dark)").matches)&&document.body.classList.add(e);var d=sessionStorage.getItem(E),A=d!==n&&!window.matchMedia(`screen and (max-width: ${768}px)`).matches;document.body.classList.toggle(a,A);var c=sessionStorage.getItem(r);c&&document.body.style.setProperty("--sidebarWidth",`${c}px`);var p=/(Macintosh|iPhone|iPad|iPod)/.test(window.navigator.userAgent);document.documentElement.classList.toggle("apple-os",p);})();
+</script>
+
+<div class="body-wrapper">
+
+<button id="sidebar-menu" class="sidebar-button sidebar-toggle" aria-label="toggle sidebar" aria-controls="sidebar">
+  <i class="ri-menu-line ri-lg" title="Collapse/expand sidebar"></i>
+</button>
+
+<nav id="sidebar" class="sidebar">
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectInfo">
+
+      <div>
+        <a href="readme.html" class="sidebar-projectName" translate="no">
+gamend_core
+        </a>
+        <div class="sidebar-projectVersion" translate="no">
+          v1.0.1088
+        </div>
+      </div>
+    </div>
+    <ul id="sidebar-list-nav" class="sidebar-list-nav" role="tablist" data-extras="Pages"></ul>
+  </div>
+</nav>
+
+<output role="status" id="toast"></output>
+
+<main class="content page-module" id="main" data-type="modules">
+  <div id="content" class="content-inner">
+    <div class="top-search">
+      <div class="search-settings">
+        <form class="search-bar" action="search.html">
+          <label class="search-label">
+            <span class="sr-only">Search documentation of gamend_core</span>
+            <div class="search-input-wrapper">
+              <input name="q" type="text" class="search-input" placeholder="Press / to search" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+              <button type="button" tabindex="-1" class="search-close-button" aria-hidden="true">
+                <i class="ri-close-line ri-lg" title="Cancel search"></i>
+              </button>
+            </div>
+          </label>
+        </form>
+        <div class="autocomplete">
+        </div>
+        <div class="engine-selector" data-multiple="false">
+          <button type="button" class="engine-button" aria-label="Select search engine" aria-haspopup="true" aria-expanded="false">
+            <i class="ri-search-2-line" aria-hidden="true"></i>
+            <span class="engine-name">Default</span>
+            <i class="ri-arrow-down-s-line" aria-hidden="true"></i>
+          </button>
+          <div class="engine-dropdown" hidden role="menu">
+
+              <button type="button"
+                      class="engine-option"
+                      data-engine-url="search.html?q="
+                      role="menuitemradio"
+                      aria-checked="true">
+                <span class="name">Default</span>
+                <span class="help">In-browser search</span>
+              </button>
+
+          </div>
+        </div>
+        <button class="icon-settings display-settings">
+          <i class="ri-settings-3-line"></i>
+          <span class="sr-only">Settings</span>
+        </button>
+      </div>
+    </div>
+
+<div id="top-content">
+  <div class="heading-with-actions top-heading">
+    <h1>
+      <span translate="no">Gamend.<wbr>ReadyChecks</span> 
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1088)</small>
+
+    </h1>
+
+<a href="Gamend.ReadyChecks.md" title="Copy Markdown (hold Ctrl/Cmd and click it to open as Markdown)" class="copy-markdown icon-action" rel="help">
+  <i class="ri-markdown-line" aria-hidden="true"></i>
+  <span class="sr-only">Copy Markdown</span>
+</a>
+
+
+
+      <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L1" title="View Source" class="icon-action" rel="help">
+        <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        <span class="sr-only">View Source</span>
+      </a>
+
+  </div>
+
+
+    <section id="moduledoc">
+<p>Ready checks: <em>these players must each answer before this proceeds</em>.</p><p>One primitive, two kinds — the only differences are what a &quot;no&quot; means and
+whether an answer can be taken back:</p><table><thead><tr><th style="text-align: left;"></th><th style="text-align: left;"><code class="inline">&quot;accept&quot;</code></th><th style="text-align: left;"><code class="inline">&quot;ready&quot;</code></th></tr></thead><tbody><tr><td style="text-align: left;">Answer</td><td style="text-align: left;">one-shot, irrevocable</td><td style="text-align: left;">a toggle</td></tr><tr><td style="text-align: left;">A &quot;no&quot;</td><td style="text-align: left;">fails the check for everyone</td><td style="text-align: left;">leaves it pending</td></tr><tr><td style="text-align: left;">Deadline</td><td style="text-align: left;">mandatory</td><td style="text-align: left;">optional</td></tr><tr><td style="text-align: left;">On timeout</td><td style="text-align: left;">fails</td><td style="text-align: left;">fails, naming who stalled</td></tr></tbody></table><p><code class="inline">&quot;ready&quot;</code> is the lobby's ready-up and the party's standing ready board;
+<code class="inline">&quot;accept&quot;</code> is matchmaking's match confirmation (see
+the moduledoc below).</p><h2 id="module-two-lanes" class="section-heading"><a href="#module-two-lanes" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Two lanes</span></h2><p>A player can be in at most one open check <em>per lane</em>: the match lane (lobby
+ready or matchmaking accept — one match at a time) and the party lane. The
+lanes are independent, so a party's standing board never blocks the party's
+lobby from opening its own check.</p><h2 id="module-what-core-does-not-do" class="section-heading"><a href="#module-what-core-does-not-do" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">What core does <em>not</em> do</span></h2><p>A failed check kicks nobody, deletes no lobby and moves no lobby state. Core
+records who did not answer (<a href="#not_ready/1"><code class="inline">not_ready/1</code></a>); the host — or the game, in
+<code class="inline">after_ready_check_failed</code> — decides what that is worth.</p><h2 id="module-usage" class="section-heading"><a href="#module-usage" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Usage</span></h2><pre><code class="makeup elixir" translate="no"><span class="p" data-group-id="9169053673-1">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">check</span><span class="p" data-group-id="9169053673-1">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">ReadyChecks</span><span class="o">.</span><span class="n">open</span><span class="p" data-group-id="9169053673-2">(</span><span class="n">lobby</span><span class="p">,</span><span class="w"> </span><span class="n">member_ids</span><span class="p">,</span><span class="w"> </span><span class="ss">opened_by</span><span class="p">:</span><span class="w"> </span><span class="n">host</span><span class="o">.</span><span class="n">id</span><span class="p" data-group-id="9169053673-2">)</span><span class="w">
+</span><span class="p" data-group-id="9169053673-3">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">check</span><span class="p" data-group-id="9169053673-3">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">ReadyChecks</span><span class="o">.</span><span class="n">respond</span><span class="p" data-group-id="9169053673-4">(</span><span class="n">user</span><span class="p">,</span><span class="w"> </span><span class="no">true</span><span class="p" data-group-id="9169053673-4">)</span><span class="w">
+</span><span class="nc">ReadyChecks</span><span class="o">.</span><span class="n">passed?</span><span class="p" data-group-id="9169053673-5">(</span><span class="n">lobby</span><span class="p" data-group-id="9169053673-5">)</span></code></pre><h2 id="module-concurrency" class="section-heading"><a href="#module-concurrency" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Concurrency</span></h2><p>Answering is a single-row write, so no two players can lose each other's
+flag. <em>Evaluating</em> the result is the part that races: two players answering
+at once can each count the other as still pending, and nobody passes. So
+<a href="#respond/3"><code class="inline">respond/3</code></a> holds a per-check advisory lock (<code class="inline">:ready_check</code>) around
+write-then-evaluate. Hooks and broadcasts fire after the lock is released —
+never inside the transaction.</p>
+    </section>
+
+</div>
+
+  <section id="summary" class="details-list">
+    <h2 class="section-heading">
+      <a class="hover-link" href="#summary">
+        <i class="ri-link-m" aria-hidden="true"></i>
+      </a>
+      <span class="text">Summary</span>
+    </h2>
+<div class="summary-types summary">
+  <h3>
+    <a href="#types">Types</a>
+  </h3>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#t:answer/0" data-no-tooltip="" translate="no">answer()</a>
+
+      </div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#t:scope/0" data-no-tooltip="" translate="no">scope()</a>
+
+      </div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#t:subject/0" data-no-tooltip="" translate="no">subject()</a>
+
+      </div>
+
+    </div>
+
+</div>
+<div class="summary-functions summary">
+  <h3>
+    <a href="#functions">Functions</a>
+  </h3>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#add_member/2" data-no-tooltip="" translate="no">add_member(lobby_id, user_id)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Adds a member to the lobby's open check, if there is one.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#add_party_member/2" data-no-tooltip="" translate="no">add_party_member(party_id, user_id)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Adds a member to the party's open check, if there is one.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#answer_for/3" data-no-tooltip="" translate="no">answer_for(check, user_id, ready?)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Answers on behalf of a member — for bots and AI-controlled players, which
+cannot press anything.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#cancel/2" data-no-tooltip="" translate="no">cancel(check, reason \\ &quot;cancelled&quot;)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Cancels a pending check — the host called it off, or the subject went away.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#cancel_for_lobby/1" data-no-tooltip="" translate="no">cancel_for_lobby(lobby_id)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Cancels the lobby's pending check, if it has one.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#cancel_for_party/1" data-no-tooltip="" translate="no">cancel_for_party(party_id)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Cancels the party's pending check, if it has one.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#count_checks/1" data-no-tooltip="" translate="no">count_checks(opts \\ [])</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Counts checks matching the same filters as <a href="#list_checks/1"><code class="inline">list_checks/1</code></a>.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#expire/1" data-no-tooltip="" translate="no">expire(check)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Fails one check on its deadline_at. A no-op if it already resolved.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#expire_due/1" data-no-tooltip="" translate="no">expire_due(now \\ DateTime.utc_now())</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Fails every pending check whose deadline_at has passed.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#for_user/2" data-no-tooltip="" translate="no">for_user(user, scope \\ :any)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>The caller's open check, with participants preloaded, or nil.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#get_check/1" data-no-tooltip="" translate="no">get_check(id)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Fetches a check by id (with participants), or nil.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#list_checks/1" data-no-tooltip="" translate="no">list_checks(opts \\ [])</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Lists checks for the admin views, newest first.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#not_ready/1" data-no-tooltip="" translate="no">not_ready(check)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>The participants who did not answer ready — the host's kick list, and what
+<code class="inline">after_ready_check_failed</code> is handed.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#open/3" data-no-tooltip="" translate="no">open(subject, user_ids, opts \\ [])</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Opens a check over <code class="inline">user_ids</code> and notifies them.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#passed?/1" data-no-tooltip="" translate="no">passed?(lobby_id)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>True when the subject's most recent check passed.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#pending_for_lobby/1" data-no-tooltip="" translate="no">pending_for_lobby(lobby_id)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>The lobby's open check, with participants preloaded, or nil.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#pending_for_party/1" data-no-tooltip="" translate="no">pending_for_party(party_id)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>The party's open check, with participants preloaded, or nil.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#remove_member/2" data-no-tooltip="" translate="no">remove_member(lobby_id, user_id)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Drops a member from the lobby's open check and re-evaluates it.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#remove_party_member/2" data-no-tooltip="" translate="no">remove_party_member(party_id, user_id)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Drops a member from the party's open check and re-evaluates it.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#reset/3" data-no-tooltip="" translate="no">reset(subject, user_ids, opts \\ [])</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Resets the subject's board: quietly cancels its pending check (no failed
+event, no hook — the fresh <code class="inline">ready_check_started</code> replaces it on clients) and
+opens a new one over <code class="inline">user_ids</code>.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#respond/3" data-no-tooltip="" translate="no">respond(user, ready?, scope \\ :match)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Records the caller's answer to their open check in <code class="inline">scope</code> and re-evaluates
+it.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#stats/1" data-no-tooltip="" translate="no">stats(hours \\ 24)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Counts by status over the last <code class="inline">hours</code> — the accept-rate and dodge-rate
+numbers on the admin page.</p></div>
+
+    </div>
+
+</div>
+
+  </section>
+
+
+  <section id="types" class="details-list">
+    <h2 class="section-heading">
+      <a class="hover-link" href="#types">
+        <i class="ri-link-m" aria-hidden="true"></i>
+      </a>
+      <span class="text">Types</span>
+    </h2>
+
+    <div class="types-list">
+<section class="detail" id="t:answer/0">
+
+  <div class="detail-header">
+    <a href="#t:answer/0" class="detail-link" data-no-tooltip="" aria-label="Link to this type">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">answer()</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L63" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@type</span> answer() :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:scope/0">
+
+  <div class="detail-header">
+    <a href="#t:scope/0" class="detail-link" data-no-tooltip="" aria-label="Link to this type">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">scope()</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L62" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@type</span> scope() :: :match | :party</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:subject/0">
+
+  <div class="detail-header">
+    <a href="#t:subject/0" class="detail-link" data-no-tooltip="" aria-label="Link to this type">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">subject()</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L61" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@type</span> subject() :: <a href="Gamend.Lobbies.Lobby.html#t:t/0">Gamend.Lobbies.Lobby.t</a>() | <a href="Gamend.Parties.Party.html#t:t/0">Gamend.Parties.Party.t</a>() | :matchmaking</pre>
+
+      </div>
+
+
+  </section>
+</section>
+
+    </div>
+  </section>
+
+  <section id="functions" class="details-list">
+    <h2 class="section-heading">
+      <a class="hover-link" href="#functions">
+        <i class="ri-link-m" aria-hidden="true"></i>
+      </a>
+      <span class="text">Functions</span>
+    </h2>
+
+    <div class="functions-list">
+<section class="detail" id="add_member/2">
+
+  <div class="detail-header">
+    <a href="#add_member/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">add_member(lobby_id, user_id)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L463" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> add_member(<a href="https://hexdocs.pm/ecto/3.13.6/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>(), <a href="https://hexdocs.pm/ecto/3.13.6/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) :: :ok</pre>
+
+      </div>
+
+<p>Adds a member to the lobby's open check, if there is one.</p>
+  </section>
+</section>
+<section class="detail" id="add_party_member/2">
+
+  <div class="detail-header">
+    <a href="#add_party_member/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">add_party_member(party_id, user_id)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L469" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> add_party_member(<a href="https://hexdocs.pm/ecto/3.13.6/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>(), <a href="https://hexdocs.pm/ecto/3.13.6/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) :: :ok</pre>
+
+      </div>
+
+<p>Adds a member to the party's open check, if there is one.</p>
+  </section>
+</section>
+<section class="detail" id="answer_for/3">
+
+  <div class="detail-header">
+    <a href="#answer_for/3" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">answer_for(check, user_id, ready?)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L292" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> answer_for(<a href="Gamend.ReadyChecks.Check.html#t:t/0">Gamend.ReadyChecks.Check.t</a>(), <a href="https://hexdocs.pm/ecto/3.13.6/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>(), <a href="#t:answer/0">answer</a>()) ::
+  {:ok, <a href="Gamend.ReadyChecks.Check.html#t:t/0">Gamend.ReadyChecks.Check.t</a>()} | {:error, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}</pre>
+
+      </div>
+
+<p>Answers on behalf of a member — for bots and AI-controlled players, which
+cannot press anything.</p><p>Server-side only: this is in <code class="inline">internal_hooks()</code>, so a client cannot reach it
+over RPC and mark someone else ready.</p>
+  </section>
+</section>
+<section class="detail" id="cancel/2">
+
+    <span id="cancel/1"></span>
+
+  <div class="detail-header">
+    <a href="#cancel/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">cancel(check, reason \\ &quot;cancelled&quot;)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L498" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> cancel(<a href="Gamend.ReadyChecks.Check.html#t:t/0">Gamend.ReadyChecks.Check.t</a>(), <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()) ::
+  {:ok, <a href="Gamend.ReadyChecks.Check.html#t:t/0">Gamend.ReadyChecks.Check.t</a>()} | {:error, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}</pre>
+
+      </div>
+
+<p>Cancels a pending check — the host called it off, or the subject went away.</p>
+  </section>
+</section>
+<section class="detail" id="cancel_for_lobby/1">
+
+  <div class="detail-header">
+    <a href="#cancel_for_lobby/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">cancel_for_lobby(lobby_id)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L515" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> cancel_for_lobby(<a href="https://hexdocs.pm/ecto/3.13.6/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) :: :ok</pre>
+
+      </div>
+
+<p>Cancels the lobby's pending check, if it has one.</p>
+  </section>
+</section>
+<section class="detail" id="cancel_for_party/1">
+
+  <div class="detail-header">
+    <a href="#cancel_for_party/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">cancel_for_party(party_id)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L524" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> cancel_for_party(<a href="https://hexdocs.pm/ecto/3.13.6/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) :: :ok</pre>
+
+      </div>
+
+<p>Cancels the party's pending check, if it has one.</p>
+  </section>
+</section>
+<section class="detail" id="count_checks/1">
+
+    <span id="count_checks/0"></span>
+
+  <div class="detail-header">
+    <a href="#count_checks/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">count_checks(opts \\ [])</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L698" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> count_checks(<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">keyword</a>()) :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>()</pre>
+
+      </div>
+
+<p>Counts checks matching the same filters as <a href="#list_checks/1"><code class="inline">list_checks/1</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="expire/1">
+
+  <div class="detail-header">
+    <a href="#expire/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">expire(check)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L548" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> expire(<a href="Gamend.ReadyChecks.Check.html#t:t/0">Gamend.ReadyChecks.Check.t</a>()) :: :ok | :noop</pre>
+
+      </div>
+
+<p>Fails one check on its deadline_at. A no-op if it already resolved.</p>
+  </section>
+</section>
+<section class="detail" id="expire_due/1">
+
+    <span id="expire_due/0"></span>
+
+  <div class="detail-header">
+    <a href="#expire_due/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">expire_due(now \\ DateTime.utc_now())</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L539" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> expire_due(<a href="https://hexdocs.pm/elixir/DateTime.html#t:t/0">DateTime.t</a>()) :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>()</pre>
+
+      </div>
+
+<p>Fails every pending check whose deadline_at has passed.</p><p>Each still-unanswered participant becomes <code class="inline">timed_out</code>. Returns how many
+checks were expired. Idempotent, so the durable expiry job and the
+matchmaking sweep's backstop can both run it.</p>
+  </section>
+</section>
+<section class="detail" id="for_user/2">
+
+    <span id="for_user/1"></span>
+
+  <div class="detail-header">
+    <a href="#for_user/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">for_user(user, scope \\ :any)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L591" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> for_user(<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>() | <a href="https://hexdocs.pm/ecto/3.13.6/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>(), <a href="#t:scope/0">scope</a>() | :any) ::
+  <a href="Gamend.ReadyChecks.Check.html#t:t/0">Gamend.ReadyChecks.Check.t</a>() | nil</pre>
+
+      </div>
+
+<p>The caller's open check, with participants preloaded, or nil.</p><p><code class="inline">scope</code> narrows to one lane: <code class="inline">:match</code> (lobby or matchmaking) or <code class="inline">:party</code>.
+<code class="inline">:any</code> returns the newest across both lanes — the admin's view, not the
+API's.</p>
+  </section>
+</section>
+<section class="detail" id="get_check/1">
+
+  <div class="detail-header">
+    <a href="#get_check/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">get_check(id)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L673" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> get_check(<a href="https://hexdocs.pm/ecto/3.13.6/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) :: <a href="Gamend.ReadyChecks.Check.html#t:t/0">Gamend.ReadyChecks.Check.t</a>() | nil</pre>
+
+      </div>
+
+<p>Fetches a check by id (with participants), or nil.</p>
+  </section>
+</section>
+<section class="detail" id="list_checks/1">
+
+    <span id="list_checks/0"></span>
+
+  <div class="detail-header">
+    <a href="#list_checks/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">list_checks(opts \\ [])</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L687" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> list_checks(<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">keyword</a>()) :: [<a href="Gamend.ReadyChecks.Check.html#t:t/0">Gamend.ReadyChecks.Check.t</a>()]</pre>
+
+      </div>
+
+<p>Lists checks for the admin views, newest first.</p><p>Options: <code class="inline">:status</code>, <code class="inline">:kind</code>, <code class="inline">:lobby_id</code>, <code class="inline">:party_id</code>, <code class="inline">:page</code>,
+<code class="inline">:page_size</code>.</p>
+  </section>
+</section>
+<section class="detail" id="not_ready/1">
+
+  <div class="detail-header">
+    <a href="#not_ready/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">not_ready(check)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L665" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> not_ready(<a href="Gamend.ReadyChecks.Check.html#t:t/0">Gamend.ReadyChecks.Check.t</a>()) :: [<a href="Gamend.ReadyChecks.Participant.html#t:t/0">Gamend.ReadyChecks.Participant.t</a>()]</pre>
+
+      </div>
+
+<p>The participants who did not answer ready — the host's kick list, and what
+<code class="inline">after_ready_check_failed</code> is handed.</p>
+  </section>
+</section>
+<section class="detail" id="open/3">
+
+    <span id="open/2"></span>
+
+  <div class="detail-header">
+    <a href="#open/3" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">open(subject, user_ids, opts \\ [])</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L88" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> open(<a href="#t:subject/0">subject</a>(), [<a href="https://hexdocs.pm/ecto/3.13.6/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()], <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">keyword</a>()) ::
+  {:ok, <a href="Gamend.ReadyChecks.Check.html#t:t/0">Gamend.ReadyChecks.Check.t</a>()} | {:error, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}</pre>
+
+      </div>
+
+<p>Opens a check over <code class="inline">user_ids</code> and notifies them.</p><p><code class="inline">subject</code> is a <code class="inline">%Lobby{}</code> or <code class="inline">%Party{}</code> (kind <code class="inline">&quot;ready&quot;</code>) or <code class="inline">:matchmaking</code>
+(kind <code class="inline">&quot;accept&quot;</code>). Options:</p><ul><li><code class="inline">:kind</code> — override the kind implied by the subject</li><li><code class="inline">:timeout_ms</code> — answering window; <code class="inline">nil</code> leaves a <code class="inline">&quot;ready&quot;</code> check open
+until it passes or is cancelled. Defaults to <code class="inline">ready_check_timeout_ms</code>.</li><li><code class="inline">:opened_by</code> — the user who asked for it; they are pre-marked ready,
+since clicking the button is their answer</li><li><code class="inline">:ready</code> — user ids to pre-mark ready (bots, an auto-ready mode)</li><li><code class="inline">:tickets</code> — <code class="inline">%{user_id =&gt; ticket_id}</code> for matchmaking checks</li><li><code class="inline">:metadata</code> — game payload echoed to clients (match params, mode)</li></ul><p>Fails with <code class="inline">{:error, :already_pending}</code> when the subject already has an open
+check or any player is in one in the same lane, <code class="inline">{:error, :no_participants}</code>,
+and <code class="inline">{:error, :too_many_participants}</code> past <code class="inline">max_ready_check_participants</code>.</p>
+  </section>
+</section>
+<section class="detail" id="passed?/1">
+
+  <div class="detail-header">
+    <a href="#passed?/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">passed?(lobby_id)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L640" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> passed?(<a href="Gamend.Lobbies.Lobby.html#t:t/0">Gamend.Lobbies.Lobby.t</a>() | <a href="Gamend.Parties.Party.html#t:t/0">Gamend.Parties.Party.t</a>() | <a href="https://hexdocs.pm/ecto/3.13.6/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) ::
+  <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()</pre>
+
+      </div>
+
+<p>True when the subject's most recent check passed.</p><p>What a game calls from <code class="inline">before_lobby_state_change</code> to gate its own start.
+A reset opens a fresh pending check, which makes this false again — so a
+rematch cannot ride the previous match's pass.</p>
+  </section>
+</section>
+<section class="detail" id="pending_for_lobby/1">
+
+  <div class="detail-header">
+    <a href="#pending_for_lobby/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">pending_for_lobby(lobby_id)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L612" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> pending_for_lobby(<a href="https://hexdocs.pm/ecto/3.13.6/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) :: <a href="Gamend.ReadyChecks.Check.html#t:t/0">Gamend.ReadyChecks.Check.t</a>() | nil</pre>
+
+      </div>
+
+<p>The lobby's open check, with participants preloaded, or nil.</p>
+  </section>
+</section>
+<section class="detail" id="pending_for_party/1">
+
+  <div class="detail-header">
+    <a href="#pending_for_party/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">pending_for_party(party_id)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L623" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> pending_for_party(<a href="https://hexdocs.pm/ecto/3.13.6/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) :: <a href="Gamend.ReadyChecks.Check.html#t:t/0">Gamend.ReadyChecks.Check.t</a>() | nil</pre>
+
+      </div>
+
+<p>The party's open check, with participants preloaded, or nil.</p>
+  </section>
+</section>
+<section class="detail" id="remove_member/2">
+
+  <div class="detail-header">
+    <a href="#remove_member/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">remove_member(lobby_id, user_id)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L432" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> remove_member(<a href="https://hexdocs.pm/ecto/3.13.6/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>(), <a href="https://hexdocs.pm/ecto/3.13.6/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) :: :ok</pre>
+
+      </div>
+
+<p>Drops a member from the lobby's open check and re-evaluates it.</p><p>Called when someone leaves or is kicked: kicking the one player who never
+answered is a legitimate way to pass a check.</p>
+  </section>
+</section>
+<section class="detail" id="remove_party_member/2">
+
+  <div class="detail-header">
+    <a href="#remove_party_member/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">remove_party_member(party_id, user_id)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L438" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> remove_party_member(<a href="https://hexdocs.pm/ecto/3.13.6/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>(), <a href="https://hexdocs.pm/ecto/3.13.6/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) :: :ok</pre>
+
+      </div>
+
+<p>Drops a member from the party's open check and re-evaluates it.</p>
+  </section>
+</section>
+<section class="detail" id="reset/3">
+
+    <span id="reset/2"></span>
+
+  <div class="detail-header">
+    <a href="#reset/3" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">reset(subject, user_ids, opts \\ [])</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L114" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> reset(<a href="#t:subject/0">subject</a>(), [<a href="https://hexdocs.pm/ecto/3.13.6/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()], <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">keyword</a>()) ::
+  {:ok, <a href="Gamend.ReadyChecks.Check.html#t:t/0">Gamend.ReadyChecks.Check.t</a>()} | {:error, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}</pre>
+
+      </div>
+
+<p>Resets the subject's board: quietly cancels its pending check (no failed
+event, no hook — the fresh <code class="inline">ready_check_started</code> replaces it on clients) and
+opens a new one over <code class="inline">user_ids</code>.</p><p>The one verb behind every &quot;answers are stale now&quot; moment: a match ended
+(rematch needs a fresh board), the game mode changed, a member joined a
+party whose board had already resolved, or the host wants everyone to
+re-confirm on a deadline_at (&quot;force ready&quot;). Same options as <a href="#open/3"><code class="inline">open/3</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="respond/3">
+
+    <span id="respond/2"></span>
+
+  <div class="detail-header">
+    <a href="#respond/3" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">respond(user, ready?, scope \\ :match)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L275" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> respond(<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>() | <a href="https://hexdocs.pm/ecto/3.13.6/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>(), <a href="#t:answer/0">answer</a>(), <a href="#t:scope/0">scope</a>()) ::
+  {:ok, <a href="Gamend.ReadyChecks.Check.html#t:t/0">Gamend.ReadyChecks.Check.t</a>()} | {:error, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}</pre>
+
+      </div>
+
+<p>Records the caller's answer to their open check in <code class="inline">scope</code> and re-evaluates
+it.</p><p><code class="inline">scope</code> is <code class="inline">:match</code> (the lobby ready-up or matchmaking accept — the default)
+or <code class="inline">:party</code> (the party's standing board): a player can hold one open check
+in each lane, so the answer needs to say which one it is for.</p><p><code class="inline">true</code> is &quot;ready&quot;/&quot;accept&quot;; <code class="inline">false</code> is &quot;not ready&quot;/&quot;decline&quot;. In an <code class="inline">accept</code>
+check a decline fails the whole check; in a <code class="inline">ready</code> check it just leaves the
+check pending and can be taken back.</p><p>Returns the check as it stands after the answer. Fails with
+<code class="inline">{:error, :no_open_check}</code> and, for an <code class="inline">accept</code> check the caller already
+answered, <code class="inline">{:error, :not_revocable}</code>.</p>
+  </section>
+</section>
+<section class="detail" id="stats/1">
+
+    <span id="stats/0"></span>
+
+  <div class="detail-header">
+    <a href="#stats/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">stats(hours \\ 24)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L707" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> stats(<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pos_integer</a>()) :: %{required(<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()) =&gt; <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>()}</pre>
+
+      </div>
+
+<p>Counts by status over the last <code class="inline">hours</code> — the accept-rate and dodge-rate
+numbers on the admin page.</p>
+  </section>
+</section>
+
+    </div>
+  </section>
+
+    <footer class="footer">
+
+        <p>
+
+            <span class="line">
+              <a href="https://hex.pm/packages/gamend_core/1.0.1088">Hex Package</a>
+
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1088">Hex Preview</a>
+
+            </span>
+
+          <span class="line">
+            <button class="a-main footer-button display-quick-switch" title="Go to package docs">
+              Go to package docs
+            </button>
+
+              <a href="llms.txt" target="_blank">
+                View llms.txt
+              </a>
+
+
+              <a href="gamend_core.epub">
+                Download ePub version
+              </a>
+
+          </span>
+        </p>
+
+        <p class="built-using">
+          Built using
+          <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener" translate="no">ExDoc</a> (v0.40.1) for the
+
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank" translate="no">Elixir programming language</a>
+
+        </p>
+
+
+    </footer>
+  </div>
+</main>
+</div>
+
+  </body>
+</html>

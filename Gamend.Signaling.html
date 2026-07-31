@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.40.1">
+    <meta name="project" content="gamend_core v1.0.1088">
+
+
+    <title>Gamend.Signaling — gamend_core v1.0.1088</title>
+
+    <link rel="stylesheet" href="dist/html-elixir-YJO4MOOW.css" />
+
+    <script defer src="dist/sidebar_items-B2D06903.js"></script>
+    <script defer src="docs_config.js"></script>
+    <script defer src="dist/html-YU4BZFVS.js"></script>
+
+  </head>
+  <body>
+    <script>(()=>{var t="ex_doc:settings",e="dark";var o="dark",s="light";var E="sidebar_state",n="closed";var r="sidebar_width";var a="sidebar-open";var i=new URLSearchParams(window.location.search),S=i.get("theme")||JSON.parse(localStorage.getItem(t)||"{}").theme;(S===o||S!==s&&window.matchMedia("(prefers-color-scheme: dark)").matches)&&document.body.classList.add(e);var d=sessionStorage.getItem(E),A=d!==n&&!window.matchMedia(`screen and (max-width: ${768}px)`).matches;document.body.classList.toggle(a,A);var c=sessionStorage.getItem(r);c&&document.body.style.setProperty("--sidebarWidth",`${c}px`);var p=/(Macintosh|iPhone|iPad|iPod)/.test(window.navigator.userAgent);document.documentElement.classList.toggle("apple-os",p);})();
+</script>
+
+<div class="body-wrapper">
+
+<button id="sidebar-menu" class="sidebar-button sidebar-toggle" aria-label="toggle sidebar" aria-controls="sidebar">
+  <i class="ri-menu-line ri-lg" title="Collapse/expand sidebar"></i>
+</button>
+
+<nav id="sidebar" class="sidebar">
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectInfo">
+
+      <div>
+        <a href="readme.html" class="sidebar-projectName" translate="no">
+gamend_core
+        </a>
+        <div class="sidebar-projectVersion" translate="no">
+          v1.0.1088
+        </div>
+      </div>
+    </div>
+    <ul id="sidebar-list-nav" class="sidebar-list-nav" role="tablist" data-extras="Pages"></ul>
+  </div>
+</nav>
+
+<output role="status" id="toast"></output>
+
+<main class="content page-module" id="main" data-type="modules">
+  <div id="content" class="content-inner">
+    <div class="top-search">
+      <div class="search-settings">
+        <form class="search-bar" action="search.html">
+          <label class="search-label">
+            <span class="sr-only">Search documentation of gamend_core</span>
+            <div class="search-input-wrapper">
+              <input name="q" type="text" class="search-input" placeholder="Press / to search" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+              <button type="button" tabindex="-1" class="search-close-button" aria-hidden="true">
+                <i class="ri-close-line ri-lg" title="Cancel search"></i>
+              </button>
+            </div>
+          </label>
+        </form>
+        <div class="autocomplete">
+        </div>
+        <div class="engine-selector" data-multiple="false">
+          <button type="button" class="engine-button" aria-label="Select search engine" aria-haspopup="true" aria-expanded="false">
+            <i class="ri-search-2-line" aria-hidden="true"></i>
+            <span class="engine-name">Default</span>
+            <i class="ri-arrow-down-s-line" aria-hidden="true"></i>
+          </button>
+          <div class="engine-dropdown" hidden role="menu">
+
+              <button type="button"
+                      class="engine-option"
+                      data-engine-url="search.html?q="
+                      role="menuitemradio"
+                      aria-checked="true">
+                <span class="name">Default</span>
+                <span class="help">In-browser search</span>
+              </button>
+
+          </div>
+        </div>
+        <button class="icon-settings display-settings">
+          <i class="ri-settings-3-line"></i>
+          <span class="sr-only">Settings</span>
+        </button>
+      </div>
+    </div>
+
+<div id="top-content">
+  <div class="heading-with-actions top-heading">
+    <h1>
+      <span translate="no">Gamend.<wbr>Signaling</span> 
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1088)</small>
+
+    </h1>
+
+<a href="Gamend.Signaling.md" title="Copy Markdown (hold Ctrl/Cmd and click it to open as Markdown)" class="copy-markdown icon-action" rel="help">
+  <i class="ri-markdown-line" aria-hidden="true"></i>
+  <span class="sr-only">Copy Markdown</span>
+</a>
+
+
+
+      <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L1" title="View Source" class="icon-action" rel="help">
+        <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        <span class="sr-only">View Source</span>
+      </a>
+
+  </div>
+
+
+    <section id="moduledoc">
+<p>WebRTC signaling: who is in a room, and relaying offers between them.</p><p>A &quot;room&quot; is a lobby. There is no room record and no room process — the
+configuration lives in the lobby's own <code class="inline">webrtc_*</code> columns, membership lives
+in <a href="Gamend.Presence.html"><code class="inline">Gamend.Presence</code></a>, and relayed messages travel over <a href="https://hexdocs.pm/phoenix_pubsub/2.2.0/Phoenix.PubSub.html"><code class="inline">Phoenix.PubSub</code></a>.
+All three are cluster-wide, so a peer on one node can signal a peer on
+another.</p><p>That is the reason for this shape. The previous version kept rooms in a
+GenServer registered under a plain local name, so a room created on one node
+did not exist on any other, and every player whose socket landed elsewhere
+failed to join with <code class="inline">:room_not_found</code>.</p><h2 id="module-configuration" class="section-heading"><a href="#module-configuration" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Configuration</span></h2><p>Read from the lobby, never mirrored:</p><pre><code class="makeup elixir" translate="no"><span class="nc">Signaling</span><span class="o">.</span><span class="n">configure</span><span class="p" data-group-id="5852741920-1">(</span><span class="n">lobby</span><span class="p">,</span><span class="w"> </span><span class="ss">enabled</span><span class="p">:</span><span class="w"> </span><span class="no">true</span><span class="p">,</span><span class="w"> </span><span class="ss">topology</span><span class="p">:</span><span class="w"> </span><span class="ss">:star</span><span class="p" data-group-id="5852741920-1">)</span></code></pre><p>Held in server-owned <code class="inline">lobbies.webrtc_*</code> columns, written only by
+<a href="#configure/2"><code class="inline">configure/2</code></a>. It lived in <code class="inline">metadata</code> once, which was wrong twice over: that
+map is replaced wholesale by any writer, so a game storing match state wiped
+it, and the lobby host can <code class="inline">PATCH</code> it, so a player could flip the topology and
+hand everyone the right to broadcast. The star host is always
+<code class="inline">lobby.host_id</code> and is not settable.</p><h2 id="module-topology" class="section-heading"><a href="#module-topology" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Topology</span></h2><ul><li><code class="inline">:mesh</code> — any peer may signal any other.</li><li><code class="inline">:star</code> — every exchange must involve the host, and only the host may
+broadcast.</li></ul>
+    </section>
+
+</div>
+
+  <section id="summary" class="details-list">
+    <h2 class="section-heading">
+      <a class="hover-link" href="#summary">
+        <i class="ri-link-m" aria-hidden="true"></i>
+      </a>
+      <span class="text">Summary</span>
+    </h2>
+<div class="summary-types summary">
+  <h3>
+    <a href="#types">Types</a>
+  </h3>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#t:config/0" data-no-tooltip="" translate="no">config()</a>
+
+      </div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#t:message_type/0" data-no-tooltip="" translate="no">message_type()</a>
+
+      </div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#t:role/0" data-no-tooltip="" translate="no">role()</a>
+
+      </div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#t:room_id/0" data-no-tooltip="" translate="no">room_id()</a>
+
+      </div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#t:topology/0" data-no-tooltip="" translate="no">topology()</a>
+
+      </div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#t:user_id/0" data-no-tooltip="" translate="no">user_id()</a>
+
+      </div>
+
+    </div>
+
+</div>
+<div class="summary-functions summary">
+  <h3>
+    <a href="#functions">Functions</a>
+  </h3>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#authorize/2" data-no-tooltip="" translate="no">authorize(room_id, user_id)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>The role <code class="inline">user_id</code> may join with, or <code class="inline">{:error, :not_allowed}</code>.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#broadcast/4" data-no-tooltip="" translate="no">broadcast(room_id, from, type, payload)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Sends <code class="inline">payload</code> to every other peer in the room.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#close/1" data-no-tooltip="" translate="no">close(room_id)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Tells every connected peer the room is over, so their channels stop.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#config/1" data-no-tooltip="" translate="no">config(room_id)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>The room's configuration, derived from the lobby.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#configure/2" data-no-tooltip="" translate="no">configure(room_id, opts)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Turns signaling on or off for a lobby, and sets how it behaves.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#enabled?/1" data-no-tooltip="" translate="no">enabled?(room_id)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Whether the lobby has WebRTC enabled.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#inbox/2" data-no-tooltip="" translate="no">inbox(room_id, user_id)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>PubSub topic one peer listens on for messages addressed to it.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#peer_role/2" data-no-tooltip="" translate="no">peer_role(room_id, user_id)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>The role <code class="inline">user_id</code> is connected with, or <code class="inline">nil</code>.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#peers/1" data-no-tooltip="" translate="no">peers(room_id)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Everyone currently connected to the room, as <code class="inline">%{user_id =&gt; role}</code>.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#relay/5" data-no-tooltip="" translate="no">relay(room_id, from, to, type, payload)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Sends <code class="inline">payload</code> to one peer.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#topic/1" data-no-tooltip="" translate="no">topic(room_id)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>PubSub topic carrying a room's presence.</p></div>
+
+    </div>
+
+</div>
+
+  </section>
+
+
+  <section id="types" class="details-list">
+    <h2 class="section-heading">
+      <a class="hover-link" href="#types">
+        <i class="ri-link-m" aria-hidden="true"></i>
+      </a>
+      <span class="text">Types</span>
+    </h2>
+
+    <div class="types-list">
+<section class="detail" id="t:config/0">
+
+  <div class="detail-header">
+    <a href="#t:config/0" class="detail-link" data-no-tooltip="" aria-label="Link to this type">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">config()</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L47" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@type</span> config() :: %{
+  topology: <a href="#t:topology/0">topology</a>(),
+  host_user_id: <a href="#t:user_id/0">user_id</a>() | nil,
+  late_join: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>(),
+  reconnect_timeout: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>()
+}</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:message_type/0">
+
+  <div class="detail-header">
+    <a href="#t:message_type/0" class="detail-link" data-no-tooltip="" aria-label="Link to this type">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">message_type()</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L45" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@type</span> message_type() :: :offer | :answer | :ice</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:role/0">
+
+  <div class="detail-header">
+    <a href="#t:role/0" class="detail-link" data-no-tooltip="" aria-label="Link to this type">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">role()</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L44" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@type</span> role() :: :host | :user</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:room_id/0">
+
+  <div class="detail-header">
+    <a href="#t:room_id/0" class="detail-link" data-no-tooltip="" aria-label="Link to this type">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">room_id()</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L41" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@type</span> room_id() :: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:topology/0">
+
+  <div class="detail-header">
+    <a href="#t:topology/0" class="detail-link" data-no-tooltip="" aria-label="Link to this type">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">topology()</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L43" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@type</span> topology() :: :mesh | :star</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:user_id/0">
+
+  <div class="detail-header">
+    <a href="#t:user_id/0" class="detail-link" data-no-tooltip="" aria-label="Link to this type">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">user_id()</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L42" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@type</span> user_id() :: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()</pre>
+
+      </div>
+
+
+  </section>
+</section>
+
+    </div>
+  </section>
+
+  <section id="functions" class="details-list">
+    <h2 class="section-heading">
+      <a class="hover-link" href="#functions">
+        <i class="ri-link-m" aria-hidden="true"></i>
+      </a>
+      <span class="text">Functions</span>
+    </h2>
+
+    <div class="functions-list">
+<section class="detail" id="authorize/2">
+
+  <div class="detail-header">
+    <a href="#authorize/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">authorize(room_id, user_id)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L143" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> authorize(<a href="#t:room_id/0">room_id</a>(), <a href="#t:user_id/0">user_id</a>()) ::
+  {:ok, <a href="#t:role/0">role</a>()} | {:error, :room_not_found | :not_allowed}</pre>
+
+      </div>
+
+<p>The role <code class="inline">user_id</code> may join with, or <code class="inline">{:error, :not_allowed}</code>.</p><p>Membership comes from the lobby. <code class="inline">late_join</code> decides whether a non-member may
+connect at all; the host of a star room is whoever the lobby says it is.</p>
+  </section>
+</section>
+<section class="detail" id="broadcast/4">
+
+  <div class="detail-header">
+    <a href="#broadcast/4" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">broadcast(room_id, from, type, payload)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L212" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> broadcast(<a href="#t:room_id/0">room_id</a>(), <a href="#t:user_id/0">user_id</a>(), <a href="#t:message_type/0">message_type</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()) ::
+  :ok | {:error, :room_not_found | :user_not_found | :not_allowed}</pre>
+
+      </div>
+
+<p>Sends <code class="inline">payload</code> to every other peer in the room.</p><p>Only the host may broadcast in a star room.</p>
+  </section>
+</section>
+<section class="detail" id="close/1">
+
+  <div class="detail-header">
+    <a href="#close/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">close(room_id)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L231" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> close(<a href="#t:room_id/0">room_id</a>()) :: :ok</pre>
+
+      </div>
+
+<p>Tells every connected peer the room is over, so their channels stop.</p>
+  </section>
+</section>
+<section class="detail" id="config/1">
+
+  <div class="detail-header">
+    <a href="#config/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">config(room_id)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L71" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> config(<a href="#t:room_id/0">room_id</a>()) :: {:ok, <a href="#t:config/0">config</a>()} | {:error, :room_not_found}</pre>
+
+      </div>
+
+<p>The room's configuration, derived from the lobby.</p><p><code class="inline">{:error, :room_not_found}</code> when the lobby is gone or WebRTC is not enabled
+on it — deliberately indistinguishable to a caller.</p>
+  </section>
+</section>
+<section class="detail" id="configure/2">
+
+  <div class="detail-header">
+    <a href="#configure/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">configure(room_id, opts)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L99" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> configure(
+  <a href="Gamend.Lobbies.Lobby.html#t:t/0">Gamend.Lobbies.Lobby.t</a>() | <a href="#t:room_id/0">room_id</a>(),
+  <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">keyword</a>()
+) :: {:ok, <a href="Gamend.Lobbies.Lobby.html#t:t/0">Gamend.Lobbies.Lobby.t</a>()} | {:error, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}</pre>
+
+      </div>
+
+<p>Turns signaling on or off for a lobby, and sets how it behaves.</p><p>The only writer of the <code class="inline">webrtc_*</code> columns. Options: <code class="inline">:enabled</code>, <code class="inline">:topology</code>
+(<code class="inline">:star</code> | <code class="inline">:mesh</code>), <code class="inline">:late_join</code>, <code class="inline">:reconnect_timeout</code>.</p><p>Deliberately not part of the lobby changeset — a client <code class="inline">PATCH</code> must not be
+able to reach any of it. The star host is not settable at all; it is always
+the lobby host.</p>
+  </section>
+</section>
+<section class="detail" id="enabled?/1">
+
+  <div class="detail-header">
+    <a href="#enabled?/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">enabled?(room_id)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L133" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> enabled?(<a href="#t:room_id/0">room_id</a>()) :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()</pre>
+
+      </div>
+
+<p>Whether the lobby has WebRTC enabled.</p>
+  </section>
+</section>
+<section class="detail" id="inbox/2">
+
+  <div class="detail-header">
+    <a href="#inbox/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">inbox(room_id, user_id)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L62" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> inbox(<a href="#t:room_id/0">room_id</a>(), <a href="#t:user_id/0">user_id</a>()) :: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()</pre>
+
+      </div>
+
+<p>PubSub topic one peer listens on for messages addressed to it.</p>
+  </section>
+</section>
+<section class="detail" id="peer_role/2">
+
+  <div class="detail-header">
+    <a href="#peer_role/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">peer_role(room_id, user_id)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L181" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> peer_role(<a href="#t:room_id/0">room_id</a>(), <a href="#t:user_id/0">user_id</a>()) :: <a href="#t:role/0">role</a>() | nil</pre>
+
+      </div>
+
+<p>The role <code class="inline">user_id</code> is connected with, or <code class="inline">nil</code>.</p>
+  </section>
+</section>
+<section class="detail" id="peers/1">
+
+  <div class="detail-header">
+    <a href="#peers/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">peers(room_id)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L163" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> peers(<a href="#t:room_id/0">room_id</a>()) :: %{required(<a href="#t:user_id/0">user_id</a>()) =&gt; <a href="#t:role/0">role</a>()}</pre>
+
+      </div>
+
+<p>Everyone currently connected to the room, as <code class="inline">%{user_id =&gt; role}</code>.</p><p>The role is computed from the lobby on every read rather than read back from
+the presence meta it was tracked with. Otherwise a host change leaves the new
+host tracked as <code class="inline">:user</code> and the old one still holding <code class="inline">:host</code> until they
+happen to reconnect.</p>
+  </section>
+</section>
+<section class="detail" id="relay/5">
+
+  <div class="detail-header">
+    <a href="#relay/5" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">relay(room_id, from, to, type, payload)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L191" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> relay(<a href="#t:room_id/0">room_id</a>(), <a href="#t:user_id/0">user_id</a>(), <a href="#t:user_id/0">user_id</a>(), <a href="#t:message_type/0">message_type</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()) ::
+  :ok | {:error, :room_not_found | :user_not_found | :not_allowed}</pre>
+
+      </div>
+
+<p>Sends <code class="inline">payload</code> to one peer.</p><p>In a star room every exchange must involve the host; in a mesh room any pair
+may talk.</p>
+  </section>
+</section>
+<section class="detail" id="topic/1">
+
+  <div class="detail-header">
+    <a href="#topic/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">topic(room_id)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L58" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> topic(<a href="#t:room_id/0">room_id</a>()) :: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()</pre>
+
+      </div>
+
+<p>PubSub topic carrying a room's presence.</p>
+  </section>
+</section>
+
+    </div>
+  </section>
+
+    <footer class="footer">
+
+        <p>
+
+            <span class="line">
+              <a href="https://hex.pm/packages/gamend_core/1.0.1088">Hex Package</a>
+
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1088">Hex Preview</a>
+
+            </span>
+
+          <span class="line">
+            <button class="a-main footer-button display-quick-switch" title="Go to package docs">
+              Go to package docs
+            </button>
+
+              <a href="llms.txt" target="_blank">
+                View llms.txt
+              </a>
+
+
+              <a href="gamend_core.epub">
+                Download ePub version
+              </a>
+
+          </span>
+        </p>
+
+        <p class="built-using">
+          Built using
+          <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener" translate="no">ExDoc</a> (v0.40.1) for the
+
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank" translate="no">Elixir programming language</a>
+
+        </p>
+
+
+    </footer>
+  </div>
+</main>
+</div>
+
+  </body>
+</html>

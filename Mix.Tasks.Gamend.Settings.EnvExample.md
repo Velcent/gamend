@@ -1,7 +1,7 @@
 # `mix gamend.settings.env_example`
-[🔗](https://github.com/appsinacup/game_server/blob/v1.0.7/lib/mix/tasks/gamend.settings.env_example.ex#L1)
+[🔗](https://github.com/appsinacup/gamend/blob/v1.0.7/lib/mix/tasks/gamend.settings.env_example.ex#L1)
 
-Writes `.env.example` from `GameServer.Settings.all/0`, grouped and
+Writes `.env.example` from `Gamend.Settings.all/0`, grouped and
 commented from each setting's declaration.
 
     mix gamend.settings.env_example          # write .env.example

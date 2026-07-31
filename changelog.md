@@ -1,5 +1,6 @@
 # July 2026
 
+- [breaking] **Renamed to Gamend.**
 - [added] **Captcha** on the register and magic-link forms
 - [breaking] **One theme file**
 - [added] **Translation pipeline**

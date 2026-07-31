@@ -1,5 +1,5 @@
 # `mix gamend.content.migrate_metadata`
-[🔗](https://github.com/appsinacup/game_server/blob/v1.0.7/lib/mix/tasks/gamend.content.migrate_metadata.ex#L1)
+[🔗](https://github.com/appsinacup/gamend/blob/v1.0.7/lib/mix/tasks/gamend.content.migrate_metadata.ex#L1)
 
 One-shot migration for instances that stored translations in the database.
 

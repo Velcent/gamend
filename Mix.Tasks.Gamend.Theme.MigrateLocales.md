@@ -1,5 +1,5 @@
 # `mix gamend.theme.migrate_locales`
-[🔗](https://github.com/appsinacup/game_server/blob/v1.0.7/lib/mix/tasks/gamend.theme.migrate_locales.ex#L1)
+[🔗](https://github.com/appsinacup/gamend/blob/v1.0.7/lib/mix/tasks/gamend.theme.migrate_locales.ex#L1)
 
 One-shot migration off one-JSON-file-per-locale.
 

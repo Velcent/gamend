@@ -1,5 +1,5 @@
 # `mix demo.seed`
-[🔗](https://github.com/appsinacup/game_server/blob/v1.0.7/lib/mix/tasks/demo.seed.ex#L1)
+[🔗](https://github.com/appsinacup/gamend/blob/v1.0.7/lib/mix/tasks/demo.seed.ex#L1)
 
 Fills the database with enough demo data to exercise pagination and the
 list/detail pages at realistic sizes.
