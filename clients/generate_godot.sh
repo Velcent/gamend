@@ -230,6 +230,23 @@ for f in glob.glob(os.path.join(out_dir, "**/*.gd"), recursive=True):
         open(f, "w").write(out)
 PYEOF
 
+# Generic fix: JSON null must never reach a typed model property or a nested
+# denormalize call. The API serializes absent values as null (progress: null,
+# claimed_at: null, reset_interval_days: null...), and the generated
+# `if from_dict.has("key"):` guard happily assigns that Nil into a typed
+# String/int property — a runtime error in Godot. Treat null exactly like
+# absent: the property keeps its default.
+python3 - "$OUT_DIR" <<'PYEOF'
+import glob, re, sys, os
+out_dir = sys.argv[1]
+pattern = re.compile(r'if from_dict\.has\((".*?")\):')
+for f in glob.glob(os.path.join(out_dir, "models/*.gd")):
+    src = open(f).read()
+    out = pattern.sub(r'if from_dict.get(\1) != null:', src)
+    if out != src:
+        open(f, "w").write(out)
+PYEOF
+
 # Copy the main client pieces (apis, core, model) to a separate godot_api folder
 # This keeps the API surface separated for distribution or packaging.
 DEST_API_DIR="$ROOT_DIR/clients/gamend"

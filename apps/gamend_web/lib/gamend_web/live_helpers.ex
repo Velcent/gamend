@@ -134,6 +134,9 @@ defmodule GamendWeb.LiveHelpers do
   none (renders as empty in HEEx, so callers can interpolate it directly).
   """
   def public_user_handle(%{username: name}) when is_binary(name) and name != "", do: "@" <> name
-  def public_user_handle(%{"username" => name}) when is_binary(name) and name != "", do: "@" <> name
+
+  def public_user_handle(%{"username" => name}) when is_binary(name) and name != "",
+    do: "@" <> name
+
   def public_user_handle(_), do: nil
 end

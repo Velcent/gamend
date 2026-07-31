@@ -338,7 +338,8 @@ defmodule GamendWeb.UserLive.Settings.GroupsTab do
                       {LiveHelpers.public_user_name(req.user)}
                     </div>
                     <span class="text-xs text-base-content/50">
-                      {LiveHelpers.public_user_handle(req.user)} &mdash; <.timestamp at={req.inserted_at} />
+                      {LiveHelpers.public_user_handle(req.user)} &mdash;
+                      <.timestamp at={req.inserted_at} />
                     </span>
                   </div>
                   <div class="flex gap-1">

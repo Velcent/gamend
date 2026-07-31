@@ -15,6 +15,7 @@ signal network_request_failed(message: String)
 
 ## Lobby realtime events
 signal lobby_updated(lobby: Dictionary)
+signal lobby_state_changed(payload: Dictionary)  ## {from, to, lobby_id, state_changed_at}
 signal lobby_member_joined(payload: Dictionary)   ## {user_id}
 signal lobby_member_left(payload: Dictionary)     ## {user_id}
 signal lobby_member_kicked(payload: Dictionary)   ## {user_id}
@@ -725,6 +726,8 @@ func _handle_lobby_event(event: String, payload: Dictionary):
 	match event:
 		"updated":
 			lobby_updated.emit(payload)
+		"state_changed":
+			lobby_state_changed.emit(payload)
 		"user_joined":
 			lobby_member_joined.emit(payload)
 		"user_left":

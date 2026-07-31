@@ -426,9 +426,20 @@ defmodule Gamend.Hooks.PluginManager do
 
     plugin_dir = Path.join(root, plugin_name)
 
+    # In dev the plugin is usually also a regular (path) dependency of the
+    # host, so its beams already live in _build and load from there. Adding
+    # the bundled ebin/ on top would make a stale `mix plugin.bundle` output
+    # loadable next to the live build — the source of "redefining module
+    # (current version loaded from ebin/...)" warnings on every recompile
+    # until the dep is force-recompiled. A plugin the build already provides
+    # needs no code-path surgery; load/start/hooks below work the same.
     ebin_paths =
-      [Path.join(plugin_dir, "ebin")] ++
-        Path.wildcard(Path.join(plugin_dir, "deps/*/ebin"))
+      if provided_by_build?(app, plugin_dir) do
+        []
+      else
+        [Path.join(plugin_dir, "ebin")] ++
+          Path.wildcard(Path.join(plugin_dir, "deps/*/ebin"))
+      end
 
     Enum.each(ebin_paths, fn p ->
       if File.dir?(p) do
@@ -461,6 +472,23 @@ defmodule Gamend.Hooks.PluginManager do
   defp load_plugin(_root, plugin_name) do
     Logger.warning("plugin=#{plugin_name} skipped: name exceeds #{@max_plugin_name_length} chars")
     nil
+  end
+
+  # True when the app's code is already reachable on the code path from
+  # outside the plugin directory (the host build's _build in dev). In prod
+  # the plugin ships only as the bundle, `:code.lib_dir/1` misses, and the
+  # bundle paths are added as before. Reloads stay correct either way:
+  # `stop_unload_plugin/1` removes only the paths recorded on the Plugin
+  # struct, so a build-provided plugin (with no recorded paths) keeps its
+  # _build entry, and a bundle-provided one gets its paths re-added fresh.
+  defp provided_by_build?(app, plugin_dir) do
+    case :code.lib_dir(app) do
+      {:error, _} ->
+        false
+
+      dir ->
+        not String.starts_with?(Path.expand(to_string(dir)), Path.expand(plugin_dir))
+    end
   end
 
   defp safe_load_app(app) do
