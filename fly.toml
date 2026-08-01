@@ -37,6 +37,7 @@ primary_region = "ams"
 [[vm]]
   size = "shared-cpu-4x"
 
+# The volume also predates the rename and can't be renamed in place.
 [[mounts]]
-  source = "gamend_data"
+  source = "game_server_data"
   destination = "/data"
