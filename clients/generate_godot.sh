@@ -280,3 +280,10 @@ rm -rf "$ROOT_ADDONS/addons/gamend"
 mv "$DST_GAMEND" "$ROOT_ADDONS/addons/gamend"
 
 echo "gamend_template -> gamend copy complete."
+
+# Godot's editor saves scripts with exactly one trailing newline; the
+# generator emits two. Normalize so a file Godot ever re-saves in the game
+# repo does not flap forever against `mix game.sync_data --check`.
+find "$ROOT_ADDONS/addons/gamend" -name '*.gd' -exec perl -0777 -pi -e 's/\n+\z/\n/' {} +
+
+echo "Trailing-newline normalization complete."
