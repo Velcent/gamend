@@ -10,6 +10,9 @@ msgstr ""
 msgid "Open source Elixir game server for real-time multiplayer games."
 msgstr ""
 
+msgid "GitHub"
+msgstr ""
+
 msgid "Discord"
 msgstr ""
 
@@ -83,9 +86,6 @@ msgid "Getting Started"
 msgstr ""
 
 msgid "Presentation Video"
-msgstr ""
-
-msgid "GitHub"
 msgstr ""
 
 msgid "Gamend"

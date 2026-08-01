@@ -218,6 +218,11 @@
         "title": "Social",
         "links": [
           {
+            "label": "GitHub",
+            "href": "https://github.com/appsinacup/gamend",
+            "external": true
+          },
+          {
             "label": "Discord",
             "href": "https://discord.com/invite/v649emcpAu",
             "external": true
