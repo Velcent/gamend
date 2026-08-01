@@ -9,8 +9,13 @@ defmodule GamendWeb.Endpoint do
     secure: Application.compile_env(:gamend_web, :session_secure, false)
   ]
 
+  # timeout: the game client runs on requestAnimationFrame, which browsers
+  # stop entirely for background tabs — heartbeats pause and the default 60s
+  # would drop every alt-tabbed player. 5 minutes keeps the TCP-alive-but-
+  # silent socket open across short tab switches; hard disconnects still
+  # terminate immediately (this only defers reaping half-open connections).
   socket "/socket", GamendWeb.UserSocket,
-    websocket: [log: false, compress: true, max_frame_size: 131_072],
+    websocket: [log: false, compress: true, max_frame_size: 131_072, timeout: 300_000],
     longpoll: false
 
   socket "/live", Phoenix.LiveView.Socket,

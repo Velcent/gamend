@@ -424,6 +424,49 @@ defmodule Gamend.Accounts do
   end
 
   @doc """
+  Aggregate player counts for the public stats endpoint.
+
+  Every field is derived, never a counter: a counter would put a write on the
+  login path (SQLite has one writer) and would drift from the bulk updates in
+  `touch_users/1` and `StalePresenceSweeper`. `players_online` rides the
+  partial index over online rows, so it scans the smallest set; the unfiltered
+  `players_total` cannot use an index at all, which is what the cache is for.
+  """
+  @spec player_stats() :: %{
+          players_online: non_neg_integer(),
+          players_total: non_neg_integer(),
+          players_offline: non_neg_integer(),
+          players_in_lobbies: non_neg_integer(),
+          players_in_parties: non_neg_integer()
+        }
+  def player_stats do
+    Gamend.Cache.cached({:accounts, :player_stats}, [ttl: @stats_cache_ttl_ms], fn ->
+      total = count_users()
+      online = count_users_online()
+
+      %{
+        players_online: online,
+        players_total: total,
+        players_offline: max(total - online, 0),
+        players_in_lobbies: count_users_in_lobbies(),
+        players_in_parties: count_users_in_parties()
+      }
+    end)
+  end
+
+  @doc "Count users currently seated in a lobby (`users.lobby_id`, indexed)."
+  @spec count_users_in_lobbies() :: non_neg_integer()
+  def count_users_in_lobbies do
+    Repo.one(from u in User, where: not is_nil(u.lobby_id), select: count(u.id)) || 0
+  end
+
+  @doc "Count users currently in a party (`users.party_id`, indexed)."
+  @spec count_users_in_parties() :: non_neg_integer()
+  def count_users_in_parties do
+    Repo.one(from u in User, where: not is_nil(u.party_id), select: count(u.id)) || 0
+  end
+
+  @doc """
   Count users who are not yet activated (is_activated == false).
   """
   @spec count_unactivated_users() :: non_neg_integer()

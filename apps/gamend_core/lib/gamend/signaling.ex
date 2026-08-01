@@ -38,6 +38,8 @@ defmodule Gamend.Signaling do
   alias Gamend.Lobbies
   alias Gamend.Presence
 
+  @stats_cache_ttl_ms 60_000
+
   @type room_id :: String.t()
   @type user_id :: String.t()
   @type topology :: :mesh | :star
@@ -179,6 +181,32 @@ defmodule Gamend.Signaling do
   @doc "The role `user_id` is connected with, or `nil`."
   @spec peer_role(room_id(), user_id()) :: role() | nil
   def peer_role(room_id, user_id), do: Map.get(peers(room_id), user_id)
+
+  @doc """
+  Aggregate room counts for the public stats endpoint.
+
+  `rooms_enabled` is what the lobbies are configured for; `rooms_active` counts
+  only rooms someone is actually connected to. Presence cannot enumerate its own
+  topics, so the room ids come from the lobby table first.
+  """
+  @spec stats() :: %{
+          rooms_enabled: non_neg_integer(),
+          rooms_active: non_neg_integer(),
+          peers_connected: non_neg_integer()
+        }
+  def stats do
+    Gamend.Cache.cached({:signaling, :stats}, [ttl: @stats_cache_ttl_ms], fn ->
+      peer_counts =
+        Lobbies.webrtc_enabled_lobby_ids()
+        |> Enum.map(fn room_id -> room_id |> topic() |> Presence.list() |> map_size() end)
+
+      %{
+        rooms_enabled: length(peer_counts),
+        rooms_active: Enum.count(peer_counts, &(&1 > 0)),
+        peers_connected: Enum.sum(peer_counts)
+      }
+    end)
+  end
 
   @doc """
   Sends `payload` to one peer.

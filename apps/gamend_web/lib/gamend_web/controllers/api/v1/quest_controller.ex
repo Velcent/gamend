@@ -268,6 +268,23 @@ defmodule GamendWeb.Api.V1.QuestController do
     }
   )
 
+  operation(:stats,
+    operation_id: "quest_stats",
+    summary: "Quest progress counts",
+    description:
+      "Aggregate quest progress. Public, and cached — treat the numbers as up to a minute old.",
+    responses: [
+      ok:
+        GamendWeb.ApiStatsSchema.response("Quest stats", [
+          :quests_total,
+          :completed,
+          :claimed
+        ])
+    ]
+  )
+
+  def stats(conn, _params), do: json(conn, %{data: Quests.stats()})
+
   def index(conn, params) do
     case conn.assigns[:current_scope] do
       %{user_id: _} ->

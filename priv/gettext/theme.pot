@@ -25,19 +25,31 @@ msgstr ""
 msgid "Social"
 msgstr ""
 
-msgid "Elixir Docs"
-msgstr ""
-
-msgid "About"
-msgstr ""
-
 msgid "Guides"
 msgstr ""
 
 msgid "API Docs"
 msgstr ""
 
+msgid "Elixir Docs"
+msgstr ""
+
+msgid "Deployment Tutorial"
+msgstr ""
+
+msgid "Scaling Guide"
+msgstr ""
+
+msgid "Docs"
+msgstr ""
+
+msgid "Starter Template"
+msgstr ""
+
 msgid "Store"
+msgstr ""
+
+msgid "Server Stats"
 msgstr ""
 
 msgid "Help"
@@ -71,6 +83,9 @@ msgid "Getting Started"
 msgstr ""
 
 msgid "Presentation Video"
+msgstr ""
+
+msgid "GitHub"
 msgstr ""
 
 msgid "Gamend"

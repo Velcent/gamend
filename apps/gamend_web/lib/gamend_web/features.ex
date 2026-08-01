@@ -46,6 +46,12 @@ defmodule GamendWeb.Features do
     doc: "GET /api/v1/matchmaking/stats. Own-ticket endpoints stay."
   )
 
+  setting(:public_stats, :boolean,
+    default: true,
+    doc:
+      "The unauthenticated stats endpoints: GET /api/v1/users/stats, /api/v1/lobbies/stats, /api/v1/parties/stats, /api/v1/quests/stats, /api/v1/signaling/stats and /api/v1/matchmaking/stats. Aggregate counts only, never per-row data — but they do reveal how busy the server is."
+  )
+
   setting(:mailbox_preview, :boolean,
     default: false,
     doc:

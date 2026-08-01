@@ -138,8 +138,7 @@ defmodule GamendWeb.Api.V1.MatchmakingController do
   operation(:stats,
     operation_id: "matchmaking_stats",
     summary: "Queue statistics",
-    description: "Waiting-player depth per match_params group.",
-    security: [%{"bearer" => []}],
+    description: "Waiting-player depth per match_params group. Public.",
     responses: [
       ok:
         {"Stats", "application/json",

@@ -4,7 +4,7 @@
 ## Once connected, named DataChannels carry game data alongside the WebSocket.
 ##
 ## Usage:
-##   var realtime = GamendRealtime.new(token)
+##   var realtime = GamendWebSocket.new(token)
 ##   var user_channel = realtime.add_channel("user:123")
 ##   # wait for channel join...
 ##

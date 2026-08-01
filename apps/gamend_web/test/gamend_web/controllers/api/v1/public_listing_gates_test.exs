@@ -70,15 +70,16 @@ defmodule GamendWeb.Api.V1.PublicListingGatesTest do
   end
 
   describe "LIST_MATCHMAKING_ENABLED=false" do
-    test "GET /matchmaking/stats returns 404; own-ticket endpoints stay", %{conn: conn} do
+    # Queue stats moved to the public stats surface and are gated by
+    # :public_stats now (see StatsControllerTest); this flag no longer
+    # covers them, only the caller's own ticket endpoints stay unaffected.
+    test "own-ticket endpoints stay", %{conn: conn} do
       user = AccountsFixtures.user_fixture()
       {:ok, token, _} = Guardian.encode_and_sign(user)
       authed = Plug.Conn.put_req_header(conn, "authorization", "Bearer " <> token)
 
       disable(:list_matchmaking)
 
-      assert authed |> get("/api/v1/matchmaking/stats") |> response(404)
-      # The caller's own ticket endpoints are authenticated, not gated.
       assert authed |> get("/api/v1/matchmaking/tickets/me") |> json_response(200)
     end
   end

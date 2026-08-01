@@ -7,7 +7,7 @@ generated: by `mix gamend.settings.guide` - do not edit by hand; edit the
 # Settings
 
 Every setting the server has, with the environment variable that sets it.
-226 settings across 20 groups.
+227 settings across 20 groups.
 
 A setting is declared in the module that owns it, so this page and
 `.env.example` are generated from the same source the server reads. The
@@ -120,6 +120,7 @@ Live values, and where each one came from, are on the
 | `GAMEND_FEATURES_LIST_USERS` | boolean | `true` | GET /api/v1/users and /users/:id. |
 | `GAMEND_FEATURES_MAILBOX_PREVIEW` | boolean | `false` | Serve the in-browser mailbox at /dev/mailbox outside dev. Every sent email is readable there. |
 | `GAMEND_FEATURES_OPENAPI` | boolean | `true` | OpenAPI spec + Swagger UI. A complete map of your API — consider off in production. |
+| `GAMEND_FEATURES_PUBLIC_STATS` | boolean | `true` | The unauthenticated stats endpoints: GET /api/v1/users/stats, /api/v1/lobbies/stats, /api/v1/parties/stats, /api/v1/quests/stats, /api/v1/signaling/stats and /api/v1/matchmaking/stats. Aggregate counts only, never per-row data — but they do reveal how busy the server is. |
 
 
 ## Server & HTTP

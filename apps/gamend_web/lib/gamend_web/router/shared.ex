@@ -176,6 +176,10 @@ defmodule GamendWeb.Router.Shared do
         plug GamendWeb.Plugs.FeatureGate, feature: :list_matchmaking
       end
 
+      pipeline :public_stats_gate do
+        plug GamendWeb.Plugs.FeatureGate, feature: :public_stats
+      end
+
       pipeline :metrics_auth do
         plug GamendWeb.Plugs.MetricsAuth
       end
@@ -278,6 +282,19 @@ defmodule GamendWeb.Router.Shared do
         post "/payments/webhooks/apple", PaymentWebhookController, :apple
       end
 
+      # Before the listing scopes: "/users/stats" would otherwise be captured
+      # by "/users/:id", and "/quests/stats" by "/quests/:key".
+      scope "/api/v1", GamendWeb.Api.V1, as: :api_v1 do
+        pipe_through [:api, :public_stats_gate]
+
+        get "/users/stats", UserController, :stats
+        get "/lobbies/stats", LobbyController, :stats
+        get "/parties/stats", PartyController, :stats
+        get "/quests/stats", QuestController, :stats
+        get "/signaling/stats", SignalingController, :stats
+        get "/matchmaking/stats", MatchmakingController, :stats
+      end
+
       scope "/api/v1", GamendWeb.Api.V1, as: :api_v1 do
         pipe_through [:api, :list_users_gate]
 
@@ -338,20 +355,14 @@ defmodule GamendWeb.Router.Shared do
 
   defmacro gamend_matchmaking_api_routes do
     quote do
-      # Mutations and the caller's own ticket are authenticated, not gated;
-      # only the aggregate queue stats sit behind the listing gate.
+      # Mutations and the caller's own ticket are authenticated. Aggregate queue
+      # stats live with the other public stats routes, not here.
       scope "/api/v1", GamendWeb.Api.V1, as: :api_v1 do
         pipe_through [:api, :api_auth]
 
         post "/matchmaking/tickets", MatchmakingController, :create
         delete "/matchmaking/tickets", MatchmakingController, :delete
         get "/matchmaking/tickets/me", MatchmakingController, :me
-      end
-
-      scope "/api/v1", GamendWeb.Api.V1, as: :api_v1 do
-        pipe_through [:api, :api_auth, :list_matchmaking_gate]
-
-        get "/matchmaking/stats", MatchmakingController, :stats
       end
     end
   end
@@ -852,6 +863,7 @@ defmodule GamendWeb.Router.Shared do
           live "/groups", GroupsLive, :index
           live "/groups/:id", GroupsLive, :show
           live "/quests", QuestsLive, :index
+          live "/stats", StatsLive, :index
           live "/tournaments", TournamentsLive, :index
           # Slug-first for SEO; older editions get a stable 1-based number.
           # A UUID still resolves in the :slug position, so old links keep working.

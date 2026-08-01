@@ -52,7 +52,7 @@ defmodule GamendCore.MixProject do
       {:dns_cluster, "~> 0.2.0"},
       {:ueberauth, "~> 0.10"},
       {:ueberauth_discord, "~> 0.7"},
-      {:ueberauth_apple, github: "appsinacup/ueberauth_apple", branch: "master"},
+      {:ueberauth_apple, "~> 0.7"},
       {:ueberauth_google, "~> 0.12"},
       {:ueberauth_facebook, "~> 0.10"},
       {:ueberauth_steam_strategy, "~> 0.1.6"},
@@ -79,7 +79,7 @@ defmodule GamendCore.MixProject do
 
   defp description do
     """
-    Core functionality for Gamend Gamend, including user management, authentication, friends, matchmaking, and more.
+    Core functionality for Gamend, including user management, authentication, friends, matchmaking, and more.
     """
   end
 

@@ -115,6 +115,25 @@ defmodule GamendWeb.Api.V1.UserController do
     ]
   )
 
+  operation(:stats,
+    operation_id: "user_stats",
+    summary: "Player counts",
+    description:
+      "Aggregate player counts. Public, and cached — treat the numbers as up to a minute old.",
+    responses: [
+      ok:
+        GamendWeb.ApiStatsSchema.response("Player stats", [
+          :players_online,
+          :players_total,
+          :players_offline,
+          :players_in_lobbies,
+          :players_in_parties
+        ])
+    ]
+  )
+
+  def stats(conn, _params), do: json(conn, %{data: Accounts.player_stats()})
+
   def index(conn, params) do
     q = Map.get(params, "q", "")
     {page, page_size} = Pagination.params(params)

@@ -54,6 +54,7 @@ defmodule Gamend.Lobbies do
   alias Gamend.KV
   alias Gamend.KV.Entry, as: KVEntry
   alias Gamend.Lobbies.Lobby
+  alias Gamend.Lobbies.SpectatorTracker
   alias Gamend.Lobbies.States
   alias Gamend.Repo
   alias Gamend.Repo.AdvisoryLock
@@ -74,6 +75,7 @@ defmodule Gamend.Lobbies do
   @lobbies_topic "lobbies"
 
   @lobby_cache_ttl_ms 60_000
+  @stats_cache_ttl_ms 60_000
 
   defp lobby_cache_version(lobby_id) when is_binary(lobby_id) do
     Gamend.Cache.get!({:lobbies, :lobby_version, lobby_id}) || 1
@@ -313,6 +315,51 @@ defmodule Gamend.Lobbies do
     q = from(l in Lobby)
     q = apply_admin_filters(q, filters)
     Repo.aggregate(q, :count, :id)
+  end
+
+  @doc """
+  Aggregate lobby counts for the public stats endpoint.
+
+  Spectators live in Presence, keyed per lobby topic, and Presence cannot
+  enumerate its own topics — so the lobby ids come from the table first. That
+  makes the total one query plus an ETS read per lobby, which is why it sits
+  inside the cached snapshot rather than being computed per request.
+  """
+  @spec stats() :: %{
+          lobbies_total: non_neg_integer(),
+          by_state: %{String.t() => non_neg_integer()},
+          spectators: non_neg_integer()
+        }
+  def stats do
+    Gamend.Cache.cached({:lobbies, :stats}, [ttl: @stats_cache_ttl_ms], fn ->
+      lobby_ids = Repo.all(from(l in Lobby, select: l.id))
+
+      spectators =
+        lobby_ids
+        |> SpectatorTracker.counts()
+        |> Map.values()
+        |> Enum.sum()
+
+      %{
+        lobbies_total: length(lobby_ids),
+        by_state: lobby_counts_by_state(),
+        spectators: spectators
+      }
+    end)
+  end
+
+  @doc "Ids of lobbies with WebRTC enabled — the signaling rooms that can exist."
+  @spec webrtc_enabled_lobby_ids() :: [Ecto.UUID.t()]
+  def webrtc_enabled_lobby_ids do
+    Repo.all(from(l in Lobby, where: l.webrtc_enabled == true, select: l.id))
+  end
+
+  # One grouped query rather than a count per state: states are game-chosen
+  # words, so the set is not known here.
+  defp lobby_counts_by_state do
+    from(l in Lobby, group_by: l.state, select: {l.state, count(l.id)})
+    |> Repo.all()
+    |> Map.new(fn {state, count} -> {state || "unknown", count} end)
   end
 
   @doc """

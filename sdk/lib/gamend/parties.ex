@@ -499,6 +499,25 @@ defmodule Gamend.Parties do
 
 
   @doc ~S"""
+    Aggregate party counts for the public stats endpoint.
+    
+    Membership is a user column (`users.party_id`, indexed), so both numbers are
+    derived counts rather than a maintained size.
+    
+  """
+  @spec stats() :: %{parties_active: non_neg_integer(), players_in_parties: non_neg_integer()}
+  def stats() do
+    case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        0
+
+      _ ->
+        raise "Gamend.Parties.stats/0 is a stub - only available at runtime on Gamend"
+    end
+  end
+
+
+  @doc ~S"""
     Subscribe to all party events (create/delete).
   """
   @spec subscribe_parties() :: :ok | {:error, term()}

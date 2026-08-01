@@ -507,6 +507,36 @@ defmodule Gamend.Accounts do
 
 
   @doc ~S"""
+    Count users currently seated in a lobby (`users.lobby_id`, indexed).
+  """
+  @spec count_users_in_lobbies() :: non_neg_integer()
+  def count_users_in_lobbies() do
+    case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        0
+
+      _ ->
+        raise "Gamend.Accounts.count_users_in_lobbies/0 is a stub - only available at runtime on Gamend"
+    end
+  end
+
+
+  @doc ~S"""
+    Count users currently in a party (`users.party_id`, indexed).
+  """
+  @spec count_users_in_parties() :: non_neg_integer()
+  def count_users_in_parties() do
+    case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        0
+
+      _ ->
+        raise "Gamend.Accounts.count_users_in_parties/0 is a stub - only available at runtime on Gamend"
+    end
+  end
+
+
+  @doc ~S"""
     Count users currently marked as online.
     
   """
@@ -1312,6 +1342,34 @@ defmodule Gamend.Accounts do
 
       _ ->
         raise "Gamend.Accounts.merge_metadata/2 is a stub - only available at runtime on Gamend"
+    end
+  end
+
+
+  @doc ~S"""
+    Aggregate player counts for the public stats endpoint.
+    
+    Every field is derived, never a counter: a counter would put a write on the
+    login path (SQLite has one writer) and would drift from the bulk updates in
+    `touch_users/1` and `StalePresenceSweeper`. `players_online` rides the
+    partial index over online rows, so it scans the smallest set; the unfiltered
+    `players_total` cannot use an index at all, which is what the cache is for.
+    
+  """
+  @spec player_stats() :: %{
+  players_online: non_neg_integer(),
+  players_total: non_neg_integer(),
+  players_offline: non_neg_integer(),
+  players_in_lobbies: non_neg_integer(),
+  players_in_parties: non_neg_integer()
+}
+  def player_stats() do
+    case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        nil
+
+      _ ->
+        raise "Gamend.Accounts.player_stats/0 is a stub - only available at runtime on Gamend"
     end
   end
 

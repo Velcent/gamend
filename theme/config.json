@@ -33,6 +33,17 @@
             "href": "https://www.youtube.com/watch?v=KhjWyUVsTkE",
             "icon": "hero-play-solid",
             "external": true
+          },
+          {
+            "label": "GitHub",
+            "href": "https://github.com/appsinacup/gamend",
+            "icon": "hero-code-bracket-square-solid",
+            "external": true
+          },
+          {
+            "label": "Server Stats",
+            "href": "/stats",
+            "icon": "hero-chart-bar-solid"
           }
         ]
       },
@@ -226,17 +237,7 @@
         ]
       },
       {
-        "title": "About",
-        "links": [
-          {
-            "label": "Elixir Docs",
-            "href": "https://docs.gamend.org/",
-            "external": true
-          }
-        ]
-      },
-      {
-        "title": "Help",
+        "title": "Docs",
         "links": [
           {
             "label": "Guides",
@@ -247,9 +248,38 @@
             "href": "/api/docs"
           },
           {
+            "label": "Elixir Docs",
+            "href": "https://docs.gamend.org/",
+            "external": true
+          },
+          {
+            "label": "Deployment Tutorial",
+            "href": "https://appsinacup.com/gamend-deploy/",
+            "external": true
+          },
+          {
+            "label": "Scaling Guide",
+            "href": "https://appsinacup.com/gamend-scaling/",
+            "external": true
+          }
+        ]
+      },
+      {
+        "title": "Help",
+        "links": [
+          {
+            "label": "Starter Template",
+            "href": "https://github.com/appsinacup/gamend_starter",
+            "external": true
+          },
+          {
             "label": "Store",
             "href": "/store",
             "auth": "authenticated"
+          },
+          {
+            "label": "Server Stats",
+            "href": "/stats"
           }
         ]
       },

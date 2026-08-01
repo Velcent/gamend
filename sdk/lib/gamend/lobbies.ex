@@ -844,6 +844,31 @@ defmodule Gamend.Lobbies do
 
 
   @doc ~S"""
+    Aggregate lobby counts for the public stats endpoint.
+    
+    Spectators live in Presence, keyed per lobby topic, and Presence cannot
+    enumerate its own topics — so the lobby ids come from the table first. That
+    makes the total one query plus an ETS read per lobby, which is why it sits
+    inside the cached snapshot rather than being computed per request.
+    
+  """
+  @spec stats() :: %{
+  lobbies_total: non_neg_integer(),
+  by_state: %{required(String.t()) => non_neg_integer()},
+  spectators: non_neg_integer()
+}
+  def stats() do
+    case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        nil
+
+      _ ->
+        raise "Gamend.Lobbies.stats/0 is a stub - only available at runtime on Gamend"
+    end
+  end
+
+
+  @doc ~S"""
     Subscribe to global lobby events (lobby created, updated, deleted).
     
   """
@@ -987,6 +1012,21 @@ defmodule Gamend.Lobbies do
 
       _ ->
         raise "Gamend.Lobbies.update_lobby_by_host/3 is a stub - only available at runtime on Gamend"
+    end
+  end
+
+
+  @doc ~S"""
+    Ids of lobbies with WebRTC enabled — the signaling rooms that can exist.
+  """
+  @spec webrtc_enabled_lobby_ids() :: [Ecto.UUID.t()]
+  def webrtc_enabled_lobby_ids() do
+    case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        []
+
+      _ ->
+        raise "Gamend.Lobbies.webrtc_enabled_lobby_ids/0 is a stub - only available at runtime on Gamend"
     end
   end
 

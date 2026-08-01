@@ -234,6 +234,30 @@ defmodule Gamend.Signaling do
 
 
   @doc ~S"""
+    Aggregate room counts for the public stats endpoint.
+    
+    `rooms_enabled` is what the lobbies are configured for; `rooms_active` counts
+    only rooms someone is actually connected to. Presence cannot enumerate its own
+    topics, so the room ids come from the lobby table first.
+    
+  """
+  @spec stats() :: %{
+  rooms_enabled: non_neg_integer(),
+  rooms_active: non_neg_integer(),
+  peers_connected: non_neg_integer()
+}
+  def stats() do
+    case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        nil
+
+      _ ->
+        raise "Gamend.Signaling.stats/0 is a stub - only available at runtime on Gamend"
+    end
+  end
+
+
+  @doc ~S"""
     PubSub topic carrying a room's presence.
   """
   @spec topic(room_id()) :: String.t()

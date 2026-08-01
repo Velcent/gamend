@@ -412,6 +412,28 @@ defmodule GamendWeb.Api.V1.LobbyController do
     ]
   )
 
+  operation(:stats,
+    operation_id: "lobby_stats",
+    summary: "Lobby counts",
+    description:
+      "Aggregate lobby counts, including spectators. Public, and cached — treat the numbers as up to a minute old.",
+    responses: [
+      ok:
+        GamendWeb.ApiStatsSchema.response("Lobby stats", [
+          :lobbies_total,
+          :spectators,
+          {:by_state,
+           %OpenApiSpex.Schema{
+             type: :object,
+             description: "Lobby count per game-defined lifecycle state.",
+             additionalProperties: %OpenApiSpex.Schema{type: :integer}
+           }}
+        ])
+    ]
+  )
+
+  def stats(conn, _params), do: json(conn, %{data: Lobbies.stats()})
+
   def index(conn, params) do
     params = params || %{}
 

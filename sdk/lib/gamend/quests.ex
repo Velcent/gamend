@@ -573,6 +573,29 @@ defmodule Gamend.Quests do
 
 
   @doc ~S"""
+    Aggregate quest progress counts for the public stats endpoint.
+    
+    Grouped by status in one query — `quest_progress` carries a partial index on
+    completed rows, and the group-by reads the same rows the listing already does.
+    
+  """
+  @spec stats() :: %{
+  quests_total: non_neg_integer(),
+  completed: non_neg_integer(),
+  claimed: non_neg_integer()
+}
+  def stats() do
+    case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        nil
+
+      _ ->
+        raise "Gamend.Quests.stats/0 is a stub - only available at runtime on Gamend"
+    end
+  end
+
+
+  @doc ~S"""
     Subscribe to global quest events (definition changes, completions).
   """
   @spec subscribe_quests() :: :ok | {:error, term()}

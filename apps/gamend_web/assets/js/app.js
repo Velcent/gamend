@@ -376,6 +376,14 @@ const Hooks = {
     updated() {
       this.syncNavbar()
     },
+    // A reconnect (Safari suspends sockets on background tabs) re-patches the
+    // layout from server HTML, wiping the client-set inline styles that keep
+    // the navbar hidden. Re-apply the state this hook instance still holds.
+    reconnected() {
+      this.instant = true
+      this.syncNavbar()
+      this.instant = false
+    },
     destroyed() {
       if (this.navbar) this.applyVisibleState()
       if (this.toggleBtn) {

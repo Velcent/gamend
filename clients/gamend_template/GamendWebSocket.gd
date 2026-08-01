@@ -1,4 +1,4 @@
-class_name GamendRealtime
+class_name GamendWebSocket
 extends Node
 
 signal channel_event(event: String, payload: Dictionary, status, topic: String)
@@ -91,7 +91,7 @@ func push(event: String, payload: Dictionary = {}, topic: String = "") -> bool:
 	elif _channels.has(topic):
 		ch = _channels[topic]
 	if ch == null:
-		push_warning("GamendRealtime: no channel found for push")
+		push_warning("GamendWebSocket: no channel found for push")
 		return false
 	return ch.push(event, payload)
 

@@ -219,6 +219,32 @@ defmodule Gamend.Quests do
     Repo.aggregate(quest_query(opts), :count, :id)
   end
 
+  @doc """
+  Aggregate quest progress counts for the public stats endpoint.
+
+  Grouped by status in one query — `quest_progress` carries a partial index on
+  completed rows, and the group-by reads the same rows the listing already does.
+  """
+  @spec stats() :: %{
+          quests_total: non_neg_integer(),
+          completed: non_neg_integer(),
+          claimed: non_neg_integer()
+        }
+  def stats do
+    Gamend.Cache.cached({:quests, :stats}, [ttl: @cache_ttl_ms], fn ->
+      by_status =
+        from(p in QuestProgress, group_by: p.status, select: {p.status, count(p.id)})
+        |> Repo.all()
+        |> Map.new()
+
+      %{
+        quests_total: Repo.aggregate(Quest, :count, :id),
+        completed: Map.get(by_status, "completed", 0),
+        claimed: Map.get(by_status, "claimed", 0)
+      }
+    end)
+  end
+
   defp quest_query(opts) do
     Quest
     |> maybe_filter_category(Keyword.get(opts, :category))

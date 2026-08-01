@@ -105,7 +105,24 @@ defmodule Gamend.Parties do
   # Party-row cache: get_party is keyed by a version bumped on every party-row
   # write. Membership/invite changes don't touch the party row, so they don't bump.
   @party_cache_ttl_ms 60_000
+  @stats_cache_ttl_ms 60_000
   defp party_cache_version, do: Gamend.Cache.get!({:parties, :version}) || 1
+
+  @doc """
+  Aggregate party counts for the public stats endpoint.
+
+  Membership is a user column (`users.party_id`, indexed), so both numbers are
+  derived counts rather than a maintained size.
+  """
+  @spec stats() :: %{parties_active: non_neg_integer(), players_in_parties: non_neg_integer()}
+  def stats do
+    Gamend.Cache.cached({:parties, :stats}, [ttl: @stats_cache_ttl_ms], fn ->
+      %{
+        parties_active: Repo.aggregate(Party, :count, :id),
+        players_in_parties: Accounts.count_users_in_parties()
+      }
+    end)
+  end
 
   defp tap_bump_party({:ok, _} = result) do
     _ = Gamend.Cache.bump_version({:parties, :version})

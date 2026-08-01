@@ -467,6 +467,22 @@ defmodule GamendWeb.Api.V1.PartyController do
   # Actions
   # ---------------------------------------------------------------------------
 
+  operation(:stats,
+    operation_id: "party_stats",
+    summary: "Party counts",
+    description:
+      "Aggregate party counts. Public, and cached — treat the numbers as up to a minute old.",
+    responses: [
+      ok:
+        GamendWeb.ApiStatsSchema.response("Party stats", [
+          :parties_active,
+          :players_in_parties
+        ])
+    ]
+  )
+
+  def stats(conn, _params), do: json(conn, %{data: Parties.stats()})
+
   def show(conn, _params) do
     case Scope.user(conn.assigns[:current_scope]) do
       %User{} = user ->

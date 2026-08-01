@@ -5,7 +5,7 @@ extends RefCounted
 ##
 ## Mirrors the server's `GamendWeb.EventCodec` mapping (wire contract:
 ## proto/gamend_realtime.proto in the gamend repo). Used by
-## GamendRealtime when constructed with format "protobuf" and by
+## GamendWebSocket when constructed with format "protobuf" and by
 ## GamendWebRTC DataChannels negotiated with protocol "protobuf".
 ##
 ## Decoded payloads match the JSON-mode payload keys, with two documented
