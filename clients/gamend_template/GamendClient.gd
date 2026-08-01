@@ -436,8 +436,31 @@ func rpc_call(fn: String, args: Array = []) -> Dictionary:
 		return {"ok": false, "data": null, "error": message, "latency_ms": latency}
 	var data: Variant = null
 	if result.response and result.response.data:
-		data = result.response.data.data
+		data = strip_json_nulls(result.response.data.data)
 	return {"ok": true, "data": data, "error": "", "latency_ms": latency}
+
+
+## JSON null and absent are the same thing to GDScript callers: hook payloads
+## are schemaless (CallHook200Response.data), so a null that survives to a
+## typed variable is a runtime error the type system cannot catch. Strip nulls
+## recursively so `.get(key, default)` applies the default — the same
+## null-equals-absent rule generate_godot.sh already enforces for typed model
+## properties. Array elements are recursed into but never removed: dropping
+## one would shift the positions callers index by.
+static func strip_json_nulls(value: Variant) -> Variant:
+	if value is Dictionary:
+		var dict := {}
+		for key: Variant in (value as Dictionary):
+			var entry: Variant = (value as Dictionary)[key]
+			if entry != null:
+				dict[key] = strip_json_nulls(entry)
+		return dict
+	if value is Array:
+		var list := []
+		for entry: Variant in (value as Array):
+			list.append(strip_json_nulls(entry))
+		return list
+	return value
 
 
 ## Fire-and-forget hook call over the WebSocket (no reply awaited).

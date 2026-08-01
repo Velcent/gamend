@@ -60,7 +60,11 @@ defmodule GamendWeb.PresentationPage do
     }>
       <div class="relative overflow-hidden">
         <.background_icons icons={@background_icons} bands={@background_icon_bands} />
-        <section class="relative min-h-screen">
+        <%!-- `hero.media_layout: "cover"` turns the hero into a banner: the
+              image fills it edge to edge behind a scrim with the title over
+              the top. Without it the hero keeps media in its own column. --%>
+        <.hero_cover :if={hero_cover?(@hero)} hero={@hero} sections={@sections} />
+        <section :if={!hero_cover?(@hero)} class="relative min-h-screen">
           <div class="relative z-10 flex min-h-screen items-center px-6 pb-12 pt-24 sm:px-8 lg:px-12">
             <div class={[
               "mx-auto grid w-full items-center gap-8 lg:gap-12",
@@ -111,6 +115,162 @@ defmodule GamendWeb.PresentationPage do
       </div>
     </div>
     """
+  end
+
+  defp has_copy?(item) do
+    not is_nil(non_empty_string(Map.get(item, "title"))) or
+      not is_nil(non_empty_string(Map.get(item, "text"))) or
+      has_buttons?(item)
+  end
+
+  # A hero opts into the banner treatment with `"media_layout": "cover"` and an
+  # image; anything else keeps the two-column hero.
+  defp hero_cover?(hero) do
+    Map.get(hero, "media_layout") == "cover" and image_config(hero).light != nil
+  end
+
+  attr :hero, :map, required: true
+  attr :sections, :list, default: []
+
+  defp hero_cover(assigns) do
+    ~H"""
+    <%!-- Exactly one screen, never more. The wrapper's -mt-20 cancels the
+          layout's top offset rather than pulling the hero above the fold, so
+          the hero starts at y=0 and any extra height is pure overflow.
+          `dvh` (not `vh`) tracks mobile browser chrome, so the banner keeps
+          filling the visible area instead of hiding behind the URL bar. --%>
+    <.cover_banner item={@hero} heading="h1" class="min-h-[100dvh]">
+      <a
+        :if={@sections != []}
+        href="#more-content"
+        aria-label="Scroll to content"
+        class="absolute bottom-6 left-1/2 z-20 -translate-x-1/2 text-white/70 transition hover:text-white motion-safe:animate-bounce"
+      >
+        <.dynamic_icon name="hero-chevron-down-solid" class="size-9" />
+      </a>
+    </.cover_banner>
+    """
+  end
+
+  attr :item, :map, required: true
+  attr :heading, :string, default: "h2"
+  attr :class, :string, default: nil
+  attr :eager, :boolean, default: true
+  slot :inner_block
+
+  @doc false
+  # The shared banner treatment: the image fills the block and the title, text
+  # and buttons sit on top of it. Used by a `media_layout: "cover"` hero and by
+  # `media_layout: "bleed"` sections, so the two read as one design.
+  def cover_banner(assigns) do
+    assigns =
+      assign(assigns,
+        image: image_config(assigns.item),
+        fit: media_fit_class(assigns.item),
+        loading: if(assigns.eager, do: "eager", else: "lazy"),
+        # non_empty_string/1 returns the string (or nil), not a boolean.
+        has_copy: has_copy?(assigns.item),
+        scrim: has_copy?(assigns.item) and Map.get(assigns.item, "scrim") != false
+      )
+
+    ~H"""
+    <section class={[
+      "relative z-[2] flex items-center justify-center overflow-hidden",
+      @class
+    ]}>
+      <%!-- Portrait art (when supplied) below `sm`, landscape above it.
+            Breakpoint lives on the wrapper and theme on the images: putting
+            both on one element loses to attribute-selector specificity. --%>
+      <div :if={@image.portrait} class="absolute inset-0 sm:hidden">
+        <img
+          src={@image.portrait}
+          alt={@image.alt}
+          loading={@loading}
+          decoding="async"
+          class={[
+            "h-full w-full",
+            @fit,
+            @image.portrait_dark && "[[data-theme=dark]_&]:hidden"
+          ]}
+        />
+        <img
+          :if={@image.portrait_dark}
+          src={@image.portrait_dark}
+          alt={@image.alt}
+          loading={@loading}
+          decoding="async"
+          class={["hidden h-full w-full [[data-theme=dark]_&]:block", @fit]}
+        />
+      </div>
+      <div class={["absolute inset-0", @image.portrait && "hidden sm:block"]}>
+        <img
+          src={@image.light}
+          alt={@image.alt}
+          width={@image.width}
+          height={@image.height}
+          loading={@loading}
+          decoding="async"
+          class={["h-full w-full", @fit, @image.dark && "[[data-theme=dark]_&]:hidden"]}
+        />
+        <img
+          :if={@image.dark}
+          src={@image.dark}
+          alt={@image.alt}
+          width={@image.width}
+          height={@image.height}
+          loading={@loading}
+          decoding="async"
+          class={["hidden h-full w-full [[data-theme=dark]_&]:block", @fit]}
+        />
+      </div>
+      <%!-- Scrim and copy only when there is something to overlay. A banner
+            with no title is just the picture: dimming it would cost contrast
+            for nothing. --%>
+      <%= if @has_copy do %>
+        <%!-- Theme-aware: a light-theme capture is bright and needs a real
+              wash for white text to read, while the dark-theme capture is
+              already dark and the same wash would flatten it to black. --%>
+        <div :if={@scrim} class="absolute inset-0 bg-black/45 [[data-theme=dark]_&]:bg-black/20">
+        </div>
+        <div
+          :if={@scrim}
+          class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/40 [[data-theme=dark]_&]:from-black/60 [[data-theme=dark]_&]:to-black/25"
+        >
+        </div>
+        <div class="relative z-10 flex w-full flex-col items-center gap-5 px-6 py-12 text-center">
+          <h1
+            :if={@heading == "h1"}
+            class="text-4xl font-extrabold tracking-normal text-white [text-shadow:0_2px_6px_rgb(0_0_0_/_0.95),0_4px_24px_rgb(0_0_0_/_0.8)] sm:text-5xl lg:text-6xl"
+          >
+            {Map.get(@item, "title", "")}
+          </h1>
+          <h2
+            :if={@heading != "h1"}
+            class="text-2xl font-bold tracking-normal text-white [text-shadow:0_2px_6px_rgb(0_0_0_/_0.95),0_4px_24px_rgb(0_0_0_/_0.8)] sm:text-3xl"
+          >
+            {Map.get(@item, "title", "")}
+          </h2>
+          <div
+            :if={non_empty_string(Map.get(@item, "text"))}
+            class="max-w-2xl text-base leading-relaxed text-white/90 [text-shadow:0_1px_8px_rgb(0_0_0_/_0.8)] sm:text-lg"
+          >
+            {rich_text(Map.get(@item, "text", ""))}
+          </div>
+          <.buttons :if={has_buttons?(@item)} buttons={Map.get(@item, "buttons", [])} />
+        </div>
+      <% end %>
+      {render_slot(@inner_block)}
+    </section>
+    """
+  end
+
+  # `"media_fit": "contain"` shows the WHOLE image (letterboxed against the
+  # section background); the default "cover" fills the section and crops.
+  defp media_fit_class(item) do
+    case Map.get(item, "media_fit") do
+      "contain" -> "object-contain"
+      _ -> "object-cover"
+    end
   end
 
   attr :icons, :list, default: []
@@ -338,6 +498,34 @@ defmodule GamendWeb.PresentationPage do
     """
   end
 
+  # `"media_layout": "bleed"` is the hero's banner treatment applied to a
+  # section: the media spans the whole VIEWPORT (breaking out of the centered
+  # content container) and the title/text sit on top of it, so a run of
+  # screenshots reads as one continuous piece with the hero.
+  #
+  # `self-start` is load-bearing: the parent section centers its items, and
+  # centring an over-wide item fights the negative margin, landing the block
+  # half off screen. `50%` resolves against the content box and `50vw`
+  # against the viewport, so the margin cancels whatever padding and
+  # centring the container applies.
+  def section(%{section: %{"media_layout" => "bleed"}} = assigns) do
+    ~H"""
+    <%!-- Cancels the sections grid's `gap-y-4` so consecutive banners butt
+          up against each other — a run of full-bleed screenshots should read
+          as one continuous strip, not as cards with alleys between them.
+          Only from the SECOND banner on: a symmetric `-my-2` would also pull
+          the first one up into whatever precedes it (the hero). --%>
+    <div class="w-screen self-start [&:not(:first-child)]:-mt-4 ml-[calc(50%-50vw)]">
+      <.cover_banner
+        item={@section}
+        heading="h2"
+        eager={false}
+        class={bleed_height_class(@section)}
+      />
+    </div>
+    """
+  end
+
   # `"media_layout": "full"` stacks the section: media across the whole width
   # (16:9 art keeps its shape — no aspect-square box), then centered text and
   # buttons. Media stays optional, so full-layout also covers text-only or
@@ -435,6 +623,14 @@ defmodule GamendWeb.PresentationPage do
   # or hiding, chrome settling during load). That moves every section, so a
   # scroll position the browser restores on reload lands at the wrong offset
   # and visibly jumps once layout settles. `svh` is fixed for the session.
+  defp bleed_height_class(section) do
+    case section_height(section) do
+      value when value in ["compact", "sm", "small"] -> "min-h-[40svh]"
+      value when value in ["full", "screen", "100", "100%"] -> "min-h-[100dvh]"
+      _ -> "min-h-[50svh]"
+    end
+  end
+
   defp section_height_class(section) do
     case section_height(section) do
       value when value in ["compact", "sm", "small"] ->
@@ -516,16 +712,32 @@ defmodule GamendWeb.PresentationPage do
         dark = non_empty_string(Map.get(image, "dark"))
         {natural_width, natural_height} = image_dimensions(light || dark)
 
+        portrait = non_empty_string(Map.get(image, "portrait"))
+        portrait_dark = non_empty_string(Map.get(image, "portrait_dark"))
+
         %{
           light: image_src(light),
           dark: image_src(dark),
+          # Optional narrow-viewport art. Landscape captures shrink to an
+          # unreadable strip on a phone, so a page can ship a portrait cut and
+          # the renderer swaps on breakpoint the same way it swaps on theme.
+          portrait: image_src(portrait),
+          portrait_dark: image_src(portrait_dark),
           alt: Map.get(image, "alt", ""),
           width: positive_int(Map.get(image, "width")) || natural_width,
           height: positive_int(Map.get(image, "height")) || natural_height
         }
 
       _ ->
-        %{light: nil, dark: nil, alt: "", width: nil, height: nil}
+        %{
+          light: nil,
+          dark: nil,
+          portrait: nil,
+          portrait_dark: nil,
+          alt: "",
+          width: nil,
+          height: nil
+        }
     end
   end
 
@@ -698,7 +910,7 @@ defmodule GamendWeb.PresentationPage do
 
   defp media_size(item, variant) do
     case Map.get(item, "media_size", variant) do
-      value when value in ["hero", "section"] -> value
+      value when value in ["hero", "section", "full", "bleed"] -> value
       _ -> variant
     end
   end
@@ -708,6 +920,10 @@ defmodule GamendWeb.PresentationPage do
   defp media_class("hero"), do: "block max-h-[58dvh] w-full rounded-lg object-contain"
 
   defp media_class("full"), do: "block max-h-[70dvh] w-full rounded-lg object-contain"
+
+  # Edge to edge: no rounding (it meets both screen edges) and no height
+  # cap beyond the viewport itself.
+  defp media_class("bleed"), do: "block max-h-[85dvh] w-full object-contain"
 
   defp media_class("section"),
     do: "block aspect-square max-h-[42dvh] w-full rounded-lg object-contain"
@@ -720,6 +936,9 @@ defmodule GamendWeb.PresentationPage do
 
   defp media_video_class("full"),
     do: "block max-h-[70dvh] w-full rounded-lg object-contain"
+
+  defp media_video_class("bleed"),
+    do: "block max-h-[85dvh] w-full object-contain"
 
   defp media_video_class("section"),
     do: "block max-h-[42dvh] w-full rounded-lg object-contain"
