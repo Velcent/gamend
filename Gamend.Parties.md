@@ -304,6 +304,20 @@ atomically.
 
 Returns `{:ok, lobby}` on success.
 
+# `stats`
+
+```elixir
+@spec stats() :: %{
+  parties_active: non_neg_integer(),
+  players_in_parties: non_neg_integer()
+}
+```
+
+Aggregate party counts for the public stats endpoint.
+
+Membership is a user column (`users.party_id`, indexed), so both numbers are
+derived counts rather than a maintained size.
+
 # `subscribe_parties`
 
 ```elixir

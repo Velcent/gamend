@@ -211,6 +211,22 @@ This metric is based on `users.updated_at` (any user record update,
 including registration/creation), so it reflects all users and not just
 session-token based authentication.
 
+# `count_users_in_lobbies`
+
+```elixir
+@spec count_users_in_lobbies() :: non_neg_integer()
+```
+
+Count users currently seated in a lobby (`users.lobby_id`, indexed).
+
+# `count_users_in_parties`
+
+```elixir
+@spec count_users_in_parties() :: non_neg_integer()
+```
+
+Count users currently in a party (`users.party_id`, indexed).
+
 # `count_users_online`
 
 ```elixir
@@ -685,6 +701,26 @@ The counterpart to `Gamend.Lobbies.merge_metadata/2`, and for the same
 reason: `metadata` is one shared map, so a writer that replaces it wipes keys
 belonging to code it has never heard of. Top-level merge, serialized so two
 concurrent merges cannot lose each other.
+
+# `player_stats`
+
+```elixir
+@spec player_stats() :: %{
+  players_online: non_neg_integer(),
+  players_total: non_neg_integer(),
+  players_offline: non_neg_integer(),
+  players_in_lobbies: non_neg_integer(),
+  players_in_parties: non_neg_integer()
+}
+```
+
+Aggregate player counts for the public stats endpoint.
+
+Every field is derived, never a counter: a counter would put a write on the
+login path (SQLite has one writer) and would drift from the bulk updates in
+`touch_users/1` and `StalePresenceSweeper`. `players_online` rides the
+partial index over online rows, so it scans the smallest set; the unfiltered
+`players_total` cannot use an index at all, which is what the cache is for.
 
 # `prune_user_avatars`
 

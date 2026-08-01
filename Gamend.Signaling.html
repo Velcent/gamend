@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.1">
-    <meta name="project" content="gamend_core v1.0.1093">
+    <meta name="project" content="gamend_core v1.0.1095">
 
 
-    <title>Gamend.Signaling — gamend_core v1.0.1093</title>
+    <title>Gamend.Signaling — gamend_core v1.0.1095</title>
 
     <link rel="stylesheet" href="dist/html-elixir-YJO4MOOW.css" />
 
-    <script defer src="dist/sidebar_items-80C66CBE.js"></script>
+    <script defer src="dist/sidebar_items-064113BE.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-YU4BZFVS.js"></script>
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1093
+          v1.0.1095
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr>Signaling</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1093)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1095)</small>
 
     </h1>
 
@@ -121,7 +121,7 @@ All three are cluster-wide, so a peer on one node can signal a peer on
 another.</p><p>That is the reason for this shape. The previous version kept rooms in a
 GenServer registered under a plain local name, so a room created on one node
 did not exist on any other, and every player whose socket landed elsewhere
-failed to join with <code class="inline">:room_not_found</code>.</p><h2 id="module-configuration" class="section-heading"><a href="#module-configuration" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Configuration</span></h2><p>Read from the lobby, never mirrored:</p><pre><code class="makeup elixir" translate="no"><span class="nc">Signaling</span><span class="o">.</span><span class="n">configure</span><span class="p" data-group-id="3416545979-1">(</span><span class="n">lobby</span><span class="p">,</span><span class="w"> </span><span class="ss">enabled</span><span class="p">:</span><span class="w"> </span><span class="no">true</span><span class="p">,</span><span class="w"> </span><span class="ss">topology</span><span class="p">:</span><span class="w"> </span><span class="ss">:star</span><span class="p" data-group-id="3416545979-1">)</span></code></pre><p>Held in server-owned <code class="inline">lobbies.webrtc_*</code> columns, written only by
+failed to join with <code class="inline">:room_not_found</code>.</p><h2 id="module-configuration" class="section-heading"><a href="#module-configuration" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Configuration</span></h2><p>Read from the lobby, never mirrored:</p><pre><code class="makeup elixir" translate="no"><span class="nc">Signaling</span><span class="o">.</span><span class="n">configure</span><span class="p" data-group-id="7888522051-1">(</span><span class="n">lobby</span><span class="p">,</span><span class="w"> </span><span class="ss">enabled</span><span class="p">:</span><span class="w"> </span><span class="no">true</span><span class="p">,</span><span class="w"> </span><span class="ss">topology</span><span class="p">:</span><span class="w"> </span><span class="ss">:star</span><span class="p" data-group-id="7888522051-1">)</span></code></pre><p>Held in server-owned <code class="inline">lobbies.webrtc_*</code> columns, written only by
 <a href="#configure/2"><code class="inline">configure/2</code></a>. It lived in <code class="inline">metadata</code> once, which was wrong twice over: that
 map is replaced wholesale by any writer, so a game storing match state wiped
 it, and the lobby host can <code class="inline">PATCH</code> it, so a player could flip the topology and
@@ -300,6 +300,16 @@ broadcast.</li></ul>
 
     <div class="summary-row">
       <div class="summary-signature">
+        <a href="#stats/0" data-no-tooltip="" translate="no">stats()</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Aggregate room counts for the public stats endpoint.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
         <a href="#topic/1" data-no-tooltip="" translate="no">topic(room_id)</a>
 
       </div>
@@ -332,7 +342,7 @@ broadcast.</li></ul>
       <h1 class="signature" translate="no">config()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L47" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L49" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -365,7 +375,7 @@ broadcast.</li></ul>
       <h1 class="signature" translate="no">message_type()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L45" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L47" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -393,7 +403,7 @@ broadcast.</li></ul>
       <h1 class="signature" translate="no">role()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L44" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L46" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -421,7 +431,7 @@ broadcast.</li></ul>
       <h1 class="signature" translate="no">room_id()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L41" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L43" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -449,7 +459,7 @@ broadcast.</li></ul>
       <h1 class="signature" translate="no">topology()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L43" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L45" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -477,7 +487,7 @@ broadcast.</li></ul>
       <h1 class="signature" translate="no">user_id()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L42" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L44" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -518,7 +528,7 @@ broadcast.</li></ul>
       <h1 class="signature" translate="no">authorize(room_id, user_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L143" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L145" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -548,7 +558,7 @@ connect at all; the host of a star room is whoever the lobby says it is.</p>
       <h1 class="signature" translate="no">broadcast(room_id, from, type, payload)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L212" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L240" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -577,7 +587,7 @@ connect at all; the host of a star room is whoever the lobby says it is.</p>
       <h1 class="signature" translate="no">close(room_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L231" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L259" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -605,7 +615,7 @@ connect at all; the host of a star room is whoever the lobby says it is.</p>
       <h1 class="signature" translate="no">config(room_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L71" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L73" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -634,7 +644,7 @@ on it — deliberately indistinguishable to a caller.</p>
       <h1 class="signature" translate="no">configure(room_id, opts)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L99" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L101" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -668,7 +678,7 @@ the lobby host.</p>
       <h1 class="signature" translate="no">enabled?(room_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L133" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L135" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -696,7 +706,7 @@ the lobby host.</p>
       <h1 class="signature" translate="no">inbox(room_id, user_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L62" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L64" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -724,7 +734,7 @@ the lobby host.</p>
       <h1 class="signature" translate="no">peer_role(room_id, user_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L181" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L183" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -752,7 +762,7 @@ the lobby host.</p>
       <h1 class="signature" translate="no">peers(room_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L163" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L165" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -783,7 +793,7 @@ happen to reconnect.</p>
       <h1 class="signature" translate="no">relay(room_id, from, to, type, payload)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L191" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L219" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -803,6 +813,40 @@ happen to reconnect.</p>
 may talk.</p>
   </section>
 </section>
+<section class="detail" id="stats/0">
+
+  <div class="detail-header">
+    <a href="#stats/0" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">stats()</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L197" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> stats() :: %{
+  rooms_enabled: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>(),
+  rooms_active: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>(),
+  peers_connected: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>()
+}</pre>
+
+      </div>
+
+<p>Aggregate room counts for the public stats endpoint.</p><p><code class="inline">rooms_enabled</code> is what the lobbies are configured for; <code class="inline">rooms_active</code> counts
+only rooms someone is actually connected to. Presence cannot enumerate its own
+topics, so the room ids come from the lobby table first.</p>
+  </section>
+</section>
 <section class="detail" id="topic/1">
 
   <div class="detail-header">
@@ -813,7 +857,7 @@ may talk.</p>
       <h1 class="signature" translate="no">topic(room_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L58" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signaling.ex#L60" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -840,9 +884,9 @@ may talk.</p>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1093">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1095">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1093">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1095">Hex Preview</a>
 
             </span>
 

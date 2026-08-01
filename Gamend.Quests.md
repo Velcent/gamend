@@ -370,6 +370,21 @@ when every param key/value is present in `meta`.
 
 Returns `{:ok, progress_rows}` for the quests that advanced.
 
+# `stats`
+
+```elixir
+@spec stats() :: %{
+  quests_total: non_neg_integer(),
+  completed: non_neg_integer(),
+  claimed: non_neg_integer()
+}
+```
+
+Aggregate quest progress counts for the public stats endpoint.
+
+Grouped by status in one query — `quest_progress` carries a partial index on
+completed rows, and the group-by reads the same rows the listing already does.
+
 # `subscribe_quests`
 
 ```elixir

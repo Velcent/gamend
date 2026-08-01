@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.1">
-    <meta name="project" content="gamend_core v1.0.1093">
+    <meta name="project" content="gamend_core v1.0.1095">
 
 
-    <title>Gamend.Parties — gamend_core v1.0.1093</title>
+    <title>Gamend.Parties — gamend_core v1.0.1095</title>
 
     <link rel="stylesheet" href="dist/html-elixir-YJO4MOOW.css" />
 
-    <script defer src="dist/sidebar_items-80C66CBE.js"></script>
+    <script defer src="dist/sidebar_items-064113BE.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-YU4BZFVS.js"></script>
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1093
+          v1.0.1095
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr>Parties</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1093)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1095)</small>
 
     </h1>
 
@@ -116,25 +116,25 @@ gamend_core
     <section id="moduledoc">
 <p>Context module for party management.</p><p>A party is a pre-lobby grouping mechanism. Players form a party before
 creating or joining a lobby together.</p><h2 id="module-usage" class="section-heading"><a href="#module-usage" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Usage</span></h2><pre><code class="makeup elixir" translate="no"><span class="c1"># Create a party (user becomes leader and first member)</span><span class="w">
-</span><span class="p" data-group-id="5823306828-1">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">party</span><span class="p" data-group-id="5823306828-1">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Gamend.Parties</span><span class="o">.</span><span class="n">create_party</span><span class="p" data-group-id="5823306828-2">(</span><span class="n">user</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="5823306828-3">%{</span><span class="ss">max_size</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p" data-group-id="5823306828-3">}</span><span class="p" data-group-id="5823306828-2">)</span><span class="w">
+</span><span class="p" data-group-id="4852784450-1">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">party</span><span class="p" data-group-id="4852784450-1">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Gamend.Parties</span><span class="o">.</span><span class="n">create_party</span><span class="p" data-group-id="4852784450-2">(</span><span class="n">user</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="4852784450-3">%{</span><span class="ss">max_size</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p" data-group-id="4852784450-3">}</span><span class="p" data-group-id="4852784450-2">)</span><span class="w">
 
 </span><span class="c1"># Leader invites a friend or shared-group member by user_id</span><span class="w">
-</span><span class="p" data-group-id="5823306828-4">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="c">_notification</span><span class="p" data-group-id="5823306828-4">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Gamend.Parties</span><span class="o">.</span><span class="n">invite_to_party</span><span class="p" data-group-id="5823306828-5">(</span><span class="n">leader</span><span class="p">,</span><span class="w"> </span><span class="n">target_user_id</span><span class="p" data-group-id="5823306828-5">)</span><span class="w">
+</span><span class="p" data-group-id="4852784450-4">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="c">_notification</span><span class="p" data-group-id="4852784450-4">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Gamend.Parties</span><span class="o">.</span><span class="n">invite_to_party</span><span class="p" data-group-id="4852784450-5">(</span><span class="n">leader</span><span class="p">,</span><span class="w"> </span><span class="n">target_user_id</span><span class="p" data-group-id="4852784450-5">)</span><span class="w">
 
 </span><span class="c1"># Target accepts the invite</span><span class="w">
-</span><span class="p" data-group-id="5823306828-6">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">party</span><span class="p" data-group-id="5823306828-6">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Gamend.Parties</span><span class="o">.</span><span class="n">accept_party_invite</span><span class="p" data-group-id="5823306828-7">(</span><span class="n">target</span><span class="p">,</span><span class="w"> </span><span class="n">party_id</span><span class="p" data-group-id="5823306828-7">)</span><span class="w">
+</span><span class="p" data-group-id="4852784450-6">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">party</span><span class="p" data-group-id="4852784450-6">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Gamend.Parties</span><span class="o">.</span><span class="n">accept_party_invite</span><span class="p" data-group-id="4852784450-7">(</span><span class="n">target</span><span class="p">,</span><span class="w"> </span><span class="n">party_id</span><span class="p" data-group-id="4852784450-7">)</span><span class="w">
 
 </span><span class="c1"># Or declines</span><span class="w">
-</span><span class="ss">:ok</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Gamend.Parties</span><span class="o">.</span><span class="n">decline_party_invite</span><span class="p" data-group-id="5823306828-8">(</span><span class="n">target</span><span class="p">,</span><span class="w"> </span><span class="n">party_id</span><span class="p" data-group-id="5823306828-8">)</span><span class="w">
+</span><span class="ss">:ok</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Gamend.Parties</span><span class="o">.</span><span class="n">decline_party_invite</span><span class="p" data-group-id="4852784450-8">(</span><span class="n">target</span><span class="p">,</span><span class="w"> </span><span class="n">party_id</span><span class="p" data-group-id="4852784450-8">)</span><span class="w">
 
 </span><span class="c1"># Leave a party (if leader leaves, party is disbanded)</span><span class="w">
-</span><span class="p" data-group-id="5823306828-9">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="bp">_</span><span class="p" data-group-id="5823306828-9">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Gamend.Parties</span><span class="o">.</span><span class="n">leave_party</span><span class="p" data-group-id="5823306828-10">(</span><span class="n">user</span><span class="p" data-group-id="5823306828-10">)</span><span class="w">
+</span><span class="p" data-group-id="4852784450-9">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="bp">_</span><span class="p" data-group-id="4852784450-9">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Gamend.Parties</span><span class="o">.</span><span class="n">leave_party</span><span class="p" data-group-id="4852784450-10">(</span><span class="n">user</span><span class="p" data-group-id="4852784450-10">)</span><span class="w">
 
 </span><span class="c1"># Party leader creates a lobby — all members join atomically</span><span class="w">
-</span><span class="p" data-group-id="5823306828-11">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">lobby</span><span class="p" data-group-id="5823306828-11">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Gamend.Parties</span><span class="o">.</span><span class="n">create_lobby_with_party</span><span class="p" data-group-id="5823306828-12">(</span><span class="n">user</span><span class="p">,</span><span class="w"> </span><span class="n">lobby_attrs</span><span class="p" data-group-id="5823306828-12">)</span><span class="w">
+</span><span class="p" data-group-id="4852784450-11">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">lobby</span><span class="p" data-group-id="4852784450-11">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Gamend.Parties</span><span class="o">.</span><span class="n">create_lobby_with_party</span><span class="p" data-group-id="4852784450-12">(</span><span class="n">user</span><span class="p">,</span><span class="w"> </span><span class="n">lobby_attrs</span><span class="p" data-group-id="4852784450-12">)</span><span class="w">
 
 </span><span class="c1"># Party leader joins an existing lobby — all members join atomically</span><span class="w">
-</span><span class="p" data-group-id="5823306828-13">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">lobby</span><span class="p" data-group-id="5823306828-13">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Gamend.Parties</span><span class="o">.</span><span class="n">join_lobby_with_party</span><span class="p" data-group-id="5823306828-14">(</span><span class="n">user</span><span class="p">,</span><span class="w"> </span><span class="n">lobby_id</span><span class="p">,</span><span class="w"> </span><span class="n">opts</span><span class="p" data-group-id="5823306828-14">)</span></code></pre><h2 id="module-pubsub-events" class="section-heading"><a href="#module-pubsub-events" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">PubSub Events</span></h2><p>This module broadcasts the following events:</p><ul><li><code class="inline">&quot;party:&lt;party_id&gt;&quot;</code> topic:<ul><li><code class="inline">{:party_member_joined, party_id, user_id}</code></li><li><code class="inline">{:party_member_left, party_id, user_id}</code></li><li><code class="inline">{:party_disbanded, party_id}</code></li><li><code class="inline">{:party_updated, party}</code></li></ul></li></ul>
+</span><span class="p" data-group-id="4852784450-13">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">lobby</span><span class="p" data-group-id="4852784450-13">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Gamend.Parties</span><span class="o">.</span><span class="n">join_lobby_with_party</span><span class="p" data-group-id="4852784450-14">(</span><span class="n">user</span><span class="p">,</span><span class="w"> </span><span class="n">lobby_id</span><span class="p">,</span><span class="w"> </span><span class="n">opts</span><span class="p" data-group-id="4852784450-14">)</span></code></pre><h2 id="module-pubsub-events" class="section-heading"><a href="#module-pubsub-events" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">PubSub Events</span></h2><p>This module broadcasts the following events:</p><ul><li><code class="inline">&quot;party:&lt;party_id&gt;&quot;</code> topic:<ul><li><code class="inline">{:party_member_joined, party_id, user_id}</code></li><li><code class="inline">{:party_member_left, party_id, user_id}</code></li><li><code class="inline">{:party_disbanded, party_id}</code></li><li><code class="inline">{:party_updated, party}</code></li></ul></li></ul>
     </section>
 
 </div>
@@ -416,6 +416,16 @@ atomically. The party is kept intact.</p></div>
 
     <div class="summary-row">
       <div class="summary-signature">
+        <a href="#stats/0" data-no-tooltip="" translate="no">stats()</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Aggregate party counts for the public stats endpoint.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
         <a href="#subscribe_parties/0" data-no-tooltip="" translate="no">subscribe_parties()</a>
 
       </div>
@@ -478,7 +488,7 @@ atomically. The party is kept intact.</p></div>
       <h1 class="signature" translate="no">accept_party_invite(user, party_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L478" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L495" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -508,7 +518,7 @@ atomically. The party is kept intact.</p></div>
       <h1 class="signature" translate="no">admin_delete_party(party_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L1681" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L1698" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -537,7 +547,7 @@ atomically. The party is kept intact.</p></div>
       <h1 class="signature" translate="no">admin_update_party(party, attrs)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L1661" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L1678" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -594,7 +604,7 @@ atomically. The party is kept intact.</p></div>
       <h1 class="signature" translate="no">cancel_party_invite(leader, target_user_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L428" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L445" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -623,7 +633,7 @@ atomically. The party is kept intact.</p></div>
       <h1 class="signature" translate="no">change_party(party)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L1655" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L1672" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -653,7 +663,7 @@ atomically. The party is kept intact.</p></div>
       <h1 class="signature" translate="no">count_all_parties(filters \\ %{})</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L1647" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L1664" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -681,7 +691,7 @@ atomically. The party is kept intact.</p></div>
       <h1 class="signature" translate="no">count_all_party_members()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L256" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L273" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -709,7 +719,7 @@ atomically. The party is kept intact.</p></div>
       <h1 class="signature" translate="no">count_party_members(party_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L250" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L267" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -739,7 +749,7 @@ atomically. The party is kept intact.</p></div>
       <h1 class="signature" translate="no">create_lobby_with_party(user, lobby_attrs \\ %{})</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L1264" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L1281" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -771,7 +781,7 @@ atomically. The party is kept intact.</p><p>The lobby's <code class="inline">max
       <h1 class="signature" translate="no">create_party(user, attrs \\ %{})</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L278" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L295" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -800,7 +810,7 @@ atomically. The party is kept intact.</p><p>The lobby's <code class="inline">max
       <h1 class="signature" translate="no">decline_party_invite(user, party_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L644" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L661" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -829,7 +839,7 @@ atomically. The party is kept intact.</p><p>The lobby's <code class="inline">max
       <h1 class="signature" translate="no">disband(party)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L933" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L950" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -888,7 +898,7 @@ retention sweep for parties everyone has abandoned. Members leaving is
       <h1 class="signature" translate="no">get_party!(id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L218" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L235" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -916,7 +926,7 @@ retention sweep for parties everyone has abandoned. Members leaving is
       <h1 class="signature" translate="no">get_party_members(party_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L238" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L255" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -946,7 +956,7 @@ retention sweep for parties everyone has abandoned. Members leaving is
       <h1 class="signature" translate="no">get_user_party(user)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L262" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L279" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -974,7 +984,7 @@ retention sweep for parties everyone has abandoned. Members leaving is
       <h1 class="signature" translate="no">invite_to_party(leader, target_user_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L354" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L371" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1011,7 +1021,7 @@ If a pending invite already exists, returns <code class="inline">{:ok, existing_
       <h1 class="signature" translate="no">join_lobby_with_party(user, lobby_id, opts \\ %{})</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L1385" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L1402" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1041,7 +1051,7 @@ atomically. The party is kept intact.</p><p>The lobby must have enough free slot
       <h1 class="signature" translate="no">kick_member(leader, target_user_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L939" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L956" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1070,7 +1080,7 @@ atomically. The party is kept intact.</p><p>The lobby must have enough free slot
       <h1 class="signature" translate="no">leader?(user)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L227" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L244" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1098,7 +1108,7 @@ atomically. The party is kept intact.</p><p>The lobby must have enough free slot
       <h1 class="signature" translate="no">leave_party(user)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L902" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L919" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1132,7 +1142,7 @@ party deleted). Regular members are simply removed.</p>
       <h1 class="signature" translate="no">list_all_parties(filters \\ %{}, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L1630" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L1647" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1163,7 +1173,7 @@ party deleted). Regular members are simply removed.</p>
       <h1 class="signature" translate="no">list_party_invitations(user)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L711" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L728" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1191,7 +1201,7 @@ party deleted). Regular members are simply removed.</p>
       <h1 class="signature" translate="no">list_sent_party_invitations(leader)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L737" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L754" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1221,7 +1231,7 @@ party deleted). Regular members are simply removed.</p>
       <h1 class="signature" translate="no">quick_join_with_party(user, params \\ %{})</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L1138" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L1155" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1243,6 +1253,38 @@ matching lobby is found, creates a new one and joins all party members
 atomically.</p><p>Returns <code class="inline">{:ok, lobby}</code> on success.</p>
   </section>
 </section>
+<section class="detail" id="stats/0">
+
+  <div class="detail-header">
+    <a href="#stats/0" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">stats()</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L118" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> stats() :: %{
+  parties_active: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>(),
+  players_in_parties: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>()
+}</pre>
+
+      </div>
+
+<p>Aggregate party counts for the public stats endpoint.</p><p>Membership is a user column (<code class="inline">users.party_id</code>, indexed), so both numbers are
+derived counts rather than a maintained size.</p>
+  </section>
+</section>
 <section class="detail" id="subscribe_parties/0">
 
   <div class="detail-header">
@@ -1253,7 +1295,7 @@ atomically.</p><p>Returns <code class="inline">{:ok, lobby}</code> on success.</
       <h1 class="signature" translate="no">subscribe_parties()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L1620" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L1637" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1337,7 +1379,7 @@ atomically.</p><p>Returns <code class="inline">{:ok, lobby}</code> on success.</
       <h1 class="signature" translate="no">update_party(user, attrs)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L1062" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L1079" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1365,9 +1407,9 @@ atomically.</p><p>Returns <code class="inline">{:ok, lobby}</code> on success.</
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1093">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1095">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1093">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1095">Hex Preview</a>
 
             </span>
 

@@ -183,6 +183,22 @@ Sends `payload` to one peer.
 In a star room every exchange must involve the host; in a mesh room any pair
 may talk.
 
+# `stats`
+
+```elixir
+@spec stats() :: %{
+  rooms_enabled: non_neg_integer(),
+  rooms_active: non_neg_integer(),
+  peers_connected: non_neg_integer()
+}
+```
+
+Aggregate room counts for the public stats endpoint.
+
+`rooms_enabled` is what the lobbies are configured for; `rooms_active` counts
+only rooms someone is actually connected to. Presence cannot enumerate its own
+topics, so the room ids come from the lobby table first.
+
 # `topic`
 
 ```elixir

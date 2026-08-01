@@ -344,6 +344,23 @@ Check if a lobby can be spectated (watched by non-members).
 
 A lobby is spectatable if it is not hidden and not locked.
 
+# `stats`
+
+```elixir
+@spec stats() :: %{
+  lobbies_total: non_neg_integer(),
+  by_state: %{required(String.t()) =&gt; non_neg_integer()},
+  spectators: non_neg_integer()
+}
+```
+
+Aggregate lobby counts for the public stats endpoint.
+
+Spectators live in Presence, keyed per lobby topic, and Presence cannot
+enumerate its own topics — so the lobby ids come from the table first. That
+makes the total one query plus an ETS read per lobby, which is why it sits
+inside the cached snapshot rather than being computed per request.
+
 # `subscribe_lobbies`
 
 ```elixir
@@ -442,6 +459,14 @@ Allowed only for the **host of a host-managed lobby**. **Hostless** lobbies
 could otherwise rewrite `metadata`, `max_users`, `password_hash` and the
 visibility flags of a ranked match they merely happen to be in. Server-side
 code (hooks, jobs, matchmaking, admin) uses `update_lobby/2` instead.
+
+# `webrtc_enabled_lobby_ids`
+
+```elixir
+@spec webrtc_enabled_lobby_ids() :: [Ecto.UUID.t()]
+```
+
+Ids of lobbies with WebRTC enabled — the signaling rooms that can exist.
 
 # `write_webrtc_config`
 
