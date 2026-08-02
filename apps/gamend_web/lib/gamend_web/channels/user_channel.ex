@@ -417,6 +417,24 @@ defmodule GamendWeb.UserChannel do
   end
 
   @impl true
+  def handle_info({:chat_muted, mute}, socket) do
+    push_event(socket, "chat_muted", %{
+      scope: mute.scope,
+      scope_ref_id: mute.scope_ref_id || "",
+      expires_at: mute.expires_at,
+      reason: mute.reason || ""
+    })
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info({:chat_unmuted, %{scope: scope, scope_ref_id: scope_ref_id}}, socket) do
+    push_event(socket, "chat_unmuted", %{scope: scope, scope_ref_id: scope_ref_id || ""})
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_info({:group_invite_accepted, payload}, socket) do
     push_event(socket, "group_invite_accepted", payload)
     {:noreply, socket}

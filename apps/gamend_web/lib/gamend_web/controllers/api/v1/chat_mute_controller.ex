@@ -1,0 +1,457 @@
+defmodule GamendWeb.Api.V1.ChatMuteController do
+  @moduledoc """
+  Scoped chat mutes, applied by a room's own authority.
+
+  Authority follows the room and mirrors kick: the **lobby host** mutes in their
+  lobby, a **group admin** in their group, the **party leader** in their party.
+  Like kick, lobby and party actions take no id — the room comes from the
+  caller's `lobby_id` / `party_id`.
+
+  Global mutes are deliberately absent here: they are server-authoritative and
+  live on the admin API (`/api/v1/admin/chat/mutes`) or a plugin calling
+  `Gamend.Chat.mute_user/4`.
+  """
+  use GamendWeb, :controller
+  use OpenApiSpex.ControllerSpecs
+
+  alias Gamend.Accounts.Scope
+  alias Gamend.Accounts.User
+  alias Gamend.Chat
+  alias Gamend.Groups
+  alias Gamend.Lobbies
+  alias Gamend.Parties
+  alias OpenApiSpex.Schema
+
+  tags(["Chat"])
+
+  @mute_schema %Schema{
+    type: :object,
+    properties: %{
+      id: %Schema{type: :string, format: :uuid},
+      user_id: %Schema{type: :string, format: :uuid},
+      scope: %Schema{type: :string, enum: ["global", "lobby", "group", "party"]},
+      scope_ref_id: %Schema{type: :string},
+      expires_at: %Schema{type: :string, format: :"date-time", nullable: true},
+      reason: %Schema{type: :string},
+      muted_by: %Schema{type: :string},
+      inserted_at: %Schema{type: :string, format: :"date-time"}
+    }
+  }
+
+  @meta_schema %Schema{
+    type: :object,
+    properties: %{
+      page: %Schema{type: :integer},
+      page_size: %Schema{type: :integer},
+      total_count: %Schema{type: :integer},
+      total_pages: %Schema{type: :integer}
+    }
+  }
+
+  @mute_request %Schema{
+    type: :object,
+    required: [:target_user_id],
+    properties: %{
+      target_user_id: %Schema{type: :string, format: :uuid, description: "Player to mute"},
+      expires_at: %Schema{
+        type: :string,
+        format: :"date-time",
+        nullable: true,
+        description: "When the mute lifts. Omit for a permanent mute."
+      },
+      reason: %Schema{type: :string, description: "Shown to moderators, not to the player"}
+    }
+  }
+
+  @unmute_request %Schema{
+    type: :object,
+    required: [:target_user_id],
+    properties: %{
+      target_user_id: %Schema{type: :string, format: :uuid, description: "Player to unmute"}
+    }
+  }
+
+  # ── Lobby ──────────────────────────────────────────────────────────────────
+
+  operation(:mute_lobby,
+    operation_id: "mute_lobby_member",
+    summary: "Mute a player in your lobby",
+    description:
+      "Silences the player in this lobby's chat. Lobby host only; a hostless " <>
+        "lobby has no in-game moderator.",
+    security: [%{"authorization" => []}],
+    request_body: {"Mute", "application/json", @mute_request},
+    responses: [
+      ok: {"Muted", "application/json", @mute_schema},
+      bad_request: {"Not in a lobby or invalid id", "application/json", %Schema{type: :object}},
+      forbidden: {"Not the lobby host", "application/json", %Schema{type: :object}}
+    ]
+  )
+
+  def mute_lobby(conn, params) do
+    with_lobby(conn, fn user, lobby ->
+      if host_of?(user, lobby) do
+        do_mute(conn, params, "lobby", lobby.id, user)
+      else
+        forbidden(conn, "not_host")
+      end
+    end)
+  end
+
+  operation(:unmute_lobby,
+    operation_id: "unmute_lobby_member",
+    summary: "Lift a mute in your lobby",
+    security: [%{"authorization" => []}],
+    request_body: {"Unmute", "application/json", @unmute_request},
+    responses: [
+      ok: {"Unmuted", "application/json", %Schema{type: :object}},
+      bad_request: {"Not in a lobby or invalid id", "application/json", %Schema{type: :object}},
+      forbidden: {"Not the lobby host", "application/json", %Schema{type: :object}}
+    ]
+  )
+
+  def unmute_lobby(conn, params) do
+    with_lobby(conn, fn user, lobby ->
+      if host_of?(user, lobby) do
+        do_unmute(conn, params, "lobby", lobby.id)
+      else
+        forbidden(conn, "not_host")
+      end
+    end)
+  end
+
+  operation(:list_lobby_mutes,
+    operation_id: "list_lobby_mutes",
+    summary: "List active mutes in your lobby",
+    security: [%{"authorization" => []}],
+    parameters: [
+      page: [in: :query, schema: %Schema{type: :integer, default: 1}, description: "Page number"],
+      page_size: [
+        in: :query,
+        schema: %Schema{type: :integer, default: 25},
+        description: "Items per page (max 100)"
+      ]
+    ],
+    responses: [
+      ok:
+        {"Mutes", "application/json",
+         %Schema{
+           type: :object,
+           properties: %{data: %Schema{type: :array, items: @mute_schema}, meta: @meta_schema}
+         }},
+      forbidden: {"Not the lobby host", "application/json", %Schema{type: :object}}
+    ]
+  )
+
+  def list_lobby_mutes(conn, params) do
+    with_lobby(conn, fn user, lobby ->
+      if host_of?(user, lobby) do
+        list_scoped(conn, params, "lobby", lobby.id)
+      else
+        forbidden(conn, "not_host")
+      end
+    end)
+  end
+
+  # ── Group ──────────────────────────────────────────────────────────────────
+
+  operation(:mute_group,
+    operation_id: "mute_group_member",
+    summary: "Mute a player in a group",
+    description: "Silences the player in this group's chat. Group admins only.",
+    security: [%{"authorization" => []}],
+    parameters: [
+      id: [
+        in: :path,
+        required: true,
+        schema: %Schema{type: :string, format: :uuid},
+        description: "Group ID"
+      ]
+    ],
+    request_body: {"Mute", "application/json", @mute_request},
+    responses: [
+      ok: {"Muted", "application/json", @mute_schema},
+      bad_request: {"Invalid id", "application/json", %Schema{type: :object}},
+      forbidden: {"Not a group admin", "application/json", %Schema{type: :object}}
+    ]
+  )
+
+  def mute_group(conn, %{"id" => group_id} = params) do
+    with_group_admin(conn, group_id, fn user, group_id ->
+      do_mute(conn, params, "group", group_id, user)
+    end)
+  end
+
+  operation(:unmute_group,
+    operation_id: "unmute_group_member",
+    summary: "Lift a mute in a group",
+    security: [%{"authorization" => []}],
+    parameters: [
+      id: [
+        in: :path,
+        required: true,
+        schema: %Schema{type: :string, format: :uuid},
+        description: "Group ID"
+      ]
+    ],
+    request_body: {"Unmute", "application/json", @unmute_request},
+    responses: [
+      ok: {"Unmuted", "application/json", %Schema{type: :object}},
+      bad_request: {"Invalid id", "application/json", %Schema{type: :object}},
+      forbidden: {"Not a group admin", "application/json", %Schema{type: :object}}
+    ]
+  )
+
+  def unmute_group(conn, %{"id" => group_id} = params) do
+    with_group_admin(conn, group_id, fn _user, group_id ->
+      do_unmute(conn, params, "group", group_id)
+    end)
+  end
+
+  operation(:list_group_mutes,
+    operation_id: "list_group_mutes",
+    summary: "List active mutes in a group",
+    security: [%{"authorization" => []}],
+    parameters: [
+      id: [
+        in: :path,
+        required: true,
+        schema: %Schema{type: :string, format: :uuid},
+        description: "Group ID"
+      ],
+      page: [in: :query, schema: %Schema{type: :integer, default: 1}, description: "Page number"],
+      page_size: [
+        in: :query,
+        schema: %Schema{type: :integer, default: 25},
+        description: "Items per page (max 100)"
+      ]
+    ],
+    responses: [
+      ok:
+        {"Mutes", "application/json",
+         %Schema{
+           type: :object,
+           properties: %{data: %Schema{type: :array, items: @mute_schema}, meta: @meta_schema}
+         }},
+      forbidden: {"Not a group admin", "application/json", %Schema{type: :object}}
+    ]
+  )
+
+  def list_group_mutes(conn, %{"id" => group_id} = params) do
+    with_group_admin(conn, group_id, fn _user, group_id ->
+      list_scoped(conn, params, "group", group_id)
+    end)
+  end
+
+  # ── Party ──────────────────────────────────────────────────────────────────
+
+  operation(:mute_party,
+    operation_id: "mute_party_member",
+    summary: "Mute a player in your party",
+    description: "Silences the player in this party's chat. Party leader only.",
+    security: [%{"authorization" => []}],
+    request_body: {"Mute", "application/json", @mute_request},
+    responses: [
+      ok: {"Muted", "application/json", @mute_schema},
+      bad_request: {"Not in a party or invalid id", "application/json", %Schema{type: :object}},
+      forbidden: {"Not the party leader", "application/json", %Schema{type: :object}}
+    ]
+  )
+
+  def mute_party(conn, params) do
+    with_party(conn, fn user, party ->
+      if party.leader_id == user.id do
+        do_mute(conn, params, "party", party.id, user)
+      else
+        forbidden(conn, "not_leader")
+      end
+    end)
+  end
+
+  operation(:unmute_party,
+    operation_id: "unmute_party_member",
+    summary: "Lift a mute in your party",
+    security: [%{"authorization" => []}],
+    request_body: {"Unmute", "application/json", @unmute_request},
+    responses: [
+      ok: {"Unmuted", "application/json", %Schema{type: :object}},
+      bad_request: {"Not in a party or invalid id", "application/json", %Schema{type: :object}},
+      forbidden: {"Not the party leader", "application/json", %Schema{type: :object}}
+    ]
+  )
+
+  def unmute_party(conn, params) do
+    with_party(conn, fn user, party ->
+      if party.leader_id == user.id do
+        do_unmute(conn, params, "party", party.id)
+      else
+        forbidden(conn, "not_leader")
+      end
+    end)
+  end
+
+  operation(:list_party_mutes,
+    operation_id: "list_party_mutes",
+    summary: "List active mutes in your party",
+    security: [%{"authorization" => []}],
+    parameters: [
+      page: [in: :query, schema: %Schema{type: :integer, default: 1}, description: "Page number"],
+      page_size: [
+        in: :query,
+        schema: %Schema{type: :integer, default: 25},
+        description: "Items per page (max 100)"
+      ]
+    ],
+    responses: [
+      ok:
+        {"Mutes", "application/json",
+         %Schema{
+           type: :object,
+           properties: %{data: %Schema{type: :array, items: @mute_schema}, meta: @meta_schema}
+         }},
+      forbidden: {"Not the party leader", "application/json", %Schema{type: :object}}
+    ]
+  )
+
+  def list_party_mutes(conn, params) do
+    with_party(conn, fn user, party ->
+      if party.leader_id == user.id do
+        list_scoped(conn, params, "party", party.id)
+      else
+        forbidden(conn, "not_leader")
+      end
+    end)
+  end
+
+  # ── Shared ─────────────────────────────────────────────────────────────────
+
+  defp do_mute(conn, params, scope, scope_ref_id, actor) do
+    case target_id(params) do
+      nil ->
+        conn |> put_status(:bad_request) |> json(%{error: "invalid_target_user_id"})
+
+      target_user_id ->
+        attrs = %{
+          "expires_at" => param(params, "expires_at"),
+          "reason" => param(params, "reason"),
+          "muted_by" => actor.id
+        }
+
+        case Chat.mute_user(target_user_id, scope, scope_ref_id, attrs) do
+          {:ok, mute} ->
+            json(conn, %{data: serialize(mute)})
+
+          {:error, %Ecto.Changeset{} = changeset} ->
+            conn
+            |> put_status(:unprocessable_entity)
+            |> json(%{error: "invalid", details: changeset_errors(changeset)})
+
+          {:error, reason} ->
+            conn |> put_status(:unprocessable_entity) |> json(%{error: to_string(reason)})
+        end
+    end
+  end
+
+  defp do_unmute(conn, params, scope, scope_ref_id) do
+    case target_id(params) do
+      nil ->
+        conn |> put_status(:bad_request) |> json(%{error: "invalid_target_user_id"})
+
+      target_user_id ->
+        {:ok, count} = Chat.unmute_user(target_user_id, scope, scope_ref_id)
+        json(conn, %{ok: true, removed: count})
+    end
+  end
+
+  defp list_scoped(conn, params, scope, scope_ref_id) do
+    {page, page_size} = GamendWeb.Pagination.params(params)
+    filters = %{"scope" => scope, "scope_ref_id" => scope_ref_id, "active" => true}
+
+    mutes = Chat.list_mutes(filters, page: page, page_size: page_size)
+    total_count = Chat.count_mutes(filters)
+
+    json(conn, %{
+      data: Enum.map(mutes, &serialize/1),
+      meta: GamendWeb.Pagination.meta(page, page_size, length(mutes), total_count)
+    })
+  end
+
+  defp serialize(mute) do
+    %{
+      id: mute.id,
+      user_id: mute.user_id,
+      scope: mute.scope,
+      scope_ref_id: mute.scope_ref_id,
+      expires_at: mute.expires_at,
+      reason: mute.reason || "",
+      muted_by: mute.muted_by || "",
+      inserted_at: mute.inserted_at
+    }
+  end
+
+  defp target_id(params) do
+    params
+    |> param("target_user_id")
+    |> Gamend.UUIDv7.cast_or_nil()
+  end
+
+  defp param(params, key) do
+    Map.get(params, key) || Map.get(params, String.to_atom(key))
+  end
+
+  # The same rule as POST /lobbies/state: nobody owns a hostless lobby, so no
+  # player may act on it.
+  defp host_of?(%User{id: user_id}, lobby), do: not lobby.hostless and lobby.host_id == user_id
+
+  defp with_user(conn, fun) do
+    case Scope.user(conn.assigns[:current_scope]) do
+      %User{} = user -> fun.(user)
+      _ -> conn |> put_status(:unauthorized) |> json(%{error: "Not authenticated"})
+    end
+  end
+
+  defp with_lobby(conn, fun) do
+    with_user(conn, fn user ->
+      if is_nil(user.lobby_id) do
+        conn |> put_status(:bad_request) |> json(%{error: "not_in_lobby"})
+      else
+        fun.(user, Lobbies.get_lobby!(user.lobby_id))
+      end
+    end)
+  end
+
+  defp with_party(conn, fun) do
+    with_user(conn, fn user ->
+      case user.party_id && Parties.get_party(user.party_id) do
+        %Parties.Party{} = party -> fun.(user, party)
+        _ -> conn |> put_status(:bad_request) |> json(%{error: "not_in_party"})
+      end
+    end)
+  end
+
+  defp with_group_admin(conn, group_id, fun) do
+    with_user(conn, fn user ->
+      case Gamend.UUIDv7.cast_or_nil(group_id) do
+        nil ->
+          conn |> put_status(:bad_request) |> json(%{error: "invalid_id"})
+
+        group_id ->
+          if Groups.admin?(group_id, user.id) do
+            fun.(user, group_id)
+          else
+            forbidden(conn, "not_group_admin")
+          end
+      end
+    end)
+  end
+
+  defp forbidden(conn, reason), do: conn |> put_status(:forbidden) |> json(%{error: reason})
+
+  defp changeset_errors(%Ecto.Changeset{} = changeset) do
+    Ecto.Changeset.traverse_errors(changeset, fn {msg, opts} ->
+      Regex.replace(~r"%{(\w+)}", msg, fn _, key ->
+        opts |> Keyword.get(String.to_existing_atom(key), key) |> to_string()
+      end)
+    end)
+  end
+end

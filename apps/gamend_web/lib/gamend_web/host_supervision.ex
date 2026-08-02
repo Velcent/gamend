@@ -32,6 +32,7 @@ defmodule GamendWeb.HostSupervision do
       end
   """
 
+  alias Gamend.Chat.Moderation.Cache, as: ModerationCache
   alias GamendWeb.Plugs.GeoCountry
   alias GamendWeb.Plugs.IpBan
 
@@ -56,6 +57,8 @@ defmodule GamendWeb.HostSupervision do
     Gamend.Schedule.start_link()
     IpBan.init_table()
     GeoCountry.init_table()
+    # Word blocklist + active mutes, read on every outgoing chat message.
+    ModerationCache.init_table()
 
     :ok
   end
@@ -97,6 +100,9 @@ defmodule GamendWeb.HostSupervision do
       GamendWeb.ConnectionTracker,
       # Load persisted IP bans and mirror ban events from other instances
       GamendWeb.IpBanSync,
+      # Load the word blocklist + mutes, mirror moderation events from other
+      # instances, and sweep expired mutes
+      Gamend.Chat.Moderation.Sync,
       {GamendWeb.RateLimit, clean_period: :timer.minutes(5)},
       GamendWeb.AdminLogBuffer,
       # Periodic cleanup of old geo-country minute buckets

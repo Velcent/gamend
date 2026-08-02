@@ -1,6 +1,7 @@
 defmodule GamendWeb.TestSupport.Runtime do
   @moduledoc false
 
+  alias Gamend.Chat.Moderation.Cache, as: ModerationCache
   alias Gamend.Hooks.PluginManager
   alias GamendWeb.Plugs.GeoCountry
   alias GamendWeb.Plugs.IpBan
@@ -14,6 +15,10 @@ defmodule GamendWeb.TestSupport.Runtime do
     ensure_schedule_table()
     IpBan.init_table()
     GeoCountry.init_table()
+    # Tables only. Moderation.Sync is deliberately absent, like IpBanSync: its
+    # boot load would run outside the sandbox. Tests that need remote-event
+    # application drive Cache.apply_remote/2 directly.
+    ModerationCache.init_table()
 
     case Supervisor.start_link(children(), strategy: :one_for_one, name: @supervisor) do
       {:ok, _pid} -> :ok

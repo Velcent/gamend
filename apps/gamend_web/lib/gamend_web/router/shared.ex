@@ -424,6 +424,8 @@ defmodule GamendWeb.Router.Shared do
 
         get "/me", MeController, :show
         delete "/me", MeController, :delete
+        # Before "/lobbies/:id", which would otherwise capture it.
+        get "/lobbies/mutes", ChatMuteController, :list_lobby_mutes
         get "/lobbies/:id", LobbyController, :show
         post "/lobbies", LobbyController, :create
         post "/lobbies/quick_join", LobbyController, :quick_join
@@ -432,6 +434,8 @@ defmodule GamendWeb.Router.Shared do
         post "/lobbies/:id/join", LobbyController, :join
         post "/lobbies/leave", LobbyController, :leave
         post "/lobbies/kick", LobbyController, :kick
+        post "/lobbies/mute", ChatMuteController, :mute_lobby
+        post "/lobbies/unmute", ChatMuteController, :unmute_lobby
         post "/lobbies/ready_check", ReadyCheckController, :open
         delete "/lobbies/ready_check", ReadyCheckController, :cancel
         get "/me/ready_check", ReadyCheckController, :show
@@ -494,6 +498,9 @@ defmodule GamendWeb.Router.Shared do
         post "/groups/:id/join", GroupController, :join
         post "/groups/:id/leave", GroupController, :leave
         post "/groups/:id/kick", GroupController, :kick
+        post "/groups/:id/mute", ChatMuteController, :mute_group
+        post "/groups/:id/unmute", ChatMuteController, :unmute_group
+        get "/groups/:id/mutes", ChatMuteController, :list_group_mutes
         post "/groups/:id/promote", GroupController, :promote
         post "/groups/:id/demote", GroupController, :demote
         get "/groups/:id/join_requests", GroupController, :join_requests
@@ -520,6 +527,9 @@ defmodule GamendWeb.Router.Shared do
         patch "/parties", PartyController, :update
         post "/parties/leave", PartyController, :leave
         post "/parties/kick", PartyController, :kick
+        post "/parties/mute", ChatMuteController, :mute_party
+        post "/parties/unmute", ChatMuteController, :unmute_party
+        get "/parties/mutes", ChatMuteController, :list_party_mutes
         post "/parties/invite", PartyController, :invite
         post "/parties/invite/cancel", PartyController, :cancel_party_invite
         post "/parties/invite/accept", PartyController, :accept_party_invite
@@ -546,6 +556,7 @@ defmodule GamendWeb.Router.Shared do
         post "/chat/messages", ChatController, :send
         patch "/chat/messages/:id", unquote(update), :update
         delete "/chat/messages/:id", ChatController, :delete
+        post "/chat/messages/:id/report", ChatController, :report
         post "/chat/read", ChatController, :mark_read
         get "/chat/unread", ChatController, :unread
       end
@@ -651,8 +662,22 @@ defmodule GamendWeb.Router.Shared do
         pipe_through [:api, :api_auth, :api_admin]
 
         get "/chat", ChatController, :index
-        delete "/chat/:id", ChatController, :delete
+        # Literal paths before "/chat/:id", which would otherwise capture them.
         delete "/chat/conversation", ChatController, :delete_conversation
+        delete "/chat/filter_words", ChatModerationController, :delete_filter_words_by_lang
+        delete "/chat/:id", ChatController, :delete
+        get "/chat/reports", ChatModerationController, :list_reports
+        post "/chat/reports/:id/resolve", ChatModerationController, :resolve_report
+        delete "/chat/reports/:id", ChatModerationController, :delete_report
+        get "/chat/mutes", ChatModerationController, :list_mutes
+        post "/chat/mutes", ChatModerationController, :create_mute
+        delete "/chat/mutes/:id", ChatModerationController, :delete_mute
+        get "/chat/filter_words", ChatModerationController, :list_filter_words
+        post "/chat/filter_words", ChatModerationController, :create_filter_word
+        patch "/chat/filter_words/:id", ChatModerationController, :update_filter_word
+        delete "/chat/filter_words/:id", ChatModerationController, :delete_filter_word
+        post "/chat/filter_words/import", ChatModerationController, :import_filter_words
+        post "/chat/filter_words/test", ChatModerationController, :test_phrase
         get "/quests", QuestController, :index
         post "/quests", QuestController, :create
         patch "/quests/:id", QuestController, :update
@@ -758,6 +783,9 @@ defmodule GamendWeb.Router.Shared do
           live "/admin/parties", AdminLive.Parties, :index
           live "/admin/blacklist", AdminLive.Blacklist, :index
           live "/admin/chat", AdminLive.Chat, :index
+          live "/admin/chat/reports", AdminLive.ChatReports, :index
+          live "/admin/chat/mutes", AdminLive.ChatMutes, :index
+          live "/admin/chat/filter", AdminLive.ChatFilter, :index
           live "/admin/quests", AdminLive.Quests, :index
           live "/admin/payments", AdminLive.Payments, :index
           live "/admin/translations", AdminLive.Translations, :index
@@ -911,6 +939,15 @@ defmodule GamendWeb.Router.Shared do
 
   defmacro gamend_configured_page_fallback_routes do
     quote do
+      # Unknown API paths must not reach the page catch-all below: that pipes
+      # through :browser, and the endpoint skips Plug.Session for /api/v1/*, so
+      # fetch_session would raise a 500 where a 404 belongs.
+      scope "/api/v1", GamendWeb do
+        pipe_through :api
+
+        match :*, "/*path", Api.V1.NotFoundController, :not_found
+      end
+
       scope "/", GamendWeb do
         pipe_through :browser
 

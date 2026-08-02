@@ -310,6 +310,10 @@ defmodule Mix.Tasks.Gen.Sdk do
        "{:ok, #{push_token_placeholder_expr()}}"},
       {fn rt -> String.contains?(rt, "{:ok, Gamend.ReadyChecks.Check.t()}") end,
        "{:ok, #{ready_check_placeholder_expr()}}"},
+      {fn rt -> String.contains?(rt, "{:ok, Gamend.Chat.Report.t()}") end,
+       "{:ok, #{chat_report_placeholder_expr()}}"},
+      {fn rt -> String.contains?(rt, "{:ok, Gamend.Chat.Mute.t()}") end,
+       "{:ok, #{chat_mute_placeholder_expr()}}"},
       {fn rt -> String.contains?(rt, "{:ok, Gamend.Quests.Quest.t()}") end,
        "{:ok, #{quest_placeholder_expr()}}"},
       {fn rt -> String.contains?(rt, "{:ok, Gamend.Quests.QuestProgress.t()}") end,
@@ -537,6 +541,18 @@ defmodule Mix.Tasks.Gen.Sdk do
     dt = dt_placeholder_expr()
 
     "%Gamend.Tournaments.Bracket{id: \"\", tournament_id: \"\", index: 0, size: 8, inserted_at: #{dt}}"
+  end
+
+  defp chat_report_placeholder_expr do
+    dt = dt_placeholder_expr()
+
+    "%Gamend.Chat.Report{id: \"\", reporter_id: nil, message_id: nil, reported_user_id: \"\", content_snapshot: nil, reason: nil, status: \"open\", resolved_by: nil, resolution_note: nil, resolved_at: nil, inserted_at: #{dt}, updated_at: #{dt}}"
+  end
+
+  defp chat_mute_placeholder_expr do
+    dt = dt_placeholder_expr()
+
+    "%Gamend.Chat.Mute{id: \"\", user_id: \"\", scope: \"global\", scope_ref_id: nil, expires_at: nil, reason: nil, muted_by: nil, inserted_at: #{dt}, updated_at: #{dt}}"
   end
 
   defp push_token_placeholder_expr do

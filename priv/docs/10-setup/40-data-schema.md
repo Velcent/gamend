@@ -212,6 +212,61 @@ are UTC.
 Access is checked per type: lobby and group messages require membership, direct
 messages require an accepted friendship and no block either way.
 
+## chat_filter_words
+
+[`Gamend.Chat.FilterWord`](https://docs.gamend.org/Gamend.Chat.FilterWord.html)
+
+| Column | Type | Notes |
+|---|---|---|
+| `word` | string | Unique. Stored **normalized** — lower-cased, diacritics and zero-width characters dropped, leetspeak folded, repeats collapsed. A matching key, not display text |
+| `severity` | string | `block` rejects the message, `mask` replaces the hit with `***`, `flag` stores it and files a report. Default `block` |
+| `match_mode` | string | `substring` matches anywhere, `exact` only a whole word. Default `substring` |
+| `lang` | string | Which bundled list the row was imported from; null for hand-added. Provenance only |
+
+The table ships empty; the admin filter page fills it, from a bundled list or by
+hand. Matching is language-agnostic — every row is checked against every
+message, so `lang` never narrows what a message is tested against. It exists to
+make "remove the German list" one bulk delete.
+
+## chat_reports
+
+[`Gamend.Chat.Report`](https://docs.gamend.org/Gamend.Chat.Report.html)
+
+| Column | Type | Notes |
+|---|---|---|
+| `reporter_id` | FK users | Who reported. **Null when the word filter filed the report itself.** Nulled, not deleted, if the user goes |
+| `message_id` | FK chat_messages | Nulled if the message is deleted — the report outlives it |
+| `reported_user_id` | FK users | The message's sender, denormalized |
+| `content_snapshot` | text | The message as sent, so the queue still reads after deletion |
+| `reason` | string | The reporter's words; `Filter: <words>` on a filter-filed report |
+| `status` | string | `open` / `reviewing` / `actioned` / `dismissed`, default `open` |
+| `resolved_by` | FK users | The moderator; nulled if that account goes |
+| `resolution_note` | text | Why it was closed that way |
+| `resolved_at` | utc_datetime | Null until resolved |
+
+Unique on `(reporter_id, message_id)` so a player cannot report one message
+twice — partial, so the many filter-filed rows (null reporter) never collide
+with each other.
+
+## chat_mutes
+
+[`Gamend.Chat.Mute`](https://docs.gamend.org/Gamend.Chat.Mute.html)
+
+| Column | Type | Notes |
+|---|---|---|
+| `user_id` | FK users | Who is silenced |
+| `scope` | string | `global` / `lobby` / `group` / `party`, default `global`. A global mute covers friend DMs too |
+| `scope_ref_id` | uuid | The lobby, group or party. Null for `global`; not a foreign key, since it points at three tables |
+| `expires_at` | utc_datetime | When the mute lifts; null is permanent |
+| `reason` | string | Moderator-facing, never shown to the muted player by core |
+| `muted_by` | FK users | Who applied it; null for a plugin or automated mute, and nulled if that account goes |
+
+Unique on `(user_id, scope, scope_ref_id)`, plus a second partial unique index
+for global mutes — `NULL` never equals `NULL`, so the composite one does not
+constrain them. Expiry is filtered in the query rather than indexed, because a
+partial index on `expires_at > now()` is not portable to SQLite; the sweep that
+deletes lapsed rows is hygiene only.
+
 ## notifications
 
 | Column | Type | Notes |

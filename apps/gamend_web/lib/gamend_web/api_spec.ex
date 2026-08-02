@@ -119,7 +119,11 @@ defmodule GamendWeb.ApiSpec do
         - **List messages** with pagination (newest first)
         - **Read tracking**: mark messages as read and get unread counts per conversation
         - **Real-time delivery** via PubSub and WebSocket channels
-        - **Moderation hooks**: `before_chat_message` pipeline hook for filtering/blocking
+        - **Moderation is built in**: an admin-managed word filter (`block` / `mask` / `flag`, matched on a normalized form so leetspeak and padding do not slip through) and mutes are enforced before a message is stored or broadcast; the `before_chat_message` pipeline hook stays available for rules of your own
+        - **Report a message**: `POST /chat/messages/:id/report` with an optional `reason` — one report per player per message, capped per day; reports the filter files itself have no reporter
+        - **Scoped mutes** mirror kick: `POST /lobbies/mute` + `/lobbies/unmute` (lobby host), `POST /groups/:id/mute` + `/groups/:id/unmute` (group admin), `POST /parties/mute` + `/parties/unmute` (party leader), each with a paginated `.../mutes` listing for the same authority. Body is `{target_user_id, expires_at?, reason?}`; omitting `expires_at` mutes permanently
+        - **Global mutes and the blocklist are server-authoritative** — no public endpoint; admin API (`/api/v1/admin/chat`) or a plugin calling `Gamend.Chat.mute_user/4`
+        - **Real-time moderation events**: the muted player receives `chat_muted` / `chat_unmuted` on their user channel
 
         ## **9. Leaderboards**
         Server-managed ranked scoreboards:
@@ -185,7 +189,7 @@ defmodule GamendWeb.ApiSpec do
         ```
 
         ### **15.2 Available Channels**
-        - **User channel** (`user:<user_id>`): notifications, friend events, quest progress/completions/claims, party/group invites, tournament events, KV subscriptions
+        - **User channel** (`user:<user_id>`): notifications, friend events, quest progress/completions/claims, party/group invites, tournament events, chat mutes (`chat_muted` / `chat_unmuted`), KV subscriptions
         - **Lobby channel** (`lobby:<lobby_id>`): lobby member joins/leaves, lobby updates, lobby chat
         - **Lobbies channel** (`lobbies`): global lobby list changes (created, updated, deleted)
         - **Group channel** (`group:<group_id>`): group member changes, group updates, group chat

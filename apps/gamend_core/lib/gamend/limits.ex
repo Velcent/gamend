@@ -92,6 +92,20 @@ defmodule Gamend.Limits do
     doc: "Rolling 24h; 0 disables. Needs rate limiting on; ETS backend counts per instance."
   )
 
+  setting(:max_chat_filter_words, :integer,
+    default: 10_000,
+    doc: "Blocklist size cap. Sized to hold the bundled word lists for several languages."
+  )
+
+  setting(:max_chat_filter_word_len, :integer, default: 64)
+  setting(:max_report_reason, :integer, default: 500)
+  setting(:max_mute_reason, :integer, default: 500)
+
+  setting(:max_chat_reports_per_user_per_day, :integer,
+    default: 50,
+    doc: "Rolling 24h; 0 disables. Needs rate limiting on; ETS backend counts per instance."
+  )
+
   # ── Notifications ───────────────────────────────────────
   setting(:max_notification_title, :integer, default: 255)
   setting(:max_notification_content, :integer, default: 10_000)

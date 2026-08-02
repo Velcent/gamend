@@ -42,19 +42,45 @@ write, so they add no contention.
 
 - **Blocklist** stored in a `chat_filter_words` table (admin-managed) — `word`
   (unique, normalized), `severity` (`"block"` | `"mask"` | `"flag"`),
-  `match_mode` (`"exact"` | `"substring"`), timestamps. **Ships empty** — hosts
+  `match_mode` (`"exact"` | `"substring"`), `lang` (nullable provenance tag —
+  `"en"`, `"de"`, … or null for hand-added), timestamps. **Ships empty** — hosts
   paste/import whatever list they trust; `mix demo.seed` adds a few sample words
   for dev only. Loaded into an ETS set at boot and kept fresh via PubSub on edit
   — the `IpBans` shape (durable table = source of truth, ETS = hot path, PubSub
   = cluster sync), but owned by a core `Chat.Moderation.Cache` GenServer:
   IpBans keeps its ETS in the web plug (`GamendWeb.Plugs.IpBan`), while this
   check runs in core, so the cache lives there too.
-- **Bundled default lists (opt-in):** vendor the LDNOOBW lists unmodified under
-  `priv/chat_filter/<lang>.txt` (CC-BY-4.0, attribution on the admin page).
-  Nothing is auto-loaded — the admin filter page gets an **Import bundled
-  list** button (language picker + severity choice) that inserts through the
-  normal changeset path, so `max_chat_filter_words` still applies (default cap
-  sized to fit all bundled lists).
+- **Bundled list (opt-in, and deliberately not a real one):**
+  `priv/chat_filter/en.txt` holds two harmless placeholders (`badword`,
+  `spamlink`) so the feature can be exercised end to end. Core ships **no**
+  profanity or slur list: the server is MIT-licensed, and vendoring someone
+  else's judgement about what is offensive in 30 languages is both a licence
+  question and a policy one we should not answer for the host. Nothing is
+  auto-loaded — the admin filter page gets an **Import bundled list** button
+  (language picker + severity choice) that inserts through the normal changeset
+  path, so `max_chat_filter_words` still applies.
+- **Sourcing a real list** is documented in three places a host will actually
+  look: the header of `en.txt`, the Chat guide, and the admin page itself.
+  Two supported paths, both stated explicitly:
+  - **Bundled file** — drop `priv/chat_filter/<lang>.txt` (one word per line,
+    `#` comments) and **rebuild**; the directory is read from the compiled
+    app's `priv/` via `Application.app_dir/2`, so a file added after the build
+    is invisible to a running server. Then import it from admin.
+  - **Admin API** — `POST /api/v1/admin/chat/filter_words` per word, for lists
+    that live outside the repo or change between deploys; tagging rows with
+    `lang` keeps the one-click bulk removal working.
+  Pointers given: LDNOOBW (CC-BY-4.0) and Shutterstock's list (MIT), with a
+  warning that search-query lists are far more aggressive than chat needs.
+- **Which language applies at runtime: all of them.** A message carries no
+  reliable language signal (players code-switch, and detecting per-message is
+  both slow and wrong on short strings), so matching is **language-agnostic** —
+  every enabled word is one flat ETS set, checked against every message. `lang`
+  is provenance only: it records which bundled list a row came from, powers
+  "remove the German list" as a bulk action, and is shown as a column in admin.
+  The host controls exposure by choosing which lists to import — importing all
+  30 raises false positives (a benign word in one language is a slur in
+  another), so the admin page defaults the picker to the host's configured
+  locales and says so.
 - **Normalization** before matching: lower-case, collapse repeated chars
   (`heeeello`→`helo`), strip zero-width/diacritics, map common leetspeak
   (`@→a`, `3→e`, `1→i`). Kept in `Gamend.Chat.Moderation.Normalizer` so the
@@ -116,8 +142,13 @@ write, so they add no contention.
   the sweep.
 - **Sweep:** hygiene only, never load-bearing (expiry is checked at read time).
   IP bans purge lazily (`IpBans.purge_expired/0`, called from the plug); mutes
-  instead get a supervised periodic worker per CONTRIBUTING §Functionality,
-  added to the host supervision tree **and** the starter repo's tree.
+  instead get a supervised periodic worker, folded into the same
+  `Chat.Moderation.Sync` GenServer that owns the boot load and PubSub mirror.
+  It goes in `GamendWeb.HostSupervision.children/1` **only** — that module
+  exists precisely because hand-maintained per-host child lists drifted, and
+  the starter repo picks it up automatically. It is disabled in `config/test.exs`
+  (`enabled: false`, like `Tournaments.Ticker` and `Matchmaking.Worker`): a
+  boot-time read has no sandbox connection and starves the pool.
 - **Context:** `Chat.mute_user/4`, `Chat.unmute_user/2`, `Chat.muted?/2`,
   `Chat.list_mutes/1` + `count_mutes/1`.
 
@@ -135,7 +166,7 @@ Each in all six places: `@callback` + `@optional_callbacks` in `Gamend.Hooks`,
 Server-scripting docs. Both are fire-and-forget after commit (deferred, never in
 the insert transaction).
 
-## Limits (`Gamend.Limits`, auto `LIMIT_*`, listed in `@limit_categories`)
+## Limits (`Gamend.Limits`, auto `GAMEND_LIMITS_*`, listed in `@limit_categories`)
 
 `max_chat_filter_words`, `max_chat_filter_word_len`, `max_report_reason` (len),
 `max_chat_reports_per_user_per_day`, `max_mute_reason` (len).
@@ -154,15 +185,31 @@ the insert transaction).
 - Realtime: push `chat_muted` / `chat_unmuted` to the muted user over
   `UserChannel` (so clients can grey the input), listed in the realtime events
   table.
-- Routes in `router/shared.ex`. Report submission returns 204; the message
+- Routes in `router/shared.ex`. Report submission returns `{"ok": true}`, not
+  204 — no controller in this repo hand-rolls a 204, and `docs/specs/
+  api-conventions.md` says a mutation returns `data` or `{"ok": true}`. The
   content snapshot is taken server-side.
 
 ## Admin
 
 - `admin_live/chat_reports.ex` — the queue (paginated, filter by status/user,
-  shows names + content snapshot), with one-click **dismiss / delete message /
-  mute user** actions that resolve the report atomically.
-- `admin_live/chat_mutes.ex` — active mutes, add/remove, scope + expiry.
+  shows names + content snapshot). The lifecycle a moderator drives:
+  **Review** claims an `open` report (→ `reviewing`, no resolution, so it stays
+  in the queue and other moderators can see it is taken); **Dismiss**,
+  **Delete message**, **Warn** and **Mute** each resolve it. Mute opens a dialog
+  with scope, a duration (10m / 1h / 24h / 7d / permanent) and an editable
+  reason — not a hardcoded permanent global mute. Warn notifies without muting.
+  Every resolving action can also notify the **reporter** (skipped when the
+  filter filed the report, which has no reporter).
+- **Notifications** (`Chat.Moderation.Notices`) — admins get a standing "new
+  chat reports" alert when one lands (upserted on title, so it stays one unread
+  entry with a live count rather than one per report); the player gets an
+  editable notice when warned or muted; the reporter gets an editable reply when
+  their report is resolved. Core supplies `default_*_message/1` prefills only —
+  the wording is the moderator's to change before sending.
+- `admin_live/chat_mutes.ex` — active mutes, add/edit/remove, scope + expiry. An
+  existing mute is **editable** (shorten, extend, re-word) rather than
+  unmute-and-redo: `mute_user/4` upserts on the same scope key.
 - `admin_live/chat_filter.ex` — blocklist CRUD, the **Import bundled list**
   button (language + severity), and a "test a phrase" box using the shared
   `Normalizer`.
@@ -174,7 +221,8 @@ the insert transaction).
 ## "Update everywhere" — file list
 
 - **CHANGELOG** `[added]` Chat moderation (filter, reports, mute).
-- **.env.example** — the new `LIMIT_*` caps.
+- **.env.example** — regenerated (`mix gamend.settings.env_example`), not hand-edited; CI runs it with
+  `--check`. Same for `mix gamend.settings.guide`.
 - **host_public_docs/** — Chat docs page gains a Moderation section; Data Schema
   page gains `chat_filter_words`, `chat_reports`, `chat_mutes`.
 - **api_spec.ex** — feature list, report + scoped mute/unmute endpoints, and
@@ -197,11 +245,13 @@ the insert transaction).
 - **Strike/auto-escalation policy: defer.** `after_chat_message_reported` +
   `after_user_muted` give a plugin everything needed to implement strikes
   without baking one policy into core.
-- **Auto-enabled / self-curated word lists: reject.** The filter still ships
-  empty and core never curates content — that's policy (context,
-  Scunthorpe-style false positives, locale politics). What core does ship is
-  the vendored LDNOOBW lists as **opt-in imports** (see Word filter): one
-  admin click, unmodified upstream content, easy to remove.
+- **Auto-enabled lists, and curated lists for all 30 locales: reject.** The
+  filter ships inert and core does not curate content per language — that's
+  policy (context, Scunthorpe-style false positives, locale politics), and a
+  permanent maintenance tail. What core ships is the mechanism plus one small
+  English starter list, importable in a click and removable in a click
+  (`delete_filter_words_by_lang/1`). Hosts drop in their own or a third-party
+  list per language.
 - **Player-side friend/DM blocking (ignore lists): defer.** Global mutes cover
   DMs from the moderation side; a per-player block list is a social feature
   with its own UX surface, not moderation.

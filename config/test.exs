@@ -83,6 +83,10 @@ config :gamend_core, Gamend.Tournaments.Ticker, enabled: false
 # Tests drive Gamend.Matchmaking.Worker.sweep/0 directly.
 config :gamend_core, Gamend.Matchmaking.Worker, enabled: false
 
+# Same again for the chat-moderation boot load and mute sweep. Tests drive
+# Gamend.Chat.Moderation.Cache.load_persisted/0 directly.
+config :gamend_core, Gamend.Chat.Moderation.Sync, enabled: false
+
 # Disable app-level caching in tests to avoid stale reads across assertions.
 # Still provide the multilevel configuration so the cache can start.
 config :gamend_core, Gamend.Cache,

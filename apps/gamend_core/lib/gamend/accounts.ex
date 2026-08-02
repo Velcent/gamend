@@ -393,6 +393,18 @@ defmodule Gamend.Accounts do
     count_users_registered_since_cached(days)
   end
 
+  @doc """
+  Ids of every admin user.
+
+  Used to fan a moderation alert out to whoever can act on it. Not cached: the
+  callers are rare (a chat report arriving), and a stale list would silently
+  skip a newly promoted moderator.
+  """
+  @spec list_admin_ids() :: [Ecto.UUID.t()]
+  def list_admin_ids do
+    Repo.all(from u in User, where: u.is_admin == true, select: u.id)
+  end
+
   @decorate cacheable(
               key:
                 {:accounts, :stats, users_stats_cache_version(), :users_registered_since, days},

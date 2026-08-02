@@ -28,6 +28,9 @@ defmodule Mix.Tasks.Demo.Seed do
       with per-user progress in every state (including claimable rows)
     * `ready_check` — one check per seeded lobby in every outcome (open,
       passed, timed out, declined), also capped at 12
+    * `chat_moderation` — a blocklist across every severity and match mode, a
+      report queue deep enough to page through (every status, some filter-filed,
+      some resolved) and mutes in every scope, including expired ones
 
   The `lobby_snapshot` set goes through the real `capture_lobby/3` path rather
   than inserting rows, so what you see is shaped exactly like production data —
@@ -52,6 +55,12 @@ defmodule Mix.Tasks.Demo.Seed do
   import Ecto.Query
 
   alias Gamend.Accounts.User
+  alias Gamend.Chat.FilterWord
+  alias Gamend.Chat.Message
+  alias Gamend.Chat.Moderation
+  alias Gamend.Chat.Moderation.Normalizer
+  alias Gamend.Chat.Mute
+  alias Gamend.Chat.Report
   alias Gamend.Groups.Group
   alias Gamend.Groups.GroupMember
   alias Gamend.Leaderboards.Leaderboard
@@ -61,6 +70,7 @@ defmodule Mix.Tasks.Demo.Seed do
   alias Gamend.LobbySnapshots.Event, as: SnapshotEvent
   alias Gamend.LobbySnapshots.Snapshot
   alias Gamend.LobbySnapshots.Writer
+  alias Gamend.Parties.Party
   alias Gamend.Push.PushToken
   alias Gamend.Quests.Quest
   alias Gamend.Quests.QuestProgress
@@ -78,9 +88,69 @@ defmodule Mix.Tasks.Demo.Seed do
   @quest_key_prefix "demo-seed-"
   @default_count 1000
   @batch 500
-  @all_sets ~w(leaderboard group tournament lobby_snapshot quest push ready_check)
+  @all_sets ~w(leaderboard group tournament lobby_snapshot quest push ready_check chat_moderation)
   @lobby_title_prefix "Demo Seed Run"
   @max_runs 12
+  @chat_lobby_title "#{@lobby_title_prefix} Chat"
+  @chat_room_types ~w(group lobby party)
+  @min_reports 48
+  @max_mutes 24
+
+  # A spread over both match modes, all three severities and the provenance tag
+  # (nil is a hand-added word). Nothing here overlaps priv/chat_filter/en.txt, so
+  # importing the bundled list on top of a seeded database still works, and no
+  # word carries a doubled letter — the normalizer collapses those, and a word
+  # displayed as "bosting" reads like a typo in the admin list.
+  @filter_words [
+    {"idiot", "block", "substring", nil},
+    {"moron", "block", "substring", "en"},
+    {"scumbag", "block", "exact", "en"},
+    {"kys", "block", "exact", nil},
+    {"arschloch", "block", "substring", "de"},
+    {"salaud", "block", "substring", "fr"},
+    {"imbecil", "block", "substring", "es"},
+    {"damn", "mask", "substring", nil},
+    {"crap", "mask", "substring", nil},
+    {"numpty", "mask", "substring", "en"},
+    {"plonker", "mask", "exact", "en"},
+    {"mist", "mask", "exact", "de"},
+    {"merde", "mask", "substring", "fr"},
+    {"trash", "flag", "substring", nil},
+    {"scam", "flag", "substring", nil},
+    {"hacker", "flag", "substring", nil},
+    {"cheater", "flag", "substring", "en"},
+    {"smurf", "flag", "exact", nil},
+    {"rmt", "flag", "exact", "en"},
+    {"goldfarm", "flag", "substring", nil},
+    {"gamekeys", "flag", "substring", nil},
+    {"buy gold", "flag", "substring", "en"}
+  ]
+
+  # Reported message and the reason it was reported for. The last two are
+  # benign: a queue with no bogus reports in it never shows why `dismissed`
+  # exists.
+  @chat_lines [
+    {"you are the worst teammate I have had all week", "Harassment"},
+    {"learn to play before you queue ranked", "Harassment"},
+    {"stop stealing my objectives", "Griefing"},
+    {"report him, he threw the game on purpose", "Griefing"},
+    {"add me, I sell accounts cheap", "Real-money trading"},
+    {"join my stream, the link is in my profile", "Spam or advertising"},
+    {"nobody from your region should be allowed to queue", "Hate speech"},
+    {"I am a moderator, send me your login to verify", "Impersonation"},
+    {"gg wp, close one", "Harassment"},
+    {"my ping is awful tonight", "Spam or advertising"}
+  ]
+
+  # Each line is paired with the `flag` word it trips, which is what the filter
+  # puts in the reason of the report it files.
+  @flagged_lines [
+    {"buy gold cheap, first ten buyers get a bonus", "buy gold"},
+    {"this smurf ruins every lobby", "smurf"},
+    {"you are trash, uninstall the game", "trash"},
+    {"total scam, the drop rates are rigged", "scam"},
+    {"goldfarm service, message me for prices", "goldfarm"}
+  ]
 
   @impl Mix.Task
   def run(args) do
@@ -106,6 +176,7 @@ defmodule Mix.Tasks.Demo.Seed do
         "quest" -> seed_quests(users)
         "push" -> seed_push_tokens(users)
         "ready_check" -> seed_ready_checks(users)
+        "chat_moderation" -> seed_chat_moderation(users)
       end)
 
       Gamend.Cache.delete_all()
@@ -213,16 +284,7 @@ defmodule Mix.Tasks.Demo.Seed do
 
   defp seed_group(user_ids) do
     [creator | members] = user_ids
-
-    group =
-      upsert(Group, [title: @group_title], %{
-        title: @group_title,
-        description: "Volume demo data.",
-        type: "public",
-        max_members: length(user_ids) + 10,
-        creator_id: creator,
-        metadata: %{}
-      })
+    group = demo_group(user_ids)
 
     Repo.delete_all(from(m in GroupMember, where: m.group_id == ^group.id))
     now = DateTime.utc_now(:second)
@@ -244,6 +306,17 @@ defmodule Mix.Tasks.Demo.Seed do
     |> insert_batches(GroupMember)
 
     info("group: #{length(rows)} members -> /groups/#{group.id}")
+  end
+
+  defp demo_group(user_ids) do
+    upsert(Group, [title: @group_title], %{
+      title: @group_title,
+      description: "Volume demo data.",
+      type: "public",
+      max_members: length(user_ids) + 10,
+      creator_id: hd(user_ids),
+      metadata: %{}
+    })
   end
 
   defp seed_tournament(user_ids) do
@@ -546,6 +619,229 @@ defmodule Mix.Tasks.Demo.Seed do
   defp participant_state(%{status: "pending"}, 0), do: "pending"
   defp participant_state(_check, _index), do: "ready"
 
+  # ── Chat moderation ───────────────────────────────────────────────────────
+
+  # Reports point at real messages in real rooms, so the queue's content
+  # snapshots, "reported user" links and per-scope mute lists all resolve the
+  # way they do in production.
+  defp seed_chat_moderation(user_ids) do
+    rooms = chat_rooms(user_ids)
+    clean_chat_moderation(rooms)
+
+    words = seed_filter_words()
+    messages = seed_chat_messages(user_ids, rooms)
+    reports = seed_chat_reports(messages, hd(user_ids))
+    mutes = seed_chat_mutes(user_ids, rooms)
+
+    info(
+      "chat moderation: #{words} filter words, #{reports} reports, #{mutes} mutes -> /admin/chat_reports"
+    )
+  end
+
+  defp chat_rooms(user_ids) do
+    now = DateTime.utc_now(:second)
+    [host | _rest] = user_ids
+
+    lobby =
+      upsert(Lobby, [title: @chat_lobby_title], %{
+        title: @chat_lobby_title,
+        host_id: host,
+        max_users: 4,
+        metadata: %{},
+        state: "created",
+        state_changed_at: now
+      })
+
+    party = upsert(Party, [leader_id: host], %{leader_id: host, max_size: 4, metadata: %{}})
+
+    %{"group" => demo_group(user_ids).id, "lobby" => lobby.id, "party" => party.id}
+  end
+
+  # Reports go before their messages: deleting a message only nils out the
+  # report pointing at it.
+  defp clean_chat_moderation(rooms) do
+    room_ids = Map.values(rooms)
+    message_ids = from(m in Message, where: m.chat_ref_id in ^room_ids, select: m.id)
+
+    Repo.delete_all(from(r in Report, where: r.message_id in subquery(message_ids)))
+    Repo.delete_all(from(m in Message, where: m.chat_ref_id in ^room_ids))
+    Repo.delete_all(from(m in Mute, where: m.user_id in subquery(demo_user_ids())))
+  end
+
+  # Words go in through the context: it stores them normalized (a raw insert
+  # would never match) and mirrors them into the ETS blocklist.
+  defp seed_filter_words do
+    clean_filter_words()
+
+    Enum.count(@filter_words, fn {word, severity, match_mode, lang} ->
+      match?(
+        {:ok, _word},
+        Moderation.create_filter_word(%{
+          "word" => word,
+          "severity" => severity,
+          "match_mode" => match_mode,
+          "lang" => lang
+        })
+      )
+    end)
+  end
+
+  defp clean_filter_words do
+    words =
+      Enum.map(@filter_words, fn {word, _severity, _mode, _lang} -> Normalizer.normalize(word) end)
+
+    from(w in FilterWord, where: w.word in ^words)
+    |> Repo.all()
+    |> Enum.each(&Moderation.delete_filter_word/1)
+  end
+
+  defp seed_chat_messages(user_ids, rooms) do
+    now = DateTime.utc_now(:second)
+
+    rows =
+      user_ids
+      |> at_least(@min_reports)
+      |> Enum.with_index()
+      |> Enum.map(fn {sender_id, i} ->
+        chat_type = Enum.at(@chat_room_types, rem(i, length(@chat_room_types)))
+        {content, _reason, flagged?} = chat_line(i)
+        at = DateTime.add(now, -(i * 900 + 60), :second)
+
+        %{
+          id: UUIDv7.generate(),
+          sender_id: sender_id,
+          chat_type: chat_type,
+          chat_ref_id: Map.fetch!(rooms, chat_type),
+          content: content,
+          metadata: if(flagged?, do: %{"flagged" => true}, else: %{}),
+          inserted_at: at,
+          updated_at: at
+        }
+      end)
+
+    insert_batches(rows, Message)
+    rows
+  end
+
+  # Every fifth message is one the filter flagged itself, so the queue mixes
+  # system-filed reports (nil reporter) into the player-filed ones. Pure and
+  # index-keyed, so the report built for message `i` reads off the same line.
+  defp chat_line(i) when rem(i, 5) == 0 do
+    {content, word} = Enum.at(@flagged_lines, rem(div(i, 5), length(@flagged_lines)))
+    {content, "Filter: " <> word, true}
+  end
+
+  defp chat_line(i) do
+    {content, reason} = Enum.at(@chat_lines, rem(i, length(@chat_lines)))
+    {content, reason, false}
+  end
+
+  # The reporter is the next player along, since a player cannot report their
+  # own message (`Chat.report_message/3` rejects it).
+  defp seed_chat_reports(messages, moderator_id) do
+    now = DateTime.utc_now(:second)
+
+    reporters =
+      messages
+      |> Stream.map(& &1.sender_id)
+      |> Stream.cycle()
+      |> Stream.drop(1)
+      |> Enum.take(length(messages))
+
+    rows =
+      messages
+      |> Enum.zip(reporters)
+      |> Enum.with_index()
+      |> Enum.map(fn {{message, reporter_id}, i} ->
+        {status, note} = report_status(i)
+        {_content, reason, flagged?} = chat_line(i)
+        at = DateTime.add(now, -i * 900, :second)
+
+        %{
+          id: UUIDv7.generate(),
+          reporter_id: if(flagged?, do: nil, else: reporter_id),
+          message_id: message.id,
+          reported_user_id: message.sender_id,
+          content_snapshot: message.content,
+          reason: reason,
+          status: status,
+          resolved_by: if(note, do: moderator_id),
+          resolution_note: note,
+          resolved_at: if(note, do: now),
+          inserted_at: at,
+          updated_at: at
+        }
+      end)
+
+    insert_batches(rows, Report)
+    length(rows)
+  end
+
+  defp report_status(i) do
+    case rem(i, 4) do
+      0 -> {"open", nil}
+      1 -> {"reviewing", nil}
+      2 -> {"actioned", "24h mute — third report this week."}
+      3 -> {"dismissed", "Heated, but inside the rules."}
+    end
+  end
+
+  # Every scope, and a spread of permanent / expiring / already expired so the
+  # sweep has rows to reap. One mute per player keeps the unique index happy.
+  defp seed_chat_mutes(user_ids, rooms) do
+    now = DateTime.utc_now(:second)
+    [moderator | rest] = user_ids
+
+    rows =
+      rest
+      |> Enum.take(@max_mutes)
+      |> Enum.with_index()
+      |> Enum.map(fn {user_id, i} ->
+        {scope, scope_ref_id} = mute_scope(rooms, i)
+        {expires_at, reason} = mute_expiry(now, i)
+
+        %{
+          id: UUIDv7.generate(),
+          user_id: user_id,
+          scope: scope,
+          scope_ref_id: scope_ref_id,
+          expires_at: expires_at,
+          reason: reason,
+          muted_by: moderator,
+          inserted_at: now,
+          updated_at: now
+        }
+      end)
+
+    insert_batches(rows, Mute)
+    length(rows)
+  end
+
+  defp mute_scope(rooms, i) do
+    case rem(i, 4) do
+      0 -> {"global", nil}
+      1 -> {"lobby", Map.fetch!(rooms, "lobby")}
+      2 -> {"group", Map.fetch!(rooms, "group")}
+      3 -> {"party", Map.fetch!(rooms, "party")}
+    end
+  end
+
+  defp mute_expiry(now, i) do
+    case rem(div(i, 4), 3) do
+      0 -> {nil, "Permanent — ban evasion."}
+      1 -> {DateTime.add(now, 900), "Cooling off, back in 15 minutes."}
+      2 -> {DateTime.add(now, -86_400), "Expired yesterday; waiting for the sweep."}
+    end
+  end
+
+  # A small --count still has to fill more than one page of the report queue.
+  defp at_least(ids, minimum) when length(ids) >= minimum, do: ids
+  defp at_least(ids, minimum), do: ids |> Stream.cycle() |> Enum.take(minimum)
+
+  defp demo_user_ids do
+    from(u in User, where: like(u.device_id, ^"#{@prefix}-%"), select: u.id)
+  end
+
   defp clean do
     lb = Repo.get_by(Leaderboard, slug: @leaderboard_slug)
     group = Repo.get_by(Group, title: @group_title)
@@ -562,6 +858,10 @@ defmodule Mix.Tasks.Demo.Seed do
     # Before the players go: seeded lobbies reference them as host.
     clean_lobby_snapshots()
     clean_quests()
+
+    # Reports, mutes and messages cascade with their players; the blocklist has
+    # no player to hang off.
+    clean_filter_words()
 
     {users, _} = Repo.delete_all(from(u in User, where: like(u.device_id, ^"#{@prefix}-%")))
 

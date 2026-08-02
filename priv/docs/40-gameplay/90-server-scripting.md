@@ -131,6 +131,42 @@ before_push_send/2 runs once per recipient before any delivery job is enqueued. 
 end
 ```
 
+### Chat moderation hooks
+
+Core already enforces the word filter and mutes inside `before_chat_message` — a
+blocked word or a muted sender never reaches your hook. These two observe what
+core did: `after_chat_message_reported/1` fires when a player reports a message
+or the filter files one itself (`reporter_id` is nil then), and
+`after_user_muted/1` fires whenever anyone is muted — admin, lobby host, group
+admin, party leader or a plugin. Both are fire-and-forget; the report is already
+queued and the mute already in effect. They are where a strike policy lives,
+since core deliberately ships none:
+
+```elixir
+@impl true
+def after_chat_message_reported(report) do
+  open = Gamend.Chat.count_reports(%{"reported_user_id" => report.reported_user_id, "status" => "open"})
+
+  # Three open reports and you sit out an hour.
+  if open >= 3 do
+    Gamend.Chat.mute_user(report.reported_user_id, "global", nil, %{
+      "expires_at" => DateTime.add(DateTime.utc_now(), 3600, :second),
+      "reason" => "auto: #{open} open reports"
+    })
+  end
+
+  :ok
+end
+
+@impl true
+def after_user_muted(mute) do
+  Gamend.Push.send_to_user(mute.user_id, %{
+    "title" => "You have been muted",
+    "body" => mute.reason || "Chat is disabled for you."
+  })
+end
+```
+
 ### Ready check hooks
 
 before_ready_check_open/2 can veto a check before it opens (veto-only: it never rewrites its args). after_ready_check_passed/1 is the "everyone answered ready" callback — the natural place to start the match. after_ready_check_failed/3 receives (check, reason, not_ready) where reason is "declined\
@@ -236,7 +272,7 @@ end
 
 ## Every hook
 
-73 callbacks, all optional — implement only what you need. A `before_*`
+79 callbacks, all optional — implement only what you need. A `before_*`
 hook returns `{:ok, value}` to continue (optionally rewriting the value) or
 `{:error, reason}` to reject the operation. An `after_*` hook runs once the
 change is committed and its return value is ignored.
@@ -248,7 +284,7 @@ change is committed and its return value is ignored.
 | Lobbies | `before_lobby_create` `before_lobby_delete` `before_lobby_join` `before_lobby_kick` `before_lobby_leave` `before_lobby_state_change` `before_lobby_update` | `after_lobby_create` `after_lobby_deleted` `after_lobby_host_change` `after_lobby_join` `after_lobby_kick` `after_lobby_leave` `after_lobby_state_changed` `after_lobby_updated` |
 | Parties | `before_party_create` `before_party_join` `before_party_kick` `before_party_update` | `after_party_create` `after_party_disband` `after_party_join` `after_party_kick` `after_party_leave` `after_party_updated` |
 | Groups | `before_group_create` `before_group_delete` `before_group_join` `before_group_kick` `before_group_update` | `after_group_create` `after_group_deleted` `after_group_join` `after_group_kick` `after_group_leave` `after_group_updated` |
-| Chat | `before_chat_message` | `after_chat_message` |
+| Chat | `before_chat_message` | `after_chat_message` `after_chat_message_reported` `after_user_muted` |
 | Quests | `before_quest_claim` | `after_quest_claimed` `after_quest_completed` |
 | Matchmaking | `before_matchmaking_join` | `after_matchmaking_cancel` `after_matchmaking_join` `after_matchmaking_matched` |
 | Ready checks | `before_ready_check_open` | `after_ready_check_failed` `after_ready_check_passed` |

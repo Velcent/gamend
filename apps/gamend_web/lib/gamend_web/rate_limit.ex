@@ -62,6 +62,28 @@ defmodule GamendWeb.RateLimit do
     end
   end
 
+  @doc """
+  Daily chat-report quota for one user (`Gamend.Limits`
+  `:max_chat_reports_per_user_per_day`, rolling 24h window). Returns `:ok` or
+  `{:error, :report_daily_limit}`.
+
+  Skipped when rate limiting is disabled or the limit is 0.
+  """
+  @spec check_report_daily(term()) :: :ok | {:error, :report_daily_limit}
+  def check_report_daily(user_id) do
+    limit = Gamend.Limits.get(:max_chat_reports_per_user_per_day)
+
+    if Gamend.Settings.get(GamendWeb.Plugs.RateLimiter, :enabled) and
+         is_integer(limit) and limit > 0 do
+      case hit("chatrep:#{user_id}", :timer.hours(24), limit) do
+        {:allow, _count} -> :ok
+        {:deny, _retry_after} -> {:error, :report_daily_limit}
+      end
+    else
+      :ok
+    end
+  end
+
   # Bucket keys look like "auth:1.2.3.4" / "general:..." / "ws:..." — the
   # part before the first colon is the scope used for metrics.
   defp scope_of(key) when is_binary(key) do

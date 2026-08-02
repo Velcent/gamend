@@ -1,0 +1,43 @@
+# Example word list for the chat filter.
+#
+# These two entries are harmless placeholders, not real profanity. They exist so
+# you can try the feature end to end — import this list, then send "badword" in
+# chat and watch it be rejected. Gamend is MIT-licensed and deliberately ships
+# no profanity or slur list of its own: which words are unacceptable is your
+# game's policy, in your languages, and not something core can decide for you.
+#
+# ── Getting a real list ─────────────────────────────────────────────────────
+#
+# Public, maintained, multi-language lists you can start from:
+#
+#   LDNOOBW "List of Dirty, Naughty, Obscene and Otherwise Bad Words"
+#     https://github.com/LDNOOBW/List-of-Dirty-Naughty-Obscene-and-Otherwise-Bad-Words
+#     ~30 languages, one word per line, CC-BY-4.0. The per-language files drop in
+#     here unchanged.
+#
+#   Shutterstock "List of Dirty Naughty Obscene and Otherwise Bad Words"
+#     https://github.com/shutterstock/List-of-Dirty-Naughty-Obscene-and-Otherwise-Bad-Words
+#
+# Check the licence of whatever you vendor, and read it before you ship it — a
+# list built for filtering search queries is usually far more aggressive than
+# you want for chat between players.
+#
+# ── Installing one ──────────────────────────────────────────────────────────
+#
+# 1. Save it as apps/gamend_core/priv/chat_filter/<lang>.txt (e.g. de.txt),
+#    one word per line. Blank lines and lines starting with # are ignored.
+# 2. Rebuild. This directory is read from the compiled app's priv/ via
+#    Application.app_dir/2, so a file added after the build is NOT visible to a
+#    running server — it ships with the release, like any other priv/ asset.
+# 3. Open Admin -> Chat filter, pick the language and a severity, and press
+#    Import bundled list. Nothing is active until you do this.
+#
+# To load words without a rebuild, skip the file entirely and POST them to
+# POST /api/v1/admin/chat/filter_words (one word per call) — that is the path to
+# script when your list lives outside the repo or changes between deploys.
+#
+# Words are stored normalized (see Gamend.Chat.Moderation.Normalizer), so one
+# entry also catches "b a d w o r d"-style evasion such as b@dw0rd and baaadword.
+
+badword
+spamlink

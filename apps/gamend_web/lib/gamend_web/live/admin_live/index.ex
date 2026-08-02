@@ -4,6 +4,7 @@ defmodule GamendWeb.AdminLive.Index do
   alias Gamend.Accounts
   alias Gamend.Accounts.User
   alias Gamend.Accounts.UserToken
+  alias Gamend.Chat.Reports
   alias Gamend.Groups
   alias Gamend.KV
   alias Gamend.Leaderboards.Leaderboard
@@ -73,6 +74,9 @@ defmodule GamendWeb.AdminLive.Index do
           </.link>
           <.link navigate={~p"/admin/chat"} class="btn btn-outline">
             Chat ({@chat_count})
+          </.link>
+          <.link navigate={~p"/admin/chat/reports"} class="btn btn-outline">
+            Reports ({@open_reports})
           </.link>
           <.link navigate={~p"/admin/quests"} class="btn btn-outline">
             Quests ({@quest_stats.definitions})
@@ -321,6 +325,27 @@ defmodule GamendWeb.AdminLive.Index do
                   <div>In lobbies: {@chat_by_lobby}</div>
                   <div>In groups: {@chat_by_group}</div>
                   <div>Friend DMs: {@chat_by_friend}</div>
+                </div>
+              </div>
+
+              <%!-- 9. Chat moderation --%>
+              <div class="card bg-base-100 p-4">
+                <div class="flex items-center justify-between mb-2">
+                  <div class="text-sm font-semibold">Chat moderation</div>
+                  <.link navigate={~p"/admin/chat/reports"} class="link link-primary text-xs">
+                    View →
+                  </.link>
+                </div>
+                <div class="text-2xl font-bold">{@open_reports}</div>
+                <div class="text-xs text-base-content/60 mt-2 space-y-1">
+                  <div>Open reports</div>
+                  <div>
+                    Active mutes:
+                    <.link navigate={~p"/admin/chat/mutes"} class="link">{@active_mutes}</.link>
+                  </div>
+                  <div>
+                    <.link navigate={~p"/admin/chat/filter"} class="link">Word filter</.link>
+                  </div>
                 </div>
               </div>
 
@@ -718,6 +743,8 @@ defmodule GamendWeb.AdminLive.Index do
       chat_count: Task.async(fn -> Gamend.Chat.count_all_messages() end),
       chat_senders: Task.async(fn -> Gamend.Chat.count_unique_senders() end),
       chat_by_type: Task.async(fn -> Gamend.Chat.count_messages_by_type() end),
+      open_reports: Task.async(fn -> Reports.count_open_reports() end),
+      active_mutes: Task.async(fn -> Gamend.Chat.count_mutes(%{"active" => true}) end),
       quest_stats: Task.async(fn -> Gamend.Quests.dashboard_stats() end),
       payments_stats: Task.async(fn -> Payments.admin_stats() end),
       translation_stats: Task.async(fn -> TranslationStats.all_completeness() end),
@@ -787,6 +814,8 @@ defmodule GamendWeb.AdminLive.Index do
        chat_by_lobby: Map.get(r.chat_by_type, "lobby", 0),
        chat_by_group: Map.get(r.chat_by_type, "group", 0),
        chat_by_friend: Map.get(r.chat_by_type, "friend", 0),
+       open_reports: r.open_reports,
+       active_mutes: r.active_mutes,
        translation_stats: r.translation_stats,
        quest_stats: r.quest_stats,
        payments_stats: r.payments_stats,

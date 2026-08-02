@@ -29,7 +29,9 @@ defmodule Gamend.Chat do
   alias Gamend.Accounts
   alias Gamend.Accounts.User
   alias Gamend.Chat.Message
+  alias Gamend.Chat.Moderation
   alias Gamend.Chat.ReadCursor
+  alias Gamend.Chat.Reports
   alias Gamend.Repo
 
   require Logger
@@ -146,17 +148,78 @@ defmodule Gamend.Chat do
     * `{:ok, %Message{}}` on success
     * `{:error, reason}` on failure
 
-  The `before_chat_message` hook is called before persistence and can modify
-  attrs or reject the message. The `after_chat_message` hook fires asynchronously
-  after the message is persisted.
+  Moderation runs before the `before_chat_message` hook: a muted sender is
+  rejected with `{:error, :muted}` and a blocked word with
+  `{:error, :blocked_content}`, so a plugin never sees a message core already
+  refused. The hook can then modify attrs or reject the message itself. The
+  `after_chat_message` hook fires asynchronously after the message is persisted.
   """
   @spec send_message(map(), map()) ::
           {:ok, Message.t()} | {:error, term()}
   def send_message(%{user: %User{id: sender_id}}, attrs) when is_map(attrs) do
     with :ok <- validate_chat_access(sender_id, attrs),
          :ok <- check_slowdown(sender_id, attrs),
+         :ok <- check_mute(sender_id, attrs),
+         {:ok, attrs, flagged} <- apply_word_filter(attrs),
          {:ok, attrs} <- run_before_hook(sender_id, attrs) do
-      do_send_message(sender_id, attrs)
+      do_send_message(sender_id, attrs, flagged)
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # Moderation enforcement
+  # ---------------------------------------------------------------------------
+
+  defp check_mute(sender_id, attrs) do
+    if Moderation.muted?(sender_id, attr(attrs, "chat_type"), attr(attrs, "chat_ref_id")) do
+      {:error, :muted}
+    else
+      :ok
+    end
+  end
+
+  defp apply_word_filter(attrs) do
+    original = attr(attrs, "content")
+
+    case Moderation.check_content(original) do
+      # Pinned so a masked message still takes the branch that writes it back.
+      {:ok, ^original, []} ->
+        {:ok, attrs, []}
+
+      {:ok, content, flagged} ->
+        {:ok, attrs |> put_attr("content", content) |> mark_flagged(flagged), flagged}
+
+      {:error, :blocked_content} ->
+        {:error, :blocked_content}
+    end
+  end
+
+  defp mark_flagged(attrs, []), do: attrs
+
+  defp mark_flagged(attrs, _flagged) do
+    metadata = attr(attrs, "metadata") || %{}
+    put_attr(attrs, "metadata", Map.put(metadata, "flagged", true))
+  end
+
+  # Callers pass string keys over HTTP and atom keys from plugins.
+  @attr_atoms %{
+    "chat_type" => :chat_type,
+    "chat_ref_id" => :chat_ref_id,
+    "content" => :content,
+    "metadata" => :metadata
+  }
+
+  defp attr(attrs, key) do
+    Map.get(attrs, key) || Map.get(attrs, Map.fetch!(@attr_atoms, key))
+  end
+
+  defp put_attr(attrs, key, value) do
+    atom_key = Map.fetch!(@attr_atoms, key)
+
+    if Map.has_key?(attrs, atom_key) do
+      Map.put(attrs, atom_key, value)
+    else
+      Map.put(attrs, key, value)
     end
   end
 
@@ -173,7 +236,7 @@ defmodule Gamend.Chat do
     end
   end
 
-  defp do_send_message(sender_id, attrs) do
+  defp do_send_message(sender_id, attrs, flagged) do
     changeset =
       %Message{sender_id: sender_id}
       |> Message.changeset(attrs)
@@ -191,6 +254,9 @@ defmodule Gamend.Chat do
           Gamend.Hooks.internal_call(:after_chat_message, [message])
           Gamend.Quests.report_event(sender_id, "chat_message")
           send_chat_notifications(message)
+          # The filter runs before the insert, so a flagged message only has an
+          # id to report against once it is committed.
+          if flagged != [], do: Reports.report_flagged_message(message, flagged)
         end)
 
         {:ok, message}
@@ -941,4 +1007,67 @@ defmodule Gamend.Chat do
   defp admin_sort(query, "inserted_at_asc"), do: order_by(query, [m], asc: m.inserted_at)
   defp admin_sort(query, "inserted_at"), do: order_by(query, [m], desc: m.inserted_at)
   defp admin_sort(query, _), do: order_by(query, [m], desc: m.inserted_at)
+
+  # ---------------------------------------------------------------------------
+  # Moderation (see Gamend.Chat.Moderation and Gamend.Chat.Reports)
+  # ---------------------------------------------------------------------------
+  #
+  # Re-exported here because `Gamend.Chat` is the module the plugin SDK is
+  # generated from (`@sdk_modules` in `mix gen.sdk`) — a plugin can only call
+  # what lives on the context.
+
+  @doc """
+  Mute `user_id` in `scope` (`"global"`, `"lobby"`, `"group"` or `"party"`).
+
+  `scope_ref_id` is the room id, or `nil` for a global mute. `attrs` may carry
+  `expires_at` (nil means permanent), `reason` and `muted_by`.
+  """
+  @spec mute_user(Ecto.UUID.t(), String.t(), Ecto.UUID.t() | nil, map()) ::
+          {:ok, Gamend.Chat.Mute.t()} | {:error, term()}
+  defdelegate mute_user(user_id, scope, scope_ref_id, attrs \\ %{}), to: Moderation
+
+  @doc "Lift a mute. Returns `{:ok, count}` — 0 when the user was not muted."
+  @spec unmute_user(Ecto.UUID.t(), String.t(), Ecto.UUID.t() | nil) :: {:ok, non_neg_integer()}
+  defdelegate unmute_user(user_id, scope, scope_ref_id \\ nil), to: Moderation
+
+  @doc "Whether `user_id` is currently muted for the given chat."
+  @spec muted?(Ecto.UUID.t(), String.t(), Ecto.UUID.t() | nil) :: boolean()
+  defdelegate muted?(user_id, chat_type, chat_ref_id), to: Moderation
+
+  @doc "List mutes. Filters: `:user_id`, `:scope`, `:scope_ref_id`, `:active`."
+  @spec list_mutes(map(), keyword()) :: [Gamend.Chat.Mute.t()]
+  defdelegate list_mutes(filters \\ %{}, opts \\ []), to: Moderation
+
+  @doc "Count mutes matching `filters`."
+  @spec count_mutes(map()) :: non_neg_integer()
+  defdelegate count_mutes(filters \\ %{}), to: Moderation
+
+  @doc "File a report about a message on behalf of `reporter_id`."
+  @spec report_message(Ecto.UUID.t(), Ecto.UUID.t(), String.t() | nil) ::
+          {:ok, Gamend.Chat.Report.t()} | {:error, term()}
+  defdelegate report_message(reporter_id, message_id, reason \\ nil), to: Reports
+
+  @doc "List reports. Filters: `:status`, `:reported_user_id`, `:reporter_id`."
+  @spec list_reports(map(), keyword()) :: [Gamend.Chat.Report.t()]
+  defdelegate list_reports(filters \\ %{}, opts \\ []), to: Reports
+
+  @doc "Count reports matching `filters`."
+  @spec count_reports(map()) :: non_neg_integer()
+  defdelegate count_reports(filters \\ %{}), to: Reports
+
+  @doc "Claim a report for review, moving it from open to reviewing."
+  @spec review_report(Gamend.Chat.Report.t() | Ecto.UUID.t()) ::
+          {:ok, Gamend.Chat.Report.t()} | {:error, term()}
+  defdelegate review_report(report), to: Reports
+
+  @doc "Resolve a report: set its status, with an optional note and resolver."
+  @spec resolve_report(Gamend.Chat.Report.t() | Ecto.UUID.t(), String.t(), map()) ::
+          {:ok, Gamend.Chat.Report.t()} | {:error, term()}
+  defdelegate resolve_report(report, status, attrs \\ %{}), to: Reports
+
+  @doc """
+  Every blocklist entry matching `content`, as `[{word, severity, match_mode}]`.
+  """
+  @spec filter_hits(String.t()) :: [{String.t(), String.t(), String.t()}]
+  defdelegate filter_hits(content), to: Moderation, as: :hits
 end

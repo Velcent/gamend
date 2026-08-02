@@ -1245,6 +1245,26 @@ defmodule Gamend.Accounts do
 
 
   @doc ~S"""
+    Ids of every admin user.
+    
+    Used to fan a moderation alert out to whoever can act on it. Not cached: the
+    callers are rare (a chat report arriving), and a stale list would silently
+    skip a newly promoted moderator.
+    
+  """
+  @spec list_admin_ids() :: [Ecto.UUID.t()]
+  def list_admin_ids() do
+    case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        []
+
+      _ ->
+        raise "Gamend.Accounts.list_admin_ids/0 is a stub - only available at runtime on Gamend"
+    end
+  end
+
+
+  @doc ~S"""
     Admin user listing: search across identity fields (or an exact id), optional
     facet filters, sorting and pagination — the query behind the admin Users page.
     

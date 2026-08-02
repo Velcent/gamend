@@ -7,7 +7,7 @@ generated: by `mix gamend.settings.guide` - do not edit by hand; edit the
 # Settings
 
 Every setting the server has, with the environment variable that sets it.
-227 settings across 20 groups.
+232 settings across 20 groups.
 
 A setting is declared in the module that owns it, so this page and
 `.env.example` are generated from the same source the server reads. The
@@ -143,7 +143,10 @@ Live values, and where each one came from, are on the
 | `GAMEND_LIMITS_MATCHMAKING_TIMEOUT_MS` | integer | `30000` | How long the oldest ticket waits before a below-max group still forms. |
 | `GAMEND_LIMITS_MAX_ACTIVE_QUESTS_PER_USER` | integer | `200` | Progress rows a user may hold in the current periods; excess events are ignored. |
 | `GAMEND_LIMITS_MAX_CHAT_CONTENT` | integer | `4096` |  |
+| `GAMEND_LIMITS_MAX_CHAT_FILTER_WORDS` | integer | `10000` | Blocklist size cap. Sized to hold the bundled word lists for several languages. |
+| `GAMEND_LIMITS_MAX_CHAT_FILTER_WORD_LEN` | integer | `64` |  |
 | `GAMEND_LIMITS_MAX_CHAT_MESSAGES_PER_DAY` | integer | `5000` | Rolling 24h; 0 disables. Needs rate limiting on; ETS backend counts per instance. |
+| `GAMEND_LIMITS_MAX_CHAT_REPORTS_PER_USER_PER_DAY` | integer | `50` | Rolling 24h; 0 disables. Needs rate limiting on; ETS backend counts per instance. |
 | `GAMEND_LIMITS_MAX_DEVICE_ID` | integer | `256` |  |
 | `GAMEND_LIMITS_MAX_DISPLAY_NAME` | integer | `80` |  |
 | `GAMEND_LIMITS_MAX_EMAIL` | integer | `160` |  |
@@ -168,6 +171,7 @@ Live values, and where each one came from, are on the
 | `GAMEND_LIMITS_MAX_MATCHMAKING_PARAMS_SIZE` | integer | `2048` | Serialized byte size of a ticket's match_params map. |
 | `GAMEND_LIMITS_MAX_MATCHMAKING_PLAYERS` | integer | `64` | Hard cap on a ticket's own max_players setting. |
 | `GAMEND_LIMITS_MAX_METADATA_SIZE` | integer | `16384` |  |
+| `GAMEND_LIMITS_MAX_MUTE_REASON` | integer | `500` |  |
 | `GAMEND_LIMITS_MAX_NOTIFICATIONS_PER_USER` | integer | `500` |  |
 | `GAMEND_LIMITS_MAX_NOTIFICATION_CONTENT` | integer | `10000` |  |
 | `GAMEND_LIMITS_MAX_NOTIFICATION_TITLE` | integer | `255` |  |
@@ -189,6 +193,7 @@ Live values, and where each one came from, are on the
 | `GAMEND_LIMITS_MAX_QUEST_REWARD_ENTRIES` | integer | `10` |  |
 | `GAMEND_LIMITS_MAX_QUEST_TITLE` | integer | `255` |  |
 | `GAMEND_LIMITS_MAX_READY_CHECK_PARTICIPANTS` | integer | `64` | Hard cap on participants in one check. |
+| `GAMEND_LIMITS_MAX_REPORT_REASON` | integer | `500` |  |
 | `GAMEND_LIMITS_MAX_SOCKETS_PER_USER` | integer | `20` | Concurrent sockets per user. 0 disables; counted per app instance. |
 | `GAMEND_LIMITS_MAX_TOURNAMENT_BRACKET_SIZE` | integer | `256` |  |
 | `GAMEND_LIMITS_MAX_TOURNAMENT_DESCRIPTION` | integer | `1000` |  |

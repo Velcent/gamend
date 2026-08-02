@@ -11,28 +11,28 @@ msgstr ""
 "Language: no\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: lib/gamend_web/live/notifications_live.ex:287
+#: lib/gamend_web/live/notifications_live.ex:294
 #, elixir-autogen, elixir-format
 msgid "Achievement Unlocked: %{name}"
 msgstr "Prestasjon låst opp: %{name}"
 
-#: lib/gamend_web/live/notifications_live.ex:281
+#: lib/gamend_web/live/notifications_live.ex:288
 #, elixir-autogen, elixir-format
 msgid "New message in party"
 msgstr "Ny melding i partyet"
 
-#: lib/gamend_web/live/notifications_live.ex:295
-#: lib/gamend_web/live/notifications_live.ex:300
+#: lib/gamend_web/live/notifications_live.ex:302
+#: lib/gamend_web/live/notifications_live.ex:307
 #, elixir-autogen, elixir-format
 msgid "New messages from %{name}"
 msgstr "Nye meldinger fra %{name}"
 
-#: lib/gamend_web/live/notifications_live.ex:279
+#: lib/gamend_web/live/notifications_live.ex:286
 #, elixir-autogen, elixir-format
 msgid "New messages from friends"
 msgstr "Nye meldinger fra venner"
 
-#: lib/gamend_web/live/notifications_live.ex:289
+#: lib/gamend_web/live/notifications_live.ex:296
 #, elixir-autogen, elixir-format
 msgid "Quest completed: %{name}"
 msgstr "Oppdrag fullført: %{name}"

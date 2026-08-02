@@ -63,6 +63,8 @@ defmodule GamendWeb.RuntimeIntrospection do
     cond do
       name in ~w(after_startup before_stop on_custom_hook) -> "Lifecycle"
       String.contains?(name, "kv") -> "KV"
+      # Before the "user" clause: after_user_muted is chat moderation.
+      String.contains?(name, "mute") -> "Chat"
       String.contains?(name, "chat") -> "Chat"
       String.contains?(name, "push") -> "Push"
       String.contains?(name, "quest") -> "Quest"

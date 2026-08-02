@@ -499,6 +499,79 @@ defmodule GamendWeb.Api.V1.ChatController do
   end
 
   # ---------------------------------------------------------------------------
+  # Report a message
+  # ---------------------------------------------------------------------------
+
+  operation(:report,
+    operation_id: "report_chat_message",
+    summary: "Report a chat message",
+    description:
+      "Flag a message for moderator review. One report per player per message; " <>
+        "capped per day by the `max_chat_reports_per_user_per_day` limit.",
+    security: [%{"authorization" => []}],
+    parameters: [
+      id: [
+        in: :path,
+        required: true,
+        schema: %Schema{type: :string, format: :uuid},
+        description: "Message ID"
+      ]
+    ],
+    request_body:
+      {"Report", "application/json",
+       %Schema{
+         type: :object,
+         properties: %{
+           reason: %Schema{type: :string, description: "Why the message is being reported"}
+         }
+       }},
+    responses: [
+      ok: {"Reported", "application/json", %Schema{type: :object}},
+      bad_request: {"Invalid id or own message", "application/json", %Schema{type: :object}},
+      not_found: {"Message not found", "application/json", %Schema{type: :object}},
+      conflict: {"Already reported", "application/json", %Schema{type: :object}},
+      too_many_requests:
+        {"Daily report limit reached", "application/json", %Schema{type: :object}}
+    ]
+  )
+
+  def report(conn, %{"id" => id} = params) do
+    user_id = conn.assigns[:current_scope].user_id
+    reason = Map.get(params, "reason") || Map.get(params, :reason)
+
+    case parse_id(id) do
+      nil ->
+        conn |> put_status(:bad_request) |> json(%{error: "invalid_id"})
+
+      message_id ->
+        with :ok <- GamendWeb.RateLimit.check_report_daily(user_id),
+             {:ok, _report} <- Chat.report_message(user_id, message_id, reason) do
+          json(conn, %{ok: true})
+        else
+          {:error, :report_daily_limit} ->
+            conn |> put_status(:too_many_requests) |> json(%{error: "report_daily_limit"})
+
+          {:error, :not_found} ->
+            conn |> put_status(:not_found) |> json(%{error: "not_found"})
+
+          {:error, :own_message} ->
+            conn |> put_status(:bad_request) |> json(%{error: "own_message"})
+
+          {:error, :already_reported} ->
+            conn |> put_status(:conflict) |> json(%{error: "already_reported"})
+
+          {:error, %Ecto.Changeset{} = changeset} ->
+            conn
+            |> put_status(:unprocessable_entity)
+            |> json(%{error: "invalid", details: changeset_errors(changeset)})
+
+          {:error, reason} ->
+            conn |> put_status(:unprocessable_entity) |> json(%{error: to_string(reason)})
+        end
+    end
+  end
+
+  # ---------------------------------------------------------------------------
   # Helpers
   # ---------------------------------------------------------------------------
 

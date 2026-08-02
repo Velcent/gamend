@@ -14,6 +14,8 @@ defmodule Gamend.Hooks do
 
   alias Gamend.Accounts.User
   alias Gamend.Chat.Message
+  alias Gamend.Chat.Mute
+  alias Gamend.Chat.Report
   alias Gamend.Groups.Group
   alias Gamend.Hooks.Default, as: Default
   alias Gamend.Hooks.PluginManager
@@ -241,6 +243,12 @@ defmodule Gamend.Hooks do
 
   @callback before_chat_message(User.t(), map()) :: hook_result(map())
   @callback after_chat_message(Message.t()) :: any()
+
+  # Chat moderation observations. Both are fire-and-forget: core has already
+  # filed the report / applied the mute by the time they run, so a plugin can
+  # tally strikes, notify moderators or auto-escalate, but cannot veto.
+  @callback after_chat_message_reported(Report.t()) :: any()
+  @callback after_user_muted(Mute.t()) :: any()
 
   # Push delivery hooks. `before_push_send/2` runs once per recipient before
   # any delivery job is enqueued: return `{:ok, message}` (possibly rewritten)
@@ -490,6 +498,7 @@ defmodule Gamend.Hooks do
   # other seventy — nor start warning when core grows a new one. `use
   # Gamend.Hooks` still injects no-op defaults for anyone who wants them.
   @optional_callbacks after_chat_message: 1,
+                      after_chat_message_reported: 1,
                       after_group_create: 1,
                       after_group_deleted: 1,
                       after_group_join: 2,
@@ -513,6 +522,7 @@ defmodule Gamend.Hooks do
                       after_startup: 0,
                       after_user_deleted: 1,
                       after_user_logged_in: 1,
+                      after_user_muted: 1,
                       after_user_offline: 1,
                       after_user_online: 1,
                       after_user_register: 1,
@@ -581,6 +591,8 @@ defmodule Gamend.Hooks do
       :before_party_kick,
       :before_chat_message,
       :after_chat_message,
+      :after_chat_message_reported,
+      :after_user_muted,
       :before_push_send,
       :after_push_sent,
       :before_lobby_leave,
@@ -1497,6 +1509,12 @@ defmodule Gamend.Hooks.Default do
 
   @impl true
   def after_chat_message(_message), do: :ok
+
+  @impl true
+  def after_chat_message_reported(_report), do: :ok
+
+  @impl true
+  def after_user_muted(_mute), do: :ok
 
   @impl true
   def before_push_send(_user_id, message), do: {:ok, message}

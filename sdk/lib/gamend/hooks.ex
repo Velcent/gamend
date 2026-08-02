@@ -241,6 +241,12 @@ defmodule Gamend.Hooks do
   @typedoc "A chat message struct from Gamend.Chat.Message"
   @type message :: Gamend.Chat.Message.t()
 
+  @typedoc "A chat report struct from Gamend.Chat.Report"
+  @type report :: Gamend.Chat.Report.t()
+
+  @typedoc "A chat mute struct from Gamend.Chat.Mute"
+  @type mute :: Gamend.Chat.Mute.t()
+
   @typedoc "Result type for before hooks"
   @type hook_result(t) :: {:ok, t} | {:error, term()}
 
@@ -455,6 +461,20 @@ defmodule Gamend.Hooks do
   @callback before_chat_message(user(), attrs :: map()) :: hook_result(map())
   @callback after_chat_message(message()) :: any()
 
+  @doc """
+  Called after a chat message is reported, by a player or by the word filter
+  (in which case `report.reporter_id` is nil). Fire-and-forget: the report is
+  already in the queue. Use it to tally strikes or notify moderators.
+  """
+  @callback after_chat_message_reported(report()) :: any()
+
+  @doc """
+  Called after a user is muted, whether by an admin, a room's own authority
+  (lobby host, group admin, party leader) or a plugin. Fire-and-forget: the
+  mute is already in effect.
+  """
+  @callback after_user_muted(mute()) :: any()
+
   @callback before_push_send(user_id :: String.t(), message :: map()) :: hook_result(map())
   @callback after_push_sent(user_id :: String.t(), message :: map(), result :: map()) :: any()
 
@@ -509,6 +529,8 @@ defmodule Gamend.Hooks do
                       after_quest_claimed: 1,
                       before_chat_message: 2,
                       after_chat_message: 1,
+                      after_chat_message_reported: 1,
+                      after_user_muted: 1,
                       before_push_send: 2,
                       after_push_sent: 3,
                       before_ready_check_open: 2,
@@ -697,6 +719,12 @@ defmodule Gamend.Hooks do
       def after_chat_message(_message), do: :ok
 
       @impl true
+      def after_chat_message_reported(_report), do: :ok
+
+      @impl true
+      def after_user_muted(_mute), do: :ok
+
+      @impl true
       def before_push_send(_user_id, message), do: {:ok, message}
 
       @impl true
@@ -832,6 +860,8 @@ defmodule Gamend.Hooks do
                      after_lobby_join: 2,
                      before_chat_message: 2,
                      after_chat_message: 1,
+                     after_chat_message_reported: 1,
+                     after_user_muted: 1,
                      before_push_send: 2,
                      after_push_sent: 3,
                      before_lobby_leave: 2,
