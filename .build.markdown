@@ -1,5 +1,6 @@
 Gamend.Accounts.AvatarMirror.md
 Gamend.Accounts.InactivityNotifier.md
+Gamend.Accounts.PresenceStatus.md
 Gamend.Accounts.Scope.md
 Gamend.Accounts.StalePresenceSweeper.md
 Gamend.Accounts.User.md

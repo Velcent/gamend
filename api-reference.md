@@ -1,4 +1,4 @@
-# gamend_core v1.0.1103 - API Reference
+# gamend_core v1.0.1104 - API Reference
 
 ## Modules
 
@@ -22,6 +22,7 @@ clients.
 own object storage, so avatars render from our storage/CDN instead of
 hotlinking the provider.
   - [Gamend.Accounts.InactivityNotifier](Gamend.Accounts.InactivityNotifier.md): Warns a user their account is about to be deleted for inactivity.
+  - [Gamend.Accounts.PresenceStatus](Gamend.Accounts.PresenceStatus.md): How recently a user was seen, as the three states the UI actually draws.
   - [Gamend.Accounts.Scope](Gamend.Accounts.Scope.md): Defines the scope of the caller to be used throughout the app.
   - [Gamend.Accounts.StalePresenceSweeper](Gamend.Accounts.StalePresenceSweeper.md): Periodically sweeps users whose `is_online` flag is `true` but whose
 `last_seen_at` timestamp is older than a configurable threshold.

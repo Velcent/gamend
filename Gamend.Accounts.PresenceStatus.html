@@ -8,7 +8,7 @@
     <meta name="project" content="gamend_core v1.0.1104">
 
 
-    <title>Gamend.ReadyChecks.Participant — gamend_core v1.0.1104</title>
+    <title>Gamend.Accounts.PresenceStatus — gamend_core v1.0.1104</title>
 
     <link rel="stylesheet" href="dist/html-elixir-YJO4MOOW.css" />
 
@@ -93,19 +93,19 @@ gamend_core
 <div id="top-content">
   <div class="heading-with-actions top-heading">
     <h1>
-      <span translate="no">Gamend.<wbr>ReadyChecks.<wbr>Participant</span> 
+      <span translate="no">Gamend.<wbr>Accounts.<wbr>PresenceStatus</span> 
       <small class="app-vsn" translate="no">(gamend_core v1.0.1104)</small>
 
     </h1>
 
-<a href="Gamend.ReadyChecks.Participant.md" title="Copy Markdown (hold Ctrl/Cmd and click it to open as Markdown)" class="copy-markdown icon-action" rel="help">
+<a href="Gamend.Accounts.PresenceStatus.md" title="Copy Markdown (hold Ctrl/Cmd and click it to open as Markdown)" class="copy-markdown icon-action" rel="help">
   <i class="ri-markdown-line" aria-hidden="true"></i>
   <span class="sr-only">Copy Markdown</span>
 </a>
 
 
 
-      <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks/participant.ex#L1" title="View Source" class="icon-action" rel="help">
+      <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/presence_status.ex#L1" title="View Source" class="icon-action" rel="help">
         <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         <span class="sr-only">View Source</span>
       </a>
@@ -114,9 +114,17 @@ gamend_core
 
 
     <section id="moduledoc">
-<p>Ecto schema for one player's answer inside a ready check.</p><p>A row, not a key in a map on the check: answering is then a single-row write,
-so two players answering in the same instant cannot overwrite each other.</p><p><code class="inline">ticket_id</code> is set only for matchmaking checks, where the participant's seat
-in the queue has to dissolve with the check.</p>
+<p>How recently a user was seen, as the three states the UI actually draws.</p><p>Distinct from <a href="Gamend.Presence.html"><code class="inline">Gamend.Presence</code></a>, which tracks live socket membership across
+the cluster. This is the durable, per-user view derived from <code class="inline">is_online</code> and
+<code class="inline">last_seen_at</code> — the thing a friends list or a chat sidebar wants when the
+user is not connected to <em>this</em> node at all.</p><p>The rule already existed twice, in two shapes: <a href="Gamend.Parties.html"><code class="inline">Gamend.Parties</code></a> kept a private
+<code class="inline">@online_grace_seconds</code> with a boolean active/not check, and the Godot client
+kept its own <code class="inline">RECENT_THRESHOLD_SECONDS</code> with a three-state version. They
+happened to agree on 300 seconds, which is exactly the kind of agreement that
+quietly stops being true. This module is the authority; clients may mirror the
+constant, but the server decides it.</p><p><code class="inline">:recent</code> is the state the web has never drawn — every surface had a boolean
+<code class="inline">online</code>, so someone who closed the tab a minute ago looked identical to
+someone who has not played in a week.</p>
     </section>
 
 </div>
@@ -139,6 +147,8 @@ in the queue has to dissolve with the check.</p>
 
       </div>
 
+        <div class="summary-synopsis"><p>Online now, seen within the grace window, or neither.</p></div>
+
     </div>
 
 </div>
@@ -149,11 +159,32 @@ in the queue has to dissolve with the check.</p>
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#states/0" data-no-tooltip="" translate="no">states()</a>
+        <a href="#active?/1" data-no-tooltip="" translate="no">active?(user)</a>
 
       </div>
 
-        <div class="summary-synopsis"><p>The states a participant may be in.</p></div>
+        <div class="summary-synopsis"><p>Whether the user counts as present at all — <code class="inline">:online</code> or <code class="inline">:recent</code>.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#recent_threshold_seconds/0" data-no-tooltip="" translate="no">recent_threshold_seconds()</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Seconds after <code class="inline">last_seen_at</code> during which a signed-off user still counts as
+<code class="inline">:recent</code>. Authoritative — mirror it in clients, do not redefine it.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#status/1" data-no-tooltip="" translate="no">status(attrs)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Presence state for a user.</p></div>
 
     </div>
 
@@ -181,7 +212,7 @@ in the queue has to dissolve with the check.</p>
       <h1 class="signature" translate="no">t()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks/participant.ex#L20" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/presence_status.ex#L25" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -192,24 +223,11 @@ in the queue has to dissolve with the check.</p>
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@type</span> t() :: %Gamend.ReadyChecks.Participant{
-  __meta__: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
-  id: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
-  inserted_at: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
-  ready_check: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
-  ready_check_id: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
-  responded_at: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
-  state: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
-  ticket: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
-  ticket_id: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
-  updated_at: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
-  user: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
-  user_id: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()
-}</pre>
+          <pre translate="no"><span class="attribute">@type</span> t() :: :online | :recent | :offline</pre>
 
       </div>
 
-
+<p>Online now, seen within the grace window, or neither.</p>
   </section>
 </section>
 
@@ -225,17 +243,17 @@ in the queue has to dissolve with the check.</p>
     </h2>
 
     <div class="functions-list">
-<section class="detail" id="states/0">
+<section class="detail" id="active?/1">
 
   <div class="detail-header">
-    <a href="#states/0" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+    <a href="#active?/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
       <i class="ri-link-m" aria-hidden="true"></i>
     </a>
     <div class="heading-with-actions">
-      <h1 class="signature" translate="no">states()</h1>
+      <h1 class="signature" translate="no">active?(user)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks/participant.ex#L51" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/presence_status.ex#L64" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -246,11 +264,71 @@ in the queue has to dissolve with the check.</p>
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> states() :: [<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()]</pre>
+          <pre translate="no"><span class="attribute">@spec</span> active?(<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>() | <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>() | nil) :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()</pre>
 
       </div>
 
-<p>The states a participant may be in.</p>
+<p>Whether the user counts as present at all — <code class="inline">:online</code> or <code class="inline">:recent</code>.</p><p>The boolean <a href="Gamend.Parties.html"><code class="inline">Gamend.Parties</code></a> needs when deciding whether a member has gone
+quiet, defined in terms of <a href="#status/1"><code class="inline">status/1</code></a> so the two cannot diverge.</p>
+  </section>
+</section>
+<section class="detail" id="recent_threshold_seconds/0">
+
+  <div class="detail-header">
+    <a href="#recent_threshold_seconds/0" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">recent_threshold_seconds()</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/presence_status.ex#L34" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> recent_threshold_seconds() :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pos_integer</a>()</pre>
+
+      </div>
+
+<p>Seconds after <code class="inline">last_seen_at</code> during which a signed-off user still counts as
+<code class="inline">:recent</code>. Authoritative — mirror it in clients, do not redefine it.</p>
+  </section>
+</section>
+<section class="detail" id="status/1">
+
+  <div class="detail-header">
+    <a href="#status/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">status(attrs)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/presence_status.ex#L44" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> status(<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>() | <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>() | nil) :: <a href="#t:t/0">t</a>()</pre>
+
+      </div>
+
+<p>Presence state for a user.</p><p>Accepts a <code class="inline">User</code>, or any map carrying <code class="inline">is_online</code>/<code class="inline">last_seen_at</code> (a serialized
+payload, say) so a caller does not have to reload the struct just to draw a
+dot. Anything else is <code class="inline">:offline</code> — an unknown user is not an online one.</p>
   </section>
 </section>
 
