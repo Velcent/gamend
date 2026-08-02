@@ -560,13 +560,13 @@ defmodule GamendWeb.Api.V1.ChatController do
           {:error, :already_reported} ->
             conn |> put_status(:conflict) |> json(%{error: "already_reported"})
 
+          # No catch-all: the clauses above cover everything
+          # `check_report_daily/1` and `report_message/3` can return, and
+          # dialyzer fails the build on the unreachable branch.
           {:error, %Ecto.Changeset{} = changeset} ->
             conn
             |> put_status(:unprocessable_entity)
             |> json(%{error: "invalid", details: changeset_errors(changeset)})
-
-          {:error, reason} ->
-            conn |> put_status(:unprocessable_entity) |> json(%{error: to_string(reason)})
         end
     end
   end
