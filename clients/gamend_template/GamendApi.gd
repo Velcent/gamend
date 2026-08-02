@@ -1113,11 +1113,25 @@ func _kv_subscription_request_ws(event: String, key: String, user_id = null, lob
 		network_request_succeeded.emit()
 	else:
 		result.error = _make_ws_api_error(error_prefix, response_payload, FAILED)
-		if result.error.response_code not in [
-			HTTPClient.RESPONSE_BAD_REQUEST,
-			HTTPClient.RESPONSE_FORBIDDEN,
-			HTTPClient.RESPONSE_NOT_FOUND,
-		]:
+		# no_channel / push_failed / no_scene_tree mean OUR transport was not
+		# ready to send — not that the network is down. Escalating them turned a
+		# reconnect blip into a dead session: the first failed re-subscribe fired
+		# network_request_failed -> fail_network -> realtime_stop(), which nulled
+		# the socket, so every remaining re-subscribe failed too and the watchdog
+		# then skipped recovery because the state was already "failed". The
+		# reconnect path owns transport readiness; the request watchdog does not.
+		var transport_error: bool = (
+			str(response_payload.get("error", "")) in ["no_channel", "push_failed", "no_scene_tree"]
+		)
+		if (
+			not transport_error
+			and result.error.response_code
+			not in [
+				HTTPClient.RESPONSE_BAD_REQUEST,
+				HTTPClient.RESPONSE_FORBIDDEN,
+				HTTPClient.RESPONSE_NOT_FOUND,
+			]
+		):
 			network_request_failed.emit(result.error.message)
 	return result
 

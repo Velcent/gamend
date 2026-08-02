@@ -207,7 +207,14 @@ func _channel_on_error(error, topic):
 func _channel_on_close(params, topic):
 	if enable_logs:
 		print("Channel on close ", topic, " ", _redact_for_log(params))
-	if _channels.has(topic):
+	# A close that WILL rejoin is transient — PhoenixChannel keeps the object and
+	# re-joins itself (phoenix_socket sets will_reconnect on any close it did not
+	# request). De-registering here made the two layers disagree about channel
+	# lifetime: the rejoin succeeded and fired user_channel_joined, but every
+	# request that followed hit an empty registry and failed with "No channel
+	# found for request". Only remove_channel()/shutdown() should de-register.
+	var will_rejoin := params is Dictionary and bool((params as Dictionary).get("will_reconnect", false))
+	if not will_rejoin and _channels.has(topic):
 		_channels.erase(topic)
 	if topic.begins_with("user:"):
 		user_channel_closed.emit()

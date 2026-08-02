@@ -516,7 +516,7 @@ defmodule GamendWeb.Api.V1.GroupControllerTest do
       assert %{"data" => [%{"title" => "Mine1"}]} = json_response(conn, 200)
     end
 
-    test "returns -1 for system group creator", %{conn: conn} do
+    test "returns an empty creator_id for a system group", %{conn: conn} do
       user = create_user()
       {:ok, group} = Groups.create_group(user.id, %{"title" => "SystemGroup"})
 
@@ -529,7 +529,9 @@ defmodule GamendWeb.Api.V1.GroupControllerTest do
         |> auth_conn(user)
         |> get("/api/v1/groups/me")
 
-      assert %{"data" => [%{"creator_id" => -1, "creator_name" => ""}]} = json_response(conn, 200)
+      # A string, not the old -1 sentinel: the contract types creator_id as a
+      # string, and a number here failed to assign in typed clients.
+      assert %{"data" => [%{"creator_id" => "", "creator_name" => ""}]} = json_response(conn, 200)
     end
 
     test "returns 401 without auth", %{conn: conn} do

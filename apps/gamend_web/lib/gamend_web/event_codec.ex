@@ -310,7 +310,7 @@ defmodule GamendWeb.EventCodec do
       description: get(p, :description),
       type: get(p, :type),
       max_members: get(p, :max_members),
-      creator_id: creator_id(get(p, :creator_id)),
+      creator_id: get(p, :creator_id),
       creator_name: get(p, :creator_name),
       metadata_json: meta_json,
       metadata_pb: meta_pb,
@@ -397,10 +397,6 @@ defmodule GamendWeb.EventCodec do
       members -> {Enum.map(members, &user_brief/1), true}
     end
   end
-
-  # Group creator_id serializes as -1 when nil (see Serializers.response_id/1).
-  defp creator_id(-1), do: ""
-  defp creator_id(id), do: id
 
   # ── Value helpers ──────────────────────────────────────────────────────
 

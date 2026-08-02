@@ -254,7 +254,11 @@ defmodule GamendWeb.Serializers do
   defp assoc_or_lookup_display_name(%{} = assoc, _id), do: assoc_display_name(assoc)
   defp assoc_or_lookup_display_name(_assoc, id), do: display_name(id)
 
-  defp response_id(nil), do: -1
+  # A group with no creator (a system group) has no creator id — emit the empty
+  # string, not a -1 sentinel. The REST contract types creator_id as a string,
+  # so -1 arrived at typed clients as a NUMBER and failed to assign; the proto
+  # path already had to translate it back (see EventCodec.creator_id/1).
+  defp response_id(nil), do: ""
   defp response_id(id), do: id
 
   defp maybe_put(map, _key, _value, false), do: map
