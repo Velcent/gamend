@@ -2,6 +2,7 @@
 
 - [breaking] **Renamed to Gamend.**
 - [added] **Captcha** on the register and magic-link forms
+- [added] **Chat moderation** — word filter, report queue, mutes
 - [breaking] **One theme file**
 - [added] **Translation pipeline**
 - [added] All **30 locales fully translated** (machine-translated, pending review).

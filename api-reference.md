@@ -1,4 +1,4 @@
-# gamend_core v1.0.1100 - API Reference
+# gamend_core v1.0.1101 - API Reference
 
 ## Modules
 
@@ -67,8 +67,22 @@ each answer before something proceeds.
 
 - Social
   - [Gamend.Chat](Gamend.Chat.md): Context for chat messaging across lobbies, groups, and friend DMs.
+  - [Gamend.Chat.FilterWord](Gamend.Chat.FilterWord.md): Ecto schema for the `chat_filter_words` table — one entry of the chat word
+blocklist.
   - [Gamend.Chat.Message](Gamend.Chat.Message.md): Ecto schema for the `chat_messages` table.
+  - [Gamend.Chat.Moderation](Gamend.Chat.Moderation.md): Chat word filter and mutes.
+  - [Gamend.Chat.Moderation.Cache](Gamend.Chat.Moderation.Cache.md): Node-local hot path for chat moderation: the word blocklist and active mutes.
+  - [Gamend.Chat.Moderation.Normalizer](Gamend.Chat.Moderation.Normalizer.md): Canonical form for chat filter matching.
+  - [Gamend.Chat.Moderation.Notices](Gamend.Chat.Moderation.Notices.md): The notifications chat moderation sends: alerting admins that a report landed,
+warning a player, telling a player they were muted, and telling a reporter
+what came of their report.
+  - [Gamend.Chat.Moderation.Sync](Gamend.Chat.Moderation.Sync.md): Keeps the node-local chat-moderation ETS tables in sync with the database and
+the other app instances, and sweeps expired mutes.
+  - [Gamend.Chat.Mute](Gamend.Chat.Mute.md): Ecto schema for the `chat_mutes` table — a silenced chat sender.
   - [Gamend.Chat.ReadCursor](Gamend.Chat.ReadCursor.md): Ecto schema for the `chat_read_cursors` table.
+  - [Gamend.Chat.Report](Gamend.Chat.Report.md): Ecto schema for the `chat_reports` table — a player- or filter-filed report
+about a chat message.
+  - [Gamend.Chat.Reports](Gamend.Chat.Reports.md): The chat report queue.
   - [Gamend.Friends](Gamend.Friends.md): Friends context - handles friend requests and relationships.
   - [Gamend.Friends.Friendship](Gamend.Friends.Friendship.md): Ecto schema representing a friendship/request between two users.
   - [Gamend.Groups](Gamend.Groups.md): Context module for group management: creating, updating, listing, joining,

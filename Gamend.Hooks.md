@@ -55,6 +55,13 @@ Receives the function name and the argument list.
 @callback after_user_logged_in(Gamend.Accounts.User.t()) :: any()
 ```
 
+# `after_user_muted`
+*optional* 
+
+```elixir
+@callback after_user_muted(Gamend.Chat.Mute.t()) :: any()
+```
+
 # `after_user_offline`
 *optional* 
 
@@ -415,6 +422,13 @@ to the player:
 
 ```elixir
 @callback after_chat_message(Gamend.Chat.Message.t()) :: any()
+```
+
+# `after_chat_message_reported`
+*optional* 
+
+```elixir
+@callback after_chat_message_reported(Gamend.Chat.Report.t()) :: any()
 ```
 
 # `before_chat_message`

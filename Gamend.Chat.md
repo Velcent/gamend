@@ -93,6 +93,22 @@ Count messages grouped by chat_type.
 
 Returns a map like `%{"lobby" => 10, "group" => 5, "friend" => 3}`.
 
+# `count_mutes`
+
+```elixir
+@spec count_mutes(map()) :: non_neg_integer()
+```
+
+Count mutes matching `filters`.
+
+# `count_reports`
+
+```elixir
+@spec count_reports(map()) :: non_neg_integer()
+```
+
+Count reports matching `filters`.
+
 # `count_unique_senders`
 
 ```elixir
@@ -173,6 +189,14 @@ Returns `{:error, :not_found}` if the message does not exist or
 
 Delete all read cursors for a given chat conversation.
 
+# `filter_hits`
+
+```elixir
+@spec filter_hits(String.t()) :: [{String.t(), String.t(), String.t()}]
+```
+
+Every blocklist entry matching `content`, as `[{word, severity, match_mode}]`.
+
 # `get_message`
 
 ```elixir
@@ -236,6 +260,28 @@ List messages for a chat conversation.
 Returns a list of `%Message{}` structs ordered by `inserted_at` descending
 (newest first).
 
+# `list_mutes`
+
+```elixir
+@spec list_mutes(
+  map(),
+  keyword()
+) :: [Gamend.Chat.Mute.t()]
+```
+
+List mutes. Filters: `:user_id`, `:scope`, `:scope_ref_id`, `:active`.
+
+# `list_reports`
+
+```elixir
+@spec list_reports(
+  map(),
+  keyword()
+) :: [Gamend.Chat.Report.t()]
+```
+
+List reports. Filters: `:status`, `:reported_user_id`, `:reporter_id`.
+
 # `mark_read`
 
 ```elixir
@@ -246,6 +292,53 @@ Returns a list of `%Message{}` structs ordered by `inserted_at` descending
 Mark a chat conversation as read up to a given message id.
 
 Uses an upsert to create or update the read cursor.
+
+# `mute_user`
+
+```elixir
+@spec mute_user(Ecto.UUID.t(), String.t(), Ecto.UUID.t() | nil, map()) ::
+  {:ok, Gamend.Chat.Mute.t()} | {:error, term()}
+```
+
+Mute `user_id` in `scope` (`"global"`, `"lobby"`, `"group"` or `"party"`).
+
+`scope_ref_id` is the room id, or `nil` for a global mute. `attrs` may carry
+`expires_at` (nil means permanent), `reason` and `muted_by`.
+
+# `muted?`
+
+```elixir
+@spec muted?(Ecto.UUID.t(), String.t(), Ecto.UUID.t() | nil) :: boolean()
+```
+
+Whether `user_id` is currently muted for the given chat.
+
+# `report_message`
+
+```elixir
+@spec report_message(Ecto.UUID.t(), Ecto.UUID.t(), String.t() | nil) ::
+  {:ok, Gamend.Chat.Report.t()} | {:error, term()}
+```
+
+File a report about a message on behalf of `reporter_id`.
+
+# `resolve_report`
+
+```elixir
+@spec resolve_report(Gamend.Chat.Report.t() | Ecto.UUID.t(), String.t(), map()) ::
+  {:ok, Gamend.Chat.Report.t()} | {:error, term()}
+```
+
+Resolve a report: set its status, with an optional note and resolver.
+
+# `review_report`
+
+```elixir
+@spec review_report(Gamend.Chat.Report.t() | Ecto.UUID.t()) ::
+  {:ok, Gamend.Chat.Report.t()} | {:error, term()}
+```
+
+Claim a report for review, moving it from open to reviewing.
 
 # `send_message`
 
@@ -265,9 +358,11 @@ Send a chat message.
   * `{:ok, %Message{}}` on success
   * `{:error, reason}` on failure
 
-The `before_chat_message` hook is called before persistence and can modify
-attrs or reject the message. The `after_chat_message` hook fires asynchronously
-after the message is persisted.
+Moderation runs before the `before_chat_message` hook: a muted sender is
+rejected with `{:error, :muted}` and a blocked word with
+`{:error, :blocked_content}`, so a plugin never sees a message core already
+refused. The hook can then modify attrs or reject the message itself. The
+`after_chat_message` hook fires asynchronously after the message is persisted.
 
 # `subscribe_friend_chat`
 
@@ -300,6 +395,15 @@ Subscribe to chat events for a lobby.
 ```
 
 Subscribe to chat events for a party.
+
+# `unmute_user`
+
+```elixir
+@spec unmute_user(Ecto.UUID.t(), String.t(), Ecto.UUID.t() | nil) ::
+  {:ok, non_neg_integer()}
+```
+
+Lift a mute. Returns `{:ok, count}` — 0 when the user was not muted.
 
 # `unsubscribe_friend_chat`
 

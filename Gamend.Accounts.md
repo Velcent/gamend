@@ -632,6 +632,18 @@ authenticate using the device_id in addition to their OAuth providers.
 Returns {:ok, user} on success or {:error, changeset} if the device_id
 is already used by another account.
 
+# `list_admin_ids`
+
+```elixir
+@spec list_admin_ids() :: [Ecto.UUID.t()]
+```
+
+Ids of every admin user.
+
+Used to fan a moderation alert out to whoever can act on it. Not cached: the
+callers are rare (a chat report arriving), and a stale list would silently
+skip a newly promoted moderator.
+
 # `list_all_users`
 
 ```elixir

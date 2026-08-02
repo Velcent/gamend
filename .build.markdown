@@ -19,8 +19,17 @@ Gamend.Cache.Stats.md
 Gamend.Cache.Sync.md
 Gamend.Cache.md
 Gamend.Captcha.md
+Gamend.Chat.FilterWord.md
 Gamend.Chat.Message.md
+Gamend.Chat.Moderation.Cache.md
+Gamend.Chat.Moderation.Normalizer.md
+Gamend.Chat.Moderation.Notices.md
+Gamend.Chat.Moderation.Sync.md
+Gamend.Chat.Moderation.md
+Gamend.Chat.Mute.md
 Gamend.Chat.ReadCursor.md
+Gamend.Chat.Report.md
+Gamend.Chat.Reports.md
 Gamend.Chat.md
 Gamend.Cluster.md
 Gamend.Config.md

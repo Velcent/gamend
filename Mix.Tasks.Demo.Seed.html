@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.1">
-    <meta name="project" content="gamend_core v1.0.1100">
+    <meta name="project" content="gamend_core v1.0.1101">
 
 
-    <title>mix demo.seed — gamend_core v1.0.1100</title>
+    <title>mix demo.seed — gamend_core v1.0.1101</title>
 
     <link rel="stylesheet" href="dist/html-elixir-YJO4MOOW.css" />
 
-    <script defer src="dist/sidebar_items-064113BE.js"></script>
+    <script defer src="dist/sidebar_items-CBC5CDEC.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-YU4BZFVS.js"></script>
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1100
+          v1.0.1101
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">mix demo.<wbr>seed</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1100)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1101)</small>
 
     </h1>
 
@@ -124,7 +124,9 @@ again without touching real data.</p><h2 id="module-usage" class="section-headin
 regardless of <code class="inline">--count</code> (this set is about having something to read, not
 volume)</li><li><code class="inline">quest</code> — a daily, an auto-claim achievement and a chained follow-up,
 with per-user progress in every state (including claimable rows)</li><li><code class="inline">ready_check</code> — one check per seeded lobby in every outcome (open,
-passed, timed out, declined), also capped at 12</li></ul><p>The <code class="inline">lobby_snapshot</code> set goes through the real <code class="inline">capture_lobby/3</code> path rather
+passed, timed out, declined), also capped at 12</li><li><code class="inline">chat_moderation</code> — a blocklist across every severity and match mode, a
+report queue deep enough to page through (every status, some filter-filed,
+some resolved) and mutes in every scope, including expired ones</li></ul><p>The <code class="inline">lobby_snapshot</code> set goes through the real <code class="inline">capture_lobby/3</code> path rather
 than inserting rows, so what you see is shaped exactly like production data —
 including content-addressed section dedup. One of its runs reproduces the July
 2026 rubber-banding bug (a distance that reverts between snapshots), which is
@@ -144,9 +146,9 @@ SQLite is slow. The cache is flushed afterwards so pages read the new rows.</p>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1100">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1101">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1100">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1101">Hex Preview</a>
 
             </span>
 

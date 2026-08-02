@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.1">
-    <meta name="project" content="gamend_core v1.0.1100">
+    <meta name="project" content="gamend_core v1.0.1101">
 
 
-    <title>Gamend.Chat — gamend_core v1.0.1100</title>
+    <title>Gamend.Chat — gamend_core v1.0.1101</title>
 
     <link rel="stylesheet" href="dist/html-elixir-YJO4MOOW.css" />
 
-    <script defer src="dist/sidebar_items-064113BE.js"></script>
+    <script defer src="dist/sidebar_items-CBC5CDEC.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-YU4BZFVS.js"></script>
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1100
+          v1.0.1101
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr>Chat</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1100)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1101)</small>
 
     </h1>
 
@@ -215,6 +215,26 @@ symmetrically).</li></ul><h2 id="module-pubsub-topics" class="section-heading"><
 
     <div class="summary-row">
       <div class="summary-signature">
+        <a href="#count_mutes/1" data-no-tooltip="" translate="no">count_mutes(filters \\ %{})</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Count mutes matching <code class="inline">filters</code>.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#count_reports/1" data-no-tooltip="" translate="no">count_reports(filters \\ %{})</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Count reports matching <code class="inline">filters</code>.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
         <a href="#count_unique_senders/0" data-no-tooltip="" translate="no">count_unique_senders()</a>
 
       </div>
@@ -295,6 +315,16 @@ symmetrically).</li></ul><h2 id="module-pubsub-topics" class="section-heading"><
 
     <div class="summary-row">
       <div class="summary-signature">
+        <a href="#filter_hits/1" data-no-tooltip="" translate="no">filter_hits(content)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Every blocklist entry matching <code class="inline">content</code>, as <code class="inline">[{word, severity, match_mode}]</code>.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
         <a href="#get_message/1" data-no-tooltip="" translate="no">get_message(id)</a>
 
       </div>
@@ -345,11 +375,81 @@ symmetrically).</li></ul><h2 id="module-pubsub-topics" class="section-heading"><
 
     <div class="summary-row">
       <div class="summary-signature">
+        <a href="#list_mutes/2" data-no-tooltip="" translate="no">list_mutes(filters \\ %{}, opts \\ [])</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>List mutes. Filters: <code class="inline">:user_id</code>, <code class="inline">:scope</code>, <code class="inline">:scope_ref_id</code>, <code class="inline">:active</code>.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#list_reports/2" data-no-tooltip="" translate="no">list_reports(filters \\ %{}, opts \\ [])</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>List reports. Filters: <code class="inline">:status</code>, <code class="inline">:reported_user_id</code>, <code class="inline">:reporter_id</code>.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
         <a href="#mark_read/4" data-no-tooltip="" translate="no">mark_read(user_id, chat_type, chat_ref_id, message_id)</a>
 
       </div>
 
         <div class="summary-synopsis"><p>Mark a chat conversation as read up to a given message id.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#mute_user/4" data-no-tooltip="" translate="no">mute_user(user_id, scope, scope_ref_id, attrs \\ %{})</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Mute <code class="inline">user_id</code> in <code class="inline">scope</code> (<code class="inline">&quot;global&quot;</code>, <code class="inline">&quot;lobby&quot;</code>, <code class="inline">&quot;group&quot;</code> or <code class="inline">&quot;party&quot;</code>).</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#muted?/3" data-no-tooltip="" translate="no">muted?(user_id, chat_type, chat_ref_id)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Whether <code class="inline">user_id</code> is currently muted for the given chat.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#report_message/3" data-no-tooltip="" translate="no">report_message(reporter_id, message_id, reason \\ nil)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>File a report about a message on behalf of <code class="inline">reporter_id</code>.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#resolve_report/3" data-no-tooltip="" translate="no">resolve_report(report, status, attrs \\ %{})</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Resolve a report: set its status, with an optional note and resolver.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#review_report/1" data-no-tooltip="" translate="no">review_report(report)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Claim a report for review, moving it from open to reviewing.</p></div>
 
     </div>
 
@@ -400,6 +500,16 @@ symmetrically).</li></ul><h2 id="module-pubsub-topics" class="section-heading"><
       </div>
 
         <div class="summary-synopsis"><p>Subscribe to chat events for a party.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#unmute_user/3" data-no-tooltip="" translate="no">unmute_user(user_id, scope, scope_ref_id \\ nil)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Lift a mute. Returns <code class="inline">{:ok, count}</code> — 0 when the user was not muted.</p></div>
 
     </div>
 
@@ -477,7 +587,7 @@ symmetrically).</li></ul><h2 id="module-pubsub-topics" class="section-heading"><
       <h1 class="signature" translate="no">admin_delete_message(id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L889" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L955" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -506,7 +616,7 @@ symmetrically).</li></ul><h2 id="module-pubsub-topics" class="section-heading"><
       <h1 class="signature" translate="no">authorize_access(user_id, chat_type, chat_ref_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L297" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L363" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -535,7 +645,7 @@ symmetrically).</li></ul><h2 id="module-pubsub-topics" class="section-heading"><
       <h1 class="signature" translate="no">cleanup_chat(chat_type, chat_ref_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L715" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L781" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -563,7 +673,7 @@ symmetrically).</li></ul><h2 id="module-pubsub-topics" class="section-heading"><
       <h1 class="signature" translate="no">cleanup_friend_chat(user_a_id, user_b_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L728" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L794" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -594,7 +704,7 @@ the other's id as chat_ref_id), so both directions must be cleaned up.</p>
       <h1 class="signature" translate="no">count_all_messages(filters \\ %{})</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L864" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L930" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -622,7 +732,7 @@ the other's id as chat_ref_id), so both directions must be cleaned up.</p>
       <h1 class="signature" translate="no">count_friend_messages(user_a_id, user_b_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L491" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L557" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -650,7 +760,7 @@ the other's id as chat_ref_id), so both directions must be cleaned up.</p>
       <h1 class="signature" translate="no">count_messages(chat_type, chat_ref_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L484" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L550" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -678,7 +788,7 @@ the other's id as chat_ref_id), so both directions must be cleaned up.</p>
       <h1 class="signature" translate="no">count_messages_by_type()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L881" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L947" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -696,6 +806,66 @@ the other's id as chat_ref_id), so both directions must be cleaned up.</p>
 <p>Count messages grouped by chat_type.</p><p>Returns a map like <code class="inline">%{&quot;lobby&quot; =&gt; 10, &quot;group&quot; =&gt; 5, &quot;friend&quot; =&gt; 3}</code>.</p>
   </section>
 </section>
+<section class="detail" id="count_mutes/1">
+
+    <span id="count_mutes/0"></span>
+
+  <div class="detail-header">
+    <a href="#count_mutes/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">count_mutes(filters \\ %{})</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L1043" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> count_mutes(<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()) :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>()</pre>
+
+      </div>
+
+<p>Count mutes matching <code class="inline">filters</code>.</p>
+  </section>
+</section>
+<section class="detail" id="count_reports/1">
+
+    <span id="count_reports/0"></span>
+
+  <div class="detail-header">
+    <a href="#count_reports/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">count_reports(filters \\ %{})</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L1056" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> count_reports(<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()) :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>()</pre>
+
+      </div>
+
+<p>Count reports matching <code class="inline">filters</code>.</p>
+  </section>
+</section>
 <section class="detail" id="count_unique_senders/0">
 
   <div class="detail-header">
@@ -706,7 +876,7 @@ the other's id as chat_ref_id), so both directions must be cleaned up.</p>
       <h1 class="signature" translate="no">count_unique_senders()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L870" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L936" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -734,7 +904,7 @@ the other's id as chat_ref_id), so both directions must be cleaned up.</p>
       <h1 class="signature" translate="no">count_unread(user_id, chat_type, chat_ref_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L590" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L656" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -763,7 +933,7 @@ in which case <a href="#count_messages/2"><code class="inline">count_messages/2<
       <h1 class="signature" translate="no">count_unread_friend(user_id, friend_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L613" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L679" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -791,7 +961,7 @@ in which case <a href="#count_messages/2"><code class="inline">count_messages/2<
       <h1 class="signature" translate="no">count_unread_friends_batch(user_id, friend_ids)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L643" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L709" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -822,7 +992,7 @@ at least one unread message.</p>
       <h1 class="signature" translate="no">count_unread_groups_batch(user_id, group_ids)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L670" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L736" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -852,7 +1022,7 @@ at least one unread message.</p>
       <h1 class="signature" translate="no">delete_messages(chat_type, chat_ref_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L693" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L759" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -880,7 +1050,7 @@ at least one unread message.</p>
       <h1 class="signature" translate="no">delete_own_message(user_id, message_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L814" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L880" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -910,7 +1080,7 @@ at least one unread message.</p>
       <h1 class="signature" translate="no">delete_read_cursors(chat_type, chat_ref_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L706" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L772" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -926,6 +1096,34 @@ at least one unread message.</p>
       </div>
 
 <p>Delete all read cursors for a given chat conversation.</p>
+  </section>
+</section>
+<section class="detail" id="filter_hits/1">
+
+  <div class="detail-header">
+    <a href="#filter_hits/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">filter_hits(content)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L1072" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> filter_hits(<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()) :: [{<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(), <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(), <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()}]</pre>
+
+      </div>
+
+<p>Every blocklist entry matching <code class="inline">content</code>, as <code class="inline">[{word, severity, match_mode}]</code>.</p>
   </section>
 </section>
 <section class="detail" id="get_message/1">
@@ -966,7 +1164,7 @@ at least one unread message.</p>
       <h1 class="signature" translate="no">get_read_cursor(user_id, chat_type, chat_ref_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L576" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L642" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -999,7 +1197,7 @@ at least one unread message.</p>
       <h1 class="signature" translate="no">list_all_messages(filters \\ %{}, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L848" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L914" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1032,7 +1230,7 @@ at least one unread message.</p>
       <h1 class="signature" translate="no">list_friend_messages(user_a_id, user_b_id, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L461" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L527" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1064,7 +1262,7 @@ at least one unread message.</p>
       <h1 class="signature" translate="no">list_messages(chat_type, chat_ref_id, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L425" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L491" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1083,6 +1281,76 @@ at least one unread message.</p>
 (newest first).</p>
   </section>
 </section>
+<section class="detail" id="list_mutes/2">
+
+    <span id="list_mutes/0"></span>
+
+    <span id="list_mutes/1"></span>
+
+  <div class="detail-header">
+    <a href="#list_mutes/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">list_mutes(filters \\ %{}, opts \\ [])</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L1039" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> list_mutes(
+  <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>(),
+  <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">keyword</a>()
+) :: [<a href="Gamend.Chat.Mute.html#t:t/0">Gamend.Chat.Mute.t</a>()]</pre>
+
+      </div>
+
+<p>List mutes. Filters: <code class="inline">:user_id</code>, <code class="inline">:scope</code>, <code class="inline">:scope_ref_id</code>, <code class="inline">:active</code>.</p>
+  </section>
+</section>
+<section class="detail" id="list_reports/2">
+
+    <span id="list_reports/0"></span>
+
+    <span id="list_reports/1"></span>
+
+  <div class="detail-header">
+    <a href="#list_reports/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">list_reports(filters \\ %{}, opts \\ [])</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L1052" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> list_reports(
+  <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>(),
+  <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">keyword</a>()
+) :: [<a href="Gamend.Chat.Report.html#t:t/0">Gamend.Chat.Report.t</a>()]</pre>
+
+      </div>
+
+<p>List reports. Filters: <code class="inline">:status</code>, <code class="inline">:reported_user_id</code>, <code class="inline">:reporter_id</code>.</p>
+  </section>
+</section>
 <section class="detail" id="mark_read/4">
 
   <div class="detail-header">
@@ -1093,7 +1361,7 @@ at least one unread message.</p>
       <h1 class="signature" translate="no">mark_read(user_id, chat_type, chat_ref_id, message_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L522" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L588" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1112,6 +1380,157 @@ at least one unread message.</p>
 <p>Mark a chat conversation as read up to a given message id.</p><p>Uses an upsert to create or update the read cursor.</p>
   </section>
 </section>
+<section class="detail" id="mute_user/4">
+
+    <span id="mute_user/3"></span>
+
+  <div class="detail-header">
+    <a href="#mute_user/4" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">mute_user(user_id, scope, scope_ref_id, attrs \\ %{})</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L1027" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> mute_user(<a href="https://hexdocs.pm/ecto/3.13.6/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>(), <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(), <a href="https://hexdocs.pm/ecto/3.13.6/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>() | nil, <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()) ::
+  {:ok, <a href="Gamend.Chat.Mute.html#t:t/0">Gamend.Chat.Mute.t</a>()} | {:error, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}</pre>
+
+      </div>
+
+<p>Mute <code class="inline">user_id</code> in <code class="inline">scope</code> (<code class="inline">&quot;global&quot;</code>, <code class="inline">&quot;lobby&quot;</code>, <code class="inline">&quot;group&quot;</code> or <code class="inline">&quot;party&quot;</code>).</p><p><code class="inline">scope_ref_id</code> is the room id, or <code class="inline">nil</code> for a global mute. <code class="inline">attrs</code> may carry
+<code class="inline">expires_at</code> (nil means permanent), <code class="inline">reason</code> and <code class="inline">muted_by</code>.</p>
+  </section>
+</section>
+<section class="detail" id="muted?/3">
+
+  <div class="detail-header">
+    <a href="#muted?/3" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">muted?(user_id, chat_type, chat_ref_id)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L1035" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> muted?(<a href="https://hexdocs.pm/ecto/3.13.6/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>(), <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(), <a href="https://hexdocs.pm/ecto/3.13.6/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>() | nil) :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()</pre>
+
+      </div>
+
+<p>Whether <code class="inline">user_id</code> is currently muted for the given chat.</p>
+  </section>
+</section>
+<section class="detail" id="report_message/3">
+
+    <span id="report_message/2"></span>
+
+  <div class="detail-header">
+    <a href="#report_message/3" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">report_message(reporter_id, message_id, reason \\ nil)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L1048" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> report_message(<a href="https://hexdocs.pm/ecto/3.13.6/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>(), <a href="https://hexdocs.pm/ecto/3.13.6/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>(), <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>() | nil) ::
+  {:ok, <a href="Gamend.Chat.Report.html#t:t/0">Gamend.Chat.Report.t</a>()} | {:error, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}</pre>
+
+      </div>
+
+<p>File a report about a message on behalf of <code class="inline">reporter_id</code>.</p>
+  </section>
+</section>
+<section class="detail" id="resolve_report/3">
+
+    <span id="resolve_report/2"></span>
+
+  <div class="detail-header">
+    <a href="#resolve_report/3" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">resolve_report(report, status, attrs \\ %{})</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L1066" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> resolve_report(<a href="Gamend.Chat.Report.html#t:t/0">Gamend.Chat.Report.t</a>() | <a href="https://hexdocs.pm/ecto/3.13.6/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>(), <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()) ::
+  {:ok, <a href="Gamend.Chat.Report.html#t:t/0">Gamend.Chat.Report.t</a>()} | {:error, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}</pre>
+
+      </div>
+
+<p>Resolve a report: set its status, with an optional note and resolver.</p>
+  </section>
+</section>
+<section class="detail" id="review_report/1">
+
+  <div class="detail-header">
+    <a href="#review_report/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">review_report(report)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L1061" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> review_report(<a href="Gamend.Chat.Report.html#t:t/0">Gamend.Chat.Report.t</a>() | <a href="https://hexdocs.pm/ecto/3.13.6/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) ::
+  {:ok, <a href="Gamend.Chat.Report.html#t:t/0">Gamend.Chat.Report.t</a>()} | {:error, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}</pre>
+
+      </div>
+
+<p>Claim a report for review, moving it from open to reviewing.</p>
+  </section>
+</section>
 <section class="detail" id="send_message/2">
 
   <div class="detail-header">
@@ -1122,7 +1541,7 @@ at least one unread message.</p>
       <h1 class="signature" translate="no">send_message(map, attrs)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L155" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L159" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1137,9 +1556,11 @@ at least one unread message.</p>
 
       </div>
 
-<p>Send a chat message.</p><h2 id="send_message/2-parameters" class="section-heading"><a href="#send_message/2-parameters" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Parameters</span></h2><ul><li><code class="inline">scope</code> — <code class="inline">%{user: %User{}}</code> (current_scope)</li><li><code class="inline">attrs</code> — map with <code class="inline">&quot;chat_type&quot;</code>, <code class="inline">&quot;chat_ref_id&quot;</code>, <code class="inline">&quot;content&quot;</code>, optional <code class="inline">&quot;metadata&quot;</code></li></ul><h2 id="send_message/2-returns" class="section-heading"><a href="#send_message/2-returns" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Returns</span></h2><ul><li><code class="inline">{:ok, %Message{}}</code> on success</li><li><code class="inline">{:error, reason}</code> on failure</li></ul><p>The <code class="inline">before_chat_message</code> hook is called before persistence and can modify
-attrs or reject the message. The <code class="inline">after_chat_message</code> hook fires asynchronously
-after the message is persisted.</p>
+<p>Send a chat message.</p><h2 id="send_message/2-parameters" class="section-heading"><a href="#send_message/2-parameters" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Parameters</span></h2><ul><li><code class="inline">scope</code> — <code class="inline">%{user: %User{}}</code> (current_scope)</li><li><code class="inline">attrs</code> — map with <code class="inline">&quot;chat_type&quot;</code>, <code class="inline">&quot;chat_ref_id&quot;</code>, <code class="inline">&quot;content&quot;</code>, optional <code class="inline">&quot;metadata&quot;</code></li></ul><h2 id="send_message/2-returns" class="section-heading"><a href="#send_message/2-returns" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Returns</span></h2><ul><li><code class="inline">{:ok, %Message{}}</code> on success</li><li><code class="inline">{:error, reason}</code> on failure</li></ul><p>Moderation runs before the <code class="inline">before_chat_message</code> hook: a muted sender is
+rejected with <code class="inline">{:error, :muted}</code> and a blocked word with
+<code class="inline">{:error, :blocked_content}</code>, so a plugin never sees a message core already
+refused. The hook can then modify attrs or reject the message itself. The
+<code class="inline">after_chat_message</code> hook fires asynchronously after the message is persisted.</p>
   </section>
 </section>
 <section class="detail" id="subscribe_friend_chat/2">
@@ -1152,7 +1573,7 @@ after the message is persisted.</p>
       <h1 class="signature" translate="no">subscribe_friend_chat(user_a_id, user_b_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L87" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L89" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1180,7 +1601,7 @@ after the message is persisted.</p>
       <h1 class="signature" translate="no">subscribe_group_chat(group_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L77" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L79" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1208,7 +1629,7 @@ after the message is persisted.</p>
       <h1 class="signature" translate="no">subscribe_lobby_chat(lobby_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L67" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L69" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1236,7 +1657,7 @@ after the message is persisted.</p>
       <h1 class="signature" translate="no">subscribe_party_chat(party_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L101" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L103" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1254,6 +1675,37 @@ after the message is persisted.</p>
 <p>Subscribe to chat events for a party.</p>
   </section>
 </section>
+<section class="detail" id="unmute_user/3">
+
+    <span id="unmute_user/2"></span>
+
+  <div class="detail-header">
+    <a href="#unmute_user/3" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">unmute_user(user_id, scope, scope_ref_id \\ nil)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L1031" class="icon-action" rel="help" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> unmute_user(<a href="https://hexdocs.pm/ecto/3.13.6/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>(), <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(), <a href="https://hexdocs.pm/ecto/3.13.6/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>() | nil) ::
+  {:ok, <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>()}</pre>
+
+      </div>
+
+<p>Lift a mute. Returns <code class="inline">{:ok, count}</code> — 0 when the user was not muted.</p>
+  </section>
+</section>
 <section class="detail" id="unsubscribe_friend_chat/2">
 
   <div class="detail-header">
@@ -1264,7 +1716,7 @@ after the message is persisted.</p>
       <h1 class="signature" translate="no">unsubscribe_friend_chat(user_a_id, user_b_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L94" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L96" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1292,7 +1744,7 @@ after the message is persisted.</p>
       <h1 class="signature" translate="no">unsubscribe_group_chat(group_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L82" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L84" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1320,7 +1772,7 @@ after the message is persisted.</p>
       <h1 class="signature" translate="no">unsubscribe_lobby_chat(lobby_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L72" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L74" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1348,7 +1800,7 @@ after the message is persisted.</p>
       <h1 class="signature" translate="no">unsubscribe_party_chat(party_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L106" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L108" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1376,7 +1828,7 @@ after the message is persisted.</p>
       <h1 class="signature" translate="no">update_message(user_id, message_id, attrs)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L774" class="icon-action" rel="help" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat.ex#L840" class="icon-action" rel="help" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1406,9 +1858,9 @@ after the message is persisted.</p>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1100">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1101">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1100">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1101">Hex Preview</a>
 
             </span>
 
