@@ -1,6 +1,9 @@
 defmodule GamendWeb.GroupsLive do
   use GamendWeb, :live_view
 
+  import GamendWeb.PresenceIndicator, only: [presence_dot: 1]
+
+  alias Gamend.Accounts.PresenceStatus
   alias Gamend.Accounts.Scope
   alias Gamend.Accounts.User
   alias Gamend.Groups
@@ -629,6 +632,7 @@ defmodule GamendWeb.GroupsLive do
                 <td>
                   <div class="flex items-center gap-2">
                     <.user_avatar user={member.user} class="w-8 h-8" />
+                    <.presence_dot status={PresenceStatus.status(member.user)} />
                     <span>
                       {LiveHelpers.public_user_name(member.user)}
                     </span>

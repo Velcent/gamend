@@ -2638,6 +2638,11 @@ defmodule Gamend.Accounts do
           {:ok, updated} = ok ->
             invalidate_user_cache(updated)
             broadcast_member_update(updated)
+            # member_update only reaches the user's lobby and party channels.
+            # A friends list, chat sidebar or group roster is neither, so the
+            # presence dot there never moved until a full reload; user:<id>
+            # is the topic those surfaces can subscribe to per friend.
+            broadcast_user_update(updated)
 
             Gamend.Async.run(fn ->
               Gamend.Hooks.internal_call(:after_user_online, [updated])
@@ -2677,6 +2682,11 @@ defmodule Gamend.Accounts do
           {:ok, updated} = ok ->
             invalidate_user_cache(updated)
             broadcast_member_update(updated)
+            # member_update only reaches the user's lobby and party channels.
+            # A friends list, chat sidebar or group roster is neither, so the
+            # presence dot there never moved until a full reload; user:<id>
+            # is the topic those surfaces can subscribe to per friend.
+            broadcast_user_update(updated)
 
             Gamend.Async.run(fn ->
               Gamend.Hooks.internal_call(:after_user_offline, [updated])

@@ -1,7 +1,10 @@
 defmodule GamendWeb.ChatLive do
   use GamendWeb, :live_view
 
+  import GamendWeb.PresenceIndicator, only: [presence_dot: 1]
+
   alias Gamend.Accounts
+  alias Gamend.Accounts.PresenceStatus
   alias Gamend.Accounts.Scope
   alias Gamend.Chat
   alias Gamend.Friends
@@ -27,6 +30,9 @@ defmodule GamendWeb.ChatLive do
     # Subscribe to all chat topics so we can track incoming messages
     if connected?(socket) do
       for fid <- friend_ids, do: Chat.subscribe_friend_chat(user.id, fid)
+      # Presence: Accounts broadcasts on user:<id> when someone goes online or
+      # offline, so the dots move without a reload.
+      for fid <- friend_ids, do: Phoenix.PubSub.subscribe(Gamend.PubSub, "user:#{fid}")
       for gid <- group_ids, do: Chat.subscribe_group_chat(gid)
     end
 
@@ -149,6 +155,7 @@ defmodule GamendWeb.ChatLive do
                 ]}
               >
                 <.user_avatar user={f} class="w-6 h-6 shrink-0" />
+                <.presence_dot status={PresenceStatus.status(f)} />
                 <span class="truncate flex-1">{LiveHelpers.public_user_name(f)}</span>
                 <%= if (count = Map.get(@friend_unread, f.id, 0)) > 0 do %>
                   <span class="badge badge-sm badge-info">{count}</span>
@@ -504,7 +511,37 @@ defmodule GamendWeb.ChatLive do
   end
 
   @impl true
+  # A friend's profile or presence changed. Only the presence fields matter to
+  # this view, and swapping in place keeps the sidebar from reordering under the
+  # pointer while someone is reading it.
+  def handle_info(%Phoenix.Socket.Broadcast{event: "updated", payload: payload}, socket) do
+    id = Map.get(payload, :id, Map.get(payload, "id"))
+
+    friends =
+      Enum.map(socket.assigns.friends, fn f ->
+        if f.id == id do
+          %{
+            f
+            | is_online: Map.get(payload, :is_online, Map.get(payload, "is_online", f.is_online)),
+              last_seen_at: parse_last_seen(payload) || f.last_seen_at
+          }
+        else
+          f
+        end
+      end)
+
+    {:noreply, assign(socket, :friends, friends)}
+  end
+
   def handle_info(_msg, socket), do: {:noreply, socket}
+
+  defp parse_last_seen(payload) do
+    case Map.get(payload, :last_seen_at, Map.get(payload, "last_seen_at")) do
+      %DateTime{} = dt -> dt
+      value when is_binary(value) -> with {:ok, dt, _} <- DateTime.from_iso8601(value), do: dt
+      _ -> nil
+    end
+  end
 
   # ---------------------------------------------------------------------------
   # Private helpers

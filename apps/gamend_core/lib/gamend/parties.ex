@@ -45,6 +45,7 @@ defmodule Gamend.Parties do
   require Logger
 
   alias Gamend.Accounts
+  alias Gamend.Accounts.PresenceStatus
   alias Gamend.Accounts.User
   alias Gamend.Friends
   alias Gamend.Groups
@@ -993,33 +994,18 @@ defmodule Gamend.Parties do
     end
   end
 
-  # A member is considered "recently active" if they are online or were last
-  # seen within the grace period (default 5 minutes). This avoids false
-  # negatives caused by brief disconnects or heartbeat delays.
-  @online_grace_seconds 300
-
+  # "Recently active" means online, or last seen inside the grace window — this
+  # avoids false negatives from brief disconnects and heartbeat delays. The
+  # window and the rule live in Accounts.PresenceStatus so this check and the
+  # three-state one the UI draws cannot drift apart; they used to be separate
+  # copies that merely happened to agree on 300 seconds.
   defp check_all_members_online(members) do
-    cutoff = DateTime.add(DateTime.utc_now(), -@online_grace_seconds, :second)
-
-    offline =
-      Enum.filter(members, fn m ->
-        not member_recently_active?(m, cutoff)
-      end)
-
-    if offline == [] do
+    if Enum.all?(members, &PresenceStatus.active?/1) do
       :ok
     else
       {:error, :members_offline}
     end
   end
-
-  defp member_recently_active?(%User{is_online: true}, _cutoff), do: true
-
-  defp member_recently_active?(%User{last_seen_at: %DateTime{} = last_seen}, cutoff) do
-    DateTime.compare(last_seen, cutoff) != :lt
-  end
-
-  defp member_recently_active?(_user, _cutoff), do: false
 
   defp check_not_self_kick(%User{id: id}, id), do: {:error, :cannot_kick_self}
   defp check_not_self_kick(%User{}, _target_id), do: :ok
