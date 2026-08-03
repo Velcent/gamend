@@ -263,6 +263,48 @@ defmodule GamendWeb.Api.V1.HookControllerTest do
     assert %{"data" => %{"greeting" => "Hello, http"}} = json_response(conn, 200)
   end
 
+  describe "rejected calls are logged" do
+    # A 400 the client only ever sees as "denied with a 400" has to name the
+    # hook server-side, or a version skew between client and deployed plugin is
+    # invisible on both ends.
+    test "not_implemented names the hook and why", %{conn: conn} do
+      body = %{"plugin" => "no_such_plugin", "fn" => "no_such_fn", "args" => [1, 2, 3]}
+
+      log =
+        ExUnit.CaptureLog.capture_log(fn ->
+          conn = post(conn, "/api/v1/hooks/call", body)
+          assert json_response(conn, 400)
+        end)
+
+      assert log =~ "hooks/call rejected:"
+      assert log =~ "no_such_plugin.no_such_fn/3"
+    end
+
+    test "a malformed request is logged too", %{conn: conn} do
+      log =
+        ExUnit.CaptureLog.capture_log(fn ->
+          conn = post(conn, "/api/v1/hooks/call", %{"fn" => "missing_plugin_key"})
+          assert %{"error" => "invalid_request"} = json_response(conn, 400)
+        end)
+
+      assert log =~ "invalid_request"
+    end
+
+    test "argument values never reach the log", %{conn: conn} do
+      secret = "tok_#{System.unique_integer([:positive])}_shhh"
+      body = %{"plugin" => "no_such_plugin", "fn" => "no_such_fn", "args" => [secret]}
+
+      log =
+        ExUnit.CaptureLog.capture_log(fn ->
+          conn = post(conn, "/api/v1/hooks/call", body)
+          assert json_response(conn, 400)
+        end)
+
+      assert log =~ "no_such_plugin.no_such_fn/1"
+      refute log =~ secret
+    end
+  end
+
   defp restore_env(key, :unset), do: Application.delete_env(:gamend_web, key)
   defp restore_env(key, value), do: Application.put_env(:gamend_web, key, value)
   defp restore_core_env(key, :unset), do: Application.delete_env(:gamend_core, key)

@@ -141,16 +141,23 @@ defmodule GamendWeb.Api.V1.HookController do
         _ -> true
       end
 
+    hook = hook_label(plugin, fn_name, length(args))
+
     cond do
       args_too_many ->
+        log_rejected(hook, "too_many_args (#{length(args)} > #{max_count})")
         conn |> put_status(:bad_request) |> json(%{error: :too_many_args, max: max_count})
 
       args_too_large ->
+        log_rejected(hook, "args_too_large (> #{max_size} bytes)")
+
         conn
         |> put_status(:request_entity_too_large)
         |> json(%{error: :args_too_large, max_bytes: max_size})
 
       reserved_hook_name?(fn_name) ->
+        log_rejected(hook, "reserved_hook_name")
+
         conn
         |> put_status(:bad_request)
         |> json(%{error: :reserved_hook_name})
@@ -161,39 +168,57 @@ defmodule GamendWeb.Api.V1.HookController do
         # hooks pass through unchanged.
         reply_to_hook_call(
           conn,
-          HookSchemas.call(plugin, fn_name, {:list, args}, :map, caller: user)
+          HookSchemas.call(plugin, fn_name, {:list, args}, :map, caller: user),
+          hook
         )
     end
   end
 
   def invoke(conn, _params) do
+    log_rejected("(unparseable)", "invalid_request — missing or non-string plugin/fn")
     conn |> put_status(:bad_request) |> json(%{error: :invalid_request})
   end
 
-  defp reply_to_hook_call(conn, result) do
+  defp reply_to_hook_call(conn, result, hook) do
     case result do
       {:ok, res} ->
         json(conn, %{data: res})
 
       {:error, :not_implemented} ->
+        # Almost always a version skew: the client calls a hook the deployed
+        # plugin build does not export yet. Silent here, this cost an afternoon.
+        log_rejected(hook, "not_implemented — plugin exports no such function/arity")
         conn |> put_status(:bad_request) |> json(%{error: :not_implemented})
 
       {:error, :not_found} ->
+        log_rejected(hook, "plugin_not_found")
         conn |> put_status(:bad_request) |> json(%{error: :plugin_not_found})
 
       {:error, :missing_hooks_module} ->
+        log_rejected(hook, "missing_hooks_module")
         conn |> put_status(:bad_request) |> json(%{error: :missing_hooks_module})
 
       {:error, :timeout} ->
+        log_rejected(hook, "timeout")
         conn |> put_status(:bad_request) |> json(%{error: :timeout})
 
       {:error, reason} ->
-        Logger.warning("hooks/call failed: #{inspect(reason)}")
+        log_rejected(hook, inspect(reason))
 
         conn
         |> put_status(:bad_request)
         |> json(normalize_hook_error(reason))
     end
+  end
+
+  defp hook_label(plugin, fn_name, arity), do: "#{plugin}.#{fn_name}/#{arity}"
+
+  # Every rejected hook call says which hook and why. Deliberately no argument
+  # values: they carry user data, and the hook plus arity is what identifies the
+  # problem. The client only ever sees "denied with a 400", so without this line
+  # a rejection is invisible on both ends.
+  defp log_rejected(hook, reason) do
+    Logger.warning("hooks/call rejected: #{hook} — #{reason}")
   end
 
   defp reserved_hook_name?(fn_name) when is_binary(fn_name) do
