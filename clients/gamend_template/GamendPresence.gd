@@ -1,20 +1,20 @@
-class_name GamendRoster
+class_name GamendPresence
 extends Node
 ## Who is around: merged user profiles, lobbies, and presence — maintained
 ## automatically from the realtime events GamendApi emits. Games read instead
-## of bookkeeping: wire the client and `client.roster.users` fills itself as
+## of bookkeeping: wire the client and `client.presence.users` fills itself as
 ## people log in, join lobbies, change hats, go online and offline.
 ##
 ## Updates arrive as partial patches (sometimes wrapped in "u", metadata as
-## sparse sections); the roster merges them so a profile only ever grows more
-## complete. Owned by GamendClient (client.roster).
+## sparse sections); they are merged so a profile only ever grows more
+## complete. Owned by GamendClient (client.presence).
 
 ## A user's merged profile changed (any source: push, member event, cache_user).
 signal user_changed(user_id: String)
 ## A lobby was created/updated or its state flipped.
 signal lobby_changed(lobby: Dictionary)
 
-## user_id -> merged profile. Read freely; treat as owned by the roster.
+## user_id -> merged profile. Read freely; treat as owned by the presence.
 var users: Dictionary[String, Dictionary] = {}
 ## lobby_id -> lobby (with members folded in when the server sent them).
 var lobbies: Dictionary[String, Dictionary] = {}

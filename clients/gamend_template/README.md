@@ -7,7 +7,7 @@ Talk to a Gamend server from Godot. Three layers:
 | `GamendApi` | Generated REST/WebSocket bindings (one method per endpoint) + realtime socket. You rarely call it directly. |
 | `GamendClient` | The facade you actually use: live KV subscriptions, caching, hook RPCs, session snapshots, reconnect watchdog. |
 | `client.auth` (`GamendAuth`) | Login flows: session restore, device, browser OAuth, Apple native, Discord embedded. |
-| `client.roster` (`GamendRoster`) | Who is around: users, lobbies, presence — self-maintained from realtime events. |
+| `client.presence` (`GamendPresence`) | Who is around: merged user profiles, lobbies, online/last-seen — self-maintained from realtime events. |
 
 Hand-written files (`GamendClient.gd`, `GamendAuth.gd`, `GamendWebSocket.gd`, …) are maintained in `clients/gamend_template/`; `apis/`, `core/`, `models/` are generated. See the Quickstart comment at the top of `GamendClient.gd` for a complete start-to-finish example.
 
@@ -79,7 +79,7 @@ States: `connected → reconnecting → connected | failed`; `failed` exits only
 
 Also: `fail_network(kind, message)` / `start_network_reconnect(message)` to drive the state from game code, `is_network_failed()` / `is_network_reconnecting()`.
 
-### Roster (client.roster — who is around)
+### Presence (client.presence — who is around)
 
 Fills itself from realtime events; games read instead of bookkeeping.
 

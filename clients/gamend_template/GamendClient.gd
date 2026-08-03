@@ -41,7 +41,7 @@ extends Node
 ##   client.kv_row_changed.connect(func(key, row): print(key, " -> ", row))
 ##
 ##   # Who is around — fills itself from realtime events, just read it:
-##   client.roster.user_changed.connect(func(id): print(client.roster.get_user(id)))
+##   client.presence.user_changed.connect(func(id): print(client.presence.get_user(id)))
 ##
 ##   # Reconnect handling with default policies; map the signals to your UI.
 ##   client.enable_network_watch()
@@ -124,8 +124,8 @@ var _watch_hooks: Dictionary = {}
 ## Authentication flows (client.auth.provider_auth(...) etc.); built in setup().
 var auth: GamendAuth
 ## Who is around — users/lobbies/presence, self-maintained from realtime
-## events (client.roster.users etc.); built in setup().
-var roster: GamendRoster
+## events (client.presence.users etc.); built in setup().
+var presence: GamendPresence
 
 
 func setup(api: GamendApi, user_id_provider: Callable) -> void:
@@ -135,10 +135,10 @@ func setup(api: GamendApi, user_id_provider: Callable) -> void:
 	auth.name = "GamendAuth"
 	add_child(auth)
 	auth.setup(api)
-	roster = GamendRoster.new()
-	roster.name = "GamendRoster"
-	add_child(roster)
-	roster.setup(api)
+	presence = GamendPresence.new()
+	presence.name = "GamendPresence"
+	add_child(presence)
+	presence.setup(api)
 	_api.user_channel_joined.connect(_on_channel_joined)
 	_api.user_channel_disconnected.connect(_on_channel_disconnected)
 	_api.kv_updated.connect(_on_kv_push)
