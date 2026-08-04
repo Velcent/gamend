@@ -25,8 +25,9 @@ Held in server-owned `lobbies.webrtc_*` columns, written only by
 `configure/2`. It lived in `metadata` once, which was wrong twice over: that
 map is replaced wholesale by any writer, so a game storing match state wiped
 it, and the lobby host can `PATCH` it, so a player could flip the topology and
-hand everyone the right to broadcast. The star host is always
-`lobby.host_id` and is not settable.
+hand everyone the right to broadcast. The star host defaults to
+`lobby.host_id`; `configure/2` can pin a different one, which is how a
+headless server process hosts a lobby it is not a member of.
 
 ## Topology
 
@@ -129,11 +130,14 @@ on it — deliberately indistinguishable to a caller.
 Turns signaling on or off for a lobby, and sets how it behaves.
 
 The only writer of the `webrtc_*` columns. Options: `:enabled`, `:topology`
-(`:star` | `:mesh`), `:late_join`, `:reconnect_timeout`.
+(`:star` | `:mesh`), `:host_id`, `:late_join`, `:reconnect_timeout`.
 
 Deliberately not part of the lobby changeset — a client `PATCH` must not be
-able to reach any of it. The star host is not settable at all; it is always
-the lobby host.
+able to reach any of it. That matters most for `:host_id`: pinning the star
+host grants that user the `:host` role on join, membership or not, so it is
+checked against `users` here and returns `{:error, :host_not_found}` rather
+than reaching the database constraint (SQLite reports no constraint name, so
+a bad id would raise instead of erroring).
 
 # `enabled?`
 
