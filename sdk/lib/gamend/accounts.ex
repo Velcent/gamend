@@ -727,6 +727,28 @@ defmodule Gamend.Accounts do
 
 
   @doc ~S"""
+    How to name a user in text a PLAYER reads: `"Ana (drift-2378)"`, or just the
+    username when there is no display name. Mirrors the client's
+    `UserDisplayUtil.name_with_username`, so a notification and the friends list
+    it sends you to name the same person the same way.
+    
+    Never falls back to the id. Every account has a server-assigned username, and
+    `"User #0198f7be-…"` reads like a name while telling the reader nothing.
+    
+  """
+  @spec display_label(Gamend.Accounts.User.t() | Ecto.UUID.t() | nil) :: String.t()
+  def display_label(_user) do
+    case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        ""
+
+      _ ->
+        raise "Gamend.Accounts.display_label/1 is a stub - only available at runtime on Gamend"
+    end
+  end
+
+
+  @doc ~S"""
     Finds a user by Apple ID or creates a new user from OAuth data.
     
     ## Examples

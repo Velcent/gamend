@@ -76,6 +76,31 @@ defmodule Gamend.SignalingTest do
 
       assert {:ok, %{late_join: false}} = Signaling.config(closed.id)
     end
+
+    test "a pinned host_id overrides the lobby host", %{lobby: lobby, peer: peer} do
+      {:ok, lobby} = Signaling.configure(lobby, topology: :star, host_id: peer.id)
+
+      assert {:ok, %{host_user_id: host_user_id}} = Signaling.config(lobby.id)
+      assert host_user_id == peer.id
+      assert {:ok, :host} = Signaling.authorize(lobby.id, peer.id)
+    end
+
+    test "clearing host_id falls back to the lobby host", %{lobby: lobby, host: host, peer: peer} do
+      {:ok, lobby} = Signaling.configure(lobby, host_id: peer.id)
+      {:ok, lobby} = Signaling.configure(lobby, host_id: nil)
+
+      assert {:ok, %{host_user_id: host_user_id}} = Signaling.config(lobby.id)
+      assert host_user_id == host.id
+    end
+
+    # SQLite reports no constraint name, so a foreign_key_constraint would raise
+    # instead of erroring. The id is checked before the write for that reason.
+    test "an unknown host_id is refused, not raised", %{lobby: lobby} do
+      assert {:error, :host_not_found} = Signaling.configure(lobby, host_id: "host_user_id")
+      assert {:error, :host_not_found} = Signaling.configure(lobby, host_id: Ecto.UUID.generate())
+
+      assert Lobbies.get_lobby(lobby.id).webrtc_host_id == nil
+    end
   end
 
   describe "authorize/2" do

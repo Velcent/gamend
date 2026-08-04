@@ -24,8 +24,9 @@ defmodule Gamend.Signaling do
   `configure/2`. It lived in `metadata` once, which was wrong twice over: that
   map is replaced wholesale by any writer, so a game storing match state wiped
   it, and the lobby host can `PATCH` it, so a player could flip the topology and
-  hand everyone the right to broadcast. The star host is always
-  `lobby.host_id` and is not settable.
+  hand everyone the right to broadcast. The star host defaults to
+  `lobby.host_id`; `configure/2` can pin a different one, which is how a
+  headless server process hosts a lobby it is not a member of.
 
   ## Topology
 
@@ -36,6 +37,7 @@ defmodule Gamend.Signaling do
 
   require Logger
 
+  alias Gamend.Accounts
   alias Gamend.Lobbies
   alias Gamend.Presence
 
@@ -91,11 +93,14 @@ defmodule Gamend.Signaling do
   Turns signaling on or off for a lobby, and sets how it behaves.
 
   The only writer of the `webrtc_*` columns. Options: `:enabled`, `:topology`
-  (`:star` | `:mesh`), `:late_join`, `:reconnect_timeout`.
+  (`:star` | `:mesh`), `:host_id`, `:late_join`, `:reconnect_timeout`.
 
   Deliberately not part of the lobby changeset — a client `PATCH` must not be
-  able to reach any of it. The star host is not settable at all; it is always
-  the lobby host.
+  able to reach any of it. That matters most for `:host_id`: pinning the star
+  host grants that user the `:host` role on join, membership or not, so it is
+  checked against `users` here and returns `{:error, :host_not_found}` rather
+  than reaching the database constraint (SQLite reports no constraint name, so
+  a bad id would raise instead of erroring).
   """
   @spec configure(Lobbies.Lobby.t() | room_id(), keyword()) ::
           {:ok, Lobbies.Lobby.t()} | {:error, term()}
@@ -107,15 +112,33 @@ defmodule Gamend.Signaling do
   end
 
   def configure(lobby, opts) do
-    changes =
-      %{}
-      |> put_opt(opts, :enabled, :webrtc_enabled)
-      |> put_opt(opts, :host_id, :webrtc_host_id)
-      |> put_opt(opts, :late_join, :webrtc_late_join)
-      |> put_opt(opts, :reconnect_timeout, :webrtc_reconnect_timeout_ms)
-      |> put_topology(opts)
+    with :ok <- validate_host_id(opts) do
+      changes =
+        %{}
+        |> put_opt(opts, :enabled, :webrtc_enabled)
+        |> put_opt(opts, :host_id, :webrtc_host_id)
+        |> put_opt(opts, :late_join, :webrtc_late_join)
+        |> put_opt(opts, :reconnect_timeout, :webrtc_reconnect_timeout_ms)
+        |> put_topology(opts)
 
-    Lobbies.write_webrtc_config(lobby, changes)
+      Lobbies.write_webrtc_config(lobby, changes)
+    end
+  end
+
+  defp validate_host_id(opts) do
+    case Keyword.fetch(opts, :host_id) do
+      {:ok, nil} ->
+        :ok
+
+      {:ok, id} when is_binary(id) ->
+        if Accounts.get_user(id), do: :ok, else: {:error, :host_not_found}
+
+      {:ok, _other} ->
+        {:error, :host_not_found}
+
+      :error ->
+        :ok
+    end
   end
 
   defp put_opt(changes, opts, key, field) do

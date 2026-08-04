@@ -1,3 +1,16 @@
+# August 2026
+
+- [added] **Godot peer-to-peer signaling SDK** — `GamendSignalingClient` drives
+  mesh or star WebRTC rooms over the `signaling:<lobby_id>` channel;
+  `GamendWebRTCPeer` is the shared PeerConnection wrapper.
+- [added] **Pinned WebRTC star host** — `Signaling.configure(lobby, host_id:)`
+  and the `lobbies.webrtc_host_id` column let a headless server host a lobby it
+  is not a member of. Unset falls back to `lobby.host_id`.
+- [fixed] **Signaling presence events reached no one.** Presence diffs are
+  broadcast on the channel's own topic, so they land in `handle_out/3`; the
+  channel translated them in `handle_info/2`, which never ran. `user_joined` /
+  `user_left` now actually fire, exactly once each.
+
 # July 2026
 
 - [breaking] **Renamed to Gamend.**

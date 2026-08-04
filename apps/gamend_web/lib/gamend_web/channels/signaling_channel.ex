@@ -13,7 +13,8 @@ defmodule GamendWeb.SignalingChannel do
   On join the authenticated `user_id` is used directly as the user identity, and
   `Signaling.authorize/2` decides both whether the join is allowed and which
   role it gets — `:host` or `:user`. Clients cannot ask for a role. In a `:star`
-  room the host is always `lobby.host_id`; a `:mesh` room has no host.
+  room the host is `lobby.webrtc_host_id`, or `lobby.host_id` when that is
+  unset; a `:mesh` room has no host.
 
   If the same user_id reconnects within the configured grace period, the
   existing user is preserved and a `user_rejoined` event is broadcast.
@@ -269,7 +270,9 @@ defmodule GamendWeb.SignalingChannel do
   # Tracking happens after join so `Presence.track/3` sees a joined channel.
   # Subscribing to our own inbox is what makes relays work across nodes: the
   # sender broadcasts to `signaling:<room>:<user>` and whichever node holds
-  # that socket delivers it.
+  # that socket delivers it. The room topic is not subscribed to here —
+  # `Phoenix.Channel` already did that on join, and a second subscription
+  # delivers every broadcast twice.
   @impl true
   def handle_info(:after_signaling_join, socket) do
     %{signaling_room: room, signaling_user_id: user_id, signaling_role: role} = socket.assigns
@@ -281,7 +284,6 @@ defmodule GamendWeb.SignalingChannel do
       })
 
     Phoenix.PubSub.subscribe(Gamend.PubSub, Signaling.inbox(room, user_id))
-    Phoenix.PubSub.subscribe(Gamend.PubSub, Signaling.topic(room))
 
     # Seed the newcomer with everyone already here so it can start connecting.
     for {other_id, other_role} <- Signaling.peers(room), other_id != user_id do

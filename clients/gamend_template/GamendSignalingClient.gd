@@ -19,7 +19,7 @@
 ##   var signaling_channel = realtime.add_channel("signaling:lobby_1")
 ##   # wait for channel join...
 ##
-##   var p2p = GamendSignalingClient.new(signaling_channel)
+##   var p2p = GamendSignalingClient.new(signaling_channel, {"user_id": my_user_id})
 ##   p2p.peer_joined.connect(func(user_id, _role): p2p.connect_to_peer(user_id))
 ##   p2p.peer_connected.connect(_on_peer_connected)
 ##   p2p.data_received.connect(_on_data_received)
@@ -94,6 +94,17 @@ func _init(channel: PhoenixChannel, opts: Dictionary = {}) -> void:
 func _ready() -> void:
 	# Listen for signaling events relayed by the server via the Phoenix channel
 	_channel.on_event.connect(_on_channel_event)
+	# The join reply ({user_id, role}) arrives on its own signal, never through
+	# on_event. It fires again on every rejoin, so this also refreshes the role.
+	_channel.on_join_result.connect(_on_join_result)
+
+	if _my_user_id.is_empty() and _channel.is_joined():
+		# Attached after the join reply was already delivered: nothing will tell
+		# us who we are, and glare resolution needs it (see _receive_offer).
+		push_warning(
+			"GamendSignalingClient: channel already joined and no opts.user_id given; "
+			+ "pass user_id so simultaneous offers can be resolved"
+		)
 
 
 ## Returns the authenticated user_id of this node (empty until joined).
@@ -208,12 +219,12 @@ func _create_peer(user_id: String) -> GamendWebRTCPeer:
 ## by the initiator arrive via data_channel_received.
 func _receive_offer(from_user_id: String, sdp: String) -> void:
 	if _peers.has(from_user_id):
-		# Exact duplicate offer (same SDP): ignore. Presence can broadcast
-		# the same join multiple times before the peer list stabilizes.
+		# Exact duplicate offer (same SDP): ignore. A rejoin re-runs the
+		# handshake, and the remote may retransmit before ours arrives.
 		if sdp == _last_remote_sdp.get(from_user_id, ""):
 			_log("Duplicate offer from peer %s ignored" % from_user_id)
 			return
-		
+
 		var existing: GamendWebRTCPeer = _peers[from_user_id]
 		if existing.is_connected_webrtc():
 			# Fresh offer over an established link: the remote likely
@@ -287,20 +298,25 @@ func _drop_peer(user_id: String) -> void:
 		peer_disconnected.emit(user_id)
 
 
+## Join reply from the SignalingChannel: {user_id, role}. `status` is "ok",
+## "error" or "timeout"; only an "ok" reply carries an identity.
+func _on_join_result(status, payload) -> void:
+	if str(status) != "ok" or not payload is Dictionary:
+		return
+
+	# Only overwrite the opts fallback if the reply carries a value.
+	var joined_id: String = payload.get("user_id", "")
+	if not joined_id.is_empty():
+		_my_user_id = joined_id
+	_my_role = payload.get("role", "")
+	_log("Joined signaling room as user_id=%s role=%s" % [_my_user_id, _my_role])
+
+
 ## Handle signaling events relayed by the server via the Phoenix channel.
 # PhoenixChannel.on_event emits (event, payload, status) — connecting a
 # 4-arg handler to it errors at emit time.
 func _on_channel_event(event: String, payload: Dictionary, _status) -> void:
 	match event:
-		"phx_join":
-			# Join reply from the SignalingChannel: {user_id, role}.
-			# Only overwrite the opts fallback if the reply carries a value.
-			var joined_id: String = payload.get("user_id", "")
-			if not joined_id.is_empty():
-				_my_user_id = joined_id
-			_my_role = payload.get("role", "")
-			_log("Joined signaling room as user_id=%s role=%s" % [_my_user_id, _my_role])
-
 		"user_joined":
 			var user_id: String = payload.get("user_id", "")
 			if user_id.is_empty() or user_id == _my_user_id:
@@ -385,7 +401,7 @@ func _on_ice_candidate_created(mid: String, index: int, candidate: String, user_
 	if not _peers.has(user_id):
 		_log("Peer %s gone, dropping candidate" % user_id)
 		return
-	
+
 	var peer: GamendWebRTCPeer = _peers[user_id]
 	_channel.push("ice", {
 		"target": user_id,
@@ -439,3 +455,5 @@ func _exit_tree() -> void:
 	close_all()
 	if _channel and _channel.on_event.is_connected(_on_channel_event):
 		_channel.on_event.disconnect(_on_channel_event)
+	if _channel and _channel.on_join_result.is_connected(_on_join_result):
+		_channel.on_join_result.disconnect(_on_join_result)

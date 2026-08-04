@@ -202,7 +202,9 @@ func poll() -> void:
 		failed.emit()
 		close()
 		return
-	elif state == WebRTCPeerConnection.STATE_CLOSED and _is_connected:
+	elif state == WebRTCPeerConnection.STATE_CLOSED:
+		# Also emitted for a negotiation that closed before it ever connected —
+		# otherwise the owner never drops the peer and it leaks.
 		# Emitted before close() so listeners still see is_connected_webrtc().
 		closed.emit()
 		close()

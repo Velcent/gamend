@@ -13,7 +13,7 @@ either, both, or neither.
 | The server is | A WebRTC peer terminating DataChannels | An SDP/ICE relay; no media path |
 | Room identity | The user (`user:<id>` channel) | A **lobby** (`signaling:<lobby_id>` channel) |
 | Use it for | Low-latency hook RPC and state to an authoritative server | Player-hosted matches, voice, direct state exchange |
-| Client SDK | `GameWebRTC` (JS) / `GamendWebRTC` (Godot) | None yet — join the channel directly |
+| Client SDK | `GameWebRTC` (JS) / `GamendWebRTC` (Godot) | `GamendSignalingClient` (Godot); JS joins the channel directly |
 | Rust toolchain | Required (`ex_sctp` NIF), locally and in Docker/CI | Not needed |
 
 ## Server as peer
@@ -104,13 +104,18 @@ columns, membership in presence, relay over PubSub; all cluster-wide, so peers
 on different nodes signal fine.
 
 Configure through `Gamend.Signaling.configure/2`, the only writer of those
-server-owned columns; the star host is always `lobby.host_id`:
+server-owned columns; the star host defaults to `lobby.host_id`:
 
 ```elixir
 Gamend.Signaling.configure(lobby, enabled: true, topology: :star)
-# options: :enabled (false), :topology (:star | :mesh),
+# options: :enabled (false), :topology (:star | :mesh), :host_id (lobby host),
 #          :late_join (true), :reconnect_timeout (30_000 ms)
 ```
+
+`:host_id` pins the star host to someone else — a headless server process that
+hosts the match without being a lobby member. It grants that user the `:host`
+role on join, so it is server-side only and never reachable from a client
+`PATCH`; an unknown id returns `{:error, :host_not_found}`.
 
 | Topology | Rule |
 |---|---|
@@ -135,6 +140,19 @@ On join the server pushes one `user_joined` per peer already connected. Rate
 limits per user: 300 msgs / 10 s overall, plus a separate 150 / 30 s budget for
 ICE so candidate bursts cannot starve offers. `webrtc:*` and signaling events
 stay JSON even on protobuf sockets.
+
+In Godot, `GamendSignalingClient` owns the peer connections and leaves the
+topology to you — connect on `peer_joined` for mesh, or only to the host's
+user_id for star. Pass `user_id`: it is what resolves simultaneous offers.
+
+```gdscript
+var p2p := GamendSignalingClient.new(signaling_channel, {"user_id": my_user_id})
+p2p.peer_joined.connect(func(user_id, _role): p2p.connect_to_peer(user_id))
+p2p.data_received.connect(_on_data_received)
+add_child(p2p)
+
+p2p.broadcast_text("events", "hello")
+```
 
 The bundled `webrtc_lobby_hook` plugin enables star signaling on every lobby,
 closes rooms on delete, and pushes `webrtc:room_ready` (with the topic to join)

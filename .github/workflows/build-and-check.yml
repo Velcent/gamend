@@ -227,6 +227,14 @@ jobs:
       - name: Check code formatting
         run: MIX_ENV=dev mix format --check-formatted
 
+      # Bundled plugins are their own mix projects, outside the umbrella's
+      # formatter inputs.
+      - name: Check code formatting (bundled plugins)
+        run: |
+          for plugin in modules/plugins/*/; do
+            (cd "$plugin" && MIX_ENV=dev mix format --check-formatted)
+          done
+
       - name: Credo (strict)
         run: MIX_ENV=dev mix credo --strict
 
