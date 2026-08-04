@@ -158,10 +158,11 @@ defmodule GamendWeb.Api.V1.QuestController do
     case conn.assigns[:current_scope] do
       %{user_id: user_id} ->
         {page, page_size} = Pagination.params(params)
-        opts = [page: page, page_size: page_size, category: params["category"]]
+        category = category_filter(params)
+        opts = [page: page, page_size: page_size, category: category]
 
         entries = Quests.list_user_quests(user_id, opts)
-        total_count = Quests.count_user_quests(user_id, category: params["category"])
+        total_count = Quests.count_user_quests(user_id, category: category)
 
         json(conn, %{
           data: Enum.map(entries, &serialize_entry/1),
@@ -294,10 +295,12 @@ defmodule GamendWeb.Api.V1.QuestController do
         {page, page_size} = Pagination.params(params)
         now = DateTime.utc_now(:second)
 
+        category = category_filter(params)
+
         visible =
           Quests.active_quests()
           |> Enum.filter(fn q ->
-            within_window?(q, now) and params["category"] in [nil, q.category]
+            within_window?(q, now) and category in [nil, q.category]
           end)
 
         entries =
@@ -310,6 +313,20 @@ defmodule GamendWeb.Api.V1.QuestController do
           data: Enum.map(entries, &serialize_entry/1),
           meta: Pagination.meta(page, page_size, length(entries), length(visible))
         })
+    end
+  end
+
+  # `?category=` decodes to "" rather than nil, and "" is nobody's category, so
+  # the filter dropped every quest — a client asking for ALL categories got an
+  # empty list back. Blank means no filter, the same as leaving the param off.
+  defp category_filter(params) do
+    case params["category"] do
+      value when is_binary(value) ->
+        trimmed = String.trim(value)
+        if trimmed == "", do: nil, else: trimmed
+
+      _ ->
+        nil
     end
   end
 
@@ -353,7 +370,7 @@ defmodule GamendWeb.Api.V1.QuestController do
     case Ecto.UUID.cast(user_id_str) do
       {:ok, user_id} ->
         {page, page_size} = Pagination.params(params)
-        category = params["category"] || "achievement"
+        category = category_filter(params) || "achievement"
         opts = [page: page, page_size: page_size, category: category]
 
         entries = Quests.list_user_completions(user_id, opts)
