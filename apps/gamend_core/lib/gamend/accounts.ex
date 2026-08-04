@@ -629,6 +629,36 @@ defmodule Gamend.Accounts do
   def get_user(id), do: Repo.get_uuid(User, id)
 
   @doc """
+  How to name a user in text a PLAYER reads: `"Ana (drift-2378)"`, or just the
+  username when there is no display name. Mirrors the client's
+  `UserDisplayUtil.name_with_username`, so a notification and the friends list
+  it sends you to name the same person the same way.
+
+  Never falls back to the id. Every account has a server-assigned username, and
+  `"User #0198f7be-…"` reads like a name while telling the reader nothing.
+  """
+  @spec display_label(User.t() | Ecto.UUID.t() | nil) :: String.t()
+  def display_label(nil), do: ""
+
+  def display_label(%User{} = user) do
+    name = String.trim(user.display_name || "")
+    handle = String.trim(user.username || "")
+
+    cond do
+      name == "" -> handle
+      handle == "" or String.downcase(name) == String.downcase(handle) -> name
+      true -> "#{name} (#{handle})"
+    end
+  end
+
+  def display_label(user_id) do
+    case get_user(user_id) do
+      %User{} = user -> display_label(user)
+      _ -> ""
+    end
+  end
+
+  @doc """
   Map of `%{id => %User{}}` for the given ids, for batch name lookups (e.g. admin
   tables that hold only a `user_id`). Nil/duplicate ids are ignored.
   """

@@ -4,6 +4,7 @@ defmodule GamendWeb.HostLayoutNavigation do
   use GamendWeb, :html
 
   alias Gamend.Accounts.Scope
+  alias GamendWeb.Plugs.LocalePath
 
   attr :current_scope, :map, default: nil
   attr :current_path, :string, default: nil
@@ -980,13 +981,13 @@ defmodule GamendWeb.HostLayoutNavigation do
     # language — but a crawler following 30 of them per page just generates
     # redirects. On this site that was 278 URLs reported as "Page with
     # redirect", i.e. most of the crawl budget spent on nothing.
-    crawlable? = GamendWeb.Plugs.LocalePath.localized_path?(base_path)
+    crawlable? = LocalePath.localized_path?(base_path)
 
     Enum.map(known_locales, fn locale ->
       # BCP-47 in the URL (`/pt-BR`), not the gettext form (`/pt_BR`): that is
       # what `hreflang` advertises and what the router declares, so emitting
       # the underscore here pointed at routes that do not exist.
-      prefix = "/" <> GamendWeb.Plugs.LocalePath.url_locale(locale)
+      prefix = "/" <> LocalePath.url_locale(locale)
 
       href =
         if(base_path == "/", do: prefix, else: prefix <> base_path) <> query_suffix

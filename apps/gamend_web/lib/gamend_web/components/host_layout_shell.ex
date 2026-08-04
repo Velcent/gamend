@@ -21,7 +21,7 @@ defmodule GamendWeb.HostLayoutShell do
 
   def app(assigns) do
     ~H"""
-    <.background_icons background_icons={@background_icons} current_path={@current_path} />
+    <.background_icons background_icons={@background_icons} />
     <div class={["flex flex-col", if(@flush, do: "h-dvh overflow-hidden relative", else: "min-h-dvh")]}>
       <div
         :if={@flush}
@@ -104,7 +104,14 @@ defmodule GamendWeb.HostLayoutShell do
         <GamendWeb.HostLayouts.flash_group flash={@flash} />
       <% else %>
         <main class="relative z-[2] px-4 py-4 sm:px-6 lg:px-8 flex-1">
-          <div class="mx-auto max-w-2xl md:max-w-3xl lg:max-w-4xl xl:max-w-6xl space-y-4">
+          <%!-- The trail sits above the content and pushes it down, which
+                knocks a full-height hero off centre. `--breadcrumb-offset` is
+                the trail's own height plus the stack gap; a hero subtracts it
+                from `100dvh` so its first screen still ends at the fold. --%>
+          <div
+            class="mx-auto max-w-2xl md:max-w-3xl lg:max-w-4xl xl:max-w-6xl space-y-4"
+            style={if length(@breadcrumbs) > 1, do: "--breadcrumb-offset: 2.25rem"}
+          >
             <.breadcrumbs trail={@breadcrumbs} />
             {render_slot(@inner_block)}
           </div>
@@ -174,11 +181,16 @@ defmodule GamendWeb.HostLayoutShell do
   end
 
   attr :background_icons, :list, default: []
-  attr :current_path, :string, default: nil
 
+  @doc """
+  The shell's decorative icon layer.
+
+  Which pages get one is decided in `GamendWeb.HostLayouts`: it hands over an
+  empty list for pages that paint their own.
+  """
   def background_icons(assigns) do
     ~H"""
-    <%= if @background_icons != [] and @current_path not in ["/", "/play"] do %>
+    <%= if @background_icons != [] do %>
       <div class="fixed inset-0 overflow-hidden pointer-events-none z-[1]" aria-hidden="true">
         <%= for placement <- GamendWeb.HostLayouts.icon_placements(@background_icons) do %>
           <div

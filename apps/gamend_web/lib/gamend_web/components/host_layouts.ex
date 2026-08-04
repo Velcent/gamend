@@ -7,6 +7,7 @@ defmodule GamendWeb.HostLayouts do
 
   alias Gamend.Theme.JSONConfig
   alias GamendWeb.HostLayoutShell
+  alias GamendWeb.Plugs.LocalePath
 
   @known_locales GamendWeb.GettextSync.known_locales()
 
@@ -121,6 +122,11 @@ defmodule GamendWeb.HostLayouts do
   attr :flush, :boolean,
     default: false,
     doc: "when true, render content edge-to-edge with no main wrapper, padding, or footer"
+
+  attr :background_icons, :any,
+    default: nil,
+    doc:
+      "pass `false` when the page paints its own decorative icon layer, as `GamendWeb.PresentationPage` does — otherwise the shell adds a second one on top"
 
   slot :inner_block, required: true
 
@@ -351,7 +357,7 @@ defmodule GamendWeb.HostLayouts do
     en_theme = resolve_theme("en")
 
     navigation = navigation_config(theme, en_theme)
-    background_icons = theme_list(theme, en_theme, "background_icons")
+    background_icons = shell_background_icons(assigns, theme, en_theme)
 
     notif_unread_count =
       if assigns[:current_scope] do
@@ -372,6 +378,19 @@ defmodule GamendWeb.HostLayouts do
       notif_unread_count: notif_unread_count,
       breadcrumbs: breadcrumbs_for(current_path, locale)
     )
+  end
+
+  # The shell's icon layer is the fallback for pages that do not paint one
+  # themselves. A `PresentationPage` draws its own, band by band, and says so
+  # with `background_icons={false}` — without that, the shell's fixed layer
+  # went on top of it and every icon showed up twice, a few pixels apart. The
+  # flush layout is the fullscreen game: no decoration there either.
+  defp shell_background_icons(assigns, theme, en_theme) do
+    if Map.get(assigns, :background_icons) == false or Map.get(assigns, :flush) == true do
+      []
+    else
+      theme_list(theme, en_theme, "background_icons")
+    end
   end
 
   # Derived here rather than threaded through as an assign: `Layouts.app` is a
@@ -596,10 +615,10 @@ defmodule GamendWeb.HostLayouts do
   """
   @spec localized_href(term(), String.t() | nil) :: term()
   def localized_href(href, locale) when is_binary(href) and is_binary(locale) do
-    prefix = GamendWeb.Plugs.LocalePath.url_locale(locale)
+    prefix = LocalePath.url_locale(locale)
 
     cond do
-      locale == GamendWeb.Plugs.LocalePath.default_locale() -> href
+      locale == LocalePath.default_locale() -> href
       not String.starts_with?(href, "/") -> href
       String.starts_with?(href, "//") -> href
       true -> prefix_path(href, prefix)
@@ -616,7 +635,7 @@ defmodule GamendWeb.HostLayouts do
       end
 
     cond do
-      not GamendWeb.Plugs.LocalePath.localized_path?(path) -> href
+      not LocalePath.localized_path?(path) -> href
       path == "/" -> "/" <> prefix <> suffix
       true -> "/" <> prefix <> path <> suffix
     end

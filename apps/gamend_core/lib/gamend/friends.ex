@@ -194,12 +194,10 @@ defmodule Gamend.Friends do
     :ok
   end
 
-  defp user_display_name(user_id) do
-    case Gamend.Accounts.get_user(user_id) do
-      %{display_name: name} when is_binary(name) and name != "" -> name
-      _ -> "User ##{user_id}"
-    end
-  end
+  # "Ana (drift-2378)", or the bare username — never "User #<uuid>", which reads
+  # like a name and identifies nobody. Accounts owns the rule so this and the
+  # friends list the notification sends you to agree.
+  defp user_display_name(user_id), do: Gamend.Accounts.display_label(user_id)
 
   @doc "Create a friend request from requester -> target.
   If a reverse pending request exists (target -> requester) it will be accepted instead.

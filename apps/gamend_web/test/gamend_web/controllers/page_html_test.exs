@@ -216,8 +216,11 @@ defmodule GamendWeb.PresentationPageTest do
           full_bleed_hero: false
         )
 
-      assert html =~ ~s(src="/images/fullscreen.png")
-      assert html =~ ~s(src="/images/fullscreen_dark.png")
+      # An image that exists in the host's static dir comes back from
+      # `SRI.versioned_path/1` with a `?v=` cache-buster, so the src is only
+      # the path up to the query.
+      assert html =~ ~r{src="/images/fullscreen\.png(\?v=[^"]*)?"}
+      assert html =~ ~r{src="/images/fullscreen_dark\.png(\?v=[^"]*)?"}
       assert html =~ ~s(alt="Demo fullscreen")
       assert html =~ "[[data-theme=dark]_&amp;]:hidden"
       assert html =~ "hidden [[data-theme=dark]_&amp;]:block"

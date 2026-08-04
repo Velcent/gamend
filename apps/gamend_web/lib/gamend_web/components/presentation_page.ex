@@ -64,8 +64,14 @@ defmodule GamendWeb.PresentationPage do
               image fills it edge to edge behind a scrim with the title over
               the top. Without it the hero keeps media in its own column. --%>
         <.hero_cover :if={hero_cover?(@hero)} hero={@hero} sections={@sections} />
-        <section :if={!hero_cover?(@hero)} class="relative min-h-screen">
-          <div class="relative z-10 flex min-h-screen items-center px-6 pb-12 pt-24 sm:px-8 lg:px-12">
+        <%!-- `--breadcrumb-offset` is the room the shell's trail took above us
+              (0 when there is no trail), so the hero's first screen ends at
+              the fold either way instead of hanging past it. --%>
+        <section
+          :if={!hero_cover?(@hero)}
+          class="relative min-h-[calc(100dvh-var(--breadcrumb-offset,0px))]"
+        >
+          <div class="relative z-10 flex min-h-[calc(100dvh-var(--breadcrumb-offset,0px))] items-center px-6 pb-12 pt-[calc(6rem-var(--breadcrumb-offset,0px))] sm:px-8 lg:px-12">
             <div class={[
               "mx-auto grid w-full items-center gap-8 lg:gap-12",
               content_width_class(),
@@ -346,6 +352,14 @@ defmodule GamendWeb.PresentationPage do
   attr :item, :map, required: true
   attr :variant, :string, default: "section"
 
+  @doc """
+  A section's illustration: video, image, light/dark image pair, or icon.
+
+  Images carry `data-lightbox`, which a host may pick up to open them
+  full-size. Inert on its own, so a host that ships no such script renders
+  exactly what it did before. The `cover` layout's images are backgrounds
+  rather than illustrations and are deliberately not marked.
+  """
   def media(assigns) do
     image = image_config(assigns.item)
 
@@ -407,6 +421,7 @@ defmodule GamendWeb.PresentationPage do
       loading={if(@variant == "hero", do: "eager", else: "lazy")}
       fetchpriority={if(@variant == "hero", do: "high", else: nil)}
       decoding="async"
+      data-lightbox
       class={media_class(@size)}
     />
     <div :if={!@video.src && @image.light && @image.dark} class="contents">
@@ -418,6 +433,7 @@ defmodule GamendWeb.PresentationPage do
         loading={if(@variant == "hero", do: "eager", else: "lazy")}
         fetchpriority={if(@variant == "hero", do: "high", else: nil)}
         decoding="async"
+        data-lightbox
         class={[media_class(@size), "[[data-theme=dark]_&]:hidden"]}
       />
       <img
@@ -428,6 +444,7 @@ defmodule GamendWeb.PresentationPage do
         loading={if(@variant == "hero", do: "eager", else: "lazy")}
         fetchpriority={if(@variant == "hero", do: "high", else: nil)}
         decoding="async"
+        data-lightbox
         class={[media_class(@size), "hidden [[data-theme=dark]_&]:block"]}
       />
     </div>

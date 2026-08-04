@@ -17,6 +17,11 @@ defmodule GamendWeb.Layouts do
     default: false,
     doc: "when true, render content edge-to-edge with no main wrapper, padding, or footer"
 
+  attr :background_icons, :any,
+    default: nil,
+    doc:
+      "pass `false` when the page paints its own decorative icon layer, as `GamendWeb.PresentationPage` does — otherwise the shell adds a second one on top"
+
   slot :inner_block, required: true
 
   def app(assigns) do
