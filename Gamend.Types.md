@@ -76,6 +76,7 @@ Attributes for updating an existing group.
   :slug =&gt; String.t(),
   :title =&gt; String.t(),
   optional(:description) =&gt; String.t(),
+  optional(:icon_url) =&gt; String.t(),
   optional(:sort_order) =&gt; :desc | :asc,
   optional(:operator) =&gt; :set | :best | :incr | :decr,
   optional(:starts_at) =&gt; DateTime.t(),
