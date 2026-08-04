@@ -40,6 +40,10 @@ defmodule GamendWeb.PageController do
         |> text("Not Found")
 
       page ->
+        # Hero and section buttons are config hrefs like "/play"; without this
+        # every call to action on /fr drops the reader back to a clean URL.
+        page = GamendWeb.HostLayouts.localize_hrefs(page, locale)
+
         conn
         |> assign(:page_title, PresentationPage.page_title(page, fallback_title))
         |> render(:presentation_page, presentation_page: page, theme: theme)

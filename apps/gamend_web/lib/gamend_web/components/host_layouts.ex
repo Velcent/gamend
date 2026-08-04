@@ -366,11 +366,11 @@ defmodule GamendWeb.HostLayouts do
       locale: locale,
       known_locales: @known_locales,
       theme: theme,
-      navigation: navigation,
-      footer: Map.get(theme, "footer", %{}),
+      navigation: localize_hrefs(navigation, locale),
+      footer: localize_hrefs(Map.get(theme, "footer", %{}), locale),
       background_icons: background_icons,
       notif_unread_count: notif_unread_count,
-      breadcrumbs: breadcrumbs_for(current_path)
+      breadcrumbs: breadcrumbs_for(current_path, locale)
     )
   end
 
@@ -379,14 +379,17 @@ defmodule GamendWeb.HostLayouts do
   # a conn assign set by the PageMeta plug would never arrive. Deriving from
   # `current_path` means every page gets a trail without touching a single
   # template, LiveViews included.
-  defp breadcrumbs_for(current_path) do
+  defp breadcrumbs_for(current_path, locale) do
     case Application.get_env(:gamend_web, :page_meta_provider) do
       nil ->
         []
 
       module ->
         if Code.ensure_loaded?(module) and function_exported?(module, :breadcrumbs, 1) do
-          module.breadcrumbs(breadcrumb_path(current_path))
+          current_path
+          |> breadcrumb_path()
+          |> module.breadcrumbs()
+          |> Enum.map(fn {label, path} -> {label, localized_href(path, locale)} end)
         else
           []
         end
@@ -577,12 +580,73 @@ defmodule GamendWeb.HostLayouts do
 
   def locale_labels, do: @locale_labels
 
+  @doc """
+  Rewrites an internal path so it keeps the reader's locale prefix.
+
+  Without this the prefix survives exactly one click: `/fr/about` renders in
+  French, but every link out of it points at a clean path, so the next page is
+  back at `/play` — French only because the session says so. That URL is then
+  wrong in the two places it matters, sharing it hands the recipient English,
+  and it is the English URL that gets bookmarked and linked to.
+
+  Leaves alone: the default locale (its pages *are* the clean URLs), external
+  and protocol-relative hrefs, and any path `LocalePath` does not serve under a
+  prefix — pointing at `/fr/blog/some-post` when that only redirects would just
+  spend a redirect per link.
+  """
+  @spec localized_href(term(), String.t() | nil) :: term()
+  def localized_href(href, locale) when is_binary(href) and is_binary(locale) do
+    prefix = GamendWeb.Plugs.LocalePath.url_locale(locale)
+
+    cond do
+      locale == GamendWeb.Plugs.LocalePath.default_locale() -> href
+      not String.starts_with?(href, "/") -> href
+      String.starts_with?(href, "//") -> href
+      true -> prefix_path(href, prefix)
+    end
+  end
+
+  def localized_href(href, _locale), do: href
+
+  defp prefix_path(href, prefix) do
+    {path, suffix} =
+      case :binary.match(href, ["?", "#"]) do
+        {at, _len} -> String.split_at(href, at)
+        :nomatch -> {href, ""}
+      end
+
+    cond do
+      not GamendWeb.Plugs.LocalePath.localized_path?(path) -> href
+      path == "/" -> "/" <> prefix <> suffix
+      true -> "/" <> prefix <> path <> suffix
+    end
+  end
+
+  @doc """
+  Deep-rewrites every `"href"` in a theme fragment through `localized_href/2`.
+
+  The nav, footer and presentation-page sections are all plain config maps, so
+  one walk covers every configured link rather than one edit per template.
+  """
+  @spec localize_hrefs(term(), String.t() | nil) :: term()
+  def localize_hrefs(map, locale) when is_map(map) and not is_struct(map) do
+    Map.new(map, fn
+      {"href", href} -> {"href", localized_href(href, locale)}
+      {key, value} -> {key, localize_hrefs(value, locale)}
+    end)
+  end
+
+  def localize_hrefs(list, locale) when is_list(list),
+    do: Enum.map(list, &localize_hrefs(&1, locale))
+
+  def localize_hrefs(other, _locale), do: other
+
   def strip_locale_prefix(path, known_locales) when is_binary(path) do
     segments = String.split(path, "/", trim: true)
 
     case segments do
       [first | rest] when is_list(rest) ->
-        if first in known_locales do
+        if first in known_locales or GamendWeb.GettextSync.normalize_locale(first) do
           case rest do
             [] -> "/"
             _ -> "/" <> Enum.join(rest, "/")

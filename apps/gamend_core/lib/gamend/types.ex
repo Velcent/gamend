@@ -152,6 +152,9 @@ defmodule Gamend.Types do
           required(:slug) => String.t(),
           required(:title) => String.t(),
           optional(:description) => String.t(),
+          # In the schema and cast by the changeset, but missing here, so every
+          # caller passing an icon read as a call that could not succeed.
+          optional(:icon_url) => String.t(),
           optional(:sort_order) => :desc | :asc,
           optional(:operator) => :set | :best | :incr | :decr,
           optional(:starts_at) => DateTime.t(),

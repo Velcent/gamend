@@ -50,8 +50,8 @@ defmodule GamendWeb.HostLayoutNavigation do
             <summary class={[
               "btn gap-1 list-none",
               if(
-                String.starts_with?(@current_path, "/users/log_in") or
-                  String.starts_with?(@current_path, "/users/register"),
+                here?(@current_path, "/users/log_in") or
+                  here?(@current_path, "/users/register"),
                 do: "btn-primary",
                 else: "btn-outline"
               )
@@ -63,9 +63,9 @@ defmodule GamendWeb.HostLayoutNavigation do
             <ul class="menu menu-sm dropdown-content mt-2 z-[1] p-2 shadow-lg bg-base-100 rounded-box w-56">
               <li>
                 <.link
-                  href={~p"/users/log_in"}
+                  href={lp(~p"/users/log_in")}
                   class={[
-                    if(String.starts_with?(@current_path, "/users/log_in"),
+                    if(here?(@current_path, "/users/log_in"),
                       do: "menu-active",
                       else: ""
                     )
@@ -77,9 +77,9 @@ defmodule GamendWeb.HostLayoutNavigation do
               </li>
               <li>
                 <.link
-                  href={~p"/users/register"}
+                  href={lp(~p"/users/register")}
                   class={[
-                    if(String.starts_with?(@current_path, "/users/register"),
+                    if(here?(@current_path, "/users/register"),
                       do: "menu-active",
                       else: ""
                     )
@@ -143,9 +143,9 @@ defmodule GamendWeb.HostLayoutNavigation do
         "btn gap-1 list-none",
         if(
           @custom_link_active? or
-            String.starts_with?(@current_path, "/users/settings") or
-            String.starts_with?(@current_path, "/notifications") or
-            String.starts_with?(@current_path, "/chat"),
+            here?(@current_path, "/users/settings") or
+            here?(@current_path, "/notifications") or
+            here?(@current_path, "/chat"),
           do: "btn-primary",
           else: "btn-outline"
         )
@@ -163,9 +163,9 @@ defmodule GamendWeb.HostLayoutNavigation do
       <ul class="menu menu-sm dropdown-content mt-2 z-[1] p-2 shadow-lg bg-base-100 rounded-box w-56">
         <li>
           <.link
-            href={~p"/users/settings"}
+            href={lp(~p"/users/settings")}
             class={[
-              if(String.starts_with?(@current_path, "/users/settings"), do: "menu-active", else: "")
+              if(here?(@current_path, "/users/settings"), do: "menu-active", else: "")
             ]}
           >
             <.icon name="hero-user-circle-solid" class="w-4 h-4" />
@@ -176,9 +176,9 @@ defmodule GamendWeb.HostLayoutNavigation do
 
         <li>
           <.link
-            href={~p"/notifications"}
+            href={lp(~p"/notifications")}
             class={[
-              if(String.starts_with?(@current_path, "/notifications"), do: "menu-active", else: "")
+              if(here?(@current_path, "/notifications"), do: "menu-active", else: "")
             ]}
           >
             <.icon name="hero-bell-solid" class="w-4 h-4" />
@@ -193,8 +193,8 @@ defmodule GamendWeb.HostLayoutNavigation do
         </li>
         <li>
           <.link
-            href={~p"/chat"}
-            class={[if(String.starts_with?(@current_path, "/chat"), do: "menu-active", else: "")]}
+            href={lp(~p"/chat")}
+            class={[if(here?(@current_path, "/chat"), do: "menu-active", else: "")]}
           >
             <.icon name="hero-chat-bubble-left-right-solid" class="w-4 h-4" />
             {GamendWeb.HostLayouts.translate("Chat")}
@@ -274,10 +274,10 @@ defmodule GamendWeb.HostLayoutNavigation do
 
             <li>
               <a
-                href={~p"/users/log_in"}
+                href={lp(~p"/users/log_in")}
                 class={[
                   "btn w-full",
-                  if(String.starts_with?(@current_path, "/users/log_in"),
+                  if(here?(@current_path, "/users/log_in"),
                     do: "btn-primary",
                     else: "btn-ghost"
                   )
@@ -289,10 +289,10 @@ defmodule GamendWeb.HostLayoutNavigation do
             </li>
             <li>
               <a
-                href={~p"/users/register"}
+                href={lp(~p"/users/register")}
                 class={[
                   "btn w-full",
-                  if(String.starts_with?(@current_path, "/users/register"),
+                  if(here?(@current_path, "/users/register"),
                     do: "btn-primary",
                     else: "btn-ghost"
                   )
@@ -426,7 +426,7 @@ defmodule GamendWeb.HostLayoutNavigation do
           <%= for link <- @locale_links do %>
             <a
               href={link.href}
-                rel={link[:rel]}
+              rel={link[:rel]}
               class={[
                 "flex items-center gap-2 px-2 py-2 rounded text-sm whitespace-nowrap hover:bg-base-200 transition-colors",
                 link.locale == @locale && "bg-primary/10 font-semibold text-primary"
@@ -560,7 +560,7 @@ defmodule GamendWeb.HostLayoutNavigation do
         <ul class="pl-4 mt-1 w-full">
           <li class="w-full">
             <a
-              href={~p"/users/settings"}
+              href={lp(~p"/users/settings")}
               class={["btn w-full", account_item_class(@current_path, "/users/settings")]}
             >
               <.icon name="hero-user-circle-solid" class="w-4 h-4" />
@@ -569,7 +569,7 @@ defmodule GamendWeb.HostLayoutNavigation do
           </li>
           <li class="w-full">
             <a
-              href={~p"/notifications"}
+              href={lp(~p"/notifications")}
               class={["btn w-full", account_item_class(@current_path, "/notifications")]}
             >
               <.icon name="hero-bell-solid" class="w-4 h-4" />
@@ -583,7 +583,7 @@ defmodule GamendWeb.HostLayoutNavigation do
             </a>
           </li>
           <li class="w-full">
-            <a href={~p"/chat"} class={["btn w-full", account_item_class(@current_path, "/chat")]}>
+            <a href={lp(~p"/chat")} class={["btn w-full", account_item_class(@current_path, "/chat")]}>
               <.icon name="hero-chat-bubble-left-right-solid" class="w-4 h-4" />
               {GamendWeb.HostLayouts.translate("Chat")}
             </a>
@@ -605,8 +605,7 @@ defmodule GamendWeb.HostLayoutNavigation do
     """
   end
 
-  defp account_path_active?(current_path, prefix),
-    do: String.starts_with?(current_path || "", prefix)
+  defp account_path_active?(current_path, prefix), do: here?(current_path || "", prefix)
 
   defp account_item_class(current_path, prefix) do
     if account_path_active?(current_path, prefix), do: "btn-primary", else: "btn-ghost"
@@ -932,6 +931,13 @@ defmodule GamendWeb.HostLayoutNavigation do
     if external_href?(href) do
       false
     else
+      # Both sides get stripped: the href now carries the reader's locale
+      # prefix, while `current_path` may be the clean path the PageMeta plug
+      # stashed. Comparing them raw left the whole nav unhighlighted under /fr.
+      known = GamendWeb.GettextSync.known_locales()
+      href = GamendWeb.HostLayouts.strip_locale_prefix(href, known)
+      current_path = GamendWeb.HostLayouts.strip_locale_prefix(current_path, known)
+
       case Map.get(link, "match", "prefix") do
         "exact" -> current_path == href
         _ -> String.starts_with?(current_path, href)
@@ -940,6 +946,22 @@ defmodule GamendWeb.HostLayoutNavigation do
   end
 
   defp link_active?(_link, _current_path), do: false
+
+  # Keeps the reader's locale prefix on the hand-written account links, the
+  # same way `localize_hrefs/2` does for every configured nav entry.
+  defp lp(href) do
+    GamendWeb.HostLayouts.localized_href(href, GamendWeb.HostLayouts.current_locale())
+  end
+
+  # `current_path` carries the locale prefix on a prefixed page; these
+  # hand-written active checks compare against clean paths.
+  defp here?(current_path, prefix) when is_binary(current_path) do
+    current_path
+    |> GamendWeb.HostLayouts.strip_locale_prefix(GamendWeb.GettextSync.known_locales())
+    |> String.starts_with?(prefix)
+  end
+
+  defp here?(_current_path, _prefix), do: false
 
   defp external_href?(href) do
     String.starts_with?(href, "http://") or String.starts_with?(href, "https://")
@@ -961,8 +983,13 @@ defmodule GamendWeb.HostLayoutNavigation do
     crawlable? = GamendWeb.Plugs.LocalePath.localized_path?(base_path)
 
     Enum.map(known_locales, fn locale ->
+      # BCP-47 in the URL (`/pt-BR`), not the gettext form (`/pt_BR`): that is
+      # what `hreflang` advertises and what the router declares, so emitting
+      # the underscore here pointed at routes that do not exist.
+      prefix = "/" <> GamendWeb.Plugs.LocalePath.url_locale(locale)
+
       href =
-        if(base_path == "/", do: "/" <> locale, else: "/" <> locale <> base_path) <> query_suffix
+        if(base_path == "/", do: prefix, else: prefix <> base_path) <> query_suffix
 
       %{
         locale: locale,

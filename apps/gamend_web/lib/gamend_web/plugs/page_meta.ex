@@ -55,6 +55,13 @@ defmodule GamendWeb.Plugs.PageMeta do
     |> maybe_assign(:seo_title, provider_call(:title, path))
     |> maybe_assign(:json_ld, provider_call(:json_ld, path))
     |> maybe_assign(:breadcrumbs, provider_call(:breadcrumbs, path))
+    # A page can still override this by assigning `:robots` itself — the
+    # vocabulary pages do, to mark a filtered view noindex.
+    |> then(fn conn ->
+      if conn.assigns[:robots],
+        do: conn,
+        else: maybe_assign(conn, :robots, provider_call(:robots, path))
+    end)
   end
 
   defp maybe_assign(conn, key, value) when is_binary(value) and value != "",

@@ -49,7 +49,10 @@ defmodule GamendWeb.HostLayoutShell do
         <% tagline = Map.get(@theme, "tagline") %>
         <% logo = Map.get(@theme, "logo") %>
         <div class="flex-1">
-          <a href={~p"/"} class="flex-1 flex w-fit items-center gap-2">
+          <a
+            href={GamendWeb.HostLayouts.localized_href(~p"/", @locale)}
+            class="flex-1 flex w-fit items-center gap-2"
+          >
             <img
               src={GamendWeb.SRI.versioned_path(logo) || logo}
               width="36"
@@ -157,7 +160,6 @@ defmodule GamendWeb.HostLayoutShell do
     </nav>
     """
   end
-
 
   defp footer_sections(%{"sections" => sections}) when is_list(sections), do: sections
   defp footer_sections(_footer), do: []
