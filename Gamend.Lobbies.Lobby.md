@@ -29,6 +29,7 @@ visibility, lock/password and arbitrary metadata).
   updated_at: term(),
   users: term(),
   webrtc_enabled: term(),
+  webrtc_host_id: term(),
   webrtc_late_join: term(),
   webrtc_reconnect_timeout_ms: term(),
   webrtc_topology: term()
