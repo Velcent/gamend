@@ -331,6 +331,20 @@ Delivers the update email instructions to the given user.
 
 Whether device-based auth is enabled. Defaults to on.
 
+# `display_label`
+
+```elixir
+@spec display_label(Gamend.Accounts.User.t() | Ecto.UUID.t() | nil) :: String.t()
+```
+
+How to name a user in text a PLAYER reads: `"Ana (drift-2378)"`, or just the
+username when there is no display name. Mirrors the client's
+`UserDisplayUtil.name_with_username`, so a notification and the friends list
+it sends you to name the same person the same way.
+
+Never falls back to the id. Every account has a server-assigned username, and
+`"User #0198f7be-…"` reads like a name while telling the reader nothing.
+
 # `find_or_create_from_apple`
 
 ```elixir
