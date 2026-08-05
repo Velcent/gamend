@@ -125,19 +125,24 @@ func _process(_delta):
 		if _last_status == WebSocketPeer.STATE_CONNECTING:
 			_on_socket_connected()
 			
-		var current_ticks = Time.get_ticks_msec()		
-		
-		if (current_ticks - _last_heartbeat_at >= _settings.heartbeat_interval) and (current_ticks - _connected_at >= _settings.heartbeat_interval):
-			_heartbeat(current_ticks)
-		
-		# Latency ping (more frequent, doesn't affect connection health)
-		if current_ticks - _last_latency_ping_at >= LATENCY_PING_INTERVAL_MS and _latency_ping_ref == EMPTY_REF:
-			_latency_ping(current_ticks)
-			
+		# Drain received packets BEFORE the heartbeat check. Coming back from a
+		# backgrounded tab (web stops _process entirely), the reply to the last
+		# pre-background heartbeat is sitting unread in the buffer — checking
+		# the pending ref first would close a healthy socket as a "heartbeat
+		# timeout" the instant the tab resumes.
 		while _socket.get_available_packet_count():
 			var packet = _socket.get_packet()
 			_on_socket_data_received(packet)
-			
+
+		var current_ticks = Time.get_ticks_msec()
+
+		if (current_ticks - _last_heartbeat_at >= _settings.heartbeat_interval) and (current_ticks - _connected_at >= _settings.heartbeat_interval):
+			_heartbeat(current_ticks)
+
+		# Latency ping (more frequent, doesn't affect connection health)
+		if current_ticks - _last_latency_ping_at >= LATENCY_PING_INTERVAL_MS and _latency_ping_ref == EMPTY_REF:
+			_latency_ping(current_ticks)
+
 	_last_status = status
 	
 	if status == WebSocketPeer.STATE_CLOSED: 
