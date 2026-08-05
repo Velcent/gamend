@@ -11,9 +11,32 @@ defmodule GamendWeb.Components.PresentationPageSrcsetTest do
 
   alias GamendWeb.PresentationPage
 
-  # priv/static/images/media-fixture.png and its -4 variant ship with the app
-  # precisely so this can assert the positive case.
   @fixture "/images/media-fixture.png"
+
+  # `priv/static` is generated, so it is gitignored wholesale — a fixture
+  # committed there reaches nobody else's checkout, and every positive case
+  # here fails on CI with no srcset. The variant only has to pass
+  # `File.regular?`, so the test writes it and takes it away again.
+  @fixture_files ["media-fixture.png", "media-fixture-4.png"]
+
+  # 1x1 transparent PNG. Never decoded — the component only checks the file is
+  # there — but a real one keeps anything that opens it honest.
+  @png Base.decode64!(
+         "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk" <>
+           "YPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
+       )
+
+  setup do
+    # Written where the component looks them up, not where the source tree
+    # keeps them, so a copied (rather than symlinked) priv still works.
+    dir = Application.app_dir(:gamend_web, "priv/static/images")
+    File.mkdir_p!(dir)
+
+    for name <- @fixture_files, do: File.write!(Path.join(dir, name), @png)
+    on_exit(fn -> for name <- @fixture_files, do: File.rm(Path.join(dir, name)) end)
+
+    :ok
+  end
 
   defp render_media(item, variant \\ "section") do
     render_component(&PresentationPage.media/1, item: item, variant: variant)
