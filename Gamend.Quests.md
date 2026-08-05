@@ -4,7 +4,7 @@
 Event-driven quest/progression engine.
 
 One engine, three independent dimensions: a **reset** cycle (never / daily /
-weekly / monthly / every N days), an optional **window**
+weekly / monthly / every N days / repeat-on-claim), an optional **window**
 (`starts_at`/`ends_at`), and an optional **prerequisite**
 (`prerequisite_quest_key`). Any combination works — a biweekly quest inside
 a seasonal window that also requires an earlier quest is just those three
@@ -27,7 +27,9 @@ from their hooks for custom events.
 
 Claiming is gated by an atomic `completed → claimed` status transition, so a
 double-tap or a concurrent claim can't double-pay. Rewards are granted after
-the transition with a per-entry idempotency key (`"quest:<progress_id>:<i>"`),
+the transition with a per-entry idempotency key (`"quest:<progress_id>:<i>"`,
+or `"quest:<progress_id>:<claim_count>:<i>"` once a `repeat` quest has been
+claimed before — the row alone would dedupe its own second payout),
 so a crashed or retried grant can't double-apply either; rows that claimed
 but never finished granting are healed by `recover_pending_rewards/1`.
 Quests with `auto_claim` grant immediately on completion (skipping the
@@ -40,6 +42,12 @@ Quests with `auto_claim` grant immediately on completion (skipping the
 `"I14-1436"`, never → `"static"`). A new period simply means a new progress
 row on the next reported event — nothing needs to fire at midnight, and
 state resolves correctly even if no job ever runs.
+
+`repeat` is the exception: it has no clock at all. The row is re-armed the
+moment its reward is paid, so the quest is available again immediately and
+as often as the player can finish it — for an endless objective, a calendar
+reset would cap the payout at once per period. It reuses `"static"` as its
+period and counts claims on the row instead (see `claim_count`).
 
 UTC means one global rollover instant rather than one per player: a daily
 turns over at noon in New Zealand and mid-afternoon the day before on the US
@@ -345,6 +353,18 @@ True when the quest's prerequisite (if any) is completed by the user.
 Deletes daily/weekly progress rows whose period ended more than
 `max_quest_period_history` days ago (called from `Gamend.Retention`).
 
+# `rearm_repeat_quests`
+
+```elixir
+@spec rearm_repeat_quests(keyword()) :: non_neg_integer()
+```
+
+Re-open `repeat` quests whose reward was paid but which never re-armed.
+
+Only reachable by crashing between the grant and the re-arm. Healing on read
+keeps that window from stranding a player on a quest that will never come
+back, without a job that has to be running for the feature to work.
+
 # `recover_pending_rewards`
 
 ```elixir
@@ -369,6 +389,27 @@ Report a gameplay event for a user, advancing every matching active quest.
 when every param key/value is present in `meta`.
 
 Returns `{:ok, progress_rows}` for the quests that advanced.
+
+# `resolve_counter`
+
+```elixir
+@spec resolve_counter(Gamend.Quests.Quest.t(), Gamend.Quests.QuestProgress.t() | nil) ::
+  Gamend.Quests.Quest.t()
+```
+
+A `repeat` quest's title and description with `%{n}` filled in.
+
+A repeat quest is one definition and one row that re-arms forever, so it has
+no natural way to say *which* run the player is on — the card reads the same
+the tenth time as the first. `"Treasures x %{n}"` renders "Treasures x 1"
+before the first claim and "Treasures x 2" after it.
+
+Substituted here, at the point a definition is paired with a player's row,
+because the definition is global and the count is not: writing the number
+into the stored title would show every player the same one.
+
+Non-repeat quests and titles without the placeholder pass through untouched,
+so this is invisible to everything that does not opt in.
 
 # `stats`
 

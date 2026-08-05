@@ -19,6 +19,7 @@ reset period.
 ```elixir
 @type t() :: %Gamend.Quests.QuestProgress{
   __meta__: term(),
+  claim_count: term(),
   claimed_at: term(),
   completed_at: term(),
   id: term(),
