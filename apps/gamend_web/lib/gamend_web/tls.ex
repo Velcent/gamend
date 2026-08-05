@@ -37,7 +37,9 @@ defmodule GamendWeb.Tls do
   )
 
   setting(:force, :boolean,
-    doc: "Redirect HTTP to HTTPS and send HSTS. Defaults to on once certs are readable."
+    doc:
+      "Redirect HTTP to HTTPS and send HSTS. Off unless set: a host that serves " <>
+        "port 80 itself keeps a plain-HTTP twin of every page until you enable it."
   )
 
   setting(:acme_webroot, :string,

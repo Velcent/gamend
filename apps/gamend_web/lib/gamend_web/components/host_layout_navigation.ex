@@ -373,13 +373,10 @@ defmodule GamendWeb.HostLayoutNavigation do
                   link.locale == @locale && "bg-primary/10 font-semibold text-primary"
                 ]}
               >
-                <span
-                  class={[
-                    "fi shrink-0 rounded-[2px] shadow-sm ring-1 ring-base-content/10",
-                    "fi-#{link.flag_code}"
-                  ]}
-                  aria-hidden="true"
-                ></span>
+                <.flag
+                  code={link.flag_code}
+                  class="rounded-[2px] shadow-sm ring-1 ring-base-content/10"
+                />
                 <span class="truncate">{link.label}</span>
               </a>
             </li>
@@ -433,13 +430,10 @@ defmodule GamendWeb.HostLayoutNavigation do
                 link.locale == @locale && "bg-primary/10 font-semibold text-primary"
               ]}
             >
-              <span
-                class={[
-                  "fi shrink-0 rounded-[2px] shadow-sm ring-1 ring-base-content/10",
-                  "fi-#{link.flag_code}"
-                ]}
-                aria-hidden="true"
-              ></span>
+              <.flag
+                code={link.flag_code}
+                class="rounded-[2px] shadow-sm ring-1 ring-base-content/10"
+              />
               <span class="truncate">{link.label}</span>
             </a>
           <% end %>

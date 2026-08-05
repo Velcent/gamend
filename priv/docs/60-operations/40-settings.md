@@ -7,7 +7,7 @@ generated: by `mix gamend.settings.guide` - do not edit by hand; edit the
 # Settings
 
 Every setting the server has, with the environment variable that sets it.
-232 settings across 20 groups.
+236 settings across 21 groups.
 
 A setting is declared in the module that owns it, so this page and
 `.env.example` are generated from the same source the server reads. The
@@ -132,6 +132,16 @@ Live values, and where each one came from, are on the
 | `GAMEND_HTTP_PORT` | integer | `4000` | TCP port the HTTP listener binds. |
 | `GAMEND_HTTP_SCHEME` | string | - | http or https. Defaults to http for localhost, https otherwise. |
 | `GAMEND_HTTP_SERVER` | boolean | `false` | Start the HTTP listener. Only needed when running as a release. |
+
+
+## IndexNow
+
+| Variable | Type | Default | Notes |
+|---|---|---|---|
+| `GAMEND_INDEX_NOW_ENABLED` | boolean | `false` | Notify IndexNow search engines (Bing, Yandex, Seznam — not Google) when pages change. |
+| `GAMEND_INDEX_NOW_ENDPOINT` | string | `"https://api.indexnow.org/indexnow"` | IndexNow submission endpoint. Any participating engine's endpoint reaches all of them. |
+| `GAMEND_INDEX_NOW_KEY` | string | - | IndexNow key, 8-128 hex characters. Public by design — it is served at /<key>.txt to prove domain ownership. Warns when unset. |
+| `GAMEND_INDEX_NOW_TIMEOUT_MS` | integer | `10000` | How long to wait for the IndexNow endpoint before giving up. |
 
 
 ## Limits
@@ -380,7 +390,7 @@ Live values, and where each one came from, are on the
 |---|---|---|---|
 | `GAMEND_TLS_ACME_WEBROOT` | string | - | Webroot for Let's Encrypt HTTP-01 challenge files. Defaults to /var/www/acme. |
 | `GAMEND_TLS_CERTFILE` | string | - | Path to fullchain.pem (certificate + CA chain). Warns when unset. |
-| `GAMEND_TLS_FORCE` | boolean | - | Redirect HTTP to HTTPS and send HSTS. Defaults to on once certs are readable. |
+| `GAMEND_TLS_FORCE` | boolean | - | Redirect HTTP to HTTPS and send HSTS. Off unless set: a host that serves port 80 itself keeps a plain-HTTP twin of every page until you enable it. |
 | `GAMEND_TLS_KEYFILE` | string | - | Path to privkey.pem. Warns when unset. |
 | `GAMEND_TLS_PORT` | integer | `443` | HTTPS listen port. |
 

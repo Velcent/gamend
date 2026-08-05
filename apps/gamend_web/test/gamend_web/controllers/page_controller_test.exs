@@ -206,7 +206,8 @@ defmodule GamendWeb.PageControllerTest do
     body = html_response(conn, 200)
 
     assert body =~ ~s(lang="ro")
-    assert body =~ "fi-ro"
+    # The locale switcher shows flags as files now, not `.fi-*` background classes.
+    assert body =~ "/flags/ro.svg"
 
     # Chrome this app owns and translates itself. Labels that come from the
     # theme config are translated through the host's `theme` domain, which

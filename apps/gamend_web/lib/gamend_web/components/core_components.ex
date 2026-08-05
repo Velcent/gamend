@@ -36,6 +36,45 @@ defmodule GamendWeb.CoreComponents do
   alias Phoenix.HTML.Form
   alias Phoenix.LiveView.JS
 
+  attr :code, :any, required: true, doc: "ISO alpha-2 country code, or nil for none"
+  attr :square, :boolean, default: false, doc: "1:1 box instead of 4:3"
+  attr :class, :any, default: nil
+
+  @doc """
+  A country flag.
+
+  An `<img>` rather than a CSS background: the flag-icons plugin inlined all 54
+  as base64 data URIs in the critical stylesheet, which made it 951 KB — 69% of
+  it flags, blocking the first paint of every page including the ones showing
+  none. As files the browser fetches only what is on screen, in parallel, each
+  cached on its own.
+
+  Sized in `em` so the caller still controls it with a `text-*` class, exactly
+  as the old `.fi`/`.fis` classes did.
+
+  No cache-busting query: a page carries up to 114 of these, and a content hash
+  on each costs more in HTML than it saves. The artwork is fixed reference
+  data — replace a flag by replacing the file and its year-long cache expires
+  on its own, which is the one case where that is an acceptable wait.
+  """
+  def flag(assigns) do
+    ~H"""
+    <img
+      :if={@code}
+      src={"/flags/#{@code}.svg"}
+      alt=""
+      aria-hidden="true"
+      loading="lazy"
+      decoding="async"
+      class={[
+        "inline-block h-[1em] shrink-0 object-contain",
+        if(@square, do: "w-[1em]", else: "w-[1.3333em]"),
+        @class
+      ]}
+    />
+    """
+  end
+
   @doc """
   Renders flash notices.
 

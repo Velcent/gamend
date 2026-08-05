@@ -393,10 +393,14 @@ defmodule GamendWeb.PresentationPage do
   attr :size, :string, default: "section"
 
   def media_visual(assigns) do
-    # `media_visual/1` is public and callable without a `video` attr, whose
-    # default is a bare `%{}` — merge over the full shape so the template can
-    # read `@video.src` unconditionally.
-    assigns = assign(assigns, :video, Map.merge(empty_video_config(), assigns.video))
+    # `media_visual/1` is public and callable with a partial `image` or no
+    # `video` at all, both of which default to a bare `%{}` — merge over the
+    # full shape so the template can read `@video.src` and `@image.light_srcset`
+    # unconditionally.
+    assigns =
+      assigns
+      |> assign(:video, Map.merge(empty_video_config(), assigns.video))
+      |> assign(:image, Map.merge(empty_image_config(), assigns.image))
 
     ~H"""
     <video
@@ -415,6 +419,8 @@ defmodule GamendWeb.PresentationPage do
     <img
       :if={!@video.src && @image.light && !@image.dark}
       src={@image.light}
+      srcset={@image.light_srcset}
+      sizes={@image.light_srcset && (@image.sizes || media_sizes(@size))}
       alt={@image.alt}
       width={@image.width}
       height={@image.height}
@@ -427,6 +433,8 @@ defmodule GamendWeb.PresentationPage do
     <div :if={!@video.src && @image.light && @image.dark} class="contents">
       <img
         src={@image.light}
+        srcset={@image.light_srcset}
+        sizes={@image.light_srcset && (@image.sizes || media_sizes(@size))}
         alt={@image.alt}
         width={@image.width}
         height={@image.height}
@@ -438,6 +446,8 @@ defmodule GamendWeb.PresentationPage do
       />
       <img
         src={@image.dark}
+        srcset={@image.dark_srcset}
+        sizes={@image.dark_srcset && (@image.sizes || media_sizes(@size))}
         alt={@image.alt}
         width={@image.width}
         height={@image.height}
@@ -474,6 +484,8 @@ defmodule GamendWeb.PresentationPage do
       <img
         :if={@image.light}
         src={@image.light}
+        srcset={@image.light_srcset}
+        sizes={@image.light_srcset && "100vw"}
         alt={@image.alt}
         width={@image.width}
         height={@image.height}
@@ -487,6 +499,8 @@ defmodule GamendWeb.PresentationPage do
       <img
         :if={@image.dark}
         src={@image.dark}
+        srcset={@image.dark_srcset}
+        sizes={@image.dark_srcset && "100vw"}
         alt={@image.alt}
         width={@image.width}
         height={@image.height}
@@ -731,6 +745,7 @@ defmodule GamendWeb.PresentationPage do
 
         portrait = non_empty_string(Map.get(image, "portrait"))
         portrait_dark = non_empty_string(Map.get(image, "portrait_dark"))
+        widths = image_widths(Map.get(image, "widths"))
 
         %{
           light: image_src(light),
@@ -742,21 +757,82 @@ defmodule GamendWeb.PresentationPage do
           portrait_dark: image_src(portrait_dark),
           alt: Map.get(image, "alt", ""),
           width: positive_int(Map.get(image, "width")) || natural_width,
-          height: positive_int(Map.get(image, "height")) || natural_height
+          height: positive_int(Map.get(image, "height")) || natural_height,
+          light_srcset: image_srcset(light, widths),
+          dark_srcset: image_srcset(dark, widths),
+          sizes: non_empty_string(Map.get(image, "sizes"))
         }
 
       _ ->
-        %{
-          light: nil,
-          dark: nil,
-          portrait: nil,
-          portrait_dark: nil,
-          alt: "",
-          width: nil,
-          height: nil
-        }
+        empty_image_config()
     end
   end
+
+  defp empty_image_config do
+    %{
+      light: nil,
+      dark: nil,
+      portrait: nil,
+      portrait_dark: nil,
+      alt: "",
+      width: nil,
+      height: nil,
+      light_srcset: nil,
+      dark_srcset: nil,
+      sizes: nil
+    }
+  end
+
+  # `"widths": [480, 960]` on an image opts it into a srcset. The variants are
+  # found by convention — `main.webp` + 480 is `main-480.webp` — so the config
+  # names one file and `mix host.responsive_images` generates the rest.
+  defp image_widths(widths) when is_list(widths) do
+    widths
+    |> Enum.map(&positive_int/1)
+    |> Enum.reject(&is_nil/1)
+    |> Enum.uniq()
+    |> Enum.sort()
+  end
+
+  defp image_widths(_widths), do: []
+
+  # A width whose file is missing is dropped rather than emitted: a 404 inside
+  # a srcset is not a fallback to `src`, it is a broken image on whichever
+  # viewport happened to pick that candidate.
+  defp image_srcset(path, widths) do
+    path = non_empty_string(path)
+
+    if is_nil(path) or widths == [] do
+      nil
+    else
+      widths
+      |> Enum.filter(&variant_exists?(path, &1))
+      |> Enum.map_join(", ", &"#{image_src(width_variant_path(path, &1))} #{&1}w")
+      |> non_empty_string()
+    end
+  end
+
+  defp width_variant_path(path, width) do
+    ext = Path.extname(path)
+    String.replace_suffix(path, ext, "-#{width}#{ext}")
+  end
+
+  defp variant_exists?(path, width) do
+    variant = width_variant_path(path, width)
+    clean = URI.parse(variant).path || variant
+
+    case static_file_path(clean) do
+      file when is_binary(file) -> File.regular?(file)
+      _ -> false
+    end
+  end
+
+  # What share of the viewport the slot actually occupies, so the browser picks
+  # a candidate instead of assuming `100vw` and always taking the largest.
+  defp media_sizes("hero"), do: "(min-width: 1024px) 55vw, 95vw"
+  defp media_sizes("full"), do: "(min-width: 1024px) 70vw, 95vw"
+  defp media_sizes("bleed"), do: "100vw"
+  defp media_sizes(_section), do: "(min-width: 1024px) 45vw, 92vw"
 
   # A `"video"` item renders in place of `"image"`, so the same slot in a hero
   # or section holds either. `src` and `poster` go through `image_src/1` for

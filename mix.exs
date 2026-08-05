@@ -118,8 +118,10 @@ defmodule GamendHost.MixProject do
           "gamend.api.lint"
         ] ++
           local_web_commands([
+            # No `xref unreachable`: Elixir folded that check into the compiler,
+            # so the task prints "has no effect now" and exits 0. A step that
+            # cannot fail is noise, not a gate.
             web_test_cmd("compile --warning-as-errors"),
-            web_test_cmd("xref unreachable"),
             web_cmd("format"),
             web_cmd("credo --strict")
           ]),

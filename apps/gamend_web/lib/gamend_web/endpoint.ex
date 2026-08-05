@@ -23,6 +23,7 @@ defmodule GamendWeb.Endpoint do
     longpoll: [connect_info: [session: @session_options], log: false]
 
   plug GamendWeb.Plugs.AcmeChallenge
+  plug GamendWeb.Plugs.IndexNowKey
   plug GamendWeb.Plugs.SecurityHeaders
   plug GamendWeb.Plugs.WellKnown
   plug GamendWeb.Plugs.GameHeaders
@@ -105,15 +106,37 @@ defmodule GamendWeb.Endpoint do
     end
   end
 
+  # Files third parties fetch at a bare, un-fingerprinted path. They must stay
+  # changeable: `robots.txt` under a year-long `immutable` meant a crawl-rule
+  # change could not reach a client that had cached it, and `.well-known`
+  # carries app-association files with the same problem.
+  @revalidating_static ~w(robots.txt .well-known)
+
   defp serve_host_static(conn, _opts) do
+    paths = host_static_paths() -- ~w(game)
+
     Plug.Static.call(
       conn,
       configurable_static_opts(
         :host_static_opts,
         host_static_app(),
-        host_static_paths() -- ~w(game)
+        paths -- @revalidating_static
       )
     )
+    |> case do
+      %{halted: true} = halted ->
+        halted
+
+      passed ->
+        Plug.Static.call(
+          passed,
+          configurable_static_opts(
+            :revalidating_static_opts,
+            host_static_app(),
+            paths -- (paths -- @revalidating_static)
+          )
+        )
+    end
   end
 
   defp serve_game_static(conn, _opts) do
@@ -176,6 +199,14 @@ defmodule GamendWeb.Endpoint do
   end
 
   defp static_headers(_kind), do: %{}
+
+  defp static_cache_control(:revalidating_static_opts) do
+    Application.get_env(
+      :gamend_web,
+      :revalidating_static_cache_control,
+      "public, max-age=0, must-revalidate"
+    )
+  end
 
   defp static_cache_control(:game_static_opts) do
     Application.get_env(
