@@ -378,6 +378,104 @@ defmodule Gamend.QuestsTest do
       assert Inventory.quantity(user.id, "loot_crate") == 2
     end
 
+    test "a repeat quest re-arms on claim and pays every time" do
+      # The whole point of the reset: an endless objective (find the treasure,
+      # then the next one) pays per completion, not per calendar period.
+      create_quest(%{
+        key: "endless",
+        reset: "repeat",
+        objectives: [%{event: "found", target: 1}],
+        rewards: [%{type: "currency", code: "gold", amount: 50}]
+      })
+
+      user = user_fixture()
+
+      for round <- 1..3 do
+        {:ok, [progress]} = Quests.report_event(user.id, "found")
+        assert progress.status == "completed", "round #{round} did not complete"
+
+        assert {:ok, %{progress: claimed}} = Quests.claim(user.id, "endless")
+        assert claimed.claim_count == round
+        # Re-armed in place, ready for the next find without waiting on a clock.
+        assert claimed.status == "active"
+        assert claimed.objective_progress == %{}
+        assert is_nil(claimed.completed_at)
+
+        # This is the assertion the whole change hangs on: without claim_count
+        # in the idempotency key, rounds 2 and 3 dedupe and pay nothing, and a
+        # deduped grant reports success.
+        assert Economy.balance(user.id, "gold") == 50 * round
+      end
+    end
+
+    test "a repeat quest is not claimable again until it is finished again" do
+      create_quest(%{
+        key: "endless_gate",
+        reset: "repeat",
+        objectives: [%{event: "found", target: 1}],
+        rewards: [%{type: "currency", code: "gold", amount: 50}]
+      })
+
+      user = user_fixture()
+      {:ok, [_p]} = Quests.report_event(user.id, "found")
+      assert {:ok, _} = Quests.claim(user.id, "endless_gate")
+
+      assert {:error, :not_completed} = Quests.claim(user.id, "endless_gate")
+      assert Economy.balance(user.id, "gold") == 50
+    end
+
+    test "rearm_repeat_quests heals a claim that died before re-arming" do
+      # Only reachable by crashing between granting and re-arming; without the
+      # heal the player sits on a quest that never comes back.
+      create_quest(%{
+        key: "endless_crash",
+        reset: "repeat",
+        objectives: [%{event: "found", target: 1}],
+        rewards: [%{type: "currency", code: "gold", amount: 50}]
+      })
+
+      user = user_fixture()
+      {:ok, [_p]} = Quests.report_event(user.id, "found")
+      assert {:ok, %{progress: claimed}} = Quests.claim(user.id, "endless_crash")
+
+      # Put it back into the stranded shape the crash would leave behind.
+      Repo.update_all(
+        from(p in QuestProgress, where: p.id == ^claimed.id),
+        set: [status: "claimed", rewards_granted_at: DateTime.utc_now(:second)]
+      )
+
+      assert Quests.rearm_repeat_quests(user_id: user.id) == 1
+      progress = Repo.get_uuid(QuestProgress, claimed.id)
+      assert progress.status == "active"
+      assert progress.objective_progress == %{}
+    end
+
+    test "a first claim keeps the original reward idempotency key" do
+      # Changing the key shape for every quest would make recover_pending_rewards
+      # retry a mid-grant row against a key the first attempt never wrote, and
+      # pay a second time for work already done.
+      create_quest(%{
+        key: "once",
+        objectives: [%{event: "e", target: 1}],
+        rewards: [%{type: "currency", code: "gold", amount: 10}]
+      })
+
+      user = user_fixture()
+      {:ok, [_p]} = Quests.report_event(user.id, "e")
+      assert {:ok, %{progress: progress}} = Quests.claim(user.id, "once")
+      assert progress.claim_count == 0
+      assert Economy.balance(user.id, "gold") == 10
+
+      # Re-grant under the same key: it must dedupe, not pay again.
+      Repo.update_all(
+        from(p in QuestProgress, where: p.id == ^progress.id),
+        set: [rewards_granted_at: nil, claimed_at: DateTime.add(DateTime.utc_now(:second), -3600)]
+      )
+
+      _ = Quests.recover_pending_rewards(user_id: user.id)
+      assert Economy.balance(user.id, "gold") == 10
+    end
+
     test "claim requires a completed quest" do
       create_quest(%{key: "not_done", objectives: [%{event: "e", target: 2}]})
       user = user_fixture()

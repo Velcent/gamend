@@ -3,6 +3,7 @@ defmodule GamendWeb.Api.V1.Admin.QuestController do
   use OpenApiSpex.ControllerSpecs
 
   alias Gamend.Quests
+  alias Gamend.Quests.Quest
   alias GamendWeb.Pagination
   alias GamendWeb.Uploads
   alias OpenApiSpex.Schema
@@ -21,7 +22,7 @@ defmodule GamendWeb.Api.V1.Admin.QuestController do
       icon_url: %Schema{type: :string},
       sort_order: %Schema{type: :integer},
       hidden: %Schema{type: :boolean},
-      reset: %Schema{type: :string, enum: ["never", "daily", "weekly", "monthly", "interval"]},
+      reset: %Schema{type: :string, enum: Quest.resets()},
       reset_interval_days: %Schema{type: :integer, nullable: true},
       category: %Schema{type: :string},
       objectives: %Schema{type: :array, items: %Schema{type: :object}},
@@ -63,7 +64,7 @@ defmodule GamendWeb.Api.V1.Admin.QuestController do
       icon_url: %Schema{type: :string},
       sort_order: %Schema{type: :integer},
       hidden: %Schema{type: :boolean},
-      reset: %Schema{type: :string, enum: ["never", "daily", "weekly", "monthly", "interval"]},
+      reset: %Schema{type: :string, enum: Quest.resets()},
       reset_interval_days: %Schema{type: :integer, nullable: true},
       category: %Schema{type: :string},
       objectives: %Schema{

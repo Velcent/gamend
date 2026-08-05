@@ -3,6 +3,7 @@ defmodule GamendWeb.Api.V1.QuestController do
   use OpenApiSpex.ControllerSpecs
 
   alias Gamend.Quests
+  alias Gamend.Quests.Quest
   alias GamendWeb.Pagination
   alias OpenApiSpex.Schema
 
@@ -56,7 +57,7 @@ defmodule GamendWeb.Api.V1.QuestController do
       hidden: %Schema{type: :boolean, description: "Whether hidden until completed"},
       reset: %Schema{
         type: :string,
-        enum: ["never", "daily", "weekly", "monthly", "interval"],
+        enum: Quest.resets(),
         description: "When progress starts over"
       },
       reset_interval_days: %Schema{

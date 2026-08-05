@@ -118,6 +118,28 @@ defmodule GamendWeb.QuestsLiveCardTest do
     assert String.contains?(weekly, "Weekly")
   end
 
+  test "a long chain reports its real length, not the walk limit", %{conn: conn} do
+    # The depth walk used to stop at 20 hops to survive malformed cycles, which
+    # cannot tell a cycle from a genuinely long chain: the 52-unit course showed
+    # every unit as "1/21". Silent — the number was plausible.
+    for tier <- 1..30 do
+      {:ok, _} =
+        Quests.create_quest(%{
+          key: "long_#{tier}",
+          title: "Long tier #{tier}",
+          description: "Tier #{tier}.",
+          category: "Long",
+          objectives: [%{event: "long_evt", target: 1}],
+          prerequisite_quest_key: if(tier > 1, do: "long_#{tier - 1}")
+        })
+    end
+
+    html = page(conn)
+
+    assert html =~ "1/30", "a 30-long chain must report 30, not the old 21 cap"
+    refute html =~ "1/21"
+  end
+
   test "a category with nothing visible behind it gets no tab", %{conn: conn} do
     html = page(conn)
 

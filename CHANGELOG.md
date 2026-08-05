@@ -1,5 +1,7 @@
 # August 2026
 
+- [added] **Repeat** quest reset type.
+
 # July 2026
 
 - [breaking] **Renamed to Gamend.**

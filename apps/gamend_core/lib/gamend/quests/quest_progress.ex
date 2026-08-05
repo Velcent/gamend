@@ -50,6 +50,9 @@ defmodule Gamend.Quests.QuestProgress do
     field :completed_at, :utc_datetime
     field :claimed_at, :utc_datetime
     field :rewards_granted_at, :utc_datetime
+    # Claims so far on THIS row. Only a `repeat` quest ever exceeds 1; it is
+    # what keeps each re-armed claim's reward idempotency key distinct.
+    field :claim_count, :integer, default: 0
     field :metadata, :map, default: %{}
 
     timestamps(type: :utc_datetime)
@@ -70,6 +73,7 @@ defmodule Gamend.Quests.QuestProgress do
       :completed_at,
       :claimed_at,
       :rewards_granted_at,
+      :claim_count,
       :metadata
     ])
     |> validate_required([:user_id, :quest_key, :period_key])

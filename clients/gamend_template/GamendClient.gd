@@ -333,12 +333,25 @@ func _store_row(key: String, row: Dictionary) -> void:
 
 ## The subscribe/get reply body carries the row under "data" (subscribe pushes
 ## and GETs both), or "value" from older KV endpoints.
+## The KV row out of a get_kv reply.
+##
+## `response.data` is the DENORMALIZED model (GetKv200Response), not the raw
+## body — the generated api swaps it in before this ever runs. Requiring a
+## Dictionary here therefore rejected every successful fetch and returned {},
+## so a row with real data read as "no row": word stats, and anything else
+## fetched over HTTP rather than pushed on the channel. Both shapes are handled
+## because a raw Dictionary is still what a hand-rolled or cached reply gives.
 func _row_from_body(result) -> Dictionary:
-	if result.response == null or not (result.response.data is Dictionary):
+	if result.response == null:
 		return {}
-	var body: Dictionary = result.response.data
-	var value: Variant = body.get("data", body.get("value", {}))
-	return (value as Dictionary) if value is Dictionary else {}
+	var body: Variant = result.response.data
+	if body is Dictionary:
+		var raw: Variant = (body as Dictionary).get("data", (body as Dictionary).get("value", {}))
+		return (raw as Dictionary) if raw is Dictionary else {}
+	if body != null and "data" in body:
+		var value: Variant = body.data
+		return (value as Dictionary) if value is Dictionary else {}
+	return {}
 
 
 func _entry_key(entry: Dictionary) -> String:

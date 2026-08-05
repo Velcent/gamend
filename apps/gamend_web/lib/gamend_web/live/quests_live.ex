@@ -209,46 +209,55 @@ defmodule GamendWeb.QuestsLive do
 
   # Position of each chained quest within its prerequisite line, as
   # {position, total} — e.g. tier 3 of 7. Quests without prerequisite links
-  # get no entry. Cycles (malformed data) are cut off by the depth cap.
-  @max_chain_walk 20
-
+  # get no entry.
+  #
+  # Cycles are cut by remembering what has been walked, not by a hop cap. A cap
+  # cannot tell a malformed cycle from a genuinely long chain: at 20 hops the
+  # 52-unit course reported every unit as "1 of 21", silently, because the walk
+  # bottomed out rather than reaching the end.
   defp chain_positions(quests) do
     prereq_by_key = Map.new(quests, &{&1.key, &1.prerequisite_quest_key})
 
     depths =
-      Map.new(prereq_by_key, fn {key, _} -> {key, chain_depth(key, prereq_by_key, 0)} end)
+      Map.new(prereq_by_key, fn {key, _} ->
+        {key, chain_depth(key, prereq_by_key, MapSet.new())}
+      end)
 
     totals =
       Enum.reduce(depths, %{}, fn {key, depth}, acc ->
-        root = chain_root(key, prereq_by_key, 0)
+        root = chain_root(key, prereq_by_key, MapSet.new())
         Map.update(acc, root, depth + 1, &max(&1, depth + 1))
       end)
 
     depths
     |> Enum.map(fn {key, depth} ->
-      {key, {depth + 1, Map.get(totals, chain_root(key, prereq_by_key, 0), depth + 1)}}
+      {key, {depth + 1, Map.get(totals, chain_root(key, prereq_by_key, MapSet.new()), depth + 1)}}
     end)
     |> Enum.filter(fn {_key, {_pos, total}} -> total > 1 end)
     |> Map.new()
   end
 
-  defp chain_depth(key, prereq_by_key, hops) when hops < @max_chain_walk do
-    case Map.get(prereq_by_key, key) do
-      nil -> 0
-      prereq -> 1 + chain_depth(prereq, prereq_by_key, hops + 1)
+  defp chain_depth(key, prereq_by_key, seen) do
+    if MapSet.member?(seen, key) do
+      0
+    else
+      case Map.get(prereq_by_key, key) do
+        nil -> 0
+        prereq -> 1 + chain_depth(prereq, prereq_by_key, MapSet.put(seen, key))
+      end
     end
   end
 
-  defp chain_depth(_key, _prereq_by_key, _hops), do: 0
-
-  defp chain_root(key, prereq_by_key, hops) when hops < @max_chain_walk do
-    case Map.get(prereq_by_key, key) do
-      nil -> key
-      prereq -> chain_root(prereq, prereq_by_key, hops + 1)
+  defp chain_root(key, prereq_by_key, seen) do
+    if MapSet.member?(seen, key) do
+      key
+    else
+      case Map.get(prereq_by_key, key) do
+        nil -> key
+        prereq -> chain_root(prereq, prereq_by_key, MapSet.put(seen, key))
+      end
     end
   end
-
-  defp chain_root(key, _prereq_by_key, _hops), do: key
 
   defp anonymous_catalog(active, category, page, page_size) do
     now = DateTime.utc_now(:second)

@@ -33,7 +33,11 @@ defmodule Gamend.Quests.Quest do
 
   @type t :: %__MODULE__{}
 
-  @resets ~w(never daily weekly monthly interval)
+  # `repeat` re-arms the moment its reward is claimed rather than waiting for a
+  # clock: available again immediately, as many times as the player can finish
+  # it. For an endless objective — find the treasure, then the next one — a
+  # calendar reset would cap the payout at once per period.
+  @resets ~w(never daily weekly monthly interval repeat)
 
   schema "quests" do
     field :key, :string

@@ -3,7 +3,7 @@ defmodule Gamend.Quests do
   Event-driven quest/progression engine.
 
   One engine, three independent dimensions: a **reset** cycle (never / daily /
-  weekly / monthly / every N days), an optional **window**
+  weekly / monthly / every N days / repeat-on-claim), an optional **window**
   (`starts_at`/`ends_at`), and an optional **prerequisite**
   (`prerequisite_quest_key`). Any combination works — a biweekly quest inside
   a seasonal window that also requires an earlier quest is just those three
@@ -26,7 +26,9 @@ defmodule Gamend.Quests do
 
   Claiming is gated by an atomic `completed → claimed` status transition, so a
   double-tap or a concurrent claim can't double-pay. Rewards are granted after
-  the transition with a per-entry idempotency key (`"quest:<progress_id>:<i>"`),
+  the transition with a per-entry idempotency key (`"quest:<progress_id>:<i>"`,
+  or `"quest:<progress_id>:<claim_count>:<i>"` once a `repeat` quest has been
+  claimed before — the row alone would dedupe its own second payout),
   so a crashed or retried grant can't double-apply either; rows that claimed
   but never finished granting are healed by `recover_pending_rewards/1`.
   Quests with `auto_claim` grant immediately on completion (skipping the
@@ -39,6 +41,12 @@ defmodule Gamend.Quests do
   `"I14-1436"`, never → `"static"`). A new period simply means a new progress
   row on the next reported event — nothing needs to fire at midnight, and
   state resolves correctly even if no job ever runs.
+
+  `repeat` is the exception: it has no clock at all. The row is re-armed the
+  moment its reward is paid, so the quest is available again immediately and
+  as often as the player can finish it — for an endless objective, a calendar
+  reset would cap the payout at once per period. It reuses `"static"` as its
+  period and counts claims on the row instead (see `claim_count`).
 
   UTC means one global rollover instant rather than one per player: a daily
   turns over at noon in New Zealand and mid-afternoon the day before on the US
@@ -620,6 +628,12 @@ defmodule Gamend.Quests do
          :ok <- run_before_claim(user_id, quest, progress, opts),
          {:ok, progress} <- transition_to_claimed(progress, now) do
       rewards = grant_rewards(user_id, quest, progress)
+      # Re-arm AFTER granting, never before: the claimed row is what makes the
+      # payout exactly-once, and re-arming first would reopen the quest with
+      # its reward still unpaid. A crash in between leaves the row claimed with
+      # rewards_granted_at set, which `rearm_repeat_quests/1` heals on the next
+      # read rather than stranding the player on a quest that never comes back.
+      _ = maybe_rearm(quest, progress, now)
       progress = Repo.get_uuid(QuestProgress, progress.id)
 
       broadcast_progress(:quest_claimed, user_id, progress)
@@ -631,6 +645,145 @@ defmodule Gamend.Quests do
       {:ok, %{progress: progress, rewards: rewards}}
     end
   end
+
+  # A `repeat` quest is available again the instant its reward is paid. The row
+  # is reused rather than replaced so nothing else has to learn a new period
+  # scheme — `claim_count` is what keeps the next payout's idempotency key
+  # distinct from this one's.
+  defp maybe_rearm(%Quest{reset: "repeat"}, %QuestProgress{} = progress, now) do
+    {count, _} =
+      from(p in QuestProgress,
+        where: p.id == ^progress.id and p.status == "claimed" and not is_nil(p.rewards_granted_at)
+      )
+      |> Repo.update_all(
+        set: [
+          status: "active",
+          objective_progress: %{},
+          completed_at: nil,
+          claimed_at: nil,
+          rewards_granted_at: nil,
+          updated_at: now
+        ],
+        inc: [claim_count: 1]
+      )
+
+    count
+  end
+
+  defp maybe_rearm(_quest, _progress, _now), do: 0
+
+  @counter_placeholder "%{n}"
+
+  @doc """
+  A `repeat` quest's title and description with `%{n}` filled in.
+
+  A repeat quest is one definition and one row that re-arms forever, so it has
+  no natural way to say *which* run the player is on — the card reads the same
+  the tenth time as the first. `"Treasures x %{n}"` renders "Treasures x 1"
+  before the first claim and "Treasures x 2" after it.
+
+  Substituted here, at the point a definition is paired with a player's row,
+  because the definition is global and the count is not: writing the number
+  into the stored title would show every player the same one.
+
+  Non-repeat quests and titles without the placeholder pass through untouched,
+  so this is invisible to everything that does not opt in.
+  """
+  @spec resolve_counter(Quest.t(), QuestProgress.t() | nil) :: Quest.t()
+  def resolve_counter(%Quest{reset: "repeat"} = quest, progress) do
+    if counter?(quest.title) or counter?(quest.description) do
+      n = repetition(progress)
+
+      %{
+        quest
+        | title: fill_counter(quest.title, n),
+          description: fill_counter(quest.description, n)
+      }
+    else
+      quest
+    end
+  end
+
+  def resolve_counter(%Quest{} = quest, _progress), do: quest
+
+  # The run the player is on, 1-based: a row that has never been claimed is
+  # run 1. A claimed row that has not re-armed yet still reads as the run just
+  # finished, so the card a player is looking at when they claim keeps its
+  # number instead of jumping forward under them.
+  defp repetition(nil), do: 1
+
+  defp repetition(%QuestProgress{claim_count: count, status: status}) do
+    claimed = count || 0
+    if status == "claimed", do: max(claimed, 1), else: claimed + 1
+  end
+
+  defp counter?(value) when is_binary(value), do: String.contains?(value, @counter_placeholder)
+  defp counter?(_value), do: false
+
+  defp fill_counter(value, n) when is_binary(value),
+    do: String.replace(value, @counter_placeholder, Integer.to_string(n))
+
+  defp fill_counter(value, _n), do: value
+
+  @doc """
+  Re-open `repeat` quests whose reward was paid but which never re-armed.
+
+  Only reachable by crashing between the grant and the re-arm. Healing on read
+  keeps that window from stranding a player on a quest that will never come
+  back, without a job that has to be running for the feature to work.
+  """
+  @spec rearm_repeat_quests(keyword()) :: non_neg_integer()
+  def rearm_repeat_quests(opts \\ []) do
+    repeat_keys = active_quests() |> Enum.filter(&(&1.reset == "repeat")) |> Enum.map(& &1.key)
+
+    if repeat_keys == [] do
+      0
+    else
+      now = DateTime.utc_now(:second)
+
+      query =
+        from p in QuestProgress,
+          where:
+            p.quest_key in ^repeat_keys and p.status == "claimed" and
+              not is_nil(p.rewards_granted_at)
+
+      query =
+        case Keyword.get(opts, :user_id) do
+          nil -> query
+          user_id -> where(query, [p], p.user_id == ^user_id)
+        end
+
+      {count, _} =
+        Repo.update_all(query,
+          set: [
+            status: "active",
+            objective_progress: %{},
+            completed_at: nil,
+            claimed_at: nil,
+            rewards_granted_at: nil,
+            updated_at: now
+          ],
+          inc: [claim_count: 1]
+        )
+
+      count
+    end
+  end
+
+  # A `repeat` quest claims the SAME row more than once, so the row id alone
+  # would make every claim after the first look like a duplicate and pay
+  # nothing at all — silently, since a deduped grant is a success.
+  #
+  # The first claim keeps the ORIGINAL key shape. Anything else would change the
+  # key for rows already claimed but mid-grant at deploy time, and
+  # `recover_pending_rewards` would retry them against a key the first attempt
+  # never wrote — paying a second time for work already done.
+  defp reward_idempotency_key(%QuestProgress{claim_count: n} = progress, index)
+       when is_integer(n) and n > 0 do
+    "quest:#{progress.id}:#{n}:#{index}"
+  end
+
+  defp reward_idempotency_key(progress, index), do: "quest:#{progress.id}:#{index}"
 
   defp claimable(nil), do: {:error, :not_completed}
   defp claimable(%QuestProgress{status: "active"}), do: {:error, :not_completed}
@@ -663,12 +816,13 @@ defmodule Gamend.Quests do
 
   # Grants run post-transition with per-entry idempotency keys; a partial
   # failure leaves rewards_granted_at unset so recovery can retry safely.
+  #
   defp grant_rewards(user_id, quest, progress) do
     results =
       quest.rewards
       |> Enum.with_index()
       |> Enum.map(fn {reward, index} ->
-        key = "quest:#{progress.id}:#{index}"
+        key = reward_idempotency_key(progress, index)
 
         result =
           case reward.type do
@@ -799,7 +953,7 @@ defmodule Gamend.Quests do
         prereq = quest.prerequisite_quest_key
 
         %{
-          quest: quest,
+          quest: resolve_counter(quest, progress),
           progress: progress,
           claimable: progress != nil and progress.status == "completed",
           locked: prereq != nil and prereq not in done,
@@ -863,6 +1017,7 @@ defmodule Gamend.Quests do
           [%{quest: Quest.t(), progress: QuestProgress.t() | nil, claimable: boolean()}]
   def list_user_quests(user_id, opts \\ []) when is_binary(user_id) do
     _ = recover_pending_rewards(user_id: user_id)
+    _ = rearm_repeat_quests(user_id: user_id)
 
     now = DateTime.utc_now(:second)
 
@@ -943,7 +1098,7 @@ defmodule Gamend.Quests do
       progress = Map.get(rows, {quest.key, period_key(quest, now)})
 
       %{
-        quest: quest,
+        quest: resolve_counter(quest, progress),
         progress: progress,
         claimable: progress != nil and progress.status == "completed"
       }
@@ -1017,7 +1172,9 @@ defmodule Gamend.Quests do
     |> paginate(opts)
     |> select([p, q], {p, q})
     |> Repo.all()
-    |> Enum.map(fn {progress, quest} -> %{quest: quest, progress: progress} end)
+    |> Enum.map(fn {progress, quest} ->
+      %{quest: resolve_counter(quest, progress), progress: progress}
+    end)
   end
 
   @doc "Count of a user's completed quests (same filters as `list_user_completions/2`)."

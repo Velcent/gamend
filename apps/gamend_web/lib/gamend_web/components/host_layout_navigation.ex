@@ -340,52 +340,34 @@ defmodule GamendWeb.HostLayoutNavigation do
   attr :known_locales, :list, default: []
   attr :mobile, :boolean, default: false
 
+  @doc """
+  The button that opens the language picker.
+
+  Only a button: the 30 locale entries live in `language_modal/1`, rendered
+  once per page. They used to be rendered here as well — a desktop dropdown
+  and a mobile modal holding the same list — which put 60 links and 60 flags
+  into every page, 31% of the HTML on a page like `/about`.
+  """
   def language_dropdown(assigns) do
-    locale_links =
-      locale_links(assigns.current_path, assigns.current_query, assigns.known_locales)
-
-    label = locale_label(assigns.locale)
-
-    assigns = assign(assigns, locale_links: locale_links, label: label)
+    assigns = assign(assigns, :label, locale_label(assigns.locale))
 
     ~H"""
-    <%= if @mobile do %>
-      <label for="lang-modal" class="btn btn-ghost btn-sm w-full relative cursor-pointer">
-        <.icon name="hero-globe-alt-solid" class="w-4 h-4" />
-        {@label}
-        <.icon name="hero-chevron-down-solid" class="w-3 h-3 absolute right-3" />
-      </label>
-    <% else %>
-      <details class="dropdown dropdown-end" data-navbar-dropdown>
-        <summary class="btn btn-outline list-none">
-          <.icon name="hero-globe-alt-solid" class="w-4 h-4" />
-          {@label}
-          <.icon name="hero-chevron-down-solid" class="w-3 h-3" />
-        </summary>
-        <ul class="dropdown-content mt-2 p-2 shadow bg-base-100 rounded-box overflow-y-auto grid grid-cols-3 gap-0.5 w-[28rem] z-[1] max-h-[60vh]">
-          <%= for link <- @locale_links do %>
-            <li class="list-none">
-              <a
-                href={link.href}
-                rel={link[:rel]}
-                class={[
-                  "flex items-center gap-2 px-2 py-1.5 rounded text-sm whitespace-nowrap hover:bg-base-200 transition-colors",
-                  link.locale == @locale && "bg-primary/10 font-semibold text-primary"
-                ]}
-              >
-                <.flag
-                  code={link.flag_code}
-                  class="rounded-[2px] shadow-sm ring-1 ring-base-content/10"
-                />
-                <span class="truncate">{link.label}</span>
-              </a>
-            </li>
-          <% end %>
-        </ul>
-      </details>
-    <% end %>
+    <label
+      for="lang-modal"
+      class={[
+        "btn relative cursor-pointer list-none",
+        if(@mobile, do: "btn-ghost btn-sm w-full", else: "btn-outline")
+      ]}
+    >
+      <.icon name="hero-globe-alt-solid" class="w-4 h-4" />
+      {@label}
+      <.icon name="hero-chevron-down-solid" class={chevron_class(@mobile)} />
+    </label>
     """
   end
+
+  defp chevron_class(true), do: "w-3 h-3 absolute right-3"
+  defp chevron_class(_mobile), do: "w-3 h-3"
 
   attr :locale, :string, required: true
   attr :current_path, :string, default: nil
@@ -408,7 +390,7 @@ defmodule GamendWeb.HostLayoutNavigation do
       aria-label={GamendWeb.HostLayouts.translate("Choose language")}
     />
     <div class="modal modal-bottom sm:modal-middle z-[100]" role="dialog">
-      <div class="modal-box max-w-2xl">
+      <div class="modal-box max-w-3xl">
         <label
           for="lang-modal"
           aria-label={GamendWeb.HostLayouts.translate("Close language picker")}
@@ -420,7 +402,9 @@ defmodule GamendWeb.HostLayoutNavigation do
           <.icon name="hero-globe-alt-solid" class="w-5 h-5" />
           {@label}
         </h3>
-        <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-1">
+        <%!-- Four columns at most: "Español" and "Español (España)" truncate to
+              the same string in five, which makes them impossible to tell apart. --%>
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1">
           <%= for link <- @locale_links do %>
             <a
               href={link.href}
