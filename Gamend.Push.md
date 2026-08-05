@@ -180,7 +180,7 @@ never as a public client endpoint. Best-effort by design: no live devices
 means no jobs, and delivery failures never propagate back to the caller.
 
 Returns `:ok` or `{:error, errors}` when the message fails validation
-(see `Gamend.Push.Message.new/1`).
+(see `Gamend.Push.Message`).
 
 # `send_to_users`
 
