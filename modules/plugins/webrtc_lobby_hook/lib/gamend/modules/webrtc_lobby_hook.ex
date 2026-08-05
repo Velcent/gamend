@@ -62,8 +62,8 @@ defmodule Gamend.Modules.WebRTCLobbyHook do
     %{
       @room_ready_event =>
         "A signaling room is ready. The star host should connect to the " <>
-        "channel topic provided in the payload. Payload fields: " <>
-        "`lobby_id`, `topology`, `host_user_id`, `signaling_topic`."
+          "channel topic provided in the payload. Payload fields: " <>
+          "`lobby_id`, `topology`, `host_user_id`, `signaling_topic`."
     }
   end
 

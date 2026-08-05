@@ -98,7 +98,8 @@ defmodule GamendHost.MixProject do
         ] ++ local_web_commands([web_test_cmd("test")]),
       lint:
         ["format --check-formatted", "credo --strict"] ++
-          local_web_commands([web_cmd("format --check-formatted"), web_cmd("credo --strict")]),
+          local_web_commands([web_cmd("format --check-formatted"), web_cmd("credo --strict")]) ++
+          plugin_commands("format --check-formatted"),
       "deps.audit": [&prune_vendored_lockfiles/1, "deps.audit"],
       # The inner loop: fast checks only. Generators and the web app's own
       precommit:
@@ -124,7 +125,7 @@ defmodule GamendHost.MixProject do
             web_test_cmd("compile --warning-as-errors"),
             web_cmd("format"),
             web_cmd("credo --strict")
-          ]),
+          ]) ++ plugin_commands("format"),
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
       "assets.build": ["compile", "tailwind gamend_web", "esbuild gamend_web"],
       "assets.deploy": [
@@ -158,6 +159,27 @@ defmodule GamendHost.MixProject do
 
   defp local_web_commands(commands) do
     if local_web_source?(), do: commands, else: []
+  end
+
+  # Bundled plugins are their own mix projects, so neither the umbrella's
+  # formatter inputs nor `local_web_commands/1` reach them. Without this, a
+  # misformatted plugin passes `precommit` and fails on CI, which does walk
+  # `modules/plugins/*`.
+  defp plugin_commands(task) do
+    for dir <- plugin_paths(), do: "cmd --cd #{dir} env #{force_ansi()}mix #{task}"
+  end
+
+  defp plugin_paths do
+    case File.ls("modules/plugins") do
+      {:ok, entries} ->
+        entries
+        |> Enum.sort()
+        |> Enum.map(&Path.join("modules/plugins", &1))
+        |> Enum.filter(&File.regular?(Path.join(&1, "mix.exs")))
+
+      {:error, _not_a_checkout_with_plugins} ->
+        []
+    end
   end
 
   defp local_web_source?, do: File.dir?("apps/gamend_web")
