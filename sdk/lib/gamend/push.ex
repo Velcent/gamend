@@ -264,7 +264,7 @@ defmodule Gamend.Push do
     means no jobs, and delivery failures never propagate back to the caller.
     
     Returns `:ok` or `{:error, errors}` when the message fails validation
-    (see `Gamend.Push.Message.new/1`).
+    (see `Gamend.Push.Message`).
     
   """
   @spec send_to_user(user_id(), map(), keyword()) :: :ok | {:error, map()}

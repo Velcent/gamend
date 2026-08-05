@@ -220,41 +220,44 @@ defmodule GamendWeb.QuestsLive do
 
     depths =
       Map.new(prereq_by_key, fn {key, _} ->
-        {key, chain_depth(key, prereq_by_key, MapSet.new())}
+        {key, chain_depth(key, prereq_by_key, %{})}
       end)
 
     totals =
       Enum.reduce(depths, %{}, fn {key, depth}, acc ->
-        root = chain_root(key, prereq_by_key, MapSet.new())
+        root = chain_root(key, prereq_by_key, %{})
         Map.update(acc, root, depth + 1, &max(&1, depth + 1))
       end)
 
     depths
     |> Enum.map(fn {key, depth} ->
-      {key, {depth + 1, Map.get(totals, chain_root(key, prereq_by_key, MapSet.new()), depth + 1)}}
+      {key, {depth + 1, Map.get(totals, chain_root(key, prereq_by_key, %{}), depth + 1)}}
     end)
     |> Enum.filter(fn {_key, {_pos, total}} -> total > 1 end)
     |> Map.new()
   end
 
+  # `seen` is a plain map, not a MapSet: dialyzer strips the opacity off a
+  # MapSet built and consumed inside one recursion and then reports the
+  # MapSet.member?/2 call as a type mismatch.
   defp chain_depth(key, prereq_by_key, seen) do
-    if MapSet.member?(seen, key) do
+    if Map.has_key?(seen, key) do
       0
     else
       case Map.get(prereq_by_key, key) do
         nil -> 0
-        prereq -> 1 + chain_depth(prereq, prereq_by_key, MapSet.put(seen, key))
+        prereq -> 1 + chain_depth(prereq, prereq_by_key, Map.put(seen, key, true))
       end
     end
   end
 
   defp chain_root(key, prereq_by_key, seen) do
-    if MapSet.member?(seen, key) do
+    if Map.has_key?(seen, key) do
       key
     else
       case Map.get(prereq_by_key, key) do
         nil -> key
-        prereq -> chain_root(prereq, prereq_by_key, MapSet.put(seen, key))
+        prereq -> chain_root(prereq, prereq_by_key, Map.put(seen, key, true))
       end
     end
   end

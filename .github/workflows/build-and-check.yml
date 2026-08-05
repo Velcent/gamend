@@ -745,18 +745,25 @@ jobs:
         run: |
           mix deps.get
           # Do not swallow the exit code: publishing silently failed for
-          # months behind an `|| echo`. A version that already exists is
-          # not an error to hex.publish, so a non-zero exit is real.
-          mix hex.publish --yes
+          # months behind an `|| echo`. hex.publish rejects a version that
+          # already exists ("must include the --replace flag"), so any
+          # non-zero exit that survives the re-publish guard below is real.
+          if curl -sfo /dev/null "https://hex.pm/api/packages/gamend_sdk/releases/${APP_VERSION}"; then
+            echo "gamend_sdk ${APP_VERSION} is already on Hex - skipping (workflow re-run on the same commit)."
+          else
+            mix hex.publish --yes
+          fi
 
       - name: Publish gamend_plugin_tools
         working-directory: sdk_tools
         run: |
           mix deps.get
-          # Do not swallow the exit code: publishing silently failed for
-          # months behind an `|| echo`. A version that already exists is
-          # not an error to hex.publish, so a non-zero exit is real.
-          mix hex.publish --yes
+          # Same re-publish guard as gamend_sdk above.
+          if curl -sfo /dev/null "https://hex.pm/api/packages/gamend_plugin_tools/releases/${APP_VERSION}"; then
+            echo "gamend_plugin_tools ${APP_VERSION} is already on Hex - skipping (workflow re-run on the same commit)."
+          else
+            mix hex.publish --yes
+          fi
 
       # gamend_core and gamend_web are NOT published to Hex.
       #
