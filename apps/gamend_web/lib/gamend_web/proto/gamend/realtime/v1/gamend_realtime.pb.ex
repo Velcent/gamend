@@ -309,6 +309,58 @@ defmodule Gamend.Realtime.V1.PartyInviteEvent do
   field :user_id, 2, type: :string, json_name: "userId"
 end
 
+defmodule Gamend.Realtime.V1.WalletChange do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "gamend.realtime.v1.WalletChange",
+    protoc_gen_elixir_version: "0.17.0",
+    syntax: :proto3
+
+  field :currency, 1, type: :string
+  field :balance, 2, type: :int64
+  field :delta, 3, type: :sint64
+end
+
+defmodule Gamend.Realtime.V1.InventoryChange do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "gamend.realtime.v1.InventoryChange",
+    protoc_gen_elixir_version: "0.17.0",
+    syntax: :proto3
+
+  field :item_code, 1, type: :string, json_name: "itemCode"
+  field :quantity, 2, type: :int64
+  field :delta, 3, type: :sint64
+end
+
+defmodule Gamend.Realtime.V1.ChatMute do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "gamend.realtime.v1.ChatMute",
+    protoc_gen_elixir_version: "0.17.0",
+    syntax: :proto3
+
+  field :scope, 1, type: :string
+  field :scope_ref_id, 2, type: :string, json_name: "scopeRefId"
+  field :expires_at, 3, type: :int64, json_name: "expiresAt"
+  field :reason, 4, type: :string
+end
+
+defmodule Gamend.Realtime.V1.ChatUnmute do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "gamend.realtime.v1.ChatUnmute",
+    protoc_gen_elixir_version: "0.17.0",
+    syntax: :proto3
+
+  field :scope, 1, type: :string
+  field :scope_ref_id, 2, type: :string, json_name: "scopeRefId"
+end
+
 defmodule Gamend.Realtime.V1.TournamentEvent do
   @moduledoc false
 
@@ -426,7 +478,7 @@ defmodule Gamend.Realtime.V1.RpcCall do
     protoc_gen_elixir_version: "0.17.0",
     syntax: :proto3
 
-  oneof(:args, 0)
+  oneof :args, 0
 
   field :id, 1, type: :uint32
   field :plugin, 2, type: :string
@@ -443,7 +495,7 @@ defmodule Gamend.Realtime.V1.RpcReply do
     protoc_gen_elixir_version: "0.17.0",
     syntax: :proto3
 
-  oneof(:data, 0)
+  oneof :data, 0
 
   field :id, 1, type: :uint32
   field :data_json, 2, type: :bytes, json_name: "dataJson", oneof: 0
@@ -470,7 +522,7 @@ defmodule Gamend.Realtime.V1.RtcEnvelope do
     protoc_gen_elixir_version: "0.17.0",
     syntax: :proto3
 
-  oneof(:msg, 0)
+  oneof :msg, 0
 
   field :call_hook, 1, type: Gamend.Realtime.V1.RpcCall, json_name: "callHook", oneof: 0
   field :hook_reply, 2, type: Gamend.Realtime.V1.RpcReply, json_name: "hookReply", oneof: 0

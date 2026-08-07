@@ -6221,6 +6221,1074 @@ export const gamend = $root.gamend = (() => {
                 return PartyInviteEvent;
             })();
 
+            v1.WalletChange = (function() {
+
+                /**
+                 * Properties of a WalletChange.
+                 * @typedef {Object} gamend.realtime.v1.WalletChange.$Properties
+                 * @property {string|null} [currency] WalletChange currency
+                 * @property {number|Long|null} [balance] WalletChange balance
+                 * @property {number|Long|null} [delta] WalletChange delta
+                 * @property {Array.<Uint8Array>} [$unknowns] Unknown fields preserved while decoding when enabled
+                 */
+
+                /**
+                 * Properties of a WalletChange.
+                 * @memberof gamend.realtime.v1
+                 * @interface IWalletChange
+                 * @augments gamend.realtime.v1.WalletChange.$Properties
+                 * @deprecated Use gamend.realtime.v1.WalletChange.$Properties instead.
+                 */
+
+                /**
+                 * Shape of a WalletChange.
+                 * @typedef {gamend.realtime.v1.WalletChange.$Properties} gamend.realtime.v1.WalletChange.$Shape
+                 */
+
+                /**
+                 * Constructs a new WalletChange.
+                 * @memberof gamend.realtime.v1
+                 * @classdesc Represents a WalletChange.
+                 * @constructor
+                 * @param {gamend.realtime.v1.WalletChange.$Properties=} [properties] Properties to set
+                 * @property {Array.<Uint8Array>} [$unknowns] Unknown fields preserved while decoding when enabled
+                 */
+                const WalletChange = function (properties) {
+                    if (properties)
+                        for (let keys = $Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null && keys[i] !== "__proto__")
+                                this[keys[i]] = properties[keys[i]];
+                };
+
+                /**
+                 * WalletChange currency.
+                 * @member {string} currency
+                 * @memberof gamend.realtime.v1.WalletChange
+                 * @instance
+                 */
+                WalletChange.prototype.currency = "";
+
+                /**
+                 * WalletChange balance.
+                 * @member {number|Long} balance
+                 * @memberof gamend.realtime.v1.WalletChange
+                 * @instance
+                 */
+                WalletChange.prototype.balance = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+
+                /**
+                 * WalletChange delta.
+                 * @member {number|Long} delta
+                 * @memberof gamend.realtime.v1.WalletChange
+                 * @instance
+                 */
+                WalletChange.prototype.delta = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+
+                /**
+                 * Encodes the specified WalletChange message. Does not implicitly {@link gamend.realtime.v1.WalletChange.verify|verify} messages.
+                 * @function encode
+                 * @memberof gamend.realtime.v1.WalletChange
+                 * @static
+                 * @param {gamend.realtime.v1.WalletChange.$Properties} message WalletChange message or plain object to encode
+                 * @param {$protobuf.Writer} [writer] Writer to encode to
+                 * @returns {$protobuf.Writer} Writer
+                 */
+                WalletChange.encode = function (message, writer, _depth) {
+                    if (!writer)
+                        writer = $Writer.create();
+                    if (_depth === $undefined)
+                        _depth = 0;
+                    if (_depth > $util.recursionLimit)
+                        throw $Error("max depth exceeded");
+                    if (message.currency != null && $Object.hasOwnProperty.call(message, "currency") && message.currency !== "")
+                        writer.uint32(/* id 1, wireType 2 =*/10).string(message.currency);
+                    if (message.balance != null && $Object.hasOwnProperty.call(message, "balance") && (typeof message.balance === "object" ? message.balance.low || message.balance.high : message.balance !== 0))
+                        writer.uint32(/* id 2, wireType 0 =*/16).int64(message.balance);
+                    if (message.delta != null && $Object.hasOwnProperty.call(message, "delta") && (typeof message.delta === "object" ? message.delta.low || message.delta.high : message.delta !== 0))
+                        writer.uint32(/* id 3, wireType 0 =*/24).sint64(message.delta);
+                    if (message.$unknowns != null && $Object.hasOwnProperty.call(message, "$unknowns"))
+                        for (let i = 0; i < message.$unknowns.length; ++i)
+                            writer.raw(message.$unknowns[i]);
+                    return writer;
+                };
+
+                /**
+                 * Decodes a WalletChange message from the specified reader or buffer.
+                 * @function decode
+                 * @memberof gamend.realtime.v1.WalletChange
+                 * @static
+                 * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+                 * @param {number} [length] Message length if known beforehand
+                 * @returns {gamend.realtime.v1.WalletChange & gamend.realtime.v1.WalletChange.$Shape} WalletChange
+                 * @throws {Error} If the payload is not a reader or valid buffer
+                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                 */
+                WalletChange.decode = function (reader, length, _end, _depth, _target) {
+                    if (!(reader instanceof $Reader))
+                        reader = $Reader.create(reader);
+                    if (_depth === $undefined)
+                        _depth = 0;
+                    if (_depth > $Reader.recursionLimit)
+                        throw $Error("max depth exceeded");
+                    let end = length === $undefined ? reader.len : reader.pos + length, message = _target || new $root.gamend.realtime.v1.WalletChange(), value;
+                    while (reader.pos < end) {
+                        let start = reader.pos;
+                        let tag = reader.tag();
+                        if (tag === _end) {
+                            _end = $undefined;
+                            break;
+                        }
+                        let wireType = tag & 7;
+                        switch (tag >>>= 3) {
+                        case 1: {
+                                if (wireType !== 2)
+                                    break;
+                                if ((value = reader.stringVerify()).length)
+                                    message.currency = value;
+                                else
+                                    delete message.currency;
+                                continue;
+                            }
+                        case 2: {
+                                if (wireType !== 0)
+                                    break;
+                                if (typeof (value = reader.int64()) === "object" ? value.low || value.high : value !== 0)
+                                    message.balance = value;
+                                else
+                                    delete message.balance;
+                                continue;
+                            }
+                        case 3: {
+                                if (wireType !== 0)
+                                    break;
+                                if (typeof (value = reader.sint64()) === "object" ? value.low || value.high : value !== 0)
+                                    message.delta = value;
+                                else
+                                    delete message.delta;
+                                continue;
+                            }
+                        }
+                        reader.skipType(wireType, _depth, tag);
+                        if (!reader.discardUnknown) {
+                            $util.makeProp(message, "$unknowns", false);
+                            (message.$unknowns || (message.$unknowns = [])).push(reader.raw(start, reader.pos));
+                        }
+                    }
+                    if (_end !== $undefined)
+                        throw $Error("missing end group");
+                    return message;
+                };
+
+                /**
+                 * Creates a WalletChange message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof gamend.realtime.v1.WalletChange
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {gamend.realtime.v1.WalletChange} WalletChange
+                 */
+                WalletChange.fromObject = function (object, _depth) {
+                    if (object instanceof $root.gamend.realtime.v1.WalletChange)
+                        return object;
+                    if (!$util.isObject(object))
+                        throw $TypeError(".gamend.realtime.v1.WalletChange: object expected");
+                    if (_depth === $undefined)
+                        _depth = 0;
+                    if (_depth > $util.recursionLimit)
+                        throw $Error("max depth exceeded");
+                    let message = new $root.gamend.realtime.v1.WalletChange();
+                    if (object.currency != null)
+                        if (typeof object.currency !== "string" || object.currency.length)
+                            message.currency = $String(object.currency);
+                    if (object.balance != null)
+                        if (typeof object.balance === "object" ? object.balance.low || object.balance.high : $Number(object.balance) !== 0)
+                            if ($util.Long)
+                                message.balance = $util.Long.fromValue(object.balance, false);
+                            else if (typeof object.balance === "string")
+                                message.balance = $parseInt(object.balance, 10);
+                            else if (typeof object.balance === "number")
+                                message.balance = object.balance;
+                            else if (typeof object.balance === "object")
+                                message.balance = new $util.LongBits(object.balance.low >>> 0, object.balance.high >>> 0).toNumber();
+                    if (object.delta != null)
+                        if (typeof object.delta === "object" ? object.delta.low || object.delta.high : $Number(object.delta) !== 0)
+                            if ($util.Long)
+                                message.delta = $util.Long.fromValue(object.delta, false);
+                            else if (typeof object.delta === "string")
+                                message.delta = $parseInt(object.delta, 10);
+                            else if (typeof object.delta === "number")
+                                message.delta = object.delta;
+                            else if (typeof object.delta === "object")
+                                message.delta = new $util.LongBits(object.delta.low >>> 0, object.delta.high >>> 0).toNumber();
+                    return message;
+                };
+
+                /**
+                 * Creates a plain object from a WalletChange message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof gamend.realtime.v1.WalletChange
+                 * @static
+                 * @param {gamend.realtime.v1.WalletChange} message WalletChange
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                WalletChange.toObject = function (message, options, _depth) {
+                    if (!options)
+                        options = {};
+                    if (_depth === $undefined)
+                        _depth = 0;
+                    if (_depth > $util.recursionLimit)
+                        throw $Error("max depth exceeded");
+                    let object = {};
+                    if (options.defaults) {
+                        object.currency = "";
+                        if ($util.Long) {
+                            let long = new $util.Long(0, 0, false);
+                            object.balance = options.longs === $String ? long.toString() : options.longs === $Number ? long.toNumber() : typeof $BigInt !== "undefined" && options.longs === $BigInt ? long.toBigInt() : long;
+                        } else
+                            object.balance = options.longs === $String ? "0" : typeof $BigInt !== "undefined" && options.longs === $BigInt ? $BigInt("0") : 0;
+                        if ($util.Long) {
+                            let long = new $util.Long(0, 0, false);
+                            object.delta = options.longs === $String ? long.toString() : options.longs === $Number ? long.toNumber() : typeof $BigInt !== "undefined" && options.longs === $BigInt ? long.toBigInt() : long;
+                        } else
+                            object.delta = options.longs === $String ? "0" : typeof $BigInt !== "undefined" && options.longs === $BigInt ? $BigInt("0") : 0;
+                    }
+                    if (message.currency != null && $Object.hasOwnProperty.call(message, "currency"))
+                        object.currency = message.currency;
+                    if (message.balance != null && $Object.hasOwnProperty.call(message, "balance"))
+                        if (typeof $BigInt !== "undefined" && options.longs === $BigInt)
+                            object.balance = typeof message.balance === "number" ? $BigInt(message.balance) : $util.Long.fromBits(message.balance.low >>> 0, message.balance.high >>> 0, false).toBigInt();
+                        else if (typeof message.balance === "number")
+                            object.balance = options.longs === $String ? $String(message.balance) : message.balance;
+                        else
+                            object.balance = options.longs === $String ? $util.Long.prototype.toString.call(message.balance) : options.longs === $Number ? new $util.LongBits(message.balance.low >>> 0, message.balance.high >>> 0).toNumber() : message.balance;
+                    if (message.delta != null && $Object.hasOwnProperty.call(message, "delta"))
+                        if (typeof $BigInt !== "undefined" && options.longs === $BigInt)
+                            object.delta = typeof message.delta === "number" ? $BigInt(message.delta) : $util.Long.fromBits(message.delta.low >>> 0, message.delta.high >>> 0, false).toBigInt();
+                        else if (typeof message.delta === "number")
+                            object.delta = options.longs === $String ? $String(message.delta) : message.delta;
+                        else
+                            object.delta = options.longs === $String ? $util.Long.prototype.toString.call(message.delta) : options.longs === $Number ? new $util.LongBits(message.delta.low >>> 0, message.delta.high >>> 0).toNumber() : message.delta;
+                    return object;
+                };
+
+                /**
+                 * Converts this WalletChange to JSON.
+                 * @function toJSON
+                 * @memberof gamend.realtime.v1.WalletChange
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                WalletChange.prototype.toJSON = function() {
+                    return WalletChange.toObject(this, $protobuf.util.toJSONOptions);
+                };
+
+                /**
+                 * Gets the type url for WalletChange
+                 * @function getTypeUrl
+                 * @memberof gamend.realtime.v1.WalletChange
+                 * @static
+                 * @param {string} [prefix] Custom type url prefix, defaults to `"type.googleapis.com"`
+                 * @returns {string} The type url
+                 */
+                WalletChange.getTypeUrl = function(prefix) {
+                    if (prefix === $undefined)
+                        prefix = "type.googleapis.com";
+                    return prefix + "/gamend.realtime.v1.WalletChange";
+                };
+
+                return WalletChange;
+            })();
+
+            v1.InventoryChange = (function() {
+
+                /**
+                 * Properties of an InventoryChange.
+                 * @typedef {Object} gamend.realtime.v1.InventoryChange.$Properties
+                 * @property {string|null} [item_code] InventoryChange item_code
+                 * @property {number|Long|null} [quantity] InventoryChange quantity
+                 * @property {number|Long|null} [delta] InventoryChange delta
+                 * @property {Array.<Uint8Array>} [$unknowns] Unknown fields preserved while decoding when enabled
+                 */
+
+                /**
+                 * Properties of an InventoryChange.
+                 * @memberof gamend.realtime.v1
+                 * @interface IInventoryChange
+                 * @augments gamend.realtime.v1.InventoryChange.$Properties
+                 * @deprecated Use gamend.realtime.v1.InventoryChange.$Properties instead.
+                 */
+
+                /**
+                 * Shape of an InventoryChange.
+                 * @typedef {gamend.realtime.v1.InventoryChange.$Properties} gamend.realtime.v1.InventoryChange.$Shape
+                 */
+
+                /**
+                 * Constructs a new InventoryChange.
+                 * @memberof gamend.realtime.v1
+                 * @classdesc Represents an InventoryChange.
+                 * @constructor
+                 * @param {gamend.realtime.v1.InventoryChange.$Properties=} [properties] Properties to set
+                 * @property {Array.<Uint8Array>} [$unknowns] Unknown fields preserved while decoding when enabled
+                 */
+                const InventoryChange = function (properties) {
+                    if (properties)
+                        for (let keys = $Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null && keys[i] !== "__proto__")
+                                this[keys[i]] = properties[keys[i]];
+                };
+
+                /**
+                 * InventoryChange item_code.
+                 * @member {string} item_code
+                 * @memberof gamend.realtime.v1.InventoryChange
+                 * @instance
+                 */
+                InventoryChange.prototype.item_code = "";
+
+                /**
+                 * InventoryChange quantity.
+                 * @member {number|Long} quantity
+                 * @memberof gamend.realtime.v1.InventoryChange
+                 * @instance
+                 */
+                InventoryChange.prototype.quantity = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+
+                /**
+                 * InventoryChange delta.
+                 * @member {number|Long} delta
+                 * @memberof gamend.realtime.v1.InventoryChange
+                 * @instance
+                 */
+                InventoryChange.prototype.delta = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+
+                /**
+                 * Encodes the specified InventoryChange message. Does not implicitly {@link gamend.realtime.v1.InventoryChange.verify|verify} messages.
+                 * @function encode
+                 * @memberof gamend.realtime.v1.InventoryChange
+                 * @static
+                 * @param {gamend.realtime.v1.InventoryChange.$Properties} message InventoryChange message or plain object to encode
+                 * @param {$protobuf.Writer} [writer] Writer to encode to
+                 * @returns {$protobuf.Writer} Writer
+                 */
+                InventoryChange.encode = function (message, writer, _depth) {
+                    if (!writer)
+                        writer = $Writer.create();
+                    if (_depth === $undefined)
+                        _depth = 0;
+                    if (_depth > $util.recursionLimit)
+                        throw $Error("max depth exceeded");
+                    if (message.item_code != null && $Object.hasOwnProperty.call(message, "item_code") && message.item_code !== "")
+                        writer.uint32(/* id 1, wireType 2 =*/10).string(message.item_code);
+                    if (message.quantity != null && $Object.hasOwnProperty.call(message, "quantity") && (typeof message.quantity === "object" ? message.quantity.low || message.quantity.high : message.quantity !== 0))
+                        writer.uint32(/* id 2, wireType 0 =*/16).int64(message.quantity);
+                    if (message.delta != null && $Object.hasOwnProperty.call(message, "delta") && (typeof message.delta === "object" ? message.delta.low || message.delta.high : message.delta !== 0))
+                        writer.uint32(/* id 3, wireType 0 =*/24).sint64(message.delta);
+                    if (message.$unknowns != null && $Object.hasOwnProperty.call(message, "$unknowns"))
+                        for (let i = 0; i < message.$unknowns.length; ++i)
+                            writer.raw(message.$unknowns[i]);
+                    return writer;
+                };
+
+                /**
+                 * Decodes an InventoryChange message from the specified reader or buffer.
+                 * @function decode
+                 * @memberof gamend.realtime.v1.InventoryChange
+                 * @static
+                 * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+                 * @param {number} [length] Message length if known beforehand
+                 * @returns {gamend.realtime.v1.InventoryChange & gamend.realtime.v1.InventoryChange.$Shape} InventoryChange
+                 * @throws {Error} If the payload is not a reader or valid buffer
+                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                 */
+                InventoryChange.decode = function (reader, length, _end, _depth, _target) {
+                    if (!(reader instanceof $Reader))
+                        reader = $Reader.create(reader);
+                    if (_depth === $undefined)
+                        _depth = 0;
+                    if (_depth > $Reader.recursionLimit)
+                        throw $Error("max depth exceeded");
+                    let end = length === $undefined ? reader.len : reader.pos + length, message = _target || new $root.gamend.realtime.v1.InventoryChange(), value;
+                    while (reader.pos < end) {
+                        let start = reader.pos;
+                        let tag = reader.tag();
+                        if (tag === _end) {
+                            _end = $undefined;
+                            break;
+                        }
+                        let wireType = tag & 7;
+                        switch (tag >>>= 3) {
+                        case 1: {
+                                if (wireType !== 2)
+                                    break;
+                                if ((value = reader.stringVerify()).length)
+                                    message.item_code = value;
+                                else
+                                    delete message.item_code;
+                                continue;
+                            }
+                        case 2: {
+                                if (wireType !== 0)
+                                    break;
+                                if (typeof (value = reader.int64()) === "object" ? value.low || value.high : value !== 0)
+                                    message.quantity = value;
+                                else
+                                    delete message.quantity;
+                                continue;
+                            }
+                        case 3: {
+                                if (wireType !== 0)
+                                    break;
+                                if (typeof (value = reader.sint64()) === "object" ? value.low || value.high : value !== 0)
+                                    message.delta = value;
+                                else
+                                    delete message.delta;
+                                continue;
+                            }
+                        }
+                        reader.skipType(wireType, _depth, tag);
+                        if (!reader.discardUnknown) {
+                            $util.makeProp(message, "$unknowns", false);
+                            (message.$unknowns || (message.$unknowns = [])).push(reader.raw(start, reader.pos));
+                        }
+                    }
+                    if (_end !== $undefined)
+                        throw $Error("missing end group");
+                    return message;
+                };
+
+                /**
+                 * Creates an InventoryChange message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof gamend.realtime.v1.InventoryChange
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {gamend.realtime.v1.InventoryChange} InventoryChange
+                 */
+                InventoryChange.fromObject = function (object, _depth) {
+                    if (object instanceof $root.gamend.realtime.v1.InventoryChange)
+                        return object;
+                    if (!$util.isObject(object))
+                        throw $TypeError(".gamend.realtime.v1.InventoryChange: object expected");
+                    if (_depth === $undefined)
+                        _depth = 0;
+                    if (_depth > $util.recursionLimit)
+                        throw $Error("max depth exceeded");
+                    let message = new $root.gamend.realtime.v1.InventoryChange();
+                    if (object.item_code != null)
+                        if (typeof object.item_code !== "string" || object.item_code.length)
+                            message.item_code = $String(object.item_code);
+                    if (object.quantity != null)
+                        if (typeof object.quantity === "object" ? object.quantity.low || object.quantity.high : $Number(object.quantity) !== 0)
+                            if ($util.Long)
+                                message.quantity = $util.Long.fromValue(object.quantity, false);
+                            else if (typeof object.quantity === "string")
+                                message.quantity = $parseInt(object.quantity, 10);
+                            else if (typeof object.quantity === "number")
+                                message.quantity = object.quantity;
+                            else if (typeof object.quantity === "object")
+                                message.quantity = new $util.LongBits(object.quantity.low >>> 0, object.quantity.high >>> 0).toNumber();
+                    if (object.delta != null)
+                        if (typeof object.delta === "object" ? object.delta.low || object.delta.high : $Number(object.delta) !== 0)
+                            if ($util.Long)
+                                message.delta = $util.Long.fromValue(object.delta, false);
+                            else if (typeof object.delta === "string")
+                                message.delta = $parseInt(object.delta, 10);
+                            else if (typeof object.delta === "number")
+                                message.delta = object.delta;
+                            else if (typeof object.delta === "object")
+                                message.delta = new $util.LongBits(object.delta.low >>> 0, object.delta.high >>> 0).toNumber();
+                    return message;
+                };
+
+                /**
+                 * Creates a plain object from an InventoryChange message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof gamend.realtime.v1.InventoryChange
+                 * @static
+                 * @param {gamend.realtime.v1.InventoryChange} message InventoryChange
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                InventoryChange.toObject = function (message, options, _depth) {
+                    if (!options)
+                        options = {};
+                    if (_depth === $undefined)
+                        _depth = 0;
+                    if (_depth > $util.recursionLimit)
+                        throw $Error("max depth exceeded");
+                    let object = {};
+                    if (options.defaults) {
+                        object.item_code = "";
+                        if ($util.Long) {
+                            let long = new $util.Long(0, 0, false);
+                            object.quantity = options.longs === $String ? long.toString() : options.longs === $Number ? long.toNumber() : typeof $BigInt !== "undefined" && options.longs === $BigInt ? long.toBigInt() : long;
+                        } else
+                            object.quantity = options.longs === $String ? "0" : typeof $BigInt !== "undefined" && options.longs === $BigInt ? $BigInt("0") : 0;
+                        if ($util.Long) {
+                            let long = new $util.Long(0, 0, false);
+                            object.delta = options.longs === $String ? long.toString() : options.longs === $Number ? long.toNumber() : typeof $BigInt !== "undefined" && options.longs === $BigInt ? long.toBigInt() : long;
+                        } else
+                            object.delta = options.longs === $String ? "0" : typeof $BigInt !== "undefined" && options.longs === $BigInt ? $BigInt("0") : 0;
+                    }
+                    if (message.item_code != null && $Object.hasOwnProperty.call(message, "item_code"))
+                        object.item_code = message.item_code;
+                    if (message.quantity != null && $Object.hasOwnProperty.call(message, "quantity"))
+                        if (typeof $BigInt !== "undefined" && options.longs === $BigInt)
+                            object.quantity = typeof message.quantity === "number" ? $BigInt(message.quantity) : $util.Long.fromBits(message.quantity.low >>> 0, message.quantity.high >>> 0, false).toBigInt();
+                        else if (typeof message.quantity === "number")
+                            object.quantity = options.longs === $String ? $String(message.quantity) : message.quantity;
+                        else
+                            object.quantity = options.longs === $String ? $util.Long.prototype.toString.call(message.quantity) : options.longs === $Number ? new $util.LongBits(message.quantity.low >>> 0, message.quantity.high >>> 0).toNumber() : message.quantity;
+                    if (message.delta != null && $Object.hasOwnProperty.call(message, "delta"))
+                        if (typeof $BigInt !== "undefined" && options.longs === $BigInt)
+                            object.delta = typeof message.delta === "number" ? $BigInt(message.delta) : $util.Long.fromBits(message.delta.low >>> 0, message.delta.high >>> 0, false).toBigInt();
+                        else if (typeof message.delta === "number")
+                            object.delta = options.longs === $String ? $String(message.delta) : message.delta;
+                        else
+                            object.delta = options.longs === $String ? $util.Long.prototype.toString.call(message.delta) : options.longs === $Number ? new $util.LongBits(message.delta.low >>> 0, message.delta.high >>> 0).toNumber() : message.delta;
+                    return object;
+                };
+
+                /**
+                 * Converts this InventoryChange to JSON.
+                 * @function toJSON
+                 * @memberof gamend.realtime.v1.InventoryChange
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                InventoryChange.prototype.toJSON = function() {
+                    return InventoryChange.toObject(this, $protobuf.util.toJSONOptions);
+                };
+
+                /**
+                 * Gets the type url for InventoryChange
+                 * @function getTypeUrl
+                 * @memberof gamend.realtime.v1.InventoryChange
+                 * @static
+                 * @param {string} [prefix] Custom type url prefix, defaults to `"type.googleapis.com"`
+                 * @returns {string} The type url
+                 */
+                InventoryChange.getTypeUrl = function(prefix) {
+                    if (prefix === $undefined)
+                        prefix = "type.googleapis.com";
+                    return prefix + "/gamend.realtime.v1.InventoryChange";
+                };
+
+                return InventoryChange;
+            })();
+
+            v1.ChatMute = (function() {
+
+                /**
+                 * Properties of a ChatMute.
+                 * @typedef {Object} gamend.realtime.v1.ChatMute.$Properties
+                 * @property {string|null} [scope] ChatMute scope
+                 * @property {string|null} [scope_ref_id] ChatMute scope_ref_id
+                 * @property {number|Long|null} [expires_at] ChatMute expires_at
+                 * @property {string|null} [reason] ChatMute reason
+                 * @property {Array.<Uint8Array>} [$unknowns] Unknown fields preserved while decoding when enabled
+                 */
+
+                /**
+                 * Properties of a ChatMute.
+                 * @memberof gamend.realtime.v1
+                 * @interface IChatMute
+                 * @augments gamend.realtime.v1.ChatMute.$Properties
+                 * @deprecated Use gamend.realtime.v1.ChatMute.$Properties instead.
+                 */
+
+                /**
+                 * Shape of a ChatMute.
+                 * @typedef {gamend.realtime.v1.ChatMute.$Properties} gamend.realtime.v1.ChatMute.$Shape
+                 */
+
+                /**
+                 * Constructs a new ChatMute.
+                 * @memberof gamend.realtime.v1
+                 * @classdesc Represents a ChatMute.
+                 * @constructor
+                 * @param {gamend.realtime.v1.ChatMute.$Properties=} [properties] Properties to set
+                 * @property {Array.<Uint8Array>} [$unknowns] Unknown fields preserved while decoding when enabled
+                 */
+                const ChatMute = function (properties) {
+                    if (properties)
+                        for (let keys = $Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null && keys[i] !== "__proto__")
+                                this[keys[i]] = properties[keys[i]];
+                };
+
+                /**
+                 * ChatMute scope.
+                 * @member {string} scope
+                 * @memberof gamend.realtime.v1.ChatMute
+                 * @instance
+                 */
+                ChatMute.prototype.scope = "";
+
+                /**
+                 * ChatMute scope_ref_id.
+                 * @member {string} scope_ref_id
+                 * @memberof gamend.realtime.v1.ChatMute
+                 * @instance
+                 */
+                ChatMute.prototype.scope_ref_id = "";
+
+                /**
+                 * ChatMute expires_at.
+                 * @member {number|Long} expires_at
+                 * @memberof gamend.realtime.v1.ChatMute
+                 * @instance
+                 */
+                ChatMute.prototype.expires_at = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+
+                /**
+                 * ChatMute reason.
+                 * @member {string} reason
+                 * @memberof gamend.realtime.v1.ChatMute
+                 * @instance
+                 */
+                ChatMute.prototype.reason = "";
+
+                /**
+                 * Encodes the specified ChatMute message. Does not implicitly {@link gamend.realtime.v1.ChatMute.verify|verify} messages.
+                 * @function encode
+                 * @memberof gamend.realtime.v1.ChatMute
+                 * @static
+                 * @param {gamend.realtime.v1.ChatMute.$Properties} message ChatMute message or plain object to encode
+                 * @param {$protobuf.Writer} [writer] Writer to encode to
+                 * @returns {$protobuf.Writer} Writer
+                 */
+                ChatMute.encode = function (message, writer, _depth) {
+                    if (!writer)
+                        writer = $Writer.create();
+                    if (_depth === $undefined)
+                        _depth = 0;
+                    if (_depth > $util.recursionLimit)
+                        throw $Error("max depth exceeded");
+                    if (message.scope != null && $Object.hasOwnProperty.call(message, "scope") && message.scope !== "")
+                        writer.uint32(/* id 1, wireType 2 =*/10).string(message.scope);
+                    if (message.scope_ref_id != null && $Object.hasOwnProperty.call(message, "scope_ref_id") && message.scope_ref_id !== "")
+                        writer.uint32(/* id 2, wireType 2 =*/18).string(message.scope_ref_id);
+                    if (message.expires_at != null && $Object.hasOwnProperty.call(message, "expires_at") && (typeof message.expires_at === "object" ? message.expires_at.low || message.expires_at.high : message.expires_at !== 0))
+                        writer.uint32(/* id 3, wireType 0 =*/24).int64(message.expires_at);
+                    if (message.reason != null && $Object.hasOwnProperty.call(message, "reason") && message.reason !== "")
+                        writer.uint32(/* id 4, wireType 2 =*/34).string(message.reason);
+                    if (message.$unknowns != null && $Object.hasOwnProperty.call(message, "$unknowns"))
+                        for (let i = 0; i < message.$unknowns.length; ++i)
+                            writer.raw(message.$unknowns[i]);
+                    return writer;
+                };
+
+                /**
+                 * Decodes a ChatMute message from the specified reader or buffer.
+                 * @function decode
+                 * @memberof gamend.realtime.v1.ChatMute
+                 * @static
+                 * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+                 * @param {number} [length] Message length if known beforehand
+                 * @returns {gamend.realtime.v1.ChatMute & gamend.realtime.v1.ChatMute.$Shape} ChatMute
+                 * @throws {Error} If the payload is not a reader or valid buffer
+                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                 */
+                ChatMute.decode = function (reader, length, _end, _depth, _target) {
+                    if (!(reader instanceof $Reader))
+                        reader = $Reader.create(reader);
+                    if (_depth === $undefined)
+                        _depth = 0;
+                    if (_depth > $Reader.recursionLimit)
+                        throw $Error("max depth exceeded");
+                    let end = length === $undefined ? reader.len : reader.pos + length, message = _target || new $root.gamend.realtime.v1.ChatMute(), value;
+                    while (reader.pos < end) {
+                        let start = reader.pos;
+                        let tag = reader.tag();
+                        if (tag === _end) {
+                            _end = $undefined;
+                            break;
+                        }
+                        let wireType = tag & 7;
+                        switch (tag >>>= 3) {
+                        case 1: {
+                                if (wireType !== 2)
+                                    break;
+                                if ((value = reader.stringVerify()).length)
+                                    message.scope = value;
+                                else
+                                    delete message.scope;
+                                continue;
+                            }
+                        case 2: {
+                                if (wireType !== 2)
+                                    break;
+                                if ((value = reader.stringVerify()).length)
+                                    message.scope_ref_id = value;
+                                else
+                                    delete message.scope_ref_id;
+                                continue;
+                            }
+                        case 3: {
+                                if (wireType !== 0)
+                                    break;
+                                if (typeof (value = reader.int64()) === "object" ? value.low || value.high : value !== 0)
+                                    message.expires_at = value;
+                                else
+                                    delete message.expires_at;
+                                continue;
+                            }
+                        case 4: {
+                                if (wireType !== 2)
+                                    break;
+                                if ((value = reader.stringVerify()).length)
+                                    message.reason = value;
+                                else
+                                    delete message.reason;
+                                continue;
+                            }
+                        }
+                        reader.skipType(wireType, _depth, tag);
+                        if (!reader.discardUnknown) {
+                            $util.makeProp(message, "$unknowns", false);
+                            (message.$unknowns || (message.$unknowns = [])).push(reader.raw(start, reader.pos));
+                        }
+                    }
+                    if (_end !== $undefined)
+                        throw $Error("missing end group");
+                    return message;
+                };
+
+                /**
+                 * Creates a ChatMute message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof gamend.realtime.v1.ChatMute
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {gamend.realtime.v1.ChatMute} ChatMute
+                 */
+                ChatMute.fromObject = function (object, _depth) {
+                    if (object instanceof $root.gamend.realtime.v1.ChatMute)
+                        return object;
+                    if (!$util.isObject(object))
+                        throw $TypeError(".gamend.realtime.v1.ChatMute: object expected");
+                    if (_depth === $undefined)
+                        _depth = 0;
+                    if (_depth > $util.recursionLimit)
+                        throw $Error("max depth exceeded");
+                    let message = new $root.gamend.realtime.v1.ChatMute();
+                    if (object.scope != null)
+                        if (typeof object.scope !== "string" || object.scope.length)
+                            message.scope = $String(object.scope);
+                    if (object.scope_ref_id != null)
+                        if (typeof object.scope_ref_id !== "string" || object.scope_ref_id.length)
+                            message.scope_ref_id = $String(object.scope_ref_id);
+                    if (object.expires_at != null)
+                        if (typeof object.expires_at === "object" ? object.expires_at.low || object.expires_at.high : $Number(object.expires_at) !== 0)
+                            if ($util.Long)
+                                message.expires_at = $util.Long.fromValue(object.expires_at, false);
+                            else if (typeof object.expires_at === "string")
+                                message.expires_at = $parseInt(object.expires_at, 10);
+                            else if (typeof object.expires_at === "number")
+                                message.expires_at = object.expires_at;
+                            else if (typeof object.expires_at === "object")
+                                message.expires_at = new $util.LongBits(object.expires_at.low >>> 0, object.expires_at.high >>> 0).toNumber();
+                    if (object.reason != null)
+                        if (typeof object.reason !== "string" || object.reason.length)
+                            message.reason = $String(object.reason);
+                    return message;
+                };
+
+                /**
+                 * Creates a plain object from a ChatMute message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof gamend.realtime.v1.ChatMute
+                 * @static
+                 * @param {gamend.realtime.v1.ChatMute} message ChatMute
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                ChatMute.toObject = function (message, options, _depth) {
+                    if (!options)
+                        options = {};
+                    if (_depth === $undefined)
+                        _depth = 0;
+                    if (_depth > $util.recursionLimit)
+                        throw $Error("max depth exceeded");
+                    let object = {};
+                    if (options.defaults) {
+                        object.scope = "";
+                        object.scope_ref_id = "";
+                        if ($util.Long) {
+                            let long = new $util.Long(0, 0, false);
+                            object.expires_at = options.longs === $String ? long.toString() : options.longs === $Number ? long.toNumber() : typeof $BigInt !== "undefined" && options.longs === $BigInt ? long.toBigInt() : long;
+                        } else
+                            object.expires_at = options.longs === $String ? "0" : typeof $BigInt !== "undefined" && options.longs === $BigInt ? $BigInt("0") : 0;
+                        object.reason = "";
+                    }
+                    if (message.scope != null && $Object.hasOwnProperty.call(message, "scope"))
+                        object.scope = message.scope;
+                    if (message.scope_ref_id != null && $Object.hasOwnProperty.call(message, "scope_ref_id"))
+                        object.scope_ref_id = message.scope_ref_id;
+                    if (message.expires_at != null && $Object.hasOwnProperty.call(message, "expires_at"))
+                        if (typeof $BigInt !== "undefined" && options.longs === $BigInt)
+                            object.expires_at = typeof message.expires_at === "number" ? $BigInt(message.expires_at) : $util.Long.fromBits(message.expires_at.low >>> 0, message.expires_at.high >>> 0, false).toBigInt();
+                        else if (typeof message.expires_at === "number")
+                            object.expires_at = options.longs === $String ? $String(message.expires_at) : message.expires_at;
+                        else
+                            object.expires_at = options.longs === $String ? $util.Long.prototype.toString.call(message.expires_at) : options.longs === $Number ? new $util.LongBits(message.expires_at.low >>> 0, message.expires_at.high >>> 0).toNumber() : message.expires_at;
+                    if (message.reason != null && $Object.hasOwnProperty.call(message, "reason"))
+                        object.reason = message.reason;
+                    return object;
+                };
+
+                /**
+                 * Converts this ChatMute to JSON.
+                 * @function toJSON
+                 * @memberof gamend.realtime.v1.ChatMute
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                ChatMute.prototype.toJSON = function() {
+                    return ChatMute.toObject(this, $protobuf.util.toJSONOptions);
+                };
+
+                /**
+                 * Gets the type url for ChatMute
+                 * @function getTypeUrl
+                 * @memberof gamend.realtime.v1.ChatMute
+                 * @static
+                 * @param {string} [prefix] Custom type url prefix, defaults to `"type.googleapis.com"`
+                 * @returns {string} The type url
+                 */
+                ChatMute.getTypeUrl = function(prefix) {
+                    if (prefix === $undefined)
+                        prefix = "type.googleapis.com";
+                    return prefix + "/gamend.realtime.v1.ChatMute";
+                };
+
+                return ChatMute;
+            })();
+
+            v1.ChatUnmute = (function() {
+
+                /**
+                 * Properties of a ChatUnmute.
+                 * @typedef {Object} gamend.realtime.v1.ChatUnmute.$Properties
+                 * @property {string|null} [scope] ChatUnmute scope
+                 * @property {string|null} [scope_ref_id] ChatUnmute scope_ref_id
+                 * @property {Array.<Uint8Array>} [$unknowns] Unknown fields preserved while decoding when enabled
+                 */
+
+                /**
+                 * Properties of a ChatUnmute.
+                 * @memberof gamend.realtime.v1
+                 * @interface IChatUnmute
+                 * @augments gamend.realtime.v1.ChatUnmute.$Properties
+                 * @deprecated Use gamend.realtime.v1.ChatUnmute.$Properties instead.
+                 */
+
+                /**
+                 * Shape of a ChatUnmute.
+                 * @typedef {gamend.realtime.v1.ChatUnmute.$Properties} gamend.realtime.v1.ChatUnmute.$Shape
+                 */
+
+                /**
+                 * Constructs a new ChatUnmute.
+                 * @memberof gamend.realtime.v1
+                 * @classdesc Represents a ChatUnmute.
+                 * @constructor
+                 * @param {gamend.realtime.v1.ChatUnmute.$Properties=} [properties] Properties to set
+                 * @property {Array.<Uint8Array>} [$unknowns] Unknown fields preserved while decoding when enabled
+                 */
+                const ChatUnmute = function (properties) {
+                    if (properties)
+                        for (let keys = $Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null && keys[i] !== "__proto__")
+                                this[keys[i]] = properties[keys[i]];
+                };
+
+                /**
+                 * ChatUnmute scope.
+                 * @member {string} scope
+                 * @memberof gamend.realtime.v1.ChatUnmute
+                 * @instance
+                 */
+                ChatUnmute.prototype.scope = "";
+
+                /**
+                 * ChatUnmute scope_ref_id.
+                 * @member {string} scope_ref_id
+                 * @memberof gamend.realtime.v1.ChatUnmute
+                 * @instance
+                 */
+                ChatUnmute.prototype.scope_ref_id = "";
+
+                /**
+                 * Encodes the specified ChatUnmute message. Does not implicitly {@link gamend.realtime.v1.ChatUnmute.verify|verify} messages.
+                 * @function encode
+                 * @memberof gamend.realtime.v1.ChatUnmute
+                 * @static
+                 * @param {gamend.realtime.v1.ChatUnmute.$Properties} message ChatUnmute message or plain object to encode
+                 * @param {$protobuf.Writer} [writer] Writer to encode to
+                 * @returns {$protobuf.Writer} Writer
+                 */
+                ChatUnmute.encode = function (message, writer, _depth) {
+                    if (!writer)
+                        writer = $Writer.create();
+                    if (_depth === $undefined)
+                        _depth = 0;
+                    if (_depth > $util.recursionLimit)
+                        throw $Error("max depth exceeded");
+                    if (message.scope != null && $Object.hasOwnProperty.call(message, "scope") && message.scope !== "")
+                        writer.uint32(/* id 1, wireType 2 =*/10).string(message.scope);
+                    if (message.scope_ref_id != null && $Object.hasOwnProperty.call(message, "scope_ref_id") && message.scope_ref_id !== "")
+                        writer.uint32(/* id 2, wireType 2 =*/18).string(message.scope_ref_id);
+                    if (message.$unknowns != null && $Object.hasOwnProperty.call(message, "$unknowns"))
+                        for (let i = 0; i < message.$unknowns.length; ++i)
+                            writer.raw(message.$unknowns[i]);
+                    return writer;
+                };
+
+                /**
+                 * Decodes a ChatUnmute message from the specified reader or buffer.
+                 * @function decode
+                 * @memberof gamend.realtime.v1.ChatUnmute
+                 * @static
+                 * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+                 * @param {number} [length] Message length if known beforehand
+                 * @returns {gamend.realtime.v1.ChatUnmute & gamend.realtime.v1.ChatUnmute.$Shape} ChatUnmute
+                 * @throws {Error} If the payload is not a reader or valid buffer
+                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                 */
+                ChatUnmute.decode = function (reader, length, _end, _depth, _target) {
+                    if (!(reader instanceof $Reader))
+                        reader = $Reader.create(reader);
+                    if (_depth === $undefined)
+                        _depth = 0;
+                    if (_depth > $Reader.recursionLimit)
+                        throw $Error("max depth exceeded");
+                    let end = length === $undefined ? reader.len : reader.pos + length, message = _target || new $root.gamend.realtime.v1.ChatUnmute(), value;
+                    while (reader.pos < end) {
+                        let start = reader.pos;
+                        let tag = reader.tag();
+                        if (tag === _end) {
+                            _end = $undefined;
+                            break;
+                        }
+                        let wireType = tag & 7;
+                        switch (tag >>>= 3) {
+                        case 1: {
+                                if (wireType !== 2)
+                                    break;
+                                if ((value = reader.stringVerify()).length)
+                                    message.scope = value;
+                                else
+                                    delete message.scope;
+                                continue;
+                            }
+                        case 2: {
+                                if (wireType !== 2)
+                                    break;
+                                if ((value = reader.stringVerify()).length)
+                                    message.scope_ref_id = value;
+                                else
+                                    delete message.scope_ref_id;
+                                continue;
+                            }
+                        }
+                        reader.skipType(wireType, _depth, tag);
+                        if (!reader.discardUnknown) {
+                            $util.makeProp(message, "$unknowns", false);
+                            (message.$unknowns || (message.$unknowns = [])).push(reader.raw(start, reader.pos));
+                        }
+                    }
+                    if (_end !== $undefined)
+                        throw $Error("missing end group");
+                    return message;
+                };
+
+                /**
+                 * Creates a ChatUnmute message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof gamend.realtime.v1.ChatUnmute
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {gamend.realtime.v1.ChatUnmute} ChatUnmute
+                 */
+                ChatUnmute.fromObject = function (object, _depth) {
+                    if (object instanceof $root.gamend.realtime.v1.ChatUnmute)
+                        return object;
+                    if (!$util.isObject(object))
+                        throw $TypeError(".gamend.realtime.v1.ChatUnmute: object expected");
+                    if (_depth === $undefined)
+                        _depth = 0;
+                    if (_depth > $util.recursionLimit)
+                        throw $Error("max depth exceeded");
+                    let message = new $root.gamend.realtime.v1.ChatUnmute();
+                    if (object.scope != null)
+                        if (typeof object.scope !== "string" || object.scope.length)
+                            message.scope = $String(object.scope);
+                    if (object.scope_ref_id != null)
+                        if (typeof object.scope_ref_id !== "string" || object.scope_ref_id.length)
+                            message.scope_ref_id = $String(object.scope_ref_id);
+                    return message;
+                };
+
+                /**
+                 * Creates a plain object from a ChatUnmute message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof gamend.realtime.v1.ChatUnmute
+                 * @static
+                 * @param {gamend.realtime.v1.ChatUnmute} message ChatUnmute
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                ChatUnmute.toObject = function (message, options, _depth) {
+                    if (!options)
+                        options = {};
+                    if (_depth === $undefined)
+                        _depth = 0;
+                    if (_depth > $util.recursionLimit)
+                        throw $Error("max depth exceeded");
+                    let object = {};
+                    if (options.defaults) {
+                        object.scope = "";
+                        object.scope_ref_id = "";
+                    }
+                    if (message.scope != null && $Object.hasOwnProperty.call(message, "scope"))
+                        object.scope = message.scope;
+                    if (message.scope_ref_id != null && $Object.hasOwnProperty.call(message, "scope_ref_id"))
+                        object.scope_ref_id = message.scope_ref_id;
+                    return object;
+                };
+
+                /**
+                 * Converts this ChatUnmute to JSON.
+                 * @function toJSON
+                 * @memberof gamend.realtime.v1.ChatUnmute
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                ChatUnmute.prototype.toJSON = function() {
+                    return ChatUnmute.toObject(this, $protobuf.util.toJSONOptions);
+                };
+
+                /**
+                 * Gets the type url for ChatUnmute
+                 * @function getTypeUrl
+                 * @memberof gamend.realtime.v1.ChatUnmute
+                 * @static
+                 * @param {string} [prefix] Custom type url prefix, defaults to `"type.googleapis.com"`
+                 * @returns {string} The type url
+                 */
+                ChatUnmute.getTypeUrl = function(prefix) {
+                    if (prefix === $undefined)
+                        prefix = "type.googleapis.com";
+                    return prefix + "/gamend.realtime.v1.ChatUnmute";
+                };
+
+                return ChatUnmute;
+            })();
+
             v1.TournamentEvent = (function() {
 
                 /**
@@ -7329,6 +8397,7 @@ export const gamend = $root.gamend = (() => {
                  * @property {string|null} [your_state] ReadyCheckState your_state
                  * @property {string|null} [reason] ReadyCheckState reason
                  * @property {Array.<gamend.realtime.v1.ReadyCheckParticipant.$Properties>|null} [participants] ReadyCheckState participants
+                 * @property {string|null} [party_id] ReadyCheckState party_id
                  * @property {Array.<Uint8Array>} [$unknowns] Unknown fields preserved while decoding when enabled
                  */
 
@@ -7442,6 +8511,14 @@ export const gamend = $root.gamend = (() => {
                 ReadyCheckState.prototype.participants = $util.emptyArray;
 
                 /**
+                 * ReadyCheckState party_id.
+                 * @member {string} party_id
+                 * @memberof gamend.realtime.v1.ReadyCheckState
+                 * @instance
+                 */
+                ReadyCheckState.prototype.party_id = "";
+
+                /**
                  * Encodes the specified ReadyCheckState message. Does not implicitly {@link gamend.realtime.v1.ReadyCheckState.verify|verify} messages.
                  * @function encode
                  * @memberof gamend.realtime.v1.ReadyCheckState
@@ -7478,6 +8555,8 @@ export const gamend = $root.gamend = (() => {
                     if (message.participants != null && message.participants.length)
                         for (let i = 0; i < message.participants.length; ++i)
                             $root.gamend.realtime.v1.ReadyCheckParticipant.encode(message.participants[i], writer.uint32(/* id 10, wireType 2 =*/82).fork(), _depth + 1).ldelim();
+                    if (message.party_id != null && $Object.hasOwnProperty.call(message, "party_id") && message.party_id !== "")
+                        writer.uint32(/* id 11, wireType 2 =*/90).string(message.party_id);
                     if (message.$unknowns != null && $Object.hasOwnProperty.call(message, "$unknowns"))
                         for (let i = 0; i < message.$unknowns.length; ++i)
                             writer.raw(message.$unknowns[i]);
@@ -7601,6 +8680,15 @@ export const gamend = $root.gamend = (() => {
                                 message.participants.push($root.gamend.realtime.v1.ReadyCheckParticipant.decode(reader, reader.uint32(), $undefined, _depth + 1));
                                 continue;
                             }
+                        case 11: {
+                                if (wireType !== 2)
+                                    break;
+                                if ((value = reader.stringVerify()).length)
+                                    message.party_id = value;
+                                else
+                                    delete message.party_id;
+                                continue;
+                            }
                         }
                         reader.skipType(wireType, _depth, tag);
                         if (!reader.discardUnknown) {
@@ -7675,6 +8763,9 @@ export const gamend = $root.gamend = (() => {
                             message.participants[i] = $root.gamend.realtime.v1.ReadyCheckParticipant.fromObject(object.participants[i], _depth + 1);
                         }
                     }
+                    if (object.party_id != null)
+                        if (typeof object.party_id !== "string" || object.party_id.length)
+                            message.party_id = $String(object.party_id);
                     return message;
                 };
 
@@ -7711,6 +8802,7 @@ export const gamend = $root.gamend = (() => {
                         object.ready_count = 0;
                         object.your_state = "";
                         object.reason = "";
+                        object.party_id = "";
                     }
                     if (message.id != null && $Object.hasOwnProperty.call(message, "id"))
                         object.id = message.id;
@@ -7740,6 +8832,8 @@ export const gamend = $root.gamend = (() => {
                         for (let j = 0; j < message.participants.length; ++j)
                             object.participants[j] = $root.gamend.realtime.v1.ReadyCheckParticipant.toObject(message.participants[j], options, _depth + 1);
                     }
+                    if (message.party_id != null && $Object.hasOwnProperty.call(message, "party_id"))
+                        object.party_id = message.party_id;
                     return object;
                 };
 

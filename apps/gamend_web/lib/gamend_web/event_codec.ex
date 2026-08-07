@@ -54,6 +54,19 @@ defmodule GamendWeb.EventCodec do
   defp message_for(_, "chat_message_created", p), do: chat_message(p)
   defp message_for(_, "chat_message_updated", p), do: chat_message(p)
   defp message_for(_, "chat_message_deleted", p), do: %PB.EntityId{id: get(p, :id)}
+  # Messages that existed for these all along; only the encoder side was
+  # missing, so the client decoded a binary frame the server never sent.
+  defp message_for(_, "group_invite_accepted", p), do: group_invite(p)
+  defp message_for(_, "group_invite_cancelled", p), do: group_invite(p)
+  defp message_for(_, "group_join_request_approved", p), do: group_invite(p)
+  defp message_for(_, "group_join_request_rejected", p), do: group_invite(p)
+  defp message_for(_, "party_invite_accepted", p), do: party_invite(p)
+  defp message_for(_, "party_invite_declined", p), do: party_invite(p)
+  defp message_for(_, "party_invite_cancelled", p), do: party_invite(p)
+  defp message_for(_, "wallet_updated", p), do: wallet_change(p)
+  defp message_for(_, "inventory_updated", p), do: inventory_change(p)
+  defp message_for(_, "chat_muted", p), do: chat_mute(p)
+  defp message_for(_, "chat_unmuted", p), do: chat_unmute(p)
   defp message_for(_, "quest_progress", p), do: quest_progress(p)
   defp message_for(_, "quest_completed", p), do: quest_progress(p)
   defp message_for(_, "quest_claimed", p), do: quest_progress(p)
@@ -397,6 +410,55 @@ defmodule GamendWeb.EventCodec do
       members -> {Enum.map(members, &user_brief/1), true}
     end
   end
+
+  defp wallet_change(p),
+    do: %PB.WalletChange{
+      currency: id_string(get(p, :currency)),
+      balance: int_value(get(p, :balance)),
+      delta: int_value(get(p, :delta))
+    }
+
+  defp inventory_change(p),
+    do: %PB.InventoryChange{
+      item_code: id_string(get(p, :item_code) || get(p, :code)),
+      quantity: int_value(get(p, :quantity)),
+      delta: int_value(get(p, :delta))
+    }
+
+  defp chat_mute(p),
+    do: %PB.ChatMute{
+      scope: id_string(get(p, :scope)),
+      scope_ref_id: id_string(get(p, :scope_ref_id)),
+      expires_at: unix_seconds(get(p, :expires_at)),
+      reason: id_string(get(p, :reason))
+    }
+
+  defp chat_unmute(p),
+    do: %PB.ChatUnmute{
+      scope: id_string(get(p, :scope)),
+      scope_ref_id: id_string(get(p, :scope_ref_id))
+    }
+
+  defp int_value(value) when is_integer(value), do: value
+  defp int_value(_value), do: 0
+
+  # 0 reads as "no expiry" on the wire; protobuf has no null for an int.
+  defp unix_seconds(%DateTime{} = at), do: DateTime.to_unix(at)
+  defp unix_seconds(value) when is_integer(value), do: value
+  defp unix_seconds(_value), do: 0
+
+  defp group_invite(p), do: %PB.GroupInviteEvent{group_id: id_string(get(p, :group_id))}
+
+  defp party_invite(p),
+    do: %PB.PartyInviteEvent{
+      party_id: id_string(get(p, :party_id)),
+      user_id: id_string(get(p, :user_id))
+    }
+
+  # Absent stays "" rather than "nil": protobuf has no null for a string, and
+  # the client reads a blank as "not sent".
+  defp id_string(nil), do: ""
+  defp id_string(value), do: to_string(value)
 
   # ── Value helpers ──────────────────────────────────────────────────────
 

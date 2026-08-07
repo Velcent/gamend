@@ -2,6 +2,10 @@ class_name GamendWebSocket
 extends Node
 
 signal channel_event(event: String, payload: Dictionary, status, topic: String)
+## A binary frame arrived that this client has no decoder for, so it was
+## dropped. Emitted as well as logged so a game can surface it rather than
+## wonder why one event type quietly stopped working.
+signal event_dropped(event: String, topic: String)
 signal socket_opened()
 signal socket_errored()
 signal socket_closed()
@@ -191,8 +195,17 @@ func _channel_on_event(event, payload, status, topic: String):
 	if payload is PackedByteArray:
 		var decoded = GamendProto.decode_event(topic, event, payload)
 		if decoded == null:
-			# No protobuf mapping: deliver the raw frame as-is.
-			channel_event.emit(event, payload, status, topic)
+			# A BINARY frame we cannot read. Not the same as an unmapped event —
+			# those arrive as JSON and never reach here — so this is the server
+			# encoding something this client has no decoder for. Handlers take a
+			# Dictionary, so forwarding the bytes would fail silently: say so.
+			var dropped := (
+				"Dropped binary %s on %s: no decoder. Client and server protobuf mappings disagree."
+				% [event, topic]
+			)
+			push_error("[gamend] " + dropped)
+			debug_message.emit("err", "network", dropped)
+			event_dropped.emit(event, topic)
 			return
 		payload = decoded
 	if enable_logs:

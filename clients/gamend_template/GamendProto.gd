@@ -95,6 +95,23 @@ static func decode_event(topic: String, event: String, data: PackedByteArray) ->
 			return _decode(PB.EntityId.new(), data, func(m): return {"id": m.get_id()})
 		"quest_progress", "quest_completed", "quest_claimed":
 			return _quest_progress(data)
+		"wallet_updated":
+			return _decode(PB.WalletChange.new(), data, func(m): return {
+				"currency": m.get_currency(), "balance": m.get_balance(), "delta": m.get_delta()
+			})
+		"inventory_updated":
+			return _decode(PB.InventoryChange.new(), data, func(m): return {
+				"item_code": m.get_item_code(), "quantity": m.get_quantity(), "delta": m.get_delta()
+			})
+		"chat_muted":
+			return _decode(PB.ChatMute.new(), data, func(m): return {
+				"scope": m.get_scope(), "scope_ref_id": m.get_scope_ref_id(),
+				"expires_at": m.get_expires_at(), "reason": m.get_reason()
+			})
+		"chat_unmuted":
+			return _decode(PB.ChatUnmute.new(), data, func(m): return {
+				"scope": m.get_scope(), "scope_ref_id": m.get_scope_ref_id()
+			})
 		"ready_check_started", "ready_check_updated", "ready_check_passed", "ready_check_failed":
 			return _ready_check(data)
 

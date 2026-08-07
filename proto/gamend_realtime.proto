@@ -216,6 +216,38 @@ message PartyInviteEvent {
   string user_id = 2;
 }
 
+// ── Economy ──────────────────────────────────────────────────────────────
+
+// "wallet_updated". `delta` is signed: a spend is negative.
+message WalletChange {
+  string currency = 1;
+  int64 balance = 2;
+  sint64 delta = 3;
+}
+
+// "inventory_updated". `delta` is signed, like WalletChange.
+message InventoryChange {
+  string item_code = 1;
+  int64 quantity = 2;
+  sint64 delta = 3;
+}
+
+// ── Moderation ───────────────────────────────────────────────────────────
+
+// "chat_muted". `expires_at` is a Unix second; 0 means no expiry.
+message ChatMute {
+  string scope = 1;
+  string scope_ref_id = 2;
+  int64 expires_at = 3;
+  string reason = 4;
+}
+
+// "chat_unmuted".
+message ChatUnmute {
+  string scope = 1;
+  string scope_ref_id = 2;
+}
+
 // ── Tournaments ──────────────────────────────────────────────────────────
 
 // "tournament_updated" and "tournament_finished" on user:<id> channels,

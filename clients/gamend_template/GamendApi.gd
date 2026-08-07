@@ -767,6 +767,11 @@ func _handle_lobby_event(event: String, payload: Dictionary):
 			ready_check_passed.emit(payload)
 		"ready_check_failed":
 			ready_check_failed.emit(payload)
+		_:
+			# Reached the end without a case: the server sent something this
+			# client has no handler for. Harmless, but it is exactly how a new
+			# event goes unnoticed for a release.
+			push_warning("[gamend] Unhandled user event: %s" % event)
 
 func _handle_lobbies_event(event: String, payload: Dictionary):
 	match event:
