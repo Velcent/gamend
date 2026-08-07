@@ -376,6 +376,19 @@ Re-runs reward grants for rows that claimed but never finished granting
 per-entry idempotency keys dedupe. Pass `:user_id` to heal one user (done
 lazily when they list their quests). Returns the number of rows retried.
 
+# `render_counter`
+
+```elixir
+@spec render_counter(Gamend.Quests.Quest.t()) :: Gamend.Quests.Quest.t()
+```
+
+The quest with `%{n}` replaced by its resolved counter, untranslated.
+
+For consumers that emit the stored string as-is. Anything that translates
+interpolates through Gettext instead, so the placeholder survives long
+enough to be looked up. An unresolved counter reads as run 1 — an anonymous
+visitor browsing the catalog is looking at the run they would start.
+
 # `report_event`
 
 ```elixir
@@ -397,16 +410,24 @@ Returns `{:ok, progress_rows}` for the quests that advanced.
   Gamend.Quests.Quest.t()
 ```
 
-A `repeat` quest's title and description with `%{n}` filled in.
+Works out which run of a `repeat` quest a player is on, into `:counter`.
 
 A repeat quest is one definition and one row that re-arms forever, so it has
 no natural way to say *which* run the player is on — the card reads the same
 the tenth time as the first. `"Treasures x %{n}"` renders "Treasures x 1"
 before the first claim and "Treasures x 2" after it.
 
-Substituted here, at the point a definition is paired with a player's row,
+Resolved here, at the point a definition is paired with a player's row,
 because the definition is global and the count is not: writing the number
 into the stored title would show every player the same one.
+
+The number lands on the virtual `:counter` field and `%{n}` stays in the
+title, because the title is also a **msgid**: `GamendWeb.ContentText` looks
+the translation up by it and hands `n` to Gettext as a binding, so a German
+card reads "Schätze x 3" instead of falling back to English. Filling it in
+here would leave "Treasures x 3", which matches no msgid in any locale.
+Callers that render the title without translating it — the JSON API — call
+`render_counter/1` to collapse the placeholder.
 
 Non-repeat quests and titles without the placeholder pass through untouched,
 so this is invisible to everything that does not opt in.

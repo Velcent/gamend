@@ -32,6 +32,7 @@ Three independent dimensions, so any combination is expressible:
   active: term(),
   auto_claim: term(),
   category: term(),
+  counter: term(),
   description: term(),
   ends_at: term(),
   hidden: term(),
