@@ -390,7 +390,7 @@ Live values, and where each one came from, are on the
 |---|---|---|---|
 | `GAMEND_TLS_ACME_WEBROOT` | string | - | Webroot for Let's Encrypt HTTP-01 challenge files. Defaults to /var/www/acme. |
 | `GAMEND_TLS_CERTFILE` | string | - | Path to fullchain.pem (certificate + CA chain). Warns when unset. |
-| `GAMEND_TLS_FORCE` | boolean | - | Redirect HTTP to HTTPS and send HSTS. Off unless set: a host that serves port 80 itself keeps a plain-HTTP twin of every page until you enable it. |
+| `GAMEND_TLS_FORCE` | boolean | - | Redirect HTTP to HTTPS. Off unless set: a host that serves port 80 itself keeps a plain-HTTP twin of every page until you enable it. Read per request by GamendWeb.Plugs.ForceSSL; HSTS is sent on every HTTPS response regardless, by GamendWeb.Plugs.SecurityHeaders. |
 | `GAMEND_TLS_KEYFILE` | string | - | Path to privkey.pem. Warns when unset. |
 | `GAMEND_TLS_PORT` | integer | `443` | HTTPS listen port. |
 
