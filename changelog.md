@@ -1,5 +1,6 @@
 # August 2026
 
+- [added] **Grouped** quests.
 - [added] **Repeat** quest reset type.
 
 # July 2026

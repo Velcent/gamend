@@ -23,8 +23,9 @@ again without touching real data.
   * `lobby_snapshot` — recorded runs for `/admin/lobby_snapshots`, capped at 12
     regardless of `--count` (this set is about having something to read, not
     volume)
-  * `quest` — a daily, an auto-claim achievement and a chained follow-up,
-    with per-user progress in every state (including claimable rows)
+  * `quest` — a daily, an auto-claim achievement, a chained follow-up and a
+    twelve-member group that lists as one card, with per-user progress in
+    every state (including claimable rows)
   * `ready_check` — one check per seeded lobby in every outcome (open,
     passed, timed out, declined), also capped at 12
   * `chat_moderation` — a blocklist across every severity and match mode, a

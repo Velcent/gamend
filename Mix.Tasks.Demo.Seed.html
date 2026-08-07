@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.1">
-    <meta name="project" content="gamend_core v1.0.1123">
+    <meta name="project" content="gamend_core v1.0.1124">
 
 
-    <title>mix demo.seed — gamend_core v1.0.1123</title>
+    <title>mix demo.seed — gamend_core v1.0.1124</title>
 
     <link rel="stylesheet" href="dist/html-elixir-YJO4MOOW.css" />
 
-    <script defer src="dist/sidebar_items-38903BE8.js"></script>
+    <script defer src="dist/sidebar_items-67AF66C7.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-YU4BZFVS.js"></script>
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1123
+          v1.0.1124
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">mix demo.<wbr>seed</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1123)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1124)</small>
 
     </h1>
 
@@ -122,8 +122,9 @@ again without touching real data.</p><h2 id="module-usage" class="section-headin
 </span><span class="n">mix</span><span class="w"> </span><span class="n">demo</span><span class="o">.</span><span class="n">seed</span><span class="w"> </span><span class="o">--</span><span class="n">only</span><span class="w"> </span><span class="n">group</span><span class="p">,</span><span class="n">tournament</span><span class="w">
 </span><span class="n">mix</span><span class="w"> </span><span class="n">demo</span><span class="o">.</span><span class="n">seed</span><span class="w"> </span><span class="o">--</span><span class="n">clean</span><span class="w">               </span><span class="c1"># remove everything this task created</span></code></pre><h2 id="module-sets" class="section-heading"><a href="#module-sets" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Sets</span></h2><ul><li><code class="inline">leaderboard</code> — a leaderboard with N scored records</li><li><code class="inline">group</code>       — a public group with N members</li><li><code class="inline">tournament</code>  — a tournament with N registered entries, still open</li><li><code class="inline">lobby_snapshot</code> — recorded runs for <code class="inline">/admin/lobby_snapshots</code>, capped at 12
 regardless of <code class="inline">--count</code> (this set is about having something to read, not
-volume)</li><li><code class="inline">quest</code> — a daily, an auto-claim achievement and a chained follow-up,
-with per-user progress in every state (including claimable rows)</li><li><code class="inline">ready_check</code> — one check per seeded lobby in every outcome (open,
+volume)</li><li><code class="inline">quest</code> — a daily, an auto-claim achievement, a chained follow-up and a
+twelve-member group that lists as one card, with per-user progress in
+every state (including claimable rows)</li><li><code class="inline">ready_check</code> — one check per seeded lobby in every outcome (open,
 passed, timed out, declined), also capped at 12</li><li><code class="inline">chat_moderation</code> — a blocklist across every severity and match mode, a
 report queue deep enough to page through (every status, some filter-filed,
 some resolved) and mutes in every scope, including expired ones</li></ul><p>The <code class="inline">lobby_snapshot</code> set goes through the real <code class="inline">capture_lobby/3</code> path rather
@@ -146,9 +147,9 @@ SQLite is slow. The cache is flushed afterwards so pages read the new rows.</p>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1123">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1124">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1123">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1124">Hex Preview</a>
 
             </span>
 

@@ -16,13 +16,25 @@ Three independent dimensions, so any combination is expressible:
 ## Fields
 
 - `key` — unique slug (e.g. "daily_win_3"); progress rows reference it
-- `category` — free-form label for grouping/filtering in your UI
-  ("achievement", "story", "seasonal", …); no engine behavior
 - `objectives` — list of `Gamend.Quests.Objective` (event/target/params)
 - `rewards` — list of `Gamend.Quests.Reward`, paid exactly-once
 - `auto_claim` — grant rewards on completion without a claim step
-- `hidden` — details withheld until earned (a teaser)
+- `hidden` — details withheld until earned (a teaser); the row still lists
 - `active` — inactive quests never advance and are not listed
+
+## Grouping, which has three unrelated forms
+
+- **`category`** — a label your UI filters or tabs by. No engine behavior;
+  every quest in a category still lists as its own row.
+- **`group_key`** (+ `group_title`, naming the collapsed entry) — many quests,
+  one list entry the player opens. Unordered: every member is live at once and
+  the entry stands for whichever is most worth acting on (52 countries to
+  chart, in any order).
+- **`prerequisite_quest_key`** — a chain. Also one entry, but because the
+  tiers are *ordered* and only one is reachable at a time.
+
+A quest may carry both a category and a group key. A chain inside a group
+collapses as a chain first, then contributes its surviving entry to the group.
 
 # `t`
 
@@ -35,6 +47,8 @@ Three independent dimensions, so any combination is expressible:
   counter: term(),
   description: term(),
   ends_at: term(),
+  group_key: term(),
+  group_title: term(),
   hidden: term(),
   icon_url: term(),
   id: term(),

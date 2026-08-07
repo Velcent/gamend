@@ -251,6 +251,28 @@ Get a quest by ID.
 
 Get a quest by key.
 
+# `group`
+
+```elixir
+@spec group(user_id() | nil, String.t()) :: [
+  %{
+    quest: Gamend.Quests.Quest.t(),
+    progress: Gamend.Quests.QuestProgress.t() | nil,
+    claimable: boolean()
+  }
+]
+```
+
+Every member of a group, with the viewer's progress — what a UI shows when the
+player opens the one entry the group collapsed into.
+
+Ordered by `sort_order` like any list; a group has no tiers, so unlike
+`chain/2` there is nothing locked and nothing to number. Members the quest
+list would not show this viewer (out of window, prerequisite unmet) are left
+out too, so the count on the collapsed entry matches what opening it reveals.
+
+Returns `[]` for a group key nothing carries.
+
 # `list_progress`
 
 ```elixir
@@ -315,10 +337,12 @@ Lists quests as seen by one user: active definitions in-window with the
 user's current-period progress and a claimable flag.
 
 Hidden quests are listed but carry no details until earned (callers obscure
-them). Chain quests only appear once their prerequisite is met.
+them). Chain quests only appear once their prerequisite is met. Grouped
+quests collapse to one entry carrying `:group_size`.
 
 ## Options
 - `:category` — filter by category
+- `:group` — expand this one group's members; every other group stays collapsed
 - `:status` — `"in_progress"` (not yet completed), `"claimable"`
   (completed, waiting to be claimed) or `"done"` (completed or claimed)
 - `:page` / `:page_size`
