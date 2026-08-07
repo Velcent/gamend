@@ -478,7 +478,7 @@ defmodule Gamend.Realtime.V1.RpcCall do
     protoc_gen_elixir_version: "0.17.0",
     syntax: :proto3
 
-  oneof :args, 0
+  oneof(:args, 0)
 
   field :id, 1, type: :uint32
   field :plugin, 2, type: :string
@@ -495,7 +495,7 @@ defmodule Gamend.Realtime.V1.RpcReply do
     protoc_gen_elixir_version: "0.17.0",
     syntax: :proto3
 
-  oneof :data, 0
+  oneof(:data, 0)
 
   field :id, 1, type: :uint32
   field :data_json, 2, type: :bytes, json_name: "dataJson", oneof: 0
@@ -522,7 +522,7 @@ defmodule Gamend.Realtime.V1.RtcEnvelope do
     protoc_gen_elixir_version: "0.17.0",
     syntax: :proto3
 
-  oneof :msg, 0
+  oneof(:msg, 0)
 
   field :call_hook, 1, type: Gamend.Realtime.V1.RpcCall, json_name: "callHook", oneof: 0
   field :hook_reply, 2, type: Gamend.Realtime.V1.RpcReply, json_name: "hookReply", oneof: 0

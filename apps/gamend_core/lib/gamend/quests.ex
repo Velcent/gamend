@@ -1050,27 +1050,30 @@ defmodule Gamend.Quests do
   # tell a cycle from a long chain: capped at 20, the 52 unit quests split into
   # three "chains" and every tier past the cap sorted equal. A seen-set
   # terminates on a real cycle and leaves an honest chain alone at any length.
-  defp walk_to_root(key, prereq_by_key, seen \\ MapSet.new()) do
+  # The seen-set is a plain map, like its counterpart on the quests page: a
+  # MapSet accumulator threaded through a private recursive function reads to
+  # dialyzer as an opaque term crossing a boundary it cannot check.
+  defp walk_to_root(key, prereq_by_key, seen \\ %{}) do
     case Map.get(prereq_by_key, key) do
       nil ->
         key
 
       prereq ->
-        if MapSet.member?(seen, prereq),
+        if Map.has_key?(seen, prereq),
           do: key,
-          else: walk_to_root(prereq, prereq_by_key, MapSet.put(seen, key))
+          else: walk_to_root(prereq, prereq_by_key, Map.put(seen, key, true))
     end
   end
 
-  defp chain_hops(key, prereq_by_key, hops, seen \\ MapSet.new()) do
+  defp chain_hops(key, prereq_by_key, hops, seen \\ %{}) do
     case Map.get(prereq_by_key, key) do
       nil ->
         hops
 
       prereq ->
-        if MapSet.member?(seen, prereq),
+        if Map.has_key?(seen, prereq),
           do: hops,
-          else: chain_hops(prereq, prereq_by_key, hops + 1, MapSet.put(seen, key))
+          else: chain_hops(prereq, prereq_by_key, hops + 1, Map.put(seen, key, true))
     end
   end
 

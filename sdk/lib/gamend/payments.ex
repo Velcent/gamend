@@ -1,16 +1,14 @@
 defmodule Gamend.Payments do
   @moduledoc ~S"""
   Payment catalog, purchase ledger, and entitlements.
-  
+
   Provider-specific integrations validate or create transactions, but this
   context remains the source of truth for what a user owns inside the game.
-  
+
 
   **Note:** This is an SDK stub. Calling these functions will raise an error.
   The actual implementation runs on the Gamend.
   """
-
-
 
   @doc false
   @spec admin_stats() :: map()
@@ -24,16 +22,15 @@ defmodule Gamend.Payments do
     end
   end
 
-
   @doc false
   @spec cancel_stripe_subscription_at_period_end(Gamend.Accounts.User.t(), Ecto.UUID.t()) ::
-  {:ok,
-   %{
-     purchase: Gamend.Payments.Purchase.t(),
-     entitlement: Gamend.Payments.Entitlement.t(),
-     stripe_subscription: map()
-   }}
-  | {:error, term()}
+          {:ok,
+           %{
+             purchase: Gamend.Payments.Purchase.t(),
+             entitlement: Gamend.Payments.Entitlement.t(),
+             stripe_subscription: map()
+           }}
+          | {:error, term()}
   def cancel_stripe_subscription_at_period_end(_user, _entitlement_id) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -43,7 +40,6 @@ defmodule Gamend.Payments do
         raise "Gamend.Payments.cancel_stripe_subscription_at_period_end/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc false
   @spec count_entitlements(keyword()) :: non_neg_integer()
@@ -57,7 +53,6 @@ defmodule Gamend.Payments do
     end
   end
 
-
   @doc false
   @spec count_products(keyword()) :: non_neg_integer()
   def count_products(_opts) do
@@ -69,7 +64,6 @@ defmodule Gamend.Payments do
         raise "Gamend.Payments.count_products/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc false
   @spec count_provider_events(keyword()) :: non_neg_integer()
@@ -83,7 +77,6 @@ defmodule Gamend.Payments do
     end
   end
 
-
   @doc false
   @spec count_provider_products(keyword()) :: non_neg_integer()
   def count_provider_products(_opts) do
@@ -95,7 +88,6 @@ defmodule Gamend.Payments do
         raise "Gamend.Payments.count_provider_products/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc false
   @spec count_purchases(keyword()) :: non_neg_integer()
@@ -109,7 +101,6 @@ defmodule Gamend.Payments do
     end
   end
 
-
   @doc false
   @spec count_reconciliation_cursors(keyword()) :: non_neg_integer()
   def count_reconciliation_cursors(_opts) do
@@ -121,7 +112,6 @@ defmodule Gamend.Payments do
         raise "Gamend.Payments.count_reconciliation_cursors/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc false
   @spec create_product(map()) :: {:ok, Gamend.Payments.Product.t()} | {:error, Ecto.Changeset.t()}
@@ -135,10 +125,9 @@ defmodule Gamend.Payments do
     end
   end
 
-
   @doc false
   @spec create_provider_product(map()) ::
-  {:ok, Gamend.Payments.ProviderProduct.t()} | {:error, Ecto.Changeset.t()}
+          {:ok, Gamend.Payments.ProviderProduct.t()} | {:error, Ecto.Changeset.t()}
   def create_provider_product(_attrs) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -149,10 +138,9 @@ defmodule Gamend.Payments do
     end
   end
 
-
   @doc false
   @spec create_purchase(Gamend.Accounts.User.t(), Gamend.Payments.ProviderProduct.t(), map()) ::
-  {:ok, Gamend.Payments.Purchase.t()} | {:error, Ecto.Changeset.t()}
+          {:ok, Gamend.Payments.Purchase.t()} | {:error, Ecto.Changeset.t()}
   def create_purchase(_user, _provider_product, _attrs) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -163,16 +151,15 @@ defmodule Gamend.Payments do
     end
   end
 
-
   @doc false
   @spec create_steam_checkout(Gamend.Accounts.User.t(), map()) ::
-  {:ok,
-   %{
-     purchase: Gamend.Payments.Purchase.t(),
-     provider_transaction_id: String.t() | nil,
-     steam_url: String.t() | nil
-   }}
-  | {:error, term()}
+          {:ok,
+           %{
+             purchase: Gamend.Payments.Purchase.t(),
+             provider_transaction_id: String.t() | nil,
+             steam_url: String.t() | nil
+           }}
+          | {:error, term()}
   def create_steam_checkout(_user, _attrs) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -183,16 +170,15 @@ defmodule Gamend.Payments do
     end
   end
 
-
   @doc false
   @spec create_stripe_checkout(Gamend.Accounts.User.t(), map()) ::
-  {:ok,
-   %{
-     purchase: Gamend.Payments.Purchase.t(),
-     checkout_url: String.t(),
-     provider_session_id: String.t()
-   }}
-  | {:error, term()}
+          {:ok,
+           %{
+             purchase: Gamend.Payments.Purchase.t(),
+             checkout_url: String.t(),
+             provider_session_id: String.t()
+           }}
+          | {:error, term()}
   def create_stripe_checkout(_user, _attrs) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -203,10 +189,9 @@ defmodule Gamend.Payments do
     end
   end
 
-
   @doc false
   @spec finalize_steam_purchase(Gamend.Accounts.User.t(), map()) ::
-  {:ok, %{purchase: Gamend.Payments.Purchase.t()}} | {:error, term()}
+          {:ok, %{purchase: Gamend.Payments.Purchase.t()}} | {:error, term()}
   def finalize_steam_purchase(_user, _attrs) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -217,10 +202,9 @@ defmodule Gamend.Payments do
     end
   end
 
-
   @doc false
   @spec fulfill_purchase(Gamend.Payments.Purchase.t(), map()) ::
-  {:ok, Gamend.Payments.Purchase.t()} | {:error, term()}
+          {:ok, Gamend.Payments.Purchase.t()} | {:error, term()}
   def fulfill_purchase(_purchase, _provider_payload) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -231,32 +215,55 @@ defmodule Gamend.Payments do
     end
   end
 
-
   @doc false
   @spec get_product(Ecto.UUID.t()) :: Gamend.Payments.Product.t() | nil
   def get_product(_id) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        if :erlang.phash2(make_ref(), 2) == 0, do: nil, else: %Gamend.Payments.Product{id: "", sku: "", title: "", description: "", kind: "entitlement", active: true, grant_config: %{}, metadata: %{}, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}
+        if :erlang.phash2(make_ref(), 2) == 0,
+          do: nil,
+          else: %Gamend.Payments.Product{
+            id: "",
+            sku: "",
+            title: "",
+            description: "",
+            kind: "entitlement",
+            active: true,
+            grant_config: %{},
+            metadata: %{},
+            inserted_at: ~U[1970-01-01 00:00:00Z],
+            updated_at: ~U[1970-01-01 00:00:00Z]
+          }
 
       _ ->
         raise "Gamend.Payments.get_product/1 is a stub - only available at runtime on Gamend"
     end
   end
 
-
   @doc false
   @spec get_product_by_sku(String.t()) :: Gamend.Payments.Product.t() | nil
   def get_product_by_sku(_sku) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        if :erlang.phash2(make_ref(), 2) == 0, do: nil, else: %Gamend.Payments.Product{id: "", sku: "", title: "", description: "", kind: "entitlement", active: true, grant_config: %{}, metadata: %{}, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}
+        if :erlang.phash2(make_ref(), 2) == 0,
+          do: nil,
+          else: %Gamend.Payments.Product{
+            id: "",
+            sku: "",
+            title: "",
+            description: "",
+            kind: "entitlement",
+            active: true,
+            grant_config: %{},
+            metadata: %{},
+            inserted_at: ~U[1970-01-01 00:00:00Z],
+            updated_at: ~U[1970-01-01 00:00:00Z]
+          }
 
       _ ->
         raise "Gamend.Payments.get_product_by_sku/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc false
   @spec get_provider_product(Ecto.UUID.t()) :: Gamend.Payments.ProviderProduct.t() | nil
@@ -270,7 +277,6 @@ defmodule Gamend.Payments do
     end
   end
 
-
   @doc false
   @spec get_provider_product(String.t(), String.t()) :: Gamend.Payments.ProviderProduct.t() | nil
   def get_provider_product(_provider, _external_id) do
@@ -282,7 +288,6 @@ defmodule Gamend.Payments do
         raise "Gamend.Payments.get_provider_product/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc false
   @spec get_purchase(Ecto.UUID.t()) :: Gamend.Payments.Purchase.t() | nil
@@ -296,7 +301,6 @@ defmodule Gamend.Payments do
     end
   end
 
-
   @doc false
   @spec get_purchase_by_order_id(String.t()) :: Gamend.Payments.Purchase.t() | nil
   def get_purchase_by_order_id(_order_id) do
@@ -309,10 +313,9 @@ defmodule Gamend.Payments do
     end
   end
 
-
   @doc false
   @spec get_purchase_by_provider_original_transaction(String.t(), String.t()) ::
-  Gamend.Payments.Purchase.t() | nil
+          Gamend.Payments.Purchase.t() | nil
   def get_purchase_by_provider_original_transaction(_provider, _transaction_id) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -323,9 +326,9 @@ defmodule Gamend.Payments do
     end
   end
 
-
   @doc false
-  @spec get_purchase_by_provider_transaction(String.t(), String.t()) :: Gamend.Payments.Purchase.t() | nil
+  @spec get_purchase_by_provider_transaction(String.t(), String.t()) ::
+          Gamend.Payments.Purchase.t() | nil
   def get_purchase_by_provider_transaction(_provider, _transaction_id) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -335,7 +338,6 @@ defmodule Gamend.Payments do
         raise "Gamend.Payments.get_purchase_by_provider_transaction/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc false
   @spec handle_apple_webhook(binary()) :: {:ok, atom()} | {:error, term()}
@@ -349,7 +351,6 @@ defmodule Gamend.Payments do
     end
   end
 
-
   @doc false
   @spec handle_google_webhook(binary(), binary() | nil) :: {:ok, atom()} | {:error, term()}
   def handle_google_webhook(_raw_body, _authorization_header) do
@@ -361,7 +362,6 @@ defmodule Gamend.Payments do
         raise "Gamend.Payments.handle_google_webhook/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc false
   @spec handle_stripe_webhook(binary(), binary() | nil) :: {:ok, atom()} | {:error, term()}
@@ -375,7 +375,6 @@ defmodule Gamend.Payments do
     end
   end
 
-
   @doc false
   @spec has_entitlement?(Ecto.UUID.t(), String.t()) :: boolean()
   def has_entitlement?(_user_id, _key) do
@@ -387,7 +386,6 @@ defmodule Gamend.Payments do
         raise "Gamend.Payments.has_entitlement?/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc false
   @spec list_admin_entitlements(keyword()) :: [Gamend.Payments.Entitlement.t()]
@@ -401,7 +399,6 @@ defmodule Gamend.Payments do
     end
   end
 
-
   @doc false
   @spec list_admin_products(keyword()) :: [Gamend.Payments.Product.t()]
   def list_admin_products(_opts) do
@@ -413,7 +410,6 @@ defmodule Gamend.Payments do
         raise "Gamend.Payments.list_admin_products/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc false
   @spec list_admin_provider_products(keyword()) :: [Gamend.Payments.ProviderProduct.t()]
@@ -427,7 +423,6 @@ defmodule Gamend.Payments do
     end
   end
 
-
   @doc false
   @spec list_admin_purchases(keyword()) :: [Gamend.Payments.Purchase.t()]
   def list_admin_purchases(_opts) do
@@ -439,7 +434,6 @@ defmodule Gamend.Payments do
         raise "Gamend.Payments.list_admin_purchases/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc false
   @spec list_catalog(String.t() | nil) :: [Gamend.Payments.ProviderProduct.t()]
@@ -453,7 +447,6 @@ defmodule Gamend.Payments do
     end
   end
 
-
   @doc false
   @spec list_products(keyword()) :: [Gamend.Payments.Product.t()]
   def list_products(_opts) do
@@ -465,7 +458,6 @@ defmodule Gamend.Payments do
         raise "Gamend.Payments.list_products/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc false
   @spec list_provider_events(keyword()) :: [Gamend.Payments.ProviderEvent.t()]
@@ -479,7 +471,6 @@ defmodule Gamend.Payments do
     end
   end
 
-
   @doc false
   @spec list_reconciliation_cursors(keyword()) :: [Gamend.Payments.ReconciliationCursor.t()]
   def list_reconciliation_cursors(_opts) do
@@ -492,12 +483,11 @@ defmodule Gamend.Payments do
     end
   end
 
-
   @doc false
   @spec list_user_entitlements(
-  Ecto.UUID.t(),
-  keyword()
-) :: [Gamend.Payments.Entitlement.t()]
+          Ecto.UUID.t(),
+          keyword()
+        ) :: [Gamend.Payments.Entitlement.t()]
   def list_user_entitlements(_user_id, _opts) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -508,12 +498,11 @@ defmodule Gamend.Payments do
     end
   end
 
-
   @doc false
   @spec list_user_purchases(
-  Ecto.UUID.t(),
-  keyword()
-) :: [Gamend.Payments.Purchase.t()]
+          Ecto.UUID.t(),
+          keyword()
+        ) :: [Gamend.Payments.Purchase.t()]
   def list_user_purchases(_user_id, _opts) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -523,7 +512,6 @@ defmodule Gamend.Payments do
         raise "Gamend.Payments.list_user_purchases/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc false
   @spec product_entitlement_key(Gamend.Payments.Product.t()) :: String.t()
@@ -537,7 +525,6 @@ defmodule Gamend.Payments do
     end
   end
 
-
   @doc false
   @spec provider_adapter_statuses() :: [map()]
   def provider_adapter_statuses() do
@@ -550,11 +537,10 @@ defmodule Gamend.Payments do
     end
   end
 
-
   @doc false
   @spec reconcile_stripe_purchase(Gamend.Payments.Purchase.t()) ::
-  {:ok, %{purchase: Gamend.Payments.Purchase.t(), result: atom(), stripe_session: map()}}
-  | {:error, term()}
+          {:ok, %{purchase: Gamend.Payments.Purchase.t(), result: atom(), stripe_session: map()}}
+          | {:error, term()}
   def reconcile_stripe_purchase(_purchase) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -565,10 +551,9 @@ defmodule Gamend.Payments do
     end
   end
 
-
   @doc false
   @spec record_provider_event(String.t(), String.t(), String.t(), map(), map()) ::
-  {:ok, Gamend.Payments.ProviderEvent.t(), boolean()} | {:error, Ecto.Changeset.t()}
+          {:ok, Gamend.Payments.ProviderEvent.t(), boolean()} | {:error, Ecto.Changeset.t()}
   def record_provider_event(_provider, _event_id, _event_type, _payload, _metadata) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -579,10 +564,9 @@ defmodule Gamend.Payments do
     end
   end
 
-
   @doc false
   @spec revoke_purchase(Gamend.Payments.Purchase.t(), map()) ::
-  {:ok, Gamend.Payments.Purchase.t()} | {:error, term()}
+          {:ok, Gamend.Payments.Purchase.t()} | {:error, term()}
   def revoke_purchase(_purchase, _attrs) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -592,7 +576,6 @@ defmodule Gamend.Payments do
         raise "Gamend.Payments.revoke_purchase/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc false
   @spec stripe_config_status() :: map()
@@ -606,10 +589,9 @@ defmodule Gamend.Payments do
     end
   end
 
-
   @doc false
   @spec update_product(Gamend.Payments.Product.t(), map()) ::
-  {:ok, Gamend.Payments.Product.t()} | {:error, Ecto.Changeset.t()}
+          {:ok, Gamend.Payments.Product.t()} | {:error, Ecto.Changeset.t()}
   def update_product(_product, _attrs) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -620,10 +602,9 @@ defmodule Gamend.Payments do
     end
   end
 
-
   @doc false
   @spec update_provider_product(Gamend.Payments.ProviderProduct.t(), map()) ::
-  {:ok, Gamend.Payments.ProviderProduct.t()} | {:error, Ecto.Changeset.t()}
+          {:ok, Gamend.Payments.ProviderProduct.t()} | {:error, Ecto.Changeset.t()}
   def update_provider_product(_provider_product, _attrs) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -634,10 +615,10 @@ defmodule Gamend.Payments do
     end
   end
 
-
   @doc false
   @spec validate_store_purchase(Gamend.Accounts.User.t(), String.t(), map()) ::
-  {:ok, %{purchase: Gamend.Payments.Purchase.t(), seen_before: boolean()}} | {:error, term()}
+          {:ok, %{purchase: Gamend.Payments.Purchase.t(), seen_before: boolean()}}
+          | {:error, term()}
   def validate_store_purchase(_user, _provider, _attrs) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -647,5 +628,4 @@ defmodule Gamend.Payments do
         raise "Gamend.Payments.validate_store_purchase/3 is a stub - only available at runtime on Gamend"
     end
   end
-
 end

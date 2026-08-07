@@ -1,32 +1,30 @@
 defmodule Gamend.Chat do
   @moduledoc ~S"""
   Context for chat messaging across lobbies, groups, and friend DMs.
-  
+
   ## Chat types
-  
+
     * `"lobby"` — messages within a lobby. `chat_ref_id` is the lobby id.
     * `"group"` — messages within a group. `chat_ref_id` is the group id.
     * `"friend"` — direct messages between two friends. `chat_ref_id` is the
       other user's id (each user stores the *other* user's id so queries work
       symmetrically).
-  
+
   ## PubSub topics
-  
+
     * `"chat:lobby:<id>"` — lobby chat events
     * `"chat:group:<id>"` — group chat events
     * `"chat:friend:<low>:<high>"` — friend DM events (sorted pair of user ids)
-  
+
   ## Hooks
-  
+
     * `before_chat_message/2` — pipeline hook `(user, attrs)` → `{:ok, attrs}` | `{:error, reason}`
     * `after_chat_message/1` — fire-and-forget after a message is persisted
-  
+
 
   **Note:** This is an SDK stub. Calling these functions will raise an error.
   The actual implementation runs on the Gamend.
   """
-
-
 
   @doc ~S"""
     Admin: delete a single message by id.
@@ -42,7 +40,6 @@ defmodule Gamend.Chat do
     end
   end
 
-
   @doc ~S"""
     Returns `:ok` when user can access the chat conversation.
   """
@@ -57,7 +54,6 @@ defmodule Gamend.Chat do
     end
   end
 
-
   @doc ~S"""
     Delete all chat data (messages + read cursors) for a given conversation.
   """
@@ -71,7 +67,6 @@ defmodule Gamend.Chat do
         raise "Gamend.Chat.cleanup_chat/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Delete all friend DM messages and read cursors between two users.
@@ -91,7 +86,6 @@ defmodule Gamend.Chat do
     end
   end
 
-
   @doc ~S"""
     Count all messages matching filters (admin).
   """
@@ -105,7 +99,6 @@ defmodule Gamend.Chat do
         raise "Gamend.Chat.count_all_messages/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Count total friend DM messages between two users.
@@ -121,7 +114,6 @@ defmodule Gamend.Chat do
     end
   end
 
-
   @doc ~S"""
     Count total messages in a chat conversation.
   """
@@ -135,7 +127,6 @@ defmodule Gamend.Chat do
         raise "Gamend.Chat.count_messages/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Count messages grouped by chat_type.
@@ -154,7 +145,6 @@ defmodule Gamend.Chat do
     end
   end
 
-
   @doc ~S"""
     Count mutes matching `filters`.
   """
@@ -168,7 +158,6 @@ defmodule Gamend.Chat do
         raise "Gamend.Chat.count_mutes/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Count reports matching `filters`.
@@ -184,7 +173,6 @@ defmodule Gamend.Chat do
     end
   end
 
-
   @doc ~S"""
     Count distinct users who have sent at least one chat message.
   """
@@ -198,7 +186,6 @@ defmodule Gamend.Chat do
         raise "Gamend.Chat.count_unique_senders/0 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Count unread messages for a user in a specific chat conversation.
@@ -218,7 +205,6 @@ defmodule Gamend.Chat do
     end
   end
 
-
   @doc ~S"""
     Count unread friend DMs between two users for a specific user.
     
@@ -234,7 +220,6 @@ defmodule Gamend.Chat do
     end
   end
 
-
   @doc ~S"""
     Count unread friend DMs for a user across all friends.
     
@@ -243,8 +228,8 @@ defmodule Gamend.Chat do
     
   """
   @spec count_unread_friends_batch(Ecto.UUID.t(), [Ecto.UUID.t()]) :: %{
-  required(Ecto.UUID.t()) => non_neg_integer()
-}
+          required(Ecto.UUID.t()) => non_neg_integer()
+        }
   def count_unread_friends_batch(_user_id, _friend_ids) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -255,7 +240,6 @@ defmodule Gamend.Chat do
     end
   end
 
-
   @doc ~S"""
     Count unread messages for a user in multiple group chats.
     
@@ -263,8 +247,8 @@ defmodule Gamend.Chat do
     
   """
   @spec count_unread_groups_batch(Ecto.UUID.t(), [Ecto.UUID.t()]) :: %{
-  required(Ecto.UUID.t()) => non_neg_integer()
-}
+          required(Ecto.UUID.t()) => non_neg_integer()
+        }
   def count_unread_groups_batch(_user_id, _group_ids) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -274,7 +258,6 @@ defmodule Gamend.Chat do
         raise "Gamend.Chat.count_unread_groups_batch/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Delete all messages for a given chat conversation.
@@ -290,7 +273,6 @@ defmodule Gamend.Chat do
     end
   end
 
-
   @doc ~S"""
     Delete a chat message owned by the given user.
     
@@ -299,7 +281,7 @@ defmodule Gamend.Chat do
     
   """
   @spec delete_own_message(Ecto.UUID.t(), Ecto.UUID.t()) ::
-  {:ok, Gamend.Chat.Message.t()} | {:error, term()}
+          {:ok, Gamend.Chat.Message.t()} | {:error, term()}
   def delete_own_message(_user_id, _message_id) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -309,7 +291,6 @@ defmodule Gamend.Chat do
         raise "Gamend.Chat.delete_own_message/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Delete all read cursors for a given chat conversation.
@@ -324,7 +305,6 @@ defmodule Gamend.Chat do
         raise "Gamend.Chat.delete_read_cursors/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Every blocklist entry matching `content`, as `[{word, severity, match_mode}]`.
@@ -341,7 +321,6 @@ defmodule Gamend.Chat do
     end
   end
 
-
   @doc ~S"""
     Get a single message by id.
   """
@@ -356,14 +335,14 @@ defmodule Gamend.Chat do
     end
   end
 
-
   @doc ~S"""
     Get the read cursor for a user in a chat conversation.
     
     Returns `nil` if the user has never opened this conversation.
     
   """
-  @spec get_read_cursor(Ecto.UUID.t(), String.t(), Ecto.UUID.t()) :: Gamend.Chat.ReadCursor.t() | nil
+  @spec get_read_cursor(Ecto.UUID.t(), String.t(), Ecto.UUID.t()) ::
+          Gamend.Chat.ReadCursor.t() | nil
   def get_read_cursor(_user_id, _chat_type, _chat_ref_id) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -374,14 +353,13 @@ defmodule Gamend.Chat do
     end
   end
 
-
   @doc ~S"""
     List all messages (admin). Supports filters: sender_id, chat_type, chat_ref_id, content.
   """
   @spec list_all_messages(
-  map(),
-  keyword()
-) :: [Gamend.Chat.Message.t()]
+          map(),
+          keyword()
+        ) :: [Gamend.Chat.Message.t()]
   def list_all_messages(_filters, _opts) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -391,7 +369,6 @@ defmodule Gamend.Chat do
         raise "Gamend.Chat.list_all_messages/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     List friend DM messages between two users.
@@ -414,7 +391,6 @@ defmodule Gamend.Chat do
         raise "Gamend.Chat.list_friend_messages/3 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     List messages for a chat conversation.
@@ -439,14 +415,13 @@ defmodule Gamend.Chat do
     end
   end
 
-
   @doc ~S"""
     List mutes. Filters: `:user_id`, `:scope`, `:scope_ref_id`, `:active`.
   """
   @spec list_mutes(
-  map(),
-  keyword()
-) :: [Gamend.Chat.Mute.t()]
+          map(),
+          keyword()
+        ) :: [Gamend.Chat.Mute.t()]
   def list_mutes(_filters, _opts) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -457,14 +432,13 @@ defmodule Gamend.Chat do
     end
   end
 
-
   @doc ~S"""
     List reports. Filters: `:status`, `:reported_user_id`, `:reporter_id`.
   """
   @spec list_reports(
-  map(),
-  keyword()
-) :: [Gamend.Chat.Report.t()]
+          map(),
+          keyword()
+        ) :: [Gamend.Chat.Report.t()]
   def list_reports(_filters, _opts) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -475,7 +449,6 @@ defmodule Gamend.Chat do
     end
   end
 
-
   @doc ~S"""
     Mark a chat conversation as read up to a given message id.
     
@@ -483,7 +456,7 @@ defmodule Gamend.Chat do
     
   """
   @spec mark_read(Ecto.UUID.t(), String.t(), Ecto.UUID.t(), Ecto.UUID.t()) ::
-  {:ok, Gamend.Chat.ReadCursor.t()} | {:error, term()}
+          {:ok, Gamend.Chat.ReadCursor.t()} | {:error, term()}
   def mark_read(_user_id, _chat_type, _chat_ref_id, _message_id) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -494,7 +467,6 @@ defmodule Gamend.Chat do
     end
   end
 
-
   @doc ~S"""
     Mute `user_id` in `scope` (`"global"`, `"lobby"`, `"group"` or `"party"`).
     
@@ -503,17 +475,27 @@ defmodule Gamend.Chat do
     
   """
   @spec mute_user(Ecto.UUID.t(), String.t(), Ecto.UUID.t() | nil, map()) ::
-  {:ok, Gamend.Chat.Mute.t()} | {:error, term()}
+          {:ok, Gamend.Chat.Mute.t()} | {:error, term()}
   def mute_user(_user_id, _scope, _scope_ref_id, _attrs) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Chat.Mute{id: "", user_id: "", scope: "global", scope_ref_id: nil, expires_at: nil, reason: nil, muted_by: nil, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Chat.Mute{
+           id: "",
+           user_id: "",
+           scope: "global",
+           scope_ref_id: nil,
+           expires_at: nil,
+           reason: nil,
+           muted_by: nil,
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Chat.mute_user/4 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Whether `user_id` is currently muted for the given chat.
@@ -529,54 +511,92 @@ defmodule Gamend.Chat do
     end
   end
 
-
   @doc ~S"""
     File a report about a message on behalf of `reporter_id`.
   """
   @spec report_message(Ecto.UUID.t(), Ecto.UUID.t(), String.t() | nil) ::
-  {:ok, Gamend.Chat.Report.t()} | {:error, term()}
+          {:ok, Gamend.Chat.Report.t()} | {:error, term()}
   def report_message(_reporter_id, _message_id, _reason) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Chat.Report{id: "", reporter_id: nil, message_id: nil, reported_user_id: "", content_snapshot: nil, reason: nil, status: "open", resolved_by: nil, resolution_note: nil, resolved_at: nil, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Chat.Report{
+           id: "",
+           reporter_id: nil,
+           message_id: nil,
+           reported_user_id: "",
+           content_snapshot: nil,
+           reason: nil,
+           status: "open",
+           resolved_by: nil,
+           resolution_note: nil,
+           resolved_at: nil,
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Chat.report_message/3 is a stub - only available at runtime on Gamend"
     end
   end
 
-
   @doc ~S"""
     Resolve a report: set its status, with an optional note and resolver.
   """
   @spec resolve_report(Gamend.Chat.Report.t() | Ecto.UUID.t(), String.t(), map()) ::
-  {:ok, Gamend.Chat.Report.t()} | {:error, term()}
+          {:ok, Gamend.Chat.Report.t()} | {:error, term()}
   def resolve_report(_report, _status, _attrs) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Chat.Report{id: "", reporter_id: nil, message_id: nil, reported_user_id: "", content_snapshot: nil, reason: nil, status: "open", resolved_by: nil, resolution_note: nil, resolved_at: nil, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Chat.Report{
+           id: "",
+           reporter_id: nil,
+           message_id: nil,
+           reported_user_id: "",
+           content_snapshot: nil,
+           reason: nil,
+           status: "open",
+           resolved_by: nil,
+           resolution_note: nil,
+           resolved_at: nil,
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Chat.resolve_report/3 is a stub - only available at runtime on Gamend"
     end
   end
 
-
   @doc ~S"""
     Claim a report for review, moving it from open to reviewing.
   """
   @spec review_report(Gamend.Chat.Report.t() | Ecto.UUID.t()) ::
-  {:ok, Gamend.Chat.Report.t()} | {:error, term()}
+          {:ok, Gamend.Chat.Report.t()} | {:error, term()}
   def review_report(_report) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Chat.Report{id: "", reporter_id: nil, message_id: nil, reported_user_id: "", content_snapshot: nil, reason: nil, status: "open", resolved_by: nil, resolution_note: nil, resolved_at: nil, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Chat.Report{
+           id: "",
+           reporter_id: nil,
+           message_id: nil,
+           reported_user_id: "",
+           content_snapshot: nil,
+           reason: nil,
+           status: "open",
+           resolved_by: nil,
+           resolution_note: nil,
+           resolved_at: nil,
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Chat.review_report/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Send a chat message.
@@ -609,7 +629,6 @@ defmodule Gamend.Chat do
     end
   end
 
-
   @doc ~S"""
     Subscribe to chat events for a friend DM conversation.
   """
@@ -623,7 +642,6 @@ defmodule Gamend.Chat do
         raise "Gamend.Chat.subscribe_friend_chat/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Subscribe to chat events for a group.
@@ -639,7 +657,6 @@ defmodule Gamend.Chat do
     end
   end
 
-
   @doc ~S"""
     Subscribe to chat events for a lobby.
   """
@@ -653,7 +670,6 @@ defmodule Gamend.Chat do
         raise "Gamend.Chat.subscribe_lobby_chat/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Subscribe to chat events for a party.
@@ -669,7 +685,6 @@ defmodule Gamend.Chat do
     end
   end
 
-
   @doc ~S"""
     Lift a mute. Returns `{:ok, count}` — 0 when the user was not muted.
   """
@@ -683,7 +698,6 @@ defmodule Gamend.Chat do
         raise "Gamend.Chat.unmute_user/3 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Unsubscribe from friend DM chat events.
@@ -699,7 +713,6 @@ defmodule Gamend.Chat do
     end
   end
 
-
   @doc ~S"""
     Unsubscribe from group chat events.
   """
@@ -713,7 +726,6 @@ defmodule Gamend.Chat do
         raise "Gamend.Chat.unsubscribe_group_chat/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Unsubscribe from lobby chat events.
@@ -729,7 +741,6 @@ defmodule Gamend.Chat do
     end
   end
 
-
   @doc ~S"""
     Unsubscribe from party chat events.
   """
@@ -744,7 +755,6 @@ defmodule Gamend.Chat do
     end
   end
 
-
   @doc ~S"""
     Update a chat message owned by the given user.
     
@@ -754,7 +764,7 @@ defmodule Gamend.Chat do
     
   """
   @spec update_message(Ecto.UUID.t(), Ecto.UUID.t(), map()) ::
-  {:ok, Gamend.Chat.Message.t()} | {:error, term()}
+          {:ok, Gamend.Chat.Message.t()} | {:error, term()}
   def update_message(_user_id, _message_id, _attrs) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -764,5 +774,4 @@ defmodule Gamend.Chat do
         raise "Gamend.Chat.update_message/3 is a stub - only available at runtime on Gamend"
     end
   end
-
 end

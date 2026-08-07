@@ -1,7 +1,7 @@
 defmodule Gamend.Quests do
   @moduledoc ~S"""
   Event-driven quest/progression engine.
-  
+
   One engine, three independent dimensions: a **reset** cycle (never / daily /
   weekly / monthly / every N days / repeat-on-claim), an optional **window**
   (`starts_at`/`ends_at`), and an optional **prerequisite**
@@ -9,21 +9,21 @@ defmodule Gamend.Quests do
   a seasonal window that also requires an earlier quest is just those three
   fields set. Rewards pay into `Gamend.Economy` / `Gamend.Inventory`
   exactly once. `category` is a free-form label for your UI only.
-  
+
   ## Reporting progress (server-side / hooks)
-  
+
       Quests.report_event(user_id, "enemy_killed", 1, %{"map" => "desert"})
-  
+
   Every **active** quest with an objective on `"enemy_killed"` (whose `params`
   all match the meta) advances; a quest completes when every objective meets
   its target. There is deliberately **no public endpoint** for this — clients
   cannot advance their own quests. Core wires common events; games call it
   from their hooks for custom events.
-  
+
   ## Claiming
-  
+
       {:ok, %{progress: progress, rewards: rewards}} = Quests.claim(user_id, "daily_win_3")
-  
+
   Claiming is gated by an atomic `completed → claimed` status transition, so a
   double-tap or a concurrent claim can't double-pay. Rewards are granted after
   the transition with a per-entry idempotency key (`"quest:<progress_id>:<i>"`,
@@ -33,27 +33,27 @@ defmodule Gamend.Quests do
   but never finished granting are healed by `recover_pending_rewards/1`.
   Quests with `auto_claim` grant immediately on completion (skipping the
   `before_quest_claim` hook — there is no player request to veto).
-  
+
   ## Resets
-  
+
   `period_key` is derived from **UTC time** by the quest's reset (daily →
   `"2026-07-22"`, weekly → `"2026-W30"`, monthly → `"2026-07"`, interval →
   `"I14-1436"`, never → `"static"`). A new period simply means a new progress
   row on the next reported event — nothing needs to fire at midnight, and
   state resolves correctly even if no job ever runs.
-  
+
   `repeat` is the exception: it has no clock at all. The row is re-armed the
   moment its reward is paid, so the quest is available again immediately and
   as often as the player can finish it — for an endless objective, a calendar
   reset would cap the payout at once per period. It reuses `"static"` as its
   period and counts claims on the row instead (see `claim_count`).
-  
+
   UTC means one global rollover instant rather than one per player: a daily
   turns over at noon in New Zealand and mid-afternoon the day before on the US
   west coast. That is deliberate — everyone races the same clock — but it is
   why the API exposes the *remaining time* on a period and never a reset
   timestamp, and why clients should show a countdown rather than an hour.
-  
+
 
   **Note:** This is an SDK stub. Calling these functions will raise an error.
   The actual implementation runs on the Gamend.
@@ -75,45 +75,74 @@ defmodule Gamend.Quests do
     end
   end
 
-
   @doc ~S"""
     Claim on a user's behalf, skipping the `before_quest_claim` veto (admin).
   """
   @spec admin_claim(user_id(), String.t()) ::
-  {:ok, %{progress: Gamend.Quests.QuestProgress.t(), rewards: [map()]}} | {:error, term()}
+          {:ok, %{progress: Gamend.Quests.QuestProgress.t(), rewards: [map()]}} | {:error, term()}
   def admin_claim(_user_id, _quest_key) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %{progress: %Gamend.Quests.QuestProgress{id: "", user_id: "", quest_key: "", period_key: "static", objective_progress: %{}, status: "active", completed_at: nil, claimed_at: nil, rewards_granted_at: nil, metadata: %{}, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}, rewards: []}}
+        {:ok,
+         %{
+           progress: %Gamend.Quests.QuestProgress{
+             id: "",
+             user_id: "",
+             quest_key: "",
+             period_key: "static",
+             objective_progress: %{},
+             status: "active",
+             completed_at: nil,
+             claimed_at: nil,
+             rewards_granted_at: nil,
+             metadata: %{},
+             inserted_at: ~U[1970-01-01 00:00:00Z],
+             updated_at: ~U[1970-01-01 00:00:00Z]
+           },
+           rewards: []
+         }}
 
       _ ->
         raise "Gamend.Quests.admin_claim/2 is a stub - only available at runtime on Gamend"
     end
   end
 
-
   @doc ~S"""
     Force-complete a quest for a user (admin grant): every objective jumps to
     its target and the normal completion side effects fire (hooks, auto-claim).
     
   """
-  @spec admin_complete(user_id(), String.t()) :: {:ok, Gamend.Quests.QuestProgress.t()} | {:error, term()}
+  @spec admin_complete(user_id(), String.t()) ::
+          {:ok, Gamend.Quests.QuestProgress.t()} | {:error, term()}
   def admin_complete(_user_id, _quest_key) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Quests.QuestProgress{id: "", user_id: "", quest_key: "", period_key: "static", objective_progress: %{}, status: "active", completed_at: nil, claimed_at: nil, rewards_granted_at: nil, metadata: %{}, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Quests.QuestProgress{
+           id: "",
+           user_id: "",
+           quest_key: "",
+           period_key: "static",
+           objective_progress: %{},
+           status: "active",
+           completed_at: nil,
+           claimed_at: nil,
+           rewards_granted_at: nil,
+           metadata: %{},
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Quests.admin_complete/2 is a stub - only available at runtime on Gamend"
     end
   end
 
-
   @doc ~S"""
     Delete a user's current-period progress row for a quest (admin reset).
   """
   @spec admin_reset(user_id(), String.t()) ::
-  {:ok, Gamend.Quests.QuestProgress.t() | :not_found} | {:error, term()}
+          {:ok, Gamend.Quests.QuestProgress.t() | :not_found} | {:error, term()}
   def admin_reset(_user_id, _quest_key) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -123,7 +152,6 @@ defmodule Gamend.Quests do
         raise "Gamend.Quests.admin_reset/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Every quest in `quest_key`'s prerequisite chain, in tier order, each with the
@@ -140,14 +168,14 @@ defmodule Gamend.Quests do
     
   """
   @spec chain(user_id() | nil, String.t()) :: [
-  %{
-    quest: Gamend.Quests.Quest.t(),
-    progress: Gamend.Quests.QuestProgress.t() | nil,
-    claimable: boolean(),
-    locked: boolean(),
-    tier: pos_integer()
-  }
-]
+          %{
+            quest: Gamend.Quests.Quest.t(),
+            progress: Gamend.Quests.QuestProgress.t() | nil,
+            claimable: boolean(),
+            locked: boolean(),
+            tier: pos_integer()
+          }
+        ]
   def chain(_user_id, _quest_key) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -157,7 +185,6 @@ defmodule Gamend.Quests do
         raise "Gamend.Quests.chain/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Returns a changeset for tracking quest changes (used by forms).
@@ -173,7 +200,6 @@ defmodule Gamend.Quests do
     end
   end
 
-
   @doc ~S"""
     Claim a completed quest's rewards for the current period.
     
@@ -185,17 +211,33 @@ defmodule Gamend.Quests do
     
   """
   @spec claim(user_id(), String.t(), keyword()) ::
-  {:ok, %{progress: Gamend.Quests.QuestProgress.t(), rewards: [map()]}} | {:error, term()}
+          {:ok, %{progress: Gamend.Quests.QuestProgress.t(), rewards: [map()]}} | {:error, term()}
   def claim(_user_id, _quest_key, _opts) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %{progress: %Gamend.Quests.QuestProgress{id: "", user_id: "", quest_key: "", period_key: "static", objective_progress: %{}, status: "active", completed_at: nil, claimed_at: nil, rewards_granted_at: nil, metadata: %{}, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}, rewards: []}}
+        {:ok,
+         %{
+           progress: %Gamend.Quests.QuestProgress{
+             id: "",
+             user_id: "",
+             quest_key: "",
+             period_key: "static",
+             objective_progress: %{},
+             status: "active",
+             completed_at: nil,
+             claimed_at: nil,
+             rewards_granted_at: nil,
+             metadata: %{},
+             inserted_at: ~U[1970-01-01 00:00:00Z],
+             updated_at: ~U[1970-01-01 00:00:00Z]
+           },
+           rewards: []
+         }}
 
       _ ->
         raise "Gamend.Quests.claim/3 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Number of completed-but-unclaimed quests for a user (badge count).
@@ -211,7 +253,6 @@ defmodule Gamend.Quests do
     end
   end
 
-
   @doc ~S"""
     Count progress rows (same filters as `list_progress/1`).
   """
@@ -225,7 +266,6 @@ defmodule Gamend.Quests do
         raise "Gamend.Quests.count_progress/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Count quest definitions (same filters as `list_quests/1`).
@@ -241,14 +281,13 @@ defmodule Gamend.Quests do
     end
   end
 
-
   @doc ~S"""
     Count of a user's completed quests (same filters as `list_user_completions/2`).
   """
   @spec count_user_completions(
-  user_id(),
-  keyword()
-) :: non_neg_integer()
+          user_id(),
+          keyword()
+        ) :: non_neg_integer()
   def count_user_completions(_user_id, _opts) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -259,14 +298,13 @@ defmodule Gamend.Quests do
     end
   end
 
-
   @doc ~S"""
     Count of quests visible to the user (same filters as `list_user_quests/2`).
   """
   @spec count_user_quests(
-  user_id(),
-  keyword()
-) :: non_neg_integer()
+          user_id(),
+          keyword()
+        ) :: non_neg_integer()
   def count_user_quests(_user_id, _opts) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -277,7 +315,6 @@ defmodule Gamend.Quests do
     end
   end
 
-
   @doc ~S"""
     Creates a quest definition. Capped by the `max_quests` limit.
   """
@@ -285,13 +322,32 @@ defmodule Gamend.Quests do
   def create_quest(_attrs) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Quests.Quest{id: "", key: "", title: "", description: "", icon_url: nil, sort_order: 0, hidden: false, kind: "achievement", objectives: [], rewards: [], auto_claim: false, prerequisite_quest_key: nil, starts_at: nil, ends_at: nil, active: true, metadata: %{}, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Quests.Quest{
+           id: "",
+           key: "",
+           title: "",
+           description: "",
+           icon_url: nil,
+           sort_order: 0,
+           hidden: false,
+           kind: "achievement",
+           objectives: [],
+           rewards: [],
+           auto_claim: false,
+           prerequisite_quest_key: nil,
+           starts_at: nil,
+           ends_at: nil,
+           active: true,
+           metadata: %{},
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Quests.create_quest/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Quest statistics for the admin dashboard.
@@ -307,22 +363,40 @@ defmodule Gamend.Quests do
     end
   end
 
-
   @doc ~S"""
     Deletes a quest definition and all related progress.
   """
   @spec delete_quest(Gamend.Quests.Quest.t()) ::
-  {:ok, Gamend.Quests.Quest.t()} | {:error, Ecto.Changeset.t()}
+          {:ok, Gamend.Quests.Quest.t()} | {:error, Ecto.Changeset.t()}
   def delete_quest(_quest) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Quests.Quest{id: "", key: "", title: "", description: "", icon_url: nil, sort_order: 0, hidden: false, kind: "achievement", objectives: [], rewards: [], auto_claim: false, prerequisite_quest_key: nil, starts_at: nil, ends_at: nil, active: true, metadata: %{}, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Quests.Quest{
+           id: "",
+           key: "",
+           title: "",
+           description: "",
+           icon_url: nil,
+           sort_order: 0,
+           hidden: false,
+           kind: "achievement",
+           objectives: [],
+           rewards: [],
+           auto_claim: false,
+           prerequisite_quest_key: nil,
+           starts_at: nil,
+           ends_at: nil,
+           active: true,
+           metadata: %{},
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Quests.delete_quest/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Per-status progress counts for one quest (admin completion funnel).
@@ -338,7 +412,6 @@ defmodule Gamend.Quests do
     end
   end
 
-
   @doc ~S"""
     Get a user's progress row for a quest's current period.
   """
@@ -346,13 +419,27 @@ defmodule Gamend.Quests do
   def get_progress(_user_id, _quest_key) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        if :erlang.phash2(make_ref(), 2) == 0, do: nil, else: %Gamend.Quests.QuestProgress{id: "", user_id: "", quest_key: "", period_key: "static", objective_progress: %{}, status: "active", completed_at: nil, claimed_at: nil, rewards_granted_at: nil, metadata: %{}, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}
+        if :erlang.phash2(make_ref(), 2) == 0,
+          do: nil,
+          else: %Gamend.Quests.QuestProgress{
+            id: "",
+            user_id: "",
+            quest_key: "",
+            period_key: "static",
+            objective_progress: %{},
+            status: "active",
+            completed_at: nil,
+            claimed_at: nil,
+            rewards_granted_at: nil,
+            metadata: %{},
+            inserted_at: ~U[1970-01-01 00:00:00Z],
+            updated_at: ~U[1970-01-01 00:00:00Z]
+          }
 
       _ ->
         raise "Gamend.Quests.get_progress/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Get a quest by ID.
@@ -361,13 +448,33 @@ defmodule Gamend.Quests do
   def get_quest(_id) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        if :erlang.phash2(make_ref(), 2) == 0, do: nil, else: %Gamend.Quests.Quest{id: "", key: "", title: "", description: "", icon_url: nil, sort_order: 0, hidden: false, kind: "achievement", objectives: [], rewards: [], auto_claim: false, prerequisite_quest_key: nil, starts_at: nil, ends_at: nil, active: true, metadata: %{}, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}
+        if :erlang.phash2(make_ref(), 2) == 0,
+          do: nil,
+          else: %Gamend.Quests.Quest{
+            id: "",
+            key: "",
+            title: "",
+            description: "",
+            icon_url: nil,
+            sort_order: 0,
+            hidden: false,
+            kind: "achievement",
+            objectives: [],
+            rewards: [],
+            auto_claim: false,
+            prerequisite_quest_key: nil,
+            starts_at: nil,
+            ends_at: nil,
+            active: true,
+            metadata: %{},
+            inserted_at: ~U[1970-01-01 00:00:00Z],
+            updated_at: ~U[1970-01-01 00:00:00Z]
+          }
 
       _ ->
         raise "Gamend.Quests.get_quest/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Get a quest by key.
@@ -376,13 +483,33 @@ defmodule Gamend.Quests do
   def get_quest_by_key(_key) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        if :erlang.phash2(make_ref(), 2) == 0, do: nil, else: %Gamend.Quests.Quest{id: "", key: "", title: "", description: "", icon_url: nil, sort_order: 0, hidden: false, kind: "achievement", objectives: [], rewards: [], auto_claim: false, prerequisite_quest_key: nil, starts_at: nil, ends_at: nil, active: true, metadata: %{}, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}
+        if :erlang.phash2(make_ref(), 2) == 0,
+          do: nil,
+          else: %Gamend.Quests.Quest{
+            id: "",
+            key: "",
+            title: "",
+            description: "",
+            icon_url: nil,
+            sort_order: 0,
+            hidden: false,
+            kind: "achievement",
+            objectives: [],
+            rewards: [],
+            auto_claim: false,
+            prerequisite_quest_key: nil,
+            starts_at: nil,
+            ends_at: nil,
+            active: true,
+            metadata: %{},
+            inserted_at: ~U[1970-01-01 00:00:00Z],
+            updated_at: ~U[1970-01-01 00:00:00Z]
+          }
 
       _ ->
         raise "Gamend.Quests.get_quest_by_key/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Every member of a group, with the viewer's progress — what a UI shows when the
@@ -397,12 +524,12 @@ defmodule Gamend.Quests do
     
   """
   @spec group(user_id() | nil, String.t()) :: [
-  %{
-    quest: Gamend.Quests.Quest.t(),
-    progress: Gamend.Quests.QuestProgress.t() | nil,
-    claimable: boolean()
-  }
-]
+          %{
+            quest: Gamend.Quests.Quest.t(),
+            progress: Gamend.Quests.QuestProgress.t() | nil,
+            claimable: boolean()
+          }
+        ]
   def group(_user_id, _group_key) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -412,7 +539,6 @@ defmodule Gamend.Quests do
         raise "Gamend.Quests.group/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Lists progress rows (admin viewer).
@@ -433,7 +559,6 @@ defmodule Gamend.Quests do
         raise "Gamend.Quests.list_progress/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Lists quest definitions (admin view — no per-user state).
@@ -456,7 +581,6 @@ defmodule Gamend.Quests do
     end
   end
 
-
   @doc ~S"""
     A user's completed quests, newest first — the public-profile view
     ("their achievements"). Hidden quests appear once earned.
@@ -467,9 +591,9 @@ defmodule Gamend.Quests do
     
   """
   @spec list_user_completions(
-  user_id(),
-  keyword()
-) :: [%{quest: Gamend.Quests.Quest.t(), progress: Gamend.Quests.QuestProgress.t()}]
+          user_id(),
+          keyword()
+        ) :: [%{quest: Gamend.Quests.Quest.t(), progress: Gamend.Quests.QuestProgress.t()}]
   def list_user_completions(_user_id, _opts) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -479,7 +603,6 @@ defmodule Gamend.Quests do
         raise "Gamend.Quests.list_user_completions/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Lists quests as seen by one user: active definitions in-window with the
@@ -498,15 +621,15 @@ defmodule Gamend.Quests do
     
   """
   @spec list_user_quests(
-  user_id(),
-  keyword()
-) :: [
-  %{
-    quest: Gamend.Quests.Quest.t(),
-    progress: Gamend.Quests.QuestProgress.t() | nil,
-    claimable: boolean()
-  }
-]
+          user_id(),
+          keyword()
+        ) :: [
+          %{
+            quest: Gamend.Quests.Quest.t(),
+            progress: Gamend.Quests.QuestProgress.t() | nil,
+            claimable: boolean()
+          }
+        ]
   def list_user_quests(_user_id, _opts) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -516,7 +639,6 @@ defmodule Gamend.Quests do
         raise "Gamend.Quests.list_user_quests/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     The reset bucket a quest is in at `now` (UTC).
@@ -538,7 +660,6 @@ defmodule Gamend.Quests do
     end
   end
 
-
   @doc ~S"""
     True when the quest's prerequisite (if any) is completed by the user.
   """
@@ -552,7 +673,6 @@ defmodule Gamend.Quests do
         raise "Gamend.Quests.prerequisite_met?/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Deletes daily/weekly progress rows whose period ended more than
@@ -569,7 +689,6 @@ defmodule Gamend.Quests do
         raise "Gamend.Quests.prune_old_periods/0 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Re-open `repeat` quests whose reward was paid but which never re-armed.
@@ -590,7 +709,6 @@ defmodule Gamend.Quests do
     end
   end
 
-
   @doc ~S"""
     Re-runs reward grants for rows that claimed but never finished granting
     (e.g. the process died mid-grant). Safe to run anywhere, any time — the
@@ -608,7 +726,6 @@ defmodule Gamend.Quests do
         raise "Gamend.Quests.recover_pending_rewards/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     The quest with `%{n}` replaced by its resolved counter, untranslated.
@@ -630,7 +747,6 @@ defmodule Gamend.Quests do
     end
   end
 
-
   @doc ~S"""
     Report a gameplay event for a user, advancing every matching active quest.
     
@@ -641,7 +757,7 @@ defmodule Gamend.Quests do
     
   """
   @spec report_event(user_id(), String.t(), pos_integer(), map()) ::
-  {:ok, [Gamend.Quests.QuestProgress.t()]}
+          {:ok, [Gamend.Quests.QuestProgress.t()]}
   def report_event(_user_id, _event, _amount, _meta) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -651,7 +767,6 @@ defmodule Gamend.Quests do
         raise "Gamend.Quests.report_event/4 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Works out which run of a `repeat` quest a player is on, into `:counter`.
@@ -678,7 +793,7 @@ defmodule Gamend.Quests do
     
   """
   @spec resolve_counter(Gamend.Quests.Quest.t(), Gamend.Quests.QuestProgress.t() | nil) ::
-  Gamend.Quests.Quest.t()
+          Gamend.Quests.Quest.t()
   def resolve_counter(_quest, _progress) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -689,7 +804,6 @@ defmodule Gamend.Quests do
     end
   end
 
-
   @doc ~S"""
     Aggregate quest progress counts for the public stats endpoint.
     
@@ -698,10 +812,10 @@ defmodule Gamend.Quests do
     
   """
   @spec stats() :: %{
-  quests_total: non_neg_integer(),
-  completed: non_neg_integer(),
-  claimed: non_neg_integer()
-}
+          quests_total: non_neg_integer(),
+          completed: non_neg_integer(),
+          claimed: non_neg_integer()
+        }
   def stats() do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -711,7 +825,6 @@ defmodule Gamend.Quests do
         raise "Gamend.Quests.stats/0 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Subscribe to global quest events (definition changes, completions).
@@ -727,22 +840,40 @@ defmodule Gamend.Quests do
     end
   end
 
-
   @doc ~S"""
     Updates a quest definition.
   """
   @spec update_quest(Gamend.Quests.Quest.t(), map()) ::
-  {:ok, Gamend.Quests.Quest.t()} | {:error, Ecto.Changeset.t()}
+          {:ok, Gamend.Quests.Quest.t()} | {:error, Ecto.Changeset.t()}
   def update_quest(_quest, _attrs) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Quests.Quest{id: "", key: "", title: "", description: "", icon_url: nil, sort_order: 0, hidden: false, kind: "achievement", objectives: [], rewards: [], auto_claim: false, prerequisite_quest_key: nil, starts_at: nil, ends_at: nil, active: true, metadata: %{}, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Quests.Quest{
+           id: "",
+           key: "",
+           title: "",
+           description: "",
+           icon_url: nil,
+           sort_order: 0,
+           hidden: false,
+           kind: "achievement",
+           objectives: [],
+           rewards: [],
+           auto_claim: false,
+           prerequisite_quest_key: nil,
+           starts_at: nil,
+           ends_at: nil,
+           active: true,
+           metadata: %{},
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Quests.update_quest/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     The categories that actually have something behind them for this viewer.
@@ -763,5 +894,4 @@ defmodule Gamend.Quests do
         raise "Gamend.Quests.visible_categories/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 end

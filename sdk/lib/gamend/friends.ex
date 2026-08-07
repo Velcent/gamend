@@ -1,7 +1,7 @@
 defmodule Gamend.Friends do
   @moduledoc ~S"""
   Friends context - handles friend requests and relationships.
-  
+
   Basic semantics:
   - A single `friendships` row represents a directed request from requester -> target.
   - status: "pending" | "accepted" | "rejected" | "blocked"
@@ -9,25 +9,25 @@ defmodule Gamend.Friends do
     If a reverse pending request exists, it will be removed to avoid duplicate rows.
   - Listing friends returns the other user from rows with status `accepted` in either
     direction.
-  
+
   ## Usage
-  
+
       # Create a friend request (requester -> target)
       {:ok, friendship} = Gamend.Friends.create_request(requester_id, target_id)
-  
+
       # Accept a pending incoming request (performed by the target)
       {:ok, accepted} = Gamend.Friends.accept_friend_request(friendship.id, %Gamend.Accounts.User{id: target_id})
-  
+
       # List accepted friends for a user (paginated)
       friends = Gamend.Friends.list_friends_for_user(user_id, page: 1, page_size: 25)
-  
+
       # Count accepted friends for a user
       count = Gamend.Friends.count_friends_for_user(user_id)
-  
+
       # Remove a friendship (either direction)
       {:ok, _} = Gamend.Friends.remove_friend(user_id, friend_id)
-  
-  
+
+
 
   **Note:** This is an SDK stub. Calling these functions will raise an error.
   The actual implementation runs on the Gamend.
@@ -39,17 +39,26 @@ defmodule Gamend.Friends do
     Accept a friend request (only the target may accept). Returns {:ok, friendship}.
   """
   @spec accept_friend_request(Ecto.UUID.t(), Gamend.Accounts.User.t()) ::
-  {:ok, Gamend.Friends.Friendship.t()} | {:error, term()}
+          {:ok, Gamend.Friends.Friendship.t()} | {:error, term()}
   def accept_friend_request(_friendship_id, _user) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Friends.Friendship{id: 0, requester_id: 0, target_id: 0, requester: nil, target: nil, status: "pending", inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Friends.Friendship{
+           id: 0,
+           requester_id: 0,
+           target_id: 0,
+           requester: nil,
+           target: nil,
+           status: "pending",
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Friends.accept_friend_request/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Returns true if `user_id` is on a block with any of `other_ids`, in either
@@ -67,22 +76,30 @@ defmodule Gamend.Friends do
     end
   end
 
-
   @doc ~S"""
     Block an incoming request (only the target may block). Returns {:ok, friendship} with status "blocked".
   """
   @spec block_friend_request(Ecto.UUID.t(), Gamend.Accounts.User.t()) ::
-  {:ok, Gamend.Friends.Friendship.t()} | {:error, term()}
+          {:ok, Gamend.Friends.Friendship.t()} | {:error, term()}
   def block_friend_request(_friendship_id, _user) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Friends.Friendship{id: 0, requester_id: 0, target_id: 0, requester: nil, target: nil, status: "pending", inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Friends.Friendship{
+           id: 0,
+           requester_id: 0,
+           target_id: 0,
+           requester: nil,
+           target: nil,
+           status: "pending",
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Friends.block_friend_request/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Block an arbitrary user, with or without any prior friendship between them.
@@ -96,17 +113,26 @@ defmodule Gamend.Friends do
     
   """
   @spec block_user(Gamend.Accounts.User.t(), user_id()) ::
-  {:ok, Gamend.Friends.Friendship.t()} | {:error, term()}
+          {:ok, Gamend.Friends.Friendship.t()} | {:error, term()}
   def block_user(_user, _blocked_id) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Friends.Friendship{id: 0, requester_id: 0, target_id: 0, requester: nil, target: nil, status: "pending", inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Friends.Friendship{
+           id: 0,
+           requester_id: 0,
+           target_id: 0,
+           requester: nil,
+           target: nil,
+           status: "pending",
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Friends.block_user/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Check if either user has blocked the other.
@@ -125,7 +151,6 @@ defmodule Gamend.Friends do
         raise "Gamend.Friends.blocked?/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Returns the set of blocked pairs among `user_ids`, as a `MapSet` of
@@ -147,12 +172,11 @@ defmodule Gamend.Friends do
     end
   end
 
-
   @doc ~S"""
     Cancel an outgoing friend request (only the requester may cancel).
   """
   @spec cancel_request(Ecto.UUID.t(), Gamend.Accounts.User.t()) ::
-  {:ok, :cancelled} | {:error, :not_found | :not_authorized | term()}
+          {:ok, :cancelled} | {:error, :not_found | :not_authorized | term()}
   def cancel_request(_friendship_id, _user) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -162,7 +186,6 @@ defmodule Gamend.Friends do
         raise "Gamend.Friends.cancel_request/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Count every block across all users, honouring the same filters as `list_all_blocks/1`.
@@ -178,7 +201,6 @@ defmodule Gamend.Friends do
     end
   end
 
-
   @doc ~S"""
     Count blocked friendships for a user (number of blocked rows where user is target).
   """
@@ -192,7 +214,6 @@ defmodule Gamend.Friends do
         raise "Gamend.Friends.count_blocked_for_user/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Count the users `user_id` has blocked.
@@ -208,7 +229,6 @@ defmodule Gamend.Friends do
     end
   end
 
-
   @doc ~S"""
     Count accepted friends for a given user (distinct other user ids).
   """
@@ -222,7 +242,6 @@ defmodule Gamend.Friends do
         raise "Gamend.Friends.count_friends_for_user/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Count incoming pending friend requests for a user.
@@ -238,7 +257,6 @@ defmodule Gamend.Friends do
     end
   end
 
-
   @doc ~S"""
     Count outgoing pending friend requests for a user.
   """
@@ -253,7 +271,6 @@ defmodule Gamend.Friends do
     end
   end
 
-
   @doc ~S"""
     Create a friend request from requester -> target.
       If a reverse pending request exists (target -> requester) it will be accepted instead.
@@ -261,8 +278,9 @@ defmodule Gamend.Friends do
       
   """
   @spec create_request(Gamend.Accounts.User.t() | user_id(), user_id()) ::
-  {:ok, Gamend.Friends.Friendship.t()}
-  | {:error, :cannot_friend_self | :blocked | :already_friends | :already_requested | term()}
+          {:ok, Gamend.Friends.Friendship.t()}
+          | {:error,
+             :cannot_friend_self | :blocked | :already_friends | :already_requested | term()}
   def create_request(_requester_id, _target_id) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -272,7 +290,6 @@ defmodule Gamend.Friends do
         raise "Gamend.Friends.create_request/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Remove a block by its friendship id, regardless of who created it.
@@ -292,7 +309,6 @@ defmodule Gamend.Friends do
     end
   end
 
-
   @doc ~S"""
     Return a list of user IDs that are accepted friends of the given user.
     
@@ -311,7 +327,6 @@ defmodule Gamend.Friends do
     end
   end
 
-
   @doc ~S"""
     Check whether two users are friends (accepted friendship in either direction).
     
@@ -327,7 +342,6 @@ defmodule Gamend.Friends do
     end
   end
 
-
   @doc ~S"""
     Get friendship between two users (ordered requester->target) if exists
   """
@@ -335,13 +349,23 @@ defmodule Gamend.Friends do
   def get_by_pair(_requester_id, _target_id) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        if :erlang.phash2(make_ref(), 2) == 0, do: nil, else: %Gamend.Friends.Friendship{id: 0, requester_id: 0, target_id: 0, requester: nil, target: nil, status: "pending", inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}
+        if :erlang.phash2(make_ref(), 2) == 0,
+          do: nil,
+          else: %Gamend.Friends.Friendship{
+            id: 0,
+            requester_id: 0,
+            target_id: 0,
+            requester: nil,
+            target: nil,
+            status: "pending",
+            inserted_at: ~U[1970-01-01 00:00:00Z],
+            updated_at: ~U[1970-01-01 00:00:00Z]
+          }
 
       _ ->
         raise "Gamend.Friends.get_by_pair/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Get friendship by id (returns nil when not found)
@@ -350,13 +374,23 @@ defmodule Gamend.Friends do
   def get_friendship(_id) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        if :erlang.phash2(make_ref(), 2) == 0, do: nil, else: %Gamend.Friends.Friendship{id: 0, requester_id: 0, target_id: 0, requester: nil, target: nil, status: "pending", inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}
+        if :erlang.phash2(make_ref(), 2) == 0,
+          do: nil,
+          else: %Gamend.Friends.Friendship{
+            id: 0,
+            requester_id: 0,
+            target_id: 0,
+            requester: nil,
+            target: nil,
+            status: "pending",
+            inserted_at: ~U[1970-01-01 00:00:00Z],
+            updated_at: ~U[1970-01-01 00:00:00Z]
+          }
 
       _ ->
         raise "Gamend.Friends.get_friendship/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Get friendship by id
@@ -365,13 +399,21 @@ defmodule Gamend.Friends do
   def get_friendship!(_id) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        %Gamend.Friends.Friendship{id: 0, requester_id: 0, target_id: 0, requester: nil, target: nil, status: "pending", inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}
+        %Gamend.Friends.Friendship{
+          id: 0,
+          requester_id: 0,
+          target_id: 0,
+          requester: nil,
+          target: nil,
+          status: "pending",
+          inserted_at: ~U[1970-01-01 00:00:00Z],
+          updated_at: ~U[1970-01-01 00:00:00Z]
+        }
 
       _ ->
         raise "Gamend.Friends.get_friendship!/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     List every block across all users, newest first, for admin views.
@@ -393,7 +435,6 @@ defmodule Gamend.Friends do
     end
   end
 
-
   @doc ~S"""
     List blocked friendships for a user (Friendship structs where the user is the blocker / target).
   """
@@ -408,13 +449,12 @@ defmodule Gamend.Friends do
     end
   end
 
-
   @doc ~S"""
     List blocked friendships for a user (Friendship structs where the user is the blocker / target).
   """
   @spec list_blocked_for_user(user_id(), Gamend.Types.pagination_opts()) :: [
-  Gamend.Friends.Friendship.t()
-]
+          Gamend.Friends.Friendship.t()
+        ]
   def list_blocked_for_user(_user_id, _opts) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -424,7 +464,6 @@ defmodule Gamend.Friends do
         raise "Gamend.Friends.list_blocked_for_user/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     List the users `user_id` has blocked, as `User` structs.
@@ -446,7 +485,6 @@ defmodule Gamend.Friends do
     end
   end
 
-
   @doc ~S"""
     List the users `user_id` has blocked, as `User` structs.
     
@@ -456,7 +494,9 @@ defmodule Gamend.Friends do
     See `t:Gamend.Types.pagination_opts/0` for available options.
     
   """
-  @spec list_blocked_users(user_id(), Gamend.Types.pagination_opts()) :: [Gamend.Accounts.User.t()]
+  @spec list_blocked_users(user_id(), Gamend.Types.pagination_opts()) :: [
+          Gamend.Accounts.User.t()
+        ]
   def list_blocked_users(_user_id, _opts) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -466,7 +506,6 @@ defmodule Gamend.Friends do
         raise "Gamend.Friends.list_blocked_users/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     List accepted friends for a given user id - returns list of User structs.
@@ -487,7 +526,6 @@ defmodule Gamend.Friends do
     end
   end
 
-
   @doc ~S"""
     List accepted friends for a given user id - returns list of User structs.
     
@@ -496,7 +534,9 @@ defmodule Gamend.Friends do
     See `t:Gamend.Types.pagination_opts/0` for available options.
     
   """
-  @spec list_friends_for_user(Ecto.UUID.t(), Gamend.Types.pagination_opts()) :: [Gamend.Accounts.User.t()]
+  @spec list_friends_for_user(Ecto.UUID.t(), Gamend.Types.pagination_opts()) :: [
+          Gamend.Accounts.User.t()
+        ]
   def list_friends_for_user(_user_id, _opts) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -507,7 +547,6 @@ defmodule Gamend.Friends do
     end
   end
 
-
   @doc ~S"""
     List accepted friendships for a user along with the other user and friendship id.
     
@@ -515,8 +554,8 @@ defmodule Gamend.Friends do
     
   """
   @spec list_friends_with_friendship(Ecto.UUID.t()) :: [
-  %{friendship_id: Ecto.UUID.t(), user: Gamend.Accounts.User.t()}
-]
+          %{friendship_id: Ecto.UUID.t(), user: Gamend.Accounts.User.t()}
+        ]
   def list_friends_with_friendship(_user_id) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -527,7 +566,6 @@ defmodule Gamend.Friends do
     end
   end
 
-
   @doc ~S"""
     List accepted friendships for a user along with the other user and friendship id.
     
@@ -535,8 +573,8 @@ defmodule Gamend.Friends do
     
   """
   @spec list_friends_with_friendship(Ecto.UUID.t(), Gamend.Types.pagination_opts()) :: [
-  %{friendship_id: Ecto.UUID.t(), user: Gamend.Accounts.User.t()}
-]
+          %{friendship_id: Ecto.UUID.t(), user: Gamend.Accounts.User.t()}
+        ]
   def list_friends_with_friendship(_user_id, _opts) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -546,7 +584,6 @@ defmodule Gamend.Friends do
         raise "Gamend.Friends.list_friends_with_friendship/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     List incoming pending friend requests for a user (Friendship structs).
@@ -567,7 +604,6 @@ defmodule Gamend.Friends do
     end
   end
 
-
   @doc ~S"""
     List incoming pending friend requests for a user (Friendship structs).
     
@@ -577,8 +613,8 @@ defmodule Gamend.Friends do
     
   """
   @spec list_incoming_requests(Ecto.UUID.t(), Gamend.Types.pagination_opts()) :: [
-  Gamend.Friends.Friendship.t()
-]
+          Gamend.Friends.Friendship.t()
+        ]
   def list_incoming_requests(_user_id, _opts) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -588,7 +624,6 @@ defmodule Gamend.Friends do
         raise "Gamend.Friends.list_incoming_requests/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     List outgoing pending friend requests for a user (Friendship structs).
@@ -609,7 +644,6 @@ defmodule Gamend.Friends do
     end
   end
 
-
   @doc ~S"""
     List outgoing pending friend requests for a user (Friendship structs).
     
@@ -619,8 +653,8 @@ defmodule Gamend.Friends do
     
   """
   @spec list_outgoing_requests(Ecto.UUID.t(), Gamend.Types.pagination_opts()) :: [
-  Gamend.Friends.Friendship.t()
-]
+          Gamend.Friends.Friendship.t()
+        ]
   def list_outgoing_requests(_user_id, _opts) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -630,7 +664,6 @@ defmodule Gamend.Friends do
         raise "Gamend.Friends.list_outgoing_requests/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Normalizes a user pair into the order-independent key used by `blocked_pairs/1`.
@@ -646,38 +679,55 @@ defmodule Gamend.Friends do
     end
   end
 
-
   @doc ~S"""
     Reject a friend request (only the target may reject). Returns {:ok, friendship}.
   """
   @spec reject_friend_request(Ecto.UUID.t(), Gamend.Accounts.User.t()) ::
-  {:ok, Gamend.Friends.Friendship.t()} | {:error, term()}
+          {:ok, Gamend.Friends.Friendship.t()} | {:error, term()}
   def reject_friend_request(_friendship_id, _user) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Friends.Friendship{id: 0, requester_id: 0, target_id: 0, requester: nil, target: nil, status: "pending", inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Friends.Friendship{
+           id: 0,
+           requester_id: 0,
+           target_id: 0,
+           requester: nil,
+           target: nil,
+           status: "pending",
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Friends.reject_friend_request/2 is a stub - only available at runtime on Gamend"
     end
   end
 
-
   @doc ~S"""
     Remove a friendship (either direction) - only participating users may call this.
   """
   @spec remove_friend(Ecto.UUID.t(), Ecto.UUID.t()) ::
-  {:ok, Gamend.Friends.Friendship.t()} | {:error, term()}
+          {:ok, Gamend.Friends.Friendship.t()} | {:error, term()}
   def remove_friend(_user_id, _friend_id) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Friends.Friendship{id: 0, requester_id: 0, target_id: 0, requester: nil, target: nil, status: "pending", inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Friends.Friendship{
+           id: 0,
+           requester_id: 0,
+           target_id: 0,
+           requester: nil,
+           target: nil,
+           status: "pending",
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Friends.remove_friend/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc false
   @spec subscribe_user(user_id()) :: :ok
@@ -691,12 +741,11 @@ defmodule Gamend.Friends do
     end
   end
 
-
   @doc ~S"""
     Unblock a previously-blocked friendship (only the user who blocked may unblock). Returns {:ok, :unblocked} on success.
   """
   @spec unblock_friendship(Ecto.UUID.t(), Gamend.Accounts.User.t()) ::
-  {:ok, :unblocked} | {:error, term()}
+          {:ok, :unblocked} | {:error, term()}
   def unblock_friendship(_friendship_id, _user) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -706,7 +755,6 @@ defmodule Gamend.Friends do
         raise "Gamend.Friends.unblock_friendship/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Unblock a user previously blocked via `block_user/2`.
@@ -725,7 +773,6 @@ defmodule Gamend.Friends do
     end
   end
 
-
   @doc false
   @spec unsubscribe_user(user_id()) :: :ok
   def unsubscribe_user(_user_id) do
@@ -737,5 +784,4 @@ defmodule Gamend.Friends do
         raise "Gamend.Friends.unsubscribe_user/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 end

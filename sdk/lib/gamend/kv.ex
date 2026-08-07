@@ -1,37 +1,37 @@
 defmodule Gamend.KV do
   @moduledoc ~S"""
   Generic key/value storage.
-  
+
   This is intentionally minimal and un-opinionated.
-  
+
   If you want namespacing, encode it in `key` (e.g. `"polyglot_pirates:key1"`).
   If you want per-user values, pass `user_id: ...` to `get/2`, `put/4`, and `delete/2`.
   If you want per-lobby values, pass `lobby_id: ...` to the same functions.
   You can also pass both to scope a key to a user within a lobby.
-  
+
   This module uses the app cache (`Gamend.Cache`) as a best-effort read cache.
   Writes update the cache and deletes evict it.
-  
+
 
   **Note:** This is an SDK stub. Calling these functions will raise an error.
   The actual implementation runs on the Gamend.
   """
 
   @type list_opts() :: [
-  page: pos_integer(),
-  page_size: pos_integer(),
-  user_id: Ecto.UUID.t(),
-  lobby_id: Ecto.UUID.t(),
-  global_only: boolean(),
-  key: String.t()
-]
+          page: pos_integer(),
+          page_size: pos_integer(),
+          user_id: Ecto.UUID.t(),
+          lobby_id: Ecto.UUID.t(),
+          global_only: boolean(),
+          key: String.t()
+        ]
   @type attrs() :: %{
-  :key => String.t(),
-  optional(:user_id) => String.t(),
-  optional(:lobby_id) => String.t(),
-  :value => value(),
-  optional(:metadata) => metadata()
-}
+          :key => String.t(),
+          optional(:user_id) => String.t(),
+          optional(:lobby_id) => String.t(),
+          :value => value(),
+          optional(:metadata) => metadata()
+        }
   @type payload() :: %{value: value(), metadata: metadata()}
   @type metadata() :: map()
   @type value() :: map()
@@ -53,7 +53,6 @@ defmodule Gamend.KV do
     end
   end
 
-
   @doc ~S"""
     Count the number of entries that match the optional filter.
     
@@ -70,7 +69,6 @@ defmodule Gamend.KV do
         raise "Gamend.KV.count_entries/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Create a new `Entry` from `attrs` (expecting `key`, optional `user_id`/`lobby_id`,
@@ -89,7 +87,6 @@ defmodule Gamend.KV do
     end
   end
 
-
   @doc ~S"""
     Delete the entry at `key`.
     
@@ -107,7 +104,6 @@ defmodule Gamend.KV do
     end
   end
 
-
   @doc ~S"""
     Delete the entry at `key`.
     
@@ -115,9 +111,9 @@ defmodule Gamend.KV do
     
   """
   @spec delete(
-  String.t(),
-  keyword()
-) :: :ok
+          String.t(),
+          keyword()
+        ) :: :ok
   def delete(_key, _opts) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -127,7 +123,6 @@ defmodule Gamend.KV do
         raise "Gamend.KV.delete/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Delete an entry by its `id`.
@@ -145,7 +140,6 @@ defmodule Gamend.KV do
         raise "Gamend.KV.delete_entry/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Delete every entry a user holds inside one lobby.
@@ -168,7 +162,6 @@ defmodule Gamend.KV do
     end
   end
 
-
   @doc ~S"""
     Retrieve the value and metadata stored for `key`.
     
@@ -180,13 +173,14 @@ defmodule Gamend.KV do
   def get(_key) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        if :erlang.phash2(make_ref(), 2) == 0, do: :error, else: {:ok, %{value: %{}, metadata: %{}}}
+        if :erlang.phash2(make_ref(), 2) == 0,
+          do: :error,
+          else: {:ok, %{value: %{}, metadata: %{}}}
 
       _ ->
         raise "Gamend.KV.get/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Retrieve the value and metadata stored for `key`.
@@ -196,19 +190,20 @@ defmodule Gamend.KV do
     
   """
   @spec get(
-  String.t(),
-  keyword()
-) :: {:ok, payload()} | :error
+          String.t(),
+          keyword()
+        ) :: {:ok, payload()} | :error
   def get(_key, _opts) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        if :erlang.phash2(make_ref(), 2) == 0, do: :error, else: {:ok, %{value: %{}, metadata: %{}}}
+        if :erlang.phash2(make_ref(), 2) == 0,
+          do: :error,
+          else: {:ok, %{value: %{}, metadata: %{}}}
 
       _ ->
         raise "Gamend.KV.get/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Fetch an `Entry` by its `id`.
@@ -225,7 +220,6 @@ defmodule Gamend.KV do
         raise "Gamend.KV.get_entry/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     List key/value entries with optional pagination and filtering.
@@ -247,7 +241,6 @@ defmodule Gamend.KV do
     end
   end
 
-
   @doc ~S"""
     List key/value entries with optional pagination and filtering.
     
@@ -268,7 +261,6 @@ defmodule Gamend.KV do
     end
   end
 
-
   @doc ~S"""
     Store `value` with optional `metadata` at `key`.
     
@@ -288,9 +280,9 @@ defmodule Gamend.KV do
     end
   end
 
-
   @doc false
-  @spec put(String.t(), value(), metadata()) :: {:ok, Gamend.KV.Entry.t()} | {:error, Ecto.Changeset.t()}
+  @spec put(String.t(), value(), metadata()) ::
+          {:ok, Gamend.KV.Entry.t()} | {:error, Ecto.Changeset.t()}
   def put(_key, _value, _metadata) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -301,7 +293,6 @@ defmodule Gamend.KV do
     end
   end
 
-
   @doc ~S"""
     Store `value` with optional `metadata` at `key`.
     
@@ -311,7 +302,7 @@ defmodule Gamend.KV do
     
   """
   @spec put(String.t(), value(), metadata(), list_opts()) ::
-  {:ok, Gamend.KV.Entry.t()} | {:error, Ecto.Changeset.t()}
+          {:ok, Gamend.KV.Entry.t()} | {:error, Ecto.Changeset.t()}
   def put(_key, _value, _metadata, _opts) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -322,15 +313,14 @@ defmodule Gamend.KV do
     end
   end
 
-
   @doc ~S"""
     Subscribe the current process to changes for a specific key/scope.
     
   """
   @spec subscribe(
-  String.t(),
-  keyword()
-) :: :ok | {:error, term()}
+          String.t(),
+          keyword()
+        ) :: :ok | {:error, term()}
   def subscribe(_key, _opts) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -341,15 +331,14 @@ defmodule Gamend.KV do
     end
   end
 
-
   @doc ~S"""
     Unsubscribe the current process from changes for a specific key/scope.
     
   """
   @spec unsubscribe(
-  String.t(),
-  keyword()
-) :: :ok | {:error, term()}
+          String.t(),
+          keyword()
+        ) :: :ok | {:error, term()}
   def unsubscribe(_key, _opts) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -360,14 +349,13 @@ defmodule Gamend.KV do
     end
   end
 
-
   @doc ~S"""
     Update an existing entry by `id` with `attrs`.
     Returns `{:ok, entry}`, `{:error, :not_found}` if missing, or `{:error, changeset}` on validation error.
     
   """
   @spec update_entry(Ecto.UUID.t(), attrs()) ::
-  {:ok, Gamend.KV.Entry.t()} | {:error, :not_found} | {:error, Ecto.Changeset.t()}
+          {:ok, Gamend.KV.Entry.t()} | {:error, :not_found} | {:error, Ecto.Changeset.t()}
   def update_entry(_id, _attrs) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -377,5 +365,4 @@ defmodule Gamend.KV do
         raise "Gamend.KV.update_entry/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 end

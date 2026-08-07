@@ -101,6 +101,12 @@ defmodule GamendHost.MixProject do
           local_web_commands([web_cmd("format --check-formatted"), web_cmd("credo --strict")]) ++
           plugin_commands("format --check-formatted"),
       "deps.audit": [&prune_vendored_lockfiles/1, "deps.audit"],
+      # The umbrella apps are path deps, so their modules sit in the *deps* PLT
+      # while dialyxir keys its freshness on mix.lock alone — app source can
+      # change without the hash moving. Skipping the recheck then reports every
+      # function added since the PLT was built as one that does not exist. CI
+      # drops the hash file for the same reason.
+      dialyzer: ["dialyzer --force-check"],
       # The inner loop: fast checks only. Generators and the web app's own
       precommit:
         [
@@ -161,24 +167,24 @@ defmodule GamendHost.MixProject do
     if local_web_source?(), do: commands, else: []
   end
 
-  # Bundled plugins are their own mix projects, so neither the umbrella's
-  # formatter inputs nor `local_web_commands/1` reach them. Without this, a
-  # misformatted plugin passes `precommit` and fails on CI, which does walk
-  # `modules/plugins/*`.
+  # Plugins, the SDK and its tooling are their own mix projects, so neither the
+  # umbrella's formatter inputs nor `local_web_commands/1` reach them. Without
+  # this, a misformatted one passes `precommit` and fails on CI, which does walk
+  # `modules/plugins/*`. Absent in a host checkout, which has none of them.
   defp plugin_commands(task) do
     for dir <- plugin_paths(), do: "cmd --cd #{dir} env #{force_ansi()}mix #{task}"
   end
 
   defp plugin_paths do
-    case File.ls("modules/plugins") do
-      {:ok, entries} ->
-        entries
-        |> Enum.sort()
-        |> Enum.map(&Path.join("modules/plugins", &1))
-        |> Enum.filter(&File.regular?(Path.join(&1, "mix.exs")))
+    (bundled_projects("modules/plugins") ++
+       bundled_projects("modules/plugins_examples") ++ ["sdk", "sdk_tools"])
+    |> Enum.filter(&File.regular?(Path.join(&1, "mix.exs")))
+  end
 
-      {:error, _not_a_checkout_with_plugins} ->
-        []
+  defp bundled_projects(root) do
+    case File.ls(root) do
+      {:ok, entries} -> entries |> Enum.sort() |> Enum.map(&Path.join(root, &1))
+      {:error, _not_a_checkout_with_plugins} -> []
     end
   end
 

@@ -1,64 +1,62 @@
 defmodule Gamend.Schedule do
   @moduledoc ~S"""
   Dynamic cron-like job scheduling for hooks.
-  
+
   Use this module in your `after_startup/0` hook to register scheduled jobs
   that will call your hook functions at specified intervals.
-  
+
   Jobs are durable and safe for distributed deployments: they run through the
   background job queue (`Gamend.Jobs`, backed by Oban), so exactly one
   instance executes each job per period and a crash mid-run is retried.
-  
+
   Scheduled callbacks are automatically protected from user RPC calls.
-  
+
   ## Examples
-  
+
       def after_startup do
         # Simple intervals
         Schedule.every_minutes(5, :on_every_5m)
         Schedule.hourly(:on_hourly)
         Schedule.daily(:on_daily)
-  
+
         # With options
         Schedule.daily(:on_morning_report, hour: 9)
         Schedule.weekly(:on_monday, day: :monday, hour: 10)
-  
+
         # Full cron syntax
         Schedule.cron(:my_job, "0 */6 * * *", :on_every_6h)
-  
+
         :ok
       end
-  
+
       # Callback receives a context map (public function, but protected from RPC)
       def on_hourly(context) do
         IO.puts("Triggered at #{context["triggered_at"]}")
         :ok
       end
-  
+
   ## Context
-  
+
   Callbacks run as background jobs, so the context is a **JSON map with string
   keys** (`triggered_at` is an ISO8601 string):
-  
+
       %{
         "triggered_at" => "2026-07-22T14:00:00Z",
         "job_name" => "on_hourly",
         "schedule" => "0 * * * *"
       }
-  
+
   ## Distributed Safety
-  
+
   A single per-minute tick (`Gamend.Schedule.TickWorker`, driven by Oban's
   leader-elected Cron plugin) enqueues each due callback as a **unique** job.
   Oban's uniqueness guarantees a callback runs at most once per period across
   the whole cluster — no application-level locks required.
-  
+
 
   **Note:** This is an SDK stub. Calling these functions will raise an error.
   The actual implementation runs on the Gamend.
   """
-
-
 
   @doc ~S"""
     Cancel a scheduled job.
@@ -79,7 +77,6 @@ defmodule Gamend.Schedule do
     end
   end
 
-
   @doc ~S"""
     Register a job with full cron syntax.
     
@@ -99,7 +96,6 @@ defmodule Gamend.Schedule do
         raise "Gamend.Schedule.cron/3 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Run a job every day.
@@ -127,7 +123,6 @@ defmodule Gamend.Schedule do
     end
   end
 
-
   @doc ~S"""
     Run a job every day.
     
@@ -154,7 +149,6 @@ defmodule Gamend.Schedule do
     end
   end
 
-
   @doc ~S"""
     Run a job every N minutes.
     
@@ -174,7 +168,6 @@ defmodule Gamend.Schedule do
         raise "Gamend.Schedule.every_minutes/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Run a job every hour.
@@ -200,7 +193,6 @@ defmodule Gamend.Schedule do
     end
   end
 
-
   @doc ~S"""
     Run a job every hour.
     
@@ -225,7 +217,6 @@ defmodule Gamend.Schedule do
     end
   end
 
-
   @doc ~S"""
     List all scheduled jobs.
     
@@ -242,7 +233,6 @@ defmodule Gamend.Schedule do
         raise "Gamend.Schedule.list/0 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Returns the set of callback function names registered for background jobs.
@@ -263,7 +253,6 @@ defmodule Gamend.Schedule do
         raise "Gamend.Schedule.registered_callbacks/0 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Run a job every week.
@@ -291,7 +280,6 @@ defmodule Gamend.Schedule do
     end
   end
 
-
   @doc ~S"""
     Run a job every week.
     
@@ -317,5 +305,4 @@ defmodule Gamend.Schedule do
         raise "Gamend.Schedule.weekly/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 end

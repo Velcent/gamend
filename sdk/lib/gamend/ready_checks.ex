@@ -1,49 +1,49 @@
 defmodule Gamend.ReadyChecks do
   @moduledoc ~S"""
   Ready checks: *these players must each answer before this proceeds*.
-  
+
   One primitive, two kinds — the only differences are what a "no" means and
   whether an answer can be taken back:
-  
+
   | | `"accept"` | `"ready"` |
   | --- | --- | --- |
   | Answer | one-shot, irrevocable | a toggle |
   | A "no" | fails the check for everyone | leaves it pending |
   | Deadline | mandatory | optional |
   | On timeout | fails | fails, naming who stalled |
-  
+
   `"ready"` is the lobby's ready-up and the party's standing ready board;
   `"accept"` is matchmaking's match confirmation (see
   the moduledoc below).
-  
+
   ## Two lanes
-  
+
   A player can be in at most one open check *per lane*: the match lane (lobby
   ready or matchmaking accept — one match at a time) and the party lane. The
   lanes are independent, so a party's standing board never blocks the party's
   lobby from opening its own check.
-  
+
   ## What core does *not* do
-  
+
   A failed check kicks nobody, deletes no lobby and moves no lobby state. Core
   records who did not answer (`not_ready/1`); the host — or the game, in
   `after_ready_check_failed` — decides what that is worth.
-  
+
   ## Usage
-  
+
       {:ok, check} = ReadyChecks.open(lobby, member_ids, opened_by: host.id)
       {:ok, check} = ReadyChecks.respond(user, true)
       ReadyChecks.passed?(lobby)
-  
+
   ## Concurrency
-  
+
   Answering is a single-row write, so no two players can lose each other's
   flag. *Evaluating* the result is the part that races: two players answering
   at once can each count the other as still pending, and nobody passes. So
   `respond/3` holds a per-check advisory lock (`:ready_check`) around
   write-then-evaluate. Hooks and broadcasts fire after the lock is released —
   never inside the transaction.
-  
+
 
   **Note:** This is an SDK stub. Calling these functions will raise an error.
   The actual implementation runs on the Gamend.
@@ -67,7 +67,6 @@ defmodule Gamend.ReadyChecks do
     end
   end
 
-
   @doc ~S"""
     Adds a member to the party's open check, if there is one.
   """
@@ -82,7 +81,6 @@ defmodule Gamend.ReadyChecks do
     end
   end
 
-
   @doc ~S"""
     Answers on behalf of a member — for bots and AI-controlled players, which
     cannot press anything.
@@ -92,33 +90,59 @@ defmodule Gamend.ReadyChecks do
     
   """
   @spec answer_for(Gamend.ReadyChecks.Check.t(), Ecto.UUID.t(), answer()) ::
-  {:ok, Gamend.ReadyChecks.Check.t()} | {:error, term()}
+          {:ok, Gamend.ReadyChecks.Check.t()} | {:error, term()}
   def answer_for(_check, _user_id, _ready?) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.ReadyChecks.Check{id: "", kind: "ready", status: "pending", lobby_id: nil, deadline_at: nil, opened_by: nil, reason: nil, resolved_at: nil, metadata: %{}, participants: [], inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.ReadyChecks.Check{
+           id: "",
+           kind: "ready",
+           status: "pending",
+           lobby_id: nil,
+           deadline_at: nil,
+           opened_by: nil,
+           reason: nil,
+           resolved_at: nil,
+           metadata: %{},
+           participants: [],
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.ReadyChecks.answer_for/3 is a stub - only available at runtime on Gamend"
     end
   end
 
-
   @doc ~S"""
     Cancels a pending check — the host called it off, or the subject went away.
   """
   @spec cancel(Gamend.ReadyChecks.Check.t(), String.t()) ::
-  {:ok, Gamend.ReadyChecks.Check.t()} | {:error, term()}
+          {:ok, Gamend.ReadyChecks.Check.t()} | {:error, term()}
   def cancel(_check, _reason) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.ReadyChecks.Check{id: "", kind: "ready", status: "pending", lobby_id: nil, deadline_at: nil, opened_by: nil, reason: nil, resolved_at: nil, metadata: %{}, participants: [], inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.ReadyChecks.Check{
+           id: "",
+           kind: "ready",
+           status: "pending",
+           lobby_id: nil,
+           deadline_at: nil,
+           opened_by: nil,
+           reason: nil,
+           resolved_at: nil,
+           metadata: %{},
+           participants: [],
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.ReadyChecks.cancel/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Cancels the lobby's pending check, if it has one.
@@ -134,7 +158,6 @@ defmodule Gamend.ReadyChecks do
     end
   end
 
-
   @doc ~S"""
     Cancels the party's pending check, if it has one.
   """
@@ -148,7 +171,6 @@ defmodule Gamend.ReadyChecks do
         raise "Gamend.ReadyChecks.cancel_for_party/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Counts checks matching the same filters as `list_checks/1`.
@@ -164,7 +186,6 @@ defmodule Gamend.ReadyChecks do
     end
   end
 
-
   @doc ~S"""
     Fails one check on its deadline_at. A no-op if it already resolved.
   """
@@ -178,7 +199,6 @@ defmodule Gamend.ReadyChecks do
         raise "Gamend.ReadyChecks.expire/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Fails every pending check whose deadline_at has passed.
@@ -199,7 +219,6 @@ defmodule Gamend.ReadyChecks do
     end
   end
 
-
   @doc ~S"""
     The caller's open check, with participants preloaded, or nil.
     
@@ -209,17 +228,31 @@ defmodule Gamend.ReadyChecks do
     
   """
   @spec for_user(Gamend.Accounts.User.t() | Ecto.UUID.t(), scope() | :any) ::
-  Gamend.ReadyChecks.Check.t() | nil
+          Gamend.ReadyChecks.Check.t() | nil
   def for_user(_user, _scope) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        if :erlang.phash2(make_ref(), 2) == 0, do: nil, else: %Gamend.ReadyChecks.Check{id: "", kind: "ready", status: "pending", lobby_id: nil, deadline_at: nil, opened_by: nil, reason: nil, resolved_at: nil, metadata: %{}, participants: [], inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}
+        if :erlang.phash2(make_ref(), 2) == 0,
+          do: nil,
+          else: %Gamend.ReadyChecks.Check{
+            id: "",
+            kind: "ready",
+            status: "pending",
+            lobby_id: nil,
+            deadline_at: nil,
+            opened_by: nil,
+            reason: nil,
+            resolved_at: nil,
+            metadata: %{},
+            participants: [],
+            inserted_at: ~U[1970-01-01 00:00:00Z],
+            updated_at: ~U[1970-01-01 00:00:00Z]
+          }
 
       _ ->
         raise "Gamend.ReadyChecks.for_user/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Fetches a check by id (with participants), or nil.
@@ -228,13 +261,27 @@ defmodule Gamend.ReadyChecks do
   def get_check(_id) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        if :erlang.phash2(make_ref(), 2) == 0, do: nil, else: %Gamend.ReadyChecks.Check{id: "", kind: "ready", status: "pending", lobby_id: nil, deadline_at: nil, opened_by: nil, reason: nil, resolved_at: nil, metadata: %{}, participants: [], inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}
+        if :erlang.phash2(make_ref(), 2) == 0,
+          do: nil,
+          else: %Gamend.ReadyChecks.Check{
+            id: "",
+            kind: "ready",
+            status: "pending",
+            lobby_id: nil,
+            deadline_at: nil,
+            opened_by: nil,
+            reason: nil,
+            resolved_at: nil,
+            metadata: %{},
+            participants: [],
+            inserted_at: ~U[1970-01-01 00:00:00Z],
+            updated_at: ~U[1970-01-01 00:00:00Z]
+          }
 
       _ ->
         raise "Gamend.ReadyChecks.get_check/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Lists checks for the admin views, newest first.
@@ -254,7 +301,6 @@ defmodule Gamend.ReadyChecks do
     end
   end
 
-
   @doc ~S"""
     The participants who did not answer ready — the host's kick list, and what
     `after_ready_check_failed` is handed.
@@ -270,7 +316,6 @@ defmodule Gamend.ReadyChecks do
         raise "Gamend.ReadyChecks.not_ready/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Opens a check over `user_ids` and notifies them.
@@ -293,17 +338,30 @@ defmodule Gamend.ReadyChecks do
     
   """
   @spec open(subject(), [Ecto.UUID.t()], keyword()) ::
-  {:ok, Gamend.ReadyChecks.Check.t()} | {:error, term()}
+          {:ok, Gamend.ReadyChecks.Check.t()} | {:error, term()}
   def open(_subject, _user_ids, _opts) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.ReadyChecks.Check{id: "", kind: "ready", status: "pending", lobby_id: nil, deadline_at: nil, opened_by: nil, reason: nil, resolved_at: nil, metadata: %{}, participants: [], inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.ReadyChecks.Check{
+           id: "",
+           kind: "ready",
+           status: "pending",
+           lobby_id: nil,
+           deadline_at: nil,
+           opened_by: nil,
+           reason: nil,
+           resolved_at: nil,
+           metadata: %{},
+           participants: [],
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.ReadyChecks.open/3 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     True when the subject's most recent check passed.
@@ -324,7 +382,6 @@ defmodule Gamend.ReadyChecks do
     end
   end
 
-
   @doc ~S"""
     The lobby's open check, with participants preloaded, or nil.
   """
@@ -332,13 +389,27 @@ defmodule Gamend.ReadyChecks do
   def pending_for_lobby(_lobby_id) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        if :erlang.phash2(make_ref(), 2) == 0, do: nil, else: %Gamend.ReadyChecks.Check{id: "", kind: "ready", status: "pending", lobby_id: nil, deadline_at: nil, opened_by: nil, reason: nil, resolved_at: nil, metadata: %{}, participants: [], inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}
+        if :erlang.phash2(make_ref(), 2) == 0,
+          do: nil,
+          else: %Gamend.ReadyChecks.Check{
+            id: "",
+            kind: "ready",
+            status: "pending",
+            lobby_id: nil,
+            deadline_at: nil,
+            opened_by: nil,
+            reason: nil,
+            resolved_at: nil,
+            metadata: %{},
+            participants: [],
+            inserted_at: ~U[1970-01-01 00:00:00Z],
+            updated_at: ~U[1970-01-01 00:00:00Z]
+          }
 
       _ ->
         raise "Gamend.ReadyChecks.pending_for_lobby/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     The party's open check, with participants preloaded, or nil.
@@ -347,13 +418,27 @@ defmodule Gamend.ReadyChecks do
   def pending_for_party(_party_id) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        if :erlang.phash2(make_ref(), 2) == 0, do: nil, else: %Gamend.ReadyChecks.Check{id: "", kind: "ready", status: "pending", lobby_id: nil, deadline_at: nil, opened_by: nil, reason: nil, resolved_at: nil, metadata: %{}, participants: [], inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}
+        if :erlang.phash2(make_ref(), 2) == 0,
+          do: nil,
+          else: %Gamend.ReadyChecks.Check{
+            id: "",
+            kind: "ready",
+            status: "pending",
+            lobby_id: nil,
+            deadline_at: nil,
+            opened_by: nil,
+            reason: nil,
+            resolved_at: nil,
+            metadata: %{},
+            participants: [],
+            inserted_at: ~U[1970-01-01 00:00:00Z],
+            updated_at: ~U[1970-01-01 00:00:00Z]
+          }
 
       _ ->
         raise "Gamend.ReadyChecks.pending_for_party/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Drops a member from the lobby's open check and re-evaluates it.
@@ -373,7 +458,6 @@ defmodule Gamend.ReadyChecks do
     end
   end
 
-
   @doc ~S"""
     Drops a member from the party's open check and re-evaluates it.
   """
@@ -388,7 +472,6 @@ defmodule Gamend.ReadyChecks do
     end
   end
 
-
   @doc ~S"""
     Resets the subject's board: quietly cancels its pending check (no failed
     event, no hook — the fresh `ready_check_started` replaces it on clients) and
@@ -401,17 +484,30 @@ defmodule Gamend.ReadyChecks do
     
   """
   @spec reset(subject(), [Ecto.UUID.t()], keyword()) ::
-  {:ok, Gamend.ReadyChecks.Check.t()} | {:error, term()}
+          {:ok, Gamend.ReadyChecks.Check.t()} | {:error, term()}
   def reset(_subject, _user_ids, _opts) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.ReadyChecks.Check{id: "", kind: "ready", status: "pending", lobby_id: nil, deadline_at: nil, opened_by: nil, reason: nil, resolved_at: nil, metadata: %{}, participants: [], inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.ReadyChecks.Check{
+           id: "",
+           kind: "ready",
+           status: "pending",
+           lobby_id: nil,
+           deadline_at: nil,
+           opened_by: nil,
+           reason: nil,
+           resolved_at: nil,
+           metadata: %{},
+           participants: [],
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.ReadyChecks.reset/3 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Records the caller's answer to their open check in `scope` and re-evaluates
@@ -431,17 +527,30 @@ defmodule Gamend.ReadyChecks do
     
   """
   @spec respond(Gamend.Accounts.User.t() | Ecto.UUID.t(), answer(), scope()) ::
-  {:ok, Gamend.ReadyChecks.Check.t()} | {:error, term()}
+          {:ok, Gamend.ReadyChecks.Check.t()} | {:error, term()}
   def respond(_user, _ready?, _scope) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.ReadyChecks.Check{id: "", kind: "ready", status: "pending", lobby_id: nil, deadline_at: nil, opened_by: nil, reason: nil, resolved_at: nil, metadata: %{}, participants: [], inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.ReadyChecks.Check{
+           id: "",
+           kind: "ready",
+           status: "pending",
+           lobby_id: nil,
+           deadline_at: nil,
+           opened_by: nil,
+           reason: nil,
+           resolved_at: nil,
+           metadata: %{},
+           participants: [],
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.ReadyChecks.respond/3 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Counts by status over the last `hours` — the accept-rate and dodge-rate
@@ -458,5 +567,4 @@ defmodule Gamend.ReadyChecks do
         raise "Gamend.ReadyChecks.stats/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 end

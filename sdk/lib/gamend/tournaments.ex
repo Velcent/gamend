@@ -2,7 +2,7 @@ defmodule Gamend.Tournaments do
   @moduledoc ~S"""
   Bracket tournaments: registration → seeded single-elimination draw → timed
   rounds → champions. See TOURNAMENT_DESIGN.md.
-  
+
   Core owns the structure (registration, seeding, rounds, deadlines,
   advancement, recurrence). Gameplay and judgment belong to the game: when a
   match becomes playable the `tournament_match_ready` hook fires, the game
@@ -10,17 +10,15 @@ defmodule Gamend.Tournaments do
   verdict with `resolve_match/2`. Unresolved matches past their deadline_at fire
   `tournament_match_expired` for the game to adjudicate; the tournament's
   `deadline_policy` applies only if it doesn't.
-  
+
   Realtime: entry leaders receive `{:tournament_event, event, payload}` on the
   `"tournaments:user:<user_id>"` PubSub topic (forwarded by the user channel
   as `tournament_*` events).
-  
+
 
   **Note:** This is an SDK stub. Calling these functions will raise an error.
   The actual implementation runs on the Gamend.
   """
-
-
 
   @doc ~S"""
     Applies any due state transition to one tournament and returns the current
@@ -28,7 +26,7 @@ defmodule Gamend.Tournaments do
     
   """
   @spec advance_lifecycle(Gamend.Tournaments.Tournament.t(), DateTime.t()) ::
-  Gamend.Tournaments.Tournament.t()
+          Gamend.Tournaments.Tournament.t()
   def advance_lifecycle(_tournament, _now) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -38,7 +36,6 @@ defmodule Gamend.Tournaments do
         raise "Gamend.Tournaments.advance_lifecycle/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Rounds needed to win a bracket of `size` slots (2→1, 4→2, 8→3).
@@ -54,7 +51,6 @@ defmodule Gamend.Tournaments do
     end
   end
 
-
   @doc ~S"""
     Smallest power of two seating `n` entries, min 2, capped at `max`.
   """
@@ -69,22 +65,39 @@ defmodule Gamend.Tournaments do
     end
   end
 
-
   @doc ~S"""
     Cancels a tournament (terminal, no hooks fired, no recurrence spawn).
   """
   @spec cancel_tournament(Gamend.Tournaments.Tournament.t()) ::
-  {:ok, Gamend.Tournaments.Tournament.t()} | {:error, term()}
+          {:ok, Gamend.Tournaments.Tournament.t()} | {:error, term()}
   def cancel_tournament(_tournament) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Tournaments.Tournament{id: "", slug: "", title: "", description: "", state: "scheduled", registration_opens_at: nil, starts_at: nil, ends_at: nil, recur: nil, max_entries: nil, team_size: 1, bracket_size: 8, round_window_sec: 3600, deadline_policy: "forfeit_both", metadata: %{}, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Tournaments.Tournament{
+           id: "",
+           slug: "",
+           title: "",
+           description: "",
+           state: "scheduled",
+           registration_opens_at: nil,
+           starts_at: nil,
+           ends_at: nil,
+           recur: nil,
+           max_entries: nil,
+           team_size: 1,
+           bracket_size: 8,
+           round_window_sec: 3600,
+           deadline_policy: "forfeit_both",
+           metadata: %{},
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Tournaments.cancel_tournament/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc false
   @spec change_tournament(Gamend.Tournaments.Tournament.t(), map()) :: Ecto.Changeset.t()
@@ -98,7 +111,6 @@ defmodule Gamend.Tournaments do
     end
   end
 
-
   @doc false
   @spec count_brackets(Ecto.UUID.t()) :: non_neg_integer()
   def count_brackets(_tournament_id) do
@@ -111,14 +123,13 @@ defmodule Gamend.Tournaments do
     end
   end
 
-
   @doc ~S"""
     Counts entries. Accepts the same `:state` and `:search` options as the listing.
   """
   @spec count_entries(
-  Ecto.UUID.t(),
-  keyword()
-) :: non_neg_integer()
+          Ecto.UUID.t(),
+          keyword()
+        ) :: non_neg_integer()
   def count_entries(_tournament_id, _opts) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -128,7 +139,6 @@ defmodule Gamend.Tournaments do
         raise "Gamend.Tournaments.count_entries/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Counts distinct tournament slugs.
@@ -144,7 +154,6 @@ defmodule Gamend.Tournaments do
     end
   end
 
-
   @doc false
   @spec count_tournaments(keyword()) :: non_neg_integer()
   def count_tournaments(_opts) do
@@ -157,41 +166,76 @@ defmodule Gamend.Tournaments do
     end
   end
 
-
   @doc false
   @spec create_tournament(map()) ::
-  {:ok, Gamend.Tournaments.Tournament.t()} | {:error, Ecto.Changeset.t()}
+          {:ok, Gamend.Tournaments.Tournament.t()} | {:error, Ecto.Changeset.t()}
   def create_tournament(_attrs) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Tournaments.Tournament{id: "", slug: "", title: "", description: "", state: "scheduled", registration_opens_at: nil, starts_at: nil, ends_at: nil, recur: nil, max_entries: nil, team_size: 1, bracket_size: 8, round_window_sec: 3600, deadline_policy: "forfeit_both", metadata: %{}, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Tournaments.Tournament{
+           id: "",
+           slug: "",
+           title: "",
+           description: "",
+           state: "scheduled",
+           registration_opens_at: nil,
+           starts_at: nil,
+           ends_at: nil,
+           recur: nil,
+           max_entries: nil,
+           team_size: 1,
+           bracket_size: 8,
+           round_window_sec: 3600,
+           deadline_policy: "forfeit_both",
+           metadata: %{},
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Tournaments.create_tournament/1 is a stub - only available at runtime on Gamend"
     end
   end
 
-
   @doc false
   @spec delete_tournament(Gamend.Tournaments.Tournament.t()) ::
-  {:ok, Gamend.Tournaments.Tournament.t()} | {:error, term()}
+          {:ok, Gamend.Tournaments.Tournament.t()} | {:error, term()}
   def delete_tournament(_tournament) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Tournaments.Tournament{id: "", slug: "", title: "", description: "", state: "scheduled", registration_opens_at: nil, starts_at: nil, ends_at: nil, recur: nil, max_entries: nil, team_size: 1, bracket_size: 8, round_window_sec: 3600, deadline_policy: "forfeit_both", metadata: %{}, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Tournaments.Tournament{
+           id: "",
+           slug: "",
+           title: "",
+           description: "",
+           state: "scheduled",
+           registration_opens_at: nil,
+           starts_at: nil,
+           ends_at: nil,
+           recur: nil,
+           max_entries: nil,
+           team_size: 1,
+           bracket_size: 8,
+           round_window_sec: 3600,
+           deadline_policy: "forfeit_both",
+           metadata: %{},
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Tournaments.delete_tournament/1 is a stub - only available at runtime on Gamend"
     end
   end
 
-
   @doc ~S"""
     Entries by id, for rendering a bracket without loading the whole field.
   """
   @spec entries_by_id(Ecto.UUID.t(), [Ecto.UUID.t()]) :: %{
-  required(Ecto.UUID.t()) => Gamend.Tournaments.Entry.t()
-}
+          required(Ecto.UUID.t()) => Gamend.Tournaments.Entry.t()
+        }
   def entries_by_id(_tournament_id, _entry_ids) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -202,58 +246,112 @@ defmodule Gamend.Tournaments do
     end
   end
 
-
   @doc false
   @spec get_bracket(Ecto.UUID.t(), integer()) :: Gamend.Tournaments.Bracket.t() | nil
   def get_bracket(_tournament_id, _index) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        if :erlang.phash2(make_ref(), 2) == 0, do: nil, else: %Gamend.Tournaments.Bracket{id: "", tournament_id: "", index: 0, size: 8, inserted_at: ~U[1970-01-01 00:00:00Z]}
+        if :erlang.phash2(make_ref(), 2) == 0,
+          do: nil,
+          else: %Gamend.Tournaments.Bracket{
+            id: "",
+            tournament_id: "",
+            index: 0,
+            size: 8,
+            inserted_at: ~U[1970-01-01 00:00:00Z]
+          }
 
       _ ->
         raise "Gamend.Tournaments.get_bracket/2 is a stub - only available at runtime on Gamend"
     end
   end
 
-
   @doc false
   @spec get_entry(Ecto.UUID.t(), Ecto.UUID.t()) :: Gamend.Tournaments.Entry.t() | nil
   def get_entry(_tournament_id, _leader_id) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        if :erlang.phash2(make_ref(), 2) == 0, do: nil, else: %Gamend.Tournaments.Entry{id: "", tournament_id: "", leader_id: "", seed: nil, bracket_index: nil, wins: 0, state: "registered", metadata: %{}, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}
+        if :erlang.phash2(make_ref(), 2) == 0,
+          do: nil,
+          else: %Gamend.Tournaments.Entry{
+            id: "",
+            tournament_id: "",
+            leader_id: "",
+            seed: nil,
+            bracket_index: nil,
+            wins: 0,
+            state: "registered",
+            metadata: %{},
+            inserted_at: ~U[1970-01-01 00:00:00Z],
+            updated_at: ~U[1970-01-01 00:00:00Z]
+          }
 
       _ ->
         raise "Gamend.Tournaments.get_entry/2 is a stub - only available at runtime on Gamend"
     end
   end
 
-
   @doc false
   @spec get_match(Ecto.UUID.t()) :: Gamend.Tournaments.Match.t() | nil
   def get_match(_match_id) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        if :erlang.phash2(make_ref(), 2) == 0, do: nil, else: %Gamend.Tournaments.Match{id: "", tournament_id: "", bracket_index: 0, round: 1, slot: 0, a_entry_id: nil, b_entry_id: nil, winner_entry_id: nil, ready_at: nil, expired_at: nil, resolved_at: nil, deadline_at: ~U[1970-01-01 00:00:00Z], metadata: %{}, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}
+        if :erlang.phash2(make_ref(), 2) == 0,
+          do: nil,
+          else: %Gamend.Tournaments.Match{
+            id: "",
+            tournament_id: "",
+            bracket_index: 0,
+            round: 1,
+            slot: 0,
+            a_entry_id: nil,
+            b_entry_id: nil,
+            winner_entry_id: nil,
+            ready_at: nil,
+            expired_at: nil,
+            resolved_at: nil,
+            deadline_at: ~U[1970-01-01 00:00:00Z],
+            metadata: %{},
+            inserted_at: ~U[1970-01-01 00:00:00Z],
+            updated_at: ~U[1970-01-01 00:00:00Z]
+          }
 
       _ ->
         raise "Gamend.Tournaments.get_match/1 is a stub - only available at runtime on Gamend"
     end
   end
 
-
   @doc false
   @spec get_tournament(Ecto.UUID.t()) :: Gamend.Tournaments.Tournament.t() | nil
   def get_tournament(_id) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        if :erlang.phash2(make_ref(), 2) == 0, do: nil, else: %Gamend.Tournaments.Tournament{id: "", slug: "", title: "", description: "", state: "scheduled", registration_opens_at: nil, starts_at: nil, ends_at: nil, recur: nil, max_entries: nil, team_size: 1, bracket_size: 8, round_window_sec: 3600, deadline_policy: "forfeit_both", metadata: %{}, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}
+        if :erlang.phash2(make_ref(), 2) == 0,
+          do: nil,
+          else: %Gamend.Tournaments.Tournament{
+            id: "",
+            slug: "",
+            title: "",
+            description: "",
+            state: "scheduled",
+            registration_opens_at: nil,
+            starts_at: nil,
+            ends_at: nil,
+            recur: nil,
+            max_entries: nil,
+            team_size: 1,
+            bracket_size: 8,
+            round_window_sec: 3600,
+            deadline_policy: "forfeit_both",
+            metadata: %{},
+            inserted_at: ~U[1970-01-01 00:00:00Z],
+            updated_at: ~U[1970-01-01 00:00:00Z]
+          }
 
       _ ->
         raise "Gamend.Tournaments.get_tournament/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc false
   @spec get_tournament!(Ecto.UUID.t()) :: Gamend.Tournaments.Tournament.t()
@@ -267,7 +365,6 @@ defmodule Gamend.Tournaments do
     end
   end
 
-
   @doc ~S"""
     The current occurrence for a slug: the latest one that is not finished or
     cancelled, falling back to the most recent row.
@@ -277,13 +374,32 @@ defmodule Gamend.Tournaments do
   def get_tournament_by_slug(_slug) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        if :erlang.phash2(make_ref(), 2) == 0, do: nil, else: %Gamend.Tournaments.Tournament{id: "", slug: "", title: "", description: "", state: "scheduled", registration_opens_at: nil, starts_at: nil, ends_at: nil, recur: nil, max_entries: nil, team_size: 1, bracket_size: 8, round_window_sec: 3600, deadline_policy: "forfeit_both", metadata: %{}, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}
+        if :erlang.phash2(make_ref(), 2) == 0,
+          do: nil,
+          else: %Gamend.Tournaments.Tournament{
+            id: "",
+            slug: "",
+            title: "",
+            description: "",
+            state: "scheduled",
+            registration_opens_at: nil,
+            starts_at: nil,
+            ends_at: nil,
+            recur: nil,
+            max_entries: nil,
+            team_size: 1,
+            bracket_size: 8,
+            round_window_sec: 3600,
+            deadline_policy: "forfeit_both",
+            metadata: %{},
+            inserted_at: ~U[1970-01-01 00:00:00Z],
+            updated_at: ~U[1970-01-01 00:00:00Z]
+          }
 
       _ ->
         raise "Gamend.Tournaments.get_tournament_by_slug/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Registers `user` as an entry leader. Runs the `before_tournament_register`
@@ -292,41 +408,70 @@ defmodule Gamend.Tournaments do
     
   """
   @spec join_tournament(Gamend.Accounts.User.t(), Gamend.Tournaments.Tournament.t()) ::
-  {:ok, Gamend.Tournaments.Entry.t()} | {:error, term()}
+          {:ok, Gamend.Tournaments.Entry.t()} | {:error, term()}
   def join_tournament(_user, _tournament) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Tournaments.Entry{id: "", tournament_id: "", leader_id: "", seed: nil, bracket_index: nil, wins: 0, state: "registered", metadata: %{}, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Tournaments.Entry{
+           id: "",
+           tournament_id: "",
+           leader_id: "",
+           seed: nil,
+           bracket_index: nil,
+           wins: 0,
+           state: "registered",
+           metadata: %{},
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Tournaments.join_tournament/2 is a stub - only available at runtime on Gamend"
     end
   end
 
-
   @doc ~S"""
     Withdraws `user`'s entry. Only before the draw; `before_tournament_leave` can veto.
   """
   @spec leave_tournament(Gamend.Accounts.User.t(), Gamend.Tournaments.Tournament.t()) ::
-  {:ok, Gamend.Tournaments.Tournament.t()} | {:error, term()}
+          {:ok, Gamend.Tournaments.Tournament.t()} | {:error, term()}
   def leave_tournament(_user, _tournament) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Tournaments.Tournament{id: "", slug: "", title: "", description: "", state: "scheduled", registration_opens_at: nil, starts_at: nil, ends_at: nil, recur: nil, max_entries: nil, team_size: 1, bracket_size: 8, round_window_sec: 3600, deadline_policy: "forfeit_both", metadata: %{}, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Tournaments.Tournament{
+           id: "",
+           slug: "",
+           title: "",
+           description: "",
+           state: "scheduled",
+           registration_opens_at: nil,
+           starts_at: nil,
+           ends_at: nil,
+           recur: nil,
+           max_entries: nil,
+           team_size: 1,
+           bracket_size: 8,
+           round_window_sec: 3600,
+           deadline_policy: "forfeit_both",
+           metadata: %{},
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Tournaments.leave_tournament/2 is a stub - only available at runtime on Gamend"
     end
   end
 
-
   @doc ~S"""
     Brackets for a tournament. Options: `:page`, `:page_size`.
   """
   @spec list_brackets(
-  Ecto.UUID.t(),
-  keyword()
-) :: [Gamend.Tournaments.Bracket.t()]
+          Ecto.UUID.t(),
+          keyword()
+        ) :: [Gamend.Tournaments.Bracket.t()]
   def list_brackets(_tournament_id, _opts) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -336,7 +481,6 @@ defmodule Gamend.Tournaments do
         raise "Gamend.Tournaments.list_brackets/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Entries for a tournament, oldest first (registration order = seed rank).
@@ -350,9 +494,9 @@ defmodule Gamend.Tournaments do
     
   """
   @spec list_entries(
-  Ecto.UUID.t(),
-  keyword()
-) :: [Gamend.Tournaments.Entry.t()]
+          Ecto.UUID.t(),
+          keyword()
+        ) :: [Gamend.Tournaments.Entry.t()]
   def list_entries(_tournament_id, _opts) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -363,7 +507,6 @@ defmodule Gamend.Tournaments do
     end
   end
 
-
   @doc ~S"""
     Matches for a tournament, bracket-major order.
     
@@ -371,9 +514,9 @@ defmodule Gamend.Tournaments do
     
   """
   @spec list_matches(
-  Ecto.UUID.t(),
-  keyword()
-) :: [Gamend.Tournaments.Match.t()]
+          Ecto.UUID.t(),
+          keyword()
+        ) :: [Gamend.Tournaments.Match.t()]
   def list_matches(_tournament_id, _opts) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -383,7 +526,6 @@ defmodule Gamend.Tournaments do
         raise "Gamend.Tournaments.list_matches/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Every occurrence of a slug, newest first.
@@ -398,7 +540,6 @@ defmodule Gamend.Tournaments do
         raise "Gamend.Tournaments.list_occurrences/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Tournaments grouped by slug — one entry per tournament *type*, the way
@@ -420,7 +561,6 @@ defmodule Gamend.Tournaments do
     end
   end
 
-
   @doc false
   @spec list_tournaments(keyword()) :: [Gamend.Tournaments.Tournament.t()]
   def list_tournaments(_opts) do
@@ -432,7 +572,6 @@ defmodule Gamend.Tournaments do
         raise "Gamend.Tournaments.list_tournaments/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     The match a slot reaches in `round` (standard folding).
@@ -448,12 +587,11 @@ defmodule Gamend.Tournaments do
     end
   end
 
-
   @doc ~S"""
     The match struct with tournament and both entries preloaded (hook payload).
   """
   @spec match_payload(Gamend.Tournaments.Tournament.t(), Gamend.Tournaments.Match.t()) ::
-  Gamend.Tournaments.Match.t()
+          Gamend.Tournaments.Match.t()
   def match_payload(_tournament, _match) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -464,21 +602,38 @@ defmodule Gamend.Tournaments do
     end
   end
 
-
   @doc ~S"""
     The caller's current unresolved match (their entry filled in a slot), if any.
   """
-  @spec my_match(Gamend.Tournaments.Tournament.t(), Ecto.UUID.t()) :: Gamend.Tournaments.Match.t() | nil
+  @spec my_match(Gamend.Tournaments.Tournament.t(), Ecto.UUID.t()) ::
+          Gamend.Tournaments.Match.t() | nil
   def my_match(_tournament, _user_id) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        if :erlang.phash2(make_ref(), 2) == 0, do: nil, else: %Gamend.Tournaments.Match{id: "", tournament_id: "", bracket_index: 0, round: 1, slot: 0, a_entry_id: nil, b_entry_id: nil, winner_entry_id: nil, ready_at: nil, expired_at: nil, resolved_at: nil, deadline_at: ~U[1970-01-01 00:00:00Z], metadata: %{}, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}
+        if :erlang.phash2(make_ref(), 2) == 0,
+          do: nil,
+          else: %Gamend.Tournaments.Match{
+            id: "",
+            tournament_id: "",
+            bracket_index: 0,
+            round: 1,
+            slot: 0,
+            a_entry_id: nil,
+            b_entry_id: nil,
+            winner_entry_id: nil,
+            ready_at: nil,
+            expired_at: nil,
+            resolved_at: nil,
+            deadline_at: ~U[1970-01-01 00:00:00Z],
+            metadata: %{},
+            inserted_at: ~U[1970-01-01 00:00:00Z],
+            updated_at: ~U[1970-01-01 00:00:00Z]
+          }
 
       _ ->
         raise "Gamend.Tournaments.my_match/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Reopens a cancelled tournament.
@@ -489,17 +644,35 @@ defmodule Gamend.Tournaments do
     
   """
   @spec reopen_tournament(Gamend.Tournaments.Tournament.t()) ::
-  {:ok, Gamend.Tournaments.Tournament.t()} | {:error, term()}
+          {:ok, Gamend.Tournaments.Tournament.t()} | {:error, term()}
   def reopen_tournament(_tournament) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Tournaments.Tournament{id: "", slug: "", title: "", description: "", state: "scheduled", registration_opens_at: nil, starts_at: nil, ends_at: nil, recur: nil, max_entries: nil, team_size: 1, bracket_size: 8, round_window_sec: 3600, deadline_policy: "forfeit_both", metadata: %{}, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Tournaments.Tournament{
+           id: "",
+           slug: "",
+           title: "",
+           description: "",
+           state: "scheduled",
+           registration_opens_at: nil,
+           starts_at: nil,
+           ends_at: nil,
+           recur: nil,
+           max_entries: nil,
+           team_size: 1,
+           bracket_size: 8,
+           round_window_sec: 3600,
+           deadline_policy: "forfeit_both",
+           metadata: %{},
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Tournaments.reopen_tournament/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Records the verdict for a match: the winning entry's id, or `:no_winner`
@@ -510,17 +683,33 @@ defmodule Gamend.Tournaments do
     
   """
   @spec resolve_match(Ecto.UUID.t(), Ecto.UUID.t() | :no_winner) ::
-  {:ok, Gamend.Tournaments.Match.t()} | {:error, term()}
+          {:ok, Gamend.Tournaments.Match.t()} | {:error, term()}
   def resolve_match(_match_id, _winner) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Tournaments.Match{id: "", tournament_id: "", bracket_index: 0, round: 1, slot: 0, a_entry_id: nil, b_entry_id: nil, winner_entry_id: nil, ready_at: nil, expired_at: nil, resolved_at: nil, deadline_at: ~U[1970-01-01 00:00:00Z], metadata: %{}, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Tournaments.Match{
+           id: "",
+           tournament_id: "",
+           bracket_index: 0,
+           round: 1,
+           slot: 0,
+           a_entry_id: nil,
+           b_entry_id: nil,
+           winner_entry_id: nil,
+           ready_at: nil,
+           expired_at: nil,
+           resolved_at: nil,
+           deadline_at: ~U[1970-01-01 00:00:00Z],
+           metadata: %{},
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Tournaments.resolve_match/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Unix-independent deadline_at for `round`, anchored to `starts_at`.
@@ -536,7 +725,6 @@ defmodule Gamend.Tournaments do
     end
   end
 
-
   @doc ~S"""
     Matches in `round` of a bracket of `size` slots.
   """
@@ -551,7 +739,6 @@ defmodule Gamend.Tournaments do
     end
   end
 
-
   @doc ~S"""
     When `round` becomes playable (its window start).
   """
@@ -565,7 +752,6 @@ defmodule Gamend.Tournaments do
         raise "Gamend.Tournaments.round_opens_at/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Standard single-elimination seeding order for a power-of-two `size`:
@@ -583,7 +769,6 @@ defmodule Gamend.Tournaments do
     end
   end
 
-
   @doc ~S"""
     Final (or current) placements: champions first, then by wins.
   """
@@ -598,7 +783,6 @@ defmodule Gamend.Tournaments do
     end
   end
 
-
   @doc ~S"""
     Aggregate counts for the admin dashboard.
     
@@ -608,10 +792,14 @@ defmodule Gamend.Tournaments do
     
   """
   @spec stats() :: %{
-  tournaments: map(),
-  entries: map(),
-  matches: %{total: non_neg_integer(), open: non_neg_integer(), overdue: non_neg_integer()}
-}
+          tournaments: map(),
+          entries: map(),
+          matches: %{
+            total: non_neg_integer(),
+            open: non_neg_integer(),
+            overdue: non_neg_integer()
+          }
+        }
   def stats() do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -621,7 +809,6 @@ defmodule Gamend.Tournaments do
         raise "Gamend.Tournaments.stats/0 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Periodic driver, called by `Gamend.Tournaments.Ticker`. Runs every
@@ -640,7 +827,6 @@ defmodule Gamend.Tournaments do
     end
   end
 
-
   @doc ~S"""
     Deep-merges `map` into the match's metadata (game scratch space).
     
@@ -650,29 +836,63 @@ defmodule Gamend.Tournaments do
     
   """
   @spec update_match_metadata(Ecto.UUID.t(), map()) ::
-  {:ok, Gamend.Tournaments.Match.t()} | {:error, term()}
+          {:ok, Gamend.Tournaments.Match.t()} | {:error, term()}
   def update_match_metadata(_match_id, _map) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Tournaments.Match{id: "", tournament_id: "", bracket_index: 0, round: 1, slot: 0, a_entry_id: nil, b_entry_id: nil, winner_entry_id: nil, ready_at: nil, expired_at: nil, resolved_at: nil, deadline_at: ~U[1970-01-01 00:00:00Z], metadata: %{}, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Tournaments.Match{
+           id: "",
+           tournament_id: "",
+           bracket_index: 0,
+           round: 1,
+           slot: 0,
+           a_entry_id: nil,
+           b_entry_id: nil,
+           winner_entry_id: nil,
+           ready_at: nil,
+           expired_at: nil,
+           resolved_at: nil,
+           deadline_at: ~U[1970-01-01 00:00:00Z],
+           metadata: %{},
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Tournaments.update_match_metadata/2 is a stub - only available at runtime on Gamend"
     end
   end
 
-
   @doc false
   @spec update_tournament(Gamend.Tournaments.Tournament.t(), map()) ::
-  {:ok, Gamend.Tournaments.Tournament.t()} | {:error, Ecto.Changeset.t()}
+          {:ok, Gamend.Tournaments.Tournament.t()} | {:error, Ecto.Changeset.t()}
   def update_tournament(_tournament, _attrs) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Tournaments.Tournament{id: "", slug: "", title: "", description: "", state: "scheduled", registration_opens_at: nil, starts_at: nil, ends_at: nil, recur: nil, max_entries: nil, team_size: 1, bracket_size: 8, round_window_sec: 3600, deadline_policy: "forfeit_both", metadata: %{}, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Tournaments.Tournament{
+           id: "",
+           slug: "",
+           title: "",
+           description: "",
+           state: "scheduled",
+           registration_opens_at: nil,
+           starts_at: nil,
+           ends_at: nil,
+           recur: nil,
+           max_entries: nil,
+           team_size: 1,
+           bracket_size: 8,
+           round_window_sec: 3600,
+           deadline_policy: "forfeit_both",
+           metadata: %{},
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Tournaments.update_tournament/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 end

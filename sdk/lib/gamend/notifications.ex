@@ -2,20 +2,20 @@ defmodule Gamend.Notifications do
   @moduledoc ~S"""
   Notifications context – create, list, and delete persisted user-to-user
   notifications.
-  
+
   Notifications can only be sent to accepted friends. They are stored in the
   database so that recipients receive them even when offline. On WebSocket
   connect the client gets all undeleted notifications (ordered by timestamp).
   New notifications are also pushed in real-time via PubSub.
-  
+
   ## PubSub Events
-  
+
   This module broadcasts to the `"notifications:user:<user_id>"` topic:
-  
+
   - `{:notification_created, notification}` – a new notification was created
-  
+
   ## Usage
-  
+
       # Send a notification to a friend
       {:ok, notification} = Notifications.send_notification(sender_id, %{
         "user_id" => recipient_id,
@@ -23,16 +23,16 @@ defmodule Gamend.Notifications do
         "content" => "Join my lobby!",
         "metadata" => %{"lobby_id" => "0198c0de-7f2a-7e3b-9c4d-1a2b3c4d5e6f"}
       })
-  
+
       # List all notifications for a user (ordered oldest-first)
       notifications = Notifications.list_notifications(user_id)
-  
+
       # Delete notifications by IDs (only owner can delete)
       {deleted_count, nil} = Notifications.delete_notifications(user_id, [1, 2, 3])
-  
+
       # Count notifications for a user
       count = Notifications.count_notifications(user_id)
-  
+
 
   **Note:** This is an SDK stub. Calling these functions will raise an error.
   The actual implementation runs on the Gamend.
@@ -45,7 +45,7 @@ defmodule Gamend.Notifications do
     
   """
   @spec admin_create_notification(user_id(), user_id(), map()) ::
-  {:ok, Gamend.Notifications.Notification.t()} | {:error, Ecto.Changeset.t() | atom()}
+          {:ok, Gamend.Notifications.Notification.t()} | {:error, Ecto.Changeset.t() | atom()}
   def admin_create_notification(_sender_id, _recipient_id, _attrs) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -56,12 +56,11 @@ defmodule Gamend.Notifications do
     end
   end
 
-
   @doc ~S"""
     Admin: delete a single notification by ID (no ownership check).
   """
   @spec admin_delete_notification(Ecto.UUID.t()) ::
-  {:ok, Gamend.Notifications.Notification.t()} | {:error, term()}
+          {:ok, Gamend.Notifications.Notification.t()} | {:error, term()}
   def admin_delete_notification(_id) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -71,7 +70,6 @@ defmodule Gamend.Notifications do
         raise "Gamend.Notifications.admin_delete_notification/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Count all notifications matching the given filters (admin).
@@ -87,7 +85,6 @@ defmodule Gamend.Notifications do
     end
   end
 
-
   @doc ~S"""
     Count total notifications for a user.
   """
@@ -101,7 +98,6 @@ defmodule Gamend.Notifications do
         raise "Gamend.Notifications.count_notifications/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Count unread notifications for a user.
@@ -117,7 +113,6 @@ defmodule Gamend.Notifications do
     end
   end
 
-
   @doc ~S"""
     Create a chat notification for a recipient.
     
@@ -130,7 +125,7 @@ defmodule Gamend.Notifications do
     
   """
   @spec create_chat_notification(user_id(), user_id(), map()) ::
-  {:ok, Gamend.Notifications.Notification.t()} | {:error, term()}
+          {:ok, Gamend.Notifications.Notification.t()} | {:error, term()}
   def create_chat_notification(_sender_id, _recipient_id, _attrs) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -140,7 +135,6 @@ defmodule Gamend.Notifications do
         raise "Gamend.Notifications.create_chat_notification/3 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Delete all notifications from `sender_id` to `recipient_id` with the given `title`.
@@ -157,7 +151,6 @@ defmodule Gamend.Notifications do
         raise "Gamend.Notifications.delete_notification_by/3 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Delete notifications by IDs, scoped to the recipient (owner).
@@ -177,7 +170,6 @@ defmodule Gamend.Notifications do
     end
   end
 
-
   @doc ~S"""
     Get a single notification by ID.
   """
@@ -192,7 +184,6 @@ defmodule Gamend.Notifications do
     end
   end
 
-
   @doc ~S"""
     Get a single notification by ID (raises if not found).
   """
@@ -206,7 +197,6 @@ defmodule Gamend.Notifications do
         raise "Gamend.Notifications.get_notification!/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     List all notifications (admin), with optional filters.
@@ -224,9 +214,9 @@ defmodule Gamend.Notifications do
     
   """
   @spec list_all_notifications(
-  map(),
-  keyword()
-) :: [Gamend.Notifications.Notification.t()]
+          map(),
+          keyword()
+        ) :: [Gamend.Notifications.Notification.t()]
   def list_all_notifications(_filters, _opts) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -237,7 +227,6 @@ defmodule Gamend.Notifications do
     end
   end
 
-
   @doc ~S"""
     List all notifications for a user, ordered oldest-first so the client
     receives them in chronological order.
@@ -246,9 +235,9 @@ defmodule Gamend.Notifications do
     
   """
   @spec list_notifications(
-  user_id(),
-  keyword()
-) :: [Gamend.Notifications.Notification.t()]
+          user_id(),
+          keyword()
+        ) :: [Gamend.Notifications.Notification.t()]
   def list_notifications(_user_id, _opts) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -259,7 +248,6 @@ defmodule Gamend.Notifications do
     end
   end
 
-
   @doc ~S"""
     List notifications for a user filtered by title (e.g. `"party_invite"`, `"group_invite"`).
     
@@ -267,7 +255,9 @@ defmodule Gamend.Notifications do
     as `list_notifications/2`.
     
   """
-  @spec list_notifications_by_title(user_id(), String.t()) :: [Gamend.Notifications.Notification.t()]
+  @spec list_notifications_by_title(user_id(), String.t()) :: [
+          Gamend.Notifications.Notification.t()
+        ]
   def list_notifications_by_title(_user_id, _title) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -278,14 +268,15 @@ defmodule Gamend.Notifications do
     end
   end
 
-
   @doc ~S"""
     Returns the `limit` most recent notifications, ordered oldest-first (so they
     can be replayed in chronological order on connect without loading the user's
     entire history).
     
   """
-  @spec list_recent_notifications(Ecto.UUID.t(), pos_integer()) :: [Gamend.Notifications.Notification.t()]
+  @spec list_recent_notifications(Ecto.UUID.t(), pos_integer()) :: [
+          Gamend.Notifications.Notification.t()
+        ]
   def list_recent_notifications(_user_id, _limit) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -296,7 +287,6 @@ defmodule Gamend.Notifications do
     end
   end
 
-
   @doc ~S"""
     List notifications sent by a user filtered by title.
     
@@ -304,7 +294,9 @@ defmodule Gamend.Notifications do
     Results are ordered newest-first and cached with the same version-based TTL.
     
   """
-  @spec list_sent_notifications_by_title(user_id(), String.t()) :: [Gamend.Notifications.Notification.t()]
+  @spec list_sent_notifications_by_title(user_id(), String.t()) :: [
+          Gamend.Notifications.Notification.t()
+        ]
   def list_sent_notifications_by_title(_user_id, _title) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -314,7 +306,6 @@ defmodule Gamend.Notifications do
         raise "Gamend.Notifications.list_sent_notifications_by_title/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Mark all notifications as read for a user.
@@ -330,12 +321,11 @@ defmodule Gamend.Notifications do
     end
   end
 
-
   @doc ~S"""
     Mark a single notification as read. Only the recipient can mark it.
   """
   @spec mark_notification_read(user_id(), Ecto.UUID.t()) ::
-  {:ok, Gamend.Notifications.Notification.t()} | {:error, atom()}
+          {:ok, Gamend.Notifications.Notification.t()} | {:error, atom()}
   def mark_notification_read(_user_id, _notification_id) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -345,7 +335,6 @@ defmodule Gamend.Notifications do
         raise "Gamend.Notifications.mark_notification_read/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Send a notification to a friend.
@@ -360,7 +349,7 @@ defmodule Gamend.Notifications do
     
   """
   @spec send_notification(user_id(), map()) ::
-  {:ok, Gamend.Notifications.Notification.t()} | {:error, Ecto.Changeset.t() | atom()}
+          {:ok, Gamend.Notifications.Notification.t()} | {:error, Ecto.Changeset.t() | atom()}
   def send_notification(_sender_id, _attrs) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -370,7 +359,6 @@ defmodule Gamend.Notifications do
         raise "Gamend.Notifications.send_notification/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Subscribe to notification events for a specific user.
@@ -386,7 +374,6 @@ defmodule Gamend.Notifications do
     end
   end
 
-
   @doc ~S"""
     Unsubscribe from notification events for a specific user.
   """
@@ -400,5 +387,4 @@ defmodule Gamend.Notifications do
         raise "Gamend.Notifications.unsubscribe/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 end

@@ -44,7 +44,7 @@ defmodule GamendWeb.MixProject do
       {:protobuf, "~> 0.17"},
       {:phoenix_ecto, "~> 4.5"},
       {:phoenix_html, "~> 4.1"},
-      {:phoenix_live_reload, "~> 1.6.2", only: :dev},
+      {:phoenix_live_reload, "~> 1.7", only: :dev},
       {:phoenix_live_view, "~> 1.2.1"},
       {:lazy_html, ">= 0.1.0", only: :test},
       {:phoenix_live_dashboard, "~> 0.8.3"},
@@ -79,9 +79,9 @@ defmodule GamendWeb.MixProject do
       {:corsica, "~> 2.0"},
       {:hammer, "~> 7.2"},
       {:hammer_backend_redis, "~> 7.1"},
-      {:ex_webrtc, "~> 0.16.0"},
-      {:ex_sctp, "~> 0.1.2"},
-      {:prom_ex, "~> 1.11"},
+      {:ex_webrtc, "~> 0.17.0"},
+      {:ex_sctp, "~> 0.1.3"},
+      {:prom_ex, "~> 1.12"},
       {:geolix, "~> 2.0"},
       {:geolix_adapter_mmdb2, "~> 0.6"}
     ]
@@ -110,6 +110,12 @@ defmodule GamendWeb.MixProject do
         "phx.digest"
       ],
       lint: ["format --check-formatted", "credo --strict"],
+      # gamend_core is a path dep, so its modules sit in the *deps* PLT while
+      # dialyxir keys its freshness on mix.lock alone — core source can change
+      # without the hash moving. Skipping the recheck then reports every core
+      # function added since the PLT was built as one that does not exist. CI
+      # drops the hash file for the same reason.
+      dialyzer: ["dialyzer --force-check"],
       precommit: [
         "compile --warning-as-errors",
         "xref unreachable",

@@ -89,7 +89,10 @@ defmodule Mix.Tasks.Gen.Sdk do
       )
 
     path = Path.join(sdk_dir, filename)
-    File.write!(path, stub_content)
+    # Formatted here rather than by a later `mix format`: no formatter sweep
+    # reaches sdk/, so hand-formatting a stub only survives until the next
+    # generation. Emitting it formatted is what keeps the tree clean.
+    File.write!(path, [Code.format_string!(stub_content), "\n"])
     Mix.shell().info("Generated #{path}")
   end
 

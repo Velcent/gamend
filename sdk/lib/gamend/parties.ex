@@ -1,49 +1,47 @@
 defmodule Gamend.Parties do
   @moduledoc ~S"""
   Context module for party management.
-  
+
   A party is a pre-lobby grouping mechanism. Players form a party before
   creating or joining a lobby together.
-  
+
   ## Usage
-  
+
       # Create a party (user becomes leader and first member)
       {:ok, party} = Gamend.Parties.create_party(user, %{max_size: 4})
-  
+
       # Leader invites a friend or shared-group member by user_id
       {:ok, _notification} = Gamend.Parties.invite_to_party(leader, target_user_id)
-  
+
       # Target accepts the invite
       {:ok, party} = Gamend.Parties.accept_party_invite(target, party_id)
-  
+
       # Or declines
       :ok = Gamend.Parties.decline_party_invite(target, party_id)
-  
+
       # Leave a party (if leader leaves, party is disbanded)
       {:ok, _} = Gamend.Parties.leave_party(user)
-  
+
       # Party leader creates a lobby — all members join atomically
       {:ok, lobby} = Gamend.Parties.create_lobby_with_party(user, lobby_attrs)
-  
+
       # Party leader joins an existing lobby — all members join atomically
       {:ok, lobby} = Gamend.Parties.join_lobby_with_party(user, lobby_id, opts)
-  
+
   ## PubSub Events
-  
+
   This module broadcasts the following events:
-  
+
   - `"party:<party_id>"` topic:
     - `{:party_member_joined, party_id, user_id}`
     - `{:party_member_left, party_id, user_id}`
     - `{:party_disbanded, party_id}`
     - `{:party_updated, party}`
-  
+
 
   **Note:** This is an SDK stub. Calling these functions will raise an error.
   The actual implementation runs on the Gamend.
   """
-
-
 
   @doc ~S"""
     Accept a party invite. Joins the party and marks the invite as accepted.
@@ -55,7 +53,7 @@ defmodule Gamend.Parties do
     
   """
   @spec accept_party_invite(Gamend.Accounts.User.t(), Ecto.UUID.t()) ::
-  {:ok, Gamend.Parties.Party.t()} | {:error, atom()}
+          {:ok, Gamend.Parties.Party.t()} | {:error, atom()}
   def accept_party_invite(_user, _party_id) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -65,7 +63,6 @@ defmodule Gamend.Parties do
         raise "Gamend.Parties.accept_party_invite/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Admin delete of a party. Clears all members' party_id and deletes the party.
@@ -81,12 +78,11 @@ defmodule Gamend.Parties do
     end
   end
 
-
   @doc ~S"""
     Admin update of a party (max_size, metadata).
   """
   @spec admin_update_party(Gamend.Parties.Party.t(), map()) ::
-  {:ok, Gamend.Parties.Party.t()} | {:error, Ecto.Changeset.t()}
+          {:ok, Gamend.Parties.Party.t()} | {:error, Ecto.Changeset.t()}
   def admin_update_party(_party, _attrs) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -96,7 +92,6 @@ defmodule Gamend.Parties do
         raise "Gamend.Parties.admin_update_party/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Broadcast a member presence event (online/offline) to a party's PubSub topic.
@@ -111,7 +106,6 @@ defmodule Gamend.Parties do
         raise "Gamend.Parties.broadcast_member_presence/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Cancel a previously sent party invite. Only the original sender (leader) can cancel.
@@ -128,7 +122,6 @@ defmodule Gamend.Parties do
     end
   end
 
-
   @doc ~S"""
     Return a changeset for the given party (for edit forms).
   """
@@ -142,7 +135,6 @@ defmodule Gamend.Parties do
         raise "Gamend.Parties.change_party/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Count all parties matching the given filters.
@@ -158,7 +150,6 @@ defmodule Gamend.Parties do
     end
   end
 
-
   @doc ~S"""
     Count total members across all parties.
   """
@@ -172,7 +163,6 @@ defmodule Gamend.Parties do
         raise "Gamend.Parties.count_all_party_members/0 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Count members in a party.
@@ -188,7 +178,6 @@ defmodule Gamend.Parties do
     end
   end
 
-
   @doc ~S"""
     The party leader creates a new lobby, and all party members join it
     atomically. The party is kept intact.
@@ -196,7 +185,8 @@ defmodule Gamend.Parties do
     The lobby's `max_users` must be >= party member count.
     
   """
-  @spec create_lobby_with_party(Gamend.Accounts.User.t(), map()) :: {:ok, map()} | {:error, term()}
+  @spec create_lobby_with_party(Gamend.Accounts.User.t(), map()) ::
+          {:ok, map()} | {:error, term()}
   def create_lobby_with_party(_user, _lobby_attrs) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -207,7 +197,6 @@ defmodule Gamend.Parties do
     end
   end
 
-
   @doc ~S"""
     Create a new party. The user becomes the leader and first member.
     
@@ -215,7 +204,7 @@ defmodule Gamend.Parties do
     
   """
   @spec create_party(Gamend.Accounts.User.t(), map()) ::
-  {:ok, Gamend.Parties.Party.t()} | {:error, term()}
+          {:ok, Gamend.Parties.Party.t()} | {:error, term()}
   def create_party(_user, _attrs) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -225,7 +214,6 @@ defmodule Gamend.Parties do
         raise "Gamend.Parties.create_party/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Decline a party invite. Marks the invite as declined.
@@ -241,7 +229,6 @@ defmodule Gamend.Parties do
         raise "Gamend.Parties.decline_party_invite/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Disband a party outright: clears every member's `party_id`, cancels pending
@@ -263,7 +250,6 @@ defmodule Gamend.Parties do
     end
   end
 
-
   @doc ~S"""
     Get a party by ID. Returns nil if not found.
   """
@@ -277,7 +263,6 @@ defmodule Gamend.Parties do
         raise "Gamend.Parties.get_party/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Get a party by ID. Raises if not found.
@@ -293,7 +278,6 @@ defmodule Gamend.Parties do
     end
   end
 
-
   @doc ~S"""
     Get all members of a party.
   """
@@ -308,7 +292,6 @@ defmodule Gamend.Parties do
     end
   end
 
-
   @doc ~S"""
     Get the party the user is currently in, or nil.
   """
@@ -322,7 +305,6 @@ defmodule Gamend.Parties do
         raise "Gamend.Parties.get_user_party/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Invite a user to join the party. Only the party leader may invite.
@@ -339,7 +321,7 @@ defmodule Gamend.Parties do
     
   """
   @spec invite_to_party(Gamend.Accounts.User.t(), Ecto.UUID.t()) ::
-  {:ok, Gamend.Parties.PartyInvite.t()} | {:error, atom()}
+          {:ok, Gamend.Parties.PartyInvite.t()} | {:error, atom()}
   def invite_to_party(_leader, _target_user_id) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -350,7 +332,6 @@ defmodule Gamend.Parties do
     end
   end
 
-
   @doc ~S"""
     The party leader joins an existing lobby, and all party members join it
     atomically. The party is kept intact.
@@ -359,7 +340,7 @@ defmodule Gamend.Parties do
     
   """
   @spec join_lobby_with_party(Gamend.Accounts.User.t(), Ecto.UUID.t(), map()) ::
-  {:ok, map()} | {:error, term()}
+          {:ok, map()} | {:error, term()}
   def join_lobby_with_party(_user, _lobby_id, _opts) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -370,23 +351,30 @@ defmodule Gamend.Parties do
     end
   end
 
-
   @doc ~S"""
     Kick a member from the party. Only the leader can kick.
     
   """
   @spec kick_member(Gamend.Accounts.User.t(), Ecto.UUID.t()) ::
-  {:ok, Gamend.Accounts.User.t()} | {:error, term()}
+          {:ok, Gamend.Accounts.User.t()} | {:error, term()}
   def kick_member(_leader, _target_user_id) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Accounts.User{id: 0, email: "", display_name: nil, metadata: %{}, is_admin: false, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Accounts.User{
+           id: 0,
+           email: "",
+           display_name: nil,
+           metadata: %{},
+           is_admin: false,
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Parties.kick_member/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Returns true if the given user is the leader of their current party.
@@ -401,7 +389,6 @@ defmodule Gamend.Parties do
         raise "Gamend.Parties.leader?/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Leave the current party.
@@ -421,14 +408,13 @@ defmodule Gamend.Parties do
     end
   end
 
-
   @doc ~S"""
     List all parties with optional filters and pagination.
   """
   @spec list_all_parties(
-  map(),
-  keyword()
-) :: [Gamend.Parties.Party.t()]
+          map(),
+          keyword()
+        ) :: [Gamend.Parties.Party.t()]
   def list_all_parties(_filters, _opts) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -438,7 +424,6 @@ defmodule Gamend.Parties do
         raise "Gamend.Parties.list_all_parties/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     List pending party invites for the given user.
@@ -454,7 +439,6 @@ defmodule Gamend.Parties do
         raise "Gamend.Parties.list_party_invitations/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     List pending party invites sent by the given leader.
@@ -473,7 +457,6 @@ defmodule Gamend.Parties do
     end
   end
 
-
   @doc ~S"""
     The party leader quick-joins a lobby with the entire party.
     
@@ -486,17 +469,28 @@ defmodule Gamend.Parties do
     
   """
   @spec quick_join_with_party(Gamend.Accounts.User.t(), map()) ::
-  {:ok, Gamend.Lobbies.Lobby.t()} | {:error, term()}
+          {:ok, Gamend.Lobbies.Lobby.t()} | {:error, term()}
   def quick_join_with_party(_user, _params) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Lobbies.Lobby{id: 0, title: "", host_id: nil, hostless: false, max_users: 0, is_hidden: false, is_locked: false, metadata: %{}, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Lobbies.Lobby{
+           id: 0,
+           title: "",
+           host_id: nil,
+           hostless: false,
+           max_users: 0,
+           is_hidden: false,
+           is_locked: false,
+           metadata: %{},
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Parties.quick_join_with_party/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Aggregate party counts for the public stats endpoint.
@@ -516,7 +510,6 @@ defmodule Gamend.Parties do
     end
   end
 
-
   @doc ~S"""
     Subscribe to all party events (create/delete).
   """
@@ -530,7 +523,6 @@ defmodule Gamend.Parties do
         raise "Gamend.Parties.subscribe_parties/0 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Subscribe to events for a specific party.
@@ -546,7 +538,6 @@ defmodule Gamend.Parties do
     end
   end
 
-
   @doc ~S"""
     Unsubscribe from a party's events.
   """
@@ -561,13 +552,12 @@ defmodule Gamend.Parties do
     end
   end
 
-
   @doc ~S"""
     Update party settings. Only the leader can update.
     
   """
   @spec update_party(Gamend.Accounts.User.t(), map()) ::
-  {:ok, Gamend.Parties.Party.t()} | {:error, term()}
+          {:ok, Gamend.Parties.Party.t()} | {:error, term()}
   def update_party(_user, _attrs) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -577,5 +567,4 @@ defmodule Gamend.Parties do
         raise "Gamend.Parties.update_party/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 end

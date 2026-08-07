@@ -78,7 +78,10 @@ defmodule Mix.Tasks.Plugin.Bundle do
       "All deps (#{length(all_deps)}): #{all_deps |> Enum.map(& &1.app) |> Enum.sort() |> Enum.join(", ")}"
     )
 
-    info(verbose?, "Runtime deps to bundle (#{length(deps_to_bundle)}): #{Enum.join(deps_to_bundle, ", ")}")
+    info(
+      verbose?,
+      "Runtime deps to bundle (#{length(deps_to_bundle)}): #{Enum.join(deps_to_bundle, ", ")}"
+    )
 
     priv_summary =
       Enum.map(deps_to_bundle, fn dep_app ->

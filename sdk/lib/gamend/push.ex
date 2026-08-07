@@ -2,28 +2,28 @@ defmodule Gamend.Push do
   @moduledoc ~S"""
   Push context – device push-token registry and (see `send_to_user/3`)
   server-authoritative delivery of push notifications.
-  
+
   Devices register their FCM registration token or APNs device token against
   the authenticated user; a user has many devices. Delivery routes **per
   token** off the `provider` column (`"fcm"` | `"apns"`), falling back to the
   zero-config `Log` provider when nothing is configured
   (see the moduledoc below).
-  
+
   ## Usage
-  
+
       # Register a device (typically via POST /me/push_tokens)
       {:ok, token} = Push.register_token(user_id, %{
         "token" => "fcm-registration-token",
         "platform" => "android",
         "device_id" => "stable-device-key"
       })
-  
+
       # List a user's devices
       tokens = Push.list_tokens(user_id, page: 1, page_size: 25)
-  
+
       # Remove one (DELETE /me/push_tokens/:id)
       {:ok, _} = Push.delete_token(user_id, token.id)
-  
+
 
   **Note:** This is an SDK stub. Calling these functions will raise an error.
   The actual implementation runs on the Gamend.
@@ -36,17 +36,30 @@ defmodule Gamend.Push do
     `{:error, :not_found}`.
     
   """
-  @spec admin_delete_token(Ecto.UUID.t()) :: {:ok, Gamend.Push.PushToken.t()} | {:error, :not_found}
+  @spec admin_delete_token(Ecto.UUID.t()) ::
+          {:ok, Gamend.Push.PushToken.t()} | {:error, :not_found}
   def admin_delete_token(_id) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Push.PushToken{id: "", user_id: "", token: "", platform: "android", provider: "fcm", device_id: nil, disabled_at: nil, last_used_at: nil, metadata: %{}, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Push.PushToken{
+           id: "",
+           user_id: "",
+           token: "",
+           platform: "android",
+           provider: "fcm",
+           device_id: nil,
+           disabled_at: nil,
+           last_used_at: nil,
+           metadata: %{},
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Push.admin_delete_token/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Count for `list_all_tokens/2` (same filters).
@@ -62,7 +75,6 @@ defmodule Gamend.Push do
     end
   end
 
-
   @doc ~S"""
     Count a user's registered tokens (including disabled).
   """
@@ -77,23 +89,35 @@ defmodule Gamend.Push do
     end
   end
 
-
   @doc ~S"""
     Remove a token row by id, scoped to `user_id` (the `DELETE /me/push_tokens/:id`
     path). Returns `{:ok, %PushToken{}}` or `{:error, :not_found}`.
     
   """
-  @spec delete_token(user_id(), Ecto.UUID.t()) :: {:ok, Gamend.Push.PushToken.t()} | {:error, :not_found}
+  @spec delete_token(user_id(), Ecto.UUID.t()) ::
+          {:ok, Gamend.Push.PushToken.t()} | {:error, :not_found}
   def delete_token(_user_id, _id) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Push.PushToken{id: "", user_id: "", token: "", platform: "android", provider: "fcm", device_id: nil, disabled_at: nil, last_used_at: nil, metadata: %{}, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Push.PushToken{
+           id: "",
+           user_id: "",
+           token: "",
+           platform: "android",
+           provider: "fcm",
+           device_id: nil,
+           disabled_at: nil,
+           last_used_at: nil,
+           metadata: %{},
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Push.delete_token/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Soft-disable a token the provider reported dead. The row is kept —
@@ -112,7 +136,6 @@ defmodule Gamend.Push do
     end
   end
 
-
   @doc ~S"""
     Whether every delivery is forced to the Log provider (`PUSH_ADAPTER=log`).
   """
@@ -127,7 +150,6 @@ defmodule Gamend.Push do
     end
   end
 
-
   @doc ~S"""
     Admin listing across all users. Supported `filters` keys (atom or string):
     `:user_id`, `:platform`, `:provider`, and `:status` (`"live"` | `"disabled"`).
@@ -137,9 +159,9 @@ defmodule Gamend.Push do
     
   """
   @spec list_all_tokens(
-  map(),
-  keyword()
-) :: [Gamend.Push.PushToken.t()]
+          map(),
+          keyword()
+        ) :: [Gamend.Push.PushToken.t()]
   def list_all_tokens(_filters, _opts) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -150,7 +172,6 @@ defmodule Gamend.Push do
     end
   end
 
-
   @doc ~S"""
     List a user's registered tokens, newest first. Includes disabled rows (they
     are the user's devices; clients can show them greyed out).
@@ -159,9 +180,9 @@ defmodule Gamend.Push do
     
   """
   @spec list_tokens(
-  user_id(),
-  keyword()
-) :: [Gamend.Push.PushToken.t()]
+          user_id(),
+          keyword()
+        ) :: [Gamend.Push.PushToken.t()]
   def list_tokens(_user_id, _opts) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -171,7 +192,6 @@ defmodule Gamend.Push do
         raise "Gamend.Push.list_tokens/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     The user's live (non-disabled) tokens — the delivery fan-out set. Unpaginated
@@ -189,7 +209,6 @@ defmodule Gamend.Push do
     end
   end
 
-
   @doc ~S"""
     Bump `last_used_at` after a successful delivery.
   """
@@ -203,7 +222,6 @@ defmodule Gamend.Push do
         raise "Gamend.Push.mark_token_used/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Resolve the delivery provider for a token: its `provider` column's module
@@ -221,7 +239,6 @@ defmodule Gamend.Push do
         raise "Gamend.Push.provider_for/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Register (or refresh) a device push token for `user_id`.
@@ -244,17 +261,29 @@ defmodule Gamend.Push do
     
   """
   @spec register_token(user_id(), map()) ::
-  {:ok, Gamend.Push.PushToken.t()} | {:error, :too_many_tokens | Ecto.Changeset.t()}
+          {:ok, Gamend.Push.PushToken.t()} | {:error, :too_many_tokens | Ecto.Changeset.t()}
   def register_token(_user_id, _attrs) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Push.PushToken{id: "", user_id: "", token: "", platform: "android", provider: "fcm", device_id: nil, disabled_at: nil, last_used_at: nil, metadata: %{}, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Push.PushToken{
+           id: "",
+           user_id: "",
+           token: "",
+           platform: "android",
+           provider: "fcm",
+           device_id: nil,
+           disabled_at: nil,
+           last_used_at: nil,
+           metadata: %{},
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Push.register_token/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Queue a push message to all of `user_id`'s live devices.
@@ -278,7 +307,6 @@ defmodule Gamend.Push do
     end
   end
 
-
   @doc ~S"""
     Queue a push message to every live device of `user_ids`.
     
@@ -298,7 +326,6 @@ defmodule Gamend.Push do
     end
   end
 
-
   @doc ~S"""
     Aggregate token counts for the admin stat card and runtime introspection:
     `%{total: n, live: n, disabled: n, by_platform: %{...}, by_provider: %{...}}`
@@ -316,24 +343,36 @@ defmodule Gamend.Push do
     end
   end
 
-
   @doc ~S"""
     Remove a token row by its raw `token` value, scoped to `user_id`.
     
     Returns `{:ok, %PushToken{}}` or `{:error, :not_found}`.
     
   """
-  @spec unregister_token(user_id(), String.t()) :: {:ok, Gamend.Push.PushToken.t()} | {:error, :not_found}
+  @spec unregister_token(user_id(), String.t()) ::
+          {:ok, Gamend.Push.PushToken.t()} | {:error, :not_found}
   def unregister_token(_user_id, _token) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Push.PushToken{id: "", user_id: "", token: "", platform: "android", provider: "fcm", device_id: nil, disabled_at: nil, last_used_at: nil, metadata: %{}, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Push.PushToken{
+           id: "",
+           user_id: "",
+           token: "",
+           platform: "android",
+           provider: "fcm",
+           device_id: nil,
+           disabled_at: nil,
+           last_used_at: nil,
+           metadata: %{},
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Push.unregister_token/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Whether the user has any live device. Cached (60s TTL + version bump on
@@ -351,5 +390,4 @@ defmodule Gamend.Push do
         raise "Gamend.Push.user_has_live_tokens?/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 end

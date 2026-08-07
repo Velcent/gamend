@@ -1,27 +1,25 @@
 defmodule Gamend.Accounts do
   @moduledoc ~S"""
   The Accounts context.
-  
+
   ## Usage
-  
+
       # Lookup by id or email
       user = Gamend.Accounts.get_user(123)
       user = Gamend.Accounts.get_user_by_email("me@example.com")
-  
+
       # Update a user
       {:ok, user} = Gamend.Accounts.update_user(user, %{display_name: "NewName"})
-  
+
       # Search (paginated) and count
       users = Gamend.Accounts.search_users("bob", page: 1, page_size: 25)
       count = Gamend.Accounts.count_search_users("bob")
-  
-  
+
+
 
   **Note:** This is an SDK stub. Calling these functions will raise an error.
   The actual implementation runs on the Gamend.
   """
-
-
 
   @doc ~S"""
     Attach a device_id to an existing user record. Returns {:ok, user} or
@@ -29,17 +27,25 @@ defmodule Gamend.Accounts do
     
   """
   @spec attach_device_to_user(Gamend.Accounts.User.t(), String.t()) ::
-  {:ok, Gamend.Accounts.User.t()} | {:error, Ecto.Changeset.t()}
+          {:ok, Gamend.Accounts.User.t()} | {:error, Ecto.Changeset.t()}
   def attach_device_to_user(_user, _device_id) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Accounts.User{id: 0, email: "", display_name: nil, metadata: %{}, is_admin: false, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Accounts.User{
+           id: 0,
+           email: "",
+           display_name: nil,
+           metadata: %{},
+           is_admin: false,
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Accounts.attach_device_to_user/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Broadcast a `friend_updated` event to all accepted friends.
@@ -58,7 +64,6 @@ defmodule Gamend.Accounts do
         raise "Gamend.Accounts.broadcast_friend_update/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Broadcast a `member_updated` event to the user's current lobby and
@@ -80,7 +85,6 @@ defmodule Gamend.Accounts do
     end
   end
 
-
   @doc ~S"""
     Broadcast that the given user has been updated.
     
@@ -98,7 +102,6 @@ defmodule Gamend.Accounts do
         raise "Gamend.Accounts.broadcast_user_update/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Stores `user` under the canonical user cache key (with the standard TTL).
@@ -119,7 +122,6 @@ defmodule Gamend.Accounts do
     end
   end
 
-
   @doc ~S"""
     Whether `user` may upload an avatar, per `anonymous_can_upload_avatar`.
     
@@ -134,7 +136,6 @@ defmodule Gamend.Accounts do
         raise "Gamend.Accounts.can_upload_avatar?/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Returns an `%Ecto.Changeset{}` for changing the user display_name.
@@ -151,7 +152,6 @@ defmodule Gamend.Accounts do
     end
   end
 
-
   @doc ~S"""
     Returns an `%Ecto.Changeset{}` for changing the user display_name.
     
@@ -166,7 +166,6 @@ defmodule Gamend.Accounts do
         raise "Gamend.Accounts.change_user_display_name/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Returns an `%Ecto.Changeset{}` for changing the user email.
@@ -191,7 +190,6 @@ defmodule Gamend.Accounts do
     end
   end
 
-
   @doc ~S"""
     Returns an `%Ecto.Changeset{}` for changing the user email.
     
@@ -214,7 +212,6 @@ defmodule Gamend.Accounts do
         raise "Gamend.Accounts.change_user_email/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Returns an `%Ecto.Changeset{}` for changing the user email.
@@ -239,7 +236,6 @@ defmodule Gamend.Accounts do
     end
   end
 
-
   @doc ~S"""
     Returns an `%Ecto.Changeset{}` for changing the user password.
     
@@ -262,7 +258,6 @@ defmodule Gamend.Accounts do
         raise "Gamend.Accounts.change_user_password/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Returns an `%Ecto.Changeset{}` for changing the user password.
@@ -287,7 +282,6 @@ defmodule Gamend.Accounts do
     end
   end
 
-
   @doc ~S"""
     Returns an `%Ecto.Changeset{}` for changing the user password.
     
@@ -311,7 +305,6 @@ defmodule Gamend.Accounts do
     end
   end
 
-
   @doc false
   @spec change_user_registration(Gamend.Accounts.User.t()) :: Ecto.Changeset.t()
   def change_user_registration(_user) do
@@ -323,7 +316,6 @@ defmodule Gamend.Accounts do
         raise "Gamend.Accounts.change_user_registration/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc false
   @spec change_user_registration(Gamend.Accounts.User.t(), map()) :: Ecto.Changeset.t()
@@ -337,7 +329,6 @@ defmodule Gamend.Accounts do
     end
   end
 
-
   @doc false
   @spec change_username(Gamend.Accounts.User.t()) :: Ecto.Changeset.t()
   def change_username(_user) do
@@ -349,7 +340,6 @@ defmodule Gamend.Accounts do
         raise "Gamend.Accounts.change_username/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc false
   @spec change_username(Gamend.Accounts.User.t(), map()) :: Ecto.Changeset.t()
@@ -363,7 +353,6 @@ defmodule Gamend.Accounts do
     end
   end
 
-
   @doc ~S"""
     Confirms a user's email by setting confirmed_at timestamp.
     
@@ -375,17 +364,25 @@ defmodule Gamend.Accounts do
     
   """
   @spec confirm_user(Gamend.Accounts.User.t()) ::
-  {:ok, Gamend.Accounts.User.t()} | {:error, Ecto.Changeset.t()}
+          {:ok, Gamend.Accounts.User.t()} | {:error, Ecto.Changeset.t()}
   def confirm_user(_user) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Accounts.User{id: 0, email: "", display_name: nil, metadata: %{}, is_admin: false, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Accounts.User{
+           id: 0,
+           email: "",
+           display_name: nil,
+           metadata: %{},
+           is_admin: false,
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Accounts.confirm_user/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Confirm a user by an email confirmation token (context: "confirm").
@@ -395,17 +392,25 @@ defmodule Gamend.Accounts do
     
   """
   @spec confirm_user_by_token(String.t()) ::
-  {:ok, Gamend.Accounts.User.t()} | {:error, :invalid | :not_found}
+          {:ok, Gamend.Accounts.User.t()} | {:error, :invalid | :not_found}
   def confirm_user_by_token(_token) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Accounts.User{id: 0, email: "", display_name: nil, metadata: %{}, is_admin: false, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Accounts.User{
+           id: 0,
+           email: "",
+           display_name: nil,
+           metadata: %{},
+           is_admin: false,
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Accounts.confirm_user_by_token/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Row count for `list_all_users/2` under the same filters.
@@ -420,7 +425,6 @@ defmodule Gamend.Accounts do
         raise "Gamend.Accounts.count_list_all_users/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Count users matching a username/display name query or exact id. Returns integer.
@@ -437,7 +441,6 @@ defmodule Gamend.Accounts do
     end
   end
 
-
   @doc ~S"""
     Count users who are not yet activated (is_activated == false).
     
@@ -452,7 +455,6 @@ defmodule Gamend.Accounts do
         raise "Gamend.Accounts.count_unactivated_users/0 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Counts tokens for a given user.
@@ -469,7 +471,6 @@ defmodule Gamend.Accounts do
     end
   end
 
-
   @doc ~S"""
     Returns the total number of users.
     
@@ -484,7 +485,6 @@ defmodule Gamend.Accounts do
         raise "Gamend.Accounts.count_users/0 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Count users active in the last N days.
@@ -505,7 +505,6 @@ defmodule Gamend.Accounts do
     end
   end
 
-
   @doc ~S"""
     Count users currently seated in a lobby (`users.lobby_id`, indexed).
   """
@@ -520,7 +519,6 @@ defmodule Gamend.Accounts do
     end
   end
 
-
   @doc ~S"""
     Count users currently in a party (`users.party_id`, indexed).
   """
@@ -534,7 +532,6 @@ defmodule Gamend.Accounts do
         raise "Gamend.Accounts.count_users_in_parties/0 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Count users currently marked as online.
@@ -551,7 +548,6 @@ defmodule Gamend.Accounts do
     end
   end
 
-
   @doc ~S"""
     Count users registered in the last N days.
     
@@ -566,7 +562,6 @@ defmodule Gamend.Accounts do
         raise "Gamend.Accounts.count_users_registered_since/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Count users with a password set (hashed_password not nil/empty).
@@ -583,7 +578,6 @@ defmodule Gamend.Accounts do
     end
   end
 
-
   @doc ~S"""
     Count users with non-empty provider id for a given provider field (e.g. :google_id)
     
@@ -599,7 +593,6 @@ defmodule Gamend.Accounts do
     end
   end
 
-
   @doc ~S"""
     Deletes a user and associated resources.
     
@@ -607,17 +600,25 @@ defmodule Gamend.Accounts do
     
   """
   @spec delete_user(Gamend.Accounts.User.t()) ::
-  {:ok, Gamend.Accounts.User.t()} | {:error, Ecto.Changeset.t()}
+          {:ok, Gamend.Accounts.User.t()} | {:error, Ecto.Changeset.t()}
   def delete_user(_user) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Accounts.User{id: 0, email: "", display_name: nil, metadata: %{}, is_admin: false, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Accounts.User{
+           id: 0,
+           email: "",
+           display_name: nil,
+           metadata: %{},
+           is_admin: false,
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Accounts.delete_user/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Deletes the signed token with the given context.
@@ -633,7 +634,6 @@ defmodule Gamend.Accounts do
         raise "Gamend.Accounts.delete_user_session_token/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Removes every stored object belonging to `user_id`.
@@ -653,13 +653,12 @@ defmodule Gamend.Accounts do
     end
   end
 
-
   @doc ~S"""
     Delivers the magic link login instructions to the given user.
     
   """
   @spec deliver_login_instructions(Gamend.Accounts.User.t(), (String.t() -> String.t())) ::
-  {:ok, Swoosh.Email.t()} | {:error, term()}
+          {:ok, Swoosh.Email.t()} | {:error, term()}
   def deliver_login_instructions(_user, _magic_link_url_fun) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -670,10 +669,10 @@ defmodule Gamend.Accounts do
     end
   end
 
-
   @doc false
-  @spec deliver_user_confirmation_instructions(Gamend.Accounts.User.t(), (String.t() -> String.t())) ::
-  {:ok, Swoosh.Email.t()} | {:error, :already_confirmed | term()}
+  @spec deliver_user_confirmation_instructions(Gamend.Accounts.User.t(), (String.t() ->
+                                                                            String.t())) ::
+          {:ok, Swoosh.Email.t()} | {:error, :already_confirmed | term()}
   def deliver_user_confirmation_instructions(_user, _confirmation_url_fun) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -683,7 +682,6 @@ defmodule Gamend.Accounts do
         raise "Gamend.Accounts.deliver_user_confirmation_instructions/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Delivers the update email instructions to the given user.
@@ -696,10 +694,10 @@ defmodule Gamend.Accounts do
     
   """
   @spec deliver_user_update_email_instructions(
-  Gamend.Accounts.User.t(),
-  String.t(),
-  (String.t() -> String.t())
-) :: {:ok, Swoosh.Email.t()} | {:error, term()}
+          Gamend.Accounts.User.t(),
+          String.t(),
+          (String.t() -> String.t())
+        ) :: {:ok, Swoosh.Email.t()} | {:error, term()}
   def deliver_user_update_email_instructions(_user, _current_email, _update_email_url_fun) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -709,7 +707,6 @@ defmodule Gamend.Accounts do
         raise "Gamend.Accounts.deliver_user_update_email_instructions/3 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Whether device-based auth is enabled. Defaults to on.
@@ -724,7 +721,6 @@ defmodule Gamend.Accounts do
         raise "Gamend.Accounts.device_auth_enabled?/0 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     How to name a user in text a PLAYER reads: `"Ana (drift-2378)"`, or just the
@@ -747,7 +743,6 @@ defmodule Gamend.Accounts do
     end
   end
 
-
   @doc ~S"""
     Finds a user by Apple ID or creates a new user from OAuth data.
     
@@ -759,17 +754,25 @@ defmodule Gamend.Accounts do
     
   """
   @spec find_or_create_from_apple(map()) ::
-  {:ok, Gamend.Accounts.User.t()} | {:error, Ecto.Changeset.t() | term()}
+          {:ok, Gamend.Accounts.User.t()} | {:error, Ecto.Changeset.t() | term()}
   def find_or_create_from_apple(_attrs) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Accounts.User{id: 0, email: "", display_name: nil, metadata: %{}, is_admin: false, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Accounts.User{
+           id: 0,
+           email: "",
+           display_name: nil,
+           metadata: %{},
+           is_admin: false,
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Accounts.find_or_create_from_apple/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Finds or creates a user associated with the given device_id.
@@ -779,17 +782,25 @@ defmodule Gamend.Accounts do
     
   """
   @spec find_or_create_from_device(String.t()) ::
-  {:ok, Gamend.Accounts.User.t()} | {:error, :disabled | Ecto.Changeset.t() | term()}
+          {:ok, Gamend.Accounts.User.t()} | {:error, :disabled | Ecto.Changeset.t() | term()}
   def find_or_create_from_device(_device_id) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Accounts.User{id: 0, email: "", display_name: nil, metadata: %{}, is_admin: false, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Accounts.User{
+           id: 0,
+           email: "",
+           display_name: nil,
+           metadata: %{},
+           is_admin: false,
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Accounts.find_or_create_from_device/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Finds or creates a user associated with the given device_id.
@@ -799,17 +810,25 @@ defmodule Gamend.Accounts do
     
   """
   @spec find_or_create_from_device(String.t(), map()) ::
-  {:ok, Gamend.Accounts.User.t()} | {:error, :disabled | Ecto.Changeset.t() | term()}
+          {:ok, Gamend.Accounts.User.t()} | {:error, :disabled | Ecto.Changeset.t() | term()}
   def find_or_create_from_device(_device_id, _attrs) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Accounts.User{id: 0, email: "", display_name: nil, metadata: %{}, is_admin: false, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Accounts.User{
+           id: 0,
+           email: "",
+           display_name: nil,
+           metadata: %{},
+           is_admin: false,
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Accounts.find_or_create_from_device/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Finds a user by Discord ID or creates a new user from OAuth data.
@@ -822,17 +841,25 @@ defmodule Gamend.Accounts do
     
   """
   @spec find_or_create_from_discord(map()) ::
-  {:ok, Gamend.Accounts.User.t()} | {:error, Ecto.Changeset.t() | term()}
+          {:ok, Gamend.Accounts.User.t()} | {:error, Ecto.Changeset.t() | term()}
   def find_or_create_from_discord(_attrs) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Accounts.User{id: 0, email: "", display_name: nil, metadata: %{}, is_admin: false, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Accounts.User{
+           id: 0,
+           email: "",
+           display_name: nil,
+           metadata: %{},
+           is_admin: false,
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Accounts.find_or_create_from_discord/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Finds a user by Facebook ID or creates a new user from OAuth data.
@@ -845,17 +872,25 @@ defmodule Gamend.Accounts do
     
   """
   @spec find_or_create_from_facebook(map()) ::
-  {:ok, Gamend.Accounts.User.t()} | {:error, Ecto.Changeset.t() | term()}
+          {:ok, Gamend.Accounts.User.t()} | {:error, Ecto.Changeset.t() | term()}
   def find_or_create_from_facebook(_attrs) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Accounts.User{id: 0, email: "", display_name: nil, metadata: %{}, is_admin: false, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Accounts.User{
+           id: 0,
+           email: "",
+           display_name: nil,
+           metadata: %{},
+           is_admin: false,
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Accounts.find_or_create_from_facebook/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Finds a user by Google ID or creates a new user from OAuth data.
@@ -868,17 +903,25 @@ defmodule Gamend.Accounts do
     
   """
   @spec find_or_create_from_google(map()) ::
-  {:ok, Gamend.Accounts.User.t()} | {:error, Ecto.Changeset.t() | term()}
+          {:ok, Gamend.Accounts.User.t()} | {:error, Ecto.Changeset.t() | term()}
   def find_or_create_from_google(_attrs) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Accounts.User{id: 0, email: "", display_name: nil, metadata: %{}, is_admin: false, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Accounts.User{
+           id: 0,
+           email: "",
+           display_name: nil,
+           metadata: %{},
+           is_admin: false,
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Accounts.find_or_create_from_google/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Finds a user by Steam ID or creates a new user from Steam OpenID data.
@@ -891,17 +934,25 @@ defmodule Gamend.Accounts do
     
   """
   @spec find_or_create_from_steam(map()) ::
-  {:ok, Gamend.Accounts.User.t()} | {:error, Ecto.Changeset.t() | term()}
+          {:ok, Gamend.Accounts.User.t()} | {:error, Ecto.Changeset.t() | term()}
   def find_or_create_from_steam(_attrs) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Accounts.User{id: 0, email: "", display_name: nil, metadata: %{}, is_admin: false, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Accounts.User{
+           id: 0,
+           email: "",
+           display_name: nil,
+           metadata: %{},
+           is_admin: false,
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Accounts.find_or_create_from_steam/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Generates a session token.
@@ -918,7 +969,6 @@ defmodule Gamend.Accounts do
     end
   end
 
-
   @doc ~S"""
     Returns a map of linked OAuth providers for the user.
     
@@ -926,13 +976,13 @@ defmodule Gamend.Accounts do
     
   """
   @spec get_linked_providers(Gamend.Accounts.User.t()) :: %{
-  google: boolean(),
-  facebook: boolean(),
-  discord: boolean(),
-  apple: boolean(),
-  steam: boolean(),
-  device: boolean()
-}
+          google: boolean(),
+          facebook: boolean(),
+          discord: boolean(),
+          apple: boolean(),
+          steam: boolean(),
+          device: boolean()
+        }
   def get_linked_providers(_user) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -942,7 +992,6 @@ defmodule Gamend.Accounts do
         raise "Gamend.Accounts.get_linked_providers/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Gets a single user by ID.
@@ -963,13 +1012,22 @@ defmodule Gamend.Accounts do
   def get_user(_id) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        if :erlang.phash2(make_ref(), 2) == 0, do: nil, else: %Gamend.Accounts.User{id: 0, email: "", display_name: nil, metadata: %{}, is_admin: false, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}
+        if :erlang.phash2(make_ref(), 2) == 0,
+          do: nil,
+          else: %Gamend.Accounts.User{
+            id: 0,
+            email: "",
+            display_name: nil,
+            metadata: %{},
+            is_admin: false,
+            inserted_at: ~U[1970-01-01 00:00:00Z],
+            updated_at: ~U[1970-01-01 00:00:00Z]
+          }
 
       _ ->
         raise "Gamend.Accounts.get_user/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Gets a single user.
@@ -997,7 +1055,6 @@ defmodule Gamend.Accounts do
     end
   end
 
-
   @doc ~S"""
     Get a user by their Apple ID.
     
@@ -1008,13 +1065,22 @@ defmodule Gamend.Accounts do
   def get_user_by_apple_id(_apple_id) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        if :erlang.phash2(make_ref(), 2) == 0, do: nil, else: %Gamend.Accounts.User{id: 0, email: "", display_name: nil, metadata: %{}, is_admin: false, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}
+        if :erlang.phash2(make_ref(), 2) == 0,
+          do: nil,
+          else: %Gamend.Accounts.User{
+            id: 0,
+            email: "",
+            display_name: nil,
+            metadata: %{},
+            is_admin: false,
+            inserted_at: ~U[1970-01-01 00:00:00Z],
+            updated_at: ~U[1970-01-01 00:00:00Z]
+          }
 
       _ ->
         raise "Gamend.Accounts.get_user_by_apple_id/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Get a user by their Discord ID.
@@ -1026,13 +1092,22 @@ defmodule Gamend.Accounts do
   def get_user_by_discord_id(_discord_id) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        if :erlang.phash2(make_ref(), 2) == 0, do: nil, else: %Gamend.Accounts.User{id: 0, email: "", display_name: nil, metadata: %{}, is_admin: false, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}
+        if :erlang.phash2(make_ref(), 2) == 0,
+          do: nil,
+          else: %Gamend.Accounts.User{
+            id: 0,
+            email: "",
+            display_name: nil,
+            metadata: %{},
+            is_admin: false,
+            inserted_at: ~U[1970-01-01 00:00:00Z],
+            updated_at: ~U[1970-01-01 00:00:00Z]
+          }
 
       _ ->
         raise "Gamend.Accounts.get_user_by_discord_id/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Gets a user by email.
@@ -1051,13 +1126,22 @@ defmodule Gamend.Accounts do
   def get_user_by_email(_email) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        if :erlang.phash2(make_ref(), 2) == 0, do: nil, else: %Gamend.Accounts.User{id: 0, email: "", display_name: nil, metadata: %{}, is_admin: false, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}
+        if :erlang.phash2(make_ref(), 2) == 0,
+          do: nil,
+          else: %Gamend.Accounts.User{
+            id: 0,
+            email: "",
+            display_name: nil,
+            metadata: %{},
+            is_admin: false,
+            inserted_at: ~U[1970-01-01 00:00:00Z],
+            updated_at: ~U[1970-01-01 00:00:00Z]
+          }
 
       _ ->
         raise "Gamend.Accounts.get_user_by_email/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Gets a user by email and password.
@@ -1076,13 +1160,22 @@ defmodule Gamend.Accounts do
   def get_user_by_email_and_password(_email, _password) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        if :erlang.phash2(make_ref(), 2) == 0, do: nil, else: %Gamend.Accounts.User{id: 0, email: "", display_name: nil, metadata: %{}, is_admin: false, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}
+        if :erlang.phash2(make_ref(), 2) == 0,
+          do: nil,
+          else: %Gamend.Accounts.User{
+            id: 0,
+            email: "",
+            display_name: nil,
+            metadata: %{},
+            is_admin: false,
+            inserted_at: ~U[1970-01-01 00:00:00Z],
+            updated_at: ~U[1970-01-01 00:00:00Z]
+          }
 
       _ ->
         raise "Gamend.Accounts.get_user_by_email_and_password/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Get a user by their Facebook ID.
@@ -1094,13 +1187,22 @@ defmodule Gamend.Accounts do
   def get_user_by_facebook_id(_facebook_id) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        if :erlang.phash2(make_ref(), 2) == 0, do: nil, else: %Gamend.Accounts.User{id: 0, email: "", display_name: nil, metadata: %{}, is_admin: false, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}
+        if :erlang.phash2(make_ref(), 2) == 0,
+          do: nil,
+          else: %Gamend.Accounts.User{
+            id: 0,
+            email: "",
+            display_name: nil,
+            metadata: %{},
+            is_admin: false,
+            inserted_at: ~U[1970-01-01 00:00:00Z],
+            updated_at: ~U[1970-01-01 00:00:00Z]
+          }
 
       _ ->
         raise "Gamend.Accounts.get_user_by_facebook_id/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Get a user by their Google ID.
@@ -1112,13 +1214,22 @@ defmodule Gamend.Accounts do
   def get_user_by_google_id(_google_id) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        if :erlang.phash2(make_ref(), 2) == 0, do: nil, else: %Gamend.Accounts.User{id: 0, email: "", display_name: nil, metadata: %{}, is_admin: false, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}
+        if :erlang.phash2(make_ref(), 2) == 0,
+          do: nil,
+          else: %Gamend.Accounts.User{
+            id: 0,
+            email: "",
+            display_name: nil,
+            metadata: %{},
+            is_admin: false,
+            inserted_at: ~U[1970-01-01 00:00:00Z],
+            updated_at: ~U[1970-01-01 00:00:00Z]
+          }
 
       _ ->
         raise "Gamend.Accounts.get_user_by_google_id/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Gets the user with the given magic link token.
@@ -1128,13 +1239,22 @@ defmodule Gamend.Accounts do
   def get_user_by_magic_link_token(_token) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        if :erlang.phash2(make_ref(), 2) == 0, do: nil, else: %Gamend.Accounts.User{id: 0, email: "", display_name: nil, metadata: %{}, is_admin: false, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}
+        if :erlang.phash2(make_ref(), 2) == 0,
+          do: nil,
+          else: %Gamend.Accounts.User{
+            id: 0,
+            email: "",
+            display_name: nil,
+            metadata: %{},
+            is_admin: false,
+            inserted_at: ~U[1970-01-01 00:00:00Z],
+            updated_at: ~U[1970-01-01 00:00:00Z]
+          }
 
       _ ->
         raise "Gamend.Accounts.get_user_by_magic_link_token/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Gets the user with the given signed token.
@@ -1146,13 +1266,22 @@ defmodule Gamend.Accounts do
   def get_user_by_session_token(_token) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        if :erlang.phash2(make_ref(), 2) == 0, do: nil, else: %Gamend.Accounts.User{id: 0, email: "", display_name: nil, metadata: %{}, is_admin: false, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}
+        if :erlang.phash2(make_ref(), 2) == 0,
+          do: nil,
+          else: %Gamend.Accounts.User{
+            id: 0,
+            email: "",
+            display_name: nil,
+            metadata: %{},
+            is_admin: false,
+            inserted_at: ~U[1970-01-01 00:00:00Z],
+            updated_at: ~U[1970-01-01 00:00:00Z]
+          }
 
       _ ->
         raise "Gamend.Accounts.get_user_by_session_token/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Get a user by their Steam ID (steam_id).
@@ -1164,13 +1293,22 @@ defmodule Gamend.Accounts do
   def get_user_by_steam_id(_steam_id) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        if :erlang.phash2(make_ref(), 2) == 0, do: nil, else: %Gamend.Accounts.User{id: 0, email: "", display_name: nil, metadata: %{}, is_admin: false, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}
+        if :erlang.phash2(make_ref(), 2) == 0,
+          do: nil,
+          else: %Gamend.Accounts.User{
+            id: 0,
+            email: "",
+            display_name: nil,
+            metadata: %{},
+            is_admin: false,
+            inserted_at: ~U[1970-01-01 00:00:00Z],
+            updated_at: ~U[1970-01-01 00:00:00Z]
+          }
 
       _ ->
         raise "Gamend.Accounts.get_user_by_steam_id/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Gets a user by their unique username handle (case-insensitive; usernames
@@ -1181,13 +1319,22 @@ defmodule Gamend.Accounts do
   def get_user_by_username(_username) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        if :erlang.phash2(make_ref(), 2) == 0, do: nil, else: %Gamend.Accounts.User{id: 0, email: "", display_name: nil, metadata: %{}, is_admin: false, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}
+        if :erlang.phash2(make_ref(), 2) == 0,
+          do: nil,
+          else: %Gamend.Accounts.User{
+            id: 0,
+            email: "",
+            display_name: nil,
+            metadata: %{},
+            is_admin: false,
+            inserted_at: ~U[1970-01-01 00:00:00Z],
+            updated_at: ~U[1970-01-01 00:00:00Z]
+          }
 
       _ ->
         raise "Gamend.Accounts.get_user_by_username/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Returns whether the user has a password set.
@@ -1203,7 +1350,6 @@ defmodule Gamend.Accounts do
         raise "Gamend.Accounts.has_password?/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Public cache invalidation for cross-module use (lobbies, parties, groups).
@@ -1221,7 +1367,6 @@ defmodule Gamend.Accounts do
     end
   end
 
-
   @doc ~S"""
     Link an OAuth provider to an existing user account. Updates the user
     via the provider's oauth changeset while being careful not to overwrite
@@ -1231,9 +1376,9 @@ defmodule Gamend.Accounts do
     
   """
   @spec link_account(Gamend.Accounts.User.t(), map(), atom(), (Gamend.Accounts.User.t(), map() ->
-                                                         Ecto.Changeset.t())) ::
-  {:ok, Gamend.Accounts.User.t()}
-  | {:error, Ecto.Changeset.t() | {:conflict, Gamend.Accounts.User.t()}}
+                                                                 Ecto.Changeset.t())) ::
+          {:ok, Gamend.Accounts.User.t()}
+          | {:error, Ecto.Changeset.t() | {:conflict, Gamend.Accounts.User.t()}}
   def link_account(_user, _attrs, _provider_id_field, _changeset_fn) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -1244,7 +1389,6 @@ defmodule Gamend.Accounts do
     end
   end
 
-
   @doc ~S"""
     Link a device_id to an existing user account. This allows the user to
     authenticate using the device_id in addition to their OAuth providers.
@@ -1254,17 +1398,25 @@ defmodule Gamend.Accounts do
     
   """
   @spec link_device_id(Gamend.Accounts.User.t(), String.t()) ::
-  {:ok, Gamend.Accounts.User.t()} | {:error, Ecto.Changeset.t()}
+          {:ok, Gamend.Accounts.User.t()} | {:error, Ecto.Changeset.t()}
   def link_device_id(_user, _device_id) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Accounts.User{id: 0, email: "", display_name: nil, metadata: %{}, is_admin: false, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Accounts.User{
+           id: 0,
+           email: "",
+           display_name: nil,
+           metadata: %{},
+           is_admin: false,
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Accounts.link_device_id/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Ids of every admin user.
@@ -1285,7 +1437,6 @@ defmodule Gamend.Accounts do
     end
   end
 
-
   @doc ~S"""
     Admin user listing: search across identity fields (or an exact id), optional
     facet filters, sorting and pagination — the query behind the admin Users page.
@@ -1299,9 +1450,9 @@ defmodule Gamend.Accounts do
     
   """
   @spec list_all_users(
-  map(),
-  keyword()
-) :: [Gamend.Accounts.User.t()]
+          map(),
+          keyword()
+        ) :: [Gamend.Accounts.User.t()]
   def list_all_users(_filters, _opts) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -1312,15 +1463,14 @@ defmodule Gamend.Accounts do
     end
   end
 
-
   @doc ~S"""
     Lists tokens for a given user, optionally filtered by context.
     
   """
   @spec list_user_tokens(
-  Ecto.UUID.t(),
-  keyword()
-) :: [Gamend.Accounts.UserToken.t()]
+          Ecto.UUID.t(),
+          keyword()
+        ) :: [Gamend.Accounts.UserToken.t()]
   def list_user_tokens(_user_id, _opts) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -1330,7 +1480,6 @@ defmodule Gamend.Accounts do
         raise "Gamend.Accounts.list_user_tokens/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Logs the user in by magic link.
@@ -1352,8 +1501,8 @@ defmodule Gamend.Accounts do
     
   """
   @spec login_user_by_magic_link(String.t()) ::
-  {:ok, {Gamend.Accounts.User.t(), [Gamend.Accounts.UserToken.t()]}}
-  | {:error, :not_found | Ecto.Changeset.t() | term()}
+          {:ok, {Gamend.Accounts.User.t(), [Gamend.Accounts.UserToken.t()]}}
+          | {:error, :not_found | Ecto.Changeset.t() | term()}
   def login_user_by_magic_link(_token) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -1363,7 +1512,6 @@ defmodule Gamend.Accounts do
         raise "Gamend.Accounts.login_user_by_magic_link/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Merges `patch` into the user's metadata, leaving untouched every key it does
@@ -1376,17 +1524,25 @@ defmodule Gamend.Accounts do
     
   """
   @spec merge_metadata(Gamend.Accounts.User.t(), map()) ::
-  {:ok, Gamend.Accounts.User.t()} | {:error, term()}
+          {:ok, Gamend.Accounts.User.t()} | {:error, term()}
   def merge_metadata(_user, _patch) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Accounts.User{id: 0, email: "", display_name: nil, metadata: %{}, is_admin: false, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Accounts.User{
+           id: 0,
+           email: "",
+           display_name: nil,
+           metadata: %{},
+           is_admin: false,
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Accounts.merge_metadata/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Aggregate player counts for the public stats endpoint.
@@ -1399,12 +1555,12 @@ defmodule Gamend.Accounts do
     
   """
   @spec player_stats() :: %{
-  players_online: non_neg_integer(),
-  players_total: non_neg_integer(),
-  players_offline: non_neg_integer(),
-  players_in_lobbies: non_neg_integer(),
-  players_in_parties: non_neg_integer()
-}
+          players_online: non_neg_integer(),
+          players_total: non_neg_integer(),
+          players_offline: non_neg_integer(),
+          players_in_lobbies: non_neg_integer(),
+          players_in_parties: non_neg_integer()
+        }
   def player_stats() do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -1414,7 +1570,6 @@ defmodule Gamend.Accounts do
         raise "Gamend.Accounts.player_stats/0 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Delete a user's stored avatar objects except `keep_key`.
@@ -1436,7 +1591,6 @@ defmodule Gamend.Accounts do
     end
   end
 
-
   @doc ~S"""
     Registers a user.
     
@@ -1455,17 +1609,25 @@ defmodule Gamend.Accounts do
     
   """
   @spec register_user(Gamend.Types.user_registration_attrs()) ::
-  {:ok, Gamend.Accounts.User.t()} | {:error, Ecto.Changeset.t()}
+          {:ok, Gamend.Accounts.User.t()} | {:error, Ecto.Changeset.t()}
   def register_user(_attrs) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Accounts.User{id: 0, email: "", display_name: nil, metadata: %{}, is_admin: false, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Accounts.User{
+           id: 0,
+           email: "",
+           display_name: nil,
+           metadata: %{},
+           is_admin: false,
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Accounts.register_user/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Register a user and send the confirmation email inside a DB transaction.
@@ -1477,18 +1639,27 @@ defmodule Gamend.Accounts do
     `{:error, reason}` is returned. On success it returns `{:ok, user}`.
     
   """
-  @spec register_user_and_deliver(Gamend.Types.user_registration_attrs(), (String.t() -> String.t())) ::
-  {:ok, Gamend.Accounts.User.t()} | {:error, Ecto.Changeset.t() | term()}
+  @spec register_user_and_deliver(Gamend.Types.user_registration_attrs(), (String.t() ->
+                                                                             String.t())) ::
+          {:ok, Gamend.Accounts.User.t()} | {:error, Ecto.Changeset.t() | term()}
   def register_user_and_deliver(_attrs, _confirmation_url_fun) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Accounts.User{id: 0, email: "", display_name: nil, metadata: %{}, is_admin: false, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Accounts.User{
+           id: 0,
+           email: "",
+           display_name: nil,
+           metadata: %{},
+           is_admin: false,
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Accounts.register_user_and_deliver/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Register a user and send the confirmation email inside a DB transaction.
@@ -1501,20 +1672,28 @@ defmodule Gamend.Accounts do
     
   """
   @spec register_user_and_deliver(
-  Gamend.Types.user_registration_attrs(),
-  (String.t() -> String.t()),
-  module()
-) :: {:ok, Gamend.Accounts.User.t()} | {:error, Ecto.Changeset.t() | term()}
+          Gamend.Types.user_registration_attrs(),
+          (String.t() -> String.t()),
+          module()
+        ) :: {:ok, Gamend.Accounts.User.t()} | {:error, Ecto.Changeset.t() | term()}
   def register_user_and_deliver(_attrs, _confirmation_url_fun, _notifier) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Accounts.User{id: 0, email: "", display_name: nil, metadata: %{}, is_admin: false, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Accounts.User{
+           id: 0,
+           email: "",
+           display_name: nil,
+           metadata: %{},
+           is_admin: false,
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Accounts.register_user_and_deliver/3 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Whether new accounts require manual admin activation before they can log in.
@@ -1531,7 +1710,6 @@ defmodule Gamend.Accounts do
     end
   end
 
-
   @doc ~S"""
     Revokes every credential the user holds: all session tokens are deleted and
     `token_version` is bumped, which invalidates all previously issued JWT
@@ -1541,8 +1719,8 @@ defmodule Gamend.Accounts do
     
   """
   @spec revoke_all_tokens(Gamend.Accounts.User.t()) ::
-  {:ok, {Gamend.Accounts.User.t(), [Gamend.Accounts.UserToken.t()]}}
-  | {:error, Ecto.Changeset.t()}
+          {:ok, {Gamend.Accounts.User.t(), [Gamend.Accounts.UserToken.t()]}}
+          | {:error, Ecto.Changeset.t()}
   def revoke_all_tokens(_user) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -1552,7 +1730,6 @@ defmodule Gamend.Accounts do
         raise "Gamend.Accounts.revoke_all_tokens/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Revokes all session tokens for a user (mass logout).
@@ -1568,7 +1745,6 @@ defmodule Gamend.Accounts do
         raise "Gamend.Accounts.revoke_all_user_sessions/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Search users by display name (case-insensitive prefix match) or exact numeric id.
@@ -1591,7 +1767,6 @@ defmodule Gamend.Accounts do
     end
   end
 
-
   @doc ~S"""
     Search users by display name (case-insensitive prefix match) or exact numeric id.
     
@@ -1613,7 +1788,6 @@ defmodule Gamend.Accounts do
     end
   end
 
-
   @doc ~S"""
     Serialize a user into the compact payload used by realtime updates.
     
@@ -1629,7 +1803,6 @@ defmodule Gamend.Accounts do
     end
   end
 
-
   @doc ~S"""
     Mark a user as offline and update last_seen_at.
     
@@ -1642,13 +1815,21 @@ defmodule Gamend.Accounts do
   def set_user_offline(_user_id) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Accounts.User{id: 0, email: "", display_name: nil, metadata: %{}, is_admin: false, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Accounts.User{
+           id: 0,
+           email: "",
+           display_name: nil,
+           metadata: %{},
+           is_admin: false,
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Accounts.set_user_offline/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Mark a user as online and update last_seen_at.
@@ -1665,13 +1846,21 @@ defmodule Gamend.Accounts do
   def set_user_online(_user_id) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Accounts.User{id: 0, email: "", display_name: nil, metadata: %{}, is_admin: false, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Accounts.User{
+           id: 0,
+           email: "",
+           display_name: nil,
+           metadata: %{},
+           is_admin: false,
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Accounts.set_user_online/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Checks whether the user is in sudo mode.
@@ -1691,7 +1880,6 @@ defmodule Gamend.Accounts do
     end
   end
 
-
   @doc ~S"""
     Checks whether the user is in sudo mode.
     
@@ -1710,7 +1898,6 @@ defmodule Gamend.Accounts do
     end
   end
 
-
   @doc ~S"""
     Updates `last_seen_at` to now for the given user. Fire-and-forget — errors are ignored.
     Call on login (session or JWT) to track activity.
@@ -1726,7 +1913,6 @@ defmodule Gamend.Accounts do
         raise "Gamend.Accounts.touch_last_seen/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Lightweight version of `touch_last_seen/1` that accepts a user ID directly.
@@ -1746,7 +1932,6 @@ defmodule Gamend.Accounts do
     end
   end
 
-
   @doc ~S"""
     Unlink the device_id from a user's account.
     
@@ -1758,17 +1943,25 @@ defmodule Gamend.Accounts do
     
   """
   @spec unlink_device_id(Gamend.Accounts.User.t()) ::
-  {:ok, Gamend.Accounts.User.t()} | {:error, :last_auth_method | Ecto.Changeset.t()}
+          {:ok, Gamend.Accounts.User.t()} | {:error, :last_auth_method | Ecto.Changeset.t()}
   def unlink_device_id(_user) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Accounts.User{id: 0, email: "", display_name: nil, metadata: %{}, is_admin: false, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Accounts.User{
+           id: 0,
+           email: "",
+           display_name: nil,
+           metadata: %{},
+           is_admin: false,
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Accounts.unlink_device_id/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Unlink an OAuth provider from a user's account.
@@ -1781,18 +1974,29 @@ defmodule Gamend.Accounts do
     social logins unexpectedly.
     
   """
-  @spec unlink_provider(Gamend.Accounts.User.t(), :discord | :apple | :google | :facebook | :steam) ::
-  {:ok, Gamend.Accounts.User.t()} | {:error, :last_provider | Ecto.Changeset.t() | term()}
+  @spec unlink_provider(
+          Gamend.Accounts.User.t(),
+          :discord | :apple | :google | :facebook | :steam
+        ) ::
+          {:ok, Gamend.Accounts.User.t()} | {:error, :last_provider | Ecto.Changeset.t() | term()}
   def unlink_provider(_user, _provider) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Accounts.User{id: 0, email: "", display_name: nil, metadata: %{}, is_admin: false, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Accounts.User{
+           id: 0,
+           email: "",
+           display_name: nil,
+           metadata: %{},
+           is_admin: false,
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Accounts.unlink_provider/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Updates a user with the given attributes.
@@ -1816,17 +2020,25 @@ defmodule Gamend.Accounts do
     
   """
   @spec update_user(Gamend.Accounts.User.t(), Gamend.Types.user_update_attrs()) ::
-  {:ok, Gamend.Accounts.User.t()} | {:error, Ecto.Changeset.t()}
+          {:ok, Gamend.Accounts.User.t()} | {:error, Ecto.Changeset.t()}
   def update_user(_user, _attrs) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Accounts.User{id: 0, email: "", display_name: nil, metadata: %{}, is_admin: false, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Accounts.User{
+           id: 0,
+           email: "",
+           display_name: nil,
+           metadata: %{},
+           is_admin: false,
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Accounts.update_user/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Set the user's avatar URL (`profile_url`), typically after an upload confirmed
@@ -1834,34 +2046,50 @@ defmodule Gamend.Accounts do
     
   """
   @spec update_user_avatar(Gamend.Accounts.User.t(), String.t()) ::
-  {:ok, Gamend.Accounts.User.t()} | {:error, Ecto.Changeset.t()}
+          {:ok, Gamend.Accounts.User.t()} | {:error, Ecto.Changeset.t()}
   def update_user_avatar(_user, _url) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Accounts.User{id: 0, email: "", display_name: nil, metadata: %{}, is_admin: false, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Accounts.User{
+           id: 0,
+           email: "",
+           display_name: nil,
+           metadata: %{},
+           is_admin: false,
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Accounts.update_user_avatar/2 is a stub - only available at runtime on Gamend"
     end
   end
 
-
   @doc ~S"""
     Updates the user's display name and broadcasts the change.
     
   """
   @spec update_user_display_name(Gamend.Accounts.User.t(), map()) ::
-  {:ok, Gamend.Accounts.User.t()} | {:error, Ecto.Changeset.t()}
+          {:ok, Gamend.Accounts.User.t()} | {:error, Ecto.Changeset.t()}
   def update_user_display_name(_user, _attrs) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Accounts.User{id: 0, email: "", display_name: nil, metadata: %{}, is_admin: false, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Accounts.User{
+           id: 0,
+           email: "",
+           display_name: nil,
+           metadata: %{},
+           is_admin: false,
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Accounts.update_user_display_name/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Updates the user email using the given token.
@@ -1870,17 +2098,25 @@ defmodule Gamend.Accounts do
     
   """
   @spec update_user_email(Gamend.Accounts.User.t(), String.t()) ::
-  {:ok, Gamend.Accounts.User.t()} | {:error, :transaction_aborted}
+          {:ok, Gamend.Accounts.User.t()} | {:error, :transaction_aborted}
   def update_user_email(_user, _token) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Accounts.User{id: 0, email: "", display_name: nil, metadata: %{}, is_admin: false, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Accounts.User{
+           id: 0,
+           email: "",
+           display_name: nil,
+           metadata: %{},
+           is_admin: false,
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Accounts.update_user_email/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Updates the user password.
@@ -1898,8 +2134,8 @@ defmodule Gamend.Accounts do
     
   """
   @spec update_user_password(Gamend.Accounts.User.t(), map()) ::
-  {:ok, {Gamend.Accounts.User.t(), [Gamend.Accounts.UserToken.t()]}}
-  | {:error, Ecto.Changeset.t()}
+          {:ok, {Gamend.Accounts.User.t(), [Gamend.Accounts.UserToken.t()]}}
+          | {:error, Ecto.Changeset.t()}
   def update_user_password(_user, _attrs) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -1909,7 +2145,6 @@ defmodule Gamend.Accounts do
         raise "Gamend.Accounts.update_user_password/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Updates the user's unique username handle and broadcasts the change.
@@ -1921,17 +2156,25 @@ defmodule Gamend.Accounts do
     
   """
   @spec update_username(Gamend.Accounts.User.t(), map()) ::
-  {:ok, Gamend.Accounts.User.t()} | {:error, Ecto.Changeset.t() | term()}
+          {:ok, Gamend.Accounts.User.t()} | {:error, Ecto.Changeset.t() | term()}
   def update_username(_user, _attrs) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Accounts.User{id: 0, email: "", display_name: nil, metadata: %{}, is_admin: false, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Accounts.User{
+           id: 0,
+           email: "",
+           display_name: nil,
+           metadata: %{},
+           is_admin: false,
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Accounts.update_username/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Returns true when the given user is activated or when account activation
@@ -1950,7 +2193,6 @@ defmodule Gamend.Accounts do
     end
   end
 
-
   @doc ~S"""
     Map of `%{id => %User{}}` for the given ids, for batch name lookups (e.g. admin
     tables that hold only a `user_id`). Nil/duplicate ids are ignored.
@@ -1967,7 +2209,6 @@ defmodule Gamend.Accounts do
     end
   end
 
-
   @doc ~S"""
     Returns true when `password` matches the user's current password.
     
@@ -1982,5 +2223,4 @@ defmodule Gamend.Accounts do
         raise "Gamend.Accounts.valid_password?/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 end

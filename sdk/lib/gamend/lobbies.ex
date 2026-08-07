@@ -1,51 +1,49 @@
 defmodule Gamend.Lobbies do
   @moduledoc ~S"""
   Context module for lobby management: creating, updating, listing and searching lobbies.
-  
+
   This module contains the core domain operations; more advanced membership and
   permission logic will be added in follow-up tasks.
-  
+
   ## Usage
-  
+
       # Create a lobby (returns {:ok, lobby} | {:error, changeset})
       {:ok, lobby} = Gamend.Lobbies.create_lobby(%{name: "fun-room", title: "Fun Room", host_id: host_id})
-  
+
       # List public lobbies (paginated/filterable)
       lobbies = Gamend.Lobbies.list_lobbies(%{}, page: 1, page_size: 25)
-  
+
       # Join and leave
       {:ok, user} = Gamend.Lobbies.join_lobby(user, lobby.id)
       {:ok, _} = Gamend.Lobbies.leave_lobby(user)
-  
+
       # Get current lobby members
       members = Gamend.Lobbies.get_lobby_members(lobby)
-  
+
       # Subscribe to global or per-lobby events
       :ok = Gamend.Lobbies.subscribe_lobbies()
       :ok = Gamend.Lobbies.subscribe_lobby(lobby.id)
-  
+
   ## PubSub Events
-  
+
   This module broadcasts the following events:
-  
+
   - `"lobbies"` topic (global lobby list changes):
     - `{:lobby_created, lobby}` - a new lobby was created
     - `{:lobby_updated, lobby}` - a lobby was updated
     - `{:lobby_deleted, lobby_id}` - a lobby was deleted
-  
+
   - `"lobby:<lobby_id>"` topic (per-lobby membership changes):
     - `{:user_joined, lobby_id, user_id}` - a user joined the lobby
     - `{:user_left, lobby_id, user_id}` - a user left the lobby
     - `{:user_kicked, lobby_id, user_id}` - a user was kicked from the lobby
     - `{:lobby_updated, lobby}` - the lobby settings were updated
     - `{:host_changed, lobby_id, new_host_id}` - the host changed (e.g., after host leaves)
-  
+
 
   **Note:** This is an SDK stub. Calling these functions will raise an error.
   The actual implementation runs on the Gamend.
   """
-
-
 
   @doc ~S"""
     Broadcast a member presence event (online/offline) to a lobby's PubSub topic.
@@ -61,13 +59,13 @@ defmodule Gamend.Lobbies do
     end
   end
 
-
   @doc ~S"""
     Check if a user can edit a lobby: the host of a host-managed lobby, nobody
     else. Hostless lobbies have no editor — see `update_lobby_by_host/3`.
     
   """
-  @spec can_edit_lobby?(Gamend.Accounts.User.t() | nil, Gamend.Lobbies.Lobby.t() | nil) :: boolean()
+  @spec can_edit_lobby?(Gamend.Accounts.User.t() | nil, Gamend.Lobbies.Lobby.t() | nil) ::
+          boolean()
   def can_edit_lobby?(_user, _lobby) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -78,13 +76,13 @@ defmodule Gamend.Lobbies do
     end
   end
 
-
   @doc ~S"""
     Check if a user can view a lobby's details.
     Users can view any lobby they can see in the list.
     
   """
-  @spec can_view_lobby?(Gamend.Accounts.User.t() | nil, Gamend.Lobbies.Lobby.t() | nil) :: boolean()
+  @spec can_view_lobby?(Gamend.Accounts.User.t() | nil, Gamend.Lobbies.Lobby.t() | nil) ::
+          boolean()
   def can_view_lobby?(_user, _lobby) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -94,7 +92,6 @@ defmodule Gamend.Lobbies do
         raise "Gamend.Lobbies.can_view_lobby?/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc false
   @spec change_lobby(Gamend.Lobbies.Lobby.t()) :: Ecto.Changeset.t()
@@ -108,7 +105,6 @@ defmodule Gamend.Lobbies do
     end
   end
 
-
   @doc false
   @spec change_lobby(Gamend.Lobbies.Lobby.t(), map()) :: Ecto.Changeset.t()
   def change_lobby(_lobby, _attrs) do
@@ -120,7 +116,6 @@ defmodule Gamend.Lobbies do
         raise "Gamend.Lobbies.change_lobby/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Returns the count of hidden lobbies.
@@ -137,7 +132,6 @@ defmodule Gamend.Lobbies do
     end
   end
 
-
   @doc ~S"""
     Returns the count of hostless lobbies.
     
@@ -152,7 +146,6 @@ defmodule Gamend.Lobbies do
         raise "Gamend.Lobbies.count_hostless_lobbies/0 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Count ALL lobbies matching filters. For admin pagination.
@@ -169,7 +162,6 @@ defmodule Gamend.Lobbies do
     end
   end
 
-
   @doc ~S"""
     Count ALL lobbies matching filters. For admin pagination.
     
@@ -185,7 +177,6 @@ defmodule Gamend.Lobbies do
     end
   end
 
-
   @doc ~S"""
     Count lobbies matching filters (excludes hidden ones unless admin list used). If metadata filters are supplied, they will be applied after fetching.
   """
@@ -200,7 +191,6 @@ defmodule Gamend.Lobbies do
     end
   end
 
-
   @doc ~S"""
     Count lobbies matching filters (excludes hidden ones unless admin list used). If metadata filters are supplied, they will be applied after fetching.
   """
@@ -214,7 +204,6 @@ defmodule Gamend.Lobbies do
         raise "Gamend.Lobbies.count_list_lobbies/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Returns the count of locked lobbies.
@@ -231,7 +220,6 @@ defmodule Gamend.Lobbies do
     end
   end
 
-
   @doc ~S"""
     Returns the count of lobbies with passwords.
     
@@ -247,7 +235,6 @@ defmodule Gamend.Lobbies do
     end
   end
 
-
   @doc ~S"""
     Creates a new lobby.
     
@@ -260,13 +247,24 @@ defmodule Gamend.Lobbies do
   def create_lobby() do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Lobbies.Lobby{id: 0, title: "", host_id: nil, hostless: false, max_users: 0, is_hidden: false, is_locked: false, metadata: %{}, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Lobbies.Lobby{
+           id: 0,
+           title: "",
+           host_id: nil,
+           hostless: false,
+           max_users: 0,
+           is_hidden: false,
+           is_locked: false,
+           metadata: %{},
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Lobbies.create_lobby/0 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Creates a new lobby.
@@ -277,72 +275,122 @@ defmodule Gamend.Lobbies do
     
   """
   @spec create_lobby(Gamend.Types.lobby_create_attrs()) ::
-  {:ok, Gamend.Lobbies.Lobby.t()} | {:error, Ecto.Changeset.t() | term()}
+          {:ok, Gamend.Lobbies.Lobby.t()} | {:error, Ecto.Changeset.t() | term()}
   def create_lobby(_attrs) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Lobbies.Lobby{id: 0, title: "", host_id: nil, hostless: false, max_users: 0, is_hidden: false, is_locked: false, metadata: %{}, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Lobbies.Lobby{
+           id: 0,
+           title: "",
+           host_id: nil,
+           hostless: false,
+           max_users: 0,
+           is_hidden: false,
+           is_locked: false,
+           metadata: %{},
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Lobbies.create_lobby/1 is a stub - only available at runtime on Gamend"
     end
   end
 
-
   @doc false
   @spec create_membership(%{lobby_id: Ecto.UUID.t(), user_id: Ecto.UUID.t()}) ::
-  {:ok, Gamend.Accounts.User.t()} | {:error, :not_found | Ecto.Changeset.t() | term()}
+          {:ok, Gamend.Accounts.User.t()} | {:error, :not_found | Ecto.Changeset.t() | term()}
   def create_membership(_attrs) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Accounts.User{id: 0, email: "", display_name: nil, metadata: %{}, is_admin: false, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Accounts.User{
+           id: 0,
+           email: "",
+           display_name: nil,
+           metadata: %{},
+           is_admin: false,
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Lobbies.create_membership/1 is a stub - only available at runtime on Gamend"
     end
   end
 
-
   @doc false
   @spec delete_lobby(Gamend.Lobbies.Lobby.t()) ::
-  {:ok, Gamend.Lobbies.Lobby.t()} | {:error, Ecto.Changeset.t() | term()}
+          {:ok, Gamend.Lobbies.Lobby.t()} | {:error, Ecto.Changeset.t() | term()}
   def delete_lobby(_lobby) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Lobbies.Lobby{id: 0, title: "", host_id: nil, hostless: false, max_users: 0, is_hidden: false, is_locked: false, metadata: %{}, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Lobbies.Lobby{
+           id: 0,
+           title: "",
+           host_id: nil,
+           hostless: false,
+           max_users: 0,
+           is_hidden: false,
+           is_locked: false,
+           metadata: %{},
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Lobbies.delete_lobby/1 is a stub - only available at runtime on Gamend"
     end
   end
 
-
   @doc false
   @spec delete_membership(Gamend.Accounts.User.t()) ::
-  {:ok, Gamend.Accounts.User.t()} | {:error, Ecto.Changeset.t()}
+          {:ok, Gamend.Accounts.User.t()} | {:error, Ecto.Changeset.t()}
   def delete_membership(_user) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Accounts.User{id: 0, email: "", display_name: nil, metadata: %{}, is_admin: false, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Accounts.User{
+           id: 0,
+           email: "",
+           display_name: nil,
+           metadata: %{},
+           is_admin: false,
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Lobbies.delete_membership/1 is a stub - only available at runtime on Gamend"
     end
   end
 
-
   @doc false
   @spec get_lobby(Ecto.UUID.t()) :: Gamend.Lobbies.Lobby.t() | nil
   def get_lobby(_id) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        if :erlang.phash2(make_ref(), 2) == 0, do: nil, else: %Gamend.Lobbies.Lobby{id: 0, title: "", host_id: nil, hostless: false, max_users: 0, is_hidden: false, is_locked: false, metadata: %{}, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}
+        if :erlang.phash2(make_ref(), 2) == 0,
+          do: nil,
+          else: %Gamend.Lobbies.Lobby{
+            id: 0,
+            title: "",
+            host_id: nil,
+            hostless: false,
+            max_users: 0,
+            is_hidden: false,
+            is_locked: false,
+            metadata: %{},
+            inserted_at: ~U[1970-01-01 00:00:00Z],
+            updated_at: ~U[1970-01-01 00:00:00Z]
+          }
 
       _ ->
         raise "Gamend.Lobbies.get_lobby/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc false
   @spec get_lobby!(Ecto.UUID.t()) :: Gamend.Lobbies.Lobby.t()
@@ -355,7 +403,6 @@ defmodule Gamend.Lobbies do
         raise "Gamend.Lobbies.get_lobby!/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Gets all users currently in a lobby.
@@ -383,7 +430,6 @@ defmodule Gamend.Lobbies do
     end
   end
 
-
   @doc ~S"""
     Join a user to a lobby.
     
@@ -400,17 +446,25 @@ defmodule Gamend.Lobbies do
     
   """
   @spec join_lobby(Gamend.Accounts.User.t(), Gamend.Lobbies.Lobby.t() | Ecto.UUID.t()) ::
-  {:ok, Gamend.Accounts.User.t()} | {:error, term()}
+          {:ok, Gamend.Accounts.User.t()} | {:error, term()}
   def join_lobby(_user, _lobby_arg) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Accounts.User{id: 0, email: "", display_name: nil, metadata: %{}, is_admin: false, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Accounts.User{
+           id: 0,
+           email: "",
+           display_name: nil,
+           metadata: %{},
+           is_admin: false,
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Lobbies.join_lobby/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Join a user to a lobby.
@@ -427,18 +481,30 @@ defmodule Gamend.Lobbies do
     `:password_required`, `:invalid_password`, `:invalid_lobby`.
     
   """
-  @spec join_lobby(Gamend.Accounts.User.t(), Gamend.Lobbies.Lobby.t() | Ecto.UUID.t(), map() | keyword()) ::
-  {:ok, Gamend.Accounts.User.t()} | {:error, term()}
+  @spec join_lobby(
+          Gamend.Accounts.User.t(),
+          Gamend.Lobbies.Lobby.t() | Ecto.UUID.t(),
+          map() | keyword()
+        ) ::
+          {:ok, Gamend.Accounts.User.t()} | {:error, term()}
   def join_lobby(_user, _lobby_arg, _opts) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Accounts.User{id: 0, email: "", display_name: nil, metadata: %{}, is_admin: false, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Accounts.User{
+           id: 0,
+           email: "",
+           display_name: nil,
+           metadata: %{},
+           is_admin: false,
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Lobbies.join_lobby/3 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Kick a user from a lobby. Only the host can kick users.
@@ -446,17 +512,25 @@ defmodule Gamend.Lobbies do
     
   """
   @spec kick_user(Gamend.Accounts.User.t(), Gamend.Lobbies.Lobby.t(), Gamend.Accounts.User.t()) ::
-  {:ok, Gamend.Accounts.User.t()} | {:error, term()}
+          {:ok, Gamend.Accounts.User.t()} | {:error, term()}
   def kick_user(_host, _lobby, _target) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Accounts.User{id: 0, email: "", display_name: nil, metadata: %{}, is_admin: false, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Accounts.User{
+           id: 0,
+           email: "",
+           display_name: nil,
+           metadata: %{},
+           is_admin: false,
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Lobbies.kick_user/3 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc false
   @spec leave_lobby(Gamend.Accounts.User.t()) :: {:ok, term()} | {:error, term()}
@@ -469,7 +543,6 @@ defmodule Gamend.Lobbies do
         raise "Gamend.Lobbies.leave_lobby/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     List ALL lobbies including hidden ones. For admin use only.
@@ -494,7 +567,6 @@ defmodule Gamend.Lobbies do
     end
   end
 
-
   @doc ~S"""
     List ALL lobbies including hidden ones. For admin use only.
     Accepts filters: %{
@@ -518,7 +590,6 @@ defmodule Gamend.Lobbies do
     end
   end
 
-
   @doc ~S"""
     List ALL lobbies including hidden ones. For admin use only.
     Accepts filters: %{
@@ -541,7 +612,6 @@ defmodule Gamend.Lobbies do
         raise "Gamend.Lobbies.list_all_lobbies/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     List lobbies. Accepts optional search filters.
@@ -573,7 +643,6 @@ defmodule Gamend.Lobbies do
     end
   end
 
-
   @doc ~S"""
     List lobbies. Accepts optional search filters.
     
@@ -603,7 +672,6 @@ defmodule Gamend.Lobbies do
         raise "Gamend.Lobbies.list_lobbies/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     List lobbies. Accepts optional search filters.
@@ -635,7 +703,6 @@ defmodule Gamend.Lobbies do
     end
   end
 
-
   @doc ~S"""
     List lobbies visible to a specific user.
     Includes the user's own lobby even if it's hidden.
@@ -651,7 +718,6 @@ defmodule Gamend.Lobbies do
         raise "Gamend.Lobbies.list_lobbies_for_user/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     List lobbies visible to a specific user.
@@ -669,15 +735,18 @@ defmodule Gamend.Lobbies do
     end
   end
 
-
   @doc ~S"""
     List lobbies visible to a specific user.
     Includes the user's own lobby even if it's hidden.
     
   """
-  @spec list_lobbies_for_user(Gamend.Accounts.User.t() | nil, map(), Gamend.Types.lobby_list_opts()) :: [
-  Gamend.Lobbies.Lobby.t()
-]
+  @spec list_lobbies_for_user(
+          Gamend.Accounts.User.t() | nil,
+          map(),
+          Gamend.Types.lobby_list_opts()
+        ) :: [
+          Gamend.Lobbies.Lobby.t()
+        ]
   def list_lobbies_for_user(_user, _filters, _opts) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -687,7 +756,6 @@ defmodule Gamend.Lobbies do
         raise "Gamend.Lobbies.list_lobbies_for_user/3 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc false
   @spec list_memberships_for_lobby(Ecto.UUID.t()) :: [Gamend.Accounts.User.t()]
@@ -700,7 +768,6 @@ defmodule Gamend.Lobbies do
         raise "Gamend.Lobbies.list_memberships_for_lobby/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Merges `patch` into the lobby's metadata, leaving untouched every key it does
@@ -717,17 +784,28 @@ defmodule Gamend.Lobbies do
     
   """
   @spec merge_metadata(Gamend.Lobbies.Lobby.t(), map()) ::
-  {:ok, Gamend.Lobbies.Lobby.t()} | {:error, term()}
+          {:ok, Gamend.Lobbies.Lobby.t()} | {:error, term()}
   def merge_metadata(_lobby, _patch) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Lobbies.Lobby{id: 0, title: "", host_id: nil, hostless: false, max_users: 0, is_hidden: false, is_locked: false, metadata: %{}, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Lobbies.Lobby{
+           id: 0,
+           title: "",
+           host_id: nil,
+           hostless: false,
+           max_users: 0,
+           is_hidden: false,
+           is_locked: false,
+           metadata: %{},
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Lobbies.merge_metadata/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Attempt to find an open lobby matching the given criteria and join it, or
@@ -741,17 +819,29 @@ defmodule Gamend.Lobbies do
     
   """
   @spec quick_join(Gamend.Accounts.User.t()) ::
-  {:ok, Gamend.Lobbies.Lobby.t()} | {:error, :already_in_lobby | Ecto.Changeset.t() | term()}
+          {:ok, Gamend.Lobbies.Lobby.t()}
+          | {:error, :already_in_lobby | Ecto.Changeset.t() | term()}
   def quick_join(_user) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Lobbies.Lobby{id: 0, title: "", host_id: nil, hostless: false, max_users: 0, is_hidden: false, is_locked: false, metadata: %{}, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Lobbies.Lobby{
+           id: 0,
+           title: "",
+           host_id: nil,
+           hostless: false,
+           max_users: 0,
+           is_hidden: false,
+           is_locked: false,
+           metadata: %{},
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Lobbies.quick_join/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Attempt to find an open lobby matching the given criteria and join it, or
@@ -765,17 +855,29 @@ defmodule Gamend.Lobbies do
     
   """
   @spec quick_join(Gamend.Accounts.User.t(), String.t() | nil) ::
-  {:ok, Gamend.Lobbies.Lobby.t()} | {:error, :already_in_lobby | Ecto.Changeset.t() | term()}
+          {:ok, Gamend.Lobbies.Lobby.t()}
+          | {:error, :already_in_lobby | Ecto.Changeset.t() | term()}
   def quick_join(_user, _title) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Lobbies.Lobby{id: 0, title: "", host_id: nil, hostless: false, max_users: 0, is_hidden: false, is_locked: false, metadata: %{}, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Lobbies.Lobby{
+           id: 0,
+           title: "",
+           host_id: nil,
+           hostless: false,
+           max_users: 0,
+           is_hidden: false,
+           is_locked: false,
+           metadata: %{},
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Lobbies.quick_join/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Attempt to find an open lobby matching the given criteria and join it, or
@@ -789,17 +891,29 @@ defmodule Gamend.Lobbies do
     
   """
   @spec quick_join(Gamend.Accounts.User.t(), String.t() | nil, integer() | nil) ::
-  {:ok, Gamend.Lobbies.Lobby.t()} | {:error, :already_in_lobby | Ecto.Changeset.t() | term()}
+          {:ok, Gamend.Lobbies.Lobby.t()}
+          | {:error, :already_in_lobby | Ecto.Changeset.t() | term()}
   def quick_join(_user, _title, _max_users) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Lobbies.Lobby{id: 0, title: "", host_id: nil, hostless: false, max_users: 0, is_hidden: false, is_locked: false, metadata: %{}, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Lobbies.Lobby{
+           id: 0,
+           title: "",
+           host_id: nil,
+           hostless: false,
+           max_users: 0,
+           is_hidden: false,
+           is_locked: false,
+           metadata: %{},
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Lobbies.quick_join/3 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Attempt to find an open lobby matching the given criteria and join it, or
@@ -813,17 +927,29 @@ defmodule Gamend.Lobbies do
     
   """
   @spec quick_join(Gamend.Accounts.User.t(), String.t() | nil, integer() | nil, map()) ::
-  {:ok, Gamend.Lobbies.Lobby.t()} | {:error, :already_in_lobby | Ecto.Changeset.t() | term()}
+          {:ok, Gamend.Lobbies.Lobby.t()}
+          | {:error, :already_in_lobby | Ecto.Changeset.t() | term()}
   def quick_join(_user, _title, _max_users, _metadata) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Lobbies.Lobby{id: 0, title: "", host_id: nil, hostless: false, max_users: 0, is_hidden: false, is_locked: false, metadata: %{}, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Lobbies.Lobby{
+           id: 0,
+           title: "",
+           host_id: nil,
+           hostless: false,
+           max_users: 0,
+           is_hidden: false,
+           is_locked: false,
+           metadata: %{},
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Lobbies.quick_join/4 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Check if a lobby can be spectated (watched by non-members).
@@ -842,7 +968,6 @@ defmodule Gamend.Lobbies do
     end
   end
 
-
   @doc ~S"""
     Aggregate lobby counts for the public stats endpoint.
     
@@ -853,10 +978,10 @@ defmodule Gamend.Lobbies do
     
   """
   @spec stats() :: %{
-  lobbies_total: non_neg_integer(),
-  by_state: %{required(String.t()) => non_neg_integer()},
-  spectators: non_neg_integer()
-}
+          lobbies_total: non_neg_integer(),
+          by_state: %{required(String.t()) => non_neg_integer()},
+          spectators: non_neg_integer()
+        }
   def stats() do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
@@ -866,7 +991,6 @@ defmodule Gamend.Lobbies do
         raise "Gamend.Lobbies.stats/0 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Subscribe to global lobby events (lobby created, updated, deleted).
@@ -883,7 +1007,6 @@ defmodule Gamend.Lobbies do
     end
   end
 
-
   @doc ~S"""
     Subscribe to a specific lobby's events (membership changes, updates).
     
@@ -898,7 +1021,6 @@ defmodule Gamend.Lobbies do
         raise "Gamend.Lobbies.subscribe_lobby/1 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Move a lobby to `state` (see `Gamend.Lobbies.States`).
@@ -917,17 +1039,29 @@ defmodule Gamend.Lobbies do
     
   """
   @spec transition_state(Gamend.Lobbies.Lobby.t(), String.t(), keyword()) ::
-  {:ok, Gamend.Lobbies.Lobby.t()} | {:error, :invalid_state | {:hook_rejected, term()} | term()}
+          {:ok, Gamend.Lobbies.Lobby.t()}
+          | {:error, :invalid_state | {:hook_rejected, term()} | term()}
   def transition_state(_lobby, _state, _opts) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Lobbies.Lobby{id: 0, title: "", host_id: nil, hostless: false, max_users: 0, is_hidden: false, is_locked: false, metadata: %{}, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Lobbies.Lobby{
+           id: 0,
+           title: "",
+           host_id: nil,
+           hostless: false,
+           max_users: 0,
+           is_hidden: false,
+           is_locked: false,
+           metadata: %{},
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Lobbies.transition_state/3 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Player-initiated state change, subject to lobby ownership.
@@ -940,17 +1074,28 @@ defmodule Gamend.Lobbies do
     
   """
   @spec transition_state_by_host(Gamend.Accounts.User.t(), Gamend.Lobbies.Lobby.t(), String.t()) ::
-  {:ok, Gamend.Lobbies.Lobby.t()} | {:error, :not_host | :invalid_state | term()}
+          {:ok, Gamend.Lobbies.Lobby.t()} | {:error, :not_host | :invalid_state | term()}
   def transition_state_by_host(_user, _lobby, _state) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Lobbies.Lobby{id: 0, title: "", host_id: nil, hostless: false, max_users: 0, is_hidden: false, is_locked: false, metadata: %{}, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Lobbies.Lobby{
+           id: 0,
+           title: "",
+           host_id: nil,
+           hostless: false,
+           max_users: 0,
+           is_hidden: false,
+           is_locked: false,
+           metadata: %{},
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Lobbies.transition_state_by_host/3 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Unsubscribe from a specific lobby's events.
@@ -967,7 +1112,6 @@ defmodule Gamend.Lobbies do
     end
   end
 
-
   @doc ~S"""
     Updates an existing lobby.
     
@@ -977,17 +1121,28 @@ defmodule Gamend.Lobbies do
     
   """
   @spec update_lobby(Gamend.Lobbies.Lobby.t(), Gamend.Types.lobby_update_attrs()) ::
-  {:ok, Gamend.Lobbies.Lobby.t()} | {:error, Ecto.Changeset.t() | term()}
+          {:ok, Gamend.Lobbies.Lobby.t()} | {:error, Ecto.Changeset.t() | term()}
   def update_lobby(_lobby, _attrs) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Lobbies.Lobby{id: 0, title: "", host_id: nil, hostless: false, max_users: 0, is_hidden: false, is_locked: false, metadata: %{}, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Lobbies.Lobby{
+           id: 0,
+           title: "",
+           host_id: nil,
+           hostless: false,
+           max_users: 0,
+           is_hidden: false,
+           is_locked: false,
+           metadata: %{},
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Lobbies.update_lobby/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Player-initiated lobby update, subject to lobby ownership.
@@ -1000,21 +1155,33 @@ defmodule Gamend.Lobbies do
     
   """
   @spec update_lobby_by_host(
-  Gamend.Accounts.User.t(),
-  Gamend.Lobbies.Lobby.t(),
-  Gamend.Types.lobby_update_attrs()
-) ::
-  {:ok, Gamend.Lobbies.Lobby.t()} | {:error, :not_host | :too_small | Ecto.Changeset.t() | term()}
+          Gamend.Accounts.User.t(),
+          Gamend.Lobbies.Lobby.t(),
+          Gamend.Types.lobby_update_attrs()
+        ) ::
+          {:ok, Gamend.Lobbies.Lobby.t()}
+          | {:error, :not_host | :too_small | Ecto.Changeset.t() | term()}
   def update_lobby_by_host(_user, _lobby, _attrs) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Lobbies.Lobby{id: 0, title: "", host_id: nil, hostless: false, max_users: 0, is_hidden: false, is_locked: false, metadata: %{}, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Lobbies.Lobby{
+           id: 0,
+           title: "",
+           host_id: nil,
+           hostless: false,
+           max_users: 0,
+           is_hidden: false,
+           is_locked: false,
+           metadata: %{},
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Lobbies.update_lobby_by_host/3 is a stub - only available at runtime on Gamend"
     end
   end
-
 
   @doc ~S"""
     Ids of lobbies with WebRTC enabled — the signaling rooms that can exist.
@@ -1030,7 +1197,6 @@ defmodule Gamend.Lobbies do
     end
   end
 
-
   @doc ~S"""
     Writes the server-owned `webrtc_*` columns.
     
@@ -1039,15 +1205,26 @@ defmodule Gamend.Lobbies do
     
   """
   @spec write_webrtc_config(Gamend.Lobbies.Lobby.t(), map()) ::
-  {:ok, Gamend.Lobbies.Lobby.t()} | {:error, Ecto.Changeset.t()}
+          {:ok, Gamend.Lobbies.Lobby.t()} | {:error, Ecto.Changeset.t()}
   def write_webrtc_config(_lobby, _changes) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        {:ok, %Gamend.Lobbies.Lobby{id: 0, title: "", host_id: nil, hostless: false, max_users: 0, is_hidden: false, is_locked: false, metadata: %{}, inserted_at: ~U[1970-01-01 00:00:00Z], updated_at: ~U[1970-01-01 00:00:00Z]}}
+        {:ok,
+         %Gamend.Lobbies.Lobby{
+           id: 0,
+           title: "",
+           host_id: nil,
+           hostless: false,
+           max_users: 0,
+           is_hidden: false,
+           is_locked: false,
+           metadata: %{},
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
 
       _ ->
         raise "Gamend.Lobbies.write_webrtc_config/2 is a stub - only available at runtime on Gamend"
     end
   end
-
 end
