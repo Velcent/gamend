@@ -12,12 +12,14 @@ defmodule GamendWeb.Components.PresentationPageSrcsetTest do
   alias GamendWeb.PresentationPage
 
   @fixture "/images/media-fixture.png"
+  @webp_fixture "/images/media-fixture.webp"
 
   # `priv/static` is generated, so it is gitignored wholesale — a fixture
   # committed there reaches nobody else's checkout, and every positive case
   # here fails on CI with no srcset. The variant only has to pass
   # `File.regular?`, so the test writes it and takes it away again.
   @fixture_files ["media-fixture.png", "media-fixture-4.png"]
+  @webp_fixture_files ["media-fixture.webp", "media-fixture-4.webp"]
 
   # 1x1 transparent PNG. Never decoded — the component only checks the file is
   # there — but a real one keeps anything that opens it honest.
@@ -26,6 +28,14 @@ defmodule GamendWeb.Components.PresentationPageSrcsetTest do
            "YPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
        )
 
+  # 12x8 lossy WebP. This one IS decoded: presentation art is WebP, and a
+  # source whose dimensions the component cannot read gets no full-size srcset
+  # candidate — which is the whole bug these tests guard.
+  @webp Base.decode64!(
+          "UklGRjwAAABXRUJQVlA4IDAAAADQAQCdASoMAAgAAUAmJaACdLoB+AADsAD+" <>
+            "8ut//NgVzXPv9//S4P0uD9Lg/9KQAAA="
+        )
+
   setup do
     # Written where the component looks them up, not where the source tree
     # keeps them, so a copied (rather than symlinked) priv still works.
@@ -33,7 +43,11 @@ defmodule GamendWeb.Components.PresentationPageSrcsetTest do
     File.mkdir_p!(dir)
 
     for name <- @fixture_files, do: File.write!(Path.join(dir, name), @png)
-    on_exit(fn -> for name <- @fixture_files, do: File.rm(Path.join(dir, name)) end)
+    for name <- @webp_fixture_files, do: File.write!(Path.join(dir, name), @webp)
+
+    on_exit(fn ->
+      for name <- @fixture_files ++ @webp_fixture_files, do: File.rm(Path.join(dir, name))
+    end)
 
     :ok
   end
@@ -74,6 +88,39 @@ defmodule GamendWeb.Components.PresentationPageSrcsetTest do
     assert html =~ "<img"
     refute html =~ "srcset"
     refute html =~ "sizes"
+  end
+
+  test "the full-size source is itself a candidate, at its declared width" do
+    # Once srcset carries `w` descriptors the browser ignores `src` when
+    # choosing, so a list of downscaled variants alone caps the image at the
+    # widest variant — a 2x viewport then upscales it and it looks blurry.
+    html =
+      render_media(%{
+        "image" => %{"light" => @fixture, "alt" => "x", "widths" => [4], "width" => 40}
+      })
+
+    assert html =~ "/images/media-fixture-4.png"
+    assert html =~ ~r{/images/media-fixture\.png[^,"]* 40w}
+  end
+
+  test "a WebP source's own dimensions are read, so it needs no declared width" do
+    html = render_media(%{"image" => %{"light" => @webp_fixture, "alt" => "x", "widths" => [4]}})
+
+    assert html =~ "/images/media-fixture-4.webp"
+    assert html =~ ~r{/images/media-fixture\.webp[^,"]* 12w}
+  end
+
+  test "a source no wider than its widest variant is not appended" do
+    # `mix host.responsive_images` refuses to upscale, so this pairing only
+    # happens when the config over-declares — and re-listing the source under a
+    # descriptor it cannot honour would make the browser pick a soft candidate.
+    html =
+      render_media(%{
+        "image" => %{"light" => @fixture, "alt" => "x", "widths" => [4], "width" => 3}
+      })
+
+    assert html =~ "/images/media-fixture-4.png"
+    refute html =~ " 3w"
   end
 
   test "sizes describes the slot, so the browser can pick before layout" do

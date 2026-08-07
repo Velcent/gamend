@@ -33,6 +33,10 @@ defmodule GamendWeb.Plugs.ForceSSL do
       [
         rewrite_on: [:x_forwarded_proto, :x_forwarded_port],
         hsts: false,
+        # Plug.SSL logs every redirect at :info. On a listener bots reach that
+        # is a line per plain-HTTP hit, saying only that the thing we turned on
+        # is on.
+        log: false,
         exclude: [
           hosts: ["localhost", "127.0.0.1"],
           conn: {__MODULE__, :excluded?, []}

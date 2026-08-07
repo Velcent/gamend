@@ -746,6 +746,7 @@ defmodule GamendWeb.PresentationPage do
         portrait = non_empty_string(Map.get(image, "portrait"))
         portrait_dark = non_empty_string(Map.get(image, "portrait_dark"))
         widths = image_widths(Map.get(image, "widths"))
+        source_width = positive_int(Map.get(image, "width")) || natural_width
 
         %{
           light: image_src(light),
@@ -758,8 +759,8 @@ defmodule GamendWeb.PresentationPage do
           alt: Map.get(image, "alt", ""),
           width: positive_int(Map.get(image, "width")) || natural_width,
           height: positive_int(Map.get(image, "height")) || natural_height,
-          light_srcset: image_srcset(light, widths),
-          dark_srcset: image_srcset(dark, widths),
+          light_srcset: image_srcset(light, widths, source_width),
+          dark_srcset: image_srcset(dark, widths, source_width),
           sizes: non_empty_string(Map.get(image, "sizes"))
         }
 
@@ -799,7 +800,7 @@ defmodule GamendWeb.PresentationPage do
   # A width whose file is missing is dropped rather than emitted: a 404 inside
   # a srcset is not a fallback to `src`, it is a broken image on whichever
   # viewport happened to pick that candidate.
-  defp image_srcset(path, widths) do
+  defp image_srcset(path, widths, source_width) do
     path = non_empty_string(path)
 
     if is_nil(path) or widths == [] do
@@ -807,8 +808,31 @@ defmodule GamendWeb.PresentationPage do
     else
       widths
       |> Enum.filter(&variant_exists?(path, &1))
-      |> Enum.map_join(", ", &"#{image_src(width_variant_path(path, &1))} #{&1}w")
+      |> Enum.map(&{width_variant_path(path, &1), &1})
+      |> append_source_candidate(path, source_width)
+      |> Enum.map_join(", ", fn {candidate, width} -> "#{image_src(candidate)} #{width}w" end)
       |> non_empty_string()
+    end
+  end
+
+  # The full-size original has to be a candidate too. Once `srcset` carries `w`
+  # descriptors the browser ignores `src` entirely when choosing — it is only a
+  # fallback for clients without srcset support — so a list of downscaled
+  # variants alone caps the image at the widest variant and any denser viewport
+  # upscales it. `mix host.responsive_images` never writes a variant at or above
+  # the source width (that would be an upscale), which is exactly why the source
+  # must be appended here rather than declared as another width in the config.
+  #
+  # No variants exist means the image opted out in practice — emit no srcset at
+  # all rather than a one-candidate list that just restates `src`.
+  defp append_source_candidate([], _path, _source_width), do: []
+
+  defp append_source_candidate(candidates, path, source_width) do
+    if is_integer(source_width) and
+         Enum.all?(candidates, fn {_candidate, width} -> width < source_width end) do
+      candidates ++ [{path, source_width}]
+    else
+      candidates
     end
   end
 
@@ -993,10 +1017,40 @@ defmodule GamendWeb.PresentationPage do
        <<0x89, "PNG\r\n", 0x1A, "\n", _length::32, "IHDR", width::32, height::32, _::binary>>} ->
         {width, height}
 
+      {:ok, <<"RIFF", _size::32, "WEBP", rest::binary>>} ->
+        webp_dimensions(rest)
+
       _ ->
         {nil, nil}
     end
   end
+
+  # Presentation art is WebP, and a source whose dimensions we cannot read gets
+  # no srcset candidate of its own — so the three container flavours all have to
+  # be understood here, not just the lossy one. Every field is little-endian,
+  # and VP8L/VP8X store each axis minus one.
+  defp webp_dimensions(<<"VP8 ", _size::32, _frame_tag::24, 0x9D, 0x01, 0x2A, raw::binary>>) do
+    case raw do
+      <<width::little-16, height::little-16, _::binary>> ->
+        # The top two bits of each 16-bit field are the scaling hint.
+        {Bitwise.band(width, 0x3FFF), Bitwise.band(height, 0x3FFF)}
+
+      _ ->
+        {nil, nil}
+    end
+  end
+
+  defp webp_dimensions(<<"VP8L", _size::32, 0x2F, bits::little-32, _::binary>>) do
+    {Bitwise.band(bits, 0x3FFF) + 1, Bitwise.band(Bitwise.bsr(bits, 14), 0x3FFF) + 1}
+  end
+
+  defp webp_dimensions(
+         <<"VP8X", _size::32, _flags::32, width::little-24, height::little-24, _::binary>>
+       ) do
+    {width + 1, height + 1}
+  end
+
+  defp webp_dimensions(_rest), do: {nil, nil}
 
   defp media_width(item, "hero"), do: Map.get(item, "media_width", "half")
   defp media_width(item, _variant), do: Map.get(item, "media_width", "third")

@@ -107,19 +107,11 @@ defmodule GamendWeb.HostLayoutNavigation do
         </li>
       <% end %>
 
-      <%= if length(@known_locales) > 1 do %>
-        <.nav_divider />
-        <li>
-          <.language_dropdown
-            locale={@locale}
-            current_path={@current_path}
-            current_query={@current_query}
-            known_locales={@known_locales}
-            mobile={false}
-          />
-        </li>
-      <% end %>
-
+      <%!-- The language picker is NOT here: the shell renders it once, outside
+            both layouts. A copy per layout puts the ~30 locale entries into the
+            page twice — 26 KB of a 77 KB document — and a test asserts each
+            locale link appears exactly once. It therefore sits to the right of
+            this toggle rather than left of it, as it used to. --%>
       <li>
         <GamendWeb.HostLayouts.theme_toggle />
       </li>
@@ -311,18 +303,8 @@ defmodule GamendWeb.HostLayoutNavigation do
             />
           <% end %>
 
-          <%= if length(@known_locales) > 1 do %>
-            <li class="[&>*]:!p-0 [&>*]:!bg-transparent mt-3">
-              <.language_dropdown
-                locale={@locale}
-                current_path={@current_path}
-                current_query={@current_query}
-                known_locales={@known_locales}
-                mobile={true}
-              />
-            </li>
-          <% end %>
-
+          <%!-- The language picker lives in the header bar beside this menu,
+                rendered once for both layouts — see `desktop_nav/1`. --%>
           <li class="mt-2">
             <div class="flex justify-center">
               <GamendWeb.HostLayouts.theme_toggle />
@@ -338,93 +320,73 @@ defmodule GamendWeb.HostLayoutNavigation do
   attr :current_path, :string, default: nil
   attr :current_query, :string, default: ""
   attr :known_locales, :list, default: []
-  attr :mobile, :boolean, default: false
 
   @doc """
-  The button that opens the language picker.
+  The language picker — the same `<details>` dropdown every other navbar menu
+  uses, so the header has one way of opening a menu rather than two.
 
-  Only a button: the 30 locale entries live in `language_modal/1`, rendered
-  once per page. They used to be rendered here as well — a desktop dropdown
-  and a mobile modal holding the same list — which put 60 links and 60 flags
-  into every page, 31% of the HTML on a page like `/about`.
+  It was a `<label>` opening a full-screen modal, which made it the only
+  control in the header that did not drop a panel under itself.
+
+  Rendered **once** by the shell for both layouts rather than once inside each
+  nav, and that is not an optimisation to trade away: the ~30 locale entries
+  are 13 KB, so a copy per layout is 26 KB of a 77 KB document. The modal
+  existed to avoid exactly that, and a test in the host repo asserts each
+  locale link appears exactly once.
+
+  The panel is a grid rather than the siblings' `w-56` column because this menu
+  has ~30 entries to their handful; everything else about it — surface, radius,
+  shadow, item styling — is theirs.
   """
   def language_dropdown(assigns) do
-    assigns = assign(assigns, :label, locale_label(assigns.locale))
+    assigns =
+      assign(assigns,
+        label: locale_label(assigns.locale),
+        locale_links:
+          locale_links(assigns.current_path, assigns.current_query, assigns.known_locales)
+      )
 
     ~H"""
-    <label
-      for="lang-modal"
-      class={[
-        "btn relative cursor-pointer list-none",
-        if(@mobile, do: "btn-ghost btn-sm w-full", else: "btn-outline")
-      ]}
-    >
-      <.icon name="hero-globe-alt-solid" class="w-4 h-4" />
-      {@label}
-      <.icon name="hero-chevron-down-solid" class={chevron_class(@mobile)} />
-    </label>
-    """
-  end
+    <details class="dropdown dropdown-end" data-navbar-dropdown>
+      <summary class="btn gap-1 list-none btn-outline">
+        <.icon name="hero-globe-alt-solid" class="w-4 h-4" />
+        <span class="hidden sm:inline">{@label}</span>
+        <.icon name="hero-chevron-down-solid" class="w-3 h-3" />
+      </summary>
 
-  defp chevron_class(true), do: "w-3 h-3 absolute right-3"
-  defp chevron_class(_mobile), do: "w-3 h-3"
+      <%!-- Four columns at most: "Español" and "Español (España)" truncate to
+            the same string in five, which makes them impossible to tell apart.
+            Capped height so 30 locales cannot run off the bottom of a phone.
 
-  attr :locale, :string, required: true
-  attr :current_path, :string, default: nil
-  attr :current_query, :string, default: ""
-  attr :known_locales, :list, default: []
-
-  def language_modal(assigns) do
-    locale_links =
-      locale_links(assigns.current_path, assigns.current_query, assigns.known_locales)
-
-    label = locale_label(assigns.locale)
-
-    assigns = assign(assigns, locale_links: locale_links, label: label)
-
-    ~H"""
-    <input
-      type="checkbox"
-      id="lang-modal"
-      class="modal-toggle"
-      aria-label={GamendWeb.HostLayouts.translate("Choose language")}
-    />
-    <div class="modal modal-bottom sm:modal-middle z-[100]" role="dialog">
-      <div class="modal-box max-w-3xl">
-        <label
-          for="lang-modal"
-          aria-label={GamendWeb.HostLayouts.translate("Close language picker")}
-          class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
-        >
-          ✕
-        </label>
-        <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
-          <.icon name="hero-globe-alt-solid" class="w-5 h-5" />
-          {@label}
-        </h3>
-        <%!-- Four columns at most: "Español" and "Español (España)" truncate to
-              the same string in five, which makes them impossible to tell apart. --%>
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1">
-          <%= for link <- @locale_links do %>
-            <a
-              href={link.href}
-              rel={link[:rel]}
-              class={[
-                "flex items-center gap-2 px-2 py-2 rounded text-sm whitespace-nowrap hover:bg-base-200 transition-colors",
-                link.locale == @locale && "bg-primary/10 font-semibold text-primary"
-              ]}
-            >
-              <.flag
-                code={link.flag_code}
-                class="rounded-[2px] shadow-sm ring-1 ring-base-content/10"
-              />
-              <span class="truncate">{link.label}</span>
-            </a>
-          <% end %>
-        </div>
-      </div>
-      <label class="modal-backdrop" for="lang-modal">Close</label>
-    </div>
+            `78vw`, not `92vw`: `dropdown-end` right-aligns the panel to the
+            *button*, and on a phone the button is not the last thing in the bar
+            — the hamburger is. A wider panel therefore starts off the left edge
+            of the screen rather than merely filling it. --%>
+      <%!-- Deliberately not daisyUI's `menu menu-sm` like the sibling panels:
+            `.menu li` is `display:flex` and its `> a` will not shrink below its
+            content, so long labels ("Português do Brasil") burst out of their
+            grid track and over the next column. `menu` is built for a vertical
+            list; this is a grid, and it only needs the surface. --%>
+      <ul class="dropdown-content mt-2 z-[1] grid max-h-[70vh] w-[min(78vw,44rem)] grid-cols-2 gap-1 overflow-y-auto rounded-box bg-base-100 p-2 shadow-lg sm:grid-cols-3 lg:grid-cols-4">
+        <%!-- `min-w-0` on both: a grid track and a flex item both default to
+              min-content width, so without it the longest label ("Português do
+              Brasil") pushes its column over the next one instead of letting
+              `truncate` do its job. --%>
+        <li :for={link <- @locale_links} class="min-w-0 list-none">
+          <a
+            href={link.href}
+            rel={link[:rel]}
+            class={[
+              "flex min-w-0 items-center gap-2 rounded px-2 py-2 text-sm transition-colors hover:bg-base-200",
+              link.locale == @locale && "bg-primary/10 font-semibold text-primary"
+            ]}
+          >
+            <.flag code={link.flag_code} class="rounded-[2px] shadow-sm ring-1 ring-base-content/10" />
+            <span class="truncate">{link.label}</span>
+          </a>
+        </li>
+      </ul>
+    </details>
     """
   end
 

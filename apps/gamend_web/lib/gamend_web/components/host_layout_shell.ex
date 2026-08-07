@@ -66,7 +66,12 @@ defmodule GamendWeb.HostLayoutShell do
             <% end %>
           </a>
         </div>
-        <div class="flex-none">
+        <%!-- The picker and the toggle sit outside both navs so each renders
+              once: the locale list is 13 KB, and a copy per layout was a third
+              of the document. It also means one control with one behaviour at
+              every width, rather than a dropdown on desktop and something else
+              inside the phone menu. --%>
+        <div class="flex-none flex items-center gap-2">
           <GamendWeb.HostLayoutNavigation.desktop_nav
             current_scope={@current_scope}
             current_path={@current_path}
@@ -74,6 +79,14 @@ defmodule GamendWeb.HostLayoutShell do
             navigation={@navigation}
             notif_unread_count={@notif_unread_count}
             locale={@locale}
+            known_locales={@known_locales}
+          />
+
+          <GamendWeb.HostLayoutNavigation.language_dropdown
+            :if={length(@known_locales) > 1}
+            locale={@locale}
+            current_path={@current_path}
+            current_query={@current_query}
             known_locales={@known_locales}
           />
 
@@ -88,14 +101,6 @@ defmodule GamendWeb.HostLayoutShell do
           />
         </div>
       </header>
-
-      <GamendWeb.HostLayoutNavigation.language_modal
-        :if={length(@known_locales) > 1}
-        locale={@locale}
-        current_path={@current_path}
-        current_query={@current_query}
-        known_locales={@known_locales}
-      />
 
       <%= if @flush do %>
         <div class="flex-1 min-h-0 relative">

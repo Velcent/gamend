@@ -93,6 +93,14 @@ defmodule GamendWeb.Plugs.ForceSSLTest do
     assert get_resp_header(conn, "strict-transport-security") == []
   end
 
+  test "does not log a line per redirect", %{opts: opts, previous: previous} do
+    force(true, previous)
+
+    log = ExUnit.CaptureLog.capture_log(fn -> ForceSSL.call(http("/pl"), opts) end)
+
+    refute log =~ "redirecting"
+  end
+
   describe "wired into the endpoint" do
     test "a plain-HTTP request through the real pipeline redirects", %{previous: previous} do
       # The unit tests above would still pass with the plug sitting in a file
