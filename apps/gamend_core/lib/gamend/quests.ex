@@ -549,7 +549,7 @@ defmodule Gamend.Quests do
 
   defp on_completed(user_id, quest, progress) do
     broadcast_progress(:quest_completed, user_id, progress)
-    send_completion_notification(user_id, quest)
+    send_completion_notification(user_id, quest, progress)
 
     Gamend.Async.run(fn ->
       Gamend.Hooks.internal_call(:after_quest_completed, [progress])
@@ -568,7 +568,12 @@ defmodule Gamend.Quests do
     :ok
   end
 
-  defp send_completion_notification(user_id, quest) do
+  defp send_completion_notification(user_id, quest, progress) do
+    # A notification is a stored string, not a rendered one, so the `%{n}` of a
+    # repeat quest has to be collapsed here — nothing downstream knows which
+    # run this was by the time it is read.
+    quest = quest |> resolve_counter(progress) |> render_counter()
+
     # The stored title is the fallback; the notifications UI re-titles by
     # type + metadata (quests categorised "achievement" keep that flavor).
     title =
@@ -675,16 +680,24 @@ defmodule Gamend.Quests do
   @counter_placeholder "%{n}"
 
   @doc """
-  A `repeat` quest's title and description with `%{n}` filled in.
+  Works out which run of a `repeat` quest a player is on, into `:counter`.
 
   A repeat quest is one definition and one row that re-arms forever, so it has
   no natural way to say *which* run the player is on — the card reads the same
   the tenth time as the first. `"Treasures x %{n}"` renders "Treasures x 1"
   before the first claim and "Treasures x 2" after it.
 
-  Substituted here, at the point a definition is paired with a player's row,
+  Resolved here, at the point a definition is paired with a player's row,
   because the definition is global and the count is not: writing the number
   into the stored title would show every player the same one.
+
+  The number lands on the virtual `:counter` field and `%{n}` stays in the
+  title, because the title is also a **msgid**: `GamendWeb.ContentText` looks
+  the translation up by it and hands `n` to Gettext as a binding, so a German
+  card reads "Schätze x 3" instead of falling back to English. Filling it in
+  here would leave "Treasures x 3", which matches no msgid in any locale.
+  Callers that render the title without translating it — the JSON API — call
+  `render_counter/1` to collapse the placeholder.
 
   Non-repeat quests and titles without the placeholder pass through untouched,
   so this is invisible to everything that does not opt in.
@@ -692,19 +705,32 @@ defmodule Gamend.Quests do
   @spec resolve_counter(Quest.t(), QuestProgress.t() | nil) :: Quest.t()
   def resolve_counter(%Quest{reset: "repeat"} = quest, progress) do
     if counter?(quest.title) or counter?(quest.description) do
-      n = repetition(progress)
-
-      %{
-        quest
-        | title: fill_counter(quest.title, n),
-          description: fill_counter(quest.description, n)
-      }
+      %{quest | counter: repetition(progress)}
     else
       quest
     end
   end
 
   def resolve_counter(%Quest{} = quest, _progress), do: quest
+
+  @doc """
+  The quest with `%{n}` replaced by its resolved counter, untranslated.
+
+  For consumers that emit the stored string as-is. Anything that translates
+  interpolates through Gettext instead, so the placeholder survives long
+  enough to be looked up. An unresolved counter reads as run 1 — an anonymous
+  visitor browsing the catalog is looking at the run they would start.
+  """
+  @spec render_counter(Quest.t()) :: Quest.t()
+  def render_counter(%Quest{} = quest) do
+    n = quest.counter || 1
+
+    %{
+      quest
+      | title: fill_counter(quest.title, n),
+        description: fill_counter(quest.description, n)
+    }
+  end
 
   # The run the player is on, 1-based: a row that has never been claimed is
   # run 1. A claimed row that has not re-armed yet still reads as the run just

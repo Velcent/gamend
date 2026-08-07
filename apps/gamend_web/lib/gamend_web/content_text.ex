@@ -33,7 +33,20 @@ defmodule GamendWeb.ContentText do
   deliberately do not use it**: an admin editing a quest has to see the string
   that is actually stored, or they will "fix" a translated title and overwrite
   the source.
+
+  ## Placeholders
+
+  A repeat quest's title carries `%{n}` (see `Gamend.Quests.resolve_counter/2`)
+  and that has to survive until *here*, because the msgid is the string with
+  the placeholder in it. So the number is passed to Gettext as a binding and
+  interpolated into the **translation**. Substituting it earlier looked right
+  in English and quietly broke every other locale: "Treasures x 3" matches no
+  msgid, so the lookup missed and the card fell back to English — while the
+  bare msgid reaching `dgettext/3` without bindings logged a
+  `missing Gettext bindings: [:n]` error on every anonymous page view.
   """
+
+  alias Gamend.Quests.Quest
 
   @domain "content"
 
@@ -42,13 +55,18 @@ defmodule GamendWeb.ContentText do
   @doc """
   Translates one stored string into the caller's locale, falling back to the
   string itself.
-  """
-  @spec t(String.t() | nil) :: String.t() | nil
-  def t(nil), do: nil
-  def t(""), do: ""
 
-  def t(text) when is_binary(text) do
-    Gettext.dgettext(backend(), @domain, text)
+  `bindings` are interpolated into the translation. Pass them for any stored
+  string that contains a `%{placeholder}`; Gettext logs an error and leaves the
+  placeholder raw on the page when one is missing.
+  """
+  @spec t(String.t() | nil, map()) :: String.t() | nil
+  def t(text, bindings \\ %{})
+  def t(nil, _bindings), do: nil
+  def t("", _bindings), do: ""
+
+  def t(text, bindings) when is_binary(text) do
+    Gettext.dgettext(backend(), @domain, text, bindings)
   end
 
   @doc """
@@ -58,6 +76,14 @@ defmodule GamendWeb.ContentText do
   """
   @spec translate(term()) :: term()
   def translate(records) when is_list(records), do: Enum.map(records, &translate/1)
+
+  # A quest's counter is a binding, not a substitution — see "Placeholders".
+  # `nil` is an anonymous visitor browsing the catalog: no row, so run 1.
+  def translate(%Quest{} = quest) do
+    bindings = %{n: quest.counter || 1}
+
+    %{quest | title: t(quest.title, bindings), description: t(quest.description, bindings)}
+  end
 
   def translate(%_struct{} = record) do
     Enum.reduce(@translated_fields, record, fn field, acc ->

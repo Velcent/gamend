@@ -164,7 +164,10 @@ var _refresh_timer: Timer
 func _init(host: String = "127.0.0.1", port: int = 4000, enable_ssl := false):
 	_config.host = host
 	_config.tls_enabled = enable_ssl
-	_config.log_level = ApiApiConfigClient.LogLevel.INFO
+	# INFO prints a line per request AND per response. That is a debugging aid, not
+	# something a shipped build should be doing on every call — on web those go
+	# straight to the browser console.
+	_config.log_level = ApiApiConfigClient.LogLevel.INFO if OS.is_debug_build() else ApiApiConfigClient.LogLevel.WARNING
 	_config.port = port
 	_config.polling_interval_ms = 1
 	_config.headers_override["Connection"] = "keep-alive"

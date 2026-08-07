@@ -4,9 +4,10 @@ defmodule Gamend.QuestsRepeatCounterTest do
   nothing about it says which run the player is on. `%{n}` in the title is how
   it does: the card reads "Treasures x 1", then "Treasures x 2".
 
-  The substitution has to happen where a definition meets a player's row —
-  writing the number into the stored title would show every player the same
-  one — which is what these pin.
+  The number has to be worked out where a definition meets a player's row —
+  writing it into the stored title would show every player the same one — and
+  it has to stay *out* of the title until the string has been translated, since
+  the title with the placeholder in it is the msgid. Both are pinned here.
   """
   use ExUnit.Case, async: true
 
@@ -22,45 +23,55 @@ defmodule Gamend.QuestsRepeatCounterTest do
     %QuestProgress{claim_count: claim_count, status: status}
   end
 
+  # What an untranslated consumer (the JSON API) ends up showing.
+  defp rendered(quest, progress) do
+    quest |> Quests.resolve_counter(progress) |> Quests.render_counter()
+  end
+
   test "no row yet reads as the first run" do
-    assert Quests.resolve_counter(repeat("Treasures x %{n}"), nil).title == "Treasures x 1"
+    assert rendered(repeat("Treasures x %{n}"), nil).title == "Treasures x 1"
   end
 
   test "an unclaimed row is the run in progress" do
-    assert Quests.resolve_counter(repeat("Treasures x %{n}"), progress(0)).title ==
-             "Treasures x 1"
-
-    assert Quests.resolve_counter(repeat("Treasures x %{n}"), progress(3)).title ==
-             "Treasures x 4"
+    assert rendered(repeat("Treasures x %{n}"), progress(0)).title == "Treasures x 1"
+    assert rendered(repeat("Treasures x %{n}"), progress(3)).title == "Treasures x 4"
   end
 
   test "a claimed row keeps the number of the run just finished" do
     # The card must not renumber itself under the player between completing and
     # claiming — they claimed "Treasures x 1", so that is what it says until it
     # re-arms.
-    assert Quests.resolve_counter(repeat("Treasures x %{n}"), progress(1, "claimed")).title ==
-             "Treasures x 1"
-
-    assert Quests.resolve_counter(repeat("Treasures x %{n}"), progress(4, "claimed")).title ==
-             "Treasures x 4"
+    assert rendered(repeat("Treasures x %{n}"), progress(1, "claimed")).title == "Treasures x 1"
+    assert rendered(repeat("Treasures x %{n}"), progress(4, "claimed")).title == "Treasures x 4"
   end
 
   test "a claimed row that somehow never counted still reads as run 1, never 0" do
-    assert Quests.resolve_counter(repeat("Treasures x %{n}"), progress(0, "claimed")).title ==
-             "Treasures x 1"
+    assert rendered(repeat("Treasures x %{n}"), progress(0, "claimed")).title == "Treasures x 1"
   end
 
   test "a nil claim_count is treated as no claims" do
-    assert Quests.resolve_counter(repeat("Treasures x %{n}"), progress(nil)).title ==
-             "Treasures x 1"
+    assert rendered(repeat("Treasures x %{n}"), progress(nil)).title == "Treasures x 1"
   end
 
   test "the description takes the counter too" do
     quest = repeat("Treasures x %{n}", "Find treasure number %{n}.")
-    resolved = Quests.resolve_counter(quest, progress(2))
+    resolved = rendered(quest, progress(2))
 
     assert resolved.title == "Treasures x 3"
     assert resolved.description == "Find treasure number 3."
+  end
+
+  test "resolving leaves the title alone — it is the msgid a translation is found by" do
+    resolved = Quests.resolve_counter(repeat("Treasures x %{n}"), progress(3))
+
+    assert resolved.counter == 4
+    assert resolved.title == "Treasures x %{n}"
+  end
+
+  test "an unresolved counter renders as run 1" do
+    # The anonymous catalog pairs no progress row, and a card reading
+    # "Treasures x %{n}" is worse than one reading the run they would start.
+    assert Quests.render_counter(repeat("Treasures x %{n}")).title == "Treasures x 1"
   end
 
   test "a repeat quest without the placeholder is untouched" do

@@ -131,8 +131,9 @@ func _bzz_connect_client_if_needed(
 	):
 		self._bzz_client.poll()
 		self._bzz_config.log_debug("Connecting…")
-		if self._bzz_config.polling_interval_ms:
-			OS.delay_msec(self._bzz_config.polling_interval_ms)
+		# No sleep before the yield. Awaiting process_frame already paces this to one
+		# poll per frame; OS.delay_msec on top of it only blocked the caller — and the
+		# caller here is the main thread, once per frame for every request in flight.
 		await _bzz_next_loop_iteration()
 
 	var connected := self._bzz_client.get_status()
@@ -299,8 +300,6 @@ func _bzz_do_request_text(
 	# Keep polling for as long as the request is being processed.
 	while self._bzz_client.get_status() == HTTPClient.STATUS_REQUESTING:
 		self._bzz_config.log_debug("Requesting…")
-		if self._bzz_config.polling_interval_ms:
-			OS.delay_msec(self._bzz_config.polling_interval_ms)
 		await _bzz_next_loop_iteration()
 		self._bzz_client.poll()
 
@@ -337,8 +336,6 @@ func _bzz_do_request_text(
 	while self._bzz_client.get_status() == HTTPClient.STATUS_BODY:
 		var chunk = self._bzz_client.read_response_body_chunk()
 		if chunk.size() == 0:  # Got nothing, wait for buffers to fill a bit.
-			if self._bzz_config.polling_interval_ms:
-				OS.delay_usec(self._bzz_config.polling_interval_ms)
 			await _bzz_next_loop_iteration()
 		else:  # Yummy data has arrived
 			response_bytes = response_bytes + chunk

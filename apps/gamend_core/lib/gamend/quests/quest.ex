@@ -60,6 +60,14 @@ defmodule Gamend.Quests.Quest do
     field :active, :boolean, default: true
     field :metadata, :map, default: %{}
 
+    # Which run of a `repeat` quest the player is on, for the `%{n}` in the
+    # title. Virtual because it is per-player: the definition is global, so the
+    # number can only exist on a row paired with a player's progress.
+    # `Gamend.Quests.resolve_counter/2` sets it; nil means "no player context",
+    # which reads as run 1. It is deliberately NOT written into the title —
+    # that would destroy the msgid the translation is looked up by.
+    field :counter, :integer, virtual: true
+
     has_many :progress, Gamend.Quests.QuestProgress,
       foreign_key: :quest_key,
       references: :key

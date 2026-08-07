@@ -38,8 +38,10 @@ defmodule GamendWeb.Tls do
 
   setting(:force, :boolean,
     doc:
-      "Redirect HTTP to HTTPS and send HSTS. Off unless set: a host that serves " <>
-        "port 80 itself keeps a plain-HTTP twin of every page until you enable it."
+      "Redirect HTTP to HTTPS. Off unless set: a host that serves port 80 itself " <>
+        "keeps a plain-HTTP twin of every page until you enable it. Read per " <>
+        "request by GamendWeb.Plugs.ForceSSL; HSTS is sent on every HTTPS " <>
+        "response regardless, by GamendWeb.Plugs.SecurityHeaders."
   )
 
   setting(:acme_webroot, :string,

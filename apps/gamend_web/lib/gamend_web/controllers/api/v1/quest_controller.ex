@@ -397,6 +397,11 @@ defmodule GamendWeb.Api.V1.QuestController do
   defp serialize_entry(%{quest: quest, progress: progress, claimable: claimable}) do
     completed? = progress != nil and progress.status in ["completed", "claimed"]
 
+    # The API ships the stored string, so a repeat quest's `%{n}` has to be
+    # collapsed here. The web pages leave it in place until Gettext fills it,
+    # which is why `resolve_counter/2` no longer does this for everyone.
+    quest = Quests.render_counter(quest)
+
     base =
       if quest.hidden and not completed? do
         # Hidden + not completed: obscure all details

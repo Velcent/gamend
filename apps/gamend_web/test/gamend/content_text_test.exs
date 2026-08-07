@@ -64,4 +64,32 @@ defmodule GamendWeb.ContentTextTest do
       assert ContentText.translate(42) == 42
     end
   end
+
+  describe "a repeat quest's %{n}" do
+    test "is interpolated from the resolved counter, not left on the page" do
+      quest = %Quest{title: "Treasures x %{n}", description: "Find number %{n}.", counter: 3}
+
+      translated = ContentText.translate(quest)
+
+      assert translated.title == "Treasures x 3"
+      assert translated.description == "Find number 3."
+    end
+
+    test "reads as run 1 with no counter, rather than rendering the placeholder" do
+      quest = %Quest{title: "Treasures x %{n}", description: ""}
+
+      assert ContentText.translate(quest).title == "Treasures x 1"
+    end
+
+    test "never logs a missing binding" do
+      # The anonymous quest catalog pairs no progress row, so this used to log
+      # `missing Gettext bindings: [:n]` on every page view in a locale that
+      # had the string translated.
+      quest = %Quest{title: "Treasures x %{n}", description: "Find number %{n}."}
+
+      log = ExUnit.CaptureLog.capture_log(fn -> ContentText.translate(quest) end)
+
+      refute log =~ "missing Gettext bindings"
+    end
+  end
 end

@@ -23,6 +23,10 @@ defmodule GamendWeb.Endpoint do
     longpoll: [connect_info: [session: @session_options], log: false]
 
   plug GamendWeb.Plugs.AcmeChallenge
+  # After AcmeChallenge so certbot's HTTP-01 fetch is answered before any
+  # redirect can touch it; before everything else so a plain-HTTP request
+  # costs one 301 and nothing more.
+  plug GamendWeb.Plugs.ForceSSL
   plug GamendWeb.Plugs.IndexNowKey
   plug GamendWeb.Plugs.SecurityHeaders
   plug GamendWeb.Plugs.WellKnown

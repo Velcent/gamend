@@ -584,7 +584,6 @@ defmodule GamendWeb.HostRuntime do
         if check_origin == nil, do: cfg, else: Keyword.put(cfg, :check_origin, check_origin)
       end)
       |> put_https(setting)
-      |> put_force_ssl(setting)
 
     [
       # Expose these choices via application config so endpoint/plug can pick
@@ -610,8 +609,10 @@ defmodule GamendWeb.HostRuntime do
   # Native HTTPS in Phoenix/Bandit via GAMEND_TLS_CERTFILE / GAMEND_TLS_KEYFILE
   # (paths to fullchain.pem / privkey.pem). Erlang's :ssl reloads certificate
   # files from disk, so renewed certificates (e.g. from certbot) are picked up
-  # without restart. GAMEND_TLS_PORT sets the HTTPS port, GAMEND_TLS_FORCE
-  # redirects HTTP → HTTPS with HSTS.
+  # without restart. GAMEND_TLS_PORT sets the HTTPS port; GAMEND_TLS_FORCE is
+  # read per request by `GamendWeb.Plugs.ForceSSL`, not from here — Phoenix's
+  # `:force_ssl` endpoint option is compile-time only, so configuring it in
+  # this (runtime) file wrote a key nothing read and no redirect ever happened.
   defp put_https(endpoint_config, setting) do
     if ssl_files_ready?(setting) do
       https_opts = [
@@ -619,9 +620,24 @@ defmodule GamendWeb.HostRuntime do
         port: setting.(GamendWeb.Tls, :port),
         cipher_suite: :strong,
         certfile: setting.(GamendWeb.Tls, :certfile),
-        keyfile: setting.(GamendWeb.Tls, :keyfile)
-        # Suppress noisy TLS handshake notices from bots/scanners probing
-        # with old TLS versions or unsupported cipher suites.
+        keyfile: setting.(GamendWeb.Tls, :keyfile),
+        thousand_island_options: [
+          # A public listener spends its day being probed. Both of these are
+          # about connections that never became a request, and neither says
+          # anything about this server:
+          #
+          #   * `silent_terminate_on_error` — the acceptor process stops
+          #     without a crash report when the socket dies under it. The
+          #     common one is a browser sending `user_canceled` and hanging up,
+          #     which OTP reported as a `GenServer terminating` error complete
+          #     with a full socket dump. Requests that fail still log: Bandit
+          #     logs those itself, from a live connection.
+          #   * `log_level: :error` — :ssl logs a `notice` per rejected
+          #     handshake (SSLv2 hellos, unsupported groups, a plain-HTTP
+          #     request to 443). Errors still come through.
+          silent_terminate_on_error: true,
+          transport_options: [log_level: :error]
+        ]
       ]
 
       Keyword.put(endpoint_config, :https, https_opts)
@@ -660,29 +676,6 @@ defmodule GamendWeb.HostRuntime do
       cert_exists? and key_exists?
     else
       false
-    end
-  end
-
-  # Force SSL — redirect all HTTP to HTTPS and set the HSTS header. Only
-  # enabled when the operator asks for it; the ACME challenge path and
-  # health-check endpoint are excluded so certbot can complete HTTP-01
-  # validation and load balancers can probe.
-  defp put_force_ssl(endpoint_config, setting) do
-    if setting.(GamendWeb.Tls, :force) do
-      Keyword.put(endpoint_config, :force_ssl,
-        rewrite_on: [:x_forwarded_proto, :x_forwarded_port],
-        hsts: true,
-        expires: 31_536_000,
-        subdomains: true,
-        preload: true,
-        exclude: fn conn ->
-          conn.host in ["localhost", "127.0.0.1"] or
-            String.starts_with?(conn.request_path, "/.well-known/acme-challenge") or
-            conn.request_path == "/api/v1/health"
-        end
-      )
-    else
-      endpoint_config
     end
   end
 
