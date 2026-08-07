@@ -564,6 +564,184 @@ defmodule Gamend.QuestsTest do
                Quests.list_user_quests(user.id)
     end
 
+    test "a group lists as one entry and opens to its members" do
+      for {id, order} <- [{"es", 2}, {"ro", 1}, {"pl", 3}] do
+        create_quest(%{
+          key: "chart_#{id}",
+          group_key: "exploration",
+          sort_order: order,
+          objectives: [%{event: "city_visited", target: 5, params: %{"country" => id}}]
+        })
+      end
+
+      create_quest(%{key: "solo", objectives: [%{event: "other", target: 1}]})
+      user = user_fixture()
+
+      # One entry for the whole group, however many countries exist, plus the
+      # ungrouped quest untouched.
+      entries = Quests.list_user_quests(user.id)
+      assert length(entries) == 2
+      group = Enum.find(entries, &(&1.quest.group_key == "exploration"))
+      assert group.group_size == 3
+
+      # The representative is the one worth acting on, not whatever sorted first.
+      {:ok, _} = Quests.report_event(user.id, "city_visited", 3, %{"country" => "pl"})
+      group = Enum.find(Quests.list_user_quests(user.id), &(&1.quest.group_key == "exploration"))
+      assert group.quest.key == "chart_pl"
+      assert group.group_size == 3
+
+      # Opening it lists every member; the ungrouped quest still comes along.
+      opened = Quests.list_user_quests(user.id, group: "exploration")
+      assert length(opened) == 4
+      assert Enum.count(opened, &(&1.quest.group_key == "exploration")) == 3
+    end
+
+    test "a chain inside a group collapses as a chain first" do
+      create_quest(%{key: "t1", group_key: "g", objectives: [%{event: "e", target: 1}]})
+
+      create_quest(%{
+        key: "t2",
+        group_key: "g",
+        prerequisite_quest_key: "t1",
+        objectives: [%{event: "e", target: 2}]
+      })
+
+      create_quest(%{key: "solo", group_key: "g", objectives: [%{event: "f", target: 1}]})
+      user = user_fixture()
+
+      # The chain is one member, not two: t2 is not even reachable yet. So the
+      # group stands for 2 things (the chain and the solo quest), not 3.
+      [entry] = Quests.list_user_quests(user.id)
+      assert entry.group_size == 2
+
+      opened = Quests.list_user_quests(user.id, group: "g")
+      assert Enum.map(opened, & &1.quest.key) |> Enum.sort() == ["solo", "t1"]
+    end
+
+    test "group/2 returns every member with the viewer's progress" do
+      create_quest(%{
+        key: "g_a",
+        group_key: "g",
+        sort_order: 2,
+        objectives: [%{event: "e", target: 2}]
+      })
+
+      create_quest(%{
+        key: "g_b",
+        group_key: "g",
+        sort_order: 1,
+        objectives: [%{event: "f", target: 2}]
+      })
+
+      create_quest(%{key: "loose", objectives: [%{event: "e", target: 1}]})
+
+      user = user_fixture()
+      {:ok, _} = Quests.report_event(user.id, "e", 1)
+
+      members = Quests.group(user.id, "g")
+
+      # Every member, sort_order first, and only members.
+      assert Enum.map(members, & &1.quest.key) == ["g_b", "g_a"]
+
+      assert Enum.find(members, &(&1.quest.key == "g_a")).progress.objective_progress == %{
+               "0" => 1
+             }
+
+      assert Enum.find(members, &(&1.quest.key == "g_b")).progress == nil
+      assert Quests.group(user.id, "nope") == []
+    end
+
+    test "group/2 leaves out what the list would not show either" do
+      now = DateTime.utc_now(:second)
+
+      create_quest(%{key: "open", group_key: "g", objectives: [%{event: "e", target: 1}]})
+
+      create_quest(%{
+        key: "over",
+        group_key: "g",
+        ends_at: DateTime.add(now, -60, :second),
+        objectives: [%{event: "e", target: 1}]
+      })
+
+      create_quest(%{key: "gate", objectives: [%{event: "f", target: 1}]})
+
+      create_quest(%{
+        key: "locked",
+        group_key: "g",
+        prerequisite_quest_key: "gate",
+        objectives: [%{event: "e", target: 1}]
+      })
+
+      user = user_fixture()
+
+      # Otherwise the badge counts one thing and opening the card reveals three.
+      assert Enum.map(Quests.group(user.id, "g"), & &1.quest.key) == ["open"]
+
+      assert Enum.find(Quests.list_user_quests(user.id), &(&1.quest.group_key == "g")).group_size ==
+               1
+
+      {:ok, _} = Quests.report_event(user.id, "f", 1)
+      assert Enum.map(Quests.group(user.id, "g"), & &1.quest.key) == ["locked", "open"]
+    end
+
+    test "an opened group does not expand the other groups" do
+      create_quest(%{key: "a1", group_key: "a", objectives: [%{event: "e", target: 1}]})
+      create_quest(%{key: "a2", group_key: "a", objectives: [%{event: "e", target: 1}]})
+      create_quest(%{key: "b1", group_key: "b", objectives: [%{event: "f", target: 1}]})
+      create_quest(%{key: "b2", group_key: "b", objectives: [%{event: "f", target: 1}]})
+
+      user = user_fixture()
+      opened = Quests.list_user_quests(user.id, group: "a")
+
+      assert Enum.count(opened, &(&1.quest.group_key == "a")) == 2
+      assert Enum.count(opened, &(&1.quest.group_key == "b")) == 1
+    end
+
+    test "a chain longer than 20 tiers is still ONE chain, in order" do
+      # 52 course units chain end to end. A hop cap of 20 split them into three
+      # separate "chains" and sorted every tier past the cap equal.
+      for tier <- 1..52 do
+        create_quest(%{
+          key: "unit_#{tier}",
+          sort_order: tier,
+          prerequisite_quest_key: if(tier > 1, do: "unit_#{tier - 1}"),
+          objectives: [%{event: "mastered", target: 1, params: %{"unit" => tier}}]
+        })
+      end
+
+      user = user_fixture()
+
+      assert [%{quest: %{key: "unit_1"}}] = Quests.list_user_quests(user.id)
+
+      chain = Quests.chain(user.id, "unit_52")
+      assert length(chain) == 52
+      assert Enum.map(chain, & &1.tier) == Enum.to_list(1..52)
+      assert List.last(chain).quest.key == "unit_52"
+    end
+
+    test "a prerequisite cycle terminates instead of hanging" do
+      # The hop cap was really a cycle guard. Nothing stops an operator wiring
+      # A -> B -> A by hand, and an unbounded walk would spin forever.
+      create_quest(%{key: "loop_a", objectives: [%{event: "e", target: 1}]})
+
+      create_quest(%{
+        key: "loop_b",
+        prerequisite_quest_key: "loop_a",
+        objectives: [%{event: "e", target: 1}]
+      })
+
+      {:ok, a} =
+        Quests.get_quest_by_key("loop_a")
+        |> Quests.update_quest(%{prerequisite_quest_key: "loop_b"})
+
+      assert a.prerequisite_quest_key == "loop_b"
+
+      user = user_fixture()
+
+      assert is_list(Quests.list_user_quests(user.id))
+      assert is_list(Quests.chain(user.id, "loop_a"))
+    end
+
     test "a chain lists as one entry: the tier the player can act on" do
       create_quest(%{key: "first", objectives: [%{event: "win", target: 1}]})
 

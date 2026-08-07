@@ -90,6 +90,8 @@ signal group_chat_message_updated(message: Dictionary)
 signal group_chat_message_deleted(payload: Dictionary)
 
 ## Quest events (achievements are quests of kind "achievement")
+signal wallet_updated(change: Dictionary)     ## currency + balance + delta
+signal inventory_updated(change: Dictionary)  ## item + quantity + delta
 signal quest_progress(progress: Dictionary)   ## a quest objective advanced
 signal quest_completed(progress: Dictionary)  ## every objective met — claim or auto-claim next
 signal quest_claimed(progress: Dictionary)    ## the quest's rewards were granted
@@ -664,6 +666,12 @@ func _handle_user_event(event: String, payload: Dictionary):
 			user_updated.emit(payload)
 		"notification_created":
 			notification_emitted.emit(payload)
+		# Sent as JSON — neither has a protobuf mapping, so decode_event returns
+		# null for them and the raw payload arrives here unchanged.
+		"wallet_updated":
+			wallet_updated.emit(payload)
+		"inventory_updated":
+			inventory_updated.emit(payload)
 		"kv_updated":
 			kv_updated.emit(payload)
 		"kv_deleted":
@@ -1141,8 +1149,8 @@ func _kv_subscription_request_ws(event: String, key: String, user_id = null, lob
 ### QUESTS
 
 ## List my quests with progress and claimable flag (auth required)
-func quests_my_quests(kind = "", page = 1, page_size = 25) -> GamendResult:
-	return await _call_api(QuestsApi.new(_config), "my_quests", [kind, page, page_size])
+func quests_my_quests(kind = "", group = "", page = 1, page_size = 25) -> GamendResult:
+	return await _call_api(QuestsApi.new(_config), "my_quests", [kind, group, page, page_size])
 
 ## Claim a completed quest's rewards (auth required)
 func quests_claim_quest(key: String) -> GamendResult:

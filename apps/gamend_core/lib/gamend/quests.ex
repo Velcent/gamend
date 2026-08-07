@@ -339,6 +339,8 @@ defmodule Gamend.Quests do
     end)
   end
 
+  defp done_prerequisites(nil, _keys), do: MapSet.new()
+
   defp done_prerequisites(user_id, keys) do
     keys = keys |> Enum.reject(&is_nil/1) |> Enum.uniq()
 
@@ -991,6 +993,43 @@ defmodule Gamend.Quests do
     end
   end
 
+  @doc """
+  Every member of a group, with the viewer's progress — what a UI shows when the
+  player opens the one entry the group collapsed into.
+
+  Ordered by `sort_order` like any list; a group has no tiers, so unlike
+  `chain/2` there is nothing locked and nothing to number. Members the quest
+  list would not show this viewer (out of window, prerequisite unmet) are left
+  out too, so the count on the collapsed entry matches what opening it reveals.
+
+  Returns `[]` for a group key nothing carries.
+  """
+  @spec group(user_id() | nil, String.t()) ::
+          [%{quest: Quest.t(), progress: QuestProgress.t() | nil, claimable: boolean()}]
+  def group(user_id, group_key) when is_binary(group_key) and group_key != "" do
+    now = DateTime.utc_now(:second)
+
+    members =
+      Enum.filter(active_quests(), &(&1.group_key == group_key and within_window?(&1, now)))
+
+    done_prereqs = done_prerequisites(user_id, Enum.map(members, & &1.prerequisite_quest_key))
+    rows = chain_progress(user_id, members)
+
+    members
+    |> Enum.filter(&visible_to_user?(&1, nil, done_prereqs))
+    |> Enum.map(fn quest ->
+      progress = Map.get(rows, {quest.key, period_key(quest, now)})
+
+      %{
+        quest: resolve_counter(quest, progress),
+        progress: progress,
+        claimable: progress != nil and progress.status == "completed"
+      }
+    end)
+  end
+
+  def group(_user_id, _group_key), do: []
+
   # The chain's earlier tiers may sit in past periods for resetting quests, so
   # this reads each member's *current* period only — the same window the quest
   # list uses. `done_prerequisites/2` is deliberately not reused here: it spans
@@ -1007,34 +1046,45 @@ defmodule Gamend.Quests do
     |> Map.new(fn p -> {{p.quest_key, p.period_key}, p} end)
   end
 
-  defp walk_to_root(key, prereq_by_key, hops \\ 0)
-  defp walk_to_root(key, _prereq_by_key, hops) when hops >= 20, do: key
-
-  defp walk_to_root(key, prereq_by_key, hops) do
+  # Both walks stop on a key already seen, not at a hop count. A number cannot
+  # tell a cycle from a long chain: capped at 20, the 52 unit quests split into
+  # three "chains" and every tier past the cap sorted equal. A seen-set
+  # terminates on a real cycle and leaves an honest chain alone at any length.
+  defp walk_to_root(key, prereq_by_key, seen \\ MapSet.new()) do
     case Map.get(prereq_by_key, key) do
-      nil -> key
-      prereq -> walk_to_root(prereq, prereq_by_key, hops + 1)
+      nil ->
+        key
+
+      prereq ->
+        if MapSet.member?(seen, prereq),
+          do: key,
+          else: walk_to_root(prereq, prereq_by_key, MapSet.put(seen, key))
     end
   end
 
-  defp chain_hops(key, prereq_by_key, hops) when hops < 20 do
+  defp chain_hops(key, prereq_by_key, hops, seen \\ MapSet.new()) do
     case Map.get(prereq_by_key, key) do
-      nil -> hops
-      prereq -> chain_hops(prereq, prereq_by_key, hops + 1)
+      nil ->
+        hops
+
+      prereq ->
+        if MapSet.member?(seen, prereq),
+          do: hops,
+          else: chain_hops(prereq, prereq_by_key, hops + 1, MapSet.put(seen, key))
     end
   end
-
-  defp chain_hops(_key, _prereq_by_key, hops), do: hops
 
   @doc """
   Lists quests as seen by one user: active definitions in-window with the
   user's current-period progress and a claimable flag.
 
   Hidden quests are listed but carry no details until earned (callers obscure
-  them). Chain quests only appear once their prerequisite is met.
+  them). Chain quests only appear once their prerequisite is met. Grouped
+  quests collapse to one entry carrying `:group_size`.
 
   ## Options
   - `:category` — filter by category
+  - `:group` — expand this one group's members; every other group stays collapsed
   - `:status` — `"in_progress"` (not yet completed), `"claimable"`
     (completed, waiting to be claimed) or `"done"` (completed or claimed)
   - `:page` / `:page_size`
@@ -1133,8 +1183,48 @@ defmodule Gamend.Quests do
       visible_to_user?(quest, progress, done_prereqs)
     end)
     |> collapse_chains(prereq_by_key)
+    |> collapse_groups(Keyword.get(opts, :group))
     |> Enum.filter(&matches_status?(&1, status))
   end
+
+  # One entry per group, carrying `:group_size` so a UI can say "and 51 more".
+  # `opened` lists that one group's members in full; the rest stay collapsed
+  # behind the member worth acting on (claimable first, then furthest along).
+  defp collapse_groups(entries, opened) do
+    # First-appearance order, so a group lands where its best member sorted.
+    # chunk_by would only catch members sort_order happened to make adjacent.
+    members_by_key = Enum.group_by(entries, fn %{quest: q} -> q.group_key end)
+
+    entries
+    |> Enum.map(fn %{quest: q} -> q.group_key end)
+    |> Enum.uniq()
+    |> Enum.flat_map(fn
+      nil ->
+        Map.get(members_by_key, nil, [])
+
+      key ->
+        members = Map.fetch!(members_by_key, key)
+        size = length(members)
+
+        if key == opened do
+          Enum.map(members, &Map.put(&1, :group_size, size))
+        else
+          [Map.put(group_representative(members), :group_size, size)]
+        end
+    end)
+  end
+
+  defp group_representative(members) do
+    Enum.max_by(members, fn %{progress: progress, claimable: claimable} ->
+      {if(claimable, do: 1, else: 0), objective_total(progress)}
+    end)
+  end
+
+  defp objective_total(%QuestProgress{objective_progress: counts}) when is_map(counts) do
+    counts |> Map.values() |> Enum.filter(&is_integer/1) |> Enum.sum()
+  end
+
+  defp objective_total(_progress), do: 0
 
   # One entry per chain: the earliest tier the player can still act on — in
   # progress or completed-but-unclaimed. Only claiming advances the card to

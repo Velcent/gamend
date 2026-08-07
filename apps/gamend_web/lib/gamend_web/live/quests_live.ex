@@ -38,6 +38,7 @@ defmodule GamendWeb.QuestsLive do
       |> assign(:page, 1)
       |> assign(:page_size, @page_size)
       |> assign(:category, nil)
+      |> assign(:group, nil)
       |> assign(:status, nil)
       |> assign(:chain, nil)
       |> assign(:chain_focus, nil)
@@ -112,6 +113,17 @@ defmodule GamendWeb.QuestsLive do
   def handle_event("close_chain", _params, socket) do
     {:noreply, socket |> assign(:chain, nil) |> assign(:chain_focus, nil)}
   end
+
+  def handle_event("show_group", %{"group" => group_key}, socket) do
+    user = get_user(socket)
+
+    case Quests.group(user && user.id, group_key) do
+      [] -> {:noreply, socket}
+      members -> {:noreply, assign(socket, :group, ContentText.translate(members))}
+    end
+  end
+
+  def handle_event("close_group", _params, socket), do: {:noreply, assign(socket, :group, nil)}
 
   def handle_event("chain_noop", _params, socket), do: {:noreply, socket}
 
@@ -273,13 +285,31 @@ defmodule GamendWeb.QuestsLive do
           is_nil(q.prerequisite_quest_key)
       end)
 
+    collapsed = collapse_groups_for_catalog(visible)
+
     entries =
-      visible
+      collapsed
       |> Enum.drop((page - 1) * page_size)
       |> Enum.take(page_size)
-      |> Enum.map(fn quest -> %{quest: quest, progress: nil, claimable: false} end)
+      |> Enum.map(fn {quest, size} ->
+        %{quest: quest, progress: nil, claimable: false, group_size: size}
+      end)
 
-    {entries, length(visible)}
+    {entries, length(collapsed)}
+  end
+
+  # `{quest, group_size}` in first-appearance order. Nobody is signed in, so
+  # there is no progress to rank members by — the first one stands for the group.
+  defp collapse_groups_for_catalog(quests) do
+    by_key = Enum.group_by(quests, & &1.group_key)
+
+    quests
+    |> Enum.map(& &1.group_key)
+    |> Enum.uniq()
+    |> Enum.flat_map(fn
+      nil -> Enum.map(Map.get(by_key, nil, []), &{&1, 1})
+      key -> [{hd(Map.fetch!(by_key, key)), length(Map.fetch!(by_key, key))}]
+    end)
   end
 
   defp within_window?(quest, now) do
@@ -468,6 +498,7 @@ defmodule GamendWeb.QuestsLive do
               locale={@locale}
               now={@now}
               chain_position={@chain_positions[entry.quest.key]}
+              group_size={Map.get(entry, :group_size, 1)}
             />
           </div>
         <% end %>
@@ -487,6 +518,7 @@ defmodule GamendWeb.QuestsLive do
         </div>
 
         <.chain_modal :if={@chain} chain={@chain} focus={@chain_focus} locale={@locale} />
+        <.group_modal :if={@group} group={@group} />
       </div>
     </Layouts.app>
     """
@@ -530,7 +562,7 @@ defmodule GamendWeb.QuestsLive do
                   "flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold",
                   chain_tier_class(entry)
                 ]}>
-                  <%= if chain_done?(entry) do %>
+                  <%= if entry_done?(entry) do %>
                     <.icon name="hero-check" class="w-4 h-4" />
                   <% else %>
                     {entry.tier}
@@ -538,7 +570,7 @@ defmodule GamendWeb.QuestsLive do
                 </div>
                 <div class="min-w-0 flex-1">
                   <div class="font-medium text-sm truncate">
-                    {chain_title(entry)}
+                    {entry_title(entry)}
                   </div>
                   <div class="text-xs text-base-content/60">
                     {chain_status_label(entry)}
@@ -547,7 +579,7 @@ defmodule GamendWeb.QuestsLive do
                 <%!-- A secret tier must not leak its icon, so it keeps the
                       shared fallback. --%>
                 <.entity_icon
-                  icon_url={if chain_secret?(entry), do: nil, else: entry.quest.icon_url}
+                  icon_url={if entry_secret?(entry), do: nil, else: entry.quest.icon_url}
                   type={:quest}
                   class="w-6 h-6 flex-shrink-0"
                 />
@@ -560,29 +592,103 @@ defmodule GamendWeb.QuestsLive do
     """
   end
 
-  defp chain_done?(%{progress: progress}),
+  # The members behind the one entry a group collapses into. Flat, not a ladder:
+  # every member is live, so unlike the chain modal nothing is numbered or
+  # locked. Hidden members keep their teaser here too.
+  attr :group, :list, required: true
+
+  defp group_modal(assigns) do
+    ~H"""
+    <div
+      class="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4"
+      phx-click="close_group"
+    >
+      <div
+        class="card bg-base-100 shadow-xl w-full max-w-md max-h-[80vh] overflow-y-auto"
+        phx-click="chain_noop"
+      >
+        <div class="card-body p-5">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="font-bold text-lg flex items-center gap-2">
+              <.icon name="hero-rectangle-stack" class="w-5 h-5" />
+              {group_modal_title(@group)}
+            </h3>
+            <button phx-click="close_group" class="btn btn-ghost btn-sm btn-circle" type="button">
+              <.icon name="hero-x-mark" class="w-4 h-4" />
+            </button>
+          </div>
+
+          <ul class="space-y-1">
+            <li :for={entry <- @group} class="flex items-center gap-3 rounded-lg p-2">
+              <.entity_icon
+                icon_url={if entry_secret?(entry), do: nil, else: entry.quest.icon_url}
+                type={:quest}
+                class="w-6 h-6 flex-shrink-0"
+              />
+              <div class="min-w-0 flex-1">
+                <div class="font-medium text-sm truncate">{entry_title(entry)}</div>
+                <div class="text-xs text-base-content/60">{entry_status_label(entry)}</div>
+              </div>
+              <span class="text-xs text-base-content/60 text-nowrap">
+                {group_member_counts(entry)}
+              </span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  defp group_modal_title([%{quest: %Quest{group_title: title}} | _]) when is_binary(title),
+    do: title
+
+  defp group_modal_title(_group), do: gettext("Quests")
+
+  # "12 / 250" for the one objective these carry. A member with several would
+  # need the card's own breakdown, so it gets no summary rather than a wrong one.
+  defp group_member_counts(%{quest: %Quest{objectives: [objective]}, progress: progress} = entry) do
+    if entry_secret?(entry) do
+      ""
+    else
+      done =
+        case progress do
+          %{objective_progress: counts} when is_map(counts) -> Map.get(counts, "0", 0)
+          _ -> 0
+        end
+
+      "#{done} / #{objective.target}"
+    end
+  end
+
+  defp group_member_counts(_entry), do: ""
+
+  defp entry_done?(%{progress: progress}),
     do: progress != nil and progress.status in ["completed", "claimed"]
 
-  defp chain_secret?(entry), do: entry.quest.hidden and not chain_done?(entry)
+  defp entry_secret?(entry), do: entry.quest.hidden and not entry_done?(entry)
 
-  defp chain_title(entry) do
-    if chain_secret?(entry), do: "???", else: entry.quest.title
+  defp entry_title(entry) do
+    if entry_secret?(entry), do: "???", else: entry.quest.title
   end
 
   defp chain_tier_class(entry) do
     cond do
-      chain_done?(entry) -> "bg-success/20 text-success"
+      entry_done?(entry) -> "bg-success/20 text-success"
       entry.locked -> "bg-base-300 text-base-content/40"
       true -> "bg-primary/20 text-primary"
     end
   end
 
-  defp chain_status_label(entry) do
+  # Only chain entries carry `:locked` — a tier waiting on the one before it.
+  defp chain_status_label(%{locked: true}), do: gettext("Locked")
+  defp chain_status_label(entry), do: entry_status_label(entry)
+
+  defp entry_status_label(entry) do
     cond do
       entry.progress != nil and entry.progress.status == "claimed" -> gettext("Claimed")
       entry.claimable -> gettext("Ready to claim")
-      chain_done?(entry) -> gettext("Completed")
-      entry.locked -> gettext("Locked")
+      entry_done?(entry) -> gettext("Completed")
       entry.progress != nil -> gettext("In progress")
       true -> gettext("Not started")
     end
@@ -601,6 +707,9 @@ defmodule GamendWeb.QuestsLive do
     # Hidden quests stay teasers until earned, the way achievements did.
     secret? = quest.hidden and not done?
     left = time_left(quest, assigns.now)
+    # A card standing for more than itself is the group, not the member picked to
+    # represent it, so it takes the group's name and opens the whole list.
+    grouped? = is_binary(quest.group_key) and assigns.group_size > 1
 
     assigns =
       assigns
@@ -612,7 +721,15 @@ defmodule GamendWeb.QuestsLive do
       |> assign(:left, left)
       |> assign(:secret?, secret?)
       |> assign(:objective_rows, if(secret?, do: [], else: objective_rows(quest, progress)))
-      |> assign(:localized_title, if(secret?, do: "???", else: quest.title))
+      |> assign(:grouped?, grouped?)
+      |> assign(
+        :localized_title,
+        cond do
+          grouped? -> quest.group_title || quest.title
+          secret? -> "???"
+          true -> quest.title
+        end
+      )
       |> assign(
         :localized_desc,
         if(secret?, do: gettext("Hidden"), else: quest.description)
@@ -625,15 +742,16 @@ defmodule GamendWeb.QuestsLive do
       type={:quest}
       description={@localized_desc}
       class={[
-        @chain_position && "cursor-pointer",
+        (@chain_position || @grouped?) && "cursor-pointer",
         cond do
           @claimable -> "border border-success"
           @done? -> "border border-success/30"
           true -> ""
         end
       ]}
-      phx-click={@chain_position && "show_chain"}
-      phx-value-key={@chain_position && @quest.key}
+      phx-click={(@grouped? && "show_group") || (@chain_position && "show_chain")}
+      phx-value-group={@grouped? && @quest.group_key}
+      phx-value-key={not @grouped? && @chain_position && @quest.key}
     >
       <:badges>
         <%!-- Progress is a property of the viewer, not the quest, so a
@@ -652,12 +770,20 @@ defmodule GamendWeb.QuestsLive do
           {reset_label(@quest)}
         </span>
         <span
-          :if={@chain_position}
+          :if={@chain_position && not @grouped?}
           class="badge badge-ghost badge-sm gap-0.5 text-nowrap"
           title={gettext("View quest chain")}
         >
           <.icon name="hero-link" class="w-3 h-3" />
           {elem(@chain_position, 0)}/{elem(@chain_position, 1)}
+        </span>
+        <span
+          :if={@grouped?}
+          class="badge badge-ghost badge-sm gap-0.5 text-nowrap"
+          title={gettext("View every quest in this group")}
+        >
+          <.icon name="hero-rectangle-stack" class="w-3 h-3" />
+          {@group_size}
         </span>
       </:badges>
 

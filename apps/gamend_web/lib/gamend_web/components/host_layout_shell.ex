@@ -66,11 +66,9 @@ defmodule GamendWeb.HostLayoutShell do
             <% end %>
           </a>
         </div>
-        <%!-- The picker and the toggle sit outside both navs so each renders
-              once: the locale list is 13 KB, and a copy per layout was a third
-              of the document. It also means one control with one behaviour at
-              every width, rather than a dropdown on desktop and something else
-              inside the phone menu. --%>
+        <%!-- The language picker sits outside both navs: one button in the bar
+              at every width, rather than a dropdown up here and a different
+              control buried in the phone menu. --%>
         <div class="flex-none flex items-center gap-2">
           <GamendWeb.HostLayoutNavigation.desktop_nav
             current_scope={@current_scope}
@@ -101,6 +99,18 @@ defmodule GamendWeb.HostLayoutShell do
           />
         </div>
       </header>
+
+      <%!-- Outside `<header>` on purpose: the sheet is `position: fixed`, and
+            the header's `backdrop-blur` makes it a containing block for fixed
+            descendants — inside it, the sheet pins to the header's box and
+            opens above the fold instead of along the bottom of the screen. --%>
+      <GamendWeb.HostLayoutNavigation.language_modal
+        :if={length(@known_locales) > 1}
+        locale={@locale}
+        current_path={@current_path}
+        current_query={@current_query}
+        known_locales={@known_locales}
+      />
 
       <%= if @flush do %>
         <div class="flex-1 min-h-0 relative">

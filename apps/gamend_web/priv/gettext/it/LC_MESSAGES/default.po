@@ -11,7 +11,7 @@ msgstr ""
 "Language: it\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: lib/gamend_web/components/core_components.ex:505
+#: lib/gamend_web/components/core_components.ex:544
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:244
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:759
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:803
@@ -38,8 +38,8 @@ msgstr "Classifiche"
 #: lib/gamend_web/live/auth_success_live.ex:30
 #: lib/gamend_web/live/auth_success_live.ex:42
 #: lib/gamend_web/live/auth_success_live.ex:52
-#: lib/gamend_web/live/groups_live.ex:539
-#: lib/gamend_web/live/groups_live.ex:713
+#: lib/gamend_web/live/groups_live.ex:542
+#: lib/gamend_web/live/groups_live.ex:717
 #: lib/gamend_web/live/tournaments_live.ex:728
 #: lib/gamend_web/live/user_live/confirmation.ex:56
 #: lib/gamend_web/live/user_live/confirmation.ex:71
@@ -61,13 +61,13 @@ msgstr "Accedi"
 msgid "Password"
 msgstr "Password"
 
-#: lib/gamend_web/components/core_components.ex:371
+#: lib/gamend_web/components/core_components.ex:410
 #: lib/gamend_web/live/user_live/login.ex:61
 #, elixir-autogen, elixir-format
 msgid "or"
 msgstr "oppure"
 
-#: lib/gamend_web/live/groups_live.ex:639
+#: lib/gamend_web/live/groups_live.ex:643
 #, elixir-autogen, elixir-format
 msgid "Admin"
 msgstr "Admin"
@@ -88,9 +88,9 @@ msgid "Accept"
 msgstr "Accetta"
 
 #: lib/gamend_web/live/admin_live/chat_reports.ex:403
-#: lib/gamend_web/live/groups_live.ex:420
-#: lib/gamend_web/live/quests_live.ex:278
-#: lib/gamend_web/live/quests_live.ex:321
+#: lib/gamend_web/live/groups_live.ex:423
+#: lib/gamend_web/live/quests_live.ex:320
+#: lib/gamend_web/live/quests_live.ex:363
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:597
 #, elixir-autogen, elixir-format
 msgid "All"
@@ -106,7 +106,7 @@ msgstr "Applica"
 msgid "Approve"
 msgstr "Approva"
 
-#: lib/gamend_web/live/groups_live.ex:550
+#: lib/gamend_web/live/groups_live.ex:553
 #: lib/gamend_web/live/leaderboards_live.ex:192
 #: lib/gamend_web/live/tournaments_live.ex:507
 #: lib/gamend_web/live/tournaments_live.ex:775
@@ -125,7 +125,7 @@ msgstr "Blocca"
 #: lib/gamend_web/live/admin_live/chat_reports.ex:644
 #: lib/gamend_web/live/admin_live/lobbies.ex:372
 #: lib/gamend_web/live/admin_live/matchmaking.ex:241
-#: lib/gamend_web/live/chat_live.ex:270
+#: lib/gamend_web/live/chat_live.ex:277
 #: lib/gamend_web/live/lobby_live/index.ex:760
 #: lib/gamend_web/live/user_live/settings/friends_tab.ex:113
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:74
@@ -143,7 +143,7 @@ msgstr "Annulla"
 msgid "Clear"
 msgstr "Pulisci"
 
-#: lib/gamend_web/components/core_components.ex:79
+#: lib/gamend_web/components/core_components.ex:118
 #: lib/gamend_web/live/lobby_live/index.ex:816
 #: lib/gamend_web/live/lobby_live/index.ex:886
 #, elixir-autogen, elixir-format
@@ -174,7 +174,7 @@ msgstr "Contenuto"
 msgid "Create"
 msgstr "Crea"
 
-#: lib/gamend_web/live/groups_live.ex:442
+#: lib/gamend_web/live/groups_live.ex:445
 #: lib/gamend_web/live/notifications_live.ex:44
 #: lib/gamend_web/live/user_live/settings/data_tab.ex:72
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:198
@@ -188,8 +188,8 @@ msgstr "Data"
 
 #: lib/gamend_web/controllers/page_controller.ex:22
 #: lib/gamend_web/live/admin_live/chat_filter.ex:569
-#: lib/gamend_web/live/chat_live.ex:296
-#: lib/gamend_web/live/chat_live.ex:298
+#: lib/gamend_web/live/chat_live.ex:303
+#: lib/gamend_web/live/chat_live.ex:305
 #: lib/gamend_web/live/notifications_live.ex:30
 #: lib/gamend_web/live/notifications_live.ex:91
 #: lib/gamend_web/live/user_live/settings.ex:77
@@ -223,10 +223,10 @@ msgstr "Da"
 msgid "Group"
 msgstr "Gruppo"
 
-#: lib/gamend_web/live/chat_live.ex:163
-#: lib/gamend_web/live/groups_live.ex:44
-#: lib/gamend_web/live/groups_live.ex:94
-#: lib/gamend_web/live/groups_live.ex:390
+#: lib/gamend_web/live/chat_live.ex:170
+#: lib/gamend_web/live/groups_live.ex:47
+#: lib/gamend_web/live/groups_live.ex:97
+#: lib/gamend_web/live/groups_live.ex:393
 #: lib/gamend_web/live/user_live/settings.ex:92
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:58
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:478
@@ -235,7 +235,7 @@ msgid "Groups"
 msgstr "Gruppi"
 
 #: lib/gamend_web/live/lobby_live/index.ex:800
-#: lib/gamend_web/live/quests_live.ex:606
+#: lib/gamend_web/live/quests_live.ex:735
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:111
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:154
 #, elixir-autogen, elixir-format
@@ -257,8 +257,8 @@ msgstr "ID"
 msgid "Invite"
 msgstr "Invita"
 
-#: lib/gamend_web/live/groups_live.ex:525
-#: lib/gamend_web/live/groups_live.ex:698
+#: lib/gamend_web/live/groups_live.ex:528
+#: lib/gamend_web/live/groups_live.ex:702
 #: lib/gamend_web/live/lobby_live/index.ex:726
 #: lib/gamend_web/live/lobby_live/index.ex:738
 #: lib/gamend_web/live/tournaments_live.ex:740
@@ -267,8 +267,8 @@ msgstr "Invita"
 msgid "Join"
 msgstr "Unisciti"
 
-#: lib/gamend_web/live/groups_live.ex:169
-#: lib/gamend_web/live/groups_live.ex:196
+#: lib/gamend_web/live/groups_live.ex:172
+#: lib/gamend_web/live/groups_live.ex:199
 #: lib/gamend_web/live/lobby_live/index.ex:425
 #: lib/gamend_web/live/lobby_live/index.ex:664
 #: lib/gamend_web/live/tournaments_live.ex:116
@@ -284,7 +284,7 @@ msgstr "Iscritto"
 msgid "Kick"
 msgstr "Espelli"
 
-#: lib/gamend_web/live/groups_live.ex:687
+#: lib/gamend_web/live/groups_live.ex:691
 #: lib/gamend_web/live/lobby_live/index.ex:841
 #: lib/gamend_web/live/lobby_live/index.ex:877
 #: lib/gamend_web/live/tournaments_live.ex:734
@@ -297,21 +297,21 @@ msgstr "Esci"
 #: lib/gamend_web/live/lobby_live/index.ex:719
 #: lib/gamend_web/live/lobby_live/index.ex:731
 #: lib/gamend_web/live/lobby_live/index.ex:791
-#: lib/gamend_web/live/quests_live.ex:573
+#: lib/gamend_web/live/quests_live.ex:684
 #, elixir-autogen, elixir-format
 msgid "Locked"
 msgstr "Bloccato"
 
-#: lib/gamend_web/live/groups_live.ex:516
-#: lib/gamend_web/live/groups_live.ex:641
+#: lib/gamend_web/live/groups_live.ex:519
+#: lib/gamend_web/live/groups_live.ex:645
 #, elixir-autogen, elixir-format
 msgid "Member"
 msgstr "Membro"
 
-#: lib/gamend_web/live/groups_live.ex:445
-#: lib/gamend_web/live/groups_live.ex:485
-#: lib/gamend_web/live/groups_live.ex:584
-#: lib/gamend_web/live/groups_live.ex:598
+#: lib/gamend_web/live/groups_live.ex:448
+#: lib/gamend_web/live/groups_live.ex:488
+#: lib/gamend_web/live/groups_live.ex:587
+#: lib/gamend_web/live/groups_live.ex:601
 #: lib/gamend_web/live/lobby_live/index.ex:823
 #: lib/gamend_web/live/lobby_live/index.ex:861
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:117
@@ -324,8 +324,8 @@ msgstr "Membro"
 msgid "Members"
 msgstr "Membri"
 
-#: lib/gamend_web/live/groups_live.ex:444
-#: lib/gamend_web/live/groups_live.ex:620
+#: lib/gamend_web/live/groups_live.ex:447
+#: lib/gamend_web/live/groups_live.ex:623
 #: lib/gamend_web/live/leaderboards_live.ex:306
 #: lib/gamend_web/live/tournaments_live.ex:654
 #: lib/gamend_web/live/user_live/settings/account_tab.ex:118
@@ -339,26 +339,26 @@ msgstr "Membri"
 msgid "Name"
 msgstr "Nome"
 
-#: lib/gamend_web/live/groups_live.ex:443
+#: lib/gamend_web/live/groups_live.ex:446
 #, elixir-autogen, elixir-format
 msgid "Newest"
 msgstr "Più recenti"
 
-#: lib/gamend_web/components/core_components.ex:893
+#: lib/gamend_web/components/core_components.ex:932
 #: lib/gamend_web/live/lobby_live/index.ex:654
 #, elixir-autogen, elixir-format
 msgid "Next"
 msgstr "Successivo"
 
-#: lib/gamend_web/components/core_components.ex:879
+#: lib/gamend_web/components/core_components.ex:918
 #: lib/gamend_web/live/lobby_live/index.ex:644
 #, elixir-autogen, elixir-format
 msgid "Prev"
 msgstr "Indietro"
 
-#: lib/gamend_web/live/groups_live.ex:422
-#: lib/gamend_web/live/groups_live.ex:475
-#: lib/gamend_web/live/groups_live.ex:565
+#: lib/gamend_web/live/groups_live.ex:425
+#: lib/gamend_web/live/groups_live.ex:478
+#: lib/gamend_web/live/groups_live.ex:568
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:110
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:153
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:599
@@ -371,9 +371,9 @@ msgstr "Privato"
 msgid "Promote"
 msgstr "Promuovi"
 
-#: lib/gamend_web/live/groups_live.ex:421
-#: lib/gamend_web/live/groups_live.ex:473
-#: lib/gamend_web/live/groups_live.ex:563
+#: lib/gamend_web/live/groups_live.ex:424
+#: lib/gamend_web/live/groups_live.ex:476
+#: lib/gamend_web/live/groups_live.ex:566
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:109
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:152
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:598
@@ -395,8 +395,8 @@ msgstr "Rifiuta"
 msgid "Remove"
 msgstr "Rimuovi"
 
-#: lib/gamend_web/live/groups_live.ex:533
-#: lib/gamend_web/live/groups_live.ex:707
+#: lib/gamend_web/live/groups_live.ex:536
+#: lib/gamend_web/live/groups_live.ex:711
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:329
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:481
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:669
@@ -405,7 +405,7 @@ msgstr "Rimuovi"
 msgid "Request"
 msgstr "Richiesta"
 
-#: lib/gamend_web/live/groups_live.ex:621
+#: lib/gamend_web/live/groups_live.ex:624
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:203
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:241
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:513
@@ -414,7 +414,7 @@ msgid "Role"
 msgstr "Ruolo"
 
 #: lib/gamend_web/live/admin_live/chat_mutes.ex:596
-#: lib/gamend_web/live/chat_live.ex:267
+#: lib/gamend_web/live/chat_live.ex:274
 #: lib/gamend_web/live/lobby_live/index.ex:809
 #: lib/gamend_web/live/user_live/settings/account_tab.ex:105
 #: lib/gamend_web/live/user_live/settings/account_tab.ex:122
@@ -432,8 +432,8 @@ msgstr "Salva"
 msgid "Saving..."
 msgstr "Salvataggio..."
 
-#: lib/gamend_web/live/chat_live.ex:325
-#: lib/gamend_web/live/chat_live.ex:330
+#: lib/gamend_web/live/chat_live.ex:332
+#: lib/gamend_web/live/chat_live.ex:337
 #: lib/gamend_web/live/user_live/settings/friends_tab.ex:246
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:483
 #, elixir-autogen, elixir-format
@@ -442,8 +442,8 @@ msgstr "Invia"
 
 #: lib/gamend_web/live/admin_live/chat_reports.ex:430
 #: lib/gamend_web/live/admin_live/matchmaking.ex:220
-#: lib/gamend_web/live/groups_live.ex:438
-#: lib/gamend_web/live/quests_live.ex:714
+#: lib/gamend_web/live/groups_live.ex:441
+#: lib/gamend_web/live/quests_live.ex:852
 #: lib/gamend_web/live/store_live/index.ex:130
 #: lib/gamend_web/live/user_live/settings/devices_tab.ex:48
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:757
@@ -494,7 +494,7 @@ msgstr "Sblocca"
 msgid "View"
 msgstr "Visualizza"
 
-#: lib/gamend_web/live/chat_live.ex:241
+#: lib/gamend_web/live/chat_live.ex:248
 #: lib/gamend_web/live/leaderboards_live.ex:338
 #: lib/gamend_web/live/tournaments_live.ex:673
 #: lib/gamend_web/live/tournaments_live.ex:737
@@ -504,7 +504,7 @@ msgstr "Visualizza"
 msgid "You"
 msgstr "Tu"
 
-#: lib/gamend_web/live/groups_live.ex:410
+#: lib/gamend_web/live/groups_live.ex:413
 #: lib/gamend_web/live/user_live/settings/data_tab.ex:46
 #: lib/gamend_web/live/user_live/settings/friends_tab.ex:220
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:372
@@ -514,7 +514,7 @@ msgstr "Tu"
 msgid "Search..."
 msgstr "Cerca..."
 
-#: lib/gamend_web/live/chat_live.ex:247
+#: lib/gamend_web/live/chat_live.ex:254
 #, elixir-autogen, elixir-format
 msgid "(edited)"
 msgstr "(modificato)"
@@ -528,7 +528,7 @@ msgstr "(modificato)"
 msgid "Account"
 msgstr "Account"
 
-#: lib/gamend_web/live/chat_live.ex:124
+#: lib/gamend_web/live/chat_live.ex:130
 #: lib/gamend_web/live/notifications_live.ex:67
 #, elixir-autogen, elixir-format
 msgid "Chat"
@@ -541,15 +541,15 @@ msgstr "Rifiuta"
 
 #: lib/gamend_web/live/admin_live/chat_filter.ex:561
 #: lib/gamend_web/live/admin_live/chat_mutes.ex:499
-#: lib/gamend_web/live/chat_live.ex:287
-#: lib/gamend_web/live/chat_live.ex:289
+#: lib/gamend_web/live/chat_live.ex:294
+#: lib/gamend_web/live/chat_live.ex:296
 #: lib/gamend_web/live/lobby_live/index.ex:698
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:217
 #, elixir-autogen, elixir-format
 msgid "Edit"
 msgstr "Modifica"
 
-#: lib/gamend_web/live/chat_live.ex:133
+#: lib/gamend_web/live/chat_live.ex:139
 #: lib/gamend_web/live/user_live/settings.ex:91
 #: lib/gamend_web/live/user_live/settings/friends_tab.ex:45
 #: lib/gamend_web/live/user_live/settings/friends_tab.ex:130
@@ -569,8 +569,8 @@ msgstr "Home"
 msgid "Notifications"
 msgstr "Notifiche"
 
-#: lib/gamend_web/live/chat_live.ex:336
-#: lib/gamend_web/live/chat_live.ex:337
+#: lib/gamend_web/live/chat_live.ex:343
+#: lib/gamend_web/live/chat_live.ex:344
 #, elixir-autogen, elixir-format
 msgid "Select a conversation"
 msgstr "Seleziona una conversazione"
@@ -581,7 +581,7 @@ msgstr "Seleziona una conversazione"
 msgid "Newer"
 msgstr "Più recenti"
 
-#: lib/gamend_web/live/chat_live.ex:220
+#: lib/gamend_web/live/chat_live.ex:227
 #: lib/gamend_web/live/leaderboards_live.ex:235
 #: lib/gamend_web/live/tournaments_live.ex:548
 #, elixir-autogen, elixir-format
@@ -604,9 +604,9 @@ msgstr "Caricamento..."
 
 #: lib/gamend_web/live/auth_success_live.ex:76
 #: lib/gamend_web/live/auth_success_live.ex:190
-#: lib/gamend_web/live/chat_live.ex:79
-#: lib/gamend_web/live/chat_live.ex:109
-#: lib/gamend_web/live/groups_live.ex:76
+#: lib/gamend_web/live/chat_live.ex:85
+#: lib/gamend_web/live/chat_live.ex:115
+#: lib/gamend_web/live/groups_live.ex:79
 #: lib/gamend_web/live/leaderboards_live.ex:47
 #: lib/gamend_web/live/leaderboards_live.ex:79
 #: lib/gamend_web/live/lobby_live/index.ex:139
@@ -631,7 +631,7 @@ msgstr "Non trovato"
 #: lib/gamend_web/live/auth_success_live.ex:70
 #: lib/gamend_web/live/auth_success_live.ex:98
 #: lib/gamend_web/live/auth_success_live.ex:102
-#: lib/gamend_web/live/groups_live.ex:294
+#: lib/gamend_web/live/groups_live.ex:297
 #: lib/gamend_web/live/lobby_live/index.ex:266
 #: lib/gamend_web/live/notifications_live.ex:166
 #: lib/gamend_web/live/notifications_live.ex:181
@@ -663,12 +663,12 @@ msgstr "Fatto."
 msgid "Cancel?"
 msgstr "Annullare?"
 
-#: lib/gamend_web/live/chat_live.ex:454
+#: lib/gamend_web/live/chat_live.ex:461
 #, elixir-autogen, elixir-format
 msgid "Cannot be empty."
 msgstr "Non può essere vuoto."
 
-#: lib/gamend_web/live/chat_live.ex:294
+#: lib/gamend_web/live/chat_live.ex:301
 #: lib/gamend_web/live/notifications_live.ex:27
 #: lib/gamend_web/live/user_live/settings.ex:75
 #: lib/gamend_web/live/user_live/settings/account_tab.ex:257
@@ -677,14 +677,14 @@ msgstr "Non può essere vuoto."
 msgid "Delete?"
 msgstr "Eliminare?"
 
-#: lib/gamend_web/live/chat_live.ex:136
-#: lib/gamend_web/live/chat_live.ex:166
-#: lib/gamend_web/live/chat_live.ex:226
-#: lib/gamend_web/live/groups_live.ex:493
-#: lib/gamend_web/live/groups_live.ex:651
+#: lib/gamend_web/live/chat_live.ex:142
+#: lib/gamend_web/live/chat_live.ex:173
+#: lib/gamend_web/live/chat_live.ex:233
+#: lib/gamend_web/live/groups_live.ex:496
+#: lib/gamend_web/live/groups_live.ex:655
 #: lib/gamend_web/live/leaderboards_live.ex:169
 #: lib/gamend_web/live/leaderboards_live.ex:352
-#: lib/gamend_web/live/quests_live.ex:447
+#: lib/gamend_web/live/quests_live.ex:489
 #: lib/gamend_web/live/tournaments_live.ex:484
 #: lib/gamend_web/live/tournaments_live.ex:701
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:208
@@ -732,12 +732,12 @@ msgstr "Aperto"
 #: lib/gamend_web/live/auth_success_live.ex:161
 #: lib/gamend_web/live/auth_success_live.ex:164
 #: lib/gamend_web/live/auth_success_live.ex:194
-#: lib/gamend_web/live/chat_live.ex:382
-#: lib/gamend_web/live/chat_live.ex:385
-#: lib/gamend_web/live/chat_live.ex:478
-#: lib/gamend_web/live/groups_live.ex:172
-#: lib/gamend_web/live/groups_live.ex:206
-#: lib/gamend_web/live/groups_live.ex:297
+#: lib/gamend_web/live/chat_live.ex:389
+#: lib/gamend_web/live/chat_live.ex:392
+#: lib/gamend_web/live/chat_live.ex:485
+#: lib/gamend_web/live/groups_live.ex:175
+#: lib/gamend_web/live/groups_live.ex:209
+#: lib/gamend_web/live/groups_live.ex:300
 #: lib/gamend_web/live/lobby_live/index.ex:76
 #: lib/gamend_web/live/lobby_live/index.ex:119
 #: lib/gamend_web/live/lobby_live/index.ex:162
@@ -792,15 +792,15 @@ msgstr "Non riuscito"
 msgid "Your account is pending activation."
 msgstr "Il tuo account è in attesa di attivazione."
 
-#: lib/gamend_web/live/quests_live.ex:322
+#: lib/gamend_web/live/quests_live.ex:364
 #, elixir-autogen, elixir-format
 msgid "In Progress"
 msgstr "In corso"
 
 #: lib/gamend_web/live/admin_live/matchmaking.ex:212
-#: lib/gamend_web/live/groups_live.ex:199
-#: lib/gamend_web/live/groups_live.ex:518
-#: lib/gamend_web/live/groups_live.ex:690
+#: lib/gamend_web/live/groups_live.ex:202
+#: lib/gamend_web/live/groups_live.ex:521
+#: lib/gamend_web/live/groups_live.ex:694
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:653
 #, elixir-autogen, elixir-format
 msgid "Pending"
@@ -1338,7 +1338,7 @@ msgstr "Registrato"
 msgid "Result"
 msgstr "Risultato"
 
-#: lib/gamend_web/live/groups_live.ex:609
+#: lib/gamend_web/live/groups_live.ex:612
 #: lib/gamend_web/live/leaderboards_live.ex:294
 #: lib/gamend_web/live/tournaments_live.ex:642
 #, elixir-autogen, elixir-format
@@ -1437,7 +1437,7 @@ msgstr "Oggetto"
 msgid "Items"
 msgstr "Oggetti"
 
-#: lib/gamend_web/live/groups_live.ex:679
+#: lib/gamend_web/live/groups_live.ex:683
 #, elixir-autogen, elixir-format
 msgid "Open chat"
 msgstr "Apri chat"
@@ -1479,87 +1479,88 @@ msgstr "Transazioni"
 msgid "Wallet"
 msgstr "Portafoglio"
 
-#: lib/gamend_web/live/quests_live.ex:89
+#: lib/gamend_web/live/quests_live.ex:90
 #, elixir-autogen, elixir-format
 msgid "Already claimed."
 msgstr "Già riscosso."
 
-#: lib/gamend_web/live/quests_live.ex:694
+#: lib/gamend_web/live/quests_live.ex:832
 #, elixir-autogen, elixir-format
 msgid "Claim"
 msgstr "Riscuoti"
 
-#: lib/gamend_web/live/quests_live.ex:323
+#: lib/gamend_web/live/quests_live.ex:365
 #, elixir-autogen, elixir-format
 msgid "Claimable"
 msgstr "Da riscuotere"
 
-#: lib/gamend_web/live/quests_live.ex:299
-#: lib/gamend_web/live/quests_live.ex:570
-#: lib/gamend_web/live/quests_live.ex:700
+#: lib/gamend_web/live/quests_live.ex:341
+#: lib/gamend_web/live/quests_live.ex:689
+#: lib/gamend_web/live/quests_live.ex:838
 #: lib/gamend_web/live/stats_live.ex:120
 #, elixir-autogen, elixir-format
 msgid "Claimed"
 msgstr "Riscosso"
 
-#: lib/gamend_web/live/quests_live.ex:300
-#: lib/gamend_web/live/quests_live.ex:324
-#: lib/gamend_web/live/quests_live.ex:572
-#: lib/gamend_web/live/quests_live.ex:709
+#: lib/gamend_web/live/quests_live.ex:342
+#: lib/gamend_web/live/quests_live.ex:366
+#: lib/gamend_web/live/quests_live.ex:691
+#: lib/gamend_web/live/quests_live.ex:847
 #: lib/gamend_web/live/stats_live.ex:119
 #, elixir-autogen, elixir-format
 msgid "Completed"
 msgstr "Completato"
 
-#: lib/gamend_web/live/quests_live.ex:92
+#: lib/gamend_web/live/quests_live.ex:93
 #, elixir-autogen, elixir-format
 msgid "Could not claim this quest."
 msgstr "Impossibile riscuotere questa missione."
 
-#: lib/gamend_web/live/quests_live.ex:312
+#: lib/gamend_web/live/quests_live.ex:354
 #, elixir-autogen, elixir-format
 msgid "Daily"
 msgstr "Giornaliere"
 
-#: lib/gamend_web/live/quests_live.ex:675
+#: lib/gamend_web/live/quests_live.ex:813
 #, elixir-autogen, elixir-format
 msgid "Ends in %{time}"
 msgstr "Termina tra %{time}"
 
 #: lib/gamend_web/live/quests_live.ex:37
-#: lib/gamend_web/live/quests_live.ex:396
+#: lib/gamend_web/live/quests_live.ex:438
+#: lib/gamend_web/live/quests_live.ex:646
 #: lib/gamend_web/live/stats_live.ex:116
 #: lib/gamend_web/live/stats_live.ex:118
 #, elixir-autogen, elixir-format
 msgid "Quests"
 msgstr "Missioni"
 
-#: lib/gamend_web/live/quests_live.ex:677
+#: lib/gamend_web/live/quests_live.ex:815
 #, elixir-autogen, elixir-format
 msgid "Resets in %{time}"
 msgstr "Si azzera tra %{time}"
 
-#: lib/gamend_web/live/quests_live.ex:85
+#: lib/gamend_web/live/quests_live.ex:86
 #, elixir-autogen, elixir-format
 msgid "Rewards claimed!"
 msgstr "Ricompense riscosse!"
 
-#: lib/gamend_web/live/quests_live.ex:313
+#: lib/gamend_web/live/quests_live.ex:355
 #, elixir-autogen, elixir-format
 msgid "Weekly"
 msgstr "Settimanali"
 
-#: lib/gamend_web/live/quests_live.ex:438
+#: lib/gamend_web/live/quests_live.ex:480
 #, elixir-autogen, elixir-format
 msgid "You have %{count} quest(s) ready to claim!"
 msgstr "Hai %{count} missioni da riscuotere!"
 
-#: lib/gamend_web/live/quests_live.ex:317
+#: lib/gamend_web/live/quests_live.ex:359
 #, elixir-autogen, elixir-format
 msgid "Every %{count}d"
 msgstr "Ogni %{count} g"
 
-#: lib/gamend_web/live/quests_live.ex:314
+#: lib/gamend_web/live/quests_live.ex:356
 #, elixir-autogen, elixir-format
 msgid "Monthly"
 msgstr "Mensili"
@@ -1621,30 +1622,30 @@ msgstr "Creato"
 msgid "Ready check"
 msgstr "Controllo di preparazione"
 
-#: lib/gamend_web/live/quests_live.ex:301
-#: lib/gamend_web/live/quests_live.ex:574
+#: lib/gamend_web/live/quests_live.ex:343
+#: lib/gamend_web/live/quests_live.ex:692
 #, elixir-autogen, elixir-format
 msgid "In progress"
 msgstr "In corso"
 
-#: lib/gamend_web/live/quests_live.ex:302
-#: lib/gamend_web/live/quests_live.ex:575
+#: lib/gamend_web/live/quests_live.ex:344
+#: lib/gamend_web/live/quests_live.ex:693
 #, elixir-autogen, elixir-format
 msgid "Not started"
 msgstr "Non iniziato"
 
-#: lib/gamend_web/live/quests_live.ex:503
+#: lib/gamend_web/live/quests_live.ex:547
 #, elixir-autogen, elixir-format
 msgid "Quest chain"
 msgstr "Catena di missioni"
 
-#: lib/gamend_web/live/quests_live.ex:298
-#: lib/gamend_web/live/quests_live.ex:571
+#: lib/gamend_web/live/quests_live.ex:340
+#: lib/gamend_web/live/quests_live.ex:690
 #, elixir-autogen, elixir-format
 msgid "Ready to claim"
 msgstr "Pronto da riscattare"
 
-#: lib/gamend_web/live/quests_live.ex:645
+#: lib/gamend_web/live/quests_live.ex:775
 #, elixir-autogen, elixir-format
 msgid "View quest chain"
 msgstr "Vedi la catena di missioni"
@@ -2366,3 +2367,8 @@ msgstr "Avverti giocatore"
 #, elixir-autogen, elixir-format
 msgid "Warned from the report queue"
 msgstr "Avvertito dalla coda delle segnalazioni"
+
+#: lib/gamend_web/live/quests_live.ex:783
+#, elixir-autogen, elixir-format
+msgid "View every quest in this group"
+msgstr "Vedi tutte le missioni di questo gruppo"

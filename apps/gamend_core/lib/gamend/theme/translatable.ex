@@ -46,10 +46,21 @@ defmodule Gamend.Theme.Translatable do
   end
 
   defp do_walk(value, key, fun) when is_binary(value) do
-    if text?(key) and String.trim(value) != "", do: fun.(value), else: value
+    if translatable_text?(key, value), do: fun.(value), else: value
   end
 
   defp do_walk(value, _key, _fun), do: value
+
+  # A value like `{Some.Module.function}` is a runtime template the renderer
+  # substitutes, not prose. It sits under a text key (`label`) so the key check
+  # alone lets it through — and it went out to translators as if it were a
+  # caption. Localizing one breaks the substitution and the literal braces
+  # render on the page.
+  @template ~r/^\{[A-Za-z_][\w.]*\}$/
+
+  defp translatable_text?(key, value) do
+    text?(key) and String.trim(value) != "" and not Regex.match?(@template, String.trim(value))
+  end
 
   @doc """
   Every translatable string in a decoded config, in document order, without
@@ -78,7 +89,10 @@ defmodule Gamend.Theme.Translatable do
   end
 
   defp collect(value, key, acc) when is_binary(value) do
-    if text?(key) and String.trim(value) != "", do: {value, [value | acc]}, else: {value, acc}
+    # Same guard as do_walk/3: what the extractor collects and what the
+    # renderer translates must be the same set, or a string reaches translators
+    # that the server will never look up.
+    if translatable_text?(key, value), do: {value, [value | acc]}, else: {value, acc}
   end
 
   defp collect(value, _key, acc), do: {value, acc}

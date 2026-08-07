@@ -294,6 +294,16 @@ defmodule GamendWeb.AdminLive.Quests do
                 type="text"
                 label="Category (free-form label for your UI)"
               />
+              <.input
+                field={@form[:group_key]}
+                type="text"
+                label="Group key (quests sharing it list as one entry, optional)"
+              />
+              <.input
+                field={@form[:group_title]}
+                type="text"
+                label="Group title (what the collapsed entry is called)"
+              />
 
               <div class="form-control">
                 <label class="label">

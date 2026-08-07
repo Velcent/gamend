@@ -322,21 +322,24 @@ defmodule GamendWeb.HostLayoutNavigation do
   attr :known_locales, :list, default: []
 
   @doc """
-  The language picker — the same `<details>` dropdown every other navbar menu
-  uses, so the header has one way of opening a menu rather than two.
+  The language picker's button(s).
 
-  It was a `<label>` opening a full-screen modal, which made it the only
-  control in the header that did not drop a panel under itself.
+  Two controls, one visible at a time, mirroring the in-page language selector
+  (`PolyglotLanguageSelector.target_dropdown`) so the site opens a language list
+  the same way everywhere:
 
-  Rendered **once** by the shell for both layouts rather than once inside each
-  nav, and that is not an optimisation to trade away: the ~30 locale entries
-  are 13 KB, so a copy per layout is 26 KB of a 77 KB document. The modal
-  existed to avoid exactly that, and a test in the host repo asserts each
-  locale link appears exactly once.
+    * from `sm` up, a `<details>` dropdown like every other navbar menu;
+    * below it, a button opening the bottom sheet `language_modal/1` renders.
 
-  The panel is a grid rather than the siblings' `w-56` column because this menu
-  has ~30 entries to their handful; everything else about it — surface, radius,
-  shadow, item styling — is theirs.
+  A phone gets a sheet rather than a panel because a dropdown is positioned
+  against its *button*, and the globe is not the last thing in the bar — the
+  hamburger is. Any panel wide enough to be useful therefore starts off the left
+  edge of the screen.
+
+  This does mean the ~30 locale entries are in the document twice, about 13 KB.
+  The sheet is why: it is `position: fixed`, and the header's `backdrop-blur`
+  makes the header a containing block for fixed descendants, so the sheet has to
+  live outside the header while the dropdown lives inside it.
   """
   def language_dropdown(assigns) do
     assigns =
@@ -347,46 +350,113 @@ defmodule GamendWeb.HostLayoutNavigation do
       )
 
     ~H"""
-    <details class="dropdown dropdown-end" data-navbar-dropdown>
-      <summary class="btn gap-1 list-none btn-outline">
+    <div class="contents">
+      <label for="lang-modal" class="btn gap-1 list-none btn-outline cursor-pointer sm:hidden">
         <.icon name="hero-globe-alt-solid" class="w-4 h-4" />
-        <span class="hidden sm:inline">{@label}</span>
         <.icon name="hero-chevron-down-solid" class="w-3 h-3" />
-      </summary>
+      </label>
 
-      <%!-- Four columns at most: "Español" and "Español (España)" truncate to
-            the same string in five, which makes them impossible to tell apart.
-            Capped height so 30 locales cannot run off the bottom of a phone.
+      <details class="dropdown dropdown-end hidden sm:block" data-navbar-dropdown>
+        <summary class="btn gap-1 list-none btn-outline">
+          <.icon name="hero-globe-alt-solid" class="w-4 h-4" />
+          {@label}
+          <.icon name="hero-chevron-down-solid" class="w-3 h-3" />
+        </summary>
 
-            `78vw`, not `92vw`: `dropdown-end` right-aligns the panel to the
-            *button*, and on a phone the button is not the last thing in the bar
-            — the hamburger is. A wider panel therefore starts off the left edge
-            of the screen rather than merely filling it. --%>
-      <%!-- Deliberately not daisyUI's `menu menu-sm` like the sibling panels:
-            `.menu li` is `display:flex` and its `> a` will not shrink below its
-            content, so long labels ("Português do Brasil") burst out of their
-            grid track and over the next column. `menu` is built for a vertical
-            list; this is a grid, and it only needs the surface. --%>
-      <ul class="dropdown-content mt-2 z-[1] grid max-h-[70vh] w-[min(78vw,44rem)] grid-cols-2 gap-1 overflow-y-auto rounded-box bg-base-100 p-2 shadow-lg sm:grid-cols-3 lg:grid-cols-4">
-        <%!-- `min-w-0` on both: a grid track and a flex item both default to
-              min-content width, so without it the longest label ("Português do
-              Brasil") pushes its column over the next one instead of letting
-              `truncate` do its job. --%>
-        <li :for={link <- @locale_links} class="min-w-0 list-none">
-          <a
-            href={link.href}
-            rel={link[:rel]}
-            class={[
-              "flex min-w-0 items-center gap-2 rounded px-2 py-2 text-sm transition-colors hover:bg-base-200",
-              link.locale == @locale && "bg-primary/10 font-semibold text-primary"
-            ]}
+        <%!-- Four columns at most: "Espa\u00f1ol" and "Espa\u00f1ol (Espa\u00f1a)" truncate to
+              the same string in five, which makes them impossible to tell apart.
+
+              Deliberately not daisyUI's `menu menu-sm` like the sibling panels:
+              `.menu li` is `display:flex` and its `> a` will not shrink below
+              its content, so long labels ("Portugu\u00eas do Brasil") burst out of
+              their grid track and over the next column. `menu` is built for a
+              vertical list; this is a grid, and it only needs the surface. --%>
+        <ul class="dropdown-content z-[100] mt-2 grid max-h-[70vh] w-[min(78vw,44rem)] grid-cols-3 gap-1 overflow-y-auto rounded-box bg-base-100 p-2 shadow-lg lg:grid-cols-4">
+          <.locale_option :for={link <- @locale_links} link={link} locale={@locale} />
+        </ul>
+      </details>
+    </div>
+    """
+  end
+
+  attr :locale, :string, required: true
+  attr :current_path, :string, default: nil
+  attr :current_query, :string, default: ""
+  attr :known_locales, :list, default: []
+
+  @doc """
+  The phone-sized language picker: a bottom sheet, like the in-page selector's.
+
+  Rendered by the shell **outside** `<header>`. It is `position: fixed`, and the
+  header's `backdrop-blur` would make the header its containing block — the
+  sheet would then pin to the header's box and open above the fold instead of
+  along the bottom of the screen.
+  """
+  def language_modal(assigns) do
+    assigns =
+      assign(assigns,
+        label: locale_label(assigns.locale),
+        locale_links:
+          locale_links(assigns.current_path, assigns.current_query, assigns.known_locales)
+      )
+
+    ~H"""
+    <input
+      type="checkbox"
+      id="lang-modal"
+      class="modal-toggle sm:hidden"
+      aria-label={GamendWeb.HostLayouts.translate("Choose language")}
+    />
+    <div class="modal modal-bottom z-[100] sm:hidden" role="dialog">
+      <div class="modal-box max-w-2xl p-3">
+        <div class="flex items-center justify-between gap-3">
+          <h3 class="flex items-center gap-2 text-sm font-black uppercase tracking-[0.12em]">
+            <.icon name="hero-globe-alt-solid" class="w-4 h-4" />
+            {@label}
+          </h3>
+          <label
+            for="lang-modal"
+            aria-label={GamendWeb.HostLayouts.translate("Close language picker")}
+            class="btn btn-ghost btn-square btn-sm"
           >
-            <.flag code={link.flag_code} class="rounded-[2px] shadow-sm ring-1 ring-base-content/10" />
-            <span class="truncate">{link.label}</span>
-          </a>
-        </li>
-      </ul>
-    </details>
+            <.icon name="hero-x-mark-solid" class="size-4" />
+          </label>
+        </div>
+
+        <%!-- Same rule as the in-page selector: fit as many tiles as there is
+              room for, rather than a fixed column count that squeezes them. --%>
+        <ul class="mt-3 grid max-h-[60vh] grid-cols-[repeat(auto-fit,minmax(7rem,1fr))] gap-1 overflow-y-auto">
+          <.locale_option :for={link <- @locale_links} link={link} locale={@locale} />
+        </ul>
+      </div>
+      <label class="modal-backdrop" for="lang-modal">Close</label>
+    </div>
+    """
+  end
+
+  attr :link, :map, required: true
+  attr :locale, :string, required: true
+
+  # One row, shared by the dropdown and the sheet so they cannot drift apart.
+  # `min-w-0` on both the item and the anchor: a grid track and a flex item each
+  # default to min-content width, so without it the longest label ("Portugu\u00eas do
+  # Brasil") pushes its column over the next one instead of letting `truncate` do
+  # its job.
+  defp locale_option(assigns) do
+    ~H"""
+    <li class="min-w-0 list-none">
+      <a
+        href={@link.href}
+        rel={@link[:rel]}
+        class={[
+          "flex min-w-0 items-center gap-2 rounded px-2 py-2 text-sm transition-colors hover:bg-base-200",
+          @link.locale == @locale && "bg-primary/10 font-semibold text-primary"
+        ]}
+      >
+        <.flag code={@link.flag_code} class="rounded-[2px] shadow-sm ring-1 ring-base-content/10" />
+        <span class="truncate">{@link.label}</span>
+      </a>
+    </li>
     """
   end
 

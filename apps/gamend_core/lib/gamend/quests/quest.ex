@@ -15,13 +15,25 @@ defmodule Gamend.Quests.Quest do
   ## Fields
 
   - `key` — unique slug (e.g. "daily_win_3"); progress rows reference it
-  - `category` — free-form label for grouping/filtering in your UI
-    ("achievement", "story", "seasonal", …); no engine behavior
   - `objectives` — list of `Gamend.Quests.Objective` (event/target/params)
   - `rewards` — list of `Gamend.Quests.Reward`, paid exactly-once
   - `auto_claim` — grant rewards on completion without a claim step
-  - `hidden` — details withheld until earned (a teaser)
+  - `hidden` — details withheld until earned (a teaser); the row still lists
   - `active` — inactive quests never advance and are not listed
+
+  ## Grouping, which has three unrelated forms
+
+  - **`category`** — a label your UI filters or tabs by. No engine behavior;
+    every quest in a category still lists as its own row.
+  - **`group_key`** (+ `group_title`, naming the collapsed entry) — many quests,
+    one list entry the player opens. Unordered: every member is live at once and
+    the entry stands for whichever is most worth acting on (52 countries to
+    chart, in any order).
+  - **`prerequisite_quest_key`** — a chain. Also one entry, but because the
+    tiers are *ordered* and only one is reachable at a time.
+
+  A quest may carry both a category and a group key. A chain inside a group
+  collapses as a chain first, then contributes its surviving entry to the group.
   """
 
   use Gamend.Schema
@@ -46,6 +58,9 @@ defmodule Gamend.Quests.Quest do
     field :icon_url, :string
     field :sort_order, :integer, default: 0
     field :hidden, :boolean, default: false
+    field :group_key, :string
+    # Names the collapsed entry, so every member of a group declares the same one.
+    field :group_title, :string
     field :reset, :string, default: "never"
     field :reset_interval_days, :integer
     field :category, :string
@@ -76,9 +91,9 @@ defmodule Gamend.Quests.Quest do
   end
 
   @required_fields ~w(key title)a
-  @optional_fields ~w(description icon_url sort_order hidden reset reset_interval_days
-                      category auto_claim prerequisite_quest_key starts_at ends_at
-                      active metadata)a
+  @optional_fields ~w(description icon_url sort_order hidden group_key group_title
+                      reset reset_interval_days category auto_claim
+                      prerequisite_quest_key starts_at ends_at active metadata)a
 
   @doc "The valid reset cycles."
   def resets, do: @resets
@@ -99,6 +114,8 @@ defmodule Gamend.Quests.Quest do
     |> validate_inclusion(:reset, @resets)
     |> validate_interval()
     |> validate_length(:category, max: Gamend.Limits.get(:max_quest_category))
+    |> validate_length(:group_key, max: Gamend.Limits.get(:max_quest_category))
+    |> validate_length(:group_title, max: Gamend.Limits.get(:max_quest_title))
     |> validate_objective_count()
     |> validate_reward_count()
     |> validate_window()

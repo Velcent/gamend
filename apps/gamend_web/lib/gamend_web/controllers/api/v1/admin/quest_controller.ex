@@ -25,6 +25,8 @@ defmodule GamendWeb.Api.V1.Admin.QuestController do
       reset: %Schema{type: :string, enum: Quest.resets()},
       reset_interval_days: %Schema{type: :integer, nullable: true},
       category: %Schema{type: :string},
+      group_key: %Schema{type: :string},
+      group_title: %Schema{type: :string},
       objectives: %Schema{type: :array, items: %Schema{type: :object}},
       rewards: %Schema{type: :array, items: %Schema{type: :object}},
       auto_claim: %Schema{type: :boolean},
@@ -67,6 +69,8 @@ defmodule GamendWeb.Api.V1.Admin.QuestController do
       reset: %Schema{type: :string, enum: Quest.resets()},
       reset_interval_days: %Schema{type: :integer, nullable: true},
       category: %Schema{type: :string},
+      group_key: %Schema{type: :string},
+      group_title: %Schema{type: :string},
       objectives: %Schema{
         type: :array,
         items: %Schema{

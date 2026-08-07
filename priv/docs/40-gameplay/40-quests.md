@@ -4,13 +4,14 @@ icon: hero-flag
 
 # Quests / Progression
 
-One engine for achievements, dailies, seasonal events and quest lines. A quest is objectives + rewards plus four independent settings — combine them freely.
+One engine for achievements, dailies, seasonal events and quest lines. A quest is objectives + rewards plus five independent settings — combine them freely.
 
 | reset | When progress restarts: `never`, `daily`, `weekly`, `monthly`, or `interval` with `reset_interval_days` (biweekly = 14, any cadence). Every period boundary is 00:00 UTC, the same instant for every player - so a daily rolls over at noon in New Zealand and the previous afternoon on the US west coast. Show players the countdown a quest already carries rather than a reset time. |
 |---|---|
 | starts_at / ends_at | Availability window. Set them and it is an "event". |
 | prerequisite_quest_key | Must be completed first. Set it and it is a "chain" — hidden and frozen until unlocked. |
 | category | Free-form label for your UI tabs. No engine behavior. |
+| group_key | Quests sharing it list as one entry the player opens. Set it and it is a "group". |
 
 ## Examples
 
@@ -60,6 +61,31 @@ Plugins can read the same view with
 Quests also carry an optional `icon_url`; when unset, the web UI shows the
 shared default quest icon and the API returns an empty value so game clients
 can apply their own.
+
+## Groups
+
+`group_key` also collapses many quests into **one slot**, but for the opposite
+reason to a chain: nothing is ordered and every member is live at once — 52
+countries to visit, in any order. The slot is titled by `group_title` (every
+member declares the same one) and shows the member worth acting on: claimable
+first, then furthest along. `group_size` on the entry says how many it stands
+for.
+
+```text
+%{key: "visit_spain", title: "Visit Spain", group_key: "world_tour",
+  group_title: "Sail the world", objectives: [%{event: "port_visited", target: 1,
+  params: %{"country" => "ES"}}]}
+```
+
+Clicking the card on the web quests page opens the members. Over HTTP, pass
+`?group=world_tour` to `/api/v1/me/quests` to list that one group in full while
+every other stays collapsed; plugins read the same view with
+`Gamend.Quests.group(user_id, group_key)`. Either way a member the player
+cannot see yet (out of window, prerequisite unmet) stays out.
+
+A quest can carry both a category and a group key — they are unrelated. A chain
+inside a group collapses as a chain first, then contributes its surviving entry
+to the group.
 
 ## Progress is server-authoritative
 

@@ -24,8 +24,9 @@ defmodule Mix.Tasks.Demo.Seed do
     * `lobby_snapshot` — recorded runs for `/admin/lobby_snapshots`, capped at 12
       regardless of `--count` (this set is about having something to read, not
       volume)
-    * `quest` — a daily, an auto-claim achievement and a chained follow-up,
-      with per-user progress in every state (including claimable rows)
+    * `quest` — a daily, an auto-claim achievement, a chained follow-up and a
+      twelve-member group that lists as one card, with per-user progress in
+      every state (including claimable rows)
     * `ready_check` — one check per seeded lobby in every outcome (open,
       passed, timed out, declined), also capped at 12
     * `chat_moderation` — a blocklist across every severity and match mode, a
@@ -359,8 +360,9 @@ defmodule Mix.Tasks.Demo.Seed do
 
   # ── Clean ─────────────────────────────────────────────────────────────────
 
-  # A daily, an auto-claim achievement, and a chain gated on it — with per-user
-  # progress in every state, including claimable completed rows.
+  # A daily, an auto-claim achievement, a chain gated on it and a group that
+  # collapses to one card — with per-user progress in every state, including
+  # claimable completed rows.
   defp seed_quests(user_ids) do
     daily =
       upsert_quest(%{
@@ -404,6 +406,31 @@ defmodule Mix.Tasks.Demo.Seed do
         active: true,
         metadata: %{}
       })
+
+    # A group is only worth looking at in bulk: twelve definitions, one card.
+    countries = ~w(Spain Romania Poland Portugal Greece Norway
+                   Japan Chile Kenya Peru Iceland Vietnam)
+
+    group_members =
+      for {country, i} <- Enum.with_index(countries) do
+        upsert_quest(%{
+          key: @quest_key_prefix <> "visit-" <> String.downcase(country),
+          title: "Visit #{country}",
+          description: "Visit 5 cities in #{country}.",
+          reset: "never",
+          category: "Exploration",
+          group_key: @quest_key_prefix <> "world-tour",
+          group_title: "Sail the world",
+          sort_order: i,
+          objectives: [
+            %{event: "demo_city_visited", target: 5, params: %{"country" => country}}
+          ],
+          rewards: [%{type: "currency", code: "gold", amount: 50}],
+          auto_claim: false,
+          active: true,
+          metadata: %{}
+        })
+      end
 
     now = DateTime.utc_now(:second)
     today = Gamend.Quests.period_key("daily", now)
@@ -482,10 +509,33 @@ defmodule Mix.Tasks.Demo.Seed do
         }
       end)
 
-    insert_batches(daily_rows ++ achievement_rows ++ chain_rows, QuestProgress)
+    # Spread over the members so the collapsed card has a representative to
+    # pick: the one furthest along, not whatever sorted first.
+    group_rows =
+      for {user_id, i} <- Enum.with_index(user_ids),
+          rem(i, 3) == 0,
+          member = Enum.at(group_members, rem(i, length(group_members))) do
+        %{
+          id: UUIDv7.generate(),
+          user_id: user_id,
+          quest_key: member.key,
+          period_key: "static",
+          objective_progress: %{"0" => rem(i, 5) + 1},
+          status: "active",
+          completed_at: nil,
+          claimed_at: nil,
+          rewards_granted_at: nil,
+          metadata: %{},
+          inserted_at: now,
+          updated_at: now
+        }
+      end
+
+    rows = daily_rows ++ achievement_rows ++ chain_rows ++ group_rows
+    insert_batches(rows, QuestProgress)
 
     info(
-      "quests: 3 definitions, #{length(daily_rows) + length(achievement_rows) + length(chain_rows)} progress rows -> /admin/quests"
+      "quests: #{3 + length(group_members)} definitions, #{length(rows)} progress rows -> /admin/quests"
     )
   end
 

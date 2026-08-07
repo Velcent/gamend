@@ -149,6 +149,8 @@ no separate achievements table.
 | `reset` | string | `never` / `daily` / `weekly` / `monthly` / `interval` |
 | `reset_interval_days` | integer | With `reset: "interval"`; 14 = biweekly |
 | `category` | string | Free-form grouping, e.g. `achievement` |
+| `group_key` | string | Quests sharing it list as one entry; indexed, nullable |
+| `group_title` | string | Names that collapsed entry; nullable |
 | `objectives` | jsonb | List of `{event, target, params}` |
 | `rewards` | jsonb | List of `{type, code, amount}` |
 | `auto_claim` | boolean | Grant on completion instead of requiring a claim |

@@ -52,6 +52,74 @@ defmodule GamendWeb.QuestsLiveCardTest do
     html
   end
 
+  describe "grouped quests" do
+    setup do
+      for id <- ["ro", "es", "pl"] do
+        {:ok, _} =
+          Quests.create_quest(%{
+            key: "visit_#{id}",
+            title: "Visit #{String.upcase(id)}",
+            description: "Visit every city.",
+            category: "exploration",
+            group_key: "countries",
+            group_title: "Visit countries",
+            objectives: [%{event: "city_visited", target: 5, params: %{"country" => id}}]
+          })
+      end
+
+      :ok
+    end
+
+    test "the group is one card, named for the group", %{conn: conn} do
+      html = page(conn)
+
+      assert html =~ "Visit countries", "the card is titled by the group"
+
+      refute html =~ "Visit RO",
+             "a member's own title must not head a card that stands for three"
+    end
+
+    test "opening the group renders every member", %{conn: conn} do
+      conn = log_in_user(conn, Gamend.AccountsFixtures.user_fixture())
+      {:ok, view, _html} = live(conn, ~p"/quests")
+
+      # Rendering the modal used to raise KeyError :locked — the members come
+      # from Quests.group/2, which has no tiers and so no `locked` key, and the
+      # modal was reusing the chain's status label.
+      html = render_click(view, "show_group", %{"group" => "countries"})
+
+      for id <- ["RO", "ES", "PL"], do: assert(html =~ "Visit #{id}")
+      assert html =~ "Not started"
+    end
+
+    test "opening a group a signed-out visitor can see does not raise", %{conn: conn} do
+      {:ok, view, _html} = live(conn, ~p"/quests")
+
+      assert render_click(view, "show_group", %{"group" => "countries"}) =~ "Visit countries"
+    end
+
+    test "a hidden member stays a teaser once the group is open", %{conn: conn} do
+      {:ok, _} =
+        Quests.create_quest(%{
+          key: "visit_atlantis",
+          title: "Visit Atlantis",
+          description: "Find the lost city.",
+          hidden: true,
+          group_key: "countries",
+          group_title: "Visit countries",
+          objectives: [%{event: "city_visited", target: 5, params: %{"country" => "atl"}}]
+        })
+
+      conn = log_in_user(conn, Gamend.AccountsFixtures.user_fixture())
+      {:ok, view, _html} = live(conn, ~p"/quests")
+
+      html = render_click(view, "show_group", %{"group" => "countries"})
+
+      assert html =~ "???"
+      refute html =~ "Visit Atlantis", "opening a group must not spoil a hidden member"
+    end
+  end
+
   test "the icon sits in the title, with no boxed-off tile around it", %{conn: conn} do
     html = page(conn)
 

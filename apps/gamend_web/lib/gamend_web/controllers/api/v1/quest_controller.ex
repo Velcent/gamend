@@ -41,7 +41,11 @@ defmodule GamendWeb.Api.V1.QuestController do
       },
       status: %Schema{type: :string, enum: ["active", "completed", "claimed"]},
       completed_at: %Schema{type: :string, format: "date-time", nullable: true},
-      claimed_at: %Schema{type: :string, format: "date-time", nullable: true}
+      claimed_at: %Schema{type: :string, format: "date-time", nullable: true},
+      claim_count: %Schema{
+        type: :integer,
+        description: "Finished runs of a repeat quest; 0 until the first claim"
+      }
     }
   }
 
@@ -70,6 +74,18 @@ defmodule GamendWeb.Api.V1.QuestController do
         nullable: true,
         description: "Free-form grouping label for your UI (no engine behavior)"
       },
+      group_key: %Schema{
+        type: :string,
+        description: "Quests sharing this list as one entry; pass ?group= to open it"
+      },
+      group_size: %Schema{
+        type: :integer,
+        description: "How many quests the entry stands for (1 when ungrouped)"
+      },
+      group_title: %Schema{
+        type: :string,
+        description: "What the collapsed group entry is called"
+      },
       objectives: %Schema{type: :array, items: @objective_schema},
       rewards: %Schema{type: :array, items: @reward_schema},
       auto_claim: %Schema{type: :boolean, description: "Rewards grant on completion"},
@@ -95,6 +111,9 @@ defmodule GamendWeb.Api.V1.QuestController do
       reset: "daily",
       reset_interval_days: nil,
       category: "daily",
+      group_key: "",
+      group_size: 1,
+      group_title: "",
       objectives: [%{event: "match_won", target: 3, params: %{}}],
       rewards: [%{type: "currency", code: "gold", amount: 100}],
       auto_claim: false,
@@ -135,9 +154,12 @@ defmodule GamendWeb.Api.V1.QuestController do
     description:
       "List active quests with the authenticated user's progress for the current " <>
         "reset period and a claimable flag. Hidden quests appear once completed; " <>
-        "chain quests appear once their prerequisite is met.",
+        "chain quests appear once their prerequisite is met. Grouped quests " <>
+        "collapse to one entry carrying group_size; pass ?group=<key> to list " <>
+        "that group's members instead.",
     parameters: [
       category: [in: :query, schema: %Schema{type: :string}, required: false],
+      group: [in: :query, schema: %Schema{type: :string}, required: false],
       page: [in: :query, schema: %Schema{type: :integer}, required: false],
       page_size: [in: :query, schema: %Schema{type: :integer}, required: false]
     ],
@@ -160,10 +182,11 @@ defmodule GamendWeb.Api.V1.QuestController do
       %{user_id: user_id} ->
         {page, page_size} = Pagination.params(params)
         category = category_filter(params)
-        opts = [page: page, page_size: page_size, category: category]
+        group = blank_filter(params, "group")
+        opts = [page: page, page_size: page_size, category: category, group: group]
 
         entries = Quests.list_user_quests(user_id, opts)
-        total_count = Quests.count_user_quests(user_id, category: category)
+        total_count = Quests.count_user_quests(user_id, category: category, group: group)
 
         json(conn, %{
           data: Enum.map(entries, &serialize_entry/1),
@@ -320,8 +343,10 @@ defmodule GamendWeb.Api.V1.QuestController do
   # `?category=` decodes to "" rather than nil, and "" is nobody's category, so
   # the filter dropped every quest — a client asking for ALL categories got an
   # empty list back. Blank means no filter, the same as leaving the param off.
-  defp category_filter(params) do
-    case params["category"] do
+  defp category_filter(params), do: blank_filter(params, "category")
+
+  defp blank_filter(params, name) do
+    case params[name] do
       value when is_binary(value) ->
         trimmed = String.trim(value)
         if trimmed == "", do: nil, else: trimmed
@@ -394,7 +419,15 @@ defmodule GamendWeb.Api.V1.QuestController do
   # Serialization
   # ---------------------------------------------------------------------------
 
-  defp serialize_entry(%{quest: quest, progress: progress, claimable: claimable}) do
+  defp serialize_entry(%{quest: quest} = entry) do
+    entry
+    |> serialize_quest()
+    |> Map.put(:group_key, quest.group_key || "")
+    |> Map.put(:group_title, quest.group_title || "")
+    |> Map.put(:group_size, Map.get(entry, :group_size, 1))
+  end
+
+  defp serialize_quest(%{quest: quest, progress: progress, claimable: claimable}) do
     completed? = progress != nil and progress.status in ["completed", "claimed"]
 
     # The API ships the stored string, so a repeat quest's `%{n}` has to be
@@ -465,7 +498,8 @@ defmodule GamendWeb.Api.V1.QuestController do
       objective_progress: progress.objective_progress,
       status: progress.status,
       completed_at: progress.completed_at,
-      claimed_at: progress.claimed_at
+      claimed_at: progress.claimed_at,
+      claim_count: progress.claim_count
     }
   end
 end

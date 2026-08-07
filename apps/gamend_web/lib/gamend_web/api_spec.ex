@@ -141,12 +141,13 @@ defmodule GamendWeb.ApiSpec do
         - **Metadata support**: values can include arbitrary JSON metadata
 
         ## **11. Quests / Progression**
-        One event-driven progression engine covering achievements, daily/weekly quests, time-boxed event quests, and chains:
+        One event-driven progression engine covering achievements, daily/weekly quests, time-boxed event quests, chains, and groups:
 
         - **Kinds**: `achievement` (permanent one-shot — the replacement for the old achievements system), `daily`/`weekly` (reset per UTC period), `event` (starts_at/ends_at window), `chain` (requires a prerequisite quest)
         - **Objectives**: each quest lists objectives `{event, target, params}`; server-side `report_event` advances every matching active quest — there is **no public endpoint to advance progress** (server-authoritative)
         - **Rewards**: currencies (Economy) and items (Inventory), paid **exactly once** per period via idempotent grants; `auto_claim` quests pay on completion, others via `POST /me/quests/:key/claim`
         - **My quests**: `GET /me/quests` returns active quests, per-period progress, and a claimable flag; hidden quests appear once completed
+        - **Groups**: quests sharing a `group_key` collapse to one entry carrying `group_size`; `?group=<key>` lists that group's members in full
         - **Catalog**: `GET /quests` and per-user completions `GET /quests/user/:user_id` (gated by `LIST_QUESTS_ENABLED`)
         - **Admin management**: definitions CRUD plus per-user grant/reset/force-claim under `/api/v1/admin/quests`
 

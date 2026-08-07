@@ -809,7 +809,7 @@ defmodule GamendWeb.PresentationPage do
       widths
       |> Enum.filter(&variant_exists?(path, &1))
       |> Enum.map(&{width_variant_path(path, &1), &1})
-      |> append_source_candidate(path, source_width)
+      |> with_source_candidate(path, source_width)
       |> Enum.map_join(", ", fn {candidate, width} -> "#{image_src(candidate)} #{width}w" end)
       |> non_empty_string()
     end
@@ -821,16 +821,20 @@ defmodule GamendWeb.PresentationPage do
   # variants alone caps the image at the widest variant and any denser viewport
   # upscales it. `mix host.responsive_images` never writes a variant at or above
   # the source width (that would be an upscale), which is exactly why the source
-  # must be appended here rather than declared as another width in the config.
+  # belongs here rather than as another width in the config.
+  #
+  # Prepended, not appended: those same `w` descriptors are what the browser
+  # picks by, so the order of the list carries no meaning and there is nothing
+  # to be gained by walking it to reach the end.
   #
   # No variants exist means the image opted out in practice — emit no srcset at
   # all rather than a one-candidate list that just restates `src`.
-  defp append_source_candidate([], _path, _source_width), do: []
+  defp with_source_candidate([], _path, _source_width), do: []
 
-  defp append_source_candidate(candidates, path, source_width) do
+  defp with_source_candidate(candidates, path, source_width) do
     if is_integer(source_width) and
          Enum.all?(candidates, fn {_candidate, width} -> width < source_width end) do
-      candidates ++ [{path, source_width}]
+      [{path, source_width} | candidates]
     else
       candidates
     end
