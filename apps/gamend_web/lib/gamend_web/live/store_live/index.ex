@@ -115,19 +115,19 @@ defmodule GamendWeb.StoreLive.Index do
 
                   <div class="grid grid-cols-2 gap-2 text-sm">
                     <div>
-                      <div class="text-xs uppercase text-base-content/50">{gettext("Provider")}</div>
+                      <div class="text-xs uppercase text-base-content/70">{gettext("Provider")}</div>
                       <div class="font-medium">{provider_product.provider}</div>
                     </div>
                     <div>
-                      <div class="text-xs uppercase text-base-content/50">{gettext("Price")}</div>
+                      <div class="text-xs uppercase text-base-content/70">{gettext("Price")}</div>
                       <div class="font-medium">{format_amount(provider_product)}</div>
                     </div>
                     <div>
-                      <div class="text-xs uppercase text-base-content/50">{gettext("SKU")}</div>
+                      <div class="text-xs uppercase text-base-content/70">{gettext("SKU")}</div>
                       <div class="font-mono text-xs break-all">{provider_product.external_id}</div>
                     </div>
                     <div>
-                      <div class="text-xs uppercase text-base-content/50">{gettext("Status")}</div>
+                      <div class="text-xs uppercase text-base-content/70">{gettext("Status")}</div>
                       <div>
                         {if provider_product.active, do: gettext("Active"), else: gettext("Inactive")}
                       </div>

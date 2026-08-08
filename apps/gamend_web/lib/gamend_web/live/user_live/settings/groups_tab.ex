@@ -212,14 +212,14 @@ defmodule GamendWeb.UserLive.Settings.GroupsTab do
                     <button
                       :if={@group_detail_role == "admin"}
                       phx-click="group_toggle_edit"
-                      class="btn btn-xs btn-outline btn-info"
+                      class="btn btn-sm btn-outline btn-info"
                     >
                       {gettext("Edit")}
                     </button>
                     <button
                       phx-click="group_leave"
                       phx-value-group_id={@group_detail.id}
-                      class="btn btn-xs btn-outline btn-error"
+                      class="btn btn-sm btn-outline btn-error"
                       data-confirm={gettext("Leave?")}
                     >
                       {gettext("Leave")}
@@ -303,7 +303,7 @@ defmodule GamendWeb.UserLive.Settings.GroupsTab do
                               {gettext("Kick")}
                             </button>
                           <% else %>
-                            <span class="text-xs text-base-content/50">{gettext("You")}</span>
+                            <span class="text-xs text-base-content/70">{gettext("You")}</span>
                           <% end %>
                         </td>
                       <% end %>
@@ -337,7 +337,7 @@ defmodule GamendWeb.UserLive.Settings.GroupsTab do
                     <div class="text-sm font-medium">
                       {LiveHelpers.public_user_name(req.user)}
                     </div>
-                    <span class="text-xs text-base-content/50">
+                    <span class="text-xs text-base-content/70">
                       {LiveHelpers.public_user_handle(req.user)} &mdash;
                       <.timestamp at={req.inserted_at} />
                     </span>
@@ -346,14 +346,14 @@ defmodule GamendWeb.UserLive.Settings.GroupsTab do
                     <button
                       phx-click="group_approve_request"
                       phx-value-request_id={req.id}
-                      class="btn btn-xs btn-primary"
+                      class="btn btn-sm btn-primary"
                     >
                       {gettext("Approve")}
                     </button>
                     <button
                       phx-click="group_reject_request"
                       phx-value-request_id={req.id}
-                      class="btn btn-xs btn-outline btn-error"
+                      class="btn btn-sm btn-outline btn-error"
                     >
                       {gettext("Reject")}
                     </button>
@@ -403,7 +403,7 @@ defmodule GamendWeb.UserLive.Settings.GroupsTab do
                       ]} />
                       <div>
                         <span class="text-sm font-medium">{LiveHelpers.public_user_name(u)}</span>
-                        <span class="text-xs text-base-content/50 ml-1">
+                        <span class="text-xs text-base-content/70 ml-1">
                           {LiveHelpers.public_user_handle(u)}
                         </span>
                       </div>
@@ -413,7 +413,7 @@ defmodule GamendWeb.UserLive.Settings.GroupsTab do
                       phx-click="group_invite_user"
                       phx-value-group_id={@group_detail.id}
                       phx-value-user_id={u.id}
-                      class="btn btn-xs btn-primary"
+                      class="btn btn-sm btn-primary"
                     >
                       {gettext("Invite")}
                     </button>
@@ -423,7 +423,7 @@ defmodule GamendWeb.UserLive.Settings.GroupsTab do
 
               <div
                 :if={@invite_search_query != "" && @invite_search_results == []}
-                class="mb-4 text-sm text-base-content/50"
+                class="mb-4 text-sm text-base-content/70"
               >
                 {gettext("No results.")}
               </div>
@@ -452,7 +452,7 @@ defmodule GamendWeb.UserLive.Settings.GroupsTab do
                       phx-click="group_invite_user"
                       phx-value-group_id={@group_detail.id}
                       phx-value-user_id={f.id}
-                      class="btn btn-xs btn-outline btn-primary"
+                      class="btn btn-sm btn-outline btn-primary"
                     >
                       {gettext("Invite")}
                     </button>
@@ -460,7 +460,7 @@ defmodule GamendWeb.UserLive.Settings.GroupsTab do
                 </div>
               </div>
 
-              <div :if={@invite_friends == []} class="mt-3 text-sm text-base-content/40">
+              <div :if={@invite_friends == []} class="mt-3 text-sm text-base-content/70">
                 {gettext("No results.")}
               </div>
             </div>
@@ -656,7 +656,7 @@ defmodule GamendWeb.UserLive.Settings.GroupsTab do
                           <button
                             phx-click="group_join"
                             phx-value-group_id={group.id}
-                            class="btn btn-xs btn-primary"
+                            class="btn btn-sm btn-primary"
                           >
                             {gettext("Join")}
                           </button>
@@ -664,12 +664,12 @@ defmodule GamendWeb.UserLive.Settings.GroupsTab do
                           <button
                             phx-click="group_request_join"
                             phx-value-group_id={group.id}
-                            class="btn btn-xs btn-outline btn-primary"
+                            class="btn btn-sm btn-outline btn-primary"
                           >
                             {gettext("Request")}
                           </button>
                         <% true -> %>
-                          <span class="text-xs text-base-content/50">-</span>
+                          <span class="text-xs text-base-content/70">-</span>
                       <% end %>
                     </td>
                   </tr>
@@ -723,14 +723,14 @@ defmodule GamendWeb.UserLive.Settings.GroupsTab do
                         <button
                           phx-click="group_accept_invite"
                           phx-value-invite_id={inv.id}
-                          class="btn btn-xs btn-primary"
+                          class="btn btn-sm btn-primary"
                         >
                           {gettext("Accept")}
                         </button>
                         <button
                           phx-click="group_decline_invite"
                           phx-value-invite_id={inv.id}
-                          class="btn btn-xs btn-outline btn-error"
+                          class="btn btn-sm btn-outline btn-error"
                         >
                           {gettext("Decline")}
                         </button>

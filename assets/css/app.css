@@ -47,19 +47,24 @@
    in Elixir or JS - without this the icons generate no CSS and render blank. */
 @source "../../priv/docs";
 
-/* Float animation for background icons — drift with increased movement range */
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px) rotate(0deg);
-  }
-  25% {
-    transform: translateY(-18px) rotate(3deg);
-  }
-  50% {
-    transform: translateY(-9px) rotate(-2deg);
-  }
-  75% {
-    transform: translateY(-22px) rotate(1deg);
+/* Float animation for background icons — drift with increased movement range.
+   Defined only when the user allows motion: without the keyframes the inline
+   `animation: float ...` styles resolve to nothing, so reduced-motion users
+   get static icons. */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px) rotate(0deg);
+    }
+    25% {
+      transform: translateY(-18px) rotate(3deg);
+    }
+    50% {
+      transform: translateY(-9px) rotate(-2deg);
+    }
+    75% {
+      transform: translateY(-22px) rotate(1deg);
+    }
   }
 }
 
@@ -90,27 +95,28 @@
   --color-base-200: oklch(25.26% 0.014 253.1);
   --color-base-300: oklch(20.15% 0.012 254.09);
   --color-base-content: oklch(97.807% 0.029 256.847);
-  --color-primary: oklch(58% 0.233 277.117);
-  --color-primary-content: oklch(96% 0.018 272.314);
+  /* WCAG AA pairs — checked by apps/gamend_web/test/gamend_web/a11y_contrast_test.exs */
+  --color-primary: #8B88FF;
+  --color-primary-content: #16163A;
   --color-secondary: oklch(58% 0.233 277.117);
   --color-secondary-content: oklch(96% 0.018 272.314);
   --color-accent: oklch(60% 0.25 292.717);
   --color-accent-content: oklch(96% 0.016 293.756);
   --color-neutral: oklch(37% 0.044 257.287);
   --color-neutral-content: oklch(98% 0.003 247.858);
-  --color-info: oklch(58% 0.158 241.966);
-  --color-info-content: oklch(97% 0.013 236.62);
-  --color-success: oklch(60% 0.118 184.704);
-  --color-success-content: oklch(98% 0.014 180.72);
-  --color-warning: oklch(66% 0.179 58.318);
-  --color-warning-content: oklch(98% 0.022 95.277);
-  --color-error: oklch(58% 0.253 17.585);
-  --color-error-content: oklch(96% 0.015 12.422);
+  --color-info: #39A4E6;
+  --color-info-content: #01293F;
+  --color-success: #2FBFA4;
+  --color-success-content: #013B34;
+  --color-warning: #F5A623;
+  --color-warning-content: #3D2B00;
+  --color-error: #FF5C7C;
+  --color-error-content: #45000F;
   --radius-selector: 0.25rem;
   --radius-field: 0.25rem;
   --radius-box: 0.5rem;
   --size-selector: 0.21875rem;
-  --size-field: 0.21875rem;
+  --size-field: 0.25rem;
   --border: 1.5px;
   --depth: 1;
   --noise: 0;
@@ -125,27 +131,28 @@
   --color-base-200: oklch(96% 0.001 286.375);
   --color-base-300: oklch(92% 0.004 286.32);
   --color-base-content: oklch(21% 0.006 285.885);
-  --color-primary: oklch(70% 0.213 47.604);
-  --color-primary-content: oklch(98% 0.016 73.684);
+  /* WCAG AA pairs — checked by apps/gamend_web/test/gamend_web/a11y_contrast_test.exs */
+  --color-primary: #B84A00;
+  --color-primary-content: #FFF7ED;
   --color-secondary: oklch(55% 0.027 264.364);
   --color-secondary-content: oklch(98% 0.002 247.839);
   --color-accent: oklch(0% 0 0);
   --color-accent-content: oklch(100% 0 0);
   --color-neutral: oklch(44% 0.017 285.786);
   --color-neutral-content: oklch(98% 0 0);
-  --color-info: oklch(62% 0.214 259.815);
-  --color-info-content: oklch(97% 0.014 254.604);
-  --color-success: oklch(70% 0.14 182.503);
-  --color-success-content: oklch(98% 0.014 180.72);
-  --color-warning: oklch(66% 0.179 58.318);
-  --color-warning-content: oklch(98% 0.022 95.277);
-  --color-error: oklch(58% 0.253 17.585);
-  --color-error-content: oklch(96% 0.015 12.422);
+  --color-info: #1C66E0;
+  --color-info-content: #EFF6FF;
+  --color-success: #00806F;
+  --color-success-content: #EFFCF9;
+  --color-warning: #B25800;
+  --color-warning-content: #FDF9E8;
+  --color-error: #D40038;
+  --color-error-content: #FCEEEF;
   --radius-selector: 0.25rem;
   --radius-field: 0.25rem;
   --radius-box: 0.5rem;
   --size-selector: 0.21875rem;
-  --size-field: 0.21875rem;
+  --size-field: 0.25rem;
   --border: 1.5px;
   --depth: 1;
   --noise: 0;
@@ -347,13 +354,36 @@
 .changelog-pill-plan     { background: #e1f5fe; color: #01579b; }
 .changelog-pill-other    { background: #c5cae9; color: #283593; }
 
+/* Dark theme keeps each pill's hue but flips to a dark background with a
+   light label, so the tags stay readable instead of glowing pastel boxes. */
+[data-theme="dark"] .changelog-pill-fix      { background: #14532d; color: #bbf7d0; }
+[data-theme="dark"] .changelog-pill-added    { background: #1e3a8a; color: #bfdbfe; }
+[data-theme="dark"] .changelog-pill-bug      { background: #7f1d1d; color: #fecaca; }
+[data-theme="dark"] .changelog-pill-changed  { background: #78350f; color: #fde68a; }
+[data-theme="dark"] .changelog-pill-removed  { background: #831843; color: #fbcfe8; }
+[data-theme="dark"] .changelog-pill-security { background: #4c1d95; color: #ddd6fe; }
+[data-theme="dark"] .changelog-pill-breaking { background: #450a0a; color: #fca5a5; }
+[data-theme="dark"] .changelog-pill-deprecated { background: #374151; color: #d1d5db; }
+[data-theme="dark"] .changelog-pill-perf     { background: #134e4a; color: #99f6e4; }
+[data-theme="dark"] .changelog-pill-docs     { background: #312e81; color: #c7d2fe; }
+[data-theme="dark"] .changelog-pill-started  { background: #713f12; color: #fef08a; }
+[data-theme="dark"] .changelog-pill-investigated { background: #052e16; color: #86efac; }
+[data-theme="dark"] .changelog-pill-idea     { background: #880e4f; color: #fce4ec; }
+[data-theme="dark"] .changelog-pill-plan     { background: #01579b; color: #e1f5fe; }
+[data-theme="dark"] .changelog-pill-other    { background: #283593; color: #c5cae9; }
+
 /* ─── Mobile touch targets ───
-   Ensure all interactive buttons meet the 44px minimum touch target
-   on devices that don't support hover (phones / tablets). */
+   Interactive controls meet the 44px minimum touch target on devices
+   that don't support hover (phones / tablets). */
 @media (hover: none) and (pointer: coarse) {
-  .btn-xs {
-    min-height: 2rem;
-    min-width: 2rem;
+  .btn,
+  .input,
+  .select {
+    min-height: 2.75rem;
+  }
+
+  .btn {
+    min-width: 2.75rem;
   }
 }
 

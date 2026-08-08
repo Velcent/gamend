@@ -103,7 +103,7 @@ defmodule GamendWeb.LeaderboardsLive do
         <div>
           <h1 class="text-3xl font-bold">
             {gettext("Leaderboards")}
-            <span class="text-base-content/50 font-normal">({@count})</span>
+            <span class="text-base-content/70 font-normal">({@count})</span>
           </h1>
         </div>
 
@@ -284,7 +284,7 @@ defmodule GamendWeb.LeaderboardsLive do
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <h2 class="card-title">
             {gettext("Leaderboards")}
-            <span class="text-base-content/50 font-normal text-base">({@records_count})</span>
+            <span class="text-base-content/70 font-normal text-base">({@records_count})</span>
           </h2>
 
           <form phx-change="search" phx-submit="search" id="records-search-form" class="sm:w-64">

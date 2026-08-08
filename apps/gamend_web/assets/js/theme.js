@@ -76,9 +76,11 @@ const openAnchoredDetails = () => {
   if (!(target instanceof HTMLDetailsElement)) return;
 
   target.open = true;
-  // Offset so the summary clears the sticky navbar.
+  // Offset so the summary clears the sticky navbar. Readers who ask the OS
+  // for reduced motion get an instant jump instead of a smooth glide.
   const y = target.getBoundingClientRect().top + window.pageYOffset - 80;
-  window.scrollTo({ top: y, behavior: "smooth" });
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  window.scrollTo({ top: y, behavior: reduceMotion ? "auto" : "smooth" });
 };
 
 window.addEventListener("load", openAnchoredDetails);

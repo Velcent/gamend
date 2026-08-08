@@ -735,6 +735,7 @@ defmodule GamendWeb.HostLayouts do
         class="flex p-2 cursor-pointer w-1/2"
         phx-click={JS.dispatch("phx:set-theme")}
         data-phx-theme="light"
+        aria-label={translate("Switch to light theme")}
       >
         <.icon name="hero-sun-micro" class="size-4 opacity-75 hover:opacity-100" />
       </button>
@@ -743,6 +744,7 @@ defmodule GamendWeb.HostLayouts do
         class="flex p-2 cursor-pointer w-1/2"
         phx-click={JS.dispatch("phx:set-theme")}
         data-phx-theme="dark"
+        aria-label={translate("Switch to dark theme")}
       >
         <.icon name="hero-moon-micro" class="size-4 opacity-75 hover:opacity-100" />
       </button>

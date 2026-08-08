@@ -837,7 +837,7 @@ defmodule GamendWeb.LobbyLive.Index do
                               <%= cond do %>
                                 <% @current_scope && Scope.user(@current_scope) && m.id == @current_scope.user_id -> %>
                                   <%!-- Current user (host or member) can leave --%>
-                                  <button phx-click="leave" class="btn btn-xs btn-warning">
+                                  <button phx-click="leave" class="btn btn-sm btn-warning">
                                     {gettext("Leave")}
                                   </button>
                                 <% m.id == lobby.host_id -> %>
@@ -873,7 +873,7 @@ defmodule GamendWeb.LobbyLive.Index do
                                 </span>
                               <% end %>
                               <%= if @current_scope && Scope.user(@current_scope) && m.id == @current_scope.user_id do %>
-                                <button phx-click="leave" class="btn btn-xs btn-warning ml-2">
+                                <button phx-click="leave" class="btn btn-sm btn-warning ml-2">
                                   {gettext("Leave")}
                                 </button>
                               <% end %>

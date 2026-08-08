@@ -415,7 +415,7 @@ defmodule GamendWeb.TournamentsLive do
         <div>
           <h1 class="text-3xl font-bold">
             {gettext("Tournaments")}
-            <span :if={is_nil(@tournament)} class="text-base-content/50 font-normal">
+            <span :if={is_nil(@tournament)} class="text-base-content/70 font-normal">
               ({@count})
             </span>
           </h1>
@@ -611,7 +611,7 @@ defmodule GamendWeb.TournamentsLive do
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <h2 class="card-title">
             {gettext("Players")}
-            <span class="text-base-content/50 font-normal text-base">({@players_count})</span>
+            <span class="text-base-content/70 font-normal text-base">({@players_count})</span>
           </h2>
 
           <div class="flex flex-col sm:flex-row gap-2">
@@ -683,7 +683,7 @@ defmodule GamendWeb.TournamentsLive do
                       {gettext("Bracket")} {e.bracket_index + 1}
                     </.link>
                   <% else %>
-                    <span class="text-base-content/40">—</span>
+                    <span class="text-base-content/70">—</span>
                   <% end %>
                 </td>
                 <td :if={@drawn?} class="text-right font-mono">{e.wins}</td>
@@ -825,7 +825,7 @@ defmodule GamendWeb.TournamentsLive do
         <div class="overflow-x-auto pb-2">
           <div class="flex gap-6 min-w-max w-fit mx-auto items-stretch">
             <div :for={{round, matches} <- @rounds} class="flex flex-col gap-3 min-w-56">
-              <div class="text-xs font-semibold uppercase tracking-wider text-base-content/50 text-center">
+              <div class="text-xs font-semibold uppercase tracking-wider text-base-content/70 text-center">
                 {round_label(round, length(@rounds))}
               </div>
               <div class="flex flex-col justify-around flex-1 gap-3">
@@ -888,9 +888,9 @@ defmodule GamendWeb.TournamentsLive do
           <% @entry_id -> %>
             {slot_name(@entries, @entry_id)}
           <% @round == 1 -> %>
-            <span class="text-base-content/40">{gettext("bye")}</span>
+            <span class="text-base-content/70">{gettext("bye")}</span>
           <% true -> %>
-            <span class="text-base-content/40">—</span>
+            <span class="text-base-content/70">—</span>
         <% end %>
       </span>
       <span :if={@won?} class="text-success text-xs">✓</span>

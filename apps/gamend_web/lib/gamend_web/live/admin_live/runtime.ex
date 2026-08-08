@@ -256,7 +256,7 @@ defmodule GamendWeb.AdminLive.Runtime do
             >
               Rendering…
             </div>
-            <p class="text-xs text-base-content/50 mt-1">
+            <p class="text-xs text-base-content/70 mt-1">
               Boxes are domains · thick edges cross a domain boundary · scroll to zoom · drag to pan
             </p>
             <details class="mt-2">

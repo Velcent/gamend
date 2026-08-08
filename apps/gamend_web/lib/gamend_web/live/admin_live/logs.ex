@@ -108,7 +108,7 @@ defmodule GamendWeb.AdminLive.Logs do
         >
           <div class="p-3 space-y-0.5">
             <%= if @logs == [] do %>
-              <div class="text-center text-base-content/40 py-8 italic">
+              <div class="text-center text-base-content/70 py-8 italic">
                 No logs match the current filters.
               </div>
             <% else %>
@@ -121,7 +121,7 @@ defmodule GamendWeb.AdminLive.Logs do
                   entry.level == :warning && "bg-warning/5"
                 ]}
               >
-                <span class="text-base-content/40 whitespace-nowrap shrink-0">
+                <span class="text-base-content/70 whitespace-nowrap shrink-0">
                   <.timestamp at={entry.timestamp} format="time" empty="" />
                 </span>
                 <span class={[
@@ -144,7 +144,7 @@ defmodule GamendWeb.AdminLive.Logs do
         </div>
 
         <%!-- Footer stats --%>
-        <div class="flex items-center justify-between text-xs text-base-content/40">
+        <div class="flex items-center justify-between text-xs text-base-content/70">
           <span>Showing {length(@logs)} of {@total_buffered} buffered entries</span>
           <span>Errors in last hour: {@recent_errors}</span>
         </div>
@@ -314,9 +314,9 @@ defmodule GamendWeb.AdminLive.Logs do
   defp level_color(:error), do: "text-error"
   defp level_color(:warning), do: "text-warning"
   defp level_color(:info), do: "text-info"
-  defp level_color(:debug), do: "text-base-content/40"
+  defp level_color(:debug), do: "text-base-content/70"
   defp level_color(:notice), do: "text-info"
-  defp level_color(_), do: "text-base-content/60"
+  defp level_color(_), do: "text-base-content/70"
 
   defp safe_count_by_level do
     AdminLogBuffer.count_by_level()

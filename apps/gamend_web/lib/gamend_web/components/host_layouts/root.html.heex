@@ -7,7 +7,8 @@ hreflang links below already go through `url_locale/1`; this had been missed.
 --%>
 <html
   lang={GamendWeb.Plugs.LocalePath.url_locale(GamendWeb.HostLayouts.current_locale())}
-  class="scroll-smooth bg-base-100"
+  dir={GamendWeb.Plugs.LocalePath.text_direction(GamendWeb.HostLayouts.current_locale())}
+  class="motion-safe:scroll-smooth bg-base-100"
   data-theme={assigns[:color_mode]}
 >
   <head>
@@ -162,14 +163,14 @@ hreflang links below already go through `url_locale/1`; this had been missed.
         is_map(theme_color) ->
           {
             Map.get(theme_color, "light", "#ffffff"),
-            Map.get(theme_color, "dark", Map.get(theme_color, "light", "#1a1a2e"))
+            Map.get(theme_color, "dark", Map.get(theme_color, "light", "#292f37"))
           }
 
         is_binary(theme_color) and theme_color != "" ->
           {theme_color, theme_color}
 
         true ->
-          {"#ffffff", "#1a1a2e"}
+          {"#ffffff", "#292f37"}
       end %>
     <% active_theme_color =
       if current_color_mode == "dark", do: dark_theme_color, else: light_theme_color %>

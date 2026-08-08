@@ -21,6 +21,15 @@ defmodule GamendWeb.HostLayoutShell do
 
   def app(assigns) do
     ~H"""
+    <%!-- First focusable element on every page: invisible until it receives
+          keyboard focus, then lets the reader jump past the navbar straight
+          to the main landmark. --%>
+    <a
+      href="#main-content"
+      class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:font-semibold focus:text-primary-content focus:shadow-lg"
+    >
+      {GamendWeb.HostLayouts.translate("Skip to content")}
+    </a>
     <.background_icons background_icons={@background_icons} />
     <div class={["flex flex-col", if(@flush, do: "h-dvh overflow-hidden relative", else: "min-h-dvh")]}>
       <div
@@ -113,12 +122,12 @@ defmodule GamendWeb.HostLayoutShell do
       />
 
       <%= if @flush do %>
-        <div class="flex-1 min-h-0 relative">
+        <div id="main-content" class="flex-1 min-h-0 relative">
           {render_slot(@inner_block)}
         </div>
         <GamendWeb.HostLayouts.flash_group flash={@flash} />
       <% else %>
-        <main class="relative z-[2] px-4 py-4 sm:px-6 lg:px-8 flex-1">
+        <main id="main-content" class="relative z-[2] px-4 py-4 sm:px-6 lg:px-8 flex-1">
           <%!-- The trail sits above the content and pushes it down, which
                 knocks a full-height hero off centre. `--breadcrumb-offset` is
                 the trail's own height plus the stack gap; a hero subtracts it

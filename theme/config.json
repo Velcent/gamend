@@ -4,7 +4,7 @@
   "description": "Open source Elixir game server for real-time multiplayer games.",
   "theme_color": {
     "light": "#ffffff",
-    "dark": "#1a1a2e"
+    "dark": "#292f37"
   },
   "pages": {
     "home": {

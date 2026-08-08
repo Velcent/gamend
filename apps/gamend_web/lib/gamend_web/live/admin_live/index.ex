@@ -373,7 +373,7 @@ defmodule GamendWeb.AdminLive.Index do
                       >
                       </div>
                     </div>
-                    <span class="font-mono text-[0.65rem] w-10 text-right">{stats.percent}%</span>
+                    <span class="font-mono text-xs w-10 text-right">{stats.percent}%</span>
                   </div>
                 </div>
               </div>
@@ -662,7 +662,7 @@ defmodule GamendWeb.AdminLive.Index do
               <div class="card bg-base-100 p-4">
                 <div class="flex items-center justify-between mb-2">
                   <div class="text-sm font-semibold">Cache &amp; limits</div>
-                  <span class="text-xs text-base-content/50">since boot</span>
+                  <span class="text-xs text-base-content/70">since boot</span>
                 </div>
                 <div class="text-2xl font-bold">
                   {cache_hit_rate_label(@cache_stats)}

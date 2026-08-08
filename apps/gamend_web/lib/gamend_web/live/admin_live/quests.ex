@@ -269,7 +269,7 @@ defmodule GamendWeb.AdminLive.Quests do
                     disabled
                   />
                   <label class="label">
-                    <span class="label-text-alt text-base-content/50">
+                    <span class="label-text-alt text-base-content/70">
                       Key cannot be changed after creation
                     </span>
                   </label>

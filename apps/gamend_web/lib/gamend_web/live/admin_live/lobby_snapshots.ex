@@ -174,7 +174,7 @@ defmodule GamendWeb.AdminLive.LobbySnapshots do
                     flagged
                   </span>
                 </div>
-                <span class="text-xs text-base-content/50">
+                <span class="text-xs text-base-content/70">
                   <.timestamp at={interval.snapshot.inserted_at} format="full" empty="—" />
                 </span>
               </button>
@@ -234,7 +234,7 @@ defmodule GamendWeb.AdminLive.LobbySnapshots do
                     </table>
                     <div
                       :if={visible_changes(changes, @filter, @section_filters[section]) == []}
-                      class="text-xs text-base-content/50 py-2"
+                      class="text-xs text-base-content/70 py-2"
                     >
                       No rows match.
                     </div>
@@ -289,7 +289,7 @@ defmodule GamendWeb.AdminLive.LobbySnapshots do
 
     ~H"""
     <div :if={@events != []} class="pl-4 border-l-2 border-base-300 space-y-1">
-      <div :if={@label} class="text-xs text-base-content/50">
+      <div :if={@label} class="text-xs text-base-content/70">
         {@label}
         <span :if={@total != length(@events)} class="opacity-70">
           — {length(@events)} of {@total} match

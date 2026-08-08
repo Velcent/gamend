@@ -436,7 +436,7 @@ defmodule GamendWeb.QuestsLive do
           <div>
             <h1 class="text-3xl font-bold">
               {gettext("Quests")}
-              <span class="text-base-content/50 font-normal">({@total_count})</span>
+              <span class="text-base-content/70 font-normal">({@total_count})</span>
             </h1>
           </div>
 
@@ -483,7 +483,7 @@ defmodule GamendWeb.QuestsLive do
 
         <%!-- Quest grid --%>
         <%= if @entries == [] do %>
-          <div class="text-center py-16 text-base-content/50">
+          <div class="text-center py-16 text-base-content/70">
             <.icon name="hero-map" class="w-16 h-16 mx-auto mb-4 opacity-30" />
             <p class="text-lg">
               {gettext("No results.")}
@@ -675,7 +675,7 @@ defmodule GamendWeb.QuestsLive do
   defp chain_tier_class(entry) do
     cond do
       entry_done?(entry) -> "bg-success/20 text-success"
-      entry.locked -> "bg-base-300 text-base-content/40"
+      entry.locked -> "bg-base-300 text-base-content/70"
       true -> "bg-primary/20 text-primary"
     end
   end
@@ -806,7 +806,7 @@ defmodule GamendWeb.QuestsLive do
 
       <%!-- Countdown --%>
       <%= if @left do %>
-        <div class="flex items-center gap-1.5 text-base-content/40">
+        <div class="flex items-center gap-1.5 text-base-content/70">
           <.icon name="hero-clock" class="w-3.5 h-3.5" />
           <span class="text-xs">
             <%= if @quest.ends_at do %>
@@ -836,7 +836,7 @@ defmodule GamendWeb.QuestsLive do
                 <.icon name="hero-check-circle-solid" class="w-4 h-4" />
                 <span class="text-xs font-medium">
                   {gettext("Claimed")}
-                  <span :if={@progress.completed_at} class="text-base-content/40 ml-1">
+                  <span :if={@progress.completed_at} class="text-base-content/70 ml-1">
                     <.timestamp at={@progress.completed_at} format="date" />
                   </span>
                 </span>
@@ -849,7 +849,7 @@ defmodule GamendWeb.QuestsLive do
             <% true -> %>
               <div :for={row <- @objective_rows} class="mb-1.5 last:mb-0">
                 <div class="flex items-center justify-between mb-1">
-                  <span class="text-xs text-base-content/50">{gettext("Status")}</span>
+                  <span class="text-xs text-base-content/70">{gettext("Status")}</span>
                   <span class="text-xs font-medium text-base-content/70">
                     {row.count} / {row.target}
                   </span>

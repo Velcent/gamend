@@ -523,7 +523,7 @@ defmodule GamendWeb.GroupsLive do
           <button
             phx-click="join_group"
             phx-value-id={@group.id}
-            class="btn btn-primary btn-xs"
+            class="btn btn-primary btn-sm"
           >
             {gettext("Join")}
           </button>
@@ -531,14 +531,14 @@ defmodule GamendWeb.GroupsLive do
           <button
             phx-click="request_join"
             phx-value-id={@group.id}
-            class="btn btn-outline btn-xs"
+            class="btn btn-outline btn-sm"
           >
             {gettext("Request")}
           </button>
         <% true -> %>
       <% end %>
     <% else %>
-      <.link navigate={~p"/users/log_in"} class="btn btn-ghost btn-xs">
+      <.link navigate={~p"/users/log_in"} class="btn btn-ghost btn-sm">
         {gettext("Log in")}
       </.link>
     <% end %>

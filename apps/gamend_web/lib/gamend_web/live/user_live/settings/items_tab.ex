@@ -53,7 +53,7 @@ defmodule GamendWeb.UserLive.Settings.ItemsTab do
           </table>
           <div
             :if={@items_count == 0}
-            class="text-sm text-base-content/50 italic py-4 text-center"
+            class="text-sm text-base-content/70 italic py-4 text-center"
           >
             {gettext("No results.")}
           </div>

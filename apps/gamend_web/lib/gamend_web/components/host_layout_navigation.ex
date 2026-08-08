@@ -401,10 +401,15 @@ defmodule GamendWeb.HostLayoutNavigation do
       )
 
     ~H"""
+    <%!-- The checkbox is only a state holder — the visible labels toggle it.
+          Without tabindex="-1" it is a Tab stop (daisyUI hides it with
+          `opacity: 0`, not `display: none`), and on desktop it was the page's
+          *first* one: an invisible control receiving focus. --%>
     <input
       type="checkbox"
       id="lang-modal"
       class="modal-toggle sm:hidden"
+      tabindex="-1"
       aria-label={GamendWeb.HostLayouts.translate("Choose language")}
     />
     <div class="modal modal-bottom z-[100] sm:hidden" role="dialog">
@@ -442,15 +447,23 @@ defmodule GamendWeb.HostLayoutNavigation do
   # default to min-content width, so without it the longest label ("Portugu\u00eas do
   # Brasil") pushes its column over the next one instead of letting `truncate` do
   # its job.
+  #
+  # The current locale is a solid `bg-primary` with its paired content color:
+  # the previous primary-tinted text on a primary-tinted fill fell below AA
+  # contrast on themed hosts.
   defp locale_option(assigns) do
     ~H"""
     <li class="min-w-0 list-none">
       <a
         href={@link.href}
         rel={@link[:rel]}
+        aria-current={if(@link.locale == @locale, do: "true")}
         class={[
-          "flex min-w-0 items-center gap-2 rounded px-2 py-2 text-sm transition-colors hover:bg-base-200",
-          @link.locale == @locale && "bg-primary/10 font-semibold text-primary"
+          "flex min-w-0 items-center gap-2 rounded px-2 py-2 text-sm transition-colors",
+          if(@link.locale == @locale,
+            do: "bg-primary font-semibold text-primary-content",
+            else: "hover:bg-base-200"
+          )
         ]}
       >
         <.flag code={@link.flag_code} class="rounded-[2px] shadow-sm ring-1 ring-base-content/10" />

@@ -82,7 +82,7 @@ defmodule GamendWeb.AuthSuccessLive do
               <div class="mt-8 space-y-6">
                 <%= case @session_data.status do %>
                   <% "completed" -> %>
-                    <div class="rounded-md bg-green-50 p-4">
+                    <div class="rounded-lg bg-green-50 p-4">
                       <div class="flex">
                         <div class="flex-shrink-0">
                           <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
@@ -121,7 +121,7 @@ defmodule GamendWeb.AuthSuccessLive do
                       </div>
                     </div>
                   <% "conflict" -> %>
-                    <div class="rounded-md bg-yellow-50 p-4">
+                    <div class="rounded-lg bg-yellow-50 p-4">
                       <div class="flex">
                         <div class="flex-shrink-0">
                           <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
@@ -145,7 +145,7 @@ defmodule GamendWeb.AuthSuccessLive do
                       </div>
                     </div>
                   <% "error" -> %>
-                    <div class="rounded-md bg-red-50 p-4">
+                    <div class="rounded-lg bg-red-50 p-4">
                       <div class="flex">
                         <div class="flex-shrink-0">
                           <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
@@ -174,7 +174,7 @@ defmodule GamendWeb.AuthSuccessLive do
                       </div>
                     </div>
                   <% "not_found" -> %>
-                    <div class="rounded-md bg-gray-50 p-4">
+                    <div class="rounded-lg bg-gray-50 p-4">
                       <div class="flex">
                         <div class="flex-shrink-0">
                           <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
@@ -198,7 +198,7 @@ defmodule GamendWeb.AuthSuccessLive do
                       </div>
                     </div>
                   <% _ -> %>
-                    <div class="rounded-md bg-blue-50 p-4">
+                    <div class="rounded-lg bg-blue-50 p-4">
                       <div class="flex">
                         <div class="ml-3">
                           <h3 class="text-sm font-medium text-blue-800">

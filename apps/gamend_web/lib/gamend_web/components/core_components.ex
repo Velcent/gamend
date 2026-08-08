@@ -313,7 +313,7 @@ defmodule GamendWeb.CoreComponents do
           {@rest}
         />
       </label>
-      <p class="text-xs text-base-content/50 mt-1" data-local-zone-note></p>
+      <p class="text-xs text-base-content/70 mt-1" data-local-zone-note></p>
       <.error :for={msg <- @errors}>{msg}</.error>
     </div>
     """

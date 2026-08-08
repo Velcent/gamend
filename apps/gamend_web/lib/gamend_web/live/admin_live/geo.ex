@@ -140,7 +140,7 @@ defmodule GamendWeb.AdminLive.Geo do
             <tbody>
               <%= if @filtered_stats == [] do %>
                 <tr>
-                  <td colspan="5" class="text-center py-8 text-base-content/40">
+                  <td colspan="5" class="text-center py-8 text-base-content/70">
                     <%= if @stats == [] do %>
                       No geo data yet — traffic will appear as requests come in
                     <% else %>
@@ -155,11 +155,11 @@ defmodule GamendWeb.AdminLive.Geo do
                     country == "XX" && "opacity-60"
                   ]}
                 >
-                  <td class="font-mono text-base-content/40">{idx}</td>
+                  <td class="font-mono text-base-content/70">{idx}</td>
                   <td>
                     <span class="text-lg mr-1">{country_flag(country)}</span>
                     <span class="font-mono font-semibold">{country}</span>
-                    <span :if={country == "XX"} class="text-xs text-base-content/40 ml-1">
+                    <span :if={country == "XX"} class="text-xs text-base-content/70 ml-1">
                       (Unknown)
                     </span>
                   </td>
@@ -184,7 +184,7 @@ defmodule GamendWeb.AdminLive.Geo do
         </div>
 
         <%!-- Footer --%>
-        <div class="text-xs text-base-content/40 text-center">
+        <div class="text-xs text-base-content/70 text-center">
           Auto-refreshes every {div(@refresh_interval, 1000)}s &middot;
           7-day retention &middot;
           Data is in-memory (ETS) &middot;

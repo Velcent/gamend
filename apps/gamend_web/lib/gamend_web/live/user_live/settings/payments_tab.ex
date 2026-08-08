@@ -65,7 +65,7 @@ defmodule GamendWeb.UserLive.Settings.PaymentsTab do
                 <tr :for={purchase <- @payment_purchases} id={"payment-purchase-#{purchase.id}"}>
                   <td>
                     <div class="font-mono text-xs break-all">{purchase.order_id}</div>
-                    <div class="font-mono text-xs text-base-content/50 break-all">
+                    <div class="font-mono text-xs text-base-content/70 break-all">
                       {purchase.provider_transaction_id || "-"}
                     </div>
                   </td>
@@ -119,11 +119,11 @@ defmodule GamendWeb.UserLive.Settings.PaymentsTab do
 
               <div class="mt-3 grid grid-cols-2 gap-2 text-sm">
                 <div>
-                  <div class="text-xs uppercase text-base-content/50">{gettext("Kind")}</div>
+                  <div class="text-xs uppercase text-base-content/70">{gettext("Kind")}</div>
                   <div>{payment_entitlement_kind(entitlement)}</div>
                 </div>
                 <div>
-                  <div class="text-xs uppercase text-base-content/50">
+                  <div class="text-xs uppercase text-base-content/70">
                     {payment_entitlement_period_label(entitlement)}
                   </div>
                   <div>

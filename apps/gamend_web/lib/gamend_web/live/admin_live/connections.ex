@@ -34,7 +34,7 @@ defmodule GamendWeb.AdminLive.Connections do
           <div class="bg-base-100 rounded-lg shadow-sm p-4">
             <div class="text-xs text-base-content/60">Cluster Nodes</div>
             <div class="text-2xl font-bold">{@cluster_size}</div>
-            <div class="text-xs text-base-content/40 truncate">{node()}</div>
+            <div class="text-xs text-base-content/70 truncate">{node()}</div>
           </div>
         </div>
 
@@ -139,7 +139,7 @@ defmodule GamendWeb.AdminLive.Connections do
                   Active browser tabs with server-rendered real-time pages
                 </p>
                 <%= if @live_view_pages == [] do %>
-                  <div class="text-center py-4 text-base-content/40 text-sm">
+                  <div class="text-center py-4 text-base-content/70 text-sm">
                     No LiveView sessions active
                   </div>
                 <% else %>
@@ -172,7 +172,7 @@ defmodule GamendWeb.AdminLive.Connections do
                   Active DataChannel connections
                 </p>
                 <%= if @webrtc_users == [] do %>
-                  <div class="text-center py-4 text-base-content/40 text-sm">
+                  <div class="text-center py-4 text-base-content/70 text-sm">
                     No WebRTC peers active
                   </div>
                 <% else %>
@@ -189,7 +189,7 @@ defmodule GamendWeb.AdminLive.Connections do
                           <td class="text-sm" title={peer.user_id}>
                             {user_display(@user_names[peer.user_id])}
                           </td>
-                          <td class="font-mono text-xs text-base-content/50">{peer.pid}</td>
+                          <td class="font-mono text-xs text-base-content/70">{peer.pid}</td>
                         </tr>
                       </tbody>
                     </table>
@@ -234,7 +234,7 @@ defmodule GamendWeb.AdminLive.Connections do
             </div>
 
             <%= if @paged_users == [] do %>
-              <div class="text-center py-8 text-base-content/40">
+              <div class="text-center py-8 text-base-content/70">
                 No users currently connected
               </div>
             <% else %>
@@ -268,7 +268,7 @@ defmodule GamendWeb.AdminLive.Connections do
                           </span>
                         </div>
                       </td>
-                      <td class="text-xs text-base-content/50">
+                      <td class="text-xs text-base-content/70">
                         <span class="font-mono">
                           {Enum.join(user.detail_labels, ", ")}
                         </span>

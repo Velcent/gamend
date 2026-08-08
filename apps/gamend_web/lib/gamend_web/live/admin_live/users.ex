@@ -166,7 +166,7 @@ defmodule GamendWeb.AdminLive.Users do
                   />
                   <span class="label-text ml-2">Email (password)</span>
                 </label>
-                <span class="text-base-content/30">|</span>
+                <span class="text-base-content/50">|</span>
                 <label class="label cursor-pointer">
                   <input
                     type="checkbox"

@@ -78,7 +78,7 @@ defmodule GamendWeb.NotificationsLive do
                     <td class="flex gap-1 flex-wrap">
                       <%= if action = notification_action(n) do %>
                         <% {label, path} = action %>
-                        <.link navigate={path} class="btn btn-xs btn-outline btn-primary">
+                        <.link navigate={path} class="btn btn-sm btn-outline btn-primary">
                           {label}
                         </.link>
                       <% end %>
@@ -86,7 +86,7 @@ defmodule GamendWeb.NotificationsLive do
                         type="button"
                         phx-click="delete"
                         phx-value-id={n.id}
-                        class="btn btn-xs btn-outline btn-error"
+                        class="btn btn-sm btn-outline btn-error"
                       >
                         {gettext("Delete")}
                       </button>

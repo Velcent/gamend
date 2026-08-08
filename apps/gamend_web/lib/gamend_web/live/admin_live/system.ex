@@ -27,7 +27,7 @@ defmodule GamendWeb.AdminLive.System do
           <div class="bg-base-100 rounded-lg shadow-sm p-4">
             <div class="text-xs text-base-content/60">Schedulers</div>
             <div class="text-xl font-bold">{@sys.schedulers}</div>
-            <div class="text-xs text-base-content/40">{@scheduler_util}% busy</div>
+            <div class="text-xs text-base-content/70">{@scheduler_util}% busy</div>
           </div>
           <div class="bg-base-100 rounded-lg shadow-sm p-4">
             <div class="text-xs text-base-content/60">Node</div>
@@ -298,7 +298,7 @@ defmodule GamendWeb.AdminLive.System do
                   </tr>
                 </tbody>
               </table>
-              <div class="text-xs text-base-content/40 mt-1">
+              <div class="text-xs text-base-content/70 mt-1">
                 Took {@retention.duration_ms} ms. Classes that pruned nothing are hidden.
               </div>
             </div>

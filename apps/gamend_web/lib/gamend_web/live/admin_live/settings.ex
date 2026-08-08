@@ -196,7 +196,7 @@ defmodule GamendWeb.AdminLive.Settings do
                       <div :if={row.doc != ""} class="text-xs text-base-content/70 mt-1">
                         {row.doc}
                       </div>
-                      <div :if={gate_text(row)} class="text-xs text-base-content/50 mt-1 italic">
+                      <div :if={gate_text(row)} class="text-xs text-base-content/70 mt-1 italic">
                         {gate_text(row)}
                       </div>
                     </td>
@@ -206,7 +206,7 @@ defmodule GamendWeb.AdminLive.Settings do
                     <td class="align-top">
                       <span class="font-mono text-sm break-all">{display_value(row)}</span>
                       <span :if={row.secret} class="badge badge-ghost badge-sm ml-2">secret</span>
-                      <div :if={row.source == :config} class="text-xs text-base-content/50 mt-1">
+                      <div :if={row.source == :config} class="text-xs text-base-content/70 mt-1">
                         default: {inspect(row.default)}
                       </div>
                     </td>

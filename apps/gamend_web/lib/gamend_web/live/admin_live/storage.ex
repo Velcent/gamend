@@ -269,7 +269,7 @@ defmodule GamendWeb.AdminLive.Storage do
                       class="w-10 h-10 object-cover rounded"
                       loading="lazy"
                     />
-                    <span :if={!image?(obj.key)} class="text-base-content/40 text-xs">file</span>
+                    <span :if={!image?(obj.key)} class="text-base-content/70 text-xs">file</span>
                   </td>
                   <td class="font-mono text-xs break-all">{obj.key}</td>
                   <td class="text-xs whitespace-nowrap">{format_bytes(obj.size)}</td>

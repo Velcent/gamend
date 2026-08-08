@@ -112,6 +112,18 @@ defmodule GamendWeb.Plugs.LocalePath do
   @spec url_locale(String.t()) :: String.t()
   def url_locale(locale), do: String.replace(locale, "_", "-")
 
+  @rtl_locales ~w(ar he fa ur)
+
+  @doc """
+  Text direction for the `dir` attribute. Right-to-left scripts must mirror
+  the page layout (WCAG/i18n); everything else is `ltr`.
+  """
+  @spec text_direction(String.t()) :: String.t()
+  def text_direction(locale) do
+    base = locale |> String.replace("-", "_") |> String.split("_") |> hd()
+    if base in @rtl_locales, do: "rtl", else: "ltr"
+  end
+
   defp classify(%Plug.Conn{path_info: [first | rest]} = conn) when is_binary(first) do
     case GamendWeb.GettextSync.normalize_locale(first) do
       locale when is_binary(locale) and locale in @known_locales ->

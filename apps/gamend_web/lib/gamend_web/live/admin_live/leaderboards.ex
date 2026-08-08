@@ -221,7 +221,7 @@ defmodule GamendWeb.AdminLive.Leaderboards do
                     disabled
                   />
                   <label class="label">
-                    <span class="label-text-alt text-base-content/50">
+                    <span class="label-text-alt text-base-content/70">
                       Slug cannot be changed after creation
                     </span>
                   </label>

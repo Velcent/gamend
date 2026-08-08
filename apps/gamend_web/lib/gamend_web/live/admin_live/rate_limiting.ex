@@ -174,7 +174,7 @@ defmodule GamendWeb.AdminLive.RateLimiting do
                   >
                     <td class="font-mono text-xs">
                       <span class={[
-                        "badge badge-xs font-bold text-[0.6rem] mr-2",
+                        "badge badge-sm font-bold text-xs mr-2",
                         type_badge_class(type)
                       ]}>
                         {type_label(type)}
@@ -213,7 +213,7 @@ defmodule GamendWeb.AdminLive.RateLimiting do
                     </td>
                   </tr>
                   <tr :if={@rate_stats.usage == []}>
-                    <td colspan="4" class="text-center text-xs text-base-content/40 py-4 italic">
+                    <td colspan="4" class="text-center text-xs text-base-content/70 py-4 italic">
                       No significant traffic in current window.
                     </td>
                   </tr>
@@ -288,7 +288,7 @@ defmodule GamendWeb.AdminLive.RateLimiting do
                       </td>
                     </tr>
                     <tr :if={@ip_bans == []}>
-                      <td colspan="3" class="text-center text-xs text-base-content/40 py-4 italic">
+                      <td colspan="3" class="text-center text-xs text-base-content/70 py-4 italic">
                         No active IP bans.
                       </td>
                     </tr>
@@ -330,7 +330,7 @@ defmodule GamendWeb.AdminLive.RateLimiting do
                       </td>
                     </tr>
                     <tr :if={@ban_log == []}>
-                      <td colspan="3" class="text-center text-xs text-base-content/40 py-4 italic">
+                      <td colspan="3" class="text-center text-xs text-base-content/70 py-4 italic">
                         No ban history yet.
                       </td>
                     </tr>

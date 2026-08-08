@@ -174,7 +174,7 @@ defmodule GamendWeb.AdminLive.Translations do
                     <td class="text-sm break-all max-w-xs">{s.msgid}</td>
                     <td class={[
                       "text-sm break-all max-w-xs",
-                      !s.translated? && "text-base-content/40 italic"
+                      !s.translated? && "text-base-content/70 italic"
                     ]}>
                       {if s.translated?, do: s.msgstr, else: "—"}
                     </td>

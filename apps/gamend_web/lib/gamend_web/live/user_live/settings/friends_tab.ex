@@ -193,7 +193,7 @@ defmodule GamendWeb.UserLive.Settings.FriendsTab do
                   <button
                     phx-click="unblock_friend"
                     phx-value-id={b.id}
-                    class="btn btn-xs btn-outline"
+                    class="btn btn-sm btn-outline"
                   >
                     {gettext("Unblock")}
                   </button>
@@ -241,7 +241,7 @@ defmodule GamendWeb.UserLive.Settings.FriendsTab do
                     <button
                       phx-click="send_friend"
                       phx-value-target={s.id}
-                      class="btn btn-xs btn-primary"
+                      class="btn btn-sm btn-primary"
                     >
                       {gettext("Send")}
                     </button>

@@ -139,7 +139,7 @@ defmodule GamendWeb.ChatLive do
             {gettext("Friends")}
           </h3>
           <%= if @friends == [] do %>
-            <p class="text-sm text-base-content/40 pl-2">{gettext("No results.")}</p>
+            <p class="text-sm text-base-content/70 pl-2">{gettext("No results.")}</p>
           <% end %>
           <ul class="space-y-1">
             <li :for={f <- @friends}>
@@ -170,7 +170,7 @@ defmodule GamendWeb.ChatLive do
             {gettext("Groups")}
           </h3>
           <%= if @my_groups == [] do %>
-            <p class="text-sm text-base-content/40 pl-2">{gettext("No results.")}</p>
+            <p class="text-sm text-base-content/70 pl-2">{gettext("No results.")}</p>
           <% end %>
           <ul class="space-y-1">
             <li :for={{group, _role} <- @my_groups}>
@@ -229,7 +229,7 @@ defmodule GamendWeb.ChatLive do
               </div>
 
               <%= if @messages == [] do %>
-                <div class="text-sm text-base-content/50 text-center py-8">
+                <div class="text-sm text-base-content/70 text-center py-8">
                   {gettext("No results.")}
                 </div>
               <% end %>
@@ -243,7 +243,7 @@ defmodule GamendWeb.ChatLive do
                   if(show_header, do: "mt-3", else: "mt-0.5")
                 ]}
               >
-                <div :if={show_header} class="text-xs text-base-content/50">
+                <div :if={show_header} class="text-xs text-base-content/70">
                   <%= if msg.sender_id == @user_id do %>
                     {gettext("You")}
                   <% else %>
@@ -270,10 +270,10 @@ defmodule GamendWeb.ChatLive do
                       autocomplete="off"
                       phx-mounted={JS.dispatch("focus")}
                     />
-                    <button type="submit" class="btn btn-xs btn-primary">
+                    <button type="submit" class="btn btn-sm btn-primary">
                       {gettext("Save")}
                     </button>
-                    <button type="button" phx-click="chat_edit_cancel" class="btn btn-xs btn-ghost">
+                    <button type="button" phx-click="chat_edit_cancel" class="btn btn-sm btn-ghost">
                       {gettext("Cancel")}
                     </button>
                   </form>
@@ -338,7 +338,7 @@ defmodule GamendWeb.ChatLive do
               </button>
             </form>
           <% else %>
-            <div class="flex-1 flex items-center justify-center text-base-content/40">
+            <div class="flex-1 flex items-center justify-center text-base-content/70">
               <div class="text-center">
                 <p class="text-lg">{gettext("Select a conversation")}</p>
                 <p class="text-sm mt-1">{gettext("Select a conversation")}</p>

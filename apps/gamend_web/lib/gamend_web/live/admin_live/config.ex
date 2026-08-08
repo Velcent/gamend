@@ -239,15 +239,15 @@ defmodule GamendWeb.AdminLive.Config do
                                 alt="logo"
                                 class="h-12 w-auto rounded"
                               />
-                              <span class="text-[10px] opacity-50">
+                              <span class="text-xs opacity-70">
                                 {Map.get(@config.theme_map, "logo")}
                               </span>
                             <% else %>
-                              <span class="text-xs opacity-50">—</span>
+                              <span class="text-xs opacity-70">—</span>
                             <% end %>
                             <%!-- Logo Dark --%>
                             <%= if @config.theme_dark.logo_dark_exists? do %>
-                              <span class="text-[10px] font-semibold opacity-50 mt-1">
+                              <span class="text-xs font-semibold opacity-70 mt-1">
                                 Dark
                               </span>
                               <img
@@ -255,12 +255,12 @@ defmodule GamendWeb.AdminLive.Config do
                                 alt="logo dark"
                                 class="h-12 w-auto rounded bg-neutral p-1"
                               />
-                              <span class="text-[10px] opacity-40">
+                              <span class="text-xs opacity-70">
                                 {@config.theme_dark.logo_dark_path}
                               </span>
                             <% else %>
                               <%= if Map.get(@config.theme_map, "logo") do %>
-                                <span class="text-[10px] opacity-40 mt-1">
+                                <span class="text-xs opacity-70 mt-1">
                                   Dark: not found
                                 </span>
                               <% end %>
@@ -275,15 +275,15 @@ defmodule GamendWeb.AdminLive.Config do
                                 alt="favicon"
                                 class="h-8 w-auto"
                               />
-                              <span class="text-[10px] opacity-50">
+                              <span class="text-xs opacity-70">
                                 {Map.get(@config.theme_map, "favicon")}
                               </span>
                             <% else %>
-                              <span class="text-xs opacity-50">—</span>
+                              <span class="text-xs opacity-70">—</span>
                             <% end %>
                             <%!-- Favicon Dark --%>
                             <%= if @config.theme_dark.favicon_dark_exists? do %>
-                              <span class="text-[10px] font-semibold opacity-50 mt-1">
+                              <span class="text-xs font-semibold opacity-70 mt-1">
                                 Dark
                               </span>
                               <img
@@ -291,12 +291,12 @@ defmodule GamendWeb.AdminLive.Config do
                                 alt="favicon dark"
                                 class="h-8 w-auto bg-neutral p-0.5 rounded"
                               />
-                              <span class="text-[10px] opacity-40">
+                              <span class="text-xs opacity-70">
                                 {@config.theme_dark.favicon_dark_path}
                               </span>
                             <% else %>
                               <%= if Map.get(@config.theme_map, "favicon") do %>
-                                <span class="text-[10px] opacity-40 mt-1">
+                                <span class="text-xs opacity-70 mt-1">
                                   Dark: not found
                                 </span>
                               <% end %>
@@ -311,15 +311,15 @@ defmodule GamendWeb.AdminLive.Config do
                                 alt="banner"
                                 class="h-16 w-auto rounded shadow-sm"
                               />
-                              <span class="text-[10px] opacity-50">
+                              <span class="text-xs opacity-70">
                                 {Map.get(@config.theme_map, "banner")}
                               </span>
                             <% else %>
-                              <span class="text-xs opacity-50">—</span>
+                              <span class="text-xs opacity-70">—</span>
                             <% end %>
                             <%!-- Banner Dark --%>
                             <%= if @config.theme_dark.banner_dark_exists? do %>
-                              <span class="text-[10px] font-semibold opacity-50 mt-1">
+                              <span class="text-xs font-semibold opacity-70 mt-1">
                                 Dark
                               </span>
                               <img
@@ -327,12 +327,12 @@ defmodule GamendWeb.AdminLive.Config do
                                 alt="banner dark"
                                 class="h-16 w-auto rounded shadow-sm bg-neutral p-1"
                               />
-                              <span class="text-[10px] opacity-40">
+                              <span class="text-xs opacity-70">
                                 {@config.theme_dark.banner_dark_path}
                               </span>
                             <% else %>
                               <%= if Map.get(@config.theme_map, "banner") do %>
-                                <span class="text-[10px] opacity-40 mt-1">
+                                <span class="text-xs opacity-70 mt-1">
                                   Dark: not found
                                 </span>
                               <% end %>
@@ -347,35 +347,35 @@ defmodule GamendWeb.AdminLive.Config do
                           </span>
                           <div class="mt-1 grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div class="flex flex-col items-center gap-1">
-                              <span class="text-[10px] font-semibold opacity-50">Light</span>
+                              <span class="text-xs font-semibold opacity-70">Light</span>
                               <%= if @config.theme_dark.fullscreen_exists? do %>
                                 <img
                                   src="/images/fullscreen.png"
                                   alt="fullscreen hero"
                                   class="w-full max-w-[220px] h-auto rounded shadow-sm"
                                 />
-                                <span class="text-[10px] opacity-40">
+                                <span class="text-xs opacity-70">
                                   /images/fullscreen.png
                                 </span>
                               <% else %>
-                                <span class="text-[10px] opacity-40">
+                                <span class="text-xs opacity-70">
                                   /images/fullscreen.png — not found
                                 </span>
                               <% end %>
                             </div>
                             <div class="flex flex-col items-center gap-1">
-                              <span class="text-[10px] font-semibold opacity-50">Dark</span>
+                              <span class="text-xs font-semibold opacity-70">Dark</span>
                               <%= if @config.theme_dark.fullscreen_dark_exists? do %>
                                 <img
                                   src="/images/fullscreen_dark.png"
                                   alt="fullscreen hero dark"
                                   class="w-full max-w-[220px] h-auto rounded shadow-sm bg-neutral p-1"
                                 />
-                                <span class="text-[10px] opacity-40">
+                                <span class="text-xs opacity-70">
                                   /images/fullscreen_dark.png
                                 </span>
                               <% else %>
-                                <span class="text-[10px] opacity-40">
+                                <span class="text-xs opacity-70">
                                   /images/fullscreen_dark.png — not found
                                 </span>
                               <% end %>
@@ -461,10 +461,10 @@ defmodule GamendWeb.AdminLive.Config do
                                 <% sections = Map.get(page, "sections", []) %>
                                 <div class="badge badge-outline gap-1 py-3">
                                   <span class="text-xs">{key}</span>
-                                  <span class="text-[10px] opacity-50">
+                                  <span class="text-xs opacity-70">
                                     {Map.get(page, "path", "—")}
                                   </span>
-                                  <span class="text-[10px] opacity-40">
+                                  <span class="text-xs opacity-70">
                                     ({length(sections)} sections)
                                   </span>
                                 </div>
@@ -493,11 +493,11 @@ defmodule GamendWeb.AdminLive.Config do
                                     <span class="text-xs">
                                       {theme_nav_entry_label(link)}
                                     </span>
-                                    <span class="text-[10px] opacity-50">
+                                    <span class="text-xs opacity-70">
                                       {theme_nav_entry_path(link)}
                                     </span>
                                     <%= if theme_nav_entry_auth(link) do %>
-                                      <span class="text-[10px] opacity-40">
+                                      <span class="text-xs opacity-70">
                                         ({theme_nav_entry_auth(link)})
                                       </span>
                                     <% end %>
@@ -519,7 +519,7 @@ defmodule GamendWeb.AdminLive.Config do
                               <%= for section <- footer_sections do %>
                                 <div class="badge badge-ghost gap-1 py-3">
                                   <span class="text-xs">{section["title"]}</span>
-                                  <span class="text-[10px] opacity-50">
+                                  <span class="text-xs opacity-70">
                                     {length(Map.get(section, "links", []))} links
                                   </span>
                                 </div>

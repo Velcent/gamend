@@ -1,5 +1,7 @@
 # August 2026
 
+- [fixed] **Accessible theme colors**
+- [added] **RULES.md** — design & accessibility rules.
 - [added] **Grouped** quests.
 - [added] **Repeat** quest reset type.
 
