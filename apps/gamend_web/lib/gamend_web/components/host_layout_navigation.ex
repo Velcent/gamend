@@ -345,6 +345,7 @@ defmodule GamendWeb.HostLayoutNavigation do
     assigns =
       assign(assigns,
         label: locale_label(assigns.locale),
+        flag_code: locale_flag_code(assigns.locale),
         locale_links:
           locale_links(assigns.current_path, assigns.current_query, assigns.known_locales)
       )
@@ -352,13 +353,13 @@ defmodule GamendWeb.HostLayoutNavigation do
     ~H"""
     <div class="contents">
       <label for="lang-modal" class="btn gap-1 list-none btn-outline cursor-pointer sm:hidden">
-        <.icon name="hero-globe-alt-solid" class="w-4 h-4" />
+        <.flag code={@flag_code} class="rounded-[2px] ring-1 ring-base-content/10" />
         <.icon name="hero-chevron-down-solid" class="w-3 h-3" />
       </label>
 
       <details class="dropdown dropdown-end hidden sm:block" data-navbar-dropdown>
         <summary class="btn gap-1 list-none btn-outline">
-          <.icon name="hero-globe-alt-solid" class="w-4 h-4" />
+          <.flag code={@flag_code} class="rounded-[2px] ring-1 ring-base-content/10" />
           {@label}
           <.icon name="hero-chevron-down-solid" class="w-3 h-3" />
         </summary>
