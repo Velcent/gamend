@@ -1,6 +1,12 @@
 <!DOCTYPE html>
+<%!--
+`lang` is BCP-47, which uses `-`; gettext locale names use `_`. Emitting the
+raw locale put `lang="es_ES"` on the page — not a valid language tag, so a
+crawler falls back to guessing the language of a page that is telling it. The
+hreflang links below already go through `url_locale/1`; this had been missed.
+--%>
 <html
-  lang={GamendWeb.HostLayouts.current_locale()}
+  lang={GamendWeb.Plugs.LocalePath.url_locale(GamendWeb.HostLayouts.current_locale())}
   class="scroll-smooth bg-base-100"
   data-theme={assigns[:color_mode]}
 >

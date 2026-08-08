@@ -20,7 +20,6 @@ defmodule GamendWeb.HostLayouts do
     "el" => "Ελληνικά",
     "en" => "English",
     "es" => "Español",
-    "es_ES" => "Español (España)",
     "fi" => "suomi",
     "fr" => "Français",
     "hu" => "magyar",

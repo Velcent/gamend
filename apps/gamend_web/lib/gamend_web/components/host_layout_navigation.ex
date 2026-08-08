@@ -1025,7 +1025,6 @@ defmodule GamendWeb.HostLayoutNavigation do
   defp locale_flag_code("el"), do: "gr"
   defp locale_flag_code("en"), do: "gb"
   defp locale_flag_code("es"), do: "es"
-  defp locale_flag_code("es_ES"), do: "es"
   defp locale_flag_code("fi"), do: "fi"
   defp locale_flag_code("fr"), do: "fr"
   defp locale_flag_code("hu"), do: "hu"

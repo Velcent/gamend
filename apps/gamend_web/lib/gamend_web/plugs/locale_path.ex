@@ -176,10 +176,32 @@ defmodule GamendWeb.Plugs.LocalePath do
     locale =
       conn
       |> get_session(@session_key)
-      |> GamendWeb.GettextSync.normalize_locale()
-      |> Kernel.||(@default_locale)
+      |> session_locale()
 
     GamendWeb.GettextSync.put_locale(locale)
     assign(conn, :locale, locale)
+  end
+
+  # A stored locale that no longer exists falls back to its base language before
+  # the default — someone who picked `es_ES` when it was offered should keep
+  # getting Spanish after it is retired, not English.
+  #
+  # Only for session values. `classify/1` deliberately does *not* do this: a
+  # path prefix has to match a real locale exactly, or `/es-MX/about` would be
+  # served as a 200 and mint an indexable duplicate of a page we never wrote.
+  defp session_locale(stored) do
+    case GamendWeb.GettextSync.normalize_locale(stored) do
+      locale when is_binary(locale) ->
+        locale
+
+      nil ->
+        with true <- is_binary(stored),
+             [base | _] <- String.split(stored, ["_", "-"]),
+             locale when is_binary(locale) <- GamendWeb.GettextSync.normalize_locale(base) do
+          locale
+        else
+          _ -> @default_locale
+        end
+    end
   end
 end
