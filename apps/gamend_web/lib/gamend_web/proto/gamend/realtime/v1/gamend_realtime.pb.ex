@@ -286,6 +286,24 @@ defmodule Gamend.Realtime.V1.HostChanged do
   field :display_name, 2, type: :string, json_name: "displayName"
 end
 
+defmodule Gamend.Realtime.V1.LobbyStateChanged do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "gamend.realtime.v1.LobbyStateChanged",
+    protoc_gen_elixir_version: "0.17.0",
+    syntax: :proto3
+
+  field :lobby_id, 1, type: :string, json_name: "lobbyId"
+  field :from, 2, type: :string
+  field :to, 3, type: :string
+
+  field :state_changed_at_ms, 4,
+    proto3_optional: true,
+    type: :int64,
+    json_name: "stateChangedAtMs"
+end
+
 defmodule Gamend.Realtime.V1.GroupInviteEvent do
   @moduledoc false
 

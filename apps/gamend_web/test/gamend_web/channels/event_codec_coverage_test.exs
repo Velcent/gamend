@@ -1,0 +1,142 @@
+defmodule GamendWeb.EventCodecCoverageTest do
+  @moduledoc """
+  Keeps `GamendWeb.RealtimeEvents`' `pb:` flag honest against what
+  `GamendWeb.EventCodec` actually encodes.
+
+  The registry is the published contract: it is what the admin Runtime page
+  renders as a "pb+json" or "json" badge per event, and what a client author
+  reads to decide whether to expect a binary frame. Nothing checked it. The two
+  could disagree in either direction, and both directions are silent:
+
+    * `pb: true`, no mapping — the client waits for a binary frame that never
+      comes, or worse, was written to decode one and gets JSON instead.
+    * `pb: false`, mapping exists — the client treats the event as JSON and
+      fails to parse the binary frame the server actually sends.
+
+  The second is not hypothetical: `chat_muted` and `chat_unmuted` were declared
+  `pb: false` while `EventCodec` mapped both.
+
+  `realtime_events_drift_test.exs` already keeps the registry's *event list* in
+  sync with the source. This covers the column that test does not read.
+  """
+  use ExUnit.Case, async: true
+
+  alias Gamend.Realtime.V1, as: PB
+  alias GamendWeb.EventCodec
+  alias GamendWeb.RealtimeEvents
+
+  # Registry topics are patterns ("user:*", "lobby:*") or bare ("lobbies").
+  # EventCodec dispatches on the segment before the colon, so any concrete id
+  # works — the same event can map on one topic and not another.
+  defp concrete_topic(topic), do: String.replace(topic, ":*", ":1")
+
+  # An empty payload is enough to tell mapped from unmapped: `message_for/3`
+  # dispatches on topic and event only, and every builder it reaches tolerates
+  # missing keys (proto3 fields default). A builder that raised would be
+  # rescued into `:json` by `encode/3` — which is itself worth catching, since
+  # an event that cannot encode its own empty payload is not really mapped.
+  defp mapped?(topic, event) do
+    EventCodec.encode(concrete_topic(topic), event, %{}) != :json
+  end
+
+  describe "registry pb: flag" do
+    test "matches what EventCodec actually encodes" do
+      mismatches =
+        for row <- RealtimeEvents.all(),
+            actual = mapped?(row.topic, row.event),
+            actual != row.pb,
+            do: {row.topic, row.event, row.pb, actual}
+
+      assert mismatches == [],
+             """
+             GamendWeb.RealtimeEvents disagrees with GamendWeb.EventCodec.
+
+             #{Enum.map_join(mismatches, "\n", fn {t, e, declared, actual} -> "  #{t} #{e}: registry says pb=#{declared}, codec says #{actual}" end)}
+
+             Either add/remove the `message_for` clause in EventCodec, or
+             correct the `pb:` column in RealtimeEvents. The registry is what
+             the admin Runtime page and client authors read, so a wrong flag
+             ships as wrong documentation.
+             """
+    end
+
+    test "the registry is actually populated" do
+      # Without this, an empty or unloadable registry makes every assertion
+      # above pass vacuously.
+      rows = RealtimeEvents.all()
+
+      assert length(rows) > 50, "only #{length(rows)} registry entries"
+      assert Enum.any?(rows, & &1.pb), "no event is marked pb: true"
+      assert Enum.any?(rows, &(not &1.pb)), "no event is marked pb: false"
+    end
+  end
+
+  describe "protobuf coverage" do
+    test "every topic kind in the registry reaches the codec" do
+      # A topic EventCodec has no clauses for at all encodes nothing, which
+      # would show up as a uniform pb: false across that topic rather than as
+      # an obvious hole. Signaling is that case today and is expected.
+      by_topic =
+        RealtimeEvents.all()
+        |> Enum.group_by(& &1.topic)
+        |> Enum.reject(fn {_topic, rows} -> Enum.any?(rows, & &1.pb) end)
+        |> Enum.map(&elem(&1, 0))
+        |> Enum.sort()
+
+      assert by_topic == ["signaling:*"],
+             """
+             These topics have no protobuf-mapped events at all: #{inspect(by_topic)}
+
+             Signaling is deliberate — its payloads are SDP blobs and ICE
+             candidates, opaque strings protobuf would wrap without shrinking,
+             and the peer path negotiates its own format in WebRtcPeer. Any
+             other topic here is a gap.
+             """
+    end
+
+    test "state_changed carries the payload, with atoms rendered as strings" do
+      # The states are atoms in-process — Gamend.Lobbies builds the payload from
+      # the schema field — and must not reach the wire as ":waiting".
+      {:ok, iodata} =
+        EventCodec.encode("lobby:1", "state_changed", %{
+          lobby_id: "lob-1",
+          from: :waiting,
+          to: :in_progress,
+          state_changed_at: ~U[2026-08-09 12:00:00Z]
+        })
+
+      decoded = PB.LobbyStateChanged.decode(IO.iodata_to_binary(iodata))
+
+      assert decoded.lobby_id == "lob-1"
+      assert decoded.from == "waiting"
+      assert decoded.to == "in_progress"
+
+      assert decoded.state_changed_at_ms ==
+               DateTime.to_unix(~U[2026-08-09 12:00:00Z], :millisecond)
+    end
+
+    test "state_changed matches the bytes the Godot client is tested against" do
+      # The client's decoder is hand-written GDScript in another repo (the
+      # godobuf checkout is a different generator version, so that file cannot
+      # be regenerated wholesale). This pins the exact bytes both sides use;
+      # game-world/tests/lobby_state_changed_test.gd decodes this same vector.
+      {:ok, iodata} =
+        EventCodec.encode("lobby:1", "state_changed", %{
+          lobby_id: "lob-1",
+          from: :waiting,
+          to: :in_progress,
+          state_changed_at: ~U[2026-08-09 12:00:00Z]
+        })
+
+      assert Base.encode64(IO.iodata_to_binary(iodata)) ==
+               "CgVsb2ItMRIHd2FpdGluZxoLaW5fcHJvZ3Jlc3MggMyTs/4z"
+    end
+
+    test "a mapped event encodes to something a client can decode" do
+      # `encode/3` rescues anything a builder raises and falls back to JSON, so
+      # "mapped" only means a clause matched. This proves the bytes are real.
+      assert {:ok, iodata} = EventCodec.encode("user:1", "kv_updated", %{})
+      assert IO.iodata_to_binary(iodata) |> is_binary()
+    end
+  end
+end

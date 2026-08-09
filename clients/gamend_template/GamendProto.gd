@@ -147,6 +147,8 @@ static func decode_event(topic: String, event: String, data: PackedByteArray) ->
 					return _decode(PB.MemberEvent.new(), data, _member_event_to_dict)
 				"host_changed":
 					return _decode(PB.HostChanged.new(), data, func(m): return {"new_host_id": m.get_new_host_id(), "display_name": m.get_display_name()})
+				"state_changed":
+					return _decode(PB.LobbyStateChanged.new(), data, func(m): return {"lobby_id": m.get_lobby_id(), "from": m.get_from(), "to": m.get_to(), "state_changed_at_ms": m.get_state_changed_at_ms()})
 				"user_updated":
 					return _decode(PB.UserBrief.new(), data, _brief_to_dict)
 		"lobbies":

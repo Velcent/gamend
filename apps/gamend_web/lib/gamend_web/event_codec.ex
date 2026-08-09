@@ -83,6 +83,15 @@ defmodule GamendWeb.EventCodec do
       display_name: get(p, :display_name) || ""
     }
 
+  # `from`/`to` arrive as lobby state atoms and go out as strings.
+  defp message_for("lobby", "state_changed", p),
+    do: %PB.LobbyStateChanged{
+      lobby_id: get(p, :lobby_id) || "",
+      from: state_name(get(p, :from)),
+      to: state_name(get(p, :to)),
+      state_changed_at_ms: ms(p, :state_changed_at)
+    }
+
   defp message_for("lobby", "user_updated", p), do: user_brief(p)
 
   defp message_for(kind, "member_updated", p) when kind in ~w(group party),
@@ -521,6 +530,14 @@ defmodule GamendWeb.EventCodec do
       nil
     end
   end
+
+  # Lobby states are atoms in-process and strings on the wire. The payload is
+  # built by Gamend.Lobbies from the schema's own field, never from client
+  # input, so there is no String.to_atom hazard in the other direction.
+  defp state_name(nil), do: ""
+  defp state_name(state) when is_atom(state), do: Atom.to_string(state)
+  defp state_name(state) when is_binary(state), do: state
+  defp state_name(state), do: to_string(state)
 
   # Converts a timestamp field to unix milliseconds, preserving presence.
   defp ms(p, key), do: to_ms(get(p, key))

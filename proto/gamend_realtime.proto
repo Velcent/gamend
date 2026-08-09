@@ -204,6 +204,15 @@ message HostChanged {
   string display_name = 2;
 }
 
+// "state_changed" (lobby channel): the lobby moved to another lifecycle
+// state. `from`/`to` are the state atoms rendered as strings.
+message LobbyStateChanged {
+  string lobby_id = 1;
+  string from = 2;
+  string to = 3;
+  optional int64 state_changed_at_ms = 4;
+}
+
 // "group_invite_accepted", "group_invite_cancelled", "group_join_request_approved",
 // "group_join_request_rejected".
 message GroupInviteEvent {

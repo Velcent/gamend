@@ -3017,6 +3017,98 @@ class HostChanged:
 			return PB_ERR.PARSE_INCOMPLETE
 		return result
 	
+class LobbyStateChanged:
+	extends RefCounted
+	func _init():
+		var service
+		
+		__lobby_id = PBField.new("lobby_id", PB_DATA_TYPE.STRING, PB_RULE.OPTIONAL, 1, true, DEFAULT_VALUES_3[PB_DATA_TYPE.STRING])
+		service = PBServiceField.new()
+		service.field = __lobby_id
+		data[__lobby_id.tag] = service
+		
+		__from = PBField.new("from", PB_DATA_TYPE.STRING, PB_RULE.OPTIONAL, 2, true, DEFAULT_VALUES_3[PB_DATA_TYPE.STRING])
+		service = PBServiceField.new()
+		service.field = __from
+		data[__from.tag] = service
+		
+		__to = PBField.new("to", PB_DATA_TYPE.STRING, PB_RULE.OPTIONAL, 3, true, DEFAULT_VALUES_3[PB_DATA_TYPE.STRING])
+		service = PBServiceField.new()
+		service.field = __to
+		data[__to.tag] = service
+		
+		__state_changed_at_ms = PBField.new("state_changed_at_ms", PB_DATA_TYPE.INT64, PB_RULE.OPTIONAL, 4, true, DEFAULT_VALUES_3[PB_DATA_TYPE.INT64])
+		service = PBServiceField.new()
+		service.field = __state_changed_at_ms
+		data[__state_changed_at_ms.tag] = service
+		
+	var data = {}
+	
+	var __lobby_id: PBField
+	func has_lobby_id() -> bool:
+		return data[1].state == PB_SERVICE_STATE.FILLED
+	func get_lobby_id() -> String:
+		return __lobby_id.value
+	func clear_lobby_id() -> void:
+		data[1].state = PB_SERVICE_STATE.UNFILLED
+		__lobby_id.value = DEFAULT_VALUES_3[PB_DATA_TYPE.STRING]
+	func set_lobby_id(value : String) -> void:
+		__lobby_id.value = value
+	
+	var __from: PBField
+	func has_from() -> bool:
+		return data[2].state == PB_SERVICE_STATE.FILLED
+	func get_from() -> String:
+		return __from.value
+	func clear_from() -> void:
+		data[2].state = PB_SERVICE_STATE.UNFILLED
+		__from.value = DEFAULT_VALUES_3[PB_DATA_TYPE.STRING]
+	func set_from(value : String) -> void:
+		__from.value = value
+	
+	var __to: PBField
+	func has_to() -> bool:
+		return data[3].state == PB_SERVICE_STATE.FILLED
+	func get_to() -> String:
+		return __to.value
+	func clear_to() -> void:
+		data[3].state = PB_SERVICE_STATE.UNFILLED
+		__to.value = DEFAULT_VALUES_3[PB_DATA_TYPE.STRING]
+	func set_to(value : String) -> void:
+		__to.value = value
+	
+	var __state_changed_at_ms: PBField
+	func has_state_changed_at_ms() -> bool:
+		return data[4].state == PB_SERVICE_STATE.FILLED
+	func get_state_changed_at_ms() -> int:
+		return __state_changed_at_ms.value
+	func clear_state_changed_at_ms() -> void:
+		data[4].state = PB_SERVICE_STATE.UNFILLED
+		__state_changed_at_ms.value = DEFAULT_VALUES_3[PB_DATA_TYPE.INT64]
+	func set_state_changed_at_ms(value : int) -> void:
+		__state_changed_at_ms.value = value
+	
+	func _to_string() -> String:
+		return PBPacker.message_to_string(data)
+		
+	func to_bytes() -> PackedByteArray:
+		return PBPacker.pack_message(data)
+		
+	func from_bytes(bytes : PackedByteArray, offset : int = 0, limit : int = -1) -> int:
+		var cur_limit = bytes.size()
+		if limit != -1:
+			cur_limit = limit
+		var result = PBPacker.unpack_message(data, bytes, offset, cur_limit)
+		if result == cur_limit:
+			if PBPacker.check_required(data):
+				if limit == -1:
+					return PB_ERR.NO_ERRORS
+			else:
+				return PB_ERR.REQUIRED_FIELDS
+		elif limit == -1 && result > 0:
+			return PB_ERR.PARSE_INCOMPLETE
+		return result
+	
 class GroupInviteEvent:
 	extends RefCounted
 	func _init():
