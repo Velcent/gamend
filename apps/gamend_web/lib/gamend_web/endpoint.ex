@@ -34,7 +34,7 @@ defmodule GamendWeb.Endpoint do
   plug :serve_game_static
   plug :serve_host_static
   plug :serve_asset_static
-  plug :serve_web_font_static
+  plug :serve_bundled_static
   plug GamendWeb.HostContentStatic
 
   # Two separate guards, deliberately. `Phoenix.CodeReloader` ships with
@@ -157,10 +157,12 @@ defmodule GamendWeb.Endpoint do
     )
   end
 
-  defp serve_web_font_static(conn, _opts) do
+  # Bundled reference assets: shipped with the web app, requested without a
+  # digest, and cached for a year by the `static_cache_control/1` catch-all.
+  defp serve_bundled_static(conn, _opts) do
     Plug.Static.call(
       conn,
-      configurable_static_opts(:web_font_static_opts, :gamend_web, ~w(fonts))
+      configurable_static_opts(:bundled_static_opts, :gamend_web, ~w(fonts flags))
     )
   end
 
