@@ -243,3 +243,15 @@ config :ueberauth, Ueberauth,
 # Provider credentials are not set here. Ueberauth reads them from its own
 # application env, which host_runtime.exs fills from the declared
 # Gamend.OAuth.Providers settings — one source, resolved at boot.
+
+# `<lastmod>` dates for the markdown-backed pages. The manifest is committed:
+# it stores when each page's *content* last changed, which cannot be recovered
+# from a fresh checkout, so regenerating it on a build machine would reset
+# every date to the build day.
+config :gamend_web, GamendWeb.Sitemap,
+  source: GamendHost.Sitemap.Source,
+  manifest: "priv/sitemap_lastmod.json"
+
+# Per-page titles, descriptions, breadcrumbs and schema.org markup. Without a
+# provider every page inherits the theme's site-wide description.
+config :gamend_web, page_meta_provider: GamendHost.PageMeta

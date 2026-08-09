@@ -1,0 +1,142 @@
+{
+  "changelog": {
+    "date": "2026-08-09",
+    "hash": "ce7f8308173efbb50cf2d48323bc62d2b047307337584e6eccb3209ea2085608"
+  },
+  "docs": {
+    "date": "2026-08-09",
+    "hash": "57d5ebb48502298ceada0c3448e57214322168bb27277bfceea91844a6aeaf78"
+  },
+  "docs/apple-sign-in": {
+    "date": "2026-08-09",
+    "hash": "173b99173ed1c54a495b8ddc8b7754d9a5bc94ae6b6ed5fa7085cc063fc1b186"
+  },
+  "docs/architecture": {
+    "date": "2026-08-09",
+    "hash": "32e10ae844b4fe56912c6172783a29be949f69c4d6f6b99e841ab45fe9ccbebb"
+  },
+  "docs/authentication": {
+    "date": "2026-08-09",
+    "hash": "69aa0a212ad80d3b0bb5f5a6610d1a5779426a89a6e99d5aba9a570b14792cfe"
+  },
+  "docs/cache-setup": {
+    "date": "2026-08-09",
+    "hash": "fa422446cbecc7ac93ed69fda7fe79b533b0b154012ff492f7e08adb73dbddcd"
+  },
+  "docs/chat": {
+    "date": "2026-08-09",
+    "hash": "82066f8cb335d5344f5c466c369237da7e1d254b098bef13a66e0ef0ff4b3458"
+  },
+  "docs/data-schema": {
+    "date": "2026-08-09",
+    "hash": "45675a6fcac5669efe45ee082c6c951caa68fe6d62768417b78c645d1f54c0f4"
+  },
+  "docs/deployment": {
+    "date": "2026-08-09",
+    "hash": "2a229afd68ef18d77f873b4e965f52b87406cd6acb1f1c859d7b74df6c64dd4e"
+  },
+  "docs/discord-oauth": {
+    "date": "2026-08-09",
+    "hash": "ca92d2c4764d063d3fb8f23783c2a83ce52e5744952aa743f23c6b228255a330"
+  },
+  "docs/elixir-app-starter": {
+    "date": "2026-08-09",
+    "hash": "3aa4e1c717ab38b125f4be3779ef736ac16a1a0040b24a487cafea26878278f2"
+  },
+  "docs/email-setup": {
+    "date": "2026-08-09",
+    "hash": "67c7eca8e89a9327ac7ee9e5256681f583082da62b81e16a8581f55efe4ac48e"
+  },
+  "docs/facebook-oauth": {
+    "date": "2026-08-09",
+    "hash": "bcabd1f2c1d047142c37415c1b826b007073e33cbe0ff1b87c68592272581752"
+  },
+  "docs/friends": {
+    "date": "2026-08-09",
+    "hash": "ee262ccaa50d8cc1c00658f8ace20b82dea9cd66605e0f62b7d22092496ae347"
+  },
+  "docs/godot-sdk": {
+    "date": "2026-08-09",
+    "hash": "71693d35160edb0555cc5cc42b1aa917971e70ca74d86ae1de41a13d40111dac"
+  },
+  "docs/google-oauth": {
+    "date": "2026-08-09",
+    "hash": "03720c07e77c3213c12391e2ba0f470136b6812ba0d7542df231593c1ce1c390"
+  },
+  "docs/js-sdk": {
+    "date": "2026-08-09",
+    "hash": "bd5338a74e3f2b48c5d0c8b310d483445908c803ca6d7a3cc16b59a37eaa52ae"
+  },
+  "docs/leaderboards": {
+    "date": "2026-08-09",
+    "hash": "0dba6168de811d4d99b38b0cdeca15e2fe75fb2671bb203363a502ea7a8e0f48"
+  },
+  "docs/matchmaking": {
+    "date": "2026-08-09",
+    "hash": "53455ba178bbc370a8d17a412700e25f5cfe5841f528442b2c86590f9ca6fae6"
+  },
+  "docs/notifications": {
+    "date": "2026-08-09",
+    "hash": "fc9848921d5c5653908044d8ebe0febcf2b4de599e3fe1def945fe73e617747a"
+  },
+  "docs/payments": {
+    "date": "2026-08-09",
+    "hash": "610de85adc579d6879495d6491461087fc42a5b32c132bb130900e4dc5b28856"
+  },
+  "docs/postgresql-setup": {
+    "date": "2026-08-09",
+    "hash": "9edbcda807e6d2f2e787fa5b32b7128fa34ae574361c386c1057ba35d95fc77b"
+  },
+  "docs/push-notifications": {
+    "date": "2026-08-09",
+    "hash": "1f72beb4021db10a78ee975f40215253474cefa7c9cd9ecf15a5221ac74e6bb7"
+  },
+  "docs/quests": {
+    "date": "2026-08-09",
+    "hash": "f753a87d307975e9f9d5dcba50986b06f182a44270c2da122f65c49f630e99a6"
+  },
+  "docs/realtime": {
+    "date": "2026-08-09",
+    "hash": "acc4be69b1eb02d41b9fec6e542df7250ca608fce7436600f96281bf24187f55"
+  },
+  "docs/realtime-efficiency": {
+    "date": "2026-08-09",
+    "hash": "1d6e67ca9d0f0f12a8ec3146fa7e2425489bf37d60b4221d50d811db28fd4736"
+  },
+  "docs/scaling": {
+    "date": "2026-08-09",
+    "hash": "b0791fa10225662dc31e6a5d0f2608938a7e7b168cd915639405679b6f8da12d"
+  },
+  "docs/server-scripting": {
+    "date": "2026-08-09",
+    "hash": "438b10fdebef58672ca332fb60ede836092ef9d8745f6b5edc7bfccb27a42731"
+  },
+  "docs/settings": {
+    "date": "2026-08-09",
+    "hash": "d5102158a409752dc262843779bc7bfa2c8926a77780a79e7f87540f8cbfdf44"
+  },
+  "docs/steam-openid": {
+    "date": "2026-08-09",
+    "hash": "44fe139ea858cfa7e75affd4d3901440c6e48cab0aaa2d0e4dc491c1a3209aad"
+  },
+  "docs/theme": {
+    "date": "2026-08-09",
+    "hash": "78397ab864dd2a4582844dac82a9e2a008ff838571666d98a0e9b8953344017e"
+  },
+  "docs/tournaments": {
+    "date": "2026-08-09",
+    "hash": "08e3152e97d81fbc7ae1016a624c2d43bff476a26aa0cb9ca0ffb84cc1593b02"
+  },
+  "docs/webrtc": {
+    "date": "2026-08-09",
+    "hash": "8918749e633e27848624fe77ce6c113a092751f68bc5b9480bc50804cb894f25"
+  },
+  "docs/well-known": {
+    "date": "2026-08-09",
+    "hash": "5a87f9c5d4d329f005d282c1621a337470fc4a7f02131caacb1704ea30f4459f"
+  },
+  "roadmap": {
+    "date": "2026-08-09",
+    "hash": "4ae61d05eeb4051aebefb9ab26a3cba6679ec3f5688e9352da4fabcb44ce0431"
+  }
+}

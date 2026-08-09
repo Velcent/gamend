@@ -856,7 +856,11 @@ defmodule GamendWeb.Router.Shared do
     docs_route =
       if docs do
         quote do
+          # `/docs/setup` is listed first so it stays the hub rather than being
+          # captured by `:slug`. No guide may be slugged "setup"; one would be
+          # unreachable, which `GamendWeb.HostPublicDocs` guards against.
           live "/docs/setup", unquote(docs), :index
+          live "/docs/:slug", unquote(docs), :show
         end
       end
 

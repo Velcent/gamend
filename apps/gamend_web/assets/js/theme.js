@@ -60,29 +60,3 @@ window.addEventListener("phx:set-theme", (e) => {
   }
 });
 
-// ---------------------------------------------------------------------------
-// Docs deep links
-// ---------------------------------------------------------------------------
-// The canonical form is /docs/setup?guide=payments, which the server renders
-// and can restore after a reconnect. This only upgrades older #fragment links:
-// opening the section fires `toggle`, and the GuideDisclosure hook rewrites the
-// URL to the query form from there.
-
-const openAnchoredDetails = () => {
-  const hash = window.location.hash;
-  if (!hash) return;
-
-  const target = document.getElementById(hash.slice(1));
-  if (!(target instanceof HTMLDetailsElement)) return;
-
-  target.open = true;
-  // Offset so the summary clears the sticky navbar. Readers who ask the OS
-  // for reduced motion get an instant jump instead of a smooth glide.
-  const y = target.getBoundingClientRect().top + window.pageYOffset - 80;
-  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  window.scrollTo({ top: y, behavior: reduceMotion ? "auto" : "smooth" });
-};
-
-window.addEventListener("load", openAnchoredDetails);
-window.addEventListener("hashchange", openAnchoredDetails);
-window.addEventListener("phx:page-loading-stop", openAnchoredDetails);

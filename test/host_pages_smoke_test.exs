@@ -23,6 +23,7 @@ defmodule GamendHost.PagesSmokeTest do
     "/privacy",
     "/terms",
     "/data_deletion",
+    "/docs/setup",
     "/quests",
     "/leaderboards",
     "/tournaments",
@@ -62,6 +63,46 @@ defmodule GamendHost.PagesSmokeTest do
       refute first_paragraph == excerpt,
              "#{post.slug} body starts with its excerpt — the page shows it twice"
     end
+  end
+
+  test "every guide has its own page, reachable from the index" do
+    index = html_response(get(build_conn(), "/docs/setup"), 200)
+
+    for guide <- Gamend.Content.list_docs() do
+      assert index =~ ~s(href="/docs/#{guide.slug}"),
+             "/docs/setup does not link to #{guide.slug}"
+
+      page = get(build_conn(), "/docs/#{guide.slug}")
+      assert page.status == 200, "/docs/#{guide.slug} returned #{page.status}"
+    end
+  end
+
+  # The whole point of a page per guide: its own <title> and description, not
+  # the site-wide boilerplate every guide shared when they were one page.
+  test "a guide page carries its own title and description" do
+    guide = hd(Gamend.Content.list_docs())
+    body = html_response(get(build_conn(), "/docs/#{guide.slug}"), 200)
+
+    assert body =~ guide.title
+    assert body =~ ~s(<meta name="description")
+    assert body =~ ~s("@type":"TechArticle") or body =~ ~s("@type": "TechArticle")
+
+    refute GamendHost.PageMeta.describe("/docs/#{guide.slug}") == nil,
+           "#{guide.slug} has no meta description"
+  end
+
+  test "an unknown guide is a 404, not a blank page" do
+    assert_error_sent 404, fn -> get(build_conn(), "/docs/no-such-guide") end
+  end
+
+  # `?guide=` was how the single-page version deep-linked a section; those
+  # links are still in the wild.
+  test "a legacy ?guide= link moves to the guide's own URL" do
+    guide = hd(Gamend.Content.list_docs())
+    conn = get(build_conn(), "/docs/setup?guide=#{guide.slug}")
+
+    assert conn.status == 302
+    assert redirected_to(conn) == "/docs/#{guide.slug}"
   end
 
   test "every blog post page renders, not just the index" do

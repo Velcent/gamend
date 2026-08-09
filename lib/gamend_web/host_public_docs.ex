@@ -1,22 +1,30 @@
 defmodule GamendWeb.HostPublicDocs do
   @moduledoc """
-  Renders the guides in `priv/docs` as one page of expandable sections.
+  Renders the guides in `priv/docs`: `/docs/setup` indexes them, `/docs/:slug`
+  is one guide.
 
   A guide is a markdown file and nothing else: the folder gives its category,
   the numeric filename prefix its order, the first heading its title, and
   optional front matter its heroicon. A folder's `_category.md` names the
   category and gives it an icon and a colour, which its guides inherit so each
-  section reads as one group. Adding
-  one takes no Elixir change, which is the whole point — the previous version
-  of this page carried 9k lines of hand-written HEEx for the same content.
+  section reads as one group. Adding one takes no Elixir change, which is the
+  whole point — the previous version of this page carried 9k lines of
+  hand-written HEEx for the same content.
 
-  Sections are native `<details>`, so expanding one needs no JavaScript and
-  works with find-in-page and keyboard navigation.
+  ## Why a page per guide
 
-  Which guide is open lives in the query string (`/docs/setup?guide=payments`)
-  rather than in a fragment: a fragment never reaches the server, so it could
-  neither be restored after a websocket reconnect nor rendered into the initial
-  HTML. A query param survives both, and the URL stays copy-pasteable.
+  All 32 guides used to render on `/docs/setup` as `<details>` sections, with
+  the open one in the query string. That gave the whole of the documentation a
+  single `<title>`, a single description and a single `<h1>`, so nothing could
+  match a query about any one topic — and body text collapsed behind a
+  disclosure is weighted down besides. A query parameter does not fix that:
+  `?guide=payments` is the same URL to a search engine, which is why those
+  links canonicalised back to the index.
+
+  Each guide now owns a URL, with `GamendHost.PageMeta` giving it its own
+  title, description and breadcrumbs. The index carries titles and summaries
+  only — repeating the bodies there would make every guide duplicate content
+  competing with itself.
   """
 
   use GamendWeb, :live_view
@@ -24,6 +32,48 @@ defmodule GamendWeb.HostPublicDocs do
   alias Gamend.Content
 
   @impl true
+  def render(%{live_action: :show} = assigns) do
+    ~H"""
+    <Layouts.app flash={@flash} current_scope={@current_scope} current_path={assigns[:current_path]}>
+      <article class="space-y-6">
+        <div>
+          <.link navigate={~p"/docs/setup"} class="text-sm text-base-content/60 hover:underline">
+            &larr; {gettext("All guides")}
+          </.link>
+          <p class="mt-2 text-sm uppercase tracking-[0.24em] flex items-center gap-2">
+            <.icon name={@category.icon} class={"size-4 #{@category.color}"} />
+            {@category.category}
+          </p>
+        </div>
+
+        <.header>
+          <h1 class="text-3xl font-bold flex items-center gap-3">
+            <.icon name={@guide.icon} class={"size-7 shrink-0 opacity-80 #{@category.color}"} />
+            {@guide.title}
+          </h1>
+        </.header>
+
+        <div class="markdown-content">
+          {raw(Content.doc_html(@guide.slug))}
+        </div>
+
+        <nav :if={@siblings != []} class="border-t border-base-300/60 pt-6 space-y-2">
+          <h2 class="font-semibold uppercase tracking-[0.24em] text-sm">
+            {gettext("More in %{category}", category: @category.category)}
+          </h2>
+          <ul class="space-y-1">
+            <li :for={sibling <- @siblings}>
+              <.link navigate={~p"/docs/#{sibling.slug}"} class="link link-hover">
+                {sibling.title}
+              </.link>
+            </li>
+          </ul>
+        </nav>
+      </article>
+    </Layouts.app>
+    """
+  end
+
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash} current_scope={@current_scope} current_path={assigns[:current_path]}>
@@ -45,28 +95,18 @@ defmodule GamendWeb.HostPublicDocs do
             {category.category}
           </h2>
 
-          <details
+          <.link
             :for={guide <- category.guides}
-            id={guide.slug}
-            class="card bg-base-100 shadow-sm group"
-            open={guide.slug == @open}
-            phx-hook="GuideDisclosure"
-            data-slug={guide.slug}
+            navigate={~p"/docs/#{guide.slug}"}
+            class="card bg-base-100 shadow-sm hover:shadow-md transition-shadow block"
           >
-            <summary class="card-body cursor-pointer list-none py-4 flex-row items-center gap-3">
+            <div class="card-body py-4 flex-row items-center gap-3">
               <.icon name={guide.icon} class={"size-6 shrink-0 opacity-80 #{category.color}"} />
               <span class="card-title text-xl shrink-0">{guide.title}</span>
               <span class="text-sm text-base-content/50 grow line-clamp-1">{guide.summary}</span>
-              <.icon
-                name="hero-chevron-down"
-                class="size-4 shrink-0 transition-transform group-open:rotate-180"
-              />
-            </summary>
-
-            <div class="card-body pt-0 markdown-content">
-              {raw(Content.doc_html(guide.slug))}
+              <.icon name="hero-chevron-right" class="size-4 shrink-0" />
             </div>
-          </details>
+          </.link>
         </section>
       </div>
     </Layouts.app>
@@ -75,29 +115,44 @@ defmodule GamendWeb.HostPublicDocs do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok,
-     socket
-     |> assign(:page_title, gettext("Documentation"))
-     |> assign(:categories, Content.list_doc_categories())}
+    {:ok, assign(socket, :categories, Content.list_doc_categories())}
   end
 
   @impl true
-  def handle_params(params, _uri, socket) do
-    {:noreply, assign(socket, :open, params["guide"])}
-  end
+  def handle_params(%{"slug" => slug}, _uri, socket) do
+    case Content.get_doc(slug) do
+      nil ->
+        raise GamendWeb.NotFoundError
 
-  # Opening or closing a section rewrites the URL without a server round trip
-  # for the content, which is already on the page.
-  @impl true
-  def handle_event("guide_toggled", %{"slug" => slug, "open" => true}, socket) do
-    {:noreply, socket |> assign(:open, slug) |> push_patch(to: ~p"/docs/setup?guide=#{slug}")}
-  end
+      guide ->
+        # By membership, not by name: a guide's `:category` is the folder
+        # ("10-setup") while the category's is its display title ("Setup").
+        category =
+          Enum.find(socket.assigns.categories, fn category ->
+            Enum.any?(category.guides, &(&1.slug == slug))
+          end)
 
-  def handle_event("guide_toggled", %{"slug" => slug}, socket) do
-    if socket.assigns.open == slug do
-      {:noreply, socket |> assign(:open, nil) |> push_patch(to: ~p"/docs/setup")}
-    else
-      {:noreply, socket}
+        {:noreply,
+         socket
+         |> assign(:page_title, guide.title)
+         |> assign(:guide, guide)
+         |> assign(:category, category)
+         |> assign(:siblings, Enum.reject(category.guides, &(&1.slug == slug)))}
     end
+  end
+
+  # `?guide=` is how the old single-page version deep-linked a section. Those
+  # links are in blog posts and chat history, so they move to the guide's own
+  # URL rather than silently landing on the index.
+  def handle_params(%{"guide" => slug}, _uri, socket) do
+    if Content.get_doc(slug) do
+      {:noreply, push_navigate(socket, to: ~p"/docs/#{slug}")}
+    else
+      {:noreply, assign(socket, :page_title, gettext("Documentation"))}
+    end
+  end
+
+  def handle_params(_params, _uri, socket) do
+    {:noreply, assign(socket, :page_title, gettext("Documentation"))}
   end
 end

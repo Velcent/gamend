@@ -1,203 +1,158 @@
 # ============================================================
 # robots.txt — Bot access policy
 # ============================================================
-# Allow legitimate search engines, block AI scrapers/crawlers,
-# vulnerability scanners, and aggressive bots.
+# Four groups: blocked, search + AI answer engines, link
+# unfurlers, archives. Anything unlisted is denied at the bottom.
+#
+# A group's rules apply to every `User-agent` line directly above
+# them (RFC 9309), so each rule set is written once per group
+# rather than once per bot. The per-bot copies this replaced had
+# already drifted out of sync with the router.
+#
+# Paths are listed twice — bare and as `/*/<path>` — because the
+# public pages are also served under a locale prefix: `/fr/blog`
+# is the same page as `/blog`, and `Disallow: /blog` does not
+# match it.
 # ============================================================
 
 # -----------------------------------------------------------
-# AI Crawlers / LLM Training Bots — BLOCK ALL
+# AI training crawlers, scrapers and aggressive bots — BLOCK
 # -----------------------------------------------------------
+# Training-only siblings of the answer engines allowed further
+# down (GPTBot vs OAI-SearchBot, ClaudeBot vs Claude-SearchBot).
 
-# OpenAI
+# OpenAI, Google, Anthropic, Meta, Apple — training
 User-agent: GPTBot
-Disallow: /
-
-User-agent: ChatGPT-User
-Disallow: /
-
-User-agent: OAI-SearchBot
-Disallow: /
-
-# Google AI (Gemini training)
 User-agent: Google-Extended
-Disallow: /
-
-# Anthropic
 User-agent: anthropic-ai
-Disallow: /
-
 User-agent: Claude-Web
-Disallow: /
-
 User-agent: ClaudeBot
-Disallow: /
-
-# Meta / Facebook AI
 User-agent: FacebookBot
-Disallow: /
-
 User-agent: Meta-ExternalAgent
-Disallow: /
-
 User-agent: Meta-ExternalFetcher
-Disallow: /
-
-# Apple AI (Applebot-Extended for training, not search)
 User-agent: Applebot-Extended
-Disallow: /
-
-# Common Crawl (used for LLM training datasets)
+# Dataset builders and scraping services
 User-agent: CCBot
-Disallow: /
-
-# Perplexity AI
-User-agent: PerplexityBot
-Disallow: /
-
-# Cohere AI
 User-agent: cohere-ai
-Disallow: /
-
-# Bytedance / TikTok
 User-agent: Bytespider
-Disallow: /
-
 User-agent: ByteDance
-Disallow: /
-
-# Amazon / Alexa
 User-agent: Amazonbot
-Disallow: /
-
-# Diffbot (web scraping service)
 User-agent: Diffbot
-Disallow: /
-
-# Omgili / Webz.io
 User-agent: omgili
-Disallow: /
-
 User-agent: omgilibot
-Disallow: /
-
-# Timpi (AI search)
 User-agent: Timpibot
-Disallow: /
-
-# YouBot (You.com AI)
 User-agent: YouBot
-Disallow: /
-
-# Webz.io
 User-agent: Webzio-Extended
-Disallow: /
-
-# AI2 (Allen Institute for AI)
 User-agent: AI2Bot
-Disallow: /
-
-# iask.ai
 User-agent: iaskspider
-Disallow: /
-
-# -----------------------------------------------------------
-# Aggressive / Unwanted Crawlers — BLOCK
-# -----------------------------------------------------------
-
-# SEMrush
+# SEO crawlers — all cost, no traffic
 User-agent: SemrushBot
-Disallow: /
-
-# AhrefsBot (aggressive SEO crawler)
 User-agent: AhrefsBot
-Disallow: /
-
-# MJ12bot (Majestic SEO)
 User-agent: MJ12bot
-Disallow: /
-
-# DotBot (Moz)
 User-agent: DotBot
-Disallow: /
-
-# BLEXBot
 User-agent: BLEXBot
-Disallow: /
-
-# PetalBot (Ahrefs)
 User-agent: PetalBot
 Disallow: /
 
-# Sogou
-User-agent: Sogou
-Disallow: /
-
-# Yandex
-User-agent: Yandex
-Disallow: /
-
-User-agent: YandexBot
-Disallow: /
-
-# Baidu
-User-agent: Baiduspider
-Disallow: /
-
 # -----------------------------------------------------------
-# Legitimate Search Engines — ALLOW (with limits)
+# Search engines and AI answer engines — ALLOW (with limits)
 # -----------------------------------------------------------
+# The answer engines are the point of this group. gamend is a
+# developer tool: a large share of "how do I run a game backend"
+# style questions are now asked of ChatGPT and Perplexity rather
+# than typed into a search box, and those crawlers index in order
+# to cite, not to train. Blocking them removed this site from
+# that surface entirely.
 
-# Google
+# Google. The subtype crawlers are named explicitly rather than
+# left to inherit the Googlebot group, so the policy is readable
+# from this file alone.
 User-agent: Googlebot
-Allow: /
-Disallow: /admin/
-Disallow: /api/
-Disallow: /metrics
-Disallow: /content/
-Disallow: /users/settings
-Disallow: /users/confirm/
-Disallow: /users/update-password
-Disallow: /users/log-out
-
-# Bing
+User-agent: Googlebot-Image
+User-agent: Googlebot-News
+User-agent: Googlebot-Video
+User-agent: Google-InspectionTool
+# Other search indexes. Bingbot matters twice over: it is one of
+# the engines IndexNow reaches, so blocking it would make every
+# ping a dead end.
 User-agent: Bingbot
-Allow: /
-Disallow: /admin/
-Disallow: /api/
-Disallow: /metrics
-Disallow: /content/
-Disallow: /users/settings
-Disallow: /users/confirm/
-Disallow: /users/update-password
-Disallow: /users/log-out
-
-# DuckDuckGo
+User-agent: SeznamBot
 User-agent: DuckDuckBot
-Allow: /
-Disallow: /admin/
-Disallow: /api/
-Disallow: /metrics
-Disallow: /content/
-Disallow: /users/settings
-Disallow: /users/confirm/
-Disallow: /users/update-password
-Disallow: /users/log-out
-
-# Apple (search, not training)
 User-agent: Applebot
+User-agent: Yeti
+User-agent: MojeekBot
+User-agent: Qwantbot
+User-agent: Kagibot
+# AI answer engines — they index to cite in results, not to train.
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+User-agent: Claude-SearchBot
+User-agent: Claude-User
+User-agent: PerplexityBot
+User-agent: Perplexity-User
+User-agent: DuckAssistBot
 Allow: /
+# Never public.
 Disallow: /admin/
+Disallow: /*/admin/
 Disallow: /api/
 Disallow: /metrics
-Disallow: /content/
-Disallow: /users/settings
-Disallow: /users/confirm/
-Disallow: /users/update-password
-Disallow: /users/log-out
+# Every account surface: settings, register, log_in, log_out,
+# update_password, confirm. One prefix instead of six paths that
+# have to be kept spelled the way the router spells them.
+Disallow: /users/
+Disallow: /*/users/
+
+# -----------------------------------------------------------
+# Link preview unfurlers — ALLOW
+# -----------------------------------------------------------
+# These fetch one URL someone shared to build its preview card.
+# Blocked, a link posted in Discord or on Bluesky renders as a
+# bare URL with no title, image or description.
+
+User-agent: Twitterbot
+User-agent: facebookexternalhit
+User-agent: Discordbot
+User-agent: Slackbot
+User-agent: Slackbot-LinkExpanding
+User-agent: TelegramBot
+User-agent: WhatsApp
+User-agent: LinkedInBot
+User-agent: redditbot
+User-agent: Pinterestbot
+User-agent: Mastodon
+User-agent: Bluesky
+Allow: /
+Disallow: /admin/
+Disallow: /*/admin/
+Disallow: /api/
+Disallow: /metrics
+Disallow: /users/
+Disallow: /*/users/
+
+# -----------------------------------------------------------
+# Web archives — ALLOW
+# -----------------------------------------------------------
+# The Wayback Machine. No search value either way; this is about
+# the site having a history that outlives the server.
+
+User-agent: archive.org_bot
+User-agent: ia_archiver
+Allow: /
+Disallow: /admin/
+Disallow: /*/admin/
+Disallow: /api/
+Disallow: /metrics
+Disallow: /users/
+Disallow: /*/users/
 
 # -----------------------------------------------------------
 # Default rule — block everything else
 # -----------------------------------------------------------
 User-agent: *
 Disallow: /
+
+# -----------------------------------------------------------
+# Sitemap
+# -----------------------------------------------------------
+Sitemap: https://gamend.appsinacup.com/sitemap.xml
