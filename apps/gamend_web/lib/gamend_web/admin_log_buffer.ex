@@ -86,6 +86,8 @@ defmodule GamendWeb.AdminLogBuffer do
         read_concurrency: true
       ])
 
+    # Installed before the handlers so no filtered noise reaches the buffer.
+    _ = GamendWeb.LogFilters.install()
     _ = GamendWeb.AdminLogHandler.install()
     _ = GamendWeb.FileLogHandler.install()
     {:ok, %{}}
