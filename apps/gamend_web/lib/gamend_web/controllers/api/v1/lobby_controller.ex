@@ -515,6 +515,9 @@ defmodule GamendWeb.Api.V1.LobbyController do
              }
            }
          }},
+      bad_request:
+        {"Malformed id", "application/json",
+         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}},
       not_found:
         {"Not found", "application/json",
          %Schema{type: :object, properties: %{error: %Schema{type: :string}}}}
@@ -524,7 +527,7 @@ defmodule GamendWeb.Api.V1.LobbyController do
   def show(conn, %{"id" => id_str}) do
     with {:ok, lobby_id} <- Ecto.UUID.cast(id_str),
          %Gamend.Lobbies.Lobby{} = lobby <- Lobbies.get_lobby(lobby_id),
-         true <- !lobby.is_hidden do
+         true <- Lobbies.can_view_lobby?(Scope.user(conn.assigns[:current_scope]), lobby) do
       members =
         Lobbies.get_lobby_members(lobby)
         |> Enum.map(&User.serialize_brief/1)
@@ -535,6 +538,13 @@ defmodule GamendWeb.Api.V1.LobbyController do
         spectator_count: SpectatorTracker.count(lobby.id)
       })
     else
+      :error ->
+        conn
+        |> put_status(:bad_request)
+        |> json(%{error: "Invalid lobby id"})
+
+      # 404 rather than 403 for a hidden lobby the caller is not in: a 403
+      # confirms it exists, which is the thing hiding it is meant to conceal.
       _ ->
         conn
         |> put_status(:not_found)

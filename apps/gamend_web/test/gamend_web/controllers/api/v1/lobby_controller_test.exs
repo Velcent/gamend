@@ -87,6 +87,67 @@ defmodule GamendWeb.Api.V1.LobbyControllerTest do
     refute Enum.any?(resp3["data"], fn l -> l["id"] == open_small.id end)
   end
 
+  describe "GET /api/v1/lobbies/:id on a hidden lobby" do
+    setup do
+      host = AccountsFixtures.user_fixture()
+      member = AccountsFixtures.user_fixture()
+      outsider = AccountsFixtures.user_fixture()
+      {:ok, lobby} = Lobbies.create_lobby(%{title: "hidden", host_id: host.id, is_hidden: true})
+      assert {:ok, _} = Lobbies.join_lobby(member, lobby)
+
+      %{lobby: lobby, host: host, member: member, outsider: outsider}
+    end
+
+    defp show_as(conn, user, lobby) do
+      {:ok, token, _} = Guardian.encode_and_sign(user)
+
+      conn
+      |> put_req_header("authorization", "Bearer " <> token)
+      |> get("/api/v1/lobbies/#{lobby.id}")
+    end
+
+    test "a member can read it", %{conn: conn, lobby: lobby, member: member} do
+      assert json_response(show_as(conn, member, lobby), 200)["data"]["id"] == lobby.id
+    end
+
+    test "the host can read it", %{conn: conn, lobby: lobby, host: host} do
+      assert json_response(show_as(conn, host, lobby), 200)["data"]["id"] == lobby.id
+    end
+
+    # The case that started this: a hostless matchmaking lobby whose signaling
+    # host is a headless game server, seated in no lobby of its own.
+    test "the signaling host can read it even though it is not a member", %{conn: conn} do
+      server = AccountsFixtures.user_fixture()
+
+      {:ok, lobby} =
+        Lobbies.create_lobby(%{title: "matchmade", is_hidden: true, hostless: true})
+
+      {:ok, lobby} =
+        Gamend.Signaling.configure(lobby, enabled: true, topology: :star, host_id: server.id)
+
+      assert lobby.webrtc_host_id == server.id
+
+      assert server.lobby_id == nil
+      assert json_response(show_as(conn, server, lobby), 200)["data"]["id"] == lobby.id
+    end
+
+    test "an outsider gets 404, not 403", %{conn: conn, lobby: lobby, outsider: outsider} do
+      assert json_response(show_as(conn, outsider, lobby), 404)["error"] == "Lobby not found"
+    end
+  end
+
+  test "GET /api/v1/lobbies/:id rejects a malformed id as a bad request", %{conn: conn} do
+    user = AccountsFixtures.user_fixture()
+    {:ok, token, _} = Guardian.encode_and_sign(user)
+
+    conn =
+      conn
+      |> put_req_header("authorization", "Bearer " <> token)
+      |> get("/api/v1/lobbies/not-a-uuid")
+
+    assert json_response(conn, 400)["error"] == "Invalid lobby id"
+  end
+
   test "GET /api/v1/lobbies/:id omits member emails", %{conn: conn} do
     host = AccountsFixtures.user_fixture()
     member = AccountsFixtures.user_fixture()

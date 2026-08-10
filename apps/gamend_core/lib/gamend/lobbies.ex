@@ -1523,13 +1523,22 @@ defmodule Gamend.Lobbies do
   def can_edit_lobby?(_user, nil), do: false
 
   @doc """
-  Check if a user can view a lobby's details.
-  Users can view any lobby they can see in the list.
+  Whether `user` may read `lobby`'s details.
+
+  Hiding a lobby takes it out of public listings; it does not hide it from the
+  people already inside. Those are its members and its signaling host — which
+  for a hostless matchmaking lobby is the game server running the room rather
+  than any player, so it is never a member. Everyone else sees only lobbies
+  that are not hidden.
   """
   @spec can_view_lobby?(User.t() | nil, Lobby.t() | nil) :: boolean()
-  def can_view_lobby?(%User{} = _user, %Lobby{} = _lobby), do: true
-  def can_view_lobby?(nil, %Lobby{is_hidden: false}), do: true
-  def can_view_lobby?(nil, _lobby), do: false
+  def can_view_lobby?(_user, nil), do: false
+  def can_view_lobby?(nil, %Lobby{is_hidden: hidden}), do: not hidden
+
+  def can_view_lobby?(%User{} = user, %Lobby{} = lobby) do
+    not lobby.is_hidden or user.lobby_id == lobby.id or
+      user.id == (lobby.webrtc_host_id || lobby.host_id)
+  end
 
   @doc """
   Check if a lobby can be spectated (watched by non-members).
