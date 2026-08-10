@@ -66,8 +66,13 @@ else. Hostless lobbies have no editor — see `update_lobby_by_host/3`.
   boolean()
 ```
 
-Check if a user can view a lobby's details.
-Users can view any lobby they can see in the list.
+Whether `user` may read `lobby`'s details.
+
+Hiding a lobby takes it out of public listings; it does not hide it from the
+people already inside. Those are its members and its signaling host — which
+for a hostless matchmaking lobby is the game server running the room rather
+than any player, so it is never a member. Everyone else sees only lobbies
+that are not hidden.
 
 # `change_lobby`
 

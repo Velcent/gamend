@@ -5,10 +5,10 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.3">
-    <meta name="project" content="gamend_core v1.0.1133">
+    <meta name="project" content="gamend_core v1.0.1135">
 
 
-    <title>Gamend.Lobbies — gamend_core v1.0.1133</title>
+    <title>Gamend.Lobbies — gamend_core v1.0.1135</title>
 
     <link rel="stylesheet" href="dist/html-elixir-NHQLCD6Y.css" />
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1133
+          v1.0.1135
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr />Lobbies</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1133)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1135)</small>
 
     </h1>
 
@@ -116,21 +116,21 @@ gamend_core
     <section id="moduledoc">
 <p>Context module for lobby management: creating, updating, listing and searching lobbies.</p><p>This module contains the core domain operations; more advanced membership and
 permission logic will be added in follow-up tasks.</p><h2 id="module-usage" class="section-heading"><a href="#module-usage" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Usage</span></h2><pre><code class="makeup elixir" translate="no"><span class="c1"># Create a lobby (returns {:ok, lobby} | {:error, changeset})</span><span class="w">
-</span><span class="p" data-group-id="2037057568-1">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">lobby</span><span class="p" data-group-id="2037057568-1">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Gamend.Lobbies</span><span class="o">.</span><span class="n">create_lobby</span><span class="p" data-group-id="2037057568-2">(</span><span class="p" data-group-id="2037057568-3">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;fun-room&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">title</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Fun Room&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">host_id</span><span class="p">:</span><span class="w"> </span><span class="n">host_id</span><span class="p" data-group-id="2037057568-3">}</span><span class="p" data-group-id="2037057568-2">)</span><span class="w">
+</span><span class="p" data-group-id="0714702813-1">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">lobby</span><span class="p" data-group-id="0714702813-1">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Gamend.Lobbies</span><span class="o">.</span><span class="n">create_lobby</span><span class="p" data-group-id="0714702813-2">(</span><span class="p" data-group-id="0714702813-3">%{</span><span class="ss">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;fun-room&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">title</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Fun Room&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">host_id</span><span class="p">:</span><span class="w"> </span><span class="n">host_id</span><span class="p" data-group-id="0714702813-3">}</span><span class="p" data-group-id="0714702813-2">)</span><span class="w">
 
 </span><span class="c1"># List public lobbies (paginated/filterable)</span><span class="w">
-</span><span class="n">lobbies</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Gamend.Lobbies</span><span class="o">.</span><span class="n">list_lobbies</span><span class="p" data-group-id="2037057568-4">(</span><span class="p" data-group-id="2037057568-5">%{</span><span class="p" data-group-id="2037057568-5">}</span><span class="p">,</span><span class="w"> </span><span class="ss">page</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="ss">page_size</span><span class="p">:</span><span class="w"> </span><span class="mi">25</span><span class="p" data-group-id="2037057568-4">)</span><span class="w">
+</span><span class="n">lobbies</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Gamend.Lobbies</span><span class="o">.</span><span class="n">list_lobbies</span><span class="p" data-group-id="0714702813-4">(</span><span class="p" data-group-id="0714702813-5">%{</span><span class="p" data-group-id="0714702813-5">}</span><span class="p">,</span><span class="w"> </span><span class="ss">page</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="ss">page_size</span><span class="p">:</span><span class="w"> </span><span class="mi">25</span><span class="p" data-group-id="0714702813-4">)</span><span class="w">
 
 </span><span class="c1"># Join and leave</span><span class="w">
-</span><span class="p" data-group-id="2037057568-6">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">user</span><span class="p" data-group-id="2037057568-6">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Gamend.Lobbies</span><span class="o">.</span><span class="n">join_lobby</span><span class="p" data-group-id="2037057568-7">(</span><span class="n">user</span><span class="p">,</span><span class="w"> </span><span class="n">lobby</span><span class="o">.</span><span class="n">id</span><span class="p" data-group-id="2037057568-7">)</span><span class="w">
-</span><span class="p" data-group-id="2037057568-8">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="bp">_</span><span class="p" data-group-id="2037057568-8">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Gamend.Lobbies</span><span class="o">.</span><span class="n">leave_lobby</span><span class="p" data-group-id="2037057568-9">(</span><span class="n">user</span><span class="p" data-group-id="2037057568-9">)</span><span class="w">
+</span><span class="p" data-group-id="0714702813-6">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">user</span><span class="p" data-group-id="0714702813-6">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Gamend.Lobbies</span><span class="o">.</span><span class="n">join_lobby</span><span class="p" data-group-id="0714702813-7">(</span><span class="n">user</span><span class="p">,</span><span class="w"> </span><span class="n">lobby</span><span class="o">.</span><span class="n">id</span><span class="p" data-group-id="0714702813-7">)</span><span class="w">
+</span><span class="p" data-group-id="0714702813-8">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="bp">_</span><span class="p" data-group-id="0714702813-8">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Gamend.Lobbies</span><span class="o">.</span><span class="n">leave_lobby</span><span class="p" data-group-id="0714702813-9">(</span><span class="n">user</span><span class="p" data-group-id="0714702813-9">)</span><span class="w">
 
 </span><span class="c1"># Get current lobby members</span><span class="w">
-</span><span class="n">members</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Gamend.Lobbies</span><span class="o">.</span><span class="n">get_lobby_members</span><span class="p" data-group-id="2037057568-10">(</span><span class="n">lobby</span><span class="p" data-group-id="2037057568-10">)</span><span class="w">
+</span><span class="n">members</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Gamend.Lobbies</span><span class="o">.</span><span class="n">get_lobby_members</span><span class="p" data-group-id="0714702813-10">(</span><span class="n">lobby</span><span class="p" data-group-id="0714702813-10">)</span><span class="w">
 
 </span><span class="c1"># Subscribe to global or per-lobby events</span><span class="w">
-</span><span class="ss">:ok</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Gamend.Lobbies</span><span class="o">.</span><span class="n">subscribe_lobbies</span><span class="p" data-group-id="2037057568-11">(</span><span class="p" data-group-id="2037057568-11">)</span><span class="w">
-</span><span class="ss">:ok</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Gamend.Lobbies</span><span class="o">.</span><span class="n">subscribe_lobby</span><span class="p" data-group-id="2037057568-12">(</span><span class="n">lobby</span><span class="o">.</span><span class="n">id</span><span class="p" data-group-id="2037057568-12">)</span></code></pre><h2 id="module-pubsub-events" class="section-heading"><a href="#module-pubsub-events" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">PubSub Events</span></h2><p>This module broadcasts the following events:</p><ul><li><p><code class="inline">&quot;lobbies&quot;</code> topic (global lobby list changes):</p><ul><li><code class="inline">{:lobby_created, lobby}</code> - a new lobby was created</li><li><code class="inline">{:lobby_updated, lobby}</code> - a lobby was updated</li><li><code class="inline">{:lobby_deleted, lobby_id}</code> - a lobby was deleted</li></ul></li><li><p><code class="inline">&quot;lobby:&lt;lobby_id&gt;&quot;</code> topic (per-lobby membership changes):</p><ul><li><code class="inline">{:user_joined, lobby_id, user_id}</code> - a user joined the lobby</li><li><code class="inline">{:user_left, lobby_id, user_id}</code> - a user left the lobby</li><li><code class="inline">{:user_kicked, lobby_id, user_id}</code> - a user was kicked from the lobby</li><li><code class="inline">{:lobby_updated, lobby}</code> - the lobby settings were updated</li><li><code class="inline">{:host_changed, lobby_id, new_host_id}</code> - the host changed (e.g., after host leaves)</li></ul></li></ul>
+</span><span class="ss">:ok</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Gamend.Lobbies</span><span class="o">.</span><span class="n">subscribe_lobbies</span><span class="p" data-group-id="0714702813-11">(</span><span class="p" data-group-id="0714702813-11">)</span><span class="w">
+</span><span class="ss">:ok</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Gamend.Lobbies</span><span class="o">.</span><span class="n">subscribe_lobby</span><span class="p" data-group-id="0714702813-12">(</span><span class="n">lobby</span><span class="o">.</span><span class="n">id</span><span class="p" data-group-id="0714702813-12">)</span></code></pre><h2 id="module-pubsub-events" class="section-heading"><a href="#module-pubsub-events" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">PubSub Events</span></h2><p>This module broadcasts the following events:</p><ul><li><p><code class="inline">&quot;lobbies&quot;</code> topic (global lobby list changes):</p><ul><li><code class="inline">{:lobby_created, lobby}</code> - a new lobby was created</li><li><code class="inline">{:lobby_updated, lobby}</code> - a lobby was updated</li><li><code class="inline">{:lobby_deleted, lobby_id}</code> - a lobby was deleted</li></ul></li><li><p><code class="inline">&quot;lobby:&lt;lobby_id&gt;&quot;</code> topic (per-lobby membership changes):</p><ul><li><code class="inline">{:user_joined, lobby_id, user_id}</code> - a user joined the lobby</li><li><code class="inline">{:user_left, lobby_id, user_id}</code> - a user left the lobby</li><li><code class="inline">{:user_kicked, lobby_id, user_id}</code> - a user was kicked from the lobby</li><li><code class="inline">{:lobby_updated, lobby}</code> - the lobby settings were updated</li><li><code class="inline">{:host_changed, lobby_id, new_host_id}</code> - the host changed (e.g., after host leaves)</li></ul></li></ul>
     </section>
 
 </div>
@@ -174,8 +174,7 @@ else. Hostless lobbies have no editor — see <a href="#update_lobby_by_host/3">
 
       </div>
 
-        <div class="summary-synopsis"><p>Check if a user can view a lobby's details.
-Users can view any lobby they can see in the list.</p></div>
+        <div class="summary-synopsis"><p>Whether <code class="inline">user</code> may read <code class="inline">lobby</code>'s details.</p></div>
 
     </div>
 
@@ -597,7 +596,7 @@ else. Hostless lobbies have no editor — see <a href="#update_lobby_by_host/3">
       <h1 class="signature" translate="no">can_view_lobby?(user, lobby)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/lobbies.ex#L1530" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/lobbies.ex#L1535" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -613,8 +612,11 @@ else. Hostless lobbies have no editor — see <a href="#update_lobby_by_host/3">
 
       </div>
 
-<p>Check if a user can view a lobby's details.
-Users can view any lobby they can see in the list.</p>
+<p>Whether <code class="inline">user</code> may read <code class="inline">lobby</code>'s details.</p><p>Hiding a lobby takes it out of public listings; it does not hide it from the
+people already inside. Those are its members and its signaling host — which
+for a hostless matchmaking lobby is the game server running the room rather
+than any player, so it is never a member. Everyone else sees only lobbies
+that are not hidden.</p>
   </section>
 </section>
 <section class="detail" id="change_lobby/2">
@@ -1021,11 +1023,11 @@ Users can view any lobby they can see in the list.</p>
 
       </div>
 
-<p>Gets all users currently in a lobby.</p><p>Returns a list of User structs.</p><h2 id="get_lobby_members/1-examples" class="section-heading"><a href="#get_lobby_members/1-examples" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Examples</span></h2><pre><code class="makeup elixir" translate="no"><span class="gp unselectable">iex&gt; </span><span class="n">get_lobby_members</span><span class="p" data-group-id="1283072538-1">(</span><span class="n">lobby</span><span class="p" data-group-id="1283072538-1">)</span><span class="w">
-</span><span class="p" data-group-id="1283072538-2">[</span><span class="p" data-group-id="1283072538-3">%</span><span class="nc" data-group-id="1283072538-3">User</span><span class="p" data-group-id="1283072538-3">{</span><span class="p" data-group-id="1283072538-3">}</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="1283072538-4">%</span><span class="nc" data-group-id="1283072538-4">User</span><span class="p" data-group-id="1283072538-4">{</span><span class="p" data-group-id="1283072538-4">}</span><span class="p" data-group-id="1283072538-2">]</span><span class="w">
+<p>Gets all users currently in a lobby.</p><p>Returns a list of User structs.</p><h2 id="get_lobby_members/1-examples" class="section-heading"><a href="#get_lobby_members/1-examples" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Examples</span></h2><pre><code class="makeup elixir" translate="no"><span class="gp unselectable">iex&gt; </span><span class="n">get_lobby_members</span><span class="p" data-group-id="7448217556-1">(</span><span class="n">lobby</span><span class="p" data-group-id="7448217556-1">)</span><span class="w">
+</span><span class="p" data-group-id="7448217556-2">[</span><span class="p" data-group-id="7448217556-3">%</span><span class="nc" data-group-id="7448217556-3">User</span><span class="p" data-group-id="7448217556-3">{</span><span class="p" data-group-id="7448217556-3">}</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="7448217556-4">%</span><span class="nc" data-group-id="7448217556-4">User</span><span class="p" data-group-id="7448217556-4">{</span><span class="p" data-group-id="7448217556-4">}</span><span class="p" data-group-id="7448217556-2">]</span><span class="w">
 
-</span><span class="gp unselectable">iex&gt; </span><span class="n">get_lobby_members</span><span class="p" data-group-id="1283072538-5">(</span><span class="n">lobby_id</span><span class="p" data-group-id="1283072538-5">)</span><span class="w">
-</span><span class="p" data-group-id="1283072538-6">[</span><span class="p" data-group-id="1283072538-7">%</span><span class="nc" data-group-id="1283072538-7">User</span><span class="p" data-group-id="1283072538-7">{</span><span class="p" data-group-id="1283072538-7">}</span><span class="p" data-group-id="1283072538-6">]</span></code></pre>
+</span><span class="gp unselectable">iex&gt; </span><span class="n">get_lobby_members</span><span class="p" data-group-id="7448217556-5">(</span><span class="n">lobby_id</span><span class="p" data-group-id="7448217556-5">)</span><span class="w">
+</span><span class="p" data-group-id="7448217556-6">[</span><span class="p" data-group-id="7448217556-7">%</span><span class="nc" data-group-id="7448217556-7">User</span><span class="p" data-group-id="7448217556-7">{</span><span class="p" data-group-id="7448217556-7">}</span><span class="p" data-group-id="7448217556-6">]</span></code></pre>
   </section>
 </section>
 <section class="detail" id="join_lobby/3">
@@ -1254,7 +1256,7 @@ Includes the user's own lobby even if it's hidden.</p>
       <h1 class="signature" translate="no">list_memberships_for_lobby(lobby_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/lobbies.ex#L1627" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/lobbies.ex#L1636" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1323,7 +1325,7 @@ predict is worse than one they can.</p>
       <h1 class="signature" translate="no">quick_join(user, title \\ nil, max_users \\ nil, metadata \\ %{})</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/lobbies.ex#L1650" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/lobbies.ex#L1659" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1354,7 +1356,7 @@ create a new lobby if none matches.</p><p>Signature: quick_join(user, title \ ni
       <h1 class="signature" translate="no">spectatable?(lobby)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/lobbies.ex#L1540" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/lobbies.ex#L1549" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1606,7 +1608,7 @@ lobbies (matchmaking's) belong to nobody, so no player may move them: use
       <h1 class="signature" translate="no">update_lobby_by_host(user, lobby, attrs)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/lobbies.ex#L1555" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/lobbies.ex#L1564" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1701,9 +1703,9 @@ Go through <a href="Gamend.Signaling.html#configure/2"><code class="inline">Game
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1133">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1135">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1133">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1135">Hex Preview</a>
 
             </span>
 
