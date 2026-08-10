@@ -1,6 +1,8 @@
 defmodule GamendWeb.UserSocket do
   use Phoenix.Socket
 
+  require Logger
+
   alias Gamend.Accounts.Scope
   alias GamendWeb.Auth.Guardian
 
@@ -58,15 +60,22 @@ defmodule GamendWeb.UserSocket do
          {:ok, claims} <- Guardian.decode_and_verify(token),
          {:ok, user} <- Guardian.resource_from_claims(claims),
          false <- socket_limit_reached?(user.id) do
+      format = extract_format(params, socket)
+      _ = warn_on_format_downgrade(params, format, user.id)
+
       GamendWeb.ConnectionTracker.register(:ws_socket, %{
         user_id: user.id,
-        authenticated: true
+        authenticated: true,
+        # Surfaced on the admin Runtime page: "is this client actually getting
+        # protobuf" is otherwise unanswerable from the server side, and the
+        # answer is not the same as what the client asked for.
+        format: format
       })
 
       socket =
         socket
         |> assign(:current_scope, Scope.for_user(user))
-        |> assign(:ws_format, extract_format(params, socket))
+        |> assign(:ws_format, format)
 
       {:ok, socket}
     else
@@ -81,6 +90,28 @@ defmodule GamendWeb.UserSocket do
   defp extract_format(%{"params" => %{"format" => f}}, socket), do: normalize_format(f, socket)
   defp extract_format(%{"format" => f}, socket), do: normalize_format(f, socket)
   defp extract_format(_, _socket), do: "json"
+
+  # The format the client ASKED for, before the serializer veto below.
+  defp requested_format(%{params: %{"format" => f}}), do: f
+  defp requested_format(%{"params" => %{"format" => f}}), do: f
+  defp requested_format(%{"format" => f}), do: f
+  defp requested_format(_params), do: nil
+
+  # A client asking for protobuf and silently getting JSON is the one failure
+  # here with no other symptom: everything keeps working, just uncompressed and
+  # with every binary decoder on the client idle. Almost always a missing
+  # `vsn=2.0.0` on the socket URL.
+  defp warn_on_format_downgrade(params, "json", user_id) do
+    if requested_format(params) == "protobuf" do
+      Logger.info(
+        "ws socket: protobuf requested but the connection negotiated the v1 " <>
+          "serializer, which cannot carry binary frames — falling back to JSON " <>
+          "(user_id=#{user_id}). Check the socket URL sends vsn=2.0.0."
+      )
+    end
+  end
+
+  defp warn_on_format_downgrade(_params, _format, _user_id), do: :ok
 
   # Binary frames require the V2 channel protocol; the V1 serializer (vsn
   # 1.x, the Phoenix default) cannot emit them, so "protobuf" is only

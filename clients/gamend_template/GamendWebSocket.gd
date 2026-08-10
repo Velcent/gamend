@@ -20,6 +20,10 @@ var socket : PhoenixSocket
 var enable_logs := false
 var _token_provider: Callable
 var _format := "json"
+
+## One-shot latch for the "protobuf is really being used" log. Per socket, so a
+## reconnect re-proves it rather than trusting the last session.
+var _first_binary_frame_logged := false
 var _channels := {}
 var _request_seq := 0
 const LOG_REDACTED := "[redacted]"
@@ -155,7 +159,10 @@ func request(event: String, payload: Dictionary = {}, topic: String = "", timeou
 func _socket_on_open(params):
 	if enable_logs:
 		print("Socket Open ", _redact_for_log(params))
-	debug_message.emit("info", "network", "WebSocket connected")
+	# What was ASKED for. Whether the server honoured it is a separate question:
+	# it downgrades to JSON on a v1 socket, silently. _first_binary_frame_logged
+	# is what proves protobuf is actually arriving.
+	debug_message.emit("info", "network", "WebSocket connected (format requested: %s)" % _format)
 	socket_opened.emit()
 func _socket_on_error(data):
 	if enable_logs:
@@ -193,6 +200,15 @@ func _channel_on_join_result(event, payload, topic):
 		user_channel_joined.emit()
 func _channel_on_event(event, payload, status, topic: String):
 	if payload is PackedByteArray:
+		# Proof, not intent: a binary frame can only arrive when the server
+		# accepted `format=protobuf` AND the event has a mapping. Asking for
+		# protobuf and never seeing this line means the socket silently
+		# downgraded — the v1 serializer cannot carry binary frames at all.
+		if not _first_binary_frame_logged:
+			_first_binary_frame_logged = true
+			var msg := "Realtime format CONFIRMED protobuf (first binary frame: %s)" % event
+			print("[gamend] " + msg)
+			debug_message.emit("info", "network", msg)
 		var decoded = GamendProto.decode_event(topic, event, payload)
 		if decoded == null:
 			# A BINARY frame we cannot read. Not the same as an unmapped event —

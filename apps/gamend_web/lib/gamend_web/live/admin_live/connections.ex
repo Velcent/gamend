@@ -244,6 +244,7 @@ defmodule GamendWeb.AdminLive.Connections do
                     <tr>
                       <th>User ID</th>
                       <th>Connection Types</th>
+                      <th>Wire</th>
                       <th>Details</th>
                     </tr>
                   </thead>
@@ -251,6 +252,24 @@ defmodule GamendWeb.AdminLive.Connections do
                     <tr :for={user <- @paged_users} id={"conn-user-#{user.user_id}"}>
                       <td class="text-sm" title={user.user_id}>
                         {user_display(@user_names[user.user_id])}
+                      </td>
+                      <td>
+                        <span
+                          :if={user.format}
+                          class={[
+                            "badge badge-sm",
+                            if(user.format == "protobuf", do: "badge-success", else: "badge-ghost")
+                          ]}
+                          title={
+                            if(user.format == "protobuf",
+                              do: "Events are pushed as binary protobuf frames",
+                              else:
+                                "Events are pushed as JSON — either not requested, or requested and downgraded because the socket negotiated the v1 serializer"
+                            )
+                          }
+                        >
+                          {user.format}
+                        </span>
                       </td>
                       <td>
                         <div class="flex flex-wrap gap-1">
@@ -426,6 +445,23 @@ defmodule GamendWeb.AdminLive.Connections do
         end
       end)
 
+    # Wire format per user, from the socket registration. "is this client
+    # actually on protobuf" cannot be answered from the channel list — the
+    # server silently falls back to JSON on a v1 serializer, and everything
+    # keeps working, so nothing else would show it.
+    formats =
+      all
+      |> Map.get(:ws_socket, [])
+      |> Enum.reduce(%{}, fn {_pid, meta}, acc ->
+        case {Map.get(meta, :user_id), Map.get(meta, :format)} do
+          {user_id, format} when is_binary(user_id) and is_binary(format) ->
+            Map.put(acc, user_id, format)
+
+          _ ->
+            acc
+        end
+      end)
+
     # Add WebRTC info
     webrtc_users =
       all
@@ -441,6 +477,7 @@ defmodule GamendWeb.AdminLive.Connections do
       %{
         user_id: user_id,
         channels: data.channels |> Enum.uniq() |> Enum.sort(),
+        format: Map.get(formats, user_id),
         live_view: data.live_view,
         webrtc: MapSet.member?(webrtc_users, user_id),
         detail_labels: ws_labels ++ lv_labels
