@@ -8,7 +8,7 @@
     <meta name="project" content="gamend_core v1.0.1137">
 
 
-    <title>Gamend.Payments.Providers.Google — gamend_core v1.0.1137</title>
+    <title>Gamend.Policy — gamend_core v1.0.1137</title>
 
     <link rel="stylesheet" href="dist/html-elixir-NHQLCD6Y.css" />
 
@@ -93,19 +93,19 @@ gamend_core
 <div id="top-content">
   <div class="heading-with-actions top-heading">
     <h1>
-      <span translate="no">Gamend.<wbr />Payments.<wbr />Providers.<wbr />Google</span> 
+      <span translate="no">Gamend.<wbr />Policy</span> 
       <small class="app-vsn" translate="no">(gamend_core v1.0.1137)</small>
 
     </h1>
 
-<a href="Gamend.Payments.Providers.Google.md" title="Copy Markdown (hold Ctrl/Cmd and click it to open as Markdown)" class="copy-markdown icon-action" rel="help">
+<a href="Gamend.Policy.md" title="Copy Markdown (hold Ctrl/Cmd and click it to open as Markdown)" class="copy-markdown icon-action" rel="help">
   <i class="ri-markdown-line" aria-hidden="true"></i>
   <span class="sr-only">Copy Markdown</span>
 </a>
 
 
 
-      <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/providers/google.ex#L1" title="View Source" class="icon-action" rel="help nofollow">
+      <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/policy.ex#L1" title="View Source" class="icon-action" rel="help nofollow">
         <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         <span class="sr-only">View Source</span>
       </a>
@@ -114,9 +114,19 @@ gamend_core
 
 
     <section id="moduledoc">
-<p>Google Play Billing adapter.</p><p>Validates one-time purchases and subscriptions through Android Publisher API.
-Real-time developer notifications are decoded here and processed by
-<a href="Gamend.Payments.html"><code class="inline">Gamend.Payments</code></a>.</p>
+<p>One question — &quot;may this user do this to this thing?&quot; — asked the same way
+everywhere.</p><p>Gamend has four owners: a lobby's host, a lobby's pinned WebRTC host, a
+group's admins and a party's leader. Each context decides its own rule and
+keeps deciding it; this module does not own authority, it only routes to the
+context that does:</p><pre><code class="makeup elixir" translate="no"><span class="nc">Policy</span><span class="o">.</span><span class="n">can?</span><span class="p" data-group-id="0986415376-1">(</span><span class="n">user</span><span class="p">,</span><span class="w"> </span><span class="ss">:manage</span><span class="p">,</span><span class="w"> </span><span class="n">lobby</span><span class="p" data-group-id="0986415376-1">)</span><span class="w">   </span><span class="c1"># -&gt; Lobbies.can_manage_lobby?/2</span><span class="w">
+</span><span class="nc">Policy</span><span class="o">.</span><span class="n">can?</span><span class="p" data-group-id="0986415376-2">(</span><span class="n">user</span><span class="p">,</span><span class="w"> </span><span class="ss">:manage</span><span class="p">,</span><span class="w"> </span><span class="n">group</span><span class="p" data-group-id="0986415376-2">)</span><span class="w">   </span><span class="c1"># -&gt; Groups.can_manage_group?/2</span><span class="w">
+</span><span class="nc">Policy</span><span class="o">.</span><span class="n">can?</span><span class="p" data-group-id="0986415376-3">(</span><span class="n">user</span><span class="p">,</span><span class="w"> </span><span class="ss">:manage</span><span class="p">,</span><span class="w"> </span><span class="n">party</span><span class="p" data-group-id="0986415376-3">)</span><span class="w">   </span><span class="c1"># -&gt; Parties.can_manage_party?/2</span></code></pre><p>A caller that holds a resource but does not know its type — an admin screen,
+a hook, a serializer — can ask without a <code class="inline">case</code> per resource, and the answer
+comes from the context that owns the rule rather than from a copy of it.</p><h2 id="module-actions" class="section-heading"><a href="#module-actions" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Actions</span></h2><ul><li><code class="inline">:view</code> — read the resource's details. Lobbies only; groups and parties
+have no hidden state to gate yet.</li><li><code class="inline">:manage</code> — everything an owner does: edit, kick, moderate, and for a
+lobby move its <code class="inline">state</code>. Gamend does not split these, and this module
+will not invent a split it cannot enforce.</li></ul><p>An unknown action or a resource with no rule is <code class="inline">false</code>, never an error: a
+policy that raises turns a missing case into a 500 instead of a 403.</p>
     </section>
 
 </div>
@@ -128,6 +138,28 @@ Real-time developer notifications are decoded here and processed by
       </a>
       <span class="text">Summary</span>
     </h2>
+<div class="summary-types summary">
+  <h3>
+    <a href="#types">Types</a>
+  </h3>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#t:action/0" data-no-tooltip="" translate="no">action()</a>
+
+      </div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#t:resource/0" data-no-tooltip="" translate="no">resource()</a>
+
+      </div>
+
+    </div>
+
+</div>
 <div class="summary-functions summary">
   <h3>
     <a href="#functions">Functions</a>
@@ -135,25 +167,11 @@ Real-time developer notifications are decoded here and processed by
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#config_status/0" data-no-tooltip="" translate="no">config_status()</a>
+        <a href="#can?/3" data-no-tooltip="" translate="no">can?(user, arg2, lobby)</a>
 
       </div>
 
-    </div>
-
-    <div class="summary-row">
-      <div class="summary-signature">
-        <a href="#validate_purchase/2" data-no-tooltip="" translate="no">validate_purchase(user, attrs)</a>
-
-      </div>
-
-    </div>
-
-    <div class="summary-row">
-      <div class="summary-signature">
-        <a href="#verify_webhook/2" data-no-tooltip="" translate="no">verify_webhook(raw_body, authorization_header)</a>
-
-      </div>
+        <div class="summary-synopsis"><p>Whether <code class="inline">user</code> may perform <code class="inline">action</code> on <code class="inline">resource</code>.</p></div>
 
     </div>
 
@@ -161,6 +179,76 @@ Real-time developer notifications are decoded here and processed by
 
   </section>
 
+
+  <section id="types" class="details-list">
+    <h2 class="section-heading">
+      <a class="hover-link" href="#types">
+        <i class="ri-link-m" aria-hidden="true"></i>
+      </a>
+      <span class="text">Types</span>
+    </h2>
+
+    <div class="types-list">
+<section class="detail" id="t:action/0">
+
+  <div class="detail-header">
+    <a href="#t:action/0" class="detail-link" data-no-tooltip="" aria-label="Link to this type">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">action()</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/policy.ex#L39" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@type</span> action() :: :view | :manage</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:resource/0">
+
+  <div class="detail-header">
+    <a href="#t:resource/0" class="detail-link" data-no-tooltip="" aria-label="Link to this type">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">resource()</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/policy.ex#L40" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@type</span> resource() ::
+  <a href="Gamend.Lobbies.Lobby.html#t:t/0">Gamend.Lobbies.Lobby.t</a>() | <a href="Gamend.Groups.Group.html#t:t/0">Gamend.Groups.Group.t</a>() | <a href="Gamend.Parties.Party.html#t:t/0">Gamend.Parties.Party.t</a>()</pre>
+
+      </div>
+
+
+  </section>
+</section>
+
+    </div>
+  </section>
 
   <section id="functions" class="details-list">
     <h2 class="section-heading">
@@ -171,17 +259,17 @@ Real-time developer notifications are decoded here and processed by
     </h2>
 
     <div class="functions-list">
-<section class="detail" id="config_status/0">
+<section class="detail" id="can?/3">
 
   <div class="detail-header">
-    <a href="#config_status/0" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+    <a href="#can?/3" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
       <i class="ri-link-m" aria-hidden="true"></i>
     </a>
     <div class="heading-with-actions">
-      <h1 class="signature" translate="no">config_status()</h1>
+      <h1 class="signature" translate="no">can?(user, arg2, lobby)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/providers/google.ex#L23" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/policy.ex#L49" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -190,51 +278,14 @@ Real-time developer notifications are decoded here and processed by
 
   <section class="docstring">
 
+      <div class="specs">
 
-  </section>
-</section>
-<section class="detail" id="validate_purchase/2">
+          <pre translate="no"><span class="attribute">@spec</span> can?(<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>() | nil, <a href="#t:action/0">action</a>(), <a href="#t:resource/0">resource</a>() | nil) :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()</pre>
 
-  <div class="detail-header">
-    <a href="#validate_purchase/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
-      <i class="ri-link-m" aria-hidden="true"></i>
-    </a>
-    <div class="heading-with-actions">
-      <h1 class="signature" translate="no">validate_purchase(user, attrs)</h1>
+      </div>
 
-
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/providers/google.ex#L51" class="icon-action" rel="help nofollow" aria-label="View Source">
-          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
-        </a>
-
-    </div>
-  </div>
-
-  <section class="docstring">
-
-
-  </section>
-</section>
-<section class="detail" id="verify_webhook/2">
-
-  <div class="detail-header">
-    <a href="#verify_webhook/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
-      <i class="ri-link-m" aria-hidden="true"></i>
-    </a>
-    <div class="heading-with-actions">
-      <h1 class="signature" translate="no">verify_webhook(raw_body, authorization_header)</h1>
-
-
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/providers/google.ex#L67" class="icon-action" rel="help nofollow" aria-label="View Source">
-          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
-        </a>
-
-    </div>
-  </div>
-
-  <section class="docstring">
-
-
+<p>Whether <code class="inline">user</code> may perform <code class="inline">action</code> on <code class="inline">resource</code>.</p><p><code class="inline">nil</code> for an anonymous caller. Only <code class="inline">:view</code> on a public lobby is ever true
+for one.</p>
   </section>
 </section>
 

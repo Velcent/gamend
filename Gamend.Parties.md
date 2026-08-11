@@ -79,6 +79,22 @@ Admin update of a party (max_size, metadata).
 
 Broadcast a member presence event (online/offline) to a party's PubSub topic.
 
+# `can_manage_party?`
+
+```elixir
+@spec can_manage_party?(
+  Gamend.Accounts.User.t() | nil,
+  Gamend.Parties.Party.t() | Ecto.UUID.t() | nil
+) ::
+  boolean()
+```
+
+Whether `user` holds authority over `party` — its leader, nobody else.
+
+Subject first, resource second, like every other `can_*?` predicate (see
+`Gamend.Policy`). The party takes a struct or a bare id; passing the user's
+own `party_id` is the common case.
+
 # `cancel_party_invite`
 
 ```elixir
@@ -238,14 +254,6 @@ The lobby must have enough free slots for the entire party.
 ```
 
 Kick a member from the party. Only the leader can kick.
-
-# `leader?`
-
-```elixir
-@spec leader?(Gamend.Accounts.User.t()) :: boolean()
-```
-
-Returns true if the given user is the leader of their current party.
 
 # `leave_party`
 

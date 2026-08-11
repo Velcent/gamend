@@ -49,15 +49,31 @@ This module broadcasts the following events:
 
 Broadcast a member presence event (online/offline) to a lobby's PubSub topic.
 
-# `can_edit_lobby?`
+# `can_manage_lobby?`
 
 ```elixir
-@spec can_edit_lobby?(Gamend.Accounts.User.t() | nil, Gamend.Lobbies.Lobby.t() | nil) ::
-  boolean()
+@spec can_manage_lobby?(
+  Gamend.Accounts.User.t() | nil,
+  Gamend.Lobbies.Lobby.t() | nil
+) :: boolean()
 ```
 
-Check if a user can edit a lobby: the host of a host-managed lobby, nobody
-else. Hostless lobbies have no editor — see `update_lobby_by_host/3`.
+Whether `user` holds authority over `lobby` — the one rule behind editing it,
+moving its `state`, kicking from it, opening its ready checks and moderating
+its chat. Every one of those gates asks this and nothing else.
+
+Two users hold it:
+
+  * the **host of a host-managed lobby**. Hostless lobbies (matchmaking's)
+    belong to nobody, so their `host_id` is nil and this branch never fires.
+
+  * the **pinned WebRTC host**, seated in the lobby or not. Only
+    `Gamend.Signaling.configure/2` writes `webrtc_host_id` and no
+    player-facing route reaches it, so this is the game designating a
+    server, bot or peer as the lobby's authority — the one way a hostless
+    matchmaking lobby gets an owner. It is the pinned host alone: the
+    `webrtc_host_id || host_id` fallback `Gamend.Signaling.config/1` applies
+    is about who relays packets, not who commands the lobby.
 
 # `can_view_lobby?`
 
@@ -230,7 +246,9 @@ reason is one of `:already_in_lobby`, `:locked`, `:full`, `:blocked`,
   {:ok, Gamend.Accounts.User.t()} | {:error, term()}
 ```
 
-Kick a user from a lobby. Only the host can kick users.
+Kick a user from a lobby. Only the lobby's authority can, per
+`can_manage_lobby?/2`.
+
 Returns {:ok, user} on success, {:error, reason} on failure.
 
 # `leave_lobby`
@@ -416,13 +434,13 @@ Returns `{:ok, lobby}`, `{:error, :invalid_state}` or
   | {:error, :not_host | :invalid_state | term()}
 ```
 
-Player-initiated state change, subject to lobby ownership.
+Client-initiated state change, subject to `can_manage_lobby?/2`.
 
-Allowed only for the **host of a host-managed lobby** — the host already
-renames, locks, resizes and kicks, so `state` is no more powerful than what
-they hold, and "press Start" is a normal party-game action. **Hostless**
-lobbies (matchmaking's) belong to nobody, so no player may move them: use
-`transition_state/3` from server-side hooks instead.
+The lobby's authority already renames, locks, resizes and kicks, so `state`
+is no more powerful than what it holds, and "press Start" is a normal
+party-game action. A hostless matchmaking lobby with no pinned WebRTC host
+has no authority at all: move it with `transition_state/3` from server-side
+hooks instead.
 
 # `unsubscribe_lobby`
 
@@ -457,13 +475,13 @@ See `t:Gamend.Types.lobby_update_attrs/0` for available fields.
   | {:error, :not_host | :too_small | Ecto.Changeset.t() | term()}
 ```
 
-Player-initiated lobby update, subject to lobby ownership.
+Client-initiated lobby update, subject to `can_manage_lobby?/2`.
 
-Allowed only for the **host of a host-managed lobby**. **Hostless** lobbies
-(matchmaking's) belong to nobody, so no player may edit them — a member
-could otherwise rewrite `metadata`, `max_users`, `password_hash` and the
-visibility flags of a ranked match they merely happen to be in. Server-side
-code (hooks, jobs, matchmaking, admin) uses `update_lobby/2` instead.
+A hostless matchmaking lobby with no pinned WebRTC host has no authority, so
+none of its members may edit it — one could otherwise rewrite `metadata`,
+`max_users`, `password_hash` and the visibility flags of a ranked match it
+merely happens to be in. Server-side code (hooks, jobs, matchmaking, admin)
+uses `update_lobby/2` instead.
 
 # `webrtc_enabled_lobby_ids`
 

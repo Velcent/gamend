@@ -115,6 +115,7 @@ Gamend.Payments.Purchase.md
 Gamend.Payments.ReconciliationCursor.md
 Gamend.Payments.Settings.md
 Gamend.Payments.md
+Gamend.Policy.md
 Gamend.Presence.md
 Gamend.Proto.GodobufPresence.md
 Gamend.Push.APNSDispatcher.md

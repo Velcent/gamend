@@ -56,14 +56,6 @@ three visibility types:
 
 Accept a pending group invite by invite id (recipient only).
 
-# `admin?`
-
-```elixir
-@spec admin?(Ecto.UUID.t(), Ecto.UUID.t()) :: boolean()
-```
-
-Check if user is an admin of the group.
-
 # `admin_delete_group`
 
 ```elixir
@@ -108,6 +100,20 @@ Batch count members for a list of group IDs. Returns a map of group_id => count.
 ```
 
 Broadcast a presence event (e.g. member_online, member_updated) to a group topic.
+
+# `can_manage_group?`
+
+```elixir
+@spec can_manage_group?(
+  Gamend.Accounts.User.t() | Ecto.UUID.t() | nil,
+  Gamend.Groups.Group.t() | Ecto.UUID.t() | nil
+) :: boolean()
+```
+
+Whether `user` holds authority over `group` — its admin members, nobody else.
+
+Subject first, resource second, like every other `can_*?` predicate (see
+`Gamend.Policy`). Both arguments take a struct or a bare id.
 
 # `cancel_invite`
 

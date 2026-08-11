@@ -1,4 +1,4 @@
-# gamend_core v1.0.1136 - API Reference
+# gamend_core v1.0.1137 - API Reference
 
 ## Modules
 
@@ -11,6 +11,8 @@ and business logic.
 L2 cache.
 - [Gamend.Database](Gamend.Database.md): Connection and tuning settings for `Gamend.Repo`.
 - [Gamend.Mail](Gamend.Mail.md): Outbound email transport.
+- [Gamend.Policy](Gamend.Policy.md): One question — "may this user do this to this thing?" — asked the same way
+everywhere.
 - [Gamend.Presence](Gamend.Presence.md): Cluster-wide tracking of who is connected where.
 - [Gamend.Signaling](Gamend.Signaling.md): WebRTC signaling: who is in a room, and relaying offers between them.
 - [Gamend.Time](Gamend.Time.md): The server's wall clock, in milliseconds since the epoch, for sending to

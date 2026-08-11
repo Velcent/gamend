@@ -116,6 +116,7 @@ Gamend.Payments.Purchase.html
 Gamend.Payments.ReconciliationCursor.html
 Gamend.Payments.Settings.html
 Gamend.Payments.html
+Gamend.Policy.html
 Gamend.Presence.html
 Gamend.Proto.GodobufPresence.html
 Gamend.Push.APNSDispatcher.html
@@ -184,8 +185,8 @@ dist/lato-latin-700-normal-2XVSBPG4.woff2
 dist/lato-latin-ext-400-normal-N27NCBWW.woff2
 dist/lato-latin-ext-700-normal-Q2L5DVMW.woff2
 dist/remixicon-ZWU5GQ4X.woff2
-dist/search_data-9B8C6BDA.js
-dist/sidebar_items-6332A685.js
+dist/search_data-3962057C.js
+dist/sidebar_items-012C8D3A.js
 index.html
 readme.html
 search.html
