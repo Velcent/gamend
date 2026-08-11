@@ -1009,18 +1009,18 @@ defmodule Gamend.Lobbies do
   end
 
   @doc """
-  Player-initiated state change, subject to lobby ownership.
+  Client-initiated state change, subject to `can_manage_lobby?/2`.
 
-  Allowed only for the **host of a host-managed lobby** — the host already
-  renames, locks, resizes and kicks, so `state` is no more powerful than what
-  they hold, and "press Start" is a normal party-game action. **Hostless**
-  lobbies (matchmaking's) belong to nobody, so no player may move them: use
-  `transition_state/3` from server-side hooks instead.
+  The lobby's authority already renames, locks, resizes and kicks, so `state`
+  is no more powerful than what it holds, and "press Start" is a normal
+  party-game action. A hostless matchmaking lobby with no pinned WebRTC host
+  has no authority at all: move it with `transition_state/3` from server-side
+  hooks instead.
   """
   @spec transition_state_by_host(User.t(), Lobby.t(), String.t()) ::
           {:ok, Lobby.t()} | {:error, :not_host | :invalid_state | term()}
-  def transition_state_by_host(%User{id: user_id}, %Lobby{} = lobby, state) do
-    if not lobby.hostless and lobby.host_id == user_id do
+  def transition_state_by_host(%User{} = user, %Lobby{} = lobby, state) do
+    if can_manage_lobby?(user, lobby) do
       transition_state(lobby, state)
     else
       {:error, :not_host}
@@ -1422,15 +1422,17 @@ defmodule Gamend.Lobbies do
   end
 
   @doc """
-  Kick a user from a lobby. Only the host can kick users.
+  Kick a user from a lobby. Only the lobby's authority can, per
+  `can_manage_lobby?/2`.
+
   Returns {:ok, user} on success, {:error, reason} on failure.
   """
   @spec kick_user(User.t(), Lobby.t(), User.t()) :: {:ok, User.t()} | {:error, term()}
-  def kick_user(%User{id: host_id}, %Lobby{id: lobby_id}, %User{id: target_id}) do
+  def kick_user(%User{id: host_id} = host, %Lobby{id: lobby_id}, %User{id: target_id}) do
     lobby = get_lobby!(lobby_id)
 
     cond do
-      lobby.host_id != host_id and not lobby.hostless ->
+      not can_manage_lobby?(host, lobby) ->
         {:error, :not_host}
 
       target_id == host_id ->
@@ -1511,16 +1513,31 @@ defmodule Gamend.Lobbies do
   end
 
   @doc """
-  Check if a user can edit a lobby: the host of a host-managed lobby, nobody
-  else. Hostless lobbies have no editor — see `update_lobby_by_host/3`.
+  Whether `user` holds authority over `lobby` — the one rule behind editing it,
+  moving its `state`, kicking from it, opening its ready checks and moderating
+  its chat. Every one of those gates asks this and nothing else.
+
+  Two users hold it:
+
+    * the **host of a host-managed lobby**. Hostless lobbies (matchmaking's)
+      belong to nobody, so their `host_id` is nil and this branch never fires.
+
+    * the **pinned WebRTC host**, seated in the lobby or not. Only
+      `Gamend.Signaling.configure/2` writes `webrtc_host_id` and no
+      player-facing route reaches it, so this is the game designating a
+      server, bot or peer as the lobby's authority — the one way a hostless
+      matchmaking lobby gets an owner. It is the pinned host alone: the
+      `webrtc_host_id || host_id` fallback `Gamend.Signaling.config/1` applies
+      is about who relays packets, not who commands the lobby.
   """
-  @spec can_edit_lobby?(User.t() | nil, Lobby.t() | nil) :: boolean()
-  def can_edit_lobby?(%User{id: user_id}, %Lobby{} = lobby) do
-    not lobby.hostless and lobby.host_id == user_id
+  @spec can_manage_lobby?(User.t() | nil, Lobby.t() | nil) :: boolean()
+  def can_manage_lobby?(%User{id: user_id}, %Lobby{} = lobby) do
+    user_id == lobby.webrtc_host_id or
+      (not lobby.hostless and lobby.host_id == user_id)
   end
 
-  def can_edit_lobby?(nil, _lobby), do: false
-  def can_edit_lobby?(_user, nil), do: false
+  def can_manage_lobby?(nil, _lobby), do: false
+  def can_manage_lobby?(_user, nil), do: false
 
   @doc """
   Whether `user` may read `lobby`'s details.
@@ -1536,8 +1553,7 @@ defmodule Gamend.Lobbies do
   def can_view_lobby?(nil, %Lobby{is_hidden: hidden}), do: not hidden
 
   def can_view_lobby?(%User{} = user, %Lobby{} = lobby) do
-    not lobby.is_hidden or user.lobby_id == lobby.id or
-      user.id == (lobby.webrtc_host_id || lobby.host_id)
+    not lobby.is_hidden or user.lobby_id == lobby.id or can_manage_lobby?(user, lobby)
   end
 
   @doc """
@@ -1551,18 +1567,18 @@ defmodule Gamend.Lobbies do
   def spectatable?(%Lobby{}), do: true
 
   @doc """
-  Player-initiated lobby update, subject to lobby ownership.
+  Client-initiated lobby update, subject to `can_manage_lobby?/2`.
 
-  Allowed only for the **host of a host-managed lobby**. **Hostless** lobbies
-  (matchmaking's) belong to nobody, so no player may edit them — a member
-  could otherwise rewrite `metadata`, `max_users`, `password_hash` and the
-  visibility flags of a ranked match they merely happen to be in. Server-side
-  code (hooks, jobs, matchmaking, admin) uses `update_lobby/2` instead.
+  A hostless matchmaking lobby with no pinned WebRTC host has no authority, so
+  none of its members may edit it — one could otherwise rewrite `metadata`,
+  `max_users`, `password_hash` and the visibility flags of a ranked match it
+  merely happens to be in. Server-side code (hooks, jobs, matchmaking, admin)
+  uses `update_lobby/2` instead.
   """
   @spec update_lobby_by_host(User.t(), Lobby.t(), Types.lobby_update_attrs()) ::
           {:ok, Lobby.t()} | {:error, :not_host | :too_small | Ecto.Changeset.t() | term()}
-  def update_lobby_by_host(%User{id: host_id}, %Lobby{} = lobby, attrs) do
-    if not lobby.hostless and lobby.host_id == host_id do
+  def update_lobby_by_host(%User{} = user, %Lobby{} = lobby, attrs) do
+    if can_manage_lobby?(user, lobby) do
       attrs = maybe_hash_password(attrs)
       new_max = Map.get(attrs, "max_users") || Map.get(attrs, :max_users)
 

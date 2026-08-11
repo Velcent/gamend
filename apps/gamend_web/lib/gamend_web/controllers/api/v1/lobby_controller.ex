@@ -185,62 +185,64 @@ defmodule GamendWeb.Api.V1.LobbyController do
 
   operation(:set_state,
     operation_id: "set_lobby_state",
-    summary: "Set lobby state (host only)",
+    summary: "Set lobby state (host or pinned WebRTC host)",
     description:
-      "Move the caller's lobby to another lifecycle state. Allowed only for the " <>
-        "host of a host-managed lobby: hostless (matchmaking) lobbies belong to " <>
-        "the server, so no player may move them. The vocabulary is the game's " <>
-        "(core documents created, starting, playing, ended); the game's " <>
-        "before_lobby_state_change hook enforces its own words and ordering.",
+      "Move a lobby to another lifecycle state. Allowed for the host of a " <>
+        "host-managed lobby and for the lobby's pinned WebRTC host; a hostless " <>
+        "(matchmaking) lobby with no pinned host belongs to the server, so no " <>
+        "player may move it. Targets the caller's own lobby unless lobby_id " <>
+        "names another - which is how a pinned WebRTC host, seated in no lobby, " <>
+        "moves the room it runs. The vocabulary is the game's (core documents " <>
+        "created, starting, playing, ended); the game's before_lobby_state_change " <>
+        "hook enforces its own words and ordering.",
     security: [%{"authorization" => []}],
     request_body: {
       "Target state",
       "application/json",
       %Schema{
         type: :object,
-        properties: %{state: %Schema{type: :string, description: "Target lifecycle state"}},
+        properties: %{
+          state: %Schema{type: :string, description: "Target lifecycle state"},
+          lobby_id: %Schema{
+            type: :string,
+            description: "Lobby to move. Defaults to the caller's own lobby."
+          }
+        },
         required: [:state]
       }
     },
     responses: %{
       200 => {"Updated lobby", "application/json", %Schema{type: :object}},
-      400 => {"Not in a lobby / missing state", "application/json", %Schema{type: :object}},
-      403 => {"Not the host, or lobby is hostless", "application/json", %Schema{type: :object}},
+      400 =>
+        {"Not in a lobby / missing state / malformed id", "application/json",
+         %Schema{type: :object}},
+      403 => {"No authority over the lobby", "application/json", %Schema{type: :object}},
+      404 => {"Not found", "application/json", %Schema{type: :object}},
       422 => {"Unknown state or hook rejection", "application/json", %Schema{type: :object}}
     }
   )
 
-  def set_state(conn, %{"state" => state}) when is_binary(state) do
-    case Scope.user(conn.assigns[:current_scope]) do
-      %User{} = user ->
-        if is_nil(user.lobby_id) do
-          conn |> put_status(:bad_request) |> json(%{error: "not_in_lobby"})
-        else
-          lobby = Lobbies.get_lobby!(user.lobby_id)
+  def set_state(conn, %{"state" => state} = params) when is_binary(state) do
+    with_target_lobby(conn, params, fn user, lobby ->
+      case Lobbies.transition_state_by_host(user, lobby, state) do
+        {:ok, updated} ->
+          json(conn, serialize_lobby(updated))
 
-          case Lobbies.transition_state_by_host(user, lobby, state) do
-            {:ok, updated} ->
-              json(conn, serialize_lobby(updated))
+        {:error, :not_host} ->
+          conn |> put_status(:forbidden) |> json(%{error: "not_host"})
 
-            {:error, :not_host} ->
-              conn |> put_status(:forbidden) |> json(%{error: "not_host"})
+        {:error, :invalid_state} ->
+          conn |> put_status(:unprocessable_entity) |> json(%{error: "invalid_state"})
 
-            {:error, :invalid_state} ->
-              conn |> put_status(:unprocessable_entity) |> json(%{error: "invalid_state"})
+        {:error, {:hook_rejected, reason}} ->
+          conn
+          |> put_status(:unprocessable_entity)
+          |> json(%{error: "rejected", reason: inspect(reason)})
 
-            {:error, {:hook_rejected, reason}} ->
-              conn
-              |> put_status(:unprocessable_entity)
-              |> json(%{error: "rejected", reason: inspect(reason)})
-
-            _other ->
-              conn |> put_status(:unprocessable_entity) |> json(%{error: "unexpected_error"})
-          end
-        end
-
-      _ ->
-        conn |> put_status(:unauthorized) |> json(%{error: "Not authenticated"})
-    end
+        _other ->
+          conn |> put_status(:unprocessable_entity) |> json(%{error: "unexpected_error"})
+      end
+    end)
   end
 
   def set_state(conn, _params) do
@@ -249,12 +251,15 @@ defmodule GamendWeb.Api.V1.LobbyController do
 
   operation(:update,
     operation_id: "update_lobby",
-    summary: "Update lobby (host only)",
+    summary: "Update lobby (host or pinned WebRTC host)",
     description:
-      "Update the caller's lobby settings. Allowed only for the host of a host-managed " <>
-        "lobby: hostless (matchmaking) lobbies belong to the server, so no player may edit " <>
-        "them (both cases return 403). Admins can still modify any lobby from the admin " <>
-        "console or the admin API - those changes are broadcast to viewers.",
+      "Update a lobby's settings. Allowed for the host of a host-managed lobby and for " <>
+        "the lobby's pinned WebRTC host; a hostless (matchmaking) lobby with no pinned " <>
+        "host belongs to the server, so no player may edit it (both cases return 403). " <>
+        "Targets the caller's own lobby unless lobby_id names another - which is how a " <>
+        "pinned WebRTC host, seated in no lobby, edits the room it runs. Admins can still " <>
+        "modify any lobby from the admin console or the admin API - those changes are " <>
+        "broadcast to viewers.",
     security: [%{"authorization" => []}],
     request_body: {
       "Lobby update parameters",
@@ -262,6 +267,10 @@ defmodule GamendWeb.Api.V1.LobbyController do
       %Schema{
         type: :object,
         properties: %{
+          lobby_id: %Schema{
+            type: :string,
+            description: "Lobby to update. Defaults to the caller's own lobby."
+          },
           title: %Schema{type: :string, description: "New display title"},
           max_users: %Schema{type: :integer, description: "New maximum users"},
           is_hidden: %Schema{type: :boolean, description: "Hide from public listings"},
@@ -280,11 +289,16 @@ defmodule GamendWeb.Api.V1.LobbyController do
         }
       }
     },
-    # Uses the authenticated user's lobby_id - no path id required
     responses: [
       ok: {"Lobby updated", "application/json", @lobby_schema},
+      bad_request:
+        {"Not in a lobby, or malformed id", "application/json",
+         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}},
       forbidden:
-        {"Not the host, or lobby is hostless", "application/json",
+        {"No authority over the lobby", "application/json",
+         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}},
+      not_found:
+        {"Not found", "application/json",
          %Schema{type: :object, properties: %{error: %Schema{type: :string}}}},
       unauthorized:
         {"Not authenticated", "application/json",
@@ -567,11 +581,11 @@ defmodule GamendWeb.Api.V1.LobbyController do
 
           cond do
             # Non-leader party members must leave the party first
-            user.party_id != nil and not Parties.leader?(user) ->
+            user.party_id != nil and not Parties.can_manage_party?(user, user.party_id) ->
               conn |> put_status(:forbidden) |> json(%{error: "in_party"})
 
             # Party leader: automatically bring the whole party
-            user.party_id != nil and Parties.leader?(user) ->
+            user.party_id != nil and Parties.can_manage_party?(user, user.party_id) ->
               create_lobby_as_party_leader(conn, user, params)
 
             # Not in a party: normal create flow
@@ -649,11 +663,11 @@ defmodule GamendWeb.Api.V1.LobbyController do
           {:ok, lobby_id} ->
             cond do
               # Non-leader party members cannot join a lobby individually
-              user.party_id != nil and not Parties.leader?(user) ->
+              user.party_id != nil and not Parties.can_manage_party?(user, user.party_id) ->
                 conn |> put_status(:forbidden) |> json(%{error: "in_party"})
 
               # Party leader: bring the whole party
-              user.party_id != nil and Parties.leader?(user) ->
+              user.party_id != nil and Parties.can_manage_party?(user, user.party_id) ->
                 join_lobby_as_party_leader(conn, user, lobby_id, params)
 
               # Not in a party: normal join
@@ -844,36 +858,68 @@ defmodule GamendWeb.Api.V1.LobbyController do
   end
 
   def update(conn, params) do
+    with_target_lobby(conn, params, fn user, lobby ->
+      case Lobbies.update_lobby_by_host(user, lobby, Map.drop(params, ["lobby_id", :lobby_id])) do
+        {:ok, updated} ->
+          json(conn, serialize_lobby(updated))
+
+        {:error, :not_host} ->
+          conn |> put_status(:forbidden) |> json(%{error: "not_host"})
+
+        {:error, :too_small} ->
+          conn |> put_status(:unprocessable_entity) |> json(%{error: "too_small"})
+
+        {:error, %Ecto.Changeset{} = changeset} ->
+          conn
+          |> put_status(:unprocessable_entity)
+          |> json(%{error: Ecto.Changeset.traverse_errors(changeset, fn {msg, _} -> msg end)})
+
+        _other ->
+          conn |> put_status(:unprocessable_entity) |> json(%{error: "unexpected_error"})
+      end
+    end)
+  end
+
+  # Which lobby the caller means. Normally the one it is sitting in — but a
+  # pinned WebRTC host is seated in no lobby (that is the point of pinning one:
+  # a headless server runs the room without occupying a slot), so it names the
+  # lobby explicitly instead. `can_view_lobby?` gates the named one: a caller
+  # with no relationship to a hidden lobby gets the same 404 as `show/2`, since
+  # a 403 would confirm it exists. Authority itself is checked downstream, so
+  # the answer to "may I?" comes from one place.
+  defp with_target_lobby(conn, params, fun) do
     case Scope.user(conn.assigns[:current_scope]) do
       %User{} = user ->
-        # Use the authenticated user's lobby_id - require that the user is in a lobby
-        if is_nil(user.lobby_id) do
-          conn |> put_status(:bad_request) |> json(%{error: "not_in_lobby"})
-        else
-          lobby = Lobbies.get_lobby!(user.lobby_id)
+        case target_lobby(user, Map.get(params, "lobby_id") || Map.get(params, :lobby_id)) do
+          {:ok, lobby} ->
+            fun.(user, lobby)
 
-          case Lobbies.update_lobby_by_host(user, lobby, params) do
-            {:ok, updated} ->
-              json(conn, serialize_lobby(updated))
+          {:error, :not_in_lobby} ->
+            conn |> put_status(:bad_request) |> json(%{error: "not_in_lobby"})
 
-            {:error, :not_host} ->
-              conn |> put_status(:forbidden) |> json(%{error: "not_host"})
+          {:error, :invalid_id} ->
+            conn |> put_status(:bad_request) |> json(%{error: "Invalid lobby id"})
 
-            {:error, :too_small} ->
-              conn |> put_status(:unprocessable_entity) |> json(%{error: "too_small"})
-
-            {:error, %Ecto.Changeset{} = changeset} ->
-              conn
-              |> put_status(:unprocessable_entity)
-              |> json(%{error: Ecto.Changeset.traverse_errors(changeset, fn {msg, _} -> msg end)})
-
-            _other ->
-              conn |> put_status(:unprocessable_entity) |> json(%{error: "unexpected_error"})
-          end
+          {:error, :not_found} ->
+            conn |> put_status(:not_found) |> json(%{error: "Lobby not found"})
         end
 
       _ ->
         conn |> put_status(:unauthorized) |> json(%{error: "Not authenticated"})
+    end
+  end
+
+  defp target_lobby(%User{lobby_id: nil}, nil), do: {:error, :not_in_lobby}
+  defp target_lobby(%User{lobby_id: lobby_id}, nil), do: {:ok, Lobbies.get_lobby!(lobby_id)}
+
+  defp target_lobby(%User{} = user, raw_id) do
+    with {:ok, lobby_id} <- Ecto.UUID.cast(raw_id),
+         %Gamend.Lobbies.Lobby{} = lobby <- Lobbies.get_lobby(lobby_id),
+         true <- Lobbies.can_view_lobby?(user, lobby) do
+      {:ok, lobby}
+    else
+      :error -> {:error, :invalid_id}
+      _ -> {:error, :not_found}
     end
   end
 

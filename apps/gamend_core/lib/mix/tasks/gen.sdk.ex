@@ -41,7 +41,10 @@ defmodule Mix.Tasks.Gen.Sdk do
     {Gamend.Signaling, "signaling.ex"},
     # Without this a plugin cannot push a custom event and reaches for
     # `GamendWeb.Endpoint` instead, coupling itself to the web app.
-    {Gamend.Realtime, "realtime.ex"}
+    {Gamend.Realtime, "realtime.ex"},
+    # So a hook asks "may this user?" the same way core does, instead of
+    # reimplementing each context's ownership rule.
+    {Gamend.Policy, "policy.ex"}
   ]
 
   @impl Mix.Task

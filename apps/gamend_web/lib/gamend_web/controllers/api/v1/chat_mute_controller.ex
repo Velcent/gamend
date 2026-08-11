@@ -90,7 +90,7 @@ defmodule GamendWeb.Api.V1.ChatMuteController do
 
   def mute_lobby(conn, params) do
     with_lobby(conn, fn user, lobby ->
-      if host_of?(user, lobby) do
+      if Lobbies.can_manage_lobby?(user, lobby) do
         do_mute(conn, params, "lobby", lobby.id, user)
       else
         forbidden(conn, "not_host")
@@ -112,7 +112,7 @@ defmodule GamendWeb.Api.V1.ChatMuteController do
 
   def unmute_lobby(conn, params) do
     with_lobby(conn, fn user, lobby ->
-      if host_of?(user, lobby) do
+      if Lobbies.can_manage_lobby?(user, lobby) do
         do_unmute(conn, params, "lobby", lobby.id)
       else
         forbidden(conn, "not_host")
@@ -145,7 +145,7 @@ defmodule GamendWeb.Api.V1.ChatMuteController do
 
   def list_lobby_mutes(conn, params) do
     with_lobby(conn, fn user, lobby ->
-      if host_of?(user, lobby) do
+      if Lobbies.can_manage_lobby?(user, lobby) do
         list_scoped(conn, params, "lobby", lobby.id)
       else
         forbidden(conn, "not_host")
@@ -260,7 +260,7 @@ defmodule GamendWeb.Api.V1.ChatMuteController do
 
   def mute_party(conn, params) do
     with_party(conn, fn user, party ->
-      if party.leader_id == user.id do
+      if Parties.can_manage_party?(user, party) do
         do_mute(conn, params, "party", party.id, user)
       else
         forbidden(conn, "not_leader")
@@ -282,7 +282,7 @@ defmodule GamendWeb.Api.V1.ChatMuteController do
 
   def unmute_party(conn, params) do
     with_party(conn, fn user, party ->
-      if party.leader_id == user.id do
+      if Parties.can_manage_party?(user, party) do
         do_unmute(conn, params, "party", party.id)
       else
         forbidden(conn, "not_leader")
@@ -315,7 +315,7 @@ defmodule GamendWeb.Api.V1.ChatMuteController do
 
   def list_party_mutes(conn, params) do
     with_party(conn, fn user, party ->
-      if party.leader_id == user.id do
+      if Parties.can_manage_party?(user, party) do
         list_scoped(conn, params, "party", party.id)
       else
         forbidden(conn, "not_leader")
@@ -399,10 +399,6 @@ defmodule GamendWeb.Api.V1.ChatMuteController do
     Map.get(params, key) || Map.get(params, String.to_atom(key))
   end
 
-  # The same rule as POST /lobbies/state: nobody owns a hostless lobby, so no
-  # player may act on it.
-  defp host_of?(%User{id: user_id}, lobby), do: not lobby.hostless and lobby.host_id == user_id
-
   defp with_user(conn, fun) do
     case Scope.user(conn.assigns[:current_scope]) do
       %User{} = user -> fun.(user)
@@ -436,7 +432,7 @@ defmodule GamendWeb.Api.V1.ChatMuteController do
           conn |> put_status(:bad_request) |> json(%{error: "invalid_id"})
 
         group_id ->
-          if Groups.admin?(group_id, user.id) do
+          if Groups.can_manage_group?(user.id, group_id) do
             fun.(user, group_id)
           else
             forbidden(conn, "not_group_admin")

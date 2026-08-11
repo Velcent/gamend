@@ -73,7 +73,7 @@ defmodule Gamend.Groups.Invites do
       is_nil(group) ->
         {:error, :not_found}
 
-      not Groups.admin?(group_id, admin_id) ->
+      not Groups.can_manage_group?(admin_id, group_id) ->
         {:error, :not_admin}
 
       Groups.member?(group_id, target_user_id) ->

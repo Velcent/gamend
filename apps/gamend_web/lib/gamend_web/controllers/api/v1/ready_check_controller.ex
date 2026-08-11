@@ -189,7 +189,7 @@ defmodule GamendWeb.Api.V1.ReadyCheckController do
 
   def open(conn, params) do
     with_lobby(conn, fn user, lobby ->
-      if host_of?(user, lobby) do
+      if Lobbies.can_manage_lobby?(user, lobby) do
         member_ids = lobby |> Lobbies.get_lobby_members() |> Enum.map(& &1.id)
         do_reset(conn, user, lobby, member_ids, params)
       else
@@ -231,7 +231,7 @@ defmodule GamendWeb.Api.V1.ReadyCheckController do
 
   def open_party(conn, params) do
     with_party(conn, fn user, party ->
-      if party.leader_id == user.id do
+      if Parties.can_manage_party?(user, party) do
         member_ids = party.id |> Parties.get_party_members() |> Enum.map(& &1.id)
         do_reset(conn, user, party, member_ids, params)
       else
@@ -283,7 +283,7 @@ defmodule GamendWeb.Api.V1.ReadyCheckController do
   def cancel(conn, _params) do
     with_lobby(conn, fn user, lobby ->
       cond do
-        not host_of?(user, lobby) ->
+        not Lobbies.can_manage_lobby?(user, lobby) ->
           conn |> put_status(:forbidden) |> json(%{error: "not_host"})
 
         is_nil(ReadyChecks.pending_for_lobby(lobby.id)) ->
@@ -324,10 +324,6 @@ defmodule GamendWeb.Api.V1.ReadyCheckController do
       end
     end)
   end
-
-  # The same rule as POST /lobbies/state: nobody owns a hostless lobby, so no
-  # player may act on it.
-  defp host_of?(%User{id: user_id}, lobby), do: not lobby.hostless and lobby.host_id == user_id
 
   defp parse_scope("lobby"), do: {:ok, :match}
   defp parse_scope("party"), do: {:ok, :party}

@@ -50,6 +50,39 @@ defmodule GamendWeb.Api.V1.ReadyCheckControllerTest do
       assert json_response(conn, 400)["error"] == "not_in_lobby"
     end
 
+    # A hostless lobby has no owner until the game pins one. Once it does, that
+    # user opens the board — the same authority that edits and kicks.
+    test "the pinned WebRTC host of a hostless lobby may open one", _ctx do
+      user = AccountsFixtures.user_fixture()
+      {:ok, lobby} = Lobbies.create_lobby(%{title: "ranked-pinned", hostless: true})
+      {:ok, _} = Lobbies.join_lobby(user, lobby.id)
+
+      conn = post(authed(user), "/api/v1/lobbies/ready_check", %{})
+      assert json_response(conn, 403)["error"] == "not_host"
+
+      {:ok, _} =
+        Gamend.Signaling.configure(lobby, enabled: true, topology: :star, host_id: user.id)
+
+      conn = post(authed(user), "/api/v1/lobbies/ready_check", %{})
+      assert %{"kind" => "ready", "status" => "pending"} = json_response(conn, 201)
+    end
+
+    # These endpoints take no lobby id, so they still resolve the room from the
+    # caller's own `lobby_id`: authority alone is not enough to reach them.
+    test "an authority seated in no lobby still cannot reach it", _ctx do
+      server = AccountsFixtures.user_fixture()
+      {:ok, lobby} = Lobbies.create_lobby(%{title: "ranked-headless", hostless: true})
+      {:ok, _} = Lobbies.join_lobby(AccountsFixtures.user_fixture(), lobby.id)
+
+      {:ok, lobby} =
+        Gamend.Signaling.configure(lobby, enabled: true, topology: :star, host_id: server.id)
+
+      assert Lobbies.can_manage_lobby?(server, lobby)
+
+      conn = post(authed(server), "/api/v1/lobbies/ready_check", %{})
+      assert json_response(conn, 400)["error"] == "not_in_lobby"
+    end
+
     test "a second open resets the board instead of refusing", ctx do
       first = post(authed(ctx.host), "/api/v1/lobbies/ready_check", %{})
       first_id = json_response(first, 201)["id"]

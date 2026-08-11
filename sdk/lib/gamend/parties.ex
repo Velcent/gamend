@@ -108,6 +108,29 @@ defmodule Gamend.Parties do
   end
 
   @doc ~S"""
+    Whether `user` holds authority over `party` — its leader, nobody else.
+    
+    Subject first, resource second, like every other `can_*?` predicate (see
+    `Gamend.Policy`). The party takes a struct or a bare id; passing the user's
+    own `party_id` is the common case.
+    
+  """
+  @spec can_manage_party?(
+          Gamend.Accounts.User.t() | nil,
+          Gamend.Parties.Party.t() | Ecto.UUID.t() | nil
+        ) ::
+          boolean()
+  def can_manage_party?(_user, _party_id) do
+    case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        :erlang.phash2(make_ref(), 2) == 0
+
+      _ ->
+        raise "Gamend.Parties.can_manage_party?/2 is a stub - only available at runtime on Gamend"
+    end
+  end
+
+  @doc ~S"""
     Cancel a previously sent party invite. Only the original sender (leader) can cancel.
     
   """
@@ -373,20 +396,6 @@ defmodule Gamend.Parties do
 
       _ ->
         raise "Gamend.Parties.kick_member/2 is a stub - only available at runtime on Gamend"
-    end
-  end
-
-  @doc ~S"""
-    Returns true if the given user is the leader of their current party.
-  """
-  @spec leader?(Gamend.Accounts.User.t()) :: boolean()
-  def leader?(_user) do
-    case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
-      :placeholder ->
-        :erlang.phash2(make_ref(), 2) == 0
-
-      _ ->
-        raise "Gamend.Parties.leader?/1 is a stub - only available at runtime on Gamend"
     end
   end
 

@@ -87,6 +87,162 @@ defmodule GamendWeb.Api.V1.LobbyControllerTest do
     refute Enum.any?(resp3["data"], fn l -> l["id"] == open_small.id end)
   end
 
+  describe "a pinned WebRTC host writes to a lobby it is not a member of" do
+    setup %{conn: conn} do
+      server = AccountsFixtures.user_fixture()
+      player = AccountsFixtures.user_fixture()
+
+      {:ok, lobby} = Lobbies.create_lobby(%{title: "matchmade", hostless: true, is_hidden: true})
+      assert {:ok, _} = Lobbies.join_lobby(player, lobby)
+
+      {:ok, lobby} =
+        Gamend.Signaling.configure(lobby, enabled: true, topology: :star, host_id: server.id)
+
+      {:ok, token, _} = Guardian.encode_and_sign(server)
+
+      %{
+        conn: put_req_header(conn, "authorization", "Bearer " <> token),
+        lobby: lobby,
+        server: server,
+        player: player
+      }
+    end
+
+    test "PATCH /lobbies with an explicit lobby_id", %{conn: conn, lobby: lobby, server: server} do
+      assert server.lobby_id == nil
+
+      resp =
+        conn
+        |> patch("/api/v1/lobbies", %{"lobby_id" => lobby.id, "metadata" => %{"round" => 2}})
+        |> json_response(200)
+
+      assert resp["metadata"] == %{"round" => 2}
+    end
+
+    test "POST /lobbies/state with an explicit lobby_id", %{conn: conn, lobby: lobby} do
+      resp =
+        conn
+        |> post("/api/v1/lobbies/state", %{"lobby_id" => lobby.id, "state" => "playing"})
+        |> json_response(200)
+
+      assert resp["state"] == "playing"
+      assert Lobbies.get_lobby(lobby.id).state == "playing"
+    end
+
+    test "lobby_id never lands in the lobby's own attrs", %{conn: conn, lobby: lobby} do
+      conn
+      |> patch("/api/v1/lobbies", %{"lobby_id" => lobby.id, "title" => "Round 2"})
+      |> json_response(200)
+
+      reloaded = Lobbies.get_lobby(lobby.id)
+      assert reloaded.title == "Round 2"
+      assert reloaded.metadata == %{}
+    end
+
+    test "a seated player still cannot write to it", %{conn: conn, lobby: lobby, player: player} do
+      {:ok, token, _} = Guardian.encode_and_sign(player)
+      conn = put_req_header(conn, "authorization", "Bearer " <> token)
+
+      assert json_response(post(conn, "/api/v1/lobbies/state", %{"state" => "playing"}), 403)
+
+      assert json_response(
+               patch(conn, "/api/v1/lobbies", %{"lobby_id" => lobby.id, "title" => "Hijacked"}),
+               403
+             )
+
+      assert Lobbies.get_lobby(lobby.id).title == "matchmade"
+    end
+
+    test "a stranger gets 404 on a hidden lobby, not 403", %{conn: conn, lobby: lobby} do
+      {:ok, token, _} = Guardian.encode_and_sign(AccountsFixtures.user_fixture())
+
+      resp =
+        conn
+        |> put_req_header("authorization", "Bearer " <> token)
+        |> post("/api/v1/lobbies/state", %{"lobby_id" => lobby.id, "state" => "playing"})
+
+      assert json_response(resp, 404)["error"] == "Lobby not found"
+    end
+
+    test "a malformed lobby_id is a bad request", %{conn: conn} do
+      resp = post(conn, "/api/v1/lobbies/state", %{"lobby_id" => "nope", "state" => "playing"})
+      assert json_response(resp, 400)["error"] == "Invalid lobby id"
+    end
+
+    test "omitting lobby_id while seated nowhere is still not_in_lobby", %{conn: conn} do
+      resp = post(conn, "/api/v1/lobbies/state", %{"state" => "playing"})
+      assert json_response(resp, 400)["error"] == "not_in_lobby"
+    end
+  end
+
+  # The pattern that needs no new columns and no new response fields: the game
+  # sets the headless server as `host_id` after creation, and it is the host in
+  # the plain sense everywhere — including to a client, which compares `host_id`
+  # as it always has.
+  describe "a server set as host_id, seated in no lobby" do
+    setup %{conn: conn} do
+      server = AccountsFixtures.user_fixture()
+      player = AccountsFixtures.user_fixture()
+
+      {:ok, lobby} = Lobbies.create_lobby(%{title: "matchmade", hostless: true})
+      assert {:ok, _} = Lobbies.join_lobby(player, lobby)
+
+      {:ok, lobby} =
+        Lobbies.update_lobby(lobby, %{"hostless" => false, "host_id" => server.id})
+
+      {:ok, token, _} = Guardian.encode_and_sign(server)
+
+      %{
+        conn: put_req_header(conn, "authorization", "Bearer " <> token),
+        lobby: lobby,
+        server: server,
+        player: player
+      }
+    end
+
+    test "it moves the match state", %{conn: conn, lobby: lobby, server: server} do
+      assert Gamend.Accounts.get_user(server.id).lobby_id == nil
+
+      resp =
+        conn
+        |> post("/api/v1/lobbies/state", %{"lobby_id" => lobby.id, "state" => "playing"})
+        |> json_response(200)
+
+      assert resp["state"] == "playing"
+    end
+
+    test "it edits the lobby", %{conn: conn, lobby: lobby} do
+      resp =
+        conn
+        |> patch("/api/v1/lobbies", %{"lobby_id" => lobby.id, "metadata" => %{"round" => 2}})
+        |> json_response(200)
+
+      assert resp["metadata"] == %{"round" => 2}
+    end
+
+    test "the client can tell who is in charge from host_id alone", %{
+      conn: conn,
+      lobby: lobby,
+      server: server
+    } do
+      resp = conn |> get("/api/v1/lobbies/#{lobby.id}") |> json_response(200)
+      assert resp["data"]["host_id"] == server.id
+      refute resp["data"]["hostless"]
+    end
+
+    test "a seated player has no authority over it", %{conn: conn, lobby: lobby, player: player} do
+      {:ok, token, _} = Guardian.encode_and_sign(player)
+
+      resp =
+        conn
+        |> put_req_header("authorization", "Bearer " <> token)
+        |> post("/api/v1/lobbies/state", %{"state" => "playing"})
+
+      assert json_response(resp, 403)["error"] == "not_host"
+      assert Lobbies.get_lobby(lobby.id).state == "created"
+    end
+  end
+
   describe "GET /api/v1/lobbies/:id on a hidden lobby" do
     setup do
       host = AccountsFixtures.user_fixture()

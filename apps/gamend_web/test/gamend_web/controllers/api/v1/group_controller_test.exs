@@ -348,7 +348,7 @@ defmodule GamendWeb.Api.V1.GroupControllerTest do
         |> post("/api/v1/groups/#{group.id}/promote", %{target_user_id: target.id})
 
       assert json_response(conn, 200)
-      assert Groups.admin?(group.id, target.id)
+      assert Groups.can_manage_group?(target.id, group.id)
     end
   end
 
@@ -366,7 +366,7 @@ defmodule GamendWeb.Api.V1.GroupControllerTest do
         |> post("/api/v1/groups/#{group.id}/demote", %{target_user_id: target.id})
 
       assert json_response(conn, 200)
-      refute Groups.admin?(group.id, target.id)
+      refute Groups.can_manage_group?(target.id, group.id)
     end
   end
 

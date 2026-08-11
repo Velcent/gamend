@@ -113,7 +113,7 @@ defmodule Gamend.Groups.JoinRequests do
           {:ok, [GroupJoinRequest.t()]} | {:error, atom()}
   def list_join_requests(admin_id, group_id, opts \\ [])
       when is_binary(admin_id) and is_binary(group_id) do
-    if Groups.admin?(group_id, admin_id) do
+    if Groups.can_manage_group?(admin_id, group_id) do
       page = Keyword.get(opts, :page, 1)
       page_size = Keyword.get(opts, :page_size, 25)
       offset = (page - 1) * page_size
@@ -159,7 +159,7 @@ defmodule Gamend.Groups.JoinRequests do
       %GroupJoinRequest{group_id: group_id} = request ->
         group = Groups.get_group!(group_id)
 
-        if Groups.admin?(group_id, admin_id) do
+        if Groups.can_manage_group?(admin_id, group_id) do
           approve_join_request_with_hook(request, group, admin_id, request_id)
         else
           {:error, :not_admin}
@@ -258,7 +258,7 @@ defmodule Gamend.Groups.JoinRequests do
         {:error, :not_pending}
 
       %GroupJoinRequest{group_id: group_id} = request ->
-        if Groups.admin?(group_id, admin_id) do
+        if Groups.can_manage_group?(admin_id, group_id) do
           request
           |> Ecto.Changeset.change(%{status: "rejected"})
           |> Repo.update()

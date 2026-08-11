@@ -463,7 +463,7 @@ defmodule Gamend.LobbiesTest do
 
       assert updated.title == "Renamed"
       assert updated.is_locked
-      assert Lobbies.can_edit_lobby?(host, lobby)
+      assert Lobbies.can_manage_lobby?(host, lobby)
     end
 
     test "a non-host member may not", %{host: host, member: member} do
@@ -474,7 +474,7 @@ defmodule Gamend.LobbiesTest do
                Lobbies.update_lobby_by_host(member, lobby, %{"title" => "Hijacked"})
 
       assert Lobbies.get_lobby(lobby.id).title == "member-edits"
-      refute Lobbies.can_edit_lobby?(member, lobby)
+      refute Lobbies.can_manage_lobby?(member, lobby)
     end
 
     test "no member may update a hostless lobby — matchmaking matches belong to the server", %{
@@ -497,11 +497,144 @@ defmodule Gamend.LobbiesTest do
       assert reloaded.metadata == %{}
       refute reloaded.is_hidden
       assert is_nil(reloaded.password_hash)
-      refute Lobbies.can_edit_lobby?(member, lobby)
+      refute Lobbies.can_manage_lobby?(member, lobby)
 
       # The server itself still can, via the unscoped call.
       assert {:ok, updated} = Lobbies.update_lobby(reloaded, %{"metadata" => %{"score" => 3}})
       assert updated.metadata == %{"score" => 3}
+    end
+  end
+
+  describe "the pinned WebRTC host holds lobby authority" do
+    setup do
+      %{server: AccountsFixtures.user_fixture(), member: AccountsFixtures.user_fixture()}
+    end
+
+    defp hostless_lobby_hosted_by(server, title) do
+      {:ok, lobby} = Lobbies.create_lobby(%{title: title, hostless: true})
+
+      {:ok, lobby} =
+        Gamend.Signaling.configure(lobby, enabled: true, topology: :star, host_id: server.id)
+
+      lobby
+    end
+
+    test "it may update and move a hostless lobby it is not a member of", %{server: server} do
+      lobby = hostless_lobby_hosted_by(server, "matchmade")
+      assert server.lobby_id == nil
+
+      assert Lobbies.can_manage_lobby?(server, lobby)
+
+      assert {:ok, updated} =
+               Lobbies.update_lobby_by_host(server, lobby, %{"metadata" => %{"round" => 2}})
+
+      assert updated.metadata == %{"round" => 2}
+
+      assert {:ok, moved} = Lobbies.transition_state_by_host(server, updated, "playing")
+      assert moved.state == "playing"
+    end
+
+    test "it may kick from that lobby, and a plain member may not", %{
+      server: server,
+      member: member
+    } do
+      lobby = hostless_lobby_hosted_by(server, "kickable")
+      other = AccountsFixtures.user_fixture()
+      assert {:ok, _} = Lobbies.join_lobby(member, lobby)
+      assert {:ok, _} = Lobbies.join_lobby(other, lobby)
+
+      # Regression: this guard used to read `host_id != caller and not hostless`,
+      # which never fires on a hostless lobby — every member could kick.
+      refute Lobbies.can_manage_lobby?(member, lobby)
+      assert {:error, :not_host} = Lobbies.kick_user(member, lobby, other)
+      assert Gamend.Accounts.get_user(other.id).lobby_id == lobby.id
+
+      assert {:ok, _} = Lobbies.kick_user(server, lobby, other)
+      assert is_nil(Gamend.Accounts.get_user(other.id).lobby_id)
+    end
+
+    test "a hostless lobby with no pinned host still has no authority", %{member: member} do
+      other = AccountsFixtures.user_fixture()
+      {:ok, lobby} = Lobbies.create_lobby(%{title: "ownerless", hostless: true})
+      assert {:ok, _} = Lobbies.join_lobby(member, lobby)
+      assert {:ok, _} = Lobbies.join_lobby(other, lobby)
+
+      refute Lobbies.can_manage_lobby?(member, lobby)
+      assert {:error, :not_host} = Lobbies.transition_state_by_host(member, lobby, "playing")
+      assert {:error, :not_host} = Lobbies.update_lobby_by_host(member, lobby, %{"title" => "x"})
+
+      # The plain matchmaking case of the kick regression: the old guard read
+      # `host_id != caller and not hostless`, which never fired here at all.
+      assert {:error, :not_host} = Lobbies.kick_user(member, lobby, other)
+      assert Gamend.Accounts.get_user(other.id).lobby_id == lobby.id
+    end
+
+    test "pinning it in a host-managed lobby does not unseat the host", %{
+      server: server,
+      member: host
+    } do
+      {:ok, lobby} = Lobbies.create_lobby(%{title: "co-managed", host_id: host.id})
+
+      {:ok, lobby} =
+        Gamend.Signaling.configure(lobby, enabled: true, topology: :star, host_id: server.id)
+
+      assert Lobbies.can_manage_lobby?(host, lobby)
+      assert Lobbies.can_manage_lobby?(server, lobby)
+    end
+  end
+
+  describe "host_id may be a user who is not seated in the lobby" do
+    # What lets a headless server own a matchmaking lobby without a new column
+    # and without a new field on the wire: set it as `host_id` after creation.
+    # `create_lobby` is the path that seats the host and refuses one already
+    # seated elsewhere; `update_lobby/2` does neither.
+    test "a server hosts many lobbies at once, seated in none" do
+      server = AccountsFixtures.user_fixture()
+      player = AccountsFixtures.user_fixture()
+
+      {:ok, a} = Lobbies.create_lobby(%{title: "a", hostless: true})
+      {:ok, b} = Lobbies.create_lobby(%{title: "b", hostless: true})
+      assert {:ok, _} = Lobbies.join_lobby(player, a)
+
+      {:ok, a} = Lobbies.update_lobby(a, %{"hostless" => false, "host_id" => server.id})
+      {:ok, b} = Lobbies.update_lobby(b, %{"hostless" => false, "host_id" => server.id})
+
+      assert Accounts.get_user(server.id).lobby_id == nil
+      assert Lobbies.can_manage_lobby?(server, a)
+      assert Lobbies.can_manage_lobby?(server, b)
+
+      # and consumes no slot
+      assert Lobbies.get_lobby_members(a) |> Enum.map(& &1.id) == [player.id]
+    end
+
+    # `host_id` is castable, and `update_lobby_by_host/3` passes attrs straight
+    # through — so handing the lobby over is a plain PATCH, and the old host
+    # loses its authority the moment it lands. Documented, not endorsed.
+    test "a host can hand host_id to anyone, including a non-member" do
+      host = AccountsFixtures.user_fixture()
+      server = AccountsFixtures.user_fixture()
+      {:ok, lobby} = Lobbies.create_lobby(%{title: "transfer", host_id: host.id})
+
+      assert {:ok, moved} = Lobbies.update_lobby_by_host(host, lobby, %{"host_id" => server.id})
+
+      assert moved.host_id == server.id
+      assert Accounts.get_user(server.id).lobby_id == nil
+      assert Lobbies.can_manage_lobby?(server, moved)
+      refute Lobbies.can_manage_lobby?(host, moved)
+    end
+
+    test "a member leaving does not take the host seat from it" do
+      server = AccountsFixtures.user_fixture()
+      player = AccountsFixtures.user_fixture()
+
+      {:ok, lobby} = Lobbies.create_lobby(%{title: "stable", hostless: true})
+      assert {:ok, _} = Lobbies.join_lobby(player, lobby)
+      {:ok, lobby} = Lobbies.update_lobby(lobby, %{"hostless" => false, "host_id" => server.id})
+
+      # handle_host_transfer only fires for the host's own departure, and a
+      # non-member host never departs.
+      assert {:ok, _} = Lobbies.leave_lobby(player)
+      assert Lobbies.get_lobby(lobby.id).host_id == server.id
     end
   end
 end

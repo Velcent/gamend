@@ -90,7 +90,7 @@ defmodule Gamend.Matchmaking do
   defp resolve_queue_group(%User{party_id: nil} = user, _proposed), do: {:ok, [user]}
 
   defp resolve_queue_group(%User{} = user, proposed) do
-    if Gamend.Parties.leader?(user) do
+    if Gamend.Parties.can_manage_party?(user, user.party_id) do
       members = Gamend.Parties.get_party_members(user.party_id)
       max = Map.get(proposed, "max_players") || @default_max_players
 

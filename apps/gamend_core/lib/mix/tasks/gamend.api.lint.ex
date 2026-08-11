@@ -24,7 +24,9 @@ defmodule Mix.Tasks.Gamend.Api.Lint do
     {"R6-schema-nullable", "An OpenAPI string field declares `nullable: true`"},
     {"R7-meta-helper", "A controller builds pagination meta by hand"},
     {"R8-page-params", "A controller reads page params without Pagination.params/1"},
-    {"R9-doc-route", "A guide/spec documents an API route that does not exist"}
+    {"R9-doc-route", "A guide/spec documents an API route that does not exist"},
+    {"R10-authority-predicate", "A permission predicate names a role instead of a capability"},
+    {"R11-inline-ownership", "A controller/channel re-derives who owns a resource"}
   ]
 
   @impl true

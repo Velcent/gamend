@@ -50,6 +50,7 @@ defmodule Gamend.Groups do
   import Ecto.Query, warn: false
   use Nebulex.Caching, cache: Gamend.Cache
 
+  alias Gamend.Accounts.User
   alias Gamend.Groups.Group
   alias Gamend.Groups.GroupJoinRequest
   alias Gamend.Groups.GroupMember
@@ -346,14 +347,25 @@ defmodule Gamend.Groups do
     Repo.get_by(GroupMember, group_id: group_id, user_id: user_id)
   end
 
-  @doc "Check if user is an admin of the group."
-  @spec admin?(Ecto.UUID.t(), Ecto.UUID.t()) :: boolean()
-  def admin?(group_id, user_id) do
+  @doc """
+  Whether `user` holds authority over `group` — its admin members, nobody else.
+
+  Subject first, resource second, like every other `can_*?` predicate (see
+  `Gamend.Policy`). Both arguments take a struct or a bare id.
+  """
+  @spec can_manage_group?(User.t() | Ecto.UUID.t() | nil, Group.t() | Ecto.UUID.t() | nil) ::
+          boolean()
+  def can_manage_group?(%User{id: user_id}, group), do: can_manage_group?(user_id, group)
+  def can_manage_group?(user_id, %Group{id: group_id}), do: can_manage_group?(user_id, group_id)
+
+  def can_manage_group?(user_id, group_id) when is_binary(user_id) and is_binary(group_id) do
     case get_membership(group_id, user_id) do
       %GroupMember{role: "admin"} -> true
       _ -> false
     end
   end
+
+  def can_manage_group?(_user, _group), do: false
 
   @doc "Check if user is a member (any role) of the group."
   @spec member?(Ecto.UUID.t(), Ecto.UUID.t()) :: boolean()
@@ -483,7 +495,7 @@ defmodule Gamend.Groups do
           {:ok, Group.t()} | {:error, atom() | Ecto.Changeset.t()}
   def update_group(user_id, group_id, attrs)
       when is_binary(user_id) and is_binary(group_id) and is_map(attrs) do
-    if admin?(group_id, user_id) do
+    if can_manage_group?(user_id, group_id) do
       group = get_group!(group_id)
       attrs = normalize_params(attrs)
 
@@ -563,7 +575,7 @@ defmodule Gamend.Groups do
   def delete_group(user_id, group_id)
       when is_binary(user_id) and is_binary(group_id) do
     cond do
-      not admin?(group_id, user_id) ->
+      not can_manage_group?(user_id, group_id) ->
         {:error, :not_admin}
 
       count_group_members(group_id) > 0 ->
@@ -825,7 +837,7 @@ defmodule Gamend.Groups do
   def kick_member(admin_id, group_id, target_id)
       when is_binary(admin_id) and is_binary(group_id) and is_binary(target_id) do
     cond do
-      not admin?(group_id, admin_id) ->
+      not can_manage_group?(admin_id, group_id) ->
         {:error, :not_admin}
 
       admin_id == target_id ->
@@ -894,7 +906,7 @@ defmodule Gamend.Groups do
   def promote_member(admin_id, group_id, target_id)
       when is_binary(admin_id) and is_binary(group_id) and is_binary(target_id) do
     cond do
-      not admin?(group_id, admin_id) ->
+      not can_manage_group?(admin_id, group_id) ->
         {:error, :not_admin}
 
       admin_id == target_id ->
@@ -950,7 +962,7 @@ defmodule Gamend.Groups do
   def demote_member(admin_id, group_id, target_id)
       when is_binary(admin_id) and is_binary(group_id) and is_binary(target_id) do
     cond do
-      not admin?(group_id, admin_id) ->
+      not can_manage_group?(admin_id, group_id) ->
         {:error, :not_admin}
 
       admin_id == target_id ->

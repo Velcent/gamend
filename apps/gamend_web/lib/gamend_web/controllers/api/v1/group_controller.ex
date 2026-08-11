@@ -979,7 +979,7 @@ defmodule GamendWeb.Api.V1.GroupController do
           Groups.get_group(group_id) == nil ->
             conn |> put_status(:not_found) |> json(%{error: "not_found"})
 
-          not Groups.admin?(group_id, user.id) ->
+          not Groups.can_manage_group?(user.id, group_id) ->
             conn |> put_status(:forbidden) |> json(%{error: "not_admin"})
 
           true ->

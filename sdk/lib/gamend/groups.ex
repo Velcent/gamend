@@ -67,20 +67,6 @@ defmodule Gamend.Groups do
   end
 
   @doc ~S"""
-    Check if user is an admin of the group.
-  """
-  @spec admin?(Ecto.UUID.t(), Ecto.UUID.t()) :: boolean()
-  def admin?(_group_id, _user_id) do
-    case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
-      :placeholder ->
-        :erlang.phash2(make_ref(), 2) == 0
-
-      _ ->
-        raise "Gamend.Groups.admin?/2 is a stub - only available at runtime on Gamend"
-    end
-  end
-
-  @doc ~S"""
     Admin-level delete (no membership check, for server admins).
   """
   @spec admin_delete_group(Ecto.UUID.t()) :: {:ok, Gamend.Groups.Group.t()} | {:error, term()}
@@ -149,6 +135,27 @@ defmodule Gamend.Groups do
 
       _ ->
         raise "Gamend.Groups.broadcast_member_presence/2 is a stub - only available at runtime on Gamend"
+    end
+  end
+
+  @doc ~S"""
+    Whether `user` holds authority over `group` — its admin members, nobody else.
+    
+    Subject first, resource second, like every other `can_*?` predicate (see
+    `Gamend.Policy`). Both arguments take a struct or a bare id.
+    
+  """
+  @spec can_manage_group?(
+          Gamend.Accounts.User.t() | Ecto.UUID.t() | nil,
+          Gamend.Groups.Group.t() | Ecto.UUID.t() | nil
+        ) :: boolean()
+  def can_manage_group?(_user_id, _group) do
+    case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        :erlang.phash2(make_ref(), 2) == 0
+
+      _ ->
+        raise "Gamend.Groups.can_manage_group?/2 is a stub - only available at runtime on Gamend"
     end
   end
 

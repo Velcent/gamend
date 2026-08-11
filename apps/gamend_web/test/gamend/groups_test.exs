@@ -54,7 +54,7 @@ defmodule Gamend.GroupsTest do
 
       assert group.title == "Test Group"
       assert group.creator_id == owner.id
-      assert Groups.admin?(group.id, owner.id)
+      assert Groups.can_manage_group?(owner.id, group.id)
     end
 
     test "sets title from params", %{owner: owner} do
@@ -230,7 +230,7 @@ defmodule Gamend.GroupsTest do
       {:ok, group} = Groups.create_group(owner.id, %{"title" => "Transfer", "type" => "public"})
       {:ok, _} = Groups.join_group(other.id, group.id)
       assert {:ok, _} = Groups.leave_group(owner.id, group.id)
-      assert Groups.admin?(group.id, other.id)
+      assert Groups.can_manage_group?(other.id, group.id)
     end
 
     test "last member leaving deletes the group", %{owner: owner} do
@@ -279,7 +279,7 @@ defmodule Gamend.GroupsTest do
       {:ok, group} = Groups.create_group(owner.id, %{"title" => "Promo", "type" => "public"})
       {:ok, _} = Groups.join_group(other.id, group.id)
       assert {:ok, _} = Groups.promote_member(owner.id, group.id, other.id)
-      assert Groups.admin?(group.id, other.id)
+      assert Groups.can_manage_group?(other.id, group.id)
     end
 
     test "cannot promote self", %{owner: owner} do
@@ -306,7 +306,7 @@ defmodule Gamend.GroupsTest do
       {:ok, _} = Groups.join_group(other.id, group.id)
       {:ok, _} = Groups.promote_member(owner.id, group.id, other.id)
       assert {:ok, _} = Groups.demote_member(owner.id, group.id, other.id)
-      refute Groups.admin?(group.id, other.id)
+      refute Groups.can_manage_group?(other.id, group.id)
     end
 
     test "cannot demote non-admin", %{owner: owner, other: other} do
@@ -1112,7 +1112,7 @@ defmodule Gamend.GroupsTest do
       # Owner should no longer be a member
       refute Groups.member?(group.id, owner.id)
       # Other should have been promoted to admin
-      assert Groups.admin?(group.id, other.id)
+      assert Groups.can_manage_group?(other.id, group.id)
     end
 
     test "deletes empty group when last member is deleted", %{owner: owner} do
@@ -1130,7 +1130,7 @@ defmodule Gamend.GroupsTest do
 
       # g1 still exists (other is promoted to admin)
       assert Groups.get_group(g1.id)
-      assert Groups.admin?(g1.id, other.id)
+      assert Groups.can_manage_group?(other.id, g1.id)
       # g2 is deleted (no other members)
       assert is_nil(Groups.get_group(g2.id))
     end

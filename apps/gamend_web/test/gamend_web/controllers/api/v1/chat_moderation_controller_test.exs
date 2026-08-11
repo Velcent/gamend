@@ -186,6 +186,23 @@ defmodule GamendWeb.Api.V1.ChatModerationControllerTest do
       refute Chat.muted?(other.id, "lobby", lobby.id)
     end
 
+    test "the pinned WebRTC host of a hostless lobby may mute", %{conn: conn} do
+      %{member: member, lobby: lobby} = hostless_lobby("mute-lobby-pinned")
+      other = create_user()
+      {:ok, _} = Lobbies.join_lobby(other, lobby)
+
+      {:ok, _} =
+        Gamend.Signaling.configure(lobby, enabled: true, topology: :star, host_id: member.id)
+
+      conn =
+        conn
+        |> auth_conn(member)
+        |> post("/api/v1/lobbies/mute", %{target_user_id: other.id})
+
+      assert json_response(conn, 200)
+      assert Chat.muted?(other.id, "lobby", lobby.id)
+    end
+
     test "nobody may mute in a hostless lobby", %{conn: conn} do
       %{member: member, lobby: lobby} = hostless_lobby("mute-lobby-hostless")
       other = create_user()

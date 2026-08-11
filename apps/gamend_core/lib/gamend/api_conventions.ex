@@ -53,7 +53,9 @@ defmodule Gamend.ApiConventions do
        nullable_string_schemas() ++
        hand_rolled_meta() ++
        hand_rolled_page_params() ++
-       stale_documented_routes())
+       stale_documented_routes() ++
+       role_named_predicates() ++
+       inline_ownership_checks())
     |> Enum.sort_by(&{&1.rule, &1.file, &1.line})
   end
 
@@ -368,6 +370,60 @@ defmodule Gamend.ApiConventions do
       _ -> false
     end
   end
+
+  # ── R10: authority predicates name the capability, not the role ────────────
+  #
+  # `admin?`, `leader?`, `host_of?` each answer "may this user act here", and
+  # each answered it slightly differently — argument orders disagreed and one
+  # copy of the lobby rule drifted until every member of a matchmaking lobby
+  # could kick. One name shape, `can_<verb>_<resource>?(subject, resource)`,
+  # and `Gamend.Policy` routes to it. `member?` is not authority and is fine.
+
+  @role_predicates ~w(admin owner leader host host_of)
+
+  defp role_named_predicates do
+    for {file, line, text} <- source_lines(source_dirs() ++ schema_dirs()),
+        [_, name] <- [Regex.run(~r/^\s*defp?\s+(\w+)\?\(/, text)],
+        name in @role_predicates do
+      %{
+        rule: "R10-authority-predicate",
+        file: file,
+        line: line,
+        message:
+          "#{name}?/N names a role; authority predicates are " <>
+            "can_<verb>_<resource>?(subject, resource) - see Gamend.Policy"
+      }
+    end
+  end
+
+  # ── R11: controllers do not re-derive who owns a resource ──────────────────
+  #
+  # The rule lives in the context that owns the resource. A controller or
+  # channel comparing `host_id`/`leader_id` to a caller's id is a copy of it,
+  # and copies are what drift. LiveViews are exempt: they compare the same
+  # fields to render "host" badges next to members, which is display, not a
+  # decision.
+
+  defp inline_ownership_checks do
+    for {file, line, text} <- source_lines(source_dirs()),
+        decision_site?(file),
+        Regex.match?(
+          ~r/(host_id|leader_id)\s*==\s*\w+\.id|\w+\.id\s*==\s*\w+\.(host_id|leader_id)/,
+          text
+        ) do
+      %{
+        rule: "R11-inline-ownership",
+        file: file,
+        line: line,
+        message:
+          "re-derives ownership; ask the context (Lobbies.can_manage_lobby?/2, " <>
+            "Parties.can_manage_party?/2) or Gamend.Policy.can?/3"
+      }
+    end
+  end
+
+  defp decision_site?(file),
+    do: String.contains?(file, "/controllers/") or String.contains?(file, "/channels/")
 
   # LiveViews assign structs to sockets rather than serializing them; the null
   # policy is about what crosses the wire as JSON.

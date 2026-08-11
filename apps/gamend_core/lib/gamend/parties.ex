@@ -240,16 +240,25 @@ defmodule Gamend.Parties do
     end
   end
 
-  @doc "Returns true if the given user is the leader of their current party."
-  @spec leader?(User.t()) :: boolean()
-  def leader?(%User{party_id: nil}), do: false
+  @doc """
+  Whether `user` holds authority over `party` — its leader, nobody else.
 
-  def leader?(%User{party_id: party_id, id: user_id}) do
+  Subject first, resource second, like every other `can_*?` predicate (see
+  `Gamend.Policy`). The party takes a struct or a bare id; passing the user's
+  own `party_id` is the common case.
+  """
+  @spec can_manage_party?(User.t() | nil, Party.t() | Ecto.UUID.t() | nil) :: boolean()
+  def can_manage_party?(%User{id: user_id}, %Party{leader_id: leader_id}),
+    do: user_id == leader_id
+
+  def can_manage_party?(%User{} = user, party_id) when is_binary(party_id) do
     case get_party(party_id) do
-      %Party{leader_id: ^user_id} -> true
+      %Party{} = party -> can_manage_party?(user, party)
       _ -> false
     end
   end
+
+  def can_manage_party?(_user, _party), do: false
 
   @doc "Get all members of a party."
   @spec get_party_members(Party.t() | Ecto.UUID.t()) :: [User.t()]

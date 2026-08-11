@@ -189,13 +189,9 @@ defmodule GamendWeb.LobbyLive.Index do
       "is_locked" => lobby.is_locked
     }
 
-    # only the host of a host-managed lobby may edit; everyone else, and every
-    # member of a hostless lobby, gets a view-only modal
+    # everyone without authority over the lobby gets a view-only modal
     can_edit =
-      case socket.assigns.current_scope do
-        %{user_id: uid} when uid != nil -> not lobby.hostless and uid == lobby.host_id
-        _ -> false
-      end
+      Lobbies.can_manage_lobby?(Scope.user(socket.assigns.current_scope), lobby)
 
     {:noreply,
      assign(socket,
