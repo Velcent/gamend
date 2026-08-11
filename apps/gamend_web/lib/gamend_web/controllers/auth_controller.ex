@@ -115,6 +115,14 @@ defmodule GamendWeb.AuthController do
 
         {:browser, conn}
 
+      # The state exists but is no longer pending, so this callback has already
+      # been redeemed. Pressing back after signing in, refreshing the callback,
+      # or a link prefetcher touching the URL all land here. Single-use state
+      # working exactly as designed is not a CSRF failure, and reporting it as
+      # one buries the real thing.
+      %{} ->
+        {:state_replayed, conn}
+
       _ ->
         {:csrf_error, conn}
     end
@@ -348,6 +356,19 @@ defmodule GamendWeb.AuthController do
         |> put_status(:bad_request)
         |> json(%{error: "create_failed", details: changeset.errors})
     end
+  end
+
+  # An already-redeemed callback. The reader is almost always signed in
+  # already — they pressed back — so this is worth one info line, not an error
+  # and not a failure flash claiming their sign-in did not work.
+  defp browser_oauth_replay_redirect(conn, provider) do
+    require Logger
+
+    Logger.info(
+      "#{String.capitalize(provider)} OAuth callback replayed (state already redeemed)"
+    )
+
+    redirect(conn, to: ~p"/users/log_in")
   end
 
   # Show a helpful dev-mode flash for browser flows when exchanges fail
@@ -903,6 +924,9 @@ defmodule GamendWeb.AuthController do
       {:api, session_id} ->
         handle_session_oauth_callback(conn, session_id, user_params, provider)
 
+      {:state_replayed, conn} ->
+        browser_oauth_replay_redirect(conn, provider)
+
       {:csrf_error, conn} ->
         browser_oauth_error_redirect(conn, provider, "csrf_validation_failed")
     end
@@ -920,6 +944,9 @@ defmodule GamendWeb.AuthController do
         })
 
         redirect(conn, to: ~p"/auth/success?session_id=#{session_id}")
+
+      {:state_replayed, conn} ->
+        browser_oauth_replay_redirect(conn, provider)
 
       {:csrf_error, conn} ->
         browser_oauth_error_redirect(conn, provider, "csrf_validation_failed")

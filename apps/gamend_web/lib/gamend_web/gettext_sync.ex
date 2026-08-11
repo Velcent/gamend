@@ -8,17 +8,47 @@ defmodule GamendWeb.GettextSync do
 
   @spec normalize_locale(term()) :: String.t() | nil
   def normalize_locale(locale) when is_binary(locale) do
-    normalized =
+    key =
       locale
       |> String.trim()
       |> String.replace("-", "_")
+      |> String.downcase()
 
-    Enum.find(known_locales(), fn known_locale ->
-      String.downcase(known_locale) == String.downcase(normalized)
-    end)
+    Map.get(locale_index(), key)
   end
 
   def normalize_locale(_locale), do: nil
+
+  @locale_index_key {__MODULE__, :locale_index}
+
+  # Downcased locale -> the canonical spelling, built once.
+  #
+  # This is on the layout's hot path, not a cold one: every nav and footer
+  # link calls `HostLayouts.strip_locale_prefix/2`, which lands here, so a
+  # rendered page runs it ~100 times. The linear scan this replaces downcased
+  # *every* known locale on *every* call — ~6,000 `String.downcase/1` calls per
+  # request, and the single largest cost in rendering a vocabulary page.
+  #
+  # An empty map is not cached: `known_locales/0` is empty until the backend is
+  # loaded, and caching that would make every locale unrecognized for the life
+  # of the node.
+  defp locale_index do
+    case :persistent_term.get(@locale_index_key, nil) do
+      %{} = index ->
+        index
+
+      nil ->
+        case known_locales() do
+          [] ->
+            %{}
+
+          locales ->
+            index = Map.new(locales, &{String.downcase(&1), &1})
+            :persistent_term.put(@locale_index_key, index)
+            index
+        end
+    end
+  end
 
   @spec put_locale(String.t()) :: :ok
   def put_locale(locale) when is_binary(locale) do

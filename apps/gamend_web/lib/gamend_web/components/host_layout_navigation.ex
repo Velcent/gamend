@@ -1006,6 +1006,7 @@ defmodule GamendWeb.HostLayoutNavigation do
     # redirects. On this site that was 278 URLs reported as "Page with
     # redirect", i.e. most of the crawl budget spent on nothing.
     crawlable? = LocalePath.localized_path?(base_path)
+    default_locale = LocalePath.default_locale()
 
     Enum.map(known_locales, fn locale ->
       # BCP-47 in the URL (`/pt-BR`), not the gettext form (`/pt_BR`): that is
@@ -1013,8 +1014,23 @@ defmodule GamendWeb.HostLayoutNavigation do
       # the underscore here pointed at routes that do not exist.
       prefix = "/" <> LocalePath.url_locale(locale)
 
+      # The default locale is never served under a prefix — `/en/about`
+      # redirects to `/about` — so linking it prefixed publishes a followable
+      # link that can only ever redirect. On a localized path `nofollow` does
+      # not apply, so every page shipped one of these: 229 URLs reported as
+      # "Page with redirect". Point at the clean URL the sitemap and the
+      # `hreflang` alternates already use.
       href =
-        if(base_path == "/", do: prefix, else: prefix <> base_path) <> query_suffix
+        cond do
+          locale == default_locale ->
+            (if base_path == "/", do: "/", else: base_path) <> query_suffix
+
+          base_path == "/" ->
+            prefix <> query_suffix
+
+          true ->
+            prefix <> base_path <> query_suffix
+        end
 
       %{
         locale: locale,

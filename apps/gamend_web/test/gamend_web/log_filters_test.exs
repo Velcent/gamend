@@ -54,6 +54,71 @@ defmodule GamendWeb.LogFiltersTest do
     end
   end
 
+  describe "corrupt or non-TLS traffic" do
+    # Verbatim reasons taken from the production log — the flood this exists for.
+    test "bad_record_mac from a client alert is dropped" do
+      alert =
+        {:tls_alert,
+         {:bad_record_mac,
+          ~c"TLS server: In state connection received CLIENT ALERT: Fatal - Bad Record MAC\n"}}
+
+      assert LogFilters.filter_tls_alert(terminate_report(alert), []) == :stop
+    end
+
+    test "bad_record_mac we generate ourselves is dropped" do
+      alert =
+        {:tls_alert,
+         {:bad_record_mac,
+          ~c"TLS server: In state connection at tls_record_1_3.erl:372 generated SERVER ALERT: Fatal - Bad Record MAC\n decryption_failed"}}
+
+      assert LogFilters.filter_tls_alert(terminate_report(alert), []) == :stop
+    end
+
+    test "a record type that is not TLS at all is dropped" do
+      alert =
+        {:tls_alert,
+         {:unexpected_message,
+          ~c"TLS server: In state connection at tls_record.erl:524 generated SERVER ALERT: Fatal - Unexpected Message\n {unsupported_record_type,43}"}}
+
+      assert LogFilters.filter_tls_alert(terminate_report(alert), []) == :stop
+    end
+  end
+
+  describe "sockets that died before first use" do
+    test "Bandit's conn_data failure is dropped" do
+      reason =
+        {%Bandit.TransportError{message: "Unable to obtain conn_data", error: :einval},
+         [{Bandit.SocketHelpers, :transport_error!, 2, []}]}
+
+      assert LogFilters.filter_tls_alert(terminate_report(reason), []) == :stop
+    end
+
+    test "a transport error that is not a dead socket survives" do
+      reason =
+        {%Bandit.TransportError{message: "something else", error: :eacces},
+         [{Bandit.SocketHelpers, :transport_error!, 2, []}]}
+
+      assert LogFilters.filter_tls_alert(terminate_report(reason), []) == :ignore
+    end
+  end
+
+  describe "TLS spoken to the clear-text port" do
+    test "Bandit's warning is dropped" do
+      event = %{
+        level: :warning,
+        msg: {:string, ~c"Connection that looks like TLS received on a clear channel"}
+      }
+
+      assert LogFilters.filter_tls_alert(event, []) == :stop
+    end
+
+    test "an unrelated warning survives" do
+      event = %{level: :warning, msg: {:string, ~c"Slow Request: GET /admin took 618ms"}}
+
+      assert LogFilters.filter_tls_alert(event, []) == :ignore
+    end
+  end
+
   describe "alerts that mean something is wrong on our side" do
     for alert <- [:handshake_failure, :unknown_ca, :certificate_expired, :bad_certificate] do
       test "#{alert} survives the filter" do
@@ -80,6 +145,61 @@ defmodule GamendWeb.LogFiltersTest do
       event = %{level: :error, msg: {:report, %{label: {:gen_server, :terminate}}}}
 
       assert LogFilters.filter_tls_alert(event, []) == :ignore
+    end
+  end
+
+  describe "host-supplied filters" do
+    defmodule DropsGreetings do
+      @behaviour GamendWeb.LogFilter
+
+      @impl true
+      def drop?(%{msg: {:string, message}}), do: to_string(message) =~ "hello"
+      def drop?(_event), do: false
+    end
+
+    defmodule Raises do
+      @behaviour GamendWeb.LogFilter
+
+      @impl true
+      def drop?(_event), do: raise("boom")
+    end
+
+    setup do
+      previous = Application.get_env(:gamend_web, :log_filters, [])
+      on_exit(fn -> Application.put_env(:gamend_web, :log_filters, previous) end)
+      :ok
+    end
+
+    test "a host filter can drop an event core knows nothing about" do
+      Application.put_env(:gamend_web, :log_filters, [DropsGreetings])
+
+      event = %{level: :info, msg: {:string, ~c"hello there"}}
+
+      assert LogFilters.filter_tls_alert(event, []) == :stop
+    end
+
+    test "events it does not recognise are left alone" do
+      Application.put_env(:gamend_web, :log_filters, [DropsGreetings])
+
+      event = %{level: :info, msg: {:string, ~c"something else"}}
+
+      assert LogFilters.filter_tls_alert(event, []) == :ignore
+    end
+
+    test "a raising host filter does not drop, and does not take the log down" do
+      Application.put_env(:gamend_web, :log_filters, [Raises])
+
+      event = %{level: :error, msg: {:string, ~c"a real error"}}
+
+      assert LogFilters.filter_tls_alert(event, []) == :ignore
+    end
+
+    test "a raising host filter cannot stop core's own rules from applying" do
+      Application.put_env(:gamend_web, :log_filters, [Raises])
+
+      alert = {:tls_alert, {:bad_record_mac, ~c"..."}}
+
+      assert LogFilters.filter_tls_alert(terminate_report(alert), []) == :stop
     end
   end
 

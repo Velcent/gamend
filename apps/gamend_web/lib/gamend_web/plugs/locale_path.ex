@@ -73,18 +73,19 @@ defmodule GamendWeb.Plugs.LocalePath do
           |> assign(:locale_prefix, locale)
           |> assign(:seo_path, clean_path)
 
-        {:redirect, locale, redirect_path} ->
+        {:redirect, permanence, locale, redirect_path} ->
           # Store locale in session and redirect to the unprefixed URL.
           # This avoids LiveView WebSocket URL mismatches.
           conn
           |> put_session(@session_key, locale)
+          |> put_status(redirect_status(permanence))
           |> Phoenix.Controller.redirect(to: redirect_path)
           |> halt()
 
         :no_prefix ->
           conn
-          |> apply_session_locale()
           |> assign(:seo_path, conn.request_path)
+          |> serve_unprefixed()
       end
     end
   end
@@ -135,15 +136,21 @@ defmodule GamendWeb.Plugs.LocalePath do
 
         cond do
           # The default locale never gets a prefix of its own — it would be a
-          # duplicate of the clean URL.
+          # duplicate of the clean URL. That holds whatever `:localized_paths`
+          # says, so it is a *permanent* move: a 301 tells a crawler to
+          # consolidate the two and stop coming back, where a 302 says the
+          # prefixed URL is the real one and is only away for now.
           locale == @default_locale ->
-            {:redirect, locale, with_query(clean_path, conn.query_string)}
+            {:redirect, :permanent, locale, with_query(clean_path, conn.query_string)}
 
           localized_path?(clean_path) ->
             {:serve_localized, locale, rest, clean_path}
 
+          # Whether this path is served under a prefix is a config decision, so
+          # a host that later adds it to `:localized_paths` must not be fighting
+          # 301s cached in every browser and crawler that ever saw one.
           true ->
-            {:redirect, locale, with_query(clean_path, conn.query_string)}
+            {:redirect, :temporary, locale, with_query(clean_path, conn.query_string)}
         end
 
       _ ->
@@ -152,6 +159,9 @@ defmodule GamendWeb.Plugs.LocalePath do
   end
 
   defp classify(_conn), do: :no_prefix
+
+  defp redirect_status(:permanent), do: :moved_permanently
+  defp redirect_status(:temporary), do: :found
 
   @doc """
   Whether `clean_path` is served under locale prefixes — i.e. whether it is
@@ -183,13 +193,46 @@ defmodule GamendWeb.Plugs.LocalePath do
     end
   end
 
-  # Read locale from session (set by a prior redirect) or fall back to default.
-  defp apply_session_locale(conn) do
-    locale =
-      conn
-      |> get_session(@session_key)
-      |> session_locale()
+  # An unprefixed path that *also* has per-locale URLs is the default-locale
+  # document, and only that. It used to render in whatever language the session
+  # happened to hold, which was wrong twice over: a cache keyed on the URL would
+  # serve one visitor's language to the next, and a page whose content depends
+  # on a cookie has no stable canonical URL to hand a crawler.
+  #
+  # A reader who has chosen another language is *sent to that language's URL*
+  # rather than served it here, so nobody loses their language — they get an
+  # address that names it, which is also the address worth sharing. Crawlers
+  # carry no cookie, so they never see the redirect and always get the canonical
+  # document.
+  #
+  # Paths with no localized form (the LiveView app pages) keep reading the
+  # session: there is no prefixed URL to send anyone to.
+  defp serve_unprefixed(conn) do
+    stored = conn |> get_session(@session_key) |> session_locale()
 
+    cond do
+      not localized_path?(conn.request_path) ->
+        put_locale(conn, stored)
+
+      conn.method == "GET" and stored != @default_locale ->
+        conn
+        |> Phoenix.Controller.redirect(to: prefixed_path(conn, stored))
+        |> halt()
+
+      true ->
+        put_locale(conn, @default_locale)
+    end
+  end
+
+  # `/vocabulary/spanish` + `it` -> `/it/vocabulary/spanish`. The trailing slash
+  # goes so that `/` becomes `/it` rather than `/it/`.
+  defp prefixed_path(conn, locale) do
+    path = "/" <> url_locale(locale) <> String.trim_trailing(conn.request_path, "/")
+
+    with_query(path, conn.query_string)
+  end
+
+  defp put_locale(conn, locale) do
     GamendWeb.GettextSync.put_locale(locale)
     assign(conn, :locale, locale)
   end

@@ -47,7 +47,10 @@ defmodule GamendWeb.LocaleSwitchTest do
     end
 
     test "the default locale is never served under a prefix", %{conn: conn} do
-      assert conn |> get("/en/privacy") |> redirected_to() == "/privacy"
+      # 301, not 302: the rule holds whatever `:localized_paths` says, so a
+      # crawler should consolidate the two URLs rather than keep the prefixed
+      # one indexed and come back for it.
+      assert conn |> get("/en/privacy") |> redirected_to(301) == "/privacy"
     end
 
     test "unprefixed pages canonicalize to themselves without alternates", %{conn: conn} do

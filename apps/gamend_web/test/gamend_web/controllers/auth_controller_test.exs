@@ -351,7 +351,12 @@ defmodule GamendWeb.AuthControllerTest do
     # browser callbacks depend on a cookie Apple cannot guarantee on form_post.
     replay_conn = post(build_conn(), "/auth/apple/callback", %{"code" => "xxx", "state" => state})
     assert redirected_to(replay_conn) =~ "/users/log_in"
-    assert Phoenix.Flash.get(replay_conn.assigns.flash, :error) =~ "Failed to authenticate"
+
+    # A replay is almost always a reader pressing back on a sign-in that
+    # already worked, so it is not told authentication failed. The state stays
+    # spent either way — that is what makes it single-use.
+    assert Phoenix.Flash.get(replay_conn.assigns.flash, :error) == nil
+    assert OAuthSessions.get_session(state).status == "completed"
   end
 
   test "callback (apple) browser link restores user from state without callback session cookie",

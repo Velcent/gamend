@@ -32,15 +32,59 @@ defmodule GamendWeb.LogFilters do
   `certificate_expired` on a server that terminates TLS itself (this one binds
   443 directly — no proxy) are how a broken or expired certificate announces
   itself. Dropping every `:tls_alert` would silence the one class of TLS error
-  that actually needs a human. Only alerts that mean "the peer went away" are
-  listed.
+  that actually needs a human. Only alerts that mean "the peer went away or
+  never spoke TLS" are listed.
+
+  ## The corruption alerts
+
+  Binding 443 straight to the internet puts every scanner, broken middlebox and
+  half-open mobile connection in front of the TLS stack, and each one costs a
+  full crash report:
+
+    * `bad_record_mac` — a record failed its authentication check, in either
+      direction (`decryption_failed`, `record_type_mismatch`). Bytes were
+      altered, truncated or replayed in transit; nothing on this side can
+      repair a network path that mangles packets.
+    * `unexpected_message` carrying `unsupported_record_type` — the byte where
+      a TLS content type belongs is not one of the four legal values (20, 21,
+      22, 23). Whatever connected is not speaking TLS at all.
+
+  Both are peer faults by construction. A genuine misconfiguration on this side
+  fails during the *handshake*, as one of the alerts deliberately kept above.
+
+  ## The non-alert noise
+
+  `Bandit.TransportError` "Unable to obtain conn_data" is a socket that died
+  between accept and first read: `:inet.peername/1` answers `:einval` because
+  there is no longer a connection to name. Scanners that connect and instantly
+  reset produce a steady trickle of these.
+
+  Bandit's "Connection that looks like TLS received on a clear channel" is a
+  client speaking TLS to port 80. This app serves 80 only to redirect and to
+  answer ACME challenges, so that is the client's mistake, not a fault here.
   """
 
   @filter_id :drop_benign_tls_alerts
 
-  # Alerts that only ever mean the client hung up. Everything else — anything
-  # implicating our certificate or our TLS configuration — stays visible.
-  @benign_alerts [:user_canceled, :close_notify, :closure_alert]
+  # Alerts that mean the peer hung up, or that what arrived was corrupt or was
+  # never TLS. Everything else — anything implicating our certificate or our
+  # TLS configuration — stays visible.
+  @benign_alerts [
+    :user_canceled,
+    :close_notify,
+    :closure_alert,
+    :bad_record_mac,
+    :decryption_failed,
+    :decrypt_error,
+    :record_overflow,
+    :unexpected_message,
+    :decode_error
+  ]
+
+  # Socket errors meaning the connection was gone before it could be used.
+  @dead_socket_errors [:einval, :closed, :enotconn, :econnreset, :epipe, :etimedout]
+
+  @clear_channel_warning "Connection that looks like TLS received on a clear channel"
 
   @doc """
   Installs the filters. Idempotent: re-installing is a no-op, so a supervisor
@@ -61,15 +105,63 @@ defmodule GamendWeb.LogFilters do
   end
 
   @doc """
-  Drops crash reports whose exit reason is a peer-initiated TLS alert.
+  Drops crash reports and warnings caused by the peer rather than by this server.
 
   Returns `:stop` to drop the event, or `:ignore` to leave it for the remaining
   filters and handlers — never the event itself, since this filter only ever
   rejects and must not short-circuit other filters by accepting.
   """
   def filter_tls_alert(event, _extra) do
-    if benign_tls_alert?(reason(event)), do: :stop, else: :ignore
+    if peer_fault?(event), do: :stop, else: :ignore
   end
+
+  defp peer_fault?(event) do
+    reason = reason(event)
+
+    benign_tls_alert?(reason) or dead_socket?(reason) or clear_channel_warning?(event) or
+      host_filters_drop?(event)
+  end
+
+  @doc """
+  The host-supplied `GamendWeb.LogFilter` modules, in configuration order.
+
+  Noise from a host's own code is the host's to describe; this is how it says
+  so without patching core.
+  """
+  def host_filters, do: Application.get_env(:gamend_web, :log_filters, [])
+
+  defp host_filters_drop?(event), do: Enum.any?(host_filters(), &safe_drop?(&1, event))
+
+  # A raise here is treated as "do not drop". It deliberately goes unreported:
+  # this runs inside the logging pipeline, so logging the failure would recurse
+  # through this very filter. A broken host filter therefore loses only its own
+  # noise, never the log itself, and never the events core knows how to drop.
+  defp safe_drop?(module, event) do
+    module.drop?(event) == true
+  rescue
+    _ -> false
+  catch
+    _, _ -> false
+  end
+
+  # Bandit raises this when the socket is already gone, so the crash carries an
+  # exception rather than a `:tls_alert` tuple.
+  defp dead_socket?({%Bandit.TransportError{error: error}, stack}) when is_list(stack),
+    do: error in @dead_socket_errors
+
+  defp dead_socket?(%Bandit.TransportError{error: error}), do: error in @dead_socket_errors
+  defp dead_socket?({:shutdown, inner}), do: dead_socket?(inner)
+  defp dead_socket?(_reason), do: false
+
+  # A plain `Logger.warning/2` from Bandit, not a crash report — matched on its
+  # message because that is all the event carries.
+  defp clear_channel_warning?(%{msg: {:string, message}}),
+    do: to_string(message) =~ @clear_channel_warning
+
+  defp clear_channel_warning?(%{msg: {format, args}}) when is_binary(format) and is_list(args),
+    do: format =~ @clear_channel_warning
+
+  defp clear_channel_warning?(_event), do: false
 
   # `gen_server`/`gen_statem` terminate reports carry the reason as a map key.
   defp reason(%{msg: {:report, %{reason: reason}}}), do: reason
