@@ -204,7 +204,7 @@ jobs:
       - name: Install system dependencies
         run: |
           apt update
-          apt install -y build-essential erlang-dev curl
+          apt install -y build-essential erlang-dev curl libsrtp2-dev pkg-config
 
       - name: Install Rust toolchain (for ex_sctp WebRTC DataChannels)
         run: |
@@ -268,7 +268,7 @@ jobs:
       - name: Install system dependencies
         run: |
           apt update
-          apt install -y build-essential erlang-dev curl
+          apt install -y build-essential erlang-dev curl libsrtp2-dev pkg-config
 
       - name: Install Rust toolchain (for ex_sctp WebRTC DataChannels)
         run: |
@@ -390,7 +390,7 @@ jobs:
       - name: Install system dependencies
         run: |
           apt update
-          apt install -y build-essential erlang-dev curl
+          apt install -y build-essential erlang-dev curl libsrtp2-dev pkg-config
 
       - name: Install Rust toolchain (for ex_sctp WebRTC DataChannels)
         run: |
@@ -451,7 +451,7 @@ jobs:
       - name: Install system dependencies
         run: |
           apt update
-          apt install -y build-essential erlang-dev curl
+          apt install -y build-essential erlang-dev curl libsrtp2-dev pkg-config
 
       - name: Install Rust toolchain (for ex_sctp WebRTC DataChannels)
         run: |
@@ -491,7 +491,7 @@ jobs:
       - name: Install system dependencies
         run: |
           apt update
-          apt install -y build-essential erlang-dev curl
+          apt install -y build-essential erlang-dev curl libsrtp2-dev pkg-config
 
       - name: Install Rust toolchain (for ex_sctp WebRTC DataChannels)
         run: |
