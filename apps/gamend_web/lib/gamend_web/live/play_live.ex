@@ -8,14 +8,18 @@ defmodule GamendWeb.PlayLive do
 
   When the user is session-authenticated, this LiveView mints a short-lived
   JWT access-token (and a refresh-token) so the Godot game can call the API.
-  Tokens are delivered in two ways:
+  They are handed over through **localStorage only**: the `GameAuth` hook writes
+  `gamend_access_token` / `gamend_refresh_token`, and the game reads them with
+  `JavaScriptBridge.eval("localStorage.getItem('gamend_refresh_token')")`.
 
-    1. **URL fragment** – the iframe `src` becomes
-       `/game/index.html#access_token=…&refresh_token=…`
-       (fragment never leaves the browser).
-    2. **localStorage** – a JS hook writes `gamend_access_token` and
-       `gamend_refresh_token` so the game can also read them with
-       `JavaScriptBridge.eval("localStorage.getItem('gamend_access_token')")`.
+  The iframe `src` is a CONSTANT and must stay one. `mount/2` runs at least
+  twice per page (dead render, then connected mount, then again on every socket
+  reconnect) and mints fresh tokens each time. When those tokens were part of
+  the `src` fragment, every mount produced a different URL, the browser reloaded
+  the iframe, and a second Godot/WASM instance booted before the first was
+  collected — roughly doubling the heap and getting the tab killed on iOS.
+  `phx-update="ignore"` does not save us here; the only safe answer is a `src`
+  that cannot change.
   """
   use GamendWeb, :live_view
 
@@ -24,13 +28,7 @@ defmodule GamendWeb.PlayLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    {game_src, token_data} = build_game_url(Scope.user(socket.assigns.current_scope))
-
-    {:ok,
-     assign(socket,
-       game_src: game_src,
-       token_data: token_data
-     )}
+    {:ok, assign(socket, token_data: build_token_data(Scope.user(socket.assigns.current_scope)))}
   end
 
   @impl true
@@ -57,9 +55,11 @@ defmodule GamendWeb.PlayLive do
         >
         </div>
 
+        <%!-- src is a literal on purpose: any change reloads the iframe and
+              boots a second WASM instance. See the moduledoc. --%>
         <iframe
           id="game-frame"
-          src={@game_src}
+          src="/game/index.html"
           class="w-full h-full border-0"
           allow="autoplay; fullscreen"
           allowfullscreen
@@ -74,24 +74,16 @@ defmodule GamendWeb.PlayLive do
   # Helpers
   # ---------------------------------------------------------------------------
 
-  defp build_game_url(nil), do: {"/game/index.html", %{}}
+  defp build_token_data(nil), do: %{}
 
-  defp build_game_url(user) do
+  defp build_token_data(user) do
     with {:ok, access_token, _claims} <-
            Guardian.encode_and_sign(user, %{}, token_type: "access"),
          {:ok, refresh_token, _claims} <-
            Guardian.encode_and_sign(user, %{}, token_type: "refresh", ttl: {30, :days}) do
-      fragment =
-        URI.encode_query(%{
-          "access_token" => access_token,
-          "refresh_token" => refresh_token
-        })
-
-      {"/game/index.html##{fragment}",
-       %{access_token: access_token, refresh_token: refresh_token}}
+      %{access_token: access_token, refresh_token: refresh_token}
     else
-      _error ->
-        {"/game/index.html", %{}}
+      _error -> %{}
     end
   end
 end
