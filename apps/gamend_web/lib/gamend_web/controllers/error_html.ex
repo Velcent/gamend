@@ -21,6 +21,8 @@ defmodule GamendWeb.ErrorHTML do
   """
   use GamendWeb, :html
 
+  alias GamendWeb.Plugs.LocalePath
+
   embed_templates "error_html/*"
 
   @doc """
@@ -97,7 +99,9 @@ defmodule GamendWeb.ErrorHTML do
   defp title_for(_status), do: gettext("Something went wrong")
 
   defp message_for(404) do
-    gettext("The page you were looking for has moved or never existed. The rest of the site is fine.")
+    gettext(
+      "The page you were looking for has moved or never existed. The rest of the site is fine."
+    )
   end
 
   defp message_for(403) do
@@ -105,7 +109,9 @@ defmodule GamendWeb.ErrorHTML do
   end
 
   defp message_for(429) do
-    gettext("You have made a lot of requests in a short time. Please wait a moment and try again.")
+    gettext(
+      "You have made a lot of requests in a short time. Please wait a moment and try again."
+    )
   end
 
   defp message_for(_status) do
@@ -115,12 +121,14 @@ defmodule GamendWeb.ErrorHTML do
   # The conn is present for a normal request but absent when the error is
   # rendered outside one, so both shapes have to work.
   defp locale(%{conn: %Plug.Conn{assigns: %{locale: locale}}}) when is_binary(locale), do: locale
-  defp locale(_assigns), do: GamendWeb.Plugs.LocalePath.default_locale()
+  defp locale(_assigns), do: LocalePath.default_locale()
 
   # Same theme as the rest of the site when the pipeline got far enough to
   # resolve one; daisyUI's light theme otherwise, which is what the root layout
   # falls back to as well.
-  defp color_mode(%{conn: %Plug.Conn{assigns: %{color_mode: mode}}}) when is_binary(mode), do: mode
+  defp color_mode(%{conn: %Plug.Conn{assigns: %{color_mode: mode}}}) when is_binary(mode),
+    do: mode
+
   defp color_mode(%{color_mode: mode}) when is_binary(mode), do: mode
   defp color_mode(_assigns), do: "light"
 
@@ -151,10 +159,10 @@ defmodule GamendWeb.ErrorHTML do
   defp home_path(assigns) do
     locale = locale(assigns)
 
-    if locale == GamendWeb.Plugs.LocalePath.default_locale() do
+    if locale == LocalePath.default_locale() do
       "/"
     else
-      "/" <> GamendWeb.Plugs.LocalePath.url_locale(locale) <> "/"
+      "/" <> LocalePath.url_locale(locale) <> "/"
     end
   end
 end

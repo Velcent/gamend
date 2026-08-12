@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html
-  lang={GamendWeb.Plugs.LocalePath.url_locale(@locale)}
-  dir={GamendWeb.Plugs.LocalePath.text_direction(@locale)}
+  lang={LocalePath.url_locale(@locale)}
+  dir={LocalePath.text_direction(@locale)}
   data-theme={@color_mode}
   class="bg-base-100"
 >
@@ -47,7 +47,10 @@
       <h1 class="mt-2 text-2xl font-bold">{@title}</h1>
       <p class="mt-3 text-base-content/70">{@message}</p>
 
-      <nav class="mt-8 flex flex-wrap justify-center gap-2" aria-label={gettext("Where to go next")}>
+      <nav
+        class="mt-8 flex flex-wrap justify-center gap-2"
+        aria-label={gettext("Where to go next")}
+      >
         <a class="btn btn-primary" href={@home_path}>{gettext("Home")}</a>
         <a :for={link <- @links} class="btn btn-ghost" href={@home_path <> link.path}>
           {link.label}

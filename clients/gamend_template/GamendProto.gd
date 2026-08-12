@@ -266,6 +266,7 @@ static func _user_to_dict(u) -> Dictionary:
 			"device": lp.get_device(),
 		}
 	if u.has_has_password(): d["has_password"] = u.get_has_password()
+	if u.has_username(): d["username"] = u.get_username()
 	return d
 
 
@@ -289,6 +290,7 @@ static func _brief_to_dict(b) -> Dictionary:
 	if b.has_is_online(): d["is_online"] = b.get_is_online()
 	if b.has_is_activated(): d["is_activated"] = b.get_is_activated()
 	if b.has_last_seen_at_ms(): d["last_seen_at_ms"] = b.get_last_seen_at_ms()
+	if b.has_username(): d["username"] = b.get_username()
 	return d
 
 
@@ -302,6 +304,7 @@ static func _member_event_to_dict(m) -> Dictionary:
 	if m.has_is_activated(): d["is_activated"] = m.get_is_activated()
 	if m.has_last_seen_at_ms(): d["last_seen_at_ms"] = m.get_last_seen_at_ms()
 	if m.has_group_id(): d["group_id"] = m.get_group_id()
+	if m.has_username(): d["username"] = m.get_username()
 	return d
 
 

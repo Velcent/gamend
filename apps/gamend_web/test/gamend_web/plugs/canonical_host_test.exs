@@ -92,7 +92,9 @@ defmodule GamendWeb.Plugs.CanonicalHostTest do
       # The challenge has to be answered on the alias itself, or a certificate
       # covering it can never be issued.
       conn =
-        call(request("GET", "www." <> @canonical, "/.well-known/acme-challenge/token123", :http, 80))
+        call(
+          request("GET", "www." <> @canonical, "/.well-known/acme-challenge/token123", :http, 80)
+        )
 
       refute conn.halted
     end
