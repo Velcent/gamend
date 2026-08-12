@@ -434,6 +434,7 @@ defmodule GamendWeb.Router.Shared do
         post "/lobbies/state", LobbyController, :set_state
         post "/lobbies/:id/join", LobbyController, :join
         post "/lobbies/leave", LobbyController, :leave
+        post "/lobbies/disband", LobbyController, :disband
         post "/lobbies/kick", LobbyController, :kick
         post "/lobbies/mute", ChatMuteController, :mute_lobby
         post "/lobbies/unmute", ChatMuteController, :unmute_lobby
@@ -527,6 +528,7 @@ defmodule GamendWeb.Router.Shared do
         post "/parties", PartyController, :create
         patch "/parties", PartyController, :update
         post "/parties/leave", PartyController, :leave
+        post "/parties/disband", PartyController, :disband
         post "/parties/kick", PartyController, :kick
         post "/parties/mute", ChatMuteController, :mute_party
         post "/parties/unmute", ChatMuteController, :unmute_party

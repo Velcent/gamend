@@ -654,6 +654,43 @@ defmodule GamendWeb.Api.V1.LobbyControllerTest do
     assert is_nil(reloaded.lobby_id)
   end
 
+  test "POST /api/v1/lobbies/disband ends the lobby for everyone", %{conn: conn} do
+    host = AccountsFixtures.user_fixture()
+    member = AccountsFixtures.user_fixture()
+    {:ok, lobby} = Lobbies.create_lobby(%{title: "disband-room", host_id: host.id})
+    assert {:ok, _} = Lobbies.join_lobby(member, lobby)
+
+    {:ok, token_host, _} = Guardian.encode_and_sign(host)
+
+    conn =
+      conn
+      |> put_req_header("authorization", "Bearer " <> token_host)
+      |> post("/api/v1/lobbies/disband")
+
+    assert conn.status == 200
+    assert is_nil(Lobbies.get_lobby(lobby.id))
+    assert is_nil(Gamend.Repo.get(User, member.id).lobby_id)
+  end
+
+  # Ending it is the host's call; a member who wants out has leave, which takes
+  # only them.
+  test "POST /api/v1/lobbies/disband refuses a non-host", %{conn: conn} do
+    host = AccountsFixtures.user_fixture()
+    member = AccountsFixtures.user_fixture()
+    {:ok, lobby} = Lobbies.create_lobby(%{title: "disband-guard", host_id: host.id})
+    assert {:ok, _} = Lobbies.join_lobby(member, lobby)
+
+    {:ok, token_member, _} = Guardian.encode_and_sign(member)
+
+    conn =
+      conn
+      |> put_req_header("authorization", "Bearer " <> token_member)
+      |> post("/api/v1/lobbies/disband")
+
+    assert json_response(conn, 403)["error"] == "not_host"
+    assert Lobbies.get_lobby(lobby.id)
+  end
+
   test "POST /api/v1/lobbies/:id/leave removes user from lobby", %{conn: conn} do
     host = AccountsFixtures.user_fixture()
     member = AccountsFixtures.user_fixture()

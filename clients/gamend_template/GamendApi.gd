@@ -1046,6 +1046,11 @@ func lobbies_kick_user(kick_request: KickPartyMemberRequest) -> GamendResult:
 func lobbies_leave_lobby() -> GamendResult:
 	return await _call_api(LobbiesApi.new(_config), "leave_lobby")
 
+## End the lobby for everyone (host only). Leaving hands the lobby to the next
+## member; this ends it outright, so only the host may call it.
+func lobbies_disband_lobby() -> GamendResult:
+	return await _call_api(LobbiesApi.new(_config), "disband_lobby")
+
 ## Quick-join or create a lobby
 func lobbies_quick_join(quick_request: QuickJoinRequest) -> GamendResult:
 	return await _call_api(LobbiesApi.new(_config), "quick_join", [quick_request])
@@ -1485,6 +1490,11 @@ func parties_kick_party_member(kickUserRequest: KickPartyMemberRequest) -> Gamen
 ## Leave the current party
 func parties_leave_party() -> GamendResult:
 	return await _call_api(PartiesApi.new(_config), "leave_party", [])
+
+## End the party for everyone (leader only). Leaving hands the party to the next
+## member; this ends it outright, so only the leader may call it.
+func parties_disband_party() -> GamendResult:
+	return await _call_api(PartiesApi.new(_config), "disband_party", [])
 
 ## Create a lobby with the party (leader only)
 func parties_party_create_lobby(partyCreateLobbyRequest: PartyCreateLobbyRequest) -> GamendResult:

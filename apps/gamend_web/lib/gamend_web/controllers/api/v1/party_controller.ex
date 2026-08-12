@@ -130,6 +130,27 @@ defmodule GamendWeb.Api.V1.PartyController do
     ]
   )
 
+  operation(:disband,
+    operation_id: "disband_party",
+    summary: "Disband the current party (leader only)",
+    description:
+      "End the party for everyone. Distinct from leaving: a leader who LEAVES hands the party " <>
+        "to the next member, so ending it outright is its own act and only the leader may do it.",
+    security: [%{"authorization" => []}],
+    responses: [
+      ok: {"Success", "application/json", %Schema{type: :object}},
+      bad_request:
+        {"Not in a party", "application/json",
+         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}},
+      forbidden:
+        {"Not the party leader", "application/json",
+         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}},
+      unauthorized:
+        {"Not authenticated", "application/json",
+         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}}
+    ]
+  )
+
   operation(:invite,
     operation_id: "invite_to_party",
     summary: "Invite a user to the party (leader only)",
@@ -544,6 +565,31 @@ defmodule GamendWeb.Api.V1.PartyController do
           _other ->
             conn |> put_status(:unprocessable_entity) |> json(%{error: "unexpected_error"})
         end
+
+      _ ->
+        conn |> put_status(:unauthorized) |> json(%{error: "Not authenticated"})
+    end
+  end
+
+  def disband(conn, _params) do
+    case Scope.user(conn.assigns[:current_scope]) do
+      %User{party_id: party_id} = user when is_binary(party_id) ->
+        case Parties.get_party(party_id) do
+          %{leader_id: leader_id} = party when leader_id == user.id ->
+            case Parties.disband(party) do
+              {:ok, _} -> json(conn, %{})
+              _ -> conn |> put_status(:unprocessable_entity) |> json(%{error: "unexpected_error"})
+            end
+
+          %{} ->
+            conn |> put_status(:forbidden) |> json(%{error: "not_party_leader"})
+
+          _ ->
+            conn |> put_status(:bad_request) |> json(%{error: "not_in_party"})
+        end
+
+      %User{} ->
+        conn |> put_status(:bad_request) |> json(%{error: "not_in_party"})
 
       _ ->
         conn |> put_status(:unauthorized) |> json(%{error: "Not authenticated"})

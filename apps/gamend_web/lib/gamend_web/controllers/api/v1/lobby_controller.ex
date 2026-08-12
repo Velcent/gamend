@@ -358,6 +358,28 @@ defmodule GamendWeb.Api.V1.LobbyController do
     ]
   )
 
+  operation(:disband,
+    operation_id: "disband_lobby",
+    summary: "Disband the current lobby (host only)",
+    description:
+      "Delete the lobby for everyone. Distinct from leaving: leaving hands the lobby to the next " <>
+        "member, so ending it outright is its own act and only the host may do it. A hostless " <>
+        "(matchmaking) lobby has no host to authorise it and is refused.",
+    security: [%{"authorization" => []}],
+    responses: [
+      ok: {"Success", "application/json", %Schema{type: :object}},
+      bad_request:
+        {"Not in a lobby", "application/json",
+         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}},
+      forbidden:
+        {"Not the lobby host", "application/json",
+         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}},
+      unauthorized:
+        {"Not authenticated", "application/json",
+         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}}
+    ]
+  )
+
   operation(:kick,
     operation_id: "kick_user",
     summary: "Kick a user from the lobby (host only)",
@@ -952,6 +974,36 @@ defmodule GamendWeb.Api.V1.LobbyController do
               conn |> put_status(:unprocessable_entity) |> json(%{error: "unexpected_error"})
           end
         end
+
+      _ ->
+        conn |> put_status(:unauthorized) |> json(%{error: "Not authenticated"})
+    end
+  end
+
+  def disband(conn, _params) do
+    case Scope.user(conn.assigns[:current_scope]) do
+      %User{lobby_id: lobby_id} = user when is_binary(lobby_id) ->
+        case Lobbies.get_lobby(lobby_id) do
+          # A hostless lobby is server-managed: nobody is its owner, so nobody
+          # can end it from the API.
+          %{hostless: true} ->
+            conn |> put_status(:forbidden) |> json(%{error: "not_host"})
+
+          %{host_id: host_id} = lobby when host_id == user.id ->
+            case Lobbies.delete_lobby(lobby) do
+              {:ok, _} -> json(conn, %{})
+              _ -> conn |> put_status(:unprocessable_entity) |> json(%{error: "unexpected_error"})
+            end
+
+          %{} ->
+            conn |> put_status(:forbidden) |> json(%{error: "not_host"})
+
+          _ ->
+            conn |> put_status(:bad_request) |> json(%{error: "not_in_lobby"})
+        end
+
+      %User{} ->
+        conn |> put_status(:bad_request) |> json(%{error: "not_in_lobby"})
 
       _ ->
         conn |> put_status(:unauthorized) |> json(%{error: "Not authenticated"})

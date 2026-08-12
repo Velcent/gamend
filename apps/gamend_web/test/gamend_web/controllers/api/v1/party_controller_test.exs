@@ -109,7 +109,7 @@ defmodule GamendWeb.Api.V1.PartyControllerTest do
       assert Parties.get_party(party.id) != nil
     end
 
-    test "leader leaving disbands the party", %{conn: conn} do
+    test "the last member leaving disbands the party", %{conn: conn} do
       leader = AccountsFixtures.user_fixture()
       {:ok, party} = Parties.create_party(leader, %{})
 
@@ -120,6 +120,67 @@ defmodule GamendWeb.Api.V1.PartyControllerTest do
 
       assert json_response(conn, 200) == %{}
       assert is_nil(Parties.get_party(party.id))
+    end
+
+    test "a leader leaving hands the party on rather than ending it", %{conn: conn} do
+      leader = AccountsFixtures.user_fixture()
+      member = AccountsFixtures.user_fixture()
+      {:ok, party} = Parties.create_party(leader, %{})
+      add_member_to_party(member, party)
+
+      conn =
+        conn
+        |> auth_conn(leader)
+        |> post("/api/v1/parties/leave")
+
+      assert json_response(conn, 200) == %{}
+      assert Parties.get_party(party.id).leader_id == member.id
+    end
+  end
+
+  describe "POST /api/v1/parties/disband" do
+    test "the leader ends the party for everyone", %{conn: conn} do
+      leader = AccountsFixtures.user_fixture()
+      member = AccountsFixtures.user_fixture()
+      {:ok, party} = Parties.create_party(leader, %{})
+      add_member_to_party(member, party)
+
+      conn =
+        conn
+        |> auth_conn(leader)
+        |> post("/api/v1/parties/disband")
+
+      assert json_response(conn, 200) == %{}
+      assert is_nil(Parties.get_party(party.id))
+      assert is_nil(Gamend.Accounts.get_user(member.id).party_id)
+    end
+
+    # Ending it is the leader's call; a member who wants out has leave, which
+    # takes only them.
+    test "a member cannot end the party", %{conn: conn} do
+      leader = AccountsFixtures.user_fixture()
+      member = AccountsFixtures.user_fixture()
+      {:ok, party} = Parties.create_party(leader, %{})
+      add_member_to_party(member, party)
+
+      conn =
+        conn
+        |> auth_conn(member)
+        |> post("/api/v1/parties/disband")
+
+      assert json_response(conn, 403)["error"] == "not_party_leader"
+      assert Parties.get_party(party.id)
+    end
+
+    test "returns 400 when not in a party", %{conn: conn} do
+      user = AccountsFixtures.user_fixture()
+
+      conn =
+        conn
+        |> auth_conn(user)
+        |> post("/api/v1/parties/disband")
+
+      assert json_response(conn, 400)["error"] == "not_in_party"
     end
   end
 
