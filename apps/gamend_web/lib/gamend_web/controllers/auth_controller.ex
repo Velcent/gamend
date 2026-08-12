@@ -364,9 +364,7 @@ defmodule GamendWeb.AuthController do
   defp browser_oauth_replay_redirect(conn, provider) do
     require Logger
 
-    Logger.info(
-      "#{String.capitalize(provider)} OAuth callback replayed (state already redeemed)"
-    )
+    Logger.info("#{String.capitalize(provider)} OAuth callback replayed (state already redeemed)")
 
     redirect(conn, to: ~p"/users/log_in")
   end

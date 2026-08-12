@@ -1023,7 +1023,7 @@ defmodule GamendWeb.HostLayoutNavigation do
       href =
         cond do
           locale == default_locale ->
-            (if base_path == "/", do: "/", else: base_path) <> query_suffix
+            if(base_path == "/", do: "/", else: base_path) <> query_suffix
 
           base_path == "/" ->
             prefix <> query_suffix
