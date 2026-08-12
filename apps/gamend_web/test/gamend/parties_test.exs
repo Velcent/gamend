@@ -382,18 +382,26 @@ defmodule Gamend.PartiesTest do
   end
 
   describe "leave_party/1" do
-    test "leader leaving disbands the party", %{leader: leader, member1: member1} do
+    # Handed over rather than disbanded: losing the party because one player left
+    # punished everyone else for it, the same reasoning lobbies migrate a host on.
+    test "leader leaving hands the party to the next member", %{leader: leader, member1: member1} do
       {:ok, party} = Parties.create_party(leader, %{})
       add_member_to_party(member1, party)
 
+      assert {:ok, :left} = Parties.leave_party(leader)
+
+      assert Parties.get_party(party.id).leader_id == member1.id
+      assert is_nil(Accounts.get_user(leader.id).party_id)
+      assert Accounts.get_user(member1.id).party_id == party.id
+    end
+
+    test "the last member leaving disbands the party", %{leader: leader} do
+      {:ok, party} = Parties.create_party(leader, %{})
+
       assert {:ok, :disbanded} = Parties.leave_party(leader)
 
-      # Party should no longer exist
       assert is_nil(Parties.get_party(party.id))
-
-      # Both users should have no party
       assert is_nil(Accounts.get_user(leader.id).party_id)
-      assert is_nil(Accounts.get_user(member1.id).party_id)
     end
 
     test "regular member leaving does not disband the party", %{
@@ -858,12 +866,10 @@ defmodule Gamend.PartiesTest do
       assert_receive {:party_member_left, ^party_id, ^member_id}, 500
     end
 
-    test "party_disbanded event is broadcast when leader leaves", %{
-      leader: leader,
-      member1: member1
+    test "party_disbanded event is broadcast when the last member leaves", %{
+      leader: leader
     } do
       {:ok, party} = Parties.create_party(leader, %{})
-      add_member_to_party(member1, party)
       Parties.subscribe_party(party.id)
 
       {:ok, :disbanded} = Parties.leave_party(leader)
@@ -896,7 +902,7 @@ defmodule Gamend.PartiesTest do
   end
 
   describe "user deletion edge cases" do
-    test "deleting a party leader disbands the party and clears members", %{
+    test "deleting a party leader hands the party to the remaining member", %{
       leader: leader,
       member1: member1
     } do
@@ -906,12 +912,11 @@ defmodule Gamend.PartiesTest do
       # Delete the leader
       {:ok, _} = Accounts.delete_user(leader)
 
-      # Party should no longer exist (cascade from leave_party → disband)
-      assert is_nil(Parties.get_party(party.id))
+      # The account going does not take everyone else's party with it.
+      assert Parties.get_party(party.id).leader_id == member1.id
 
-      # Member should have party_id cleared
       updated_member = Accounts.get_user(member1.id)
-      assert is_nil(updated_member.party_id)
+      assert updated_member.party_id == party.id
     end
 
     test "deleting a regular member removes them from the party", %{
@@ -1127,7 +1132,8 @@ defmodule Gamend.PartiesTest do
       {:ok, _invite} = Parties.invite_to_party(leader, member1.id)
       {:ok, _} = Parties.accept_party_invite(member1, party.id)
 
-      # Leader leaving disbands the party (since leader)
+      # Both out: the second leaves nobody to hand the party to, so it disbands.
+      assert {:ok, :left} = Parties.leave_party(member1)
       assert {:ok, :disbanded} = Parties.leave_party(leader)
       updated_leader = Accounts.get_user(leader.id)
       assert is_nil(updated_leader.party_id)

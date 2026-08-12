@@ -372,12 +372,15 @@ defmodule Gamend.Hooks.GroupPartyHooksTest do
   end
 
   describe "after_party_disband hook" do
-    test "fires with party when leader leaves (auto-disband)", %{owner: owner, other: other} do
+    # The leader leaving hands the party over now, so the disband is the LAST
+    # member out — there is nobody left to hand it to.
+    test "fires with party when the last member leaves", %{owner: owner, other: other} do
       make_friends(owner, other)
       {:ok, party} = Parties.create_party(owner, %{})
       {:ok, _} = Parties.invite_to_party(owner, other.id)
       {:ok, _} = Parties.accept_party_invite(other, party.id)
 
+      {:ok, :left} = Parties.leave_party(other)
       {:ok, :disbanded} = Parties.leave_party(owner)
 
       assert_receive {:after_party_disband, p}, 500

@@ -117,7 +117,7 @@ defmodule GamendWeb.Api.V1.PartyController do
     operation_id: "leave_party",
     summary: "Leave the current party",
     description:
-      "Leave the party you are currently in. If you are the leader, the party is disbanded and all members are removed.",
+      "Leave the party you are currently in. A leader hands it to the next member; the last member out disbands it.",
     security: [%{"authorization" => []}],
     responses: [
       ok: {"Success", "application/json", %Schema{type: :object}},

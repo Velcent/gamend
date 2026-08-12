@@ -19,7 +19,7 @@ defmodule Gamend.Parties do
       # Or declines
       :ok = Gamend.Parties.decline_party_invite(target, party_id)
 
-      # Leave a party (if leader leaves, party is disbanded)
+      # Leave a party (a leader hands it over; the last member out disbands it)
       {:ok, _} = Gamend.Parties.leave_party(user)
 
       # Party leader creates a lobby — all members join atomically
@@ -922,8 +922,12 @@ defmodule Gamend.Parties do
   @doc """
   Leave the current party.
 
-  If the user is the party leader, the party is disbanded (all members removed,
-  party deleted). Regular members are simply removed.
+  A leader leaving HANDS THE PARTY OVER to the longest-present remaining member,
+  the way a lobby migrates its host — the party outliving one player is the
+  point of it. Regular members are simply removed, and whoever leaves last takes
+  the party with them, since there is nobody to hand it to.
+
+  To end a party outright rather than leave it, call `disband/1`.
   """
   @spec leave_party(User.t()) :: {:ok, :left | :disbanded} | {:error, term()}
   def leave_party(%User{} = user) do
@@ -940,7 +944,7 @@ defmodule Gamend.Parties do
         {:ok, :left}
       else
         if party.leader_id == user.id do
-          disband_party(party)
+          hand_over_or_disband(user, party)
         else
           remove_member(user, party.id)
         end
@@ -1563,6 +1567,35 @@ defmodule Gamend.Parties do
     Ecto.StaleEntryError ->
       # Race condition: party was concurrently disbanded by another operation
       {:ok, :disbanded}
+  end
+
+  # The leader leaving hands the party to whoever else is in it, the way a lobby
+  # hands over its host — losing the whole party because one player left (or
+  # dropped, once retention releases their seat) punished everyone else for it.
+  # Longest-present member first, the same order lobby migration uses.
+  #
+  # With nobody left there is nothing to hand over, and an empty party is just a
+  # row: disband as before.
+  defp hand_over_or_disband(%User{} = user, %Party{} = party) do
+    case Enum.reject(get_party_members(party.id), &(&1.id == user.id)) do
+      [] ->
+        disband_party(party)
+
+      [%User{id: successor_id} | _] ->
+        with {:ok, promoted} <- promote_party_leader(party, successor_id),
+             {:ok, :left} <- remove_member(user, party.id) do
+          broadcast_party(promoted.id, {:party_updated, with_party_members(promoted)})
+          broadcast_parties({:party_updated, promoted.id})
+          {:ok, :left}
+        end
+    end
+  end
+
+  defp promote_party_leader(%Party{} = party, successor_id) when is_binary(successor_id) do
+    party
+    |> Ecto.Changeset.change(%{leader_id: successor_id})
+    |> Repo.update()
+    |> tap_bump_party()
   end
 
   defp remove_member(%User{} = user, party_id) do

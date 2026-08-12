@@ -170,6 +170,7 @@ defmodule Gamend.Retention do
         lobby_snapshots: &prune_lobby_snapshots/0,
         lobby_snapshot_blobs: &prune_lobby_snapshot_blobs/0,
         offline_lobby_memberships: &release_offline_lobby_memberships/0,
+        offline_party_memberships: &release_offline_party_memberships/0,
         abandoned_parties: &disband_abandoned_parties/0,
         lobbies: &prune_lobbies/0,
         resolved_invites: &prune_resolved_invites/0,
@@ -464,7 +465,7 @@ defmodule Gamend.Retention do
   # and a party whose members are merely disconnected must survive long enough
   # for them to come back.
   defp disband_abandoned_parties do
-    minutes = config(:abandoned_lobby_minutes)
+    minutes = config(:abandoned_party_minutes)
 
     if minutes > 0, do: do_disband_abandoned_parties(minutes), else: 0
   end
@@ -488,6 +489,50 @@ defmodule Gamend.Retention do
     )
     |> Repo.all()
     |> Enum.count(&disband_party/1)
+  end
+
+  # Release the party seat of a player who has been gone too long, the way
+  # `release_offline_lobby_memberships` does for lobbies.
+  #
+  # Without it a party outlived its leader indefinitely: the sweep above only
+  # fires once EVERY member is quiet, so one crew member still playing kept a
+  # party alive around a host who had left hours ago - and only the leader can
+  # steer or open a ready check, so the rest were held in a party that could do
+  # nothing but be left manually.
+  #
+  # Through `leave_party/1` rather than a bulk update, so the existing rules
+  # decide what leaving means: a departing LEADER disbands the party (there is
+  # no host migration here, unlike lobbies), any other member is just removed,
+  # and ready checks, cache invalidation and broadcasts all still run.
+  defp release_offline_party_memberships do
+    minutes = config(:abandoned_party_minutes)
+
+    if minutes > 0, do: do_release_offline_party_memberships(minutes), else: 0
+  end
+
+  defp do_release_offline_party_memberships(minutes) do
+    cutoff = DateTime.add(DateTime.utc_now(:second), -minutes, :minute)
+
+    from(u in User,
+      where: not is_nil(u.party_id),
+      where: u.is_online == false,
+      where: is_nil(u.last_seen_at) or u.last_seen_at <= ^cutoff,
+      order_by: [asc: u.id],
+      limit: @batch
+    )
+    |> Repo.all()
+    |> Enum.count(&release_party_membership/1)
+  end
+
+  defp release_party_membership(%User{} = user) do
+    match?({:ok, _}, Parties.leave_party(user))
+  rescue
+    error ->
+      Logger.error(
+        "retention failed to release party membership for #{user.id}: #{Exception.message(error)}"
+      )
+
+      false
   end
 
   # An empty party (every member already gone) is abandoned by the same rule -

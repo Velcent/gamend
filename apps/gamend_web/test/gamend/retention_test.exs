@@ -626,7 +626,7 @@ defmodule Gamend.RetentionTest do
     # their party), so without this the row and every member's party_id
     # outlive the group forever.
     test "disbands a party every member abandoned" do
-      Application.put_env(:gamend_core, Gamend.Retention, abandoned_lobby_minutes: 15)
+      Application.put_env(:gamend_core, Gamend.Retention, abandoned_party_minutes: 15)
 
       gone = DateTime.add(DateTime.utc_now(:second), -60, :minute)
       a = AccountsFixtures.user_fixture()
@@ -641,7 +641,7 @@ defmodule Gamend.RetentionTest do
     end
 
     test "keeps a party with anyone still around" do
-      Application.put_env(:gamend_core, Gamend.Retention, abandoned_lobby_minutes: 15)
+      Application.put_env(:gamend_core, Gamend.Retention, abandoned_party_minutes: 15)
 
       a = AccountsFixtures.user_fixture()
       b = AccountsFixtures.user_fixture()
@@ -654,7 +654,7 @@ defmodule Gamend.RetentionTest do
     end
 
     test "0 disables party disbanding" do
-      Application.put_env(:gamend_core, Gamend.Retention, abandoned_lobby_minutes: 0)
+      Application.put_env(:gamend_core, Gamend.Retention, abandoned_party_minutes: 0)
 
       gone = DateTime.add(DateTime.utc_now(:second), -600, :minute)
       a = AccountsFixtures.user_fixture()
@@ -663,6 +663,83 @@ defmodule Gamend.RetentionTest do
       Retention.prune_all()
 
       assert Repo.get(Party, party.id)
+    end
+
+    # The disband sweep above only fires once EVERY member is quiet, so a single
+    # player still online kept a party alive around a leader who had gone hours
+    # ago — and only the leader can steer or open a ready check, so the rest were
+    # held in a party that could do nothing. Releasing the leader's seat hands
+    # the party to whoever is still there rather than ending it under them.
+    test "a long-gone leader hands the party to a member still online" do
+      Application.put_env(:gamend_core, Gamend.Retention, abandoned_party_minutes: 15)
+
+      gone = DateTime.add(DateTime.utc_now(:second), -60, :minute)
+      leader = AccountsFixtures.user_fixture()
+      member = AccountsFixtures.user_fixture()
+      party = party_with([leader, member], online: true, last_seen: DateTime.utc_now(:second))
+
+      Repo.update_all(from(u in User, where: u.id == ^leader.id),
+        set: [is_online: false, last_seen_at: gone]
+      )
+
+      Retention.prune_all()
+
+      assert Repo.get(Party, party.id).leader_id == member.id
+      assert Repo.get(User, leader.id).party_id == nil
+      assert Repo.get(User, member.id).party_id == party.id
+    end
+
+    # Nobody left to hand it to: an empty party is just a row.
+    test "the last member leaving still ends the party" do
+      Application.put_env(:gamend_core, Gamend.Retention, abandoned_party_minutes: 15)
+
+      gone = DateTime.add(DateTime.utc_now(:second), -60, :minute)
+      leader = AccountsFixtures.user_fixture()
+      party = party_with([leader], online: false, last_seen: gone)
+
+      Retention.prune_all()
+
+      refute Repo.get(Party, party.id)
+      assert Repo.get(User, leader.id).party_id == nil
+    end
+
+    # A member is only a seat: releasing it leaves the party standing, exactly
+    # as releasing a lobby seat does.
+    test "a long-gone member is released without ending the party" do
+      Application.put_env(:gamend_core, Gamend.Retention, abandoned_party_minutes: 15)
+
+      gone = DateTime.add(DateTime.utc_now(:second), -60, :minute)
+      leader = AccountsFixtures.user_fixture()
+      member = AccountsFixtures.user_fixture()
+      party = party_with([leader, member], online: true, last_seen: DateTime.utc_now(:second))
+
+      Repo.update_all(from(u in User, where: u.id == ^member.id),
+        set: [is_online: false, last_seen_at: gone]
+      )
+
+      Retention.prune_all()
+
+      assert Repo.get(Party, party.id)
+      assert Repo.get(User, leader.id).party_id == party.id
+      assert Repo.get(User, member.id).party_id == nil
+    end
+
+    test "0 disables releasing party seats" do
+      Application.put_env(:gamend_core, Gamend.Retention, abandoned_party_minutes: 0)
+
+      gone = DateTime.add(DateTime.utc_now(:second), -600, :minute)
+      leader = AccountsFixtures.user_fixture()
+      member = AccountsFixtures.user_fixture()
+      party = party_with([leader, member], online: true, last_seen: DateTime.utc_now(:second))
+
+      Repo.update_all(from(u in User, where: u.id == ^leader.id),
+        set: [is_online: false, last_seen_at: gone]
+      )
+
+      Retention.prune_all()
+
+      assert Repo.get(Party, party.id)
+      assert Repo.get(User, leader.id).party_id == party.id
     end
   end
 end
