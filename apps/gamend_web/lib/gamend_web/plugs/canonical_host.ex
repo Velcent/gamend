@@ -86,17 +86,21 @@ defmodule GamendWeb.Plugs.CanonicalHost do
   end
 
   defp target_url(conn, canonical) do
-    query = if conn.query_string in [nil, ""], do: "", else: "?" <> conn.query_string
+    # `query_string` is `binary()` on a Plug.Conn, never nil — testing for nil
+    # made dialyzer emit `exact_compare` (binary() =:= 'nil'), which dialyxir
+    # 1.4.7 has no formatter for and throws on rather than reporting.
+    query = if conn.query_string == "", do: "", else: "?" <> conn.query_string
 
     "#{conn.scheme}://#{canonical}#{port_suffix(conn)}#{conn.request_path}#{query}"
   end
 
   # Keep a non-default port so a redirect is still followable in development,
   # where the canonical host is reached at :4000 rather than :443.
+  # No catch-all: `Plug.Conn.port` is `:inet.port_number()`, so the clause below
+  # covers every remaining conn and a fallback would be unreachable.
   defp port_suffix(%Plug.Conn{scheme: :https, port: 443}), do: ""
   defp port_suffix(%Plug.Conn{scheme: :http, port: 80}), do: ""
   defp port_suffix(%Plug.Conn{port: port}) when is_integer(port), do: ":#{port}"
-  defp port_suffix(_conn), do: ""
 
   defp canonical_host, do: Application.get_env(:gamend_web, :canonical_host)
 end
