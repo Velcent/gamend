@@ -20,7 +20,7 @@ creating or joining a lobby together.
     # Or declines
     :ok = Gamend.Parties.decline_party_invite(target, party_id)
 
-    # Leave a party (if leader leaves, party is disbanded)
+    # Leave a party (a leader hands it over; the last member out disbands it)
     {:ok, _} = Gamend.Parties.leave_party(user)
 
     # Party leader creates a lobby — all members join atomically
@@ -264,8 +264,12 @@ Kick a member from the party. Only the leader can kick.
 
 Leave the current party.
 
-If the user is the party leader, the party is disbanded (all members removed,
-party deleted). Regular members are simply removed.
+A leader leaving HANDS THE PARTY OVER to the longest-present remaining member,
+the way a lobby migrates its host — the party outliving one player is the
+point of it. Regular members are simply removed, and whoever leaves last takes
+the party with them, since there is nobody to hand it to.
+
+To end a party outright rather than leave it, call `disband/1`.
 
 # `list_all_parties`
 
