@@ -184,7 +184,7 @@ defmodule GamendWeb.Endpoint do
             gzip: gzip_static?(),
             only: only,
             cache_control_for_etags: static_cache_control(kind),
-            cache_control_for_vsn_requests: static_cache_control(kind),
+            cache_control_for_vsn_requests: static_vsn_cache_control(kind),
             headers: static_headers(kind)
           )
 
@@ -227,6 +227,28 @@ defmodule GamendWeb.Endpoint do
       :gamend_web,
       :static_cache_control,
       "public, max-age=31536000, immutable"
+    )
+  end
+
+  # A `?vsn=` request names one exact revision of a file, so it can be cached
+  # forever whatever the plain URL's policy is — that is the whole point of the
+  # parameter, and Plug.Static's own default.
+  #
+  # The revalidating kinds exist because Godot's export reuses filenames across
+  # builds (`index.png`, `index.wasm`, `index.pck`), so a bare URL must be
+  # rechecked or a deploy strands players on the previous build. Pinning vsn
+  # requests to that same policy removed the only escape hatch: every asset paid
+  # a round-trip on every load — measured at ~286 ms for a 304 carrying no
+  # bytes — with no way for a caller to say "I want exactly this revision".
+  defp static_vsn_cache_control(kind) do
+    Application.get_env(
+      :gamend_web,
+      :"#{kind}_vsn_cache_control",
+      Application.get_env(
+        :gamend_web,
+        :static_vsn_cache_control,
+        "public, max-age=31536000, immutable"
+      )
     )
   end
 
