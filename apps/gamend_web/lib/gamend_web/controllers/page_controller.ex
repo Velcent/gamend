@@ -35,9 +35,10 @@ defmodule GamendWeb.PageController do
 
     case PresentationPage.page_for_path(theme, path) || missing_home_page(theme, path) do
       nil ->
-        conn
-        |> put_status(:not_found)
-        |> text("Not Found")
+        # Not `text("Not Found")`: this decides for itself that the request is a
+        # 404, so it never reaches `render_errors` and the reader got nine bytes
+        # of plain text while the error template sat unused.
+        GamendWeb.ErrorResponse.not_found(conn)
 
       page ->
         # Hero and section buttons are config hrefs like "/play"; without this

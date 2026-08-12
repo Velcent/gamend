@@ -11,8 +11,6 @@ defmodule GamendWeb.Plugs.FeatureGate do
   leaks nothing about what the deployment runs.
   """
 
-  import Plug.Conn
-
   alias GamendWeb.Features
 
   @behaviour Plug
@@ -25,9 +23,10 @@ defmodule GamendWeb.Plugs.FeatureGate do
     if Features.enabled?(feature) do
       conn
     else
-      conn
-      |> send_resp(404, "Not Found")
-      |> halt()
+      # A switched-off feature has to look exactly like a page that does not
+      # exist — same status, same page — or the difference tells a visitor
+      # which features merely happen to be disabled.
+      GamendWeb.ErrorResponse.not_found(conn)
     end
   end
 

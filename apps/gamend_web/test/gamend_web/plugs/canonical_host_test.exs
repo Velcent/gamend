@@ -108,9 +108,23 @@ defmodule GamendWeb.Plugs.CanonicalHostTest do
     end
   end
 
-  describe "development" do
+  describe "local development is never redirected" do
+    # Setting :canonical_host outside prod once sent `localhost:4000` to
+    # `polyglotpirates.com:4000`. That was a config mistake, but this plug
+    # should refuse to act on it either way: redirecting a developer off their
+    # own machine is never what anyone meant.
+    for host <- ~w(localhost 127.0.0.1 ::1 0.0.0.0 dev.local app.localhost myhostname) do
+      test "#{host} is left alone" do
+        conn = call(request("GET", unquote(host), "/about", :http, 4000))
+
+        refute conn.halted, "#{unquote(host)} must not be redirected off the machine"
+      end
+    end
+  end
+
+  describe "ports" do
     test "a non-default port survives the redirect" do
-      conn = call(request("GET", "127.0.0.1", "/about", :http, 4000))
+      conn = call(request("GET", "staging.example.com", "/about", :http, 4000))
 
       assert get_resp_header(conn, "location") == ["http://#{@canonical}:4000/about"]
     end

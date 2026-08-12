@@ -189,10 +189,16 @@ defmodule GamendWeb.PageControllerTest do
     assert body =~ "Configured from pages map."
   end
 
-  test "unconfigured page path returns 404", %{conn: conn} do
+  test "unconfigured page path returns the 404 page", %{conn: conn} do
+    # This path decides for itself that the request is a 404, so it never
+    # reaches `render_errors`. It used to answer with nine bytes of plain text
+    # — "Not Found" — which reads as though the whole site is down.
     conn = get(conn, "/missing-page")
+    body = html_response(conn, 404)
 
-    assert text_response(conn, 404) == "Not Found"
+    assert body =~ "Page not found"
+    assert body =~ ~s(href="/")
+    refute body == "Not Found"
   end
 
   test "the default locale's prefix is a permanent redirect", %{conn: conn} do

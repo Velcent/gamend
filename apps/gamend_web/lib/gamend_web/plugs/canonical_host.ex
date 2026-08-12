@@ -34,6 +34,12 @@ defmodule GamendWeb.Plugs.CanonicalHost do
 
   @exempt_paths [["api", "v1", "health"], [".well-known", "acme-challenge"]]
 
+  # Local development, whatever the configured canonical host is. Setting it
+  # outside `prod` once sent `localhost:4000` to `polyglotpirates.com:4000` —
+  # a config mistake, but one this plug should refuse to act on: redirecting a
+  # developer off their own machine is never the intent.
+  @local_hosts ~w(localhost 127.0.0.1 ::1 0.0.0.0)
+
   @impl true
   def init(opts), do: opts
 
@@ -61,7 +67,18 @@ defmodule GamendWeb.Plugs.CanonicalHost do
 
   defp redirect?(%Plug.Conn{host: host} = conn, canonical) do
     is_binary(host) and host != "" and String.downcase(host) != String.downcase(canonical) and
-      conn.method in ["GET", "HEAD"] and not exempt_path?(conn.path_info)
+      not local_host?(host) and conn.method in ["GET", "HEAD"] and
+      not exempt_path?(conn.path_info)
+  end
+
+  # `.local` covers Bonjour names, and a bare label with no dot is a LAN
+  # hostname or a container's service name — a request that reached the app by
+  # one of those was never meant for the public canonical host.
+  defp local_host?(host) do
+    host = String.downcase(host)
+
+    host in @local_hosts or String.ends_with?(host, ".local") or
+      String.ends_with?(host, ".localhost") or not String.contains?(host, ".")
   end
 
   defp exempt_path?(path_info) do
