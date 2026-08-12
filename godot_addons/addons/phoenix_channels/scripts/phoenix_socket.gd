@@ -389,7 +389,7 @@ func _on_socket_data_received(packet):
 			_latency_ping_ref = EMPTY_REF
 	else:
 		for channel in _channels:
-			if channel.is_member(message.get_topic(), message.get_join_ref()):
+			if channel.is_member(message.get_topic(), message.get_join_ref(), message.get_event()):
 				channel.trigger(message)
 
 # V2 text frame: [join_ref, ref, topic, event, payload]

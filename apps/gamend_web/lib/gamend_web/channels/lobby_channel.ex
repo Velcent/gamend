@@ -39,6 +39,8 @@ defmodule GamendWeb.LobbyChannel do
   alias GamendWeb.ChannelUpdates
   alias GamendWeb.Serializers
 
+  require Logger
+
   @impl true
   def join("lobby:" <> lobby_id_str, _payload, socket) do
     current_scope = Map.get(socket.assigns, :current_scope)
@@ -105,8 +107,18 @@ defmodule GamendWeb.LobbyChannel do
     {:reply, {:ok, %{server_now: Gamend.Time.now_ms()}}, socket}
   end
 
-  def handle_in(_event, _payload, socket),
-    do: {:stop, :normal, {:error, %{error: "unknown_event"}}, socket}
+  # Answer and stay up. This used to be `{:stop, :normal, ...}`, which killed the
+  # channel over a single event the server did not recognise — and this is the
+  # channel a player's word data rides on, so the cost of one stray push was the
+  # rest of the session going quiet. A client that pushes something we do not
+  # know is a client to answer, not to hang up on.
+  def handle_in(event, _payload, socket) do
+    Logger.warning(
+      "LobbyChannel: unknown event=#{event} lobby=#{socket.assigns[:lobby_id] || "nil"}"
+    )
+
+    {:reply, {:error, %{error: "unknown_event"}}, socket}
+  end
 
   # Handle PubSub messages and forward them to WebSocket clients
 

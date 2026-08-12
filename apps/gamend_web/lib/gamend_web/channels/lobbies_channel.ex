@@ -17,6 +17,8 @@ defmodule GamendWeb.LobbiesChannel do
   alias GamendWeb.Plugs.FeatureGate
   alias GamendWeb.Serializers
 
+  require Logger
+
   @impl true
   def join("lobbies", _payload, socket) do
     # Same flag as GET /api/v1/lobbies — the feed must not outlive the API.
@@ -30,8 +32,14 @@ defmodule GamendWeb.LobbiesChannel do
   end
 
   @impl true
-  def handle_in(_event, _payload, socket),
-    do: {:stop, :normal, {:error, %{error: "unknown_event"}}, socket}
+  # Answer and stay up — see LobbyChannel: stopping the channel over one
+  # unrecognised event took every broadcast it carried with it, and a client
+  # cannot tell a dead channel from a quiet one.
+  def handle_in(event, _payload, socket) do
+    Logger.warning("LobbiesChannel: unknown event=#{event}")
+
+    {:reply, {:error, %{error: "unknown_event"}}, socket}
+  end
 
   @impl true
   def handle_info({:lobby_created, lobby}, socket) do

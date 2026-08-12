@@ -27,6 +27,9 @@ defmodule GamendWeb.Endpoint do
   # redirect can touch it; before everything else so a plain-HTTP request
   # costs one 301 and nothing more.
   plug GamendWeb.Plugs.ForceSSL
+  # After ForceSSL so a plain-HTTP request to an alias costs one redirect to
+  # https on the canonical host rather than two hops.
+  plug GamendWeb.Plugs.CanonicalHost
   plug GamendWeb.Plugs.IndexNowKey
   plug GamendWeb.Plugs.SecurityHeaders
   plug GamendWeb.Plugs.WellKnown

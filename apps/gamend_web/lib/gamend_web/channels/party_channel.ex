@@ -79,8 +79,16 @@ defmodule GamendWeb.PartyChannel do
   end
 
   @impl true
-  def handle_in(_event, _payload, socket),
-    do: {:stop, :normal, {:error, %{error: "unknown_event"}}, socket}
+  # Answer and stay up — see LobbyChannel: stopping the channel over one
+  # unrecognised event took every broadcast it carried with it, and a client
+  # cannot tell a dead channel from a quiet one.
+  def handle_in(event, _payload, socket) do
+    Logger.warning(
+      "PartyChannel: unknown event=#{event} party=#{socket.assigns[:party_id] || "nil"}"
+    )
+
+    {:reply, {:error, %{error: "unknown_event"}}, socket}
+  end
 
   # Handle PubSub messages and forward them to WebSocket clients
 

@@ -120,10 +120,13 @@ hreflang links below already go through `url_locale/1`; this had been missed.
     Brand last. Google truncates the title around 60 characters, so leading
     every page with "Polyglot Pirates — " spends the visible half of every
     result on a word the page already ranks for.
+
+    Kept on ONE line: HEEx preserves the whitespace around an expression, so a
+    `{doc_title}` on its own indented line rendered six spaces *inside* the
+    title — "…Word Games      | Polyglot Pirates" measured 61 characters
+    against that 60 limit, six of them blank.
     --%>
-    <.live_title default={site_title} suffix={" | #{site_title}"}>
-      {doc_title}
-    </.live_title>
+    <.live_title default={site_title} suffix={" | #{site_title}"}>{doc_title}</.live_title>
     <%!--
     schema.org JSON-LD. This is what search engines and AI answer engines read
     to understand what the site *is* rather than guessing from prose, and it

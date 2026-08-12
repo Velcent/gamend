@@ -121,71 +121,103 @@ func push(event : String, payload : Dictionary = {}) -> bool:
 func can_push(event : String) -> bool:
 	return _socket.can_push(event) and is_joined()
 	
-func is_member(topic, join_ref) -> bool:
+## A message stamped with a join_ref belongs to THAT join and to no other, so a
+## message for a join this channel has already replaced is dropped (phoenix.js
+## does the same). The old guard read `topic == CHANNEL_EVENTS.close` — the
+## TOPIC against the EVENT names — so it was never true and every stale message
+## was delivered anyway. A close for a dead join then reached the live channel,
+## failed the ref test in trigger(), and went out as an ordinary broadcast: that
+## is what "[gamend] Unhandled user event: phx_close" is.
+func is_member(topic, join_ref, event := "") -> bool:
 	if topic != _topic:
 		return false
-		
-	var is_lifecycle_event = (topic == CHANNEL_EVENTS.close or  topic == CHANNEL_EVENTS.error or 
-	topic == CHANNEL_EVENTS.join or topic == CHANNEL_EVENTS.reply or topic == CHANNEL_EVENTS.leave)
-	
-	if(join_ref and is_lifecycle_event and join_ref != _join_ref):
+
+	if join_ref != "" and _join_ref != "" and join_ref != _join_ref:
+		if event == CHANNEL_EVENTS.close or event == CHANNEL_EVENTS.error:
+			# Loud on purpose. Dropping this silently is what made the original
+			# bug unreadable: you want to know a channel died for a join you are
+			# no longer on, and not confuse it with the live one dying.
+			push_warning(
+				"[phoenix] Dropped %s on %s for a stale join (message join_ref=%s, current=%s)"
+				% [event, _topic, join_ref, _join_ref]
+			)
 		return false
-	
+
 	return true
-	
+
 func raw_trigger(event : String, payload := {}):
 	trigger(PhoenixMessage.new(_topic, event, PhoenixMessage.NO_REPLY_REF, _join_ref, payload))
 			
 func trigger(message : PhoenixMessage):
 	var status : String = STATUS.ok
-	if message.get_payload() is Dictionary and message.get_payload().has("status"):
-		status = message.get_payload().status
-	
-	# Event related to the channel connection/status
-	if message.get_ref() == _join_ref:
-		match message.get_event():
-			CHANNEL_EVENTS.error:
-				var reset_rejoin := is_joined()
-				_error(message.get_payload())
-				_start_rejoin(reset_rejoin)
-		
-			CHANNEL_EVENTS.close:
-				if _state == ChannelStates.LEAVING:
-					close({reason = "leave"})
-				else:
-					close({reason = "unexpected_close"}, true)
-		
-			_:
-				_state = ChannelStates.JOINED if status == STATUS.ok else ChannelStates.ERRORED
-				
-				if _state == ChannelStates.JOINED:
-					_joined_once = true
-					_rejoin_pos = -1
-				else:
-					_joined_once = false
-					_start_rejoin()
-					
-				emit_signal("on_join_result", status, message.get_response())
-	
-	# Event related to push replies, presence or broadcasts
-	else:
-		var event := message.get_event()
-		
-		if event == PRESENCE_EVENTS.diff or event == PRESENCE_EVENTS.state:
-			if _presence:
-				emit_signal("on_event", event, message.get_payload(), STATUS.ok)
-				
-		else:		
-			# Try to get event related to the reply
-			if event == CHANNEL_EVENTS.reply:
-				var pending_event = _get_pending_ref(message.get_ref())
-				if pending_event:
-					event = pending_event
-					var _success = _pending_refs.erase(message.get_ref())
+	# A protobuf push/broadcast payload is raw bytes and carries no status —
+	# only JSON payloads and the decoded _BIN_REPLY wrapper are Dictionaries.
+	var payload = message.get_payload()
+	if payload is Dictionary and payload.has("status"):
+		status = payload.status
 
-			if event != CHANNEL_EVENTS.leave:
-				emit_signal("on_event", event, message.get_response(), status)
-			
+	var event := message.get_event()
+
+	# Close and error are bound by EVENT, the way phoenix.js binds them — NOT by
+	# ref. Gating them on `ref == _join_ref` meant a close whose ref did not line
+	# up was handed on as an ordinary broadcast, and nothing here ever learned
+	# the channel was gone: the state stayed JOINED against a server process that
+	# no longer exists, no rejoin was scheduled, and the registry kept the topic,
+	# so add_channel() hands back the dead object instead of joining. On a
+	# `lobby:` channel that failure is completely silent — the next level waits
+	# out its whole start timeout for word data on a channel that will never
+	# speak again. is_member() above is what keeps a STALE close from getting
+	# this far; anything that reaches here is about the join we are on now.
+	if event == CHANNEL_EVENTS.close:
+		if _state == ChannelStates.LEAVING:
+			close({reason = "leave"})
+		else:
+			# will_reconnect says the topic is coming back, so whoever holds the
+			# channel registry has to keep it. Without it the two layers disagree
+			# about lifetime: the rejoin succeeds while the registry has already
+			# dropped the topic, and every request after that fails with
+			# "No channel found".
+			close({reason = "unexpected_close", will_reconnect = true}, true)
+		return
+
+	if event == CHANNEL_EVENTS.error:
+		var reset_rejoin := is_joined()
+		_error(message.get_payload())
+		_start_rejoin(reset_rejoin)
+		return
+
+	# Event related to the channel connection/status. The empty-ref guard keeps a
+	# broadcast that carries no ref from being read as a join reply before this
+	# channel has ever joined (_join_ref is "" until the join is pushed).
+	if _join_ref != "" and message.get_ref() == _join_ref:
+		_state = ChannelStates.JOINED if status == STATUS.ok else ChannelStates.ERRORED
+
+		if _state == ChannelStates.JOINED:
+			_joined_once = true
+			_rejoin_pos = -1
+		else:
+			_joined_once = false
+			_start_rejoin()
+
+		emit_signal("on_join_result", status, message.get_response())
+		return
+
+	# Event related to push replies, presence or broadcasts
+	if event == PRESENCE_EVENTS.diff or event == PRESENCE_EVENTS.state:
+		if _presence:
+			emit_signal("on_event", event, message.get_payload(), STATUS.ok)
+		return
+
+	# Try to get event related to the reply
+	if event == CHANNEL_EVENTS.reply:
+		var pending_event = _get_pending_ref(message.get_ref())
+		if pending_event:
+			event = pending_event
+			var _success = _pending_refs.erase(message.get_ref())
+
+	if event != CHANNEL_EVENTS.leave:
+		emit_signal("on_event", event, message.get_response(), status)
+
 #
 # Implementation
 #
