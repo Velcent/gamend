@@ -201,6 +201,71 @@ defmodule Gamend.ReadyChecksTest do
     end
   end
 
+  describe "answering after the deadline" do
+    # A board that ran out of time is still the one on everyone's screen. The
+    # clock is not a refusal, so a late answer counts — otherwise the crew
+    # stare at a board nobody can touch and nothing reopens it.
+    setup ctx do
+      {:ok, check} = ReadyChecks.open(ctx.lobby, ctx.members, opened_by: ctx.host.id)
+
+      Repo.update_all(Check, set: [deadline_at: DateTime.add(DateTime.utc_now(), -1, :second)])
+      1 = ReadyChecks.expire_due()
+
+      Map.put(ctx, :check, check)
+    end
+
+    test "a late yes is recorded on the timed-out board", ctx do
+      assert {:ok, _} = ReadyChecks.respond(ctx.alice, true)
+
+      assert state_of(ctx.check, ctx.alice.id) == "ready"
+      # Bob never answered, so the board has not come back to life.
+      assert ReadyChecks.get_check(ctx.check.id).status == "failed"
+    end
+
+    test "the last late yes passes the board", ctx do
+      {:ok, _} = ReadyChecks.respond(ctx.alice, true)
+      {:ok, check} = ReadyChecks.respond(ctx.bob, true)
+
+      assert check.status == "passed"
+      assert is_nil(check.reason)
+    end
+
+    test "a late no is taken too, and leaves the board failed", ctx do
+      assert {:ok, _} = ReadyChecks.respond(ctx.alice, false)
+
+      assert state_of(ctx.check, ctx.alice.id) == "declined"
+      assert ReadyChecks.get_check(ctx.check.id).status == "failed"
+    end
+
+    test "a fresh board supersedes it — the answer lands on the new one", ctx do
+      {:ok, new_check} = ReadyChecks.reset(ctx.lobby, ctx.members, timeout_ms: nil)
+
+      {:ok, answered} = ReadyChecks.respond(ctx.alice, true)
+
+      assert answered.id == new_check.id
+      assert state_of(ctx.check, ctx.alice.id) == "timed_out"
+    end
+
+    test "a cancelled board stays shut — that was somebody's decision", ctx do
+      {:ok, check} = ReadyChecks.open(ctx.lobby, [ctx.alice.id, ctx.bob.id])
+      {:ok, _} = ReadyChecks.cancel(check)
+
+      assert ReadyChecks.respond(ctx.alice, true) == {:error, :no_open_check}
+    end
+
+    test "an accept check that timed out does not take late answers", ctx do
+      # An accept always carries a deadline — the schema requires one — and
+      # once it burns the tickets are already back in the queue, so there is
+      # nothing left to accept.
+      {:ok, _} = ReadyChecks.open(ctx.lobby, ctx.members, kind: "accept", timeout_ms: 1)
+
+      Repo.update_all(Check, set: [deadline_at: DateTime.add(DateTime.utc_now(), -1, :second)])
+      _ = ReadyChecks.expire_due()
+
+      assert ReadyChecks.respond(ctx.alice, true) == {:error, :no_open_check}
+    end
+  end
+
   describe "membership changes" do
     test "kicking the straggler re-evaluates and can pass the check", ctx do
       {:ok, check} = ReadyChecks.open(ctx.lobby, ctx.members, opened_by: ctx.host.id)

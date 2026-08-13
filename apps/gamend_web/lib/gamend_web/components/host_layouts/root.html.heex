@@ -17,7 +17,17 @@ hreflang links below already go through `url_locale/1`; this had been missed.
       name="viewport"
       content="width=device-width, initial-scale=1"
     />
-    <meta name="csrf-token" content={get_csrf_token()} />
+    <%!--
+    Minting a CSRF token dirties the session, and a dirty session means a
+    `Set-Cookie` on the response — which makes it uncacheable by every shared
+    cache there is. A page a signed-out reader can only *read* has nothing to
+    forge against, so such a page may set `:skip_csrf_token` and be cached.
+
+    Opt-in, so the default is unchanged: anything rendering a form, a LiveView
+    or an authenticated surface leaves the assign unset and keeps its token.
+    `app.js` reads this tag defensively for the same reason.
+    --%>
+    <meta :if={!assigns[:skip_csrf_token]} name="csrf-token" content={get_csrf_token()} />
     <%!-- Tiny synchronous script to set data-theme before CSS loads (prevents FOUC) --%>
     <% theme_init_src = SRI.versioned_path(~p"/assets/js/theme-init.js") %>
     <script

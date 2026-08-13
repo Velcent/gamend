@@ -1,5 +1,9 @@
 # August 2026
 
+- [added] **Section link chips** — a presentation section may carry `"links"`, a wrapping row of
+  small link chips for directory-style sections; labels translate and hrefs localize like buttons.
+- [added] **`:skip_csrf_token` layout assign** — a publicly cacheable, signed-out page can omit the
+  CSRF meta tag so no session cookie is minted; `app.js` reads the tag defensively.
 - [fixed] **Accessible theme colors**
 - [added] **RULES.md** — design & accessibility rules.
 - [added] **Grouped** quests.

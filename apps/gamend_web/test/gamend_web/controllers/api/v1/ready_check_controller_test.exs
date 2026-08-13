@@ -261,6 +261,24 @@ defmodule GamendWeb.Api.V1.ReadyCheckControllerTest do
       assert json_response(conn, 201)["ready_count"] == 1
     end
 
+    # A party board STANDS — it is "are you coming", asked once and left up, not
+    # the countdown a lobby board is. It used to inherit the lobby default, and
+    # an expired check reports no participants: the crew's button fell to a
+    # disabled "Waiting for captain" and the leader's to a disabled "Waiting for
+    # crew", with nothing left that could reopen it. Both were stuck for good.
+    test "the board it opens has no deadline", ctx do
+      conn = post(authed(ctx.leader), "/api/v1/parties/ready_check", %{})
+
+      assert json_response(conn, 201)["deadline_at"] == nil
+      assert ReadyChecks.get_check(json_response(conn, 201)["id"]).deadline_at == nil
+    end
+
+    test "a caller that wants a fuse still gets one", ctx do
+      conn = post(authed(ctx.leader), "/api/v1/parties/ready_check", %{"timeout_ms" => 30_000})
+
+      assert json_response(conn, 201)["deadline_at"] != nil
+    end
+
     test "a non-leader member is refused", ctx do
       conn = post(authed(ctx.mate), "/api/v1/parties/ready_check", %{})
       assert json_response(conn, 403)["error"] == "not_leader"

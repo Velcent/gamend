@@ -164,8 +164,9 @@ defmodule GamendWeb.EventCodecCoverageTest do
           body
           |> String.split("\n")
           |> Enum.map(&String.trim/1)
-          |> Enum.reject(&(&1 == "" or String.starts_with?(&1, "//")))
-          |> Enum.reject(&String.starts_with?(&1, "optional "))
+          # Blank lines, comments and explicitly-optional fields alike: none of
+          # them is a field that carries implicit presence.
+          |> Enum.reject(&(&1 == "" or String.starts_with?(&1, ["//", "optional "])))
           |> Enum.map(fn line ->
             [_, name] = Regex.run(~r/(\w+)\s*=\s*\d+;/, line)
             name

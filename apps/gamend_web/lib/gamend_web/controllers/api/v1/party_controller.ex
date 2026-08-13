@@ -574,19 +574,7 @@ defmodule GamendWeb.Api.V1.PartyController do
   def disband(conn, _params) do
     case Scope.user(conn.assigns[:current_scope]) do
       %User{party_id: party_id} = user when is_binary(party_id) ->
-        case Parties.get_party(party_id) do
-          %{leader_id: leader_id} = party when leader_id == user.id ->
-            case Parties.disband(party) do
-              {:ok, _} -> json(conn, %{})
-              _ -> conn |> put_status(:unprocessable_entity) |> json(%{error: "unexpected_error"})
-            end
-
-          %{} ->
-            conn |> put_status(:forbidden) |> json(%{error: "not_party_leader"})
-
-          _ ->
-            conn |> put_status(:bad_request) |> json(%{error: "not_in_party"})
-        end
+        do_disband(conn, user, Parties.get_party(party_id))
 
       %User{} ->
         conn |> put_status(:bad_request) |> json(%{error: "not_in_party"})
@@ -595,6 +583,23 @@ defmodule GamendWeb.Api.V1.PartyController do
         conn |> put_status(:unauthorized) |> json(%{error: "Not authenticated"})
     end
   end
+
+  # `can_manage_party?/2` is the leader test. Comparing leader_id here would be
+  # a copy of it that stops following the context the day leadership means
+  # anything more than one id.
+  defp do_disband(conn, user, %{} = party) do
+    if Parties.can_manage_party?(user, party) do
+      case Parties.disband(party) do
+        {:ok, _} -> json(conn, %{})
+        _ -> conn |> put_status(:unprocessable_entity) |> json(%{error: "unexpected_error"})
+      end
+    else
+      conn |> put_status(:forbidden) |> json(%{error: "not_party_leader"})
+    end
+  end
+
+  defp do_disband(conn, _user, _party),
+    do: conn |> put_status(:bad_request) |> json(%{error: "not_in_party"})
 
   def invite(conn, %{"target_user_id" => target_user_id}) do
     case Scope.user(conn.assigns[:current_scope]) do

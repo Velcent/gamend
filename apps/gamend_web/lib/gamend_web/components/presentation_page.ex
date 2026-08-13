@@ -353,6 +353,56 @@ defmodule GamendWeb.PresentationPage do
     """
   end
 
+  attr :links, :list, default: []
+  attr :align, :string, default: "start"
+
+  @doc """
+  A section's `"links"`: a wrapping row of small link chips.
+
+  Buttons are calls to action and stay few; this is for a section whose point
+  is the *list* — a directory of a dozen destinations, like the home page's
+  language index. `label` and `href` per entry, nothing else: no icons, no
+  styles, so a long row stays a quiet block of navigation rather than twenty
+  competing buttons. Hrefs are theme config like button hrefs, and are locale-
+  prefixed by the same `localize_hrefs` pass in the page controller.
+  """
+  def link_chips(assigns) do
+    links = if is_list(assigns.links), do: assigns.links, else: []
+
+    assigns =
+      assign(assigns,
+        links: Enum.filter(links, &(non_empty_string(&1["label"]) && non_empty_string(&1["href"])))
+      )
+
+    ~H"""
+    <ul
+      :if={@links != []}
+      class={[
+        "flex flex-wrap gap-2",
+        if(@align == "center", do: "justify-center")
+      ]}
+    >
+      <li :for={link <- @links}>
+        <a
+          href={link["href"]}
+          class="block rounded-lg border border-base-300 px-3 py-1.5 text-sm font-bold transition hover:border-primary/40 hover:bg-base-200"
+        >
+          {link["label"]}
+        </a>
+      </li>
+    </ul>
+    """
+  end
+
+  defp has_links?(item) when is_map(item) do
+    case Map.get(item, "links") do
+      links when is_list(links) -> links != []
+      _ -> false
+    end
+  end
+
+  defp has_links?(_item), do: false
+
   attr :item, :map, required: true
   attr :variant, :string, default: "section"
 
@@ -579,6 +629,7 @@ defmodule GamendWeb.PresentationPage do
         <div class="max-w-3xl text-base leading-relaxed text-base-content/75">
           {rich_text(Map.get(@section, "text", ""))}
         </div>
+        <.link_chips :if={has_links?(@section)} links={Map.get(@section, "links")} align="center" />
         <div :if={has_buttons?(@section)} class="pt-1">
           <.buttons buttons={Map.get(@section, "buttons", [])} />
         </div>
@@ -610,6 +661,7 @@ defmodule GamendWeb.PresentationPage do
         <div class="text-base leading-relaxed text-base-content/75">
           {rich_text(Map.get(@section, "text", ""))}
         </div>
+        <.link_chips :if={has_links?(@section)} links={Map.get(@section, "links")} />
         <div :if={has_buttons?(@section)} class="pt-1 md:pt-2">
           <.buttons buttons={Map.get(@section, "buttons", [])} />
         </div>

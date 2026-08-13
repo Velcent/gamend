@@ -6,7 +6,10 @@
 // message here mirrors the corresponding JSON payload produced by
 // `GamendWeb.Serializers` with two deliberate transforms:
 //
-//   * timestamps are `int64` unix milliseconds (JSON sends ISO 8601 strings)
+//   * timestamps are `int64` unix milliseconds, named `<field>_at_ms` after
+//     the `<field>_at` the JSON sends as an ISO 8601 string — strip `_ms`
+//     and you have the REST name. The one field in another unit says so
+//     in its name (`ChatMute.expires_at_seconds`)
 //   * arbitrary JSON values (metadata, KV data, hook args) are `bytes`
 //     containing UTF-8 JSON (empty bytes means "{}" / absent)
 //   * entity metadata may instead arrive in `metadata_pb`: binary protobuf
@@ -243,11 +246,14 @@ message InventoryChange {
 
 // ── Moderation ───────────────────────────────────────────────────────────
 
-// "chat_muted". `expires_at` is a Unix second; 0 means no expiry.
+// "chat_muted". Named for its unit: this one is Unix *seconds*, not the
+// milliseconds every other timestamp here carries, and the bare `expires_at`
+// it used to be was indistinguishable from the ISO-8601 string the REST API
+// sends under that name. 0 means no expiry.
 message ChatMute {
   string scope = 1;
   string scope_ref_id = 2;
-  int64 expires_at = 3;
+  int64 expires_at_seconds = 3;
   string reason = 4;
 }
 
@@ -275,7 +281,7 @@ message TournamentMatchEvent {
   string match_id = 3;
   int32 round = 4;
   // Unix ms; 0 when the match has no deadline.
-  int64 deadline_ms = 5;
+  int64 deadline_at_ms = 5;
   // Set only on "tournament_match_resolved".
   string winner_entry_id = 6;
 }
@@ -317,7 +323,7 @@ message ReadyCheckState {
   string status = 3;
   string lobby_id = 4;
   // Unix ms; 0 when the check has no deadline.
-  int64 deadline_ms = 5;
+  int64 deadline_at_ms = 5;
   int32 total = 6;
   int32 ready_count = 7;
   string your_state = 8;

@@ -233,17 +233,25 @@ defmodule GamendWeb.Api.V1.ReadyCheckController do
     with_party(conn, fn user, party ->
       if Parties.can_manage_party?(user, party) do
         member_ids = party.id |> Parties.get_party_members() |> Enum.map(& &1.id)
-        do_reset(conn, user, party, member_ids, params)
+        # A party board STANDS: it is the crew's answer to "are you coming",
+        # asked once and left up, not a countdown gating a match start the way a
+        # lobby board is. Without this it inherited the lobby default (20s), and
+        # a crew member who looked away lost the board out from under both of
+        # them — an expired check reports no participants, so the crew's button
+        # went to a disabled "Waiting for the captain" and the leader's to a
+        # disabled "Waiting for crew", with nothing left to reopen it. A caller
+        # that genuinely wants a fuse still gets one by sending timeout_ms.
+        do_reset(conn, user, party, member_ids, params, nil)
       else
         conn |> put_status(:forbidden) |> json(%{error: "not_leader"})
       end
     end)
   end
 
-  defp do_reset(conn, user, subject, member_ids, params) do
+  defp do_reset(conn, user, subject, member_ids, params, default_timeout_ms \\ :subject_default) do
     opts =
       [opened_by: user.id, metadata: Map.get(params, "metadata", %{})]
-      |> maybe_timeout(Map.get(params, "timeout_ms"))
+      |> maybe_timeout(Map.get(params, "timeout_ms"), default_timeout_ms)
 
     case ReadyChecks.reset(subject, member_ids, opts) do
       {:ok, check} ->
@@ -331,10 +339,16 @@ defmodule GamendWeb.Api.V1.ReadyCheckController do
 
   defp serialize(check, user), do: Serializers.serialize_ready_check(check, viewer_id: user.id)
 
-  defp maybe_timeout(opts, ms) when is_integer(ms) and ms > 0,
+  # What the caller asked for always wins. Otherwise the subject decides:
+  # `:subject_default` leaves the option off entirely, so ReadyChecks applies
+  # its own `ready_check_timeout_ms`; an explicit `nil` opens a board with no
+  # deadline at all (see open_party).
+  defp maybe_timeout(opts, ms, _default) when is_integer(ms) and ms > 0,
     do: Keyword.put(opts, :timeout_ms, ms)
 
-  defp maybe_timeout(opts, _ms), do: opts
+  defp maybe_timeout(opts, _ms, :subject_default), do: opts
+
+  defp maybe_timeout(opts, _ms, default), do: Keyword.put(opts, :timeout_ms, default)
 
   defp with_user(conn, fun) do
     case Scope.user(conn.assigns[:current_scope]) do

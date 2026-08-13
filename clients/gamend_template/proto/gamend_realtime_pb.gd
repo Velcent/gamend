@@ -3380,10 +3380,10 @@ class ChatMute:
 		service.field = __scope_ref_id
 		data[__scope_ref_id.tag] = service
 		
-		__expires_at = PBField.new("expires_at", PB_DATA_TYPE.INT64, PB_RULE.OPTIONAL, 3, true, DEFAULT_VALUES_3[PB_DATA_TYPE.INT64])
+		__expires_at_seconds = PBField.new("expires_at_seconds", PB_DATA_TYPE.INT64, PB_RULE.OPTIONAL, 3, true, DEFAULT_VALUES_3[PB_DATA_TYPE.INT64])
 		service = PBServiceField.new()
-		service.field = __expires_at
-		data[__expires_at.tag] = service
+		service.field = __expires_at_seconds
+		data[__expires_at_seconds.tag] = service
 		
 		__reason = PBField.new("reason", PB_DATA_TYPE.STRING, PB_RULE.OPTIONAL, 4, true, DEFAULT_VALUES_3[PB_DATA_TYPE.STRING])
 		service = PBServiceField.new()
@@ -3414,16 +3414,16 @@ class ChatMute:
 	func set_scope_ref_id(value : String) -> void:
 		__scope_ref_id.value = value
 	
-	var __expires_at: PBField
-	func has_expires_at() -> bool:
+	var __expires_at_seconds: PBField
+	func has_expires_at_seconds() -> bool:
 		return data[3].state == PB_SERVICE_STATE.FILLED
-	func get_expires_at() -> int:
-		return __expires_at.value
-	func clear_expires_at() -> void:
+	func get_expires_at_seconds() -> int:
+		return __expires_at_seconds.value
+	func clear_expires_at_seconds() -> void:
 		data[3].state = PB_SERVICE_STATE.UNFILLED
-		__expires_at.value = DEFAULT_VALUES_3[PB_DATA_TYPE.INT64]
-	func set_expires_at(value : int) -> void:
-		__expires_at.value = value
+		__expires_at_seconds.value = DEFAULT_VALUES_3[PB_DATA_TYPE.INT64]
+	func set_expires_at_seconds(value : int) -> void:
+		__expires_at_seconds.value = value
 	
 	var __reason: PBField
 	func has_reason() -> bool:
@@ -3618,10 +3618,10 @@ class TournamentMatchEvent:
 		service.field = __round
 		data[__round.tag] = service
 		
-		__deadline_ms = PBField.new("deadline_ms", PB_DATA_TYPE.INT64, PB_RULE.OPTIONAL, 5, true, DEFAULT_VALUES_3[PB_DATA_TYPE.INT64])
+		__deadline_at_ms = PBField.new("deadline_at_ms", PB_DATA_TYPE.INT64, PB_RULE.OPTIONAL, 5, true, DEFAULT_VALUES_3[PB_DATA_TYPE.INT64])
 		service = PBServiceField.new()
-		service.field = __deadline_ms
-		data[__deadline_ms.tag] = service
+		service.field = __deadline_at_ms
+		data[__deadline_at_ms.tag] = service
 		
 		__winner_entry_id = PBField.new("winner_entry_id", PB_DATA_TYPE.STRING, PB_RULE.OPTIONAL, 6, true, DEFAULT_VALUES_3[PB_DATA_TYPE.STRING])
 		service = PBServiceField.new()
@@ -3674,16 +3674,16 @@ class TournamentMatchEvent:
 	func set_round(value : int) -> void:
 		__round.value = value
 	
-	var __deadline_ms: PBField
-	func has_deadline_ms() -> bool:
+	var __deadline_at_ms: PBField
+	func has_deadline_at_ms() -> bool:
 		return data[5].state == PB_SERVICE_STATE.FILLED
-	func get_deadline_ms() -> int:
-		return __deadline_ms.value
-	func clear_deadline_ms() -> void:
+	func get_deadline_at_ms() -> int:
+		return __deadline_at_ms.value
+	func clear_deadline_at_ms() -> void:
 		data[5].state = PB_SERVICE_STATE.UNFILLED
-		__deadline_ms.value = DEFAULT_VALUES_3[PB_DATA_TYPE.INT64]
-	func set_deadline_ms(value : int) -> void:
-		__deadline_ms.value = value
+		__deadline_at_ms.value = DEFAULT_VALUES_3[PB_DATA_TYPE.INT64]
+	func set_deadline_at_ms(value : int) -> void:
+		__deadline_at_ms.value = value
 	
 	var __winner_entry_id: PBField
 	func has_winner_entry_id() -> bool:
@@ -3957,10 +3957,10 @@ class ReadyCheckState:
 		service.field = __lobby_id
 		data[__lobby_id.tag] = service
 		
-		__deadline_ms = PBField.new("deadline_ms", PB_DATA_TYPE.INT64, PB_RULE.OPTIONAL, 5, true, DEFAULT_VALUES_3[PB_DATA_TYPE.INT64])
+		__deadline_at_ms = PBField.new("deadline_at_ms", PB_DATA_TYPE.INT64, PB_RULE.OPTIONAL, 5, true, DEFAULT_VALUES_3[PB_DATA_TYPE.INT64])
 		service = PBServiceField.new()
-		service.field = __deadline_ms
-		data[__deadline_ms.tag] = service
+		service.field = __deadline_at_ms
+		data[__deadline_at_ms.tag] = service
 		
 		__total = PBField.new("total", PB_DATA_TYPE.INT32, PB_RULE.OPTIONAL, 6, true, DEFAULT_VALUES_3[PB_DATA_TYPE.INT32])
 		service = PBServiceField.new()
@@ -4040,16 +4040,16 @@ class ReadyCheckState:
 	func set_lobby_id(value : String) -> void:
 		__lobby_id.value = value
 	
-	var __deadline_ms: PBField
-	func has_deadline_ms() -> bool:
+	var __deadline_at_ms: PBField
+	func has_deadline_at_ms() -> bool:
 		return data[5].state == PB_SERVICE_STATE.FILLED
-	func get_deadline_ms() -> int:
-		return __deadline_ms.value
-	func clear_deadline_ms() -> void:
+	func get_deadline_at_ms() -> int:
+		return __deadline_at_ms.value
+	func clear_deadline_at_ms() -> void:
 		data[5].state = PB_SERVICE_STATE.UNFILLED
-		__deadline_ms.value = DEFAULT_VALUES_3[PB_DATA_TYPE.INT64]
-	func set_deadline_ms(value : int) -> void:
-		__deadline_ms.value = value
+		__deadline_at_ms.value = DEFAULT_VALUES_3[PB_DATA_TYPE.INT64]
+	func set_deadline_at_ms(value : int) -> void:
+		__deadline_at_ms.value = value
 	
 	var __total: PBField
 	func has_total() -> bool:

@@ -983,24 +983,7 @@ defmodule GamendWeb.Api.V1.LobbyController do
   def disband(conn, _params) do
     case Scope.user(conn.assigns[:current_scope]) do
       %User{lobby_id: lobby_id} = user when is_binary(lobby_id) ->
-        case Lobbies.get_lobby(lobby_id) do
-          # A hostless lobby is server-managed: nobody is its owner, so nobody
-          # can end it from the API.
-          %{hostless: true} ->
-            conn |> put_status(:forbidden) |> json(%{error: "not_host"})
-
-          %{host_id: host_id} = lobby when host_id == user.id ->
-            case Lobbies.delete_lobby(lobby) do
-              {:ok, _} -> json(conn, %{})
-              _ -> conn |> put_status(:unprocessable_entity) |> json(%{error: "unexpected_error"})
-            end
-
-          %{} ->
-            conn |> put_status(:forbidden) |> json(%{error: "not_host"})
-
-          _ ->
-            conn |> put_status(:bad_request) |> json(%{error: "not_in_lobby"})
-        end
+        do_disband(conn, user, Lobbies.get_lobby(lobby_id))
 
       %User{} ->
         conn |> put_status(:bad_request) |> json(%{error: "not_in_lobby"})
@@ -1009,6 +992,28 @@ defmodule GamendWeb.Api.V1.LobbyController do
         conn |> put_status(:unauthorized) |> json(%{error: "Not authenticated"})
     end
   end
+
+  # A hostless lobby is server-managed: nobody is its owner, so nobody can end
+  # it from the API.
+  defp do_disband(conn, _user, %{hostless: true}),
+    do: conn |> put_status(:forbidden) |> json(%{error: "not_host"})
+
+  # Who may end a lobby is the context's rule — the same one `kick` and
+  # `update` go through. Comparing host_id here was a second copy of it living
+  # in the controller.
+  defp do_disband(conn, user, %{} = lobby) do
+    if Lobbies.can_manage_lobby?(user, lobby) do
+      case Lobbies.delete_lobby(lobby) do
+        {:ok, _} -> json(conn, %{})
+        _ -> conn |> put_status(:unprocessable_entity) |> json(%{error: "unexpected_error"})
+      end
+    else
+      conn |> put_status(:forbidden) |> json(%{error: "not_host"})
+    end
+  end
+
+  defp do_disband(conn, _user, _lobby),
+    do: conn |> put_status(:bad_request) |> json(%{error: "not_in_lobby"})
 
   def leave(conn, _params) do
     case Scope.user(conn.assigns[:current_scope]) do

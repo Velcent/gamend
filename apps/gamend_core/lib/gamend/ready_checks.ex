@@ -266,6 +266,12 @@ defmodule Gamend.ReadyChecks do
   check a decline fails the whole check; in a `ready` check it just leaves the
   check pending and can be taken back.
 
+  A `ready` board that ran out of time is still answerable: the deadline
+  passing is the weakest kind of no — nobody refused, the clock did — and the
+  board is still the one on everyone's screen. A late yes lands like any other
+  and passes the board if it was the last one missing. (An `accept` check is
+  not: its timeout has already released the tickets and re-queued everyone.)
+
   Returns the check as it stands after the answer. Fails with
   `{:error, :no_open_check}` and, for an `accept` check the caller already
   answered, `{:error, :not_revocable}`.
@@ -275,9 +281,32 @@ defmodule Gamend.ReadyChecks do
   def respond(user, ready?, scope \\ :match) when is_boolean(ready?) do
     user_id = user_id(user)
 
-    case for_user(user_id, scope) do
+    case answerable_for_user(user_id, scope) do
       nil -> {:error, :no_open_check}
       check -> write_answer(check, user_id, ready?)
+    end
+  end
+
+  # The newest check in the lane, whatever became of it, and then only if it
+  # can still take an answer. Newest-of-all rather than newest-answerable, so
+  # anything that supersedes a timed-out board buries it: a reset opens a live
+  # one to answer instead, and a cancel means there is nothing to answer at
+  # all — neither should hand the reader back a board from before it.
+  defp answerable_for_user(user_id, scope) do
+    from(c in Check,
+      join: p in Participant,
+      on: p.ready_check_id == c.id,
+      where: p.user_id == ^user_id,
+      order_by: [desc: c.inserted_at, desc: c.id],
+      limit: 1,
+      preload: [:participants]
+    )
+    |> scope_filter(scope)
+    |> Repo.one()
+    |> case do
+      %Check{status: "pending"} = check -> check
+      %Check{kind: "ready", status: "failed", reason: "timeout"} = check -> check
+      _ -> nil
     end
   end
 
@@ -296,7 +325,7 @@ defmodule Gamend.ReadyChecks do
   defp write_answer(check, user_id, ready?) do
     result =
       Gamend.Lock.serialize(:ready_check, check.id, fn ->
-        with {:ok, check} <- reload_pending(check),
+        with {:ok, check} <- reload_answerable(check),
              {:ok, participant} <- fetch_participant(check, user_id),
              :ok <- ensure_revocable(check, participant),
              {:ok, _participant} <- put_state(participant, answer_state(ready?)) do
@@ -318,6 +347,18 @@ defmodule Gamend.ReadyChecks do
   defp reload_pending(%Check{id: id}) do
     case Repo.get_uuid(Check, id) do
       %Check{status: "pending"} = check -> {:ok, check}
+      %Check{} -> {:error, :already_resolved}
+      nil -> {:error, :no_open_check}
+    end
+  end
+
+  # As `reload_pending/1`, plus the one resolved state an answer still means
+  # something in: a `ready` board that timed out. Cancelled boards stay shut —
+  # someone called those off on purpose — and so do `accept` checks.
+  defp reload_answerable(%Check{id: id}) do
+    case Repo.get_uuid(Check, id) do
+      %Check{status: "pending"} = check -> {:ok, check}
+      %Check{kind: "ready", status: "failed", reason: "timeout"} = check -> {:ok, check}
       %Check{} -> {:error, :already_resolved}
       nil -> {:error, :no_open_check}
     end

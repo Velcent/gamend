@@ -363,7 +363,7 @@ defmodule Gamend.Realtime.V1.ChatMute do
 
   field :scope, 1, type: :string
   field :scope_ref_id, 2, type: :string, json_name: "scopeRefId"
-  field :expires_at, 3, type: :int64, json_name: "expiresAt"
+  field :expires_at_seconds, 3, type: :int64, json_name: "expiresAtSeconds"
   field :reason, 4, type: :string
 end
 
@@ -404,7 +404,7 @@ defmodule Gamend.Realtime.V1.TournamentMatchEvent do
   field :slug, 2, type: :string
   field :match_id, 3, type: :string, json_name: "matchId"
   field :round, 4, type: :int32
-  field :deadline_ms, 5, type: :int64, json_name: "deadlineMs"
+  field :deadline_at_ms, 5, type: :int64, json_name: "deadlineAtMs"
   field :winner_entry_id, 6, type: :string, json_name: "winnerEntryId"
 end
 
@@ -463,7 +463,7 @@ defmodule Gamend.Realtime.V1.ReadyCheckState do
   field :kind, 2, type: :string
   field :status, 3, type: :string
   field :lobby_id, 4, type: :string, json_name: "lobbyId"
-  field :deadline_ms, 5, type: :int64, json_name: "deadlineMs"
+  field :deadline_at_ms, 5, type: :int64, json_name: "deadlineAtMs"
   field :total, 6, type: :int32
   field :ready_count, 7, type: :int32, json_name: "readyCount"
   field :your_state, 8, type: :string, json_name: "yourState"

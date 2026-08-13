@@ -458,7 +458,12 @@ async function loadExtraHooks() {
 }
 
 function createLiveSocket(extraHooks) {
-  const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
+  // Optional: a publicly cacheable, signed-out page omits the token on purpose
+  // (see the comment on the tag in root.html.heex). Such a page carries no
+  // LiveView, so `connect()` never joins and the token is never needed — but a
+  // hard `.getAttribute` on null threw here, which killed this whole module and
+  // took every colocated hook on the page down with it.
+  const csrfToken = document.querySelector("meta[name='csrf-token']")?.getAttribute("content")
 
   return new LiveSocket("/live", Socket, {
     longPollFallbackMs: 2500,

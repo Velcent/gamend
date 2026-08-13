@@ -266,6 +266,7 @@ defmodule GamendWeb.HostLayouts do
     |> translate_list_field_at_path(["sections"], "title")
     |> translate_list_field_at_path(["sections"], "text")
     |> translate_list_field_at_path(["sections", "buttons"], "label")
+    |> translate_list_field_at_path(["sections", "links"], "label")
     |> update_list_at_path(["sections"], fn section ->
       update_map_at_path(section, ["image"], &translate_map_field(&1, "alt"))
     end)

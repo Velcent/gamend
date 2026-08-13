@@ -106,7 +106,7 @@ static func decode_event(topic: String, event: String, data: PackedByteArray) ->
 		"chat_muted":
 			return _decode(PB.ChatMute.new(), data, func(m): return {
 				"scope": m.get_scope(), "scope_ref_id": m.get_scope_ref_id(),
-				"expires_at": m.get_expires_at(), "reason": m.get_reason()
+				"expires_at_seconds": m.get_expires_at_seconds(), "reason": m.get_reason()
 			})
 		"chat_unmuted":
 			return _decode(PB.ChatUnmute.new(), data, func(m): return {
@@ -134,7 +134,7 @@ static func decode_event(topic: String, event: String, data: PackedByteArray) ->
 						"slug": m.get_slug(),
 						"match_id": m.get_match_id(),
 						"round": m.get_round(),
-						"deadline_ms": m.get_deadline_ms(),
+						"deadline_at_ms": m.get_deadline_at_ms(),
 						"winner_entry_id": m.get_winner_entry_id(),
 					})
 				"match_found":
@@ -390,7 +390,7 @@ static func _ready_check(data: PackedByteArray) -> Variant:
 			"status": m.get_status(),
 			"lobby_id": m.get_lobby_id(),
 			"party_id": m.get_party_id(),
-			"deadline_ms": m.get_deadline_ms(),
+			"deadline_at_ms": m.get_deadline_at_ms(),
 			"total": m.get_total(),
 			"ready_count": m.get_ready_count(),
 			"your_state": m.get_your_state(),

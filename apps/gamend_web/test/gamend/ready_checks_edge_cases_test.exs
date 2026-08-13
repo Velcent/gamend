@@ -58,7 +58,7 @@ defmodule Gamend.ReadyChecksEdgeCasesTest do
       assert state_of(check.id, ctx.alice.id) == "ready"
     end
 
-    test "readying after a timeout does not resurrect or double-resolve it", ctx do
+    test "readying after a timeout completes the board, and resolves it once", ctx do
       {:ok, check} = ReadyChecks.open(ctx.lobby, ctx.members, opened_by: ctx.host.id)
       {:ok, _} = ReadyChecks.respond(ctx.alice, true)
 
@@ -67,14 +67,20 @@ defmodule Gamend.ReadyChecksEdgeCasesTest do
       assert failed.status == "failed"
       assert failed.reason == "timeout"
 
-      # Bob answers a beat too late: the check stays failed, and crucially it
-      # does not flip to "passed" just because everyone is now ready.
-      assert {:error, :no_open_check} = ReadyChecks.respond(ctx.bob, true)
+      # Bob answers a beat too late. The clock is not a refusal, so the answer
+      # counts — and it was the last one missing, so the board passes.
+      assert {:ok, passed} = ReadyChecks.respond(ctx.bob, true)
+      assert passed.status == "passed"
 
       after_late = ReadyChecks.get_check(check.id)
-      assert after_late.status == "failed"
-      assert after_late.reason == "timeout"
-      assert state_of(check.id, ctx.bob.id) == "timed_out"
+      assert after_late.status == "passed"
+      assert is_nil(after_late.reason)
+      assert state_of(check.id, ctx.bob.id) == "ready"
+
+      # Resolved once and now settled: answering again has nowhere to go, so
+      # the pass cannot fire twice.
+      assert {:error, :no_open_check} = ReadyChecks.respond(ctx.bob, false)
+      assert ReadyChecks.get_check(check.id).status == "passed"
     end
 
     test "answer_for/3 on a resolved check is refused", ctx do
