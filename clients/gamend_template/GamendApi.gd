@@ -1051,6 +1051,14 @@ func lobbies_leave_lobby() -> GamendResult:
 func lobbies_disband_lobby() -> GamendResult:
 	return await _call_api(LobbiesApi.new(_config), "disband_lobby")
 
+## Move the lobby to another lifecycle state (created / starting / playing /
+## ended, plus whatever the game's own before_lobby_state_change hook allows).
+## Host of a host-managed lobby, or the lobby's pinned WebRTC host; a hostless
+## matchmaking lobby with no pinned host belongs to the server, so nobody may
+## move it. Targets the caller's own lobby unless the request names another.
+func lobbies_set_lobby_state(state_request: SetLobbyStateRequest) -> GamendResult:
+	return await _call_api(LobbiesApi.new(_config), "set_lobby_state", [state_request])
+
 ## Quick-join or create a lobby
 func lobbies_quick_join(quick_request: QuickJoinRequest) -> GamendResult:
 	return await _call_api(LobbiesApi.new(_config), "quick_join", [quick_request])
@@ -1800,3 +1808,601 @@ static func parse_last_seen(last_seen_str: String) -> float:
 	if dt.is_empty():
 		return 0.0
 	return float(Time.get_unix_time_from_datetime_dict(dt))
+
+
+# ─────────────────────────────────────────────────────────────────────────
+# Everything else the generated APIs expose.
+#
+# The facade is what callers autocomplete against, so an endpoint missing a
+# wrapper here reads as an endpoint that does not exist — which is exactly
+# how `set_lobby_state` went unnoticed. Wrapper names are mechanical: the
+# class's own prefix plus the generated method name, so any operation in the
+# spec can be guessed rather than looked up. Classes whose methods already
+# carry their domain (matchmaking_*, payments_*, signaling_*) take no prefix.
+# ─────────────────────────────────────────────────────────────────────────
+
+
+### ADMIN CHAT
+## Add a blocklist word (admin)
+## Operation adminCreateChatFilterWord → POST /api/v1/admin/chat/filter_words
+func admin_chat_admin_create_chat_filter_word(adminCreateChatFilterWordRequest = null) -> GamendResult:
+	return await _call_api(AdminChatApi.new(_config), "admin_create_chat_filter_word", [adminCreateChatFilterWordRequest])
+
+
+## Mute a player (admin)
+## Operation adminCreateChatMute → POST /api/v1/admin/chat/mutes
+func admin_chat_admin_create_chat_mute(adminCreateChatMuteRequest = null) -> GamendResult:
+	return await _call_api(AdminChatApi.new(_config), "admin_create_chat_mute", [adminCreateChatMuteRequest])
+
+
+## Remove a blocklist word (admin)
+## Operation adminDeleteChatFilterWord → DELETE /api/v1/admin/chat/filter_words/{id}
+func admin_chat_admin_delete_chat_filter_word(id: String) -> GamendResult:
+	return await _call_api(AdminChatApi.new(_config), "admin_delete_chat_filter_word", [id])
+
+
+## Remove an imported word list (admin)
+## Operation adminDeleteChatFilterWordsByLang → DELETE /api/v1/admin/chat/filter_words
+func admin_chat_admin_delete_chat_filter_words_by_lang(lang: String) -> GamendResult:
+	return await _call_api(AdminChatApi.new(_config), "admin_delete_chat_filter_words_by_lang", [lang])
+
+
+## Lift a mute (admin)
+## Operation adminDeleteChatMute → DELETE /api/v1/admin/chat/mutes/{id}
+func admin_chat_admin_delete_chat_mute(id: String) -> GamendResult:
+	return await _call_api(AdminChatApi.new(_config), "admin_delete_chat_mute", [id])
+
+
+## Delete a chat report (admin)
+## Operation adminDeleteChatReport → DELETE /api/v1/admin/chat/reports/{id}
+func admin_chat_admin_delete_chat_report(id: String) -> GamendResult:
+	return await _call_api(AdminChatApi.new(_config), "admin_delete_chat_report", [id])
+
+
+## Import a bundled word list (admin)
+## Operation adminImportChatFilterWords → POST /api/v1/admin/chat/filter_words/import
+func admin_chat_admin_import_chat_filter_words(adminImportChatFilterWordsRequest = null) -> GamendResult:
+	return await _call_api(AdminChatApi.new(_config), "admin_import_chat_filter_words", [adminImportChatFilterWordsRequest])
+
+
+## List blocklist words (admin)
+## Operation adminListChatFilterWords → GET /api/v1/admin/chat/filter_words
+func admin_chat_admin_list_chat_filter_words(word = "", severity = "", lang = "", page = 1, pageSize = 25) -> GamendResult:
+	return await _call_api(AdminChatApi.new(_config), "admin_list_chat_filter_words", [word, severity, lang, page, pageSize])
+
+
+## List chat mutes (admin)
+## Operation adminListChatMutes → GET /api/v1/admin/chat/mutes
+func admin_chat_admin_list_chat_mutes(userId = null, scope = "", scopeRefId = null, active = null, page = 1, pageSize = 25) -> GamendResult:
+	return await _call_api(AdminChatApi.new(_config), "admin_list_chat_mutes", [userId, scope, scopeRefId, active, page, pageSize])
+
+
+## List chat reports (admin)
+## Operation adminListChatReports → GET /api/v1/admin/chat/reports
+func admin_chat_admin_list_chat_reports(status = "", reportedUserId = null, reporterId = null, page = 1, pageSize = 25) -> GamendResult:
+	return await _call_api(AdminChatApi.new(_config), "admin_list_chat_reports", [status, reportedUserId, reporterId, page, pageSize])
+
+
+## Resolve a chat report (admin)
+## Operation adminResolveChatReport → POST /api/v1/admin/chat/reports/{id}/resolve
+func admin_chat_admin_resolve_chat_report(id: String, adminResolveChatReportRequest = null) -> GamendResult:
+	return await _call_api(AdminChatApi.new(_config), "admin_resolve_chat_report", [id, adminResolveChatReportRequest])
+
+
+## Test a phrase against the filter (admin)
+## Operation adminTestChatPhrase → POST /api/v1/admin/chat/filter_words/test
+func admin_chat_admin_test_chat_phrase(adminTestChatPhraseRequest = null) -> GamendResult:
+	return await _call_api(AdminChatApi.new(_config), "admin_test_chat_phrase", [adminTestChatPhraseRequest])
+
+
+## Update a blocklist word (admin)
+## Operation adminUpdateChatFilterWord → PATCH /api/v1/admin/chat/filter_words/{id}
+func admin_chat_admin_update_chat_filter_word(id: String, adminUpdateChatFilterWordRequest = null) -> GamendResult:
+	return await _call_api(AdminChatApi.new(_config), "admin_update_chat_filter_word", [id, adminUpdateChatFilterWordRequest])
+
+
+### ADMIN ECONOMY
+## Consume items from a user (admin)
+## Operation adminConsumeItem → POST /api/v1/admin/economy/consume_item
+func admin_economy_admin_consume_item() -> GamendResult:
+	return await _call_api(AdminEconomyApi.new(_config), "admin_consume_item")
+
+
+## Grant currency to a user (admin)
+## Operation adminGrantCurrency → POST /api/v1/admin/economy/grant
+func admin_economy_admin_grant_currency(adminSpendCurrencyRequest = null) -> GamendResult:
+	return await _call_api(AdminEconomyApi.new(_config), "admin_grant_currency", [adminSpendCurrencyRequest])
+
+
+## Grant items to a user (admin)
+## Operation adminGrantItem → POST /api/v1/admin/economy/grant_item
+func admin_economy_admin_grant_item(adminGrantItemRequest = null) -> GamendResult:
+	return await _call_api(AdminEconomyApi.new(_config), "admin_grant_item", [adminGrantItemRequest])
+
+
+## List inventory item stacks (admin)
+## Operation adminListInventory → GET /api/v1/admin/economy/items
+func admin_economy_admin_list_inventory(userId = null, item = "", page = 1, pageSize = 25) -> GamendResult:
+	return await _call_api(AdminEconomyApi.new(_config), "admin_list_inventory", [userId, item, page, pageSize])
+
+
+## List ledger entries (admin)
+## Operation adminListLedger → GET /api/v1/admin/economy/ledger
+func admin_economy_admin_list_ledger(userId = null, currency = "", page = 1, pageSize = 25) -> GamendResult:
+	return await _call_api(AdminEconomyApi.new(_config), "admin_list_ledger", [userId, currency, page, pageSize])
+
+
+## List wallets (admin)
+## Operation adminListWallets → GET /api/v1/admin/economy/wallets
+func admin_economy_admin_list_wallets(userId = null, currency = "", page = 1, pageSize = 25) -> GamendResult:
+	return await _call_api(AdminEconomyApi.new(_config), "admin_list_wallets", [userId, currency, page, pageSize])
+
+
+## Spend currency from a user (admin)
+## Operation adminSpendCurrency → POST /api/v1/admin/economy/spend
+func admin_economy_admin_spend_currency(adminSpendCurrencyRequest = null) -> GamendResult:
+	return await _call_api(AdminEconomyApi.new(_config), "admin_spend_currency", [adminSpendCurrencyRequest])
+
+
+### ADMIN LEADERBOARDS
+## Request an upload ticket for a leaderboard icon (admin)
+## Operation adminLeaderboardIconUploadUrl → POST /api/v1/admin/leaderboards/{id}/icon/upload_url
+func admin_leaderboards_admin_leaderboard_icon_upload_url(id: String, adminTournamentIconUploadUrlRequest = null) -> GamendResult:
+	return await _call_api(AdminLeaderboardsApi.new(_config), "admin_leaderboard_icon_upload_url", [id, adminTournamentIconUploadUrlRequest])
+
+
+## Confirm an uploaded leaderboard icon (admin)
+## Operation adminSetLeaderboardIcon → POST /api/v1/admin/leaderboards/{id}/icon
+func admin_leaderboards_admin_set_leaderboard_icon(id: String, adminSetQuestIconRequest = null) -> GamendResult:
+	return await _call_api(AdminLeaderboardsApi.new(_config), "admin_set_leaderboard_icon", [id, adminSetQuestIconRequest])
+
+
+### ADMIN PUSH
+## Delete a device push token (admin)
+## Operation adminDeletePushToken → DELETE /api/v1/admin/push/tokens/{id}
+func admin_push_admin_delete_push_token(id: String) -> GamendResult:
+	return await _call_api(AdminPushApi.new(_config), "admin_delete_push_token", [id])
+
+
+## List registered device push tokens (admin)
+## Operation adminListPushTokens → GET /api/v1/admin/push/tokens
+func admin_push_admin_list_push_tokens(userId = null, platform = "", provider = "", status = "", page = 1, pageSize = 25) -> GamendResult:
+	return await _call_api(AdminPushApi.new(_config), "admin_list_push_tokens", [userId, platform, provider, status, page, pageSize])
+
+
+## Send a push notification to a user (admin)
+## Operation adminSendPush → POST /api/v1/admin/push/send
+func admin_push_admin_send_push(adminSendPushRequest = null) -> GamendResult:
+	return await _call_api(AdminPushApi.new(_config), "admin_send_push", [adminSendPushRequest])
+
+
+### ADMIN QUESTS
+## Request an upload ticket for a quest icon (admin)
+## Operation adminQuestIconUploadUrl → POST /api/v1/admin/quests/{id}/icon/upload_url
+func admin_quests_admin_quest_icon_upload_url(id: String, adminTournamentIconUploadUrlRequest = null) -> GamendResult:
+	return await _call_api(AdminQuestsApi.new(_config), "admin_quest_icon_upload_url", [id, adminTournamentIconUploadUrlRequest])
+
+
+## Confirm an uploaded quest icon (admin)
+## Operation adminSetQuestIcon → POST /api/v1/admin/quests/{id}/icon
+func admin_quests_admin_set_quest_icon(id: String, adminSetQuestIconRequest = null) -> GamendResult:
+	return await _call_api(AdminQuestsApi.new(_config), "admin_set_quest_icon", [id, adminSetQuestIconRequest])
+
+
+### ADMIN READY CHECKS
+## Force-cancel a pending ready check (admin)
+## Operation adminCancelReadyCheck → DELETE /api/v1/admin/ready_checks/{id}
+func admin_ready_checks_admin_cancel_ready_check(id: String) -> GamendResult:
+	return await _call_api(AdminReadyChecksApi.new(_config), "admin_cancel_ready_check", [id])
+
+
+## List ready checks (admin)
+## Operation adminListReadyChecks → GET /api/v1/admin/ready_checks
+func admin_ready_checks_admin_list_ready_checks(status = "", kind = "", lobbyId = null, page = 1, pageSize = 25) -> GamendResult:
+	return await _call_api(AdminReadyChecksApi.new(_config), "admin_list_ready_checks", [status, kind, lobbyId, page, pageSize])
+
+
+## Ready check outcomes over the last 24 hours (admin)
+## Operation adminReadyCheckStats → GET /api/v1/admin/ready_checks/stats
+func admin_ready_checks_admin_ready_check_stats() -> GamendResult:
+	return await _call_api(AdminReadyChecksApi.new(_config), "admin_ready_check_stats")
+
+
+### ADMIN RETENTION
+## Last retention sweep (admin)
+## Operation adminGetRetentionStatus → GET /api/v1/admin/retention
+func admin_retention_admin_get_retention_status() -> GamendResult:
+	return await _call_api(AdminRetentionApi.new(_config), "admin_get_retention_status")
+
+
+## Run a retention sweep now (admin)
+## Operation adminRunRetention → POST /api/v1/admin/retention/run
+func admin_retention_admin_run_retention() -> GamendResult:
+	return await _call_api(AdminRetentionApi.new(_config), "admin_run_retention")
+
+
+### ADMIN STORAGE
+## Delete a stored object (admin)
+## Operation adminDeleteStorageObject → DELETE /api/v1/admin/storage
+func admin_storage_admin_delete_storage_object(key: String) -> GamendResult:
+	return await _call_api(AdminStorageApi.new(_config), "admin_delete_storage_object", [key])
+
+
+## Download an object by key (admin)
+## Operation adminDownloadStorageObject → GET /api/v1/admin/storage/object
+func admin_storage_admin_download_storage_object(key: String) -> GamendResult:
+	return await _call_api(AdminStorageApi.new(_config), "admin_download_storage_object", [key])
+
+
+## List stored objects with usage (admin)
+## Operation adminListStorageObjects → GET /api/v1/admin/storage
+func admin_storage_admin_list_storage_objects(prefix = "", page = 1, pageSize = 25) -> GamendResult:
+	return await _call_api(AdminStorageApi.new(_config), "admin_list_storage_objects", [prefix, page, pageSize])
+
+
+## Upload or overwrite an object at any key (admin)
+## Operation adminUploadStorageObject → PUT /api/v1/admin/storage/object
+func admin_storage_admin_upload_storage_object(key: String, body = null) -> GamendResult:
+	return await _call_api(AdminStorageApi.new(_config), "admin_upload_storage_object", [key, body])
+
+
+### ADMIN TOURNAMENTS
+## Cancel tournament (admin; terminal, no recurrence spawn)
+## Operation adminCancelTournament → POST /api/v1/admin/tournaments/{id}/cancel
+func admin_tournaments_admin_cancel_tournament(id: String) -> GamendResult:
+	return await _call_api(AdminTournamentsApi.new(_config), "admin_cancel_tournament", [id])
+
+
+## Create tournament (admin)
+## Operation adminCreateTournament → POST /api/v1/admin/tournaments
+func admin_tournaments_admin_create_tournament(adminUpdateTournamentRequest = null) -> GamendResult:
+	return await _call_api(AdminTournamentsApi.new(_config), "admin_create_tournament", [adminUpdateTournamentRequest])
+
+
+## Delete tournament and all its entries/matches (admin)
+## Operation adminDeleteTournament → DELETE /api/v1/admin/tournaments/{id}
+func admin_tournaments_admin_delete_tournament(id: String) -> GamendResult:
+	return await _call_api(AdminTournamentsApi.new(_config), "admin_delete_tournament", [id])
+
+
+## Draw the bracket now (admin; pulls starts_at to now)
+## Operation adminDrawTournament → POST /api/v1/admin/tournaments/{id}/draw
+func admin_tournaments_admin_draw_tournament(id: String) -> GamendResult:
+	return await _call_api(AdminTournamentsApi.new(_config), "admin_draw_tournament", [id])
+
+
+## Finish tournament now (admin; pulls ends_at to now)
+## Operation adminFinishTournament → POST /api/v1/admin/tournaments/{id}/finish
+func admin_tournaments_admin_finish_tournament(id: String) -> GamendResult:
+	return await _call_api(AdminTournamentsApi.new(_config), "admin_finish_tournament", [id])
+
+
+## Reopen a cancelled tournament (admin)
+## Operation adminReopenTournament → POST /api/v1/admin/tournaments/{id}/reopen
+func admin_tournaments_admin_reopen_tournament(id: String) -> GamendResult:
+	return await _call_api(AdminTournamentsApi.new(_config), "admin_reopen_tournament", [id])
+
+
+## Force a match verdict (admin)
+## Operation adminResolveTournamentMatch → POST /api/v1/admin/tournaments/{id}/matches/{match_id}/resolve
+func admin_tournaments_admin_resolve_tournament_match(id: String, matchId: String, adminResolveTournamentMatchRequest = null) -> GamendResult:
+	return await _call_api(AdminTournamentsApi.new(_config), "admin_resolve_tournament_match", [id, matchId, adminResolveTournamentMatchRequest])
+
+
+## Confirm an uploaded tournament icon (admin)
+## Operation adminSetTournamentIcon → POST /api/v1/admin/tournaments/{id}/icon
+func admin_tournaments_admin_set_tournament_icon(id: String, adminSetQuestIconRequest = null) -> GamendResult:
+	return await _call_api(AdminTournamentsApi.new(_config), "admin_set_tournament_icon", [id, adminSetQuestIconRequest])
+
+
+## Request an upload ticket for a tournament icon (admin)
+## Operation adminTournamentIconUploadUrl → POST /api/v1/admin/tournaments/{id}/icon/upload_url
+func admin_tournaments_admin_tournament_icon_upload_url(id: String, adminTournamentIconUploadUrlRequest = null) -> GamendResult:
+	return await _call_api(AdminTournamentsApi.new(_config), "admin_tournament_icon_upload_url", [id, adminTournamentIconUploadUrlRequest])
+
+
+## Update tournament (admin)
+## Operation adminUpdateTournament → PATCH /api/v1/admin/tournaments/{id}
+func admin_tournaments_admin_update_tournament(id: String, adminUpdateTournamentRequest = null) -> GamendResult:
+	return await _call_api(AdminTournamentsApi.new(_config), "admin_update_tournament", [id, adminUpdateTournamentRequest])
+
+
+### AUTHENTICATION
+## List sign-in providers
+## Operation listAuthProviders → GET /api/v1/auth/providers
+func authenticate_list_auth_providers() -> GamendResult:
+	return await _call_api(AuthenticationApi.new(_config), "list_auth_providers")
+
+
+## Google ID token login (native/mobile)
+## Operation oauthGoogleIdToken → POST /api/v1/auth/google/id_token
+func authenticate_oauth_google_id_token(oauthGoogleIdTokenRequest = null) -> GamendResult:
+	return await _call_api(AuthenticationApi.new(_config), "oauth_google_id_token", [oauthGoogleIdTokenRequest])
+
+
+### CHAT
+## List active mutes in a group
+## Operation listGroupMutes → GET /api/v1/groups/{id}/mutes
+func chat_list_group_mutes(id: String, page = 1, pageSize = 25) -> GamendResult:
+	return await _call_api(ChatApi.new(_config), "list_group_mutes", [id, page, pageSize])
+
+
+## List active mutes in your lobby
+## Operation listLobbyMutes → GET /api/v1/lobbies/mutes
+func chat_list_lobby_mutes(page = 1, pageSize = 25) -> GamendResult:
+	return await _call_api(ChatApi.new(_config), "list_lobby_mutes", [page, pageSize])
+
+
+## List active mutes in your party
+## Operation listPartyMutes → GET /api/v1/parties/mutes
+func chat_list_party_mutes(page = 1, pageSize = 25) -> GamendResult:
+	return await _call_api(ChatApi.new(_config), "list_party_mutes", [page, pageSize])
+
+
+## Mute a player in a group
+## Operation muteGroupMember → POST /api/v1/groups/{id}/mute
+func chat_mute_group_member(id: String, muteGroupMemberRequest = null) -> GamendResult:
+	return await _call_api(ChatApi.new(_config), "mute_group_member", [id, muteGroupMemberRequest])
+
+
+## Mute a player in your lobby
+## Operation muteLobbyMember → POST /api/v1/lobbies/mute
+func chat_mute_lobby_member(muteGroupMemberRequest = null) -> GamendResult:
+	return await _call_api(ChatApi.new(_config), "mute_lobby_member", [muteGroupMemberRequest])
+
+
+## Mute a player in your party
+## Operation mutePartyMember → POST /api/v1/parties/mute
+func chat_mute_party_member(muteGroupMemberRequest = null) -> GamendResult:
+	return await _call_api(ChatApi.new(_config), "mute_party_member", [muteGroupMemberRequest])
+
+
+## Report a chat message
+## Operation reportChatMessage → POST /api/v1/chat/messages/{id}/report
+func chat_report_chat_message(id: String, reportChatMessageRequest = null) -> GamendResult:
+	return await _call_api(ChatApi.new(_config), "report_chat_message", [id, reportChatMessageRequest])
+
+
+## Lift a mute in a group
+## Operation unmuteGroupMember → POST /api/v1/groups/{id}/unmute
+func chat_unmute_group_member(id: String, unmuteLobbyMemberRequest = null) -> GamendResult:
+	return await _call_api(ChatApi.new(_config), "unmute_group_member", [id, unmuteLobbyMemberRequest])
+
+
+## Lift a mute in your lobby
+## Operation unmuteLobbyMember → POST /api/v1/lobbies/unmute
+func chat_unmute_lobby_member(unmuteLobbyMemberRequest = null) -> GamendResult:
+	return await _call_api(ChatApi.new(_config), "unmute_lobby_member", [unmuteLobbyMemberRequest])
+
+
+## Lift a mute in your party
+## Operation unmutePartyMember → POST /api/v1/parties/unmute
+func chat_unmute_party_member(unmuteLobbyMemberRequest = null) -> GamendResult:
+	return await _call_api(ChatApi.new(_config), "unmute_party_member", [unmuteLobbyMemberRequest])
+
+
+### ECONOMY
+## Current user's item quantities
+## Operation getCurrentUserInventory → GET /api/v1/me/inventory
+func economy_get_current_user_inventory() -> GamendResult:
+	return await _call_api(EconomyApi.new(_config), "get_current_user_inventory")
+
+
+## Current user's currency balances
+## Operation getCurrentUserWallet → GET /api/v1/me/wallet
+func economy_get_current_user_wallet() -> GamendResult:
+	return await _call_api(EconomyApi.new(_config), "get_current_user_wallet")
+
+
+## Current user's ledger history
+## Operation listCurrentUserLedger → GET /api/v1/me/wallet/ledger
+func economy_list_current_user_ledger(currency = "", page = 1, pageSize = 25) -> GamendResult:
+	return await _call_api(EconomyApi.new(_config), "list_current_user_ledger", [currency, page, pageSize])
+
+
+### FRIENDS
+## Blacklist a user, with or without an existing friendship
+## Operation blockUser → POST /api/v1/users/{user_id}/block
+func friends_block_user(userId: String) -> GamendResult:
+	return await _call_api(FriendsApi.new(_config), "block_user", [userId])
+
+
+## List the users you've blocked
+## Operation listBlacklistedUsers → GET /api/v1/me/blacklist
+func friends_list_blacklisted_users(page = null, pageSize = null) -> GamendResult:
+	return await _call_api(FriendsApi.new(_config), "list_blacklisted_users", [page, pageSize])
+
+
+## Remove a user from your blacklist
+## Operation unblockUser → POST /api/v1/users/{user_id}/unblock
+func friends_unblock_user(userId: String) -> GamendResult:
+	return await _call_api(FriendsApi.new(_config), "unblock_user", [userId])
+
+
+### GROUPS
+## Request a group icon upload ticket (admin only)
+## Operation createGroupIconUploadUrl → POST /api/v1/groups/{id}/icon/upload_url
+func groups_create_group_icon_upload_url(id: String, adminTournamentIconUploadUrlRequest = null) -> GamendResult:
+	return await _call_api(GroupsApi.new(_config), "create_group_icon_upload_url", [id, adminTournamentIconUploadUrlRequest])
+
+
+## Confirm an uploaded group icon (admin only)
+## Operation setGroupIcon → POST /api/v1/groups/{id}/icon
+func groups_set_group_icon(id: String, adminSetQuestIconRequest = null) -> GamendResult:
+	return await _call_api(GroupsApi.new(_config), "set_group_icon", [id, adminSetQuestIconRequest])
+
+
+### LOBBIES
+## Lobby counts
+## Operation lobbyStats → GET /api/v1/lobbies/stats
+func lobbies_lobby_stats() -> GamendResult:
+	return await _call_api(LobbiesApi.new(_config), "lobby_stats")
+
+
+### PARTIES
+## Party counts
+## Operation partyStats → GET /api/v1/parties/stats
+func parties_party_stats() -> GamendResult:
+	return await _call_api(PartiesApi.new(_config), "party_stats")
+
+
+### PAYMENTS
+## The three provider webhooks below (apple / google / stripe) are wrapped for
+## the same reason they are in the spec: every /api/v1 route is documented, and
+## a self-hoster configuring a provider dashboard needs to know these URLs
+## exist. No game client is the caller, though — Stripe, Google and Apple POST
+## to them and the signature check is what authenticates, so calling one from
+## here could only forge an event that gets thrown out.
+## Receive App Store Server Notification v2 events
+## Operation paymentsAppleWebhook → POST /api/v1/payments/webhooks/apple
+func payments_apple_webhook(body = null) -> GamendResult:
+	return await _call_api(PaymentsApi.new(_config), "payments_apple_webhook", [body])
+
+
+## Receive Google Play Developer Notification events
+## Operation paymentsGoogleWebhook → POST /api/v1/payments/webhooks/google
+func payments_google_webhook(body = null) -> GamendResult:
+	return await _call_api(PaymentsApi.new(_config), "payments_google_webhook", [body])
+
+
+## Receive Stripe webhook events
+## Operation paymentsStripeWebhook → POST /api/v1/payments/webhooks/stripe
+func payments_stripe_webhook(body = null) -> GamendResult:
+	return await _call_api(PaymentsApi.new(_config), "payments_stripe_webhook", [body])
+
+
+## List active payment catalog entries
+## Operation paymentsCatalog → GET /api/v1/payments/catalog
+func payments_catalog(provider = "") -> GamendResult:
+	return await _call_api(PaymentsApi.new(_config), "payments_catalog", [provider])
+
+
+## List current user's active entitlements
+## Operation paymentsEntitlements → GET /api/v1/payments/entitlements
+func payments_entitlements() -> GamendResult:
+	return await _call_api(PaymentsApi.new(_config), "payments_entitlements")
+
+
+## Create a Steam MicroTxn transaction
+## Operation paymentsSteamCheckout → POST /api/v1/payments/checkout/steam
+func payments_steam_checkout(paymentsSteamCheckoutRequest = null) -> GamendResult:
+	return await _call_api(PaymentsApi.new(_config), "payments_steam_checkout", [paymentsSteamCheckoutRequest])
+
+
+## Finalize an authorized Steam MicroTxn transaction
+## Operation paymentsSteamFinalize → POST /api/v1/payments/steam/finalize
+func payments_steam_finalize(paymentsSteamFinalizeRequest = null) -> GamendResult:
+	return await _call_api(PaymentsApi.new(_config), "payments_steam_finalize", [paymentsSteamFinalizeRequest])
+
+
+## Create a Stripe Checkout Session
+## Operation paymentsStripeCheckout → POST /api/v1/payments/checkout/stripe
+func payments_stripe_checkout(paymentsStripeCheckoutRequest = null) -> GamendResult:
+	return await _call_api(PaymentsApi.new(_config), "payments_stripe_checkout", [paymentsStripeCheckoutRequest])
+
+
+## Validate an Apple, Google, or Steam purchase
+## Operation paymentsValidateStorePurchase → POST /api/v1/payments/validate/{provider}
+func payments_validate_store_purchase(provider: String, requestBody = null) -> GamendResult:
+	return await _call_api(PaymentsApi.new(_config), "payments_validate_store_purchase", [provider, requestBody])
+
+
+### PUSH
+## Unregister one of the current user's devices
+## Operation deletePushToken → DELETE /api/v1/me/push_tokens/{id}
+func push_delete_push_token(id: String) -> GamendResult:
+	return await _call_api(PushApi.new(_config), "delete_push_token", [id])
+
+
+## List the current user's registered devices
+## Operation listPushTokens → GET /api/v1/me/push_tokens
+func push_list_push_tokens(page = 1, pageSize = 25) -> GamendResult:
+	return await _call_api(PushApi.new(_config), "list_push_tokens", [page, pageSize])
+
+
+## Register a device push token
+## Operation registerPushToken → POST /api/v1/me/push_tokens
+func push_register_push_token(registerPushTokenRequest = null) -> GamendResult:
+	return await _call_api(PushApi.new(_config), "register_push_token", [registerPushTokenRequest])
+
+
+### QUESTS
+## Quest progress counts
+## Operation questStats → GET /api/v1/quests/stats
+func quests_quest_stats() -> GamendResult:
+	return await _call_api(QuestsApi.new(_config), "quest_stats")
+
+
+### SIGNALING
+## WebRTC room counts
+## Operation signalingStats → GET /api/v1/signaling/stats
+func signaling_stats() -> GamendResult:
+	return await _call_api(SignalingApi.new(_config), "signaling_stats")
+
+
+### TOURNAMENTS
+## Tournament details (with the caller's participation when authenticated)
+## Operation getTournament → GET /api/v1/tournaments/{id}
+func tournaments_get_tournament(id: String) -> GamendResult:
+	return await _call_api(TournamentsApi.new(_config), "get_tournament", [id])
+
+
+## Register as an entry leader
+## Operation joinTournament → POST /api/v1/tournaments/{id}/join
+func tournaments_join_tournament(id: String) -> GamendResult:
+	return await _call_api(TournamentsApi.new(_config), "join_tournament", [id])
+
+
+## Withdraw the caller's entry (before the draw)
+## Operation leaveTournament → DELETE /api/v1/tournaments/{id}/join
+func tournaments_leave_tournament(id: String) -> GamendResult:
+	return await _call_api(TournamentsApi.new(_config), "leave_tournament", [id])
+
+
+## List tournaments
+## Operation listTournaments → GET /api/v1/tournaments
+func tournaments_list_tournaments(state = "", slug = "", page = 1, pageSize = 25) -> GamendResult:
+	return await _call_api(TournamentsApi.new(_config), "list_tournaments", [state, slug, page, pageSize])
+
+
+## Brackets and their matches (paginated by bracket)
+## Operation tournamentBracket → GET /api/v1/tournaments/{id}/bracket
+func tournaments_tournament_bracket(id: String, index = null, page = 1, pageSize = 10) -> GamendResult:
+	return await _call_api(TournamentsApi.new(_config), "tournament_bracket", [id, index, page, pageSize])
+
+
+## Registered entries (paginated)
+## Operation tournamentEntries → GET /api/v1/tournaments/{id}/entries
+func tournaments_tournament_entries(id: String, state = "", page = 1, pageSize = 25) -> GamendResult:
+	return await _call_api(TournamentsApi.new(_config), "tournament_entries", [id, state, page, pageSize])
+
+
+## The caller's current unresolved match, if any
+## Operation tournamentMyMatch → GET /api/v1/tournaments/{id}/my_match
+func tournaments_tournament_my_match(id: String) -> GamendResult:
+	return await _call_api(TournamentsApi.new(_config), "tournament_my_match", [id])
+
+
+## Placements, wins and champions
+## Operation tournamentStandings → GET /api/v1/tournaments/{id}/standings
+func tournaments_tournament_standings(id: String) -> GamendResult:
+	return await _call_api(TournamentsApi.new(_config), "tournament_standings", [id])
+
+
+### USERS
+## Request an avatar upload ticket
+## Operation createCurrentUserAvatarUploadUrl → POST /api/v1/me/avatar/upload_url
+func user_create_current_user_avatar_upload_url(createCurrentUserAvatarUploadUrlRequest = null) -> GamendResult:
+	return await _call_api(UsersApi.new(_config), "create_current_user_avatar_upload_url", [createCurrentUserAvatarUploadUrlRequest])
+
+
+## Confirm an uploaded avatar
+## Operation setCurrentUserAvatar → POST /api/v1/me/avatar
+func user_set_current_user_avatar(adminSetQuestIconRequest = null) -> GamendResult:
+	return await _call_api(UsersApi.new(_config), "set_current_user_avatar", [adminSetQuestIconRequest])
+
+
+## Player counts
+## Operation userStats → GET /api/v1/users/stats
+func user_user_stats() -> GamendResult:
+	return await _call_api(UsersApi.new(_config), "user_stats")

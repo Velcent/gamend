@@ -169,6 +169,35 @@ defmodule Gamend.LobbiesTest do
       assert :error = KV.get("cleanup_user_test", user_id: other.id, lobby_id: lobby.id)
     end
 
+    # Deleting a lobby detaches its members with one bulk update, so each of
+    # them has to be told separately — `lobby_deleted` goes to the lobby LIST
+    # topic, which a seated player has no reason to be listening on. Without
+    # this the client kept the lobby_id it had cached, skipped creating a lobby
+    # for its next game, and the server refused the start it had no lobby for.
+    test "delete_lobby tells every member their seat is gone", %{host: host, other: other} do
+      {:ok, lobby} =
+        Lobbies.create_lobby(%{title: "announce-room", host_id: host.id, max_users: 2})
+
+      assert {:ok, _} = Lobbies.join_lobby(other, lobby)
+
+      for member <- [host, other] do
+        Phoenix.PubSub.subscribe(Gamend.PubSub, "user:#{member.id}")
+      end
+
+      assert {:ok, _} = Lobbies.delete_lobby(lobby)
+
+      for member <- [host, other] do
+        topic = "user:#{member.id}"
+
+        assert_receive %Phoenix.Socket.Broadcast{
+                         topic: ^topic,
+                         event: "updated",
+                         payload: %{lobby_id: ""}
+                       },
+                       200
+      end
+    end
+
     test "search by metadata", %{host: host} do
       {:ok, _} =
         Lobbies.create_lobby(%{

@@ -1102,13 +1102,25 @@ defmodule Gamend.Lobbies do
     case Gamend.Hooks.internal_call(:before_lobby_delete, [lobby]) do
       {:ok, _} ->
         case do_delete_lobby(lobby) do
-          {:ok, {deleted, member_ids}} ->
+          {:ok, {deleted, members}} ->
             Gamend.Async.run(fn ->
               Gamend.Chat.cleanup_chat("lobby", deleted.id)
               Gamend.Hooks.internal_call(:after_lobby_deleted, [deleted])
             end)
 
-            Enum.each(member_ids, &invalidate_accounts_user_cache/1)
+            # Detaching the members is one bulk update, so each of them has to
+            # be told separately — the `lobby_deleted` broadcast below goes to
+            # the lobby LIST topic, which a seated player has no reason to be
+            # listening on. Without this a member whose lobby was deleted around
+            # them (the abandoned-lobby sweep, a finished game, matchmaking
+            # giving up, an admin) went on believing they were seated: the
+            # client kept its cached lobby_id, skipped creating a lobby for the
+            # next game, and the server refused the start it had no lobby for.
+            # Parties announce a disband to each member the same way.
+            Enum.each(members, fn member ->
+              invalidate_accounts_user_cache(member.id)
+              _ = Accounts.broadcast_user_update(%{member | lobby_id: nil})
+            end)
 
             _ = invalidate_lobby_cache(deleted.id)
             broadcast_lobbies({:lobby_deleted, deleted.id})
@@ -1133,7 +1145,10 @@ defmodule Gamend.Lobbies do
       # buffered outside this transaction, so a rollback still keeps the record.
       _ = Gamend.LobbySnapshots.capture_lobby(lobby_id, "lobby:deleted", sync: true)
 
-      member_ids = Repo.all(from u in User, where: u.lobby_id == ^lobby_id, select: u.id)
+      # Whole structs rather than ids: delete_lobby/1 announces the detachment
+      # to each of them afterwards, and this is the last moment they are
+      # readable as members of this lobby.
+      members = Repo.all(from u in User, where: u.lobby_id == ^lobby_id)
 
       _ =
         Repo.update_all(
@@ -1144,7 +1159,7 @@ defmodule Gamend.Lobbies do
       delete_lobby_kv_entries(lobby_id)
 
       case Repo.delete(lobby) do
-        {:ok, deleted} -> {deleted, member_ids}
+        {:ok, deleted} -> {deleted, members}
         {:error, reason} -> Repo.rollback(reason)
       end
     end)
