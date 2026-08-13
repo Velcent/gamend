@@ -68,7 +68,11 @@ func apply_user_update(user: Dictionary) -> void:
 	var uid := str(user.get("id", _api._user_id))
 	if uid.is_empty():
 		return
-	users[uid] = _merge_user(uid, user)
+	# The `user:<id>` push is the one payload carrying the WHOLE metadata map
+	# (serialize_user_payload sends `user.metadata` entire, "{}" and all), so it
+	# is the one place a key the server DELETED can be noticed. A `u`-wrapped
+	# body is a partial shape and stays on the merging path.
+	users[uid] = _merge_user(uid, user, not (user.get("u", null) is Dictionary))
 	# The current user's lobby_id is the truth: drop every other lobby so
 	# stale entries can't answer for the one lobby that matters.
 	if uid == _api._user_id:
@@ -121,7 +125,13 @@ static func merge_metadata(existing_metadata: Dictionary, patch_metadata: Dictio
 	return merged
 
 
-func _merge_user(uid: String, user: Dictionary) -> Dictionary:
+## `metadata_is_whole` says the payload's metadata is the complete map rather
+## than the sparse sections most sources send. Only then can a key the server
+## REMOVED be told apart from one this payload simply didn't mention — merging
+## keeps a deleted key forever, which is how a cleared setting went on reading
+## as set. Partial sources (member lists, search results, REST) must stay
+## additive or every one of them would wipe the metadata it doesn't carry.
+func _merge_user(uid: String, user: Dictionary, metadata_is_whole: bool = false) -> Dictionary:
 	var existing: Dictionary = users.get(uid, {}).duplicate(true)
 	var patch: Dictionary = user
 	if user.get("u", null) is Dictionary:
@@ -130,7 +140,10 @@ func _merge_user(uid: String, user: Dictionary) -> Dictionary:
 		existing = {"id": uid}
 	for key in patch:
 		if key == "metadata" and patch[key] is Dictionary:
-			existing["metadata"] = merge_metadata(existing.get("metadata", {}), patch[key])
+			if metadata_is_whole:
+				existing["metadata"] = (patch[key] as Dictionary).duplicate(true)
+			else:
+				existing["metadata"] = merge_metadata(existing.get("metadata", {}), patch[key])
 		else:
 			existing[key] = patch[key]
 	return existing

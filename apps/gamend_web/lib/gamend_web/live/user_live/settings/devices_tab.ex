@@ -67,7 +67,7 @@ defmodule GamendWeb.UserLive.Settings.DevicesTab do
                     {gettext("Inactive")}
                   </span>
                 </td>
-                <td class="text-right">
+                <td class="text-end">
                   <button
                     type="button"
                     phx-click="device_remove"

@@ -53,6 +53,47 @@ defmodule GamendWeb.LocaleSwitchTest do
       assert conn |> get("/en/privacy") |> redirected_to(301) == "/privacy"
     end
 
+    test "switching back to the default locale rewrites the session", %{conn: conn} do
+      # Without the param the clean URL is bounced straight back to the
+      # session's locale, so English is unreachable from any translated page.
+      conn = conn |> get("/es/privacy") |> recycle()
+
+      assert redirected_to(conn |> get("/privacy")) == "/es/privacy"
+
+      switched = conn |> recycle() |> get("/privacy?setlang=en")
+
+      assert redirected_to(switched, 302) == "/privacy"
+      assert get_session(switched, :preferred_locale) == "en"
+      assert switched |> recycle() |> get("/privacy") |> html_response(200)
+    end
+
+    test "a switch keeps the rest of the query string", %{conn: conn} do
+      conn = get(conn, "/privacy?ref=nav&setlang=de")
+
+      assert redirected_to(conn, 302) == "/de/privacy?ref=nav"
+      assert get_session(conn, :preferred_locale) == "de"
+    end
+
+    test "a switch replaces the prefix already in the path", %{conn: conn} do
+      assert conn |> get("/es/privacy?setlang=de") |> redirected_to(302) == "/de/privacy"
+      assert conn |> get("/es/privacy?setlang=en") |> redirected_to(302) == "/privacy"
+      assert conn |> get("/es?setlang=en") |> redirected_to(302) == "/"
+      assert conn |> get("/?setlang=de") |> redirected_to(302) == "/de"
+    end
+
+    test "an unknown switch value is ignored rather than redirected", %{conn: conn} do
+      assert conn |> get("/privacy?setlang=xx") |> html_response(200)
+    end
+
+    test "the switcher's default-locale link carries the switch param", %{conn: conn} do
+      html = conn |> get("/es/privacy") |> html_response(200)
+
+      assert html =~ ~s(href="/privacy?setlang=en" rel="nofollow")
+      # Every other locale still links its own prefixed, followable URL.
+      assert html =~ ~s(href="/de/privacy")
+      refute html =~ ~s(setlang=de)
+    end
+
     test "unprefixed pages canonicalize to themselves without alternates", %{conn: conn} do
       html = conn |> get("/leaderboards") |> html_response(200)
 

@@ -621,7 +621,7 @@ defmodule GamendWeb.GroupsLive do
             <thead>
               <tr>
                 <th>{gettext("Name")}</th>
-                <th class="text-right">{gettext("Role")}</th>
+                <th class="text-end">{gettext("Role")}</th>
               </tr>
             </thead>
             <tbody id="group-members-list">
@@ -638,7 +638,7 @@ defmodule GamendWeb.GroupsLive do
                     </span>
                   </div>
                 </td>
-                <td class="text-right">
+                <td class="text-end">
                   <%= if member.role == "admin" do %>
                     <span class="badge badge-primary badge-sm">{gettext("Admin")}</span>
                   <% else %>

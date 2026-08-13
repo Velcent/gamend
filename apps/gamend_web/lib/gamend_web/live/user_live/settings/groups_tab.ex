@@ -403,7 +403,7 @@ defmodule GamendWeb.UserLive.Settings.GroupsTab do
                       ]} />
                       <div>
                         <span class="text-sm font-medium">{LiveHelpers.public_user_name(u)}</span>
-                        <span class="text-xs text-base-content/70 ml-1">
+                        <span class="text-xs text-base-content/70 ms-1">
                           {LiveHelpers.public_user_handle(u)}
                         </span>
                       </div>

@@ -572,17 +572,17 @@ defmodule GamendWeb.HostLayoutNavigation do
             <span class="truncate">{display_name(Scope.user(@current_scope))}</span>
             <span
               :if={@notif_unread_count > 0}
-              class="ml-0.5 inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 text-xs font-bold rounded-full bg-error text-error-content"
+              class="ms-0.5 inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 text-xs font-bold rounded-full bg-error text-error-content"
             >
               {@notif_unread_count}
             </span>
           </span>
           <.icon
             name="hero-chevron-down-solid"
-            class="w-3 h-3 absolute right-3 transition-transform group-open:rotate-180"
+            class="w-3 h-3 absolute end-3 transition-transform group-open:rotate-180"
           />
         </summary>
-        <ul class="pl-4 mt-1 w-full">
+        <ul class="ps-4 mt-1 w-full">
           <li class="w-full">
             <a
               href={lp(~p"/users/settings")}
@@ -601,7 +601,7 @@ defmodule GamendWeb.HostLayoutNavigation do
               {GamendWeb.HostLayouts.translate("Notifications")}
               <span
                 :if={@notif_unread_count > 0}
-                class="ml-0.5 inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 text-xs font-bold rounded-full bg-error text-error-content"
+                class="ms-0.5 inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 text-xs font-bold rounded-full bg-error text-error-content"
               >
                 {@notif_unread_count}
               </span>
@@ -703,10 +703,10 @@ defmodule GamendWeb.HostLayoutNavigation do
           </span>
           <.icon
             name="hero-chevron-down-solid"
-            class="w-3 h-3 absolute right-3 transition-transform group-open:rotate-180"
+            class="w-3 h-3 absolute end-3 transition-transform group-open:rotate-180"
           />
         </summary>
-        <ul class="pl-4 mt-1 w-full">
+        <ul class="ps-4 mt-1 w-full">
           <.mobile_nav_links
             links={@link["items"]}
             current_path={@current_path}
@@ -1020,10 +1020,17 @@ defmodule GamendWeb.HostLayoutNavigation do
       # not apply, so every page shipped one of these: 229 URLs reported as
       # "Page with redirect". Point at the clean URL the sitemap and the
       # `hreflang` alternates already use.
+      #
+      # The clean URL alone is not enough to *switch* to it: the reader's
+      # session still holds the language they are leaving, and `LocalePath`
+      # redirects them back to it. `?setlang=` is what says otherwise. It is the
+      # one switcher link a crawler must not follow — it can only redirect —
+      # but nothing is lost by that: `hreflang="en"` and `x-default` in the head
+      # already point at the same clean URL.
       href =
         cond do
           locale == default_locale ->
-            if(base_path == "/", do: "/", else: base_path) <> query_suffix
+            if(base_path == "/", do: "/", else: base_path) <> switch_suffix(query_suffix, locale)
 
           base_path == "/" ->
             prefix <> query_suffix
@@ -1036,11 +1043,16 @@ defmodule GamendWeb.HostLayoutNavigation do
         locale: locale,
         label: Map.get(locale_labels, locale, locale),
         href: href,
-        rel: unless(crawlable?, do: "nofollow"),
+        rel: unless(crawlable? and locale != default_locale, do: "nofollow"),
         flag_code: locale_flag_code(locale)
       }
     end)
   end
+
+  defp switch_suffix("", locale), do: "?" <> LocalePath.switch_param() <> "=" <> locale
+
+  defp switch_suffix(query, locale),
+    do: query <> "&" <> LocalePath.switch_param() <> "=" <> locale
 
   defp locale_label(locale) do
     locale

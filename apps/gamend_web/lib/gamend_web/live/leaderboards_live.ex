@@ -268,7 +268,7 @@ defmodule GamendWeb.LeaderboardsLive do
               </span>
               <div class="text-2xl font-bold">#{@user_record.rank}</div>
             </div>
-            <div class="text-right">
+            <div class="text-end">
               <span class="text-sm text-base-content/70">
                 {gettext("Score")}
               </span>
@@ -304,7 +304,7 @@ defmodule GamendWeb.LeaderboardsLive do
               <tr>
                 <th>{gettext("Rank")}</th>
                 <th>{gettext("Name")}</th>
-                <th class="text-right">{gettext("Score")}</th>
+                <th class="text-end">{gettext("Score")}</th>
               </tr>
             </thead>
             <tbody>
@@ -339,7 +339,7 @@ defmodule GamendWeb.LeaderboardsLive do
                     <% end %>
                   </div>
                 </td>
-                <td class="text-right font-mono">
+                <td class="text-end font-mono">
                   {format_score(record.score)}
                 </td>
               </tr>

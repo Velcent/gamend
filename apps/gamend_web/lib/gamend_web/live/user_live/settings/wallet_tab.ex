@@ -60,8 +60,8 @@ defmodule GamendWeb.UserLive.Settings.WalletTab do
               <tr>
                 <th class="w-44">{gettext("Date")}</th>
                 <th>{gettext("Currency")}</th>
-                <th class="text-right">{gettext("Change")}</th>
-                <th class="text-right">{gettext("Balance")}</th>
+                <th class="text-end">{gettext("Change")}</th>
+                <th class="text-end">{gettext("Balance")}</th>
                 <th>{gettext("Reason")}</th>
               </tr>
             </thead>
@@ -74,12 +74,12 @@ defmodule GamendWeb.UserLive.Settings.WalletTab do
                 <td class="text-xs font-mono"><.timestamp at={e.inserted_at} /></td>
                 <td class="text-sm">{e.currency}</td>
                 <td class={[
-                  "text-right font-mono tabular-nums",
+                  "text-end font-mono tabular-nums",
                   if(e.delta >= 0, do: "text-success", else: "text-error")
                 ]}>
                   {format_delta(e.delta)}
                 </td>
-                <td class="text-right font-mono tabular-nums text-sm">{e.balance_after}</td>
+                <td class="text-end font-mono tabular-nums text-sm">{e.balance_after}</td>
                 <td class="text-sm break-all">{e.reason}</td>
               </tr>
             </tbody>

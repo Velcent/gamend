@@ -138,5 +138,76 @@ defmodule GamendWeb.EventCodecCoverageTest do
       assert {:ok, iodata} = EventCodec.encode("user:1", "kv_updated", %{})
       assert IO.iodata_to_binary(iodata) |> is_binary()
     end
+
+    # The client MERGES these three into a long-lived cache (GamendPresence:
+    # apply_user_update and cache_user), so for them an absent field means
+    # "unchanged", not "empty". proto3 does not write an implicit-presence
+    # scalar that holds its zero value — so a field declared without `optional`
+    # can never tell that cache a value was CLEARED, and the stale one lives on.
+    # That is precisely how a deleted lobby went unnoticed.
+    #
+    # Every other message in the schema is an event consumed whole, where an
+    # omitted empty simply reads as empty; only these three are merged, so only
+    # these three need the guarantee.
+    test "everything merged into the client cache keeps explicit presence" do
+      proto = Path.expand("../../../../../proto/gamend_realtime.proto", __DIR__)
+      assert File.exists?(proto), "the schema moved — this test can no longer see it"
+      source = File.read!(proto)
+
+      # The message key, never empty, and the one field that may stay implicit.
+      allowed_implicit = %{"MemberEvent" => ["user_id"]}
+
+      for message <- ["User", "UserBrief", "MemberEvent"] do
+        [_, body] = Regex.run(~r/^message #{message} \{\n(.*?)^\}/ms, source)
+
+        implicit =
+          body
+          |> String.split("\n")
+          |> Enum.map(&String.trim/1)
+          |> Enum.reject(&(&1 == "" or String.starts_with?(&1, "//")))
+          |> Enum.reject(&String.starts_with?(&1, "optional "))
+          |> Enum.map(fn line ->
+            [_, name] = Regex.run(~r/(\w+)\s*=\s*\d+;/, line)
+            name
+          end)
+          |> Enum.reject(&(&1 in Map.get(allowed_implicit, message, [])))
+
+        assert implicit == [],
+               "#{message} has implicit-presence field(s) #{inspect(implicit)} — " <>
+                 "clearing one would not reach the client, which merges this message"
+      end
+    end
+
+    test "a cleared lobby_id is written, not omitted" do
+      # How a player learns their lobby was deleted around them: `delete_lobby`
+      # broadcasts this with lobby_id emptied. proto3 omits empty scalars unless
+      # the field has explicit presence, and an omitted lobby_id decodes as "no
+      # value given" — the client would merge nothing and go on believing it
+      # holds a seat the server has already taken away. `optional string
+      # lobby_id = 6` is what stops that, and this is what proves it.
+      {:ok, iodata} =
+        EventCodec.encode("user:user-1", "updated", %{
+          id: "user-1",
+          email: "",
+          profile_url: "",
+          metadata: %{},
+          username: "",
+          display_name: "Ana",
+          lobby_id: "",
+          party_id: "",
+          is_online: true,
+          last_seen_at: nil,
+          linked_providers: %{},
+          has_password: false
+        })
+
+      bytes = IO.iodata_to_binary(iodata)
+
+      # Field 6, wire type 2, length 0 — the empty string, present on the wire.
+      assert <<0x32, 0x00>> = binary_part(bytes, 21, 2)
+
+      # game-world/tests/lobby_seat_cleared_test.gd decodes this same vector.
+      assert Base.encode64(bytes) == "CgZ1c2VyLTESABoAIgJ7fSoDQW5hMgA6AEABUgBYAGoA"
+    end
   end
 end

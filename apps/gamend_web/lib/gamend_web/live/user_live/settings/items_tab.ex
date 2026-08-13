@@ -37,14 +37,14 @@ defmodule GamendWeb.UserLive.Settings.ItemsTab do
             <thead>
               <tr>
                 <th class="font-mono text-sm break-all">{gettext("Item")}</th>
-                <th class="text-right">{gettext("Quantity")}</th>
+                <th class="text-end">{gettext("Quantity")}</th>
                 <th>{gettext("Metadata")}</th>
               </tr>
             </thead>
             <tbody id="inventory-items-rows" phx-update="stream">
               <tr :for={{dom_id, i} <- @streams.inventory_items} id={dom_id} class="hover">
                 <td class="font-mono text-sm break-all">{i.item}</td>
-                <td class="text-right font-mono tabular-nums">{i.quantity}</td>
+                <td class="text-end font-mono tabular-nums">{i.quantity}</td>
                 <td class="text-sm">
                   <pre class="text-xs font-mono whitespace-pre-wrap max-h-24 overflow-auto bg-base-100/60 rounded p-2">{json_preview(i.metadata)}</pre>
                 </td>

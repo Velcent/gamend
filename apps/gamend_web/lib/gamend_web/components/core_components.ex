@@ -611,7 +611,7 @@ defmodule GamendWeb.CoreComponents do
   ## Examples
 
       <.icon name="hero-x-mark" />
-      <.icon name="hero-arrow-path" class="ml-1 size-3 motion-safe:animate-spin" />
+      <.icon name="hero-arrow-path" class="ms-1 size-3 motion-safe:animate-spin" />
   """
   attr :name, :string, required: true
   attr :class, :string, default: "size-4"
@@ -935,7 +935,7 @@ defmodule GamendWeb.CoreComponents do
         <form id={"#{@on_page_size}-form"} phx-change={@on_page_size} class="inline">
           <select
             name="size"
-            class="select select-xs select-bordered w-18 ml-2"
+            class="select select-xs select-bordered w-18 ms-2"
           >
             <option :for={size <- @page_sizes} value={size} selected={@page_size == size}>
               {size}

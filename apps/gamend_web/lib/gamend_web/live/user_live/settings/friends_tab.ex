@@ -57,7 +57,7 @@ defmodule GamendWeb.UserLive.Settings.FriendsTab do
               >
                 <div class="text-sm">
                   {LiveHelpers.public_user_name(req.requester || req.requester_id)}
-                  <span class="text-xs text-base-content/60 ml-2">
+                  <span class="text-xs text-base-content/60 ms-2">
                     {LiveHelpers.public_user_handle(req.requester)}
                   </span>
                 </div>
@@ -104,7 +104,7 @@ defmodule GamendWeb.UserLive.Settings.FriendsTab do
               >
                 <div class="text-sm">
                   {LiveHelpers.public_user_name(req.target || req.target_id)}
-                  <span class="text-xs text-base-content/60 ml-2">
+                  <span class="text-xs text-base-content/60 ms-2">
                     {LiveHelpers.public_user_handle(req.target)}
                   </span>
                 </div>
@@ -185,7 +185,7 @@ defmodule GamendWeb.UserLive.Settings.FriendsTab do
               >
                 <div class="text-sm">
                   {LiveHelpers.public_user_name(b.requester || b.requester_id)}
-                  <span class="text-xs text-base-content/60 ml-2">
+                  <span class="text-xs text-base-content/60 ms-2">
                     {LiveHelpers.public_user_handle(b.requester)}
                   </span>
                 </div>
@@ -233,7 +233,7 @@ defmodule GamendWeb.UserLive.Settings.FriendsTab do
                 <div class="p-2 border rounded bg-base-100 flex items-center justify-between">
                   <div class="text-sm">
                     {LiveHelpers.public_user_name(s)}
-                    <span class="text-xs text-base-content/60 ml-2">
+                    <span class="text-xs text-base-content/60 ms-2">
                       {LiveHelpers.public_user_handle(s)}
                     </span>
                   </div>

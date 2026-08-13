@@ -255,19 +255,36 @@ static func _user_to_dict(u) -> Dictionary:
 	if u.has_party_id(): d["party_id"] = u.get_party_id()
 	if u.has_is_online(): d["is_online"] = u.get_is_online()
 	if u.has_last_seen_at_ms(): d["last_seen_at_ms"] = u.get_last_seen_at_ms()
-	if u.has_linked_providers():
-		var lp = u.get_linked_providers()
-		d["linked_providers"] = {
-			"google": lp.get_google(),
-			"facebook": lp.get_facebook(),
-			"discord": lp.get_discord(),
-			"apple": lp.get_apple(),
-			"steam": lp.get_steam(),
-			"device": lp.get_device(),
-		}
+	if u.has_linked_providers(): d["linked_providers"] = _linked_providers_to_dict(u.get_linked_providers())
 	if u.has_has_password(): d["has_password"] = u.get_has_password()
 	if u.has_username(): d["username"] = u.get_username()
 	return d
+
+
+## The six provider flags, read UNCONDITIONALLY — never `if lp.has_google()`
+## like the lines above, and this is the one place in the file where that
+## difference matters.
+##
+## LinkedProviders' fields are plain proto3 bools with no `optional`, so they
+## carry implicit presence: an UNLINKED provider is `false`, and proto3 does
+## not write a field holding its default. `has_google()` is therefore false
+## for a provider that is genuinely unlinked, indistinguishable from one the
+## server never mentioned — and since this dict is merged into a long-lived
+## cache, a flag copied only when "present" would leave the account showing a
+## provider it no longer has linked, until a reload.
+##
+## Reading every flag every time is what makes the sub-message's own presence
+## the only question, and that IS explicit (`optional LinkedProviders`): an
+## all-false LinkedProviders still arrives, as a zero-length sub-message.
+static func _linked_providers_to_dict(lp) -> Dictionary:
+	return {
+		"google": lp.get_google(),
+		"facebook": lp.get_facebook(),
+		"discord": lp.get_discord(),
+		"apple": lp.get_apple(),
+		"steam": lp.get_steam(),
+		"device": lp.get_device(),
+	}
 
 
 static func _friend_update(data: PackedByteArray) -> Variant:

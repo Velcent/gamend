@@ -26,7 +26,7 @@ defmodule GamendWeb.HostLayoutShell do
           to the main landmark. --%>
     <a
       href="#main-content"
-      class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:font-semibold focus:text-primary-content focus:shadow-lg"
+      class="sr-only focus:not-sr-only focus:fixed focus:start-4 focus:top-4 focus:z-[200] focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:font-semibold focus:text-primary-content focus:shadow-lg"
     >
       {GamendWeb.HostLayouts.translate("Skip to content")}
     </a>
@@ -45,7 +45,7 @@ defmodule GamendWeb.HostLayoutShell do
         class={[
           "navbar z-50",
           if(@flush,
-            do: "absolute top-0 left-0 right-0 pl-4 sm:pl-6 lg:pl-8 pr-14",
+            do: "absolute top-0 start-0 end-0 ps-4 sm:ps-6 lg:ps-8 pe-14",
             else: "sticky top-0 shrink-0 px-4 sm:px-6 lg:px-8"
           ),
           if(@flush,
@@ -71,7 +71,7 @@ defmodule GamendWeb.HostLayoutShell do
             />
             <span class="text-lg font-bold">{title}</span>
             <%= if tagline && tagline != "" do %>
-              <span class="text-sm opacity-80 ml-1 hidden xl:inline">{tagline}</span>
+              <span class="text-sm opacity-80 ms-1 hidden xl:inline">{tagline}</span>
             <% end %>
           </a>
         </div>

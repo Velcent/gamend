@@ -93,7 +93,7 @@ defmodule GamendWeb.AuthSuccessLive do
                             />
                           </svg>
                         </div>
-                        <div class="ml-3">
+                        <div class="ms-3">
                           <h3 class="text-sm font-medium text-green-800">
                             {gettext("Success.")}
                           </h3>
@@ -132,7 +132,7 @@ defmodule GamendWeb.AuthSuccessLive do
                             />
                           </svg>
                         </div>
-                        <div class="ml-3">
+                        <div class="ms-3">
                           <h3 class="text-sm font-medium text-yellow-800">
                             {gettext("Failed")}
                           </h3>
@@ -156,7 +156,7 @@ defmodule GamendWeb.AuthSuccessLive do
                             />
                           </svg>
                         </div>
-                        <div class="ml-3">
+                        <div class="ms-3">
                           <h3 class="text-sm font-medium text-red-800">
                             {gettext("Failed")}
                           </h3>
@@ -185,7 +185,7 @@ defmodule GamendWeb.AuthSuccessLive do
                             />
                           </svg>
                         </div>
-                        <div class="ml-3">
+                        <div class="ms-3">
                           <h3 class="text-sm font-medium text-gray-800">
                             {gettext("Not found")}
                           </h3>
@@ -200,7 +200,7 @@ defmodule GamendWeb.AuthSuccessLive do
                   <% _ -> %>
                     <div class="rounded-lg bg-blue-50 p-4">
                       <div class="flex">
-                        <div class="ml-3">
+                        <div class="ms-3">
                           <h3 class="text-sm font-medium text-blue-800">
                             {gettext("Loading...")}
                           </h3>

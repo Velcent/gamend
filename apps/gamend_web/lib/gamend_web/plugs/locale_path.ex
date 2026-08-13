@@ -33,6 +33,17 @@ defmodule GamendWeb.Plugs.LocalePath do
   @default_locale "en"
   @known_locales GamendWeb.GettextSync.known_locales()
 
+  # An explicit "switch to this language" request from the language switcher.
+  #
+  # Only the default locale needs it, and it needs it badly: every other locale
+  # has a prefixed URL that rewrites the session on its way through, while the
+  # default locale's URL is the clean one — which `serve_unprefixed/1` bounces
+  # straight back to the session's locale. English was therefore unreachable
+  # from any translated page. The param says the reader asked for this, so the
+  # session is rewritten and they are sent on to the canonical URL; the language
+  # never stays in the address.
+  @switch_param "setlang"
+
   # Controller-rendered pages worth indexing per language. A host overrides
   # this with `config :gamend_web, :localized_paths, [...]`.
   #
@@ -59,9 +70,19 @@ defmodule GamendWeb.Plugs.LocalePath do
     if websocket_request?(conn) do
       conn
     else
-      conn = fetch_session(conn)
+      conn = conn |> fetch_session() |> fetch_query_params()
 
       case classify(conn) do
+        {:switch, locale, target} ->
+          # A switch is per-reader, never a property of the URL: 302 so nothing
+          # caches it, and drop the param so the address they land on is the
+          # canonical one.
+          conn
+          |> put_session(@session_key, locale)
+          |> put_status(:found)
+          |> Phoenix.Controller.redirect(to: target)
+          |> halt()
+
         {:serve_localized, locale, rest, clean_path} ->
           # Serve at the prefixed URL. The router sees the clean path; the
           # browser and the crawler keep `/es/about`.
@@ -107,6 +128,13 @@ defmodule GamendWeb.Plugs.LocalePath do
   def default_locale, do: @default_locale
 
   @doc """
+  The query parameter a language switcher appends to say the reader chose this
+  language deliberately. Consumed and dropped by this plug — see `@switch_param`.
+  """
+  @spec switch_param() :: String.t()
+  def switch_param, do: @switch_param
+
+  @doc """
   Gettext locales use `_` (`pt_BR`); BCP-47, which `hreflang` requires, uses
   `-` (`pt-BR`). URLs emit the BCP-47 form.
   """
@@ -125,7 +153,63 @@ defmodule GamendWeb.Plugs.LocalePath do
     if base in @rtl_locales, do: "rtl", else: "ltr"
   end
 
-  defp classify(%Plug.Conn{path_info: [first | rest]} = conn) when is_binary(first) do
+  defp classify(conn) do
+    case switch_request(conn) do
+      locale when is_binary(locale) -> {:switch, locale, switch_target(conn, locale)}
+      nil -> classify_path(conn)
+    end
+  end
+
+  # Only a locale we actually serve. An unknown value is ignored rather than
+  # redirected: a stray `?setlang=xx` on a shared link should render the page,
+  # not bounce.
+  defp switch_request(conn) do
+    with requested when is_binary(requested) <- conn.query_params[@switch_param],
+         locale when is_binary(locale) <- GamendWeb.GettextSync.normalize_locale(requested),
+         true <- locale in @known_locales do
+      locale
+    else
+      _ -> nil
+    end
+  end
+
+  # Where the reader lands after switching: the same page under the chosen
+  # locale's canonical URL, with any prefix already in the path replaced rather
+  # than stacked, and the rest of the query string kept.
+  defp switch_target(conn, locale) do
+    clean_path =
+      case strip_locale_segment(conn.path_info) do
+        [] -> "/"
+        rest -> "/" <> Enum.join(rest, "/")
+      end
+
+    path =
+      if locale == @default_locale do
+        clean_path
+      else
+        "/" <> url_locale(locale) <> String.trim_trailing(clean_path, "/")
+      end
+
+    with_query(path, drop_switch_param(conn.query_string))
+  end
+
+  defp strip_locale_segment([first | rest]) when is_binary(first) do
+    case GamendWeb.GettextSync.normalize_locale(first) do
+      locale when is_binary(locale) and locale in @known_locales -> rest
+      _ -> [first | rest]
+    end
+  end
+
+  defp strip_locale_segment(path_info), do: path_info
+
+  defp drop_switch_param(query_string) do
+    query_string
+    |> String.split("&", trim: true)
+    |> Enum.reject(&String.starts_with?(&1, @switch_param <> "="))
+    |> Enum.join("&")
+  end
+
+  defp classify_path(%Plug.Conn{path_info: [first | rest]} = conn) when is_binary(first) do
     case GamendWeb.GettextSync.normalize_locale(first) do
       locale when is_binary(locale) and locale in @known_locales ->
         clean_path =
@@ -158,7 +242,7 @@ defmodule GamendWeb.Plugs.LocalePath do
     end
   end
 
-  defp classify(_conn), do: :no_prefix
+  defp classify_path(_conn), do: :no_prefix
 
   defp redirect_status(:permanent), do: :moved_permanently
   defp redirect_status(:temporary), do: :found

@@ -526,7 +526,7 @@ defmodule GamendWeb.TournamentsLive do
           </div>
         </div>
 
-        <div class="ml-auto">
+        <div class="ms-auto">
           <.join_action
             tournament={@tournament}
             joined?={@joined?}
@@ -653,8 +653,8 @@ defmodule GamendWeb.TournamentsLive do
               <tr>
                 <th>{gettext("Name")}</th>
                 <th :if={@drawn?}>{gettext("Bracket")}</th>
-                <th :if={@drawn?} class="text-right">{gettext("Wins")}</th>
-                <th class="text-right">{gettext("Result")}</th>
+                <th :if={@drawn?} class="text-end">{gettext("Wins")}</th>
+                <th class="text-end">{gettext("Result")}</th>
               </tr>
             </thead>
             <tbody>
@@ -686,8 +686,8 @@ defmodule GamendWeb.TournamentsLive do
                     <span class="text-base-content/70">—</span>
                   <% end %>
                 </td>
-                <td :if={@drawn?} class="text-right font-mono">{e.wins}</td>
-                <td class="text-right">
+                <td :if={@drawn?} class="text-end font-mono">{e.wins}</td>
+                <td class="text-end">
                   <span class={["badge badge-sm", entry_state_class(e.state)]}>
                     {entry_state_label(e.state)}
                   </span>
@@ -805,7 +805,7 @@ defmodule GamendWeb.TournamentsLive do
             <span :if={@own?} class="badge badge-primary badge-sm">{gettext("You")}</span>
           </div>
         </div>
-        <div class="flex items-center gap-4 text-right">
+        <div class="flex items-center gap-4 text-end">
           <div>
             <span class="text-sm text-base-content/70">{gettext("Wins")}</span>
             <div class="text-xl font-bold font-mono">{@highlight.wins}</div>

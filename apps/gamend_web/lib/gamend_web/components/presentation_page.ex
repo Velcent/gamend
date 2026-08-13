@@ -55,9 +55,13 @@ defmodule GamendWeb.PresentationPage do
       )
 
     ~H"""
-    <div class={
-      if(@full_bleed_hero, do: "relative w-screen left-1/2 -translate-x-1/2 -mt-20", else: "")
-    }>
+    <%!-- Full bleed by negative inline margin, not `left-1/2 -translate-x-1/2`:
+          the offset half of that pair is physical while the translate is not,
+          so under `dir="rtl"` the two stopped cancelling and the hero sat 128px
+          off the viewport — the Arabic home page had its title clipped at one
+          edge and a blank strip at the other. `margin-inline` is symmetrical
+          and needs no positioning at all. --%>
+    <div class={if(@full_bleed_hero, do: "relative w-screen mx-[calc(50%-50vw)] -mt-20", else: "")}>
       <div class="relative overflow-hidden">
         <.background_icons icons={@background_icons} bands={@background_icon_bands} />
         <%!-- `hero.media_layout: "cover"` turns the hero into a banner: the
@@ -730,8 +734,8 @@ defmodule GamendWeb.PresentationPage do
 
   defp text_align_class(item) do
     case Map.get(item, "text_align", "center") do
-      "left" -> "text-left items-start"
-      "right" -> "text-right items-end"
+      "left" -> "text-start items-start"
+      "right" -> "text-end items-end"
       _ -> "text-center items-center"
     end
   end

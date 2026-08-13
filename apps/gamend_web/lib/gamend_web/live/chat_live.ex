@@ -132,14 +132,14 @@ defmodule GamendWeb.ChatLive do
       <div class="flex gap-4 h-[calc(100vh-12rem)]">
         <%!-- Sidebar: contacts list --%>
         <div class={[
-          "w-full md:w-64 flex-shrink-0 overflow-y-auto md:border-r border-base-300 md:pr-4",
+          "w-full md:w-64 flex-shrink-0 overflow-y-auto md:border-e border-base-300 md:pe-4",
           if(@chat_type, do: "hidden md:block", else: "block")
         ]}>
           <h3 class="font-semibold text-sm text-base-content/60 uppercase tracking-wide mb-2">
             {gettext("Friends")}
           </h3>
           <%= if @friends == [] do %>
-            <p class="text-sm text-base-content/70 pl-2">{gettext("No results.")}</p>
+            <p class="text-sm text-base-content/70 ps-2">{gettext("No results.")}</p>
           <% end %>
           <ul class="space-y-1">
             <li :for={f <- @friends}>
@@ -147,7 +147,7 @@ defmodule GamendWeb.ChatLive do
                 phx-click="open_friend"
                 phx-value-id={f.id}
                 class={[
-                  "btn btn-sm w-full justify-start gap-2 text-left",
+                  "btn btn-sm w-full justify-start gap-2 text-start",
                   if(@chat_type == "friend" && @chat_target == f.id,
                     do: "btn-primary",
                     else: "btn-ghost"
@@ -170,7 +170,7 @@ defmodule GamendWeb.ChatLive do
             {gettext("Groups")}
           </h3>
           <%= if @my_groups == [] do %>
-            <p class="text-sm text-base-content/70 pl-2">{gettext("No results.")}</p>
+            <p class="text-sm text-base-content/70 ps-2">{gettext("No results.")}</p>
           <% end %>
           <ul class="space-y-1">
             <li :for={{group, _role} <- @my_groups}>
@@ -178,7 +178,7 @@ defmodule GamendWeb.ChatLive do
                 phx-click="open_group"
                 phx-value-id={group.id}
                 class={[
-                  "btn btn-sm w-full justify-start gap-2 text-left",
+                  "btn btn-sm w-full justify-start gap-2 text-start",
                   if(@chat_type == "group" && @chat_target == group.id,
                     do: "btn-primary",
                     else: "btn-ghost"
@@ -220,7 +220,7 @@ defmodule GamendWeb.ChatLive do
             <div
               id="chat-messages"
               phx-hook="ScrollToBottom"
-              class="flex-1 overflow-y-auto pr-2"
+              class="flex-1 overflow-y-auto pe-2"
             >
               <div :if={@has_more} class="text-center py-2">
                 <button phx-click="load_more" class="btn btn-xs btn-ghost">
@@ -249,9 +249,9 @@ defmodule GamendWeb.ChatLive do
                   <% else %>
                     {sender_name(msg)}
                   <% end %>
-                  <span class="ml-1"><.timestamp at={msg.inserted_at} format="time" /></span>
+                  <span class="ms-1"><.timestamp at={msg.inserted_at} format="time" /></span>
                   <%= if msg.updated_at && msg.updated_at != msg.inserted_at do %>
-                    <span class="ml-1 italic">{gettext("(edited)")}</span>
+                    <span class="ms-1 italic">{gettext("(edited)")}</span>
                   <% end %>
                 </div>
 

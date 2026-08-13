@@ -553,7 +553,7 @@ defmodule GamendWeb.QuestsLive do
 
           <ol class="space-y-0">
             <li :for={{entry, index} <- Enum.with_index(@chain)} class="relative">
-              <div :if={index > 0} class="ml-[15px] h-4 border-l-2 border-base-300"></div>
+              <div :if={index > 0} class="ms-[15px] h-4 border-s-2 border-base-300"></div>
               <div class={[
                 "flex items-center gap-3 rounded-lg p-2",
                 entry.quest.key == @focus && "bg-base-200"
@@ -836,7 +836,7 @@ defmodule GamendWeb.QuestsLive do
                 <.icon name="hero-check-circle-solid" class="w-4 h-4" />
                 <span class="text-xs font-medium">
                   {gettext("Claimed")}
-                  <span :if={@progress.completed_at} class="text-base-content/70 ml-1">
+                  <span :if={@progress.completed_at} class="text-base-content/70 ms-1">
                     <.timestamp at={@progress.completed_at} format="date" />
                   </span>
                 </span>

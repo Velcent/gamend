@@ -703,7 +703,7 @@ defmodule GamendWeb.HostLayouts do
         hidden
       >
         {translate("Loading...")}
-        <.icon name="hero-arrow-path" class="ml-1 size-3 motion-safe:animate-spin" />
+        <.icon name="hero-arrow-path" class="ms-1 size-3 motion-safe:animate-spin" />
       </.flash>
 
       <.flash
@@ -717,7 +717,7 @@ defmodule GamendWeb.HostLayouts do
         hidden
       >
         {translate("Loading...")}
-        <.icon name="hero-arrow-path" class="ml-1 size-3 motion-safe:animate-spin" />
+        <.icon name="hero-arrow-path" class="ms-1 size-3 motion-safe:animate-spin" />
       </.flash>
     </div>
     """
@@ -729,7 +729,7 @@ defmodule GamendWeb.HostLayouts do
   def theme_toggle(assigns) do
     ~H"""
     <div class="card relative flex flex-row items-center border-2 border-base-300 bg-base-300 rounded-full">
-      <div class="absolute w-1/2 h-full rounded-full border-1 border-base-200 bg-base-100 brightness-200 left-0 [[data-theme=dark]_&]:left-1/2 transition-[left]" />
+      <div class="absolute w-1/2 h-full rounded-full border-1 border-base-200 bg-base-100 brightness-200 start-0 [[data-theme=dark]_&]:start-1/2 transition-[inset-inline-start]" />
 
       <button
         class="flex p-2 cursor-pointer w-1/2"

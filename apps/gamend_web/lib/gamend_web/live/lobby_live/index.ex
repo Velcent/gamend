@@ -869,7 +869,7 @@ defmodule GamendWeb.LobbyLive.Index do
                                 </span>
                               <% end %>
                               <%= if @current_scope && Scope.user(@current_scope) && m.id == @current_scope.user_id do %>
-                                <button phx-click="leave" class="btn btn-sm btn-warning ml-2">
+                                <button phx-click="leave" class="btn btn-sm btn-warning ms-2">
                                   {gettext("Leave")}
                                 </button>
                               <% end %>
