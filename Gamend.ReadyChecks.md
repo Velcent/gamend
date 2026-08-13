@@ -293,6 +293,12 @@ in each lane, so the answer needs to say which one it is for.
 check a decline fails the whole check; in a `ready` check it just leaves the
 check pending and can be taken back.
 
+A `ready` board that ran out of time is still answerable: the deadline
+passing is the weakest kind of no — nobody refused, the clock did — and the
+board is still the one on everyone's screen. A late yes lands like any other
+and passes the board if it was the last one missing. (An `accept` check is
+not: its timeout has already released the tickets and re-queued everyone.)
+
 Returns the check as it stands after the answer. Fails with
 `{:error, :no_open_check}` and, for an `accept` check the caller already
 answered, `{:error, :not_revocable}`.

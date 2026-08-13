@@ -5,10 +5,10 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.3">
-    <meta name="project" content="gamend_core v1.0.1150">
+    <meta name="project" content="gamend_core v1.0.1151">
 
 
-    <title>Gamend.ReadyChecks — gamend_core v1.0.1150</title>
+    <title>Gamend.ReadyChecks — gamend_core v1.0.1151</title>
 
     <link rel="stylesheet" href="dist/html-elixir-NHQLCD6Y.css" />
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1150
+          v1.0.1151
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr />ReadyChecks</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1150)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1151)</small>
 
     </h1>
 
@@ -122,9 +122,9 @@ ready or matchmaking accept — one match at a time) and the party lane. The
 lanes are independent, so a party's standing board never blocks the party's
 lobby from opening its own check.</p><h2 id="module-what-core-does-not-do" class="section-heading"><a href="#module-what-core-does-not-do" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">What core does <em>not</em> do</span></h2><p>A failed check kicks nobody, deletes no lobby and moves no lobby state. Core
 records who did not answer (<a href="#not_ready/1"><code class="inline">not_ready/1</code></a>); the host — or the game, in
-<code class="inline">after_ready_check_failed</code> — decides what that is worth.</p><h2 id="module-usage" class="section-heading"><a href="#module-usage" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Usage</span></h2><pre><code class="makeup elixir" translate="no"><span class="p" data-group-id="4509976050-1">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">check</span><span class="p" data-group-id="4509976050-1">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">ReadyChecks</span><span class="o">.</span><span class="n">open</span><span class="p" data-group-id="4509976050-2">(</span><span class="n">lobby</span><span class="p">,</span><span class="w"> </span><span class="n">member_ids</span><span class="p">,</span><span class="w"> </span><span class="ss">opened_by</span><span class="p">:</span><span class="w"> </span><span class="n">host</span><span class="o">.</span><span class="n">id</span><span class="p" data-group-id="4509976050-2">)</span><span class="w">
-</span><span class="p" data-group-id="4509976050-3">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">check</span><span class="p" data-group-id="4509976050-3">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">ReadyChecks</span><span class="o">.</span><span class="n">respond</span><span class="p" data-group-id="4509976050-4">(</span><span class="n">user</span><span class="p">,</span><span class="w"> </span><span class="no">true</span><span class="p" data-group-id="4509976050-4">)</span><span class="w">
-</span><span class="nc">ReadyChecks</span><span class="o">.</span><span class="n">passed?</span><span class="p" data-group-id="4509976050-5">(</span><span class="n">lobby</span><span class="p" data-group-id="4509976050-5">)</span></code></pre><h2 id="module-concurrency" class="section-heading"><a href="#module-concurrency" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Concurrency</span></h2><p>Answering is a single-row write, so no two players can lose each other's
+<code class="inline">after_ready_check_failed</code> — decides what that is worth.</p><h2 id="module-usage" class="section-heading"><a href="#module-usage" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Usage</span></h2><pre><code class="makeup elixir" translate="no"><span class="p" data-group-id="6992092194-1">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">check</span><span class="p" data-group-id="6992092194-1">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">ReadyChecks</span><span class="o">.</span><span class="n">open</span><span class="p" data-group-id="6992092194-2">(</span><span class="n">lobby</span><span class="p">,</span><span class="w"> </span><span class="n">member_ids</span><span class="p">,</span><span class="w"> </span><span class="ss">opened_by</span><span class="p">:</span><span class="w"> </span><span class="n">host</span><span class="o">.</span><span class="n">id</span><span class="p" data-group-id="6992092194-2">)</span><span class="w">
+</span><span class="p" data-group-id="6992092194-3">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">check</span><span class="p" data-group-id="6992092194-3">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">ReadyChecks</span><span class="o">.</span><span class="n">respond</span><span class="p" data-group-id="6992092194-4">(</span><span class="n">user</span><span class="p">,</span><span class="w"> </span><span class="no">true</span><span class="p" data-group-id="6992092194-4">)</span><span class="w">
+</span><span class="nc">ReadyChecks</span><span class="o">.</span><span class="n">passed?</span><span class="p" data-group-id="6992092194-5">(</span><span class="n">lobby</span><span class="p" data-group-id="6992092194-5">)</span></code></pre><h2 id="module-concurrency" class="section-heading"><a href="#module-concurrency" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Concurrency</span></h2><p>Answering is a single-row write, so no two players can lose each other's
 flag. <em>Evaluating</em> the result is the part that races: two players answering
 at once can each count the other as still pending, and nobody passes. So
 <a href="#respond/3"><code class="inline">respond/3</code></a> holds a per-check advisory lock (<code class="inline">:ready_check</code>) around
@@ -523,7 +523,7 @@ numbers on the admin page.</p></div>
       <h1 class="signature" translate="no">add_member(lobby_id, user_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L463" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L504" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -551,7 +551,7 @@ numbers on the admin page.</p></div>
       <h1 class="signature" translate="no">add_party_member(party_id, user_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L469" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L510" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -579,7 +579,7 @@ numbers on the admin page.</p></div>
       <h1 class="signature" translate="no">answer_for(check, user_id, ready?)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L292" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L321" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -612,7 +612,7 @@ over RPC and mark someone else ready.</p>
       <h1 class="signature" translate="no">cancel(check, reason \\ &quot;cancelled&quot;)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L498" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L539" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -641,7 +641,7 @@ over RPC and mark someone else ready.</p>
       <h1 class="signature" translate="no">cancel_for_lobby(lobby_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L515" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L556" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -669,7 +669,7 @@ over RPC and mark someone else ready.</p>
       <h1 class="signature" translate="no">cancel_for_party(party_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L524" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L565" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -699,7 +699,7 @@ over RPC and mark someone else ready.</p>
       <h1 class="signature" translate="no">count_checks(opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L698" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L739" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -727,7 +727,7 @@ over RPC and mark someone else ready.</p>
       <h1 class="signature" translate="no">expire(check)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L548" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L589" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -757,7 +757,7 @@ over RPC and mark someone else ready.</p>
       <h1 class="signature" translate="no">expire_due(now \\ DateTime.utc_now())</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L539" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L580" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -789,7 +789,7 @@ matchmaking sweep's backstop can both run it.</p>
       <h1 class="signature" translate="no">for_user(user, scope \\ :any)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L591" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L632" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -820,7 +820,7 @@ API's.</p>
       <h1 class="signature" translate="no">get_check(id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L673" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L714" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -850,7 +850,7 @@ API's.</p>
       <h1 class="signature" translate="no">list_checks(opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L687" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L728" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -879,7 +879,7 @@ API's.</p>
       <h1 class="signature" translate="no">not_ready(check)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L665" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L706" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -944,7 +944,7 @@ and <code class="inline">{:error, :too_many_participants}</code> past <code clas
       <h1 class="signature" translate="no">passed?(lobby_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L640" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L681" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -975,7 +975,7 @@ rematch cannot ride the previous match's pass.</p>
       <h1 class="signature" translate="no">pending_for_lobby(lobby_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L612" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L653" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1003,7 +1003,7 @@ rematch cannot ride the previous match's pass.</p>
       <h1 class="signature" translate="no">pending_for_party(party_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L623" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L664" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1031,7 +1031,7 @@ rematch cannot ride the previous match's pass.</p>
       <h1 class="signature" translate="no">remove_member(lobby_id, user_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L432" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L473" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1060,7 +1060,7 @@ answered is a legitimate way to pass a check.</p>
       <h1 class="signature" translate="no">remove_party_member(party_id, user_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L438" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L479" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1126,7 +1126,7 @@ re-confirm on a deadline_at (&quot;force ready&quot;). Same options as <a href="
       <h1 class="signature" translate="no">respond(user, ready?, scope \\ :match)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L275" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L281" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1147,7 +1147,11 @@ it.</p><p><code class="inline">scope</code> is <code class="inline">:match</code
 or <code class="inline">:party</code> (the party's standing board): a player can hold one open check
 in each lane, so the answer needs to say which one it is for.</p><p><code class="inline">true</code> is &quot;ready&quot;/&quot;accept&quot;; <code class="inline">false</code> is &quot;not ready&quot;/&quot;decline&quot;. In an <code class="inline">accept</code>
 check a decline fails the whole check; in a <code class="inline">ready</code> check it just leaves the
-check pending and can be taken back.</p><p>Returns the check as it stands after the answer. Fails with
+check pending and can be taken back.</p><p>A <code class="inline">ready</code> board that ran out of time is still answerable: the deadline
+passing is the weakest kind of no — nobody refused, the clock did — and the
+board is still the one on everyone's screen. A late yes lands like any other
+and passes the board if it was the last one missing. (An <code class="inline">accept</code> check is
+not: its timeout has already released the tickets and re-queued everyone.)</p><p>Returns the check as it stands after the answer. Fails with
 <code class="inline">{:error, :no_open_check}</code> and, for an <code class="inline">accept</code> check the caller already
 answered, <code class="inline">{:error, :not_revocable}</code>.</p>
   </section>
@@ -1164,7 +1168,7 @@ answered, <code class="inline">{:error, :not_revocable}</code>.</p>
       <h1 class="signature" translate="no">stats(hours \\ 24)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L707" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/ready_checks.ex#L748" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1192,9 +1196,9 @@ numbers on the admin page.</p>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1150">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1151">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1150">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1151">Hex Preview</a>
 
             </span>
 
