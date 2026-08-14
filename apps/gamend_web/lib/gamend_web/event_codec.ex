@@ -238,6 +238,7 @@ defmodule GamendWeb.EventCodec do
       recipient_id: get(p, :recipient_id),
       title: get(p, :title),
       content: get(p, :content) || "",
+      icon_url: get(p, :icon_url) || "",
       metadata_json: json_bytes(p, :metadata) || "",
       inserted_at_ms: ms(p, :inserted_at) || 0
     }
@@ -272,6 +273,8 @@ defmodule GamendWeb.EventCodec do
       ready_count: get(p, :ready_count) || 0,
       your_state: get(p, :your_state) || "",
       reason: get(p, :reason) || "",
+      opened_by: get(p, :opened_by) || "",
+      metadata_json: json_bytes(p, :metadata) || "",
       participants: Enum.map(get(p, :participants) || [], &ready_check_participant/1)
     }
   end
@@ -280,7 +283,8 @@ defmodule GamendWeb.EventCodec do
     %PB.ReadyCheckParticipant{
       user_id: get(p, :user_id),
       display_name: get(p, :display_name) || "",
-      state: get(p, :state)
+      state: get(p, :state),
+      responded_at_ms: ms(p, :responded_at) || 0
     }
   end
 
@@ -319,8 +323,20 @@ defmodule GamendWeb.EventCodec do
       slowdown: get(p, :slowdown),
       spectator_count: get(p, :spectator_count),
       members: members,
-      has_members: has_members
+      has_members: has_members,
+      state: lobby_state(p),
+      state_changed_at_ms: ms(p, :state_changed_at)
     }
+  end
+
+  # The JSON lobby payload always carries `state`; the protobuf one must too,
+  # or `updated` consumers only ever learn state from a separate state_changed
+  # event they may never receive (a rejoined long-playing lobby, for one).
+  defp lobby_state(p) do
+    case get(p, :state) do
+      nil -> nil
+      state -> state_name(state)
+    end
   end
 
   defp group(p) do
@@ -339,7 +355,8 @@ defmodule GamendWeb.EventCodec do
       member_count: get(p, :member_count),
       slowdown: get(p, :slowdown),
       inserted_at_ms: ms(p, :inserted_at),
-      updated_at_ms: ms(p, :updated_at)
+      updated_at_ms: ms(p, :updated_at),
+      icon_url: get(p, :icon_url)
     }
   end
 

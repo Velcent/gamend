@@ -1387,6 +1387,11 @@ class Notification:
 		service.field = __inserted_at_ms
 		data[__inserted_at_ms.tag] = service
 		
+		__icon_url = PBField.new("icon_url", PB_DATA_TYPE.STRING, PB_RULE.OPTIONAL, 9, true, DEFAULT_VALUES_3[PB_DATA_TYPE.STRING])
+		service = PBServiceField.new()
+		service.field = __icon_url
+		data[__icon_url.tag] = service
+		
 	var data = {}
 	
 	var __id: PBField
@@ -1476,6 +1481,17 @@ class Notification:
 		__inserted_at_ms.value = DEFAULT_VALUES_3[PB_DATA_TYPE.INT64]
 	func set_inserted_at_ms(value : int) -> void:
 		__inserted_at_ms.value = value
+	
+	var __icon_url: PBField
+	func has_icon_url() -> bool:
+		return data[9].state == PB_SERVICE_STATE.FILLED
+	func get_icon_url() -> String:
+		return __icon_url.value
+	func clear_icon_url() -> void:
+		data[9].state = PB_SERVICE_STATE.UNFILLED
+		__icon_url.value = DEFAULT_VALUES_3[PB_DATA_TYPE.STRING]
+	func set_icon_url(value : String) -> void:
+		__icon_url.value = value
 	
 	func _to_string() -> String:
 		return PBPacker.message_to_string(data)
@@ -2051,6 +2067,16 @@ class Lobby:
 		service.field = __metadata_pb
 		data[__metadata_pb.tag] = service
 		
+		__state = PBField.new("state", PB_DATA_TYPE.STRING, PB_RULE.OPTIONAL, 16, true, DEFAULT_VALUES_3[PB_DATA_TYPE.STRING])
+		service = PBServiceField.new()
+		service.field = __state
+		data[__state.tag] = service
+		
+		__state_changed_at_ms = PBField.new("state_changed_at_ms", PB_DATA_TYPE.INT64, PB_RULE.OPTIONAL, 17, true, DEFAULT_VALUES_3[PB_DATA_TYPE.INT64])
+		service = PBServiceField.new()
+		service.field = __state_changed_at_ms
+		data[__state_changed_at_ms.tag] = service
+		
 	var data = {}
 	
 	var __id: PBField
@@ -2218,6 +2244,28 @@ class Lobby:
 	func set_metadata_pb(value : PackedByteArray) -> void:
 		__metadata_pb.value = value
 	
+	var __state: PBField
+	func has_state() -> bool:
+		return data[16].state == PB_SERVICE_STATE.FILLED
+	func get_state() -> String:
+		return __state.value
+	func clear_state() -> void:
+		data[16].state = PB_SERVICE_STATE.UNFILLED
+		__state.value = DEFAULT_VALUES_3[PB_DATA_TYPE.STRING]
+	func set_state(value : String) -> void:
+		__state.value = value
+	
+	var __state_changed_at_ms: PBField
+	func has_state_changed_at_ms() -> bool:
+		return data[17].state == PB_SERVICE_STATE.FILLED
+	func get_state_changed_at_ms() -> int:
+		return __state_changed_at_ms.value
+	func clear_state_changed_at_ms() -> void:
+		data[17].state = PB_SERVICE_STATE.UNFILLED
+		__state_changed_at_ms.value = DEFAULT_VALUES_3[PB_DATA_TYPE.INT64]
+	func set_state_changed_at_ms(value : int) -> void:
+		__state_changed_at_ms.value = value
+	
 	func _to_string() -> String:
 		return PBPacker.message_to_string(data)
 		
@@ -2308,6 +2356,11 @@ class Group:
 		service = PBServiceField.new()
 		service.field = __metadata_pb
 		data[__metadata_pb.tag] = service
+		
+		__icon_url = PBField.new("icon_url", PB_DATA_TYPE.STRING, PB_RULE.OPTIONAL, 14, true, DEFAULT_VALUES_3[PB_DATA_TYPE.STRING])
+		service = PBServiceField.new()
+		service.field = __icon_url
+		data[__icon_url.tag] = service
 		
 	var data = {}
 	
@@ -2453,6 +2506,17 @@ class Group:
 		__metadata_pb.value = DEFAULT_VALUES_3[PB_DATA_TYPE.BYTES]
 	func set_metadata_pb(value : PackedByteArray) -> void:
 		__metadata_pb.value = value
+	
+	var __icon_url: PBField
+	func has_icon_url() -> bool:
+		return data[14].state == PB_SERVICE_STATE.FILLED
+	func get_icon_url() -> String:
+		return __icon_url.value
+	func clear_icon_url() -> void:
+		data[14].state = PB_SERVICE_STATE.UNFILLED
+		__icon_url.value = DEFAULT_VALUES_3[PB_DATA_TYPE.STRING]
+	func set_icon_url(value : String) -> void:
+		__icon_url.value = value
 	
 	func _to_string() -> String:
 		return PBPacker.message_to_string(data)
@@ -3876,6 +3940,11 @@ class ReadyCheckParticipant:
 		service.field = __state
 		data[__state.tag] = service
 		
+		__responded_at_ms = PBField.new("responded_at_ms", PB_DATA_TYPE.INT64, PB_RULE.OPTIONAL, 4, true, DEFAULT_VALUES_3[PB_DATA_TYPE.INT64])
+		service = PBServiceField.new()
+		service.field = __responded_at_ms
+		data[__responded_at_ms.tag] = service
+		
 	var data = {}
 	
 	var __user_id: PBField
@@ -3910,6 +3979,17 @@ class ReadyCheckParticipant:
 		__state.value = DEFAULT_VALUES_3[PB_DATA_TYPE.STRING]
 	func set_state(value : String) -> void:
 		__state.value = value
+	
+	var __responded_at_ms: PBField
+	func has_responded_at_ms() -> bool:
+		return data[4].state == PB_SERVICE_STATE.FILLED
+	func get_responded_at_ms() -> int:
+		return __responded_at_ms.value
+	func clear_responded_at_ms() -> void:
+		data[4].state = PB_SERVICE_STATE.UNFILLED
+		__responded_at_ms.value = DEFAULT_VALUES_3[PB_DATA_TYPE.INT64]
+	func set_responded_at_ms(value : int) -> void:
+		__responded_at_ms.value = value
 	
 	func _to_string() -> String:
 		return PBPacker.message_to_string(data)
@@ -3993,6 +4073,16 @@ class ReadyCheckState:
 		service = PBServiceField.new()
 		service.field = __party_id
 		data[__party_id.tag] = service
+		
+		__opened_by = PBField.new("opened_by", PB_DATA_TYPE.STRING, PB_RULE.OPTIONAL, 12, true, DEFAULT_VALUES_3[PB_DATA_TYPE.STRING])
+		service = PBServiceField.new()
+		service.field = __opened_by
+		data[__opened_by.tag] = service
+		
+		__metadata_json = PBField.new("metadata_json", PB_DATA_TYPE.BYTES, PB_RULE.OPTIONAL, 13, true, DEFAULT_VALUES_3[PB_DATA_TYPE.BYTES])
+		service = PBServiceField.new()
+		service.field = __metadata_json
+		data[__metadata_json.tag] = service
 		
 	var data = {}
 	
@@ -4116,6 +4206,28 @@ class ReadyCheckState:
 		__party_id.value = DEFAULT_VALUES_3[PB_DATA_TYPE.STRING]
 	func set_party_id(value : String) -> void:
 		__party_id.value = value
+	
+	var __opened_by: PBField
+	func has_opened_by() -> bool:
+		return data[12].state == PB_SERVICE_STATE.FILLED
+	func get_opened_by() -> String:
+		return __opened_by.value
+	func clear_opened_by() -> void:
+		data[12].state = PB_SERVICE_STATE.UNFILLED
+		__opened_by.value = DEFAULT_VALUES_3[PB_DATA_TYPE.STRING]
+	func set_opened_by(value : String) -> void:
+		__opened_by.value = value
+	
+	var __metadata_json: PBField
+	func has_metadata_json() -> bool:
+		return data[13].state == PB_SERVICE_STATE.FILLED
+	func get_metadata_json() -> PackedByteArray:
+		return __metadata_json.value
+	func clear_metadata_json() -> void:
+		data[13].state = PB_SERVICE_STATE.UNFILLED
+		__metadata_json.value = DEFAULT_VALUES_3[PB_DATA_TYPE.BYTES]
+	func set_metadata_json(value : PackedByteArray) -> void:
+		__metadata_json.value = value
 	
 	func _to_string() -> String:
 		return PBPacker.message_to_string(data)

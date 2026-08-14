@@ -98,6 +98,19 @@ defmodule GamendWeb.ProtobufFormatTest do
     assert decoded.members == []
   end
 
+  test "lobby updated carries the lifecycle state like the JSON payload does" do
+    # Without it, protobuf clients only ever learned state from a separate
+    # state_changed event — one a rejoined long-playing lobby never sends —
+    # and every consumer gating on lobby.state read "" and dropped the payload.
+    {:ok, bin} = EventCodec.encode("lobby:x", "updated", %{id: "l1", state: :playing})
+    decoded = PB.Lobby.decode(IO.iodata_to_binary(bin))
+
+    assert decoded.state == "playing"
+
+    {:ok, no_state} = EventCodec.encode("lobby:x", "updated", %{id: "l1"})
+    assert PB.Lobby.decode(IO.iodata_to_binary(no_state)).state == nil
+  end
+
   test "friend_updated maps friend ids to user payloads" do
     payload = %{friends: %{"abc" => %{display_name: "Bob", is_online: false}}}
     {:ok, bin} = EventCodec.encode("user:x", "friend_updated", payload)

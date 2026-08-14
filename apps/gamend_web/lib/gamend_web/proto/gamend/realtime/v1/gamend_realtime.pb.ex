@@ -101,6 +101,7 @@ defmodule Gamend.Realtime.V1.Notification do
   field :content, 6, type: :string
   field :metadata_json, 7, type: :bytes, json_name: "metadataJson"
   field :inserted_at_ms, 8, type: :int64, json_name: "insertedAtMs"
+  field :icon_url, 9, type: :string, json_name: "iconUrl"
 end
 
 defmodule Gamend.Realtime.V1.ChatMessage do
@@ -186,6 +187,12 @@ defmodule Gamend.Realtime.V1.Lobby do
   field :members, 13, repeated: true, type: Gamend.Realtime.V1.UserBrief
   field :has_members, 14, proto3_optional: true, type: :bool, json_name: "hasMembers"
   field :metadata_pb, 15, proto3_optional: true, type: :bytes, json_name: "metadataPb"
+  field :state, 16, proto3_optional: true, type: :string
+
+  field :state_changed_at_ms, 17,
+    proto3_optional: true,
+    type: :int64,
+    json_name: "stateChangedAtMs"
 end
 
 defmodule Gamend.Realtime.V1.Group do
@@ -209,6 +216,7 @@ defmodule Gamend.Realtime.V1.Group do
   field :inserted_at_ms, 11, proto3_optional: true, type: :int64, json_name: "insertedAtMs"
   field :updated_at_ms, 12, proto3_optional: true, type: :int64, json_name: "updatedAtMs"
   field :metadata_pb, 13, proto3_optional: true, type: :bytes, json_name: "metadataPb"
+  field :icon_url, 14, proto3_optional: true, type: :string, json_name: "iconUrl"
 end
 
 defmodule Gamend.Realtime.V1.Party do
@@ -449,6 +457,7 @@ defmodule Gamend.Realtime.V1.ReadyCheckParticipant do
   field :user_id, 1, type: :string, json_name: "userId"
   field :display_name, 2, type: :string, json_name: "displayName"
   field :state, 3, type: :string
+  field :responded_at_ms, 4, type: :int64, json_name: "respondedAtMs"
 end
 
 defmodule Gamend.Realtime.V1.ReadyCheckState do
@@ -470,6 +479,8 @@ defmodule Gamend.Realtime.V1.ReadyCheckState do
   field :reason, 9, type: :string
   field :participants, 10, repeated: true, type: Gamend.Realtime.V1.ReadyCheckParticipant
   field :party_id, 11, type: :string, json_name: "partyId"
+  field :opened_by, 12, type: :string, json_name: "openedBy"
+  field :metadata_json, 13, type: :bytes, json_name: "metadataJson"
 end
 
 defmodule Gamend.Realtime.V1.KvEntry do
