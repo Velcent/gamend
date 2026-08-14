@@ -1,4 +1,4 @@
-## GamendSignalingClient — Godot WebRTC peer-to-peer client for game_server.
+## GamendSignalingClient — Godot WebRTC peer-to-peer client for gamend.
 ##
 ## Uses an existing PhoenixChannel ("signaling:<lobby_id>", must be joined
 ## already) to relay SDP offers/answers and ICE candidates between peers.

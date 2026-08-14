@@ -36,7 +36,8 @@ defmodule Gamend.Settings.Provider do
   - `:group` (required) — the middle segment of the env name, and the grouping
     the admin viewer renders. One word.
   - `:root` — first segment of the env name. Defaults to `"GAMEND"`; a plugin
-    passes its own (`root: "POLYGLOT"`).
+    passes its own (`root: "MY_GAME"`). Each definition carries it back, so
+    tooling can check the naming convention without knowing which hosts exist.
   - `:label` — display name for the group. Defaults to a capitalised `:group`.
 
   ## Options for `setting/3`
@@ -141,6 +142,7 @@ option(s) #{inspect(unknown)}; expected one of #{inspect(@setting_opts)}"
       app: app,
       group: group,
       label: label,
+      root: root,
       type: type,
       default: Keyword.get(opts, :default),
       env: derive_env(root, group, key),

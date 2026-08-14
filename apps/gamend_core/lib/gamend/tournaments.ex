@@ -1213,7 +1213,7 @@ defmodule Gamend.Tournaments do
     end
   end
 
-  # ── Pure bracket math (ported from polyglot's Weekend Gauntlet) ───────────
+  # ── Pure bracket math (ported from a downstream game's tournament mode) ───────────
 
   @doc "Rounds needed to win a bracket of `size` slots (2→1, 4→2, 8→3)."
   @spec bracket_rounds(pos_integer()) :: pos_integer()

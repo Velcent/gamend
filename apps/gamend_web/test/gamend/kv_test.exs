@@ -7,29 +7,27 @@ defmodule Gamend.KVTest do
   test "put/get/update and delete" do
     user = AccountsFixtures.user_fixture()
 
-    assert :error == KV.get("polyglot_pirates:key1")
+    assert :error == KV.get("my_game:key1")
 
     assert {:ok, _row} =
-             KV.put("polyglot_pirates:key1", %{"a" => 1}, %{"plugin" => "polyglot_pirates"})
+             KV.put("my_game:key1", %{"a" => 1}, %{"plugin" => "my_game"})
 
-    assert {:ok, %{value: %{"a" => 1}, metadata: %{"plugin" => "polyglot_pirates"}}} =
-             KV.get("polyglot_pirates:key1")
+    assert {:ok, %{value: %{"a" => 1}, metadata: %{"plugin" => "my_game"}}} =
+             KV.get("my_game:key1")
 
     assert {:ok, _row} =
-             KV.put("polyglot_pirates:key1", %{"a" => 2}, %{"plugin" => "polyglot_pirates"},
-               user_id: user.id
-             )
+             KV.put("my_game:key1", %{"a" => 2}, %{"plugin" => "my_game"}, user_id: user.id)
 
-    assert {:ok, %{value: %{"a" => 2}, metadata: %{"plugin" => "polyglot_pirates"}}} =
-             KV.get("polyglot_pirates:key1", user_id: user.id)
+    assert {:ok, %{value: %{"a" => 2}, metadata: %{"plugin" => "my_game"}}} =
+             KV.get("my_game:key1", user_id: user.id)
 
     # Deleting the global entry doesn't affect the per-user one.
-    assert :ok = KV.delete("polyglot_pirates:key1")
-    assert :error == KV.get("polyglot_pirates:key1")
-    assert {:ok, _} = KV.get("polyglot_pirates:key1", user_id: user.id)
+    assert :ok = KV.delete("my_game:key1")
+    assert :error == KV.get("my_game:key1")
+    assert {:ok, _} = KV.get("my_game:key1", user_id: user.id)
 
-    assert :ok = KV.delete("polyglot_pirates:key1", user_id: user.id)
-    assert :error == KV.get("polyglot_pirates:key1", user_id: user.id)
+    assert :ok = KV.delete("my_game:key1", user_id: user.id)
+    assert :error == KV.get("my_game:key1", user_id: user.id)
   end
 
   test "list/count entries supports global_only" do

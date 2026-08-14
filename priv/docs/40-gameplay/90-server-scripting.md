@@ -209,7 +209,7 @@ You can now call this function via the API (or better yet from the client SDK's)
 curl -X POST https://your-gamend.com/api/v1/hooks/call \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"plugin":"polyglot_hook","fn":"hello_world","args":["Alice"]}'
+  -d '{"plugin":"my_game_hook","fn":"hello_world","args":["Alice"]}'
 ```
 
 ### Server-only privileges

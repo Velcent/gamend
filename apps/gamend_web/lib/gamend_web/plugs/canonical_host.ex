@@ -35,7 +35,7 @@ defmodule GamendWeb.Plugs.CanonicalHost do
   @exempt_paths [["api", "v1", "health"], [".well-known", "acme-challenge"]]
 
   # Local development, whatever the configured canonical host is. Setting it
-  # outside `prod` once sent `localhost:4000` to `polyglotpirates.com:4000` —
+  # outside `prod` once sent `localhost:4000` to `example.com:4000` —
   # a config mistake, but one this plug should refuse to act on: redirecting a
   # developer off their own machine is never the intent.
   @local_hosts ~w(localhost 127.0.0.1 ::1 0.0.0.0)

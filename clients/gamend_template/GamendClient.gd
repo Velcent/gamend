@@ -426,7 +426,7 @@ func _cache_section() -> String:
 # --- hook RPCs + session snapshot -------------------------------------------
 
 
-## Server-plugin name rpc_call/rpc_send target (e.g. "polyglot_hook").
+## Server-plugin name rpc_call/rpc_send target (e.g. "my_game_hook").
 var plugin := ""
 ## key -> value writes currently in flight (write_deduped dedupe).
 var _pending_writes: Dictionary = {}

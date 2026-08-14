@@ -325,7 +325,7 @@ defmodule GamendWeb.HostLayoutNavigation do
   The language picker's button(s).
 
   Two controls, one visible at a time, mirroring the in-page language selector
-  (`PolyglotLanguageSelector.target_dropdown`) so the site opens a language list
+  (the host's in-page selector) so the site opens a language list
   the same way everywhere:
 
     * from `sm` up, a `<details>` dropdown like every other navbar menu;

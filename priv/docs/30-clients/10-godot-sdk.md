@@ -64,7 +64,7 @@ func _ready() -> void:
 	print_error_or_result(me)
 
 	var call_hook := CallHookRequest.new()
-	call_hook.plugin = "polyglot_hook"
+	call_hook.plugin = "my_game_hook"
 	call_hook.fn = "hello"
 	call_hook.args = ["1"]
 	print_error_or_result(await gamend_api.hooks_call_hook(call_hook).finished)

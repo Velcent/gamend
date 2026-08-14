@@ -116,10 +116,12 @@ defmodule GamendWeb.EventCodecCoverageTest do
     end
 
     test "state_changed matches the bytes the Godot client is tested against" do
-      # The client's decoder is hand-written GDScript in another repo (the
-      # godobuf checkout is a different generator version, so that file cannot
-      # be regenerated wholesale). This pins the exact bytes both sides use;
-      # game-world/tests/lobby_state_changed_test.gd decodes this same vector.
+      # A Godot client's decoder is hand-written GDScript (the godobuf checkout
+      # is a different generator version, so that file cannot be regenerated
+      # wholesale), so encoder and decoder can drift apart silently. This vector
+      # is the contract: the server pins it here, and the client's own test
+      # decodes these exact bytes. Encoding and decoding with one library proves
+      # nothing about whether two implementations agree.
       {:ok, iodata} =
         EventCodec.encode("lobby:1", "state_changed", %{
           lobby_id: "lob-1",
@@ -207,7 +209,8 @@ defmodule GamendWeb.EventCodecCoverageTest do
       # Field 6, wire type 2, length 0 — the empty string, present on the wire.
       assert <<0x32, 0x00>> = binary_part(bytes, 21, 2)
 
-      # game-world/tests/lobby_seat_cleared_test.gd decodes this same vector.
+      # Pinned for the same reason as the vector above: a client test decodes
+      # these exact bytes.
       assert Base.encode64(bytes) == "CgZ1c2VyLTESABoAIgJ7fSoDQW5hMgA6AEABUgBYAGoA"
     end
   end

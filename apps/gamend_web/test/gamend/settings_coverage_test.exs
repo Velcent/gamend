@@ -144,8 +144,9 @@ defmodule Gamend.SettingsCoverageTest do
   defp sample(%{type: :boolean, default: true}), do: {"false", false}
   defp sample(%{type: :boolean}), do: {"true", true}
 
-  defp expected_name(%{group: group, key: key, module: module}) do
-    root = if module |> Module.split() |> hd() == "PolyglotHook", do: "POLYGLOT", else: "GAMEND"
+  # The root comes from the definition rather than a list of known hosts, so any
+  # plugin declaring its own `root:` is covered without core learning its name.
+  defp expected_name(%{group: group, key: key, root: root}) do
     Enum.map_join([root, to_string(group), to_string(key)], "_", &String.upcase/1)
   end
 end

@@ -120,6 +120,30 @@ defmodule Gamend.MatchmakingTest do
       assert length(match) == 2
     end
 
+    test "queue order is chronological across a second boundary" do
+      # `sort_by` without a sorter falls back to Erlang term order, which walks
+      # a DateTime struct in alphabetical key order — `microsecond` before
+      # `second`. These three then sorted 3.000000, 2.000001, 1.999999: exactly
+      # backwards, so the longest-waiting player lost the anchor position.
+      # `fake_ticket/4` gives every ticket the same microsecond, which is why
+      # the other tests here could never see it.
+      base = ~U[2026-01-01 10:00:00.000000Z]
+
+      at = fn ticket, micros ->
+        %{ticket | queued_at: DateTime.add(base, micros, :microsecond)}
+      end
+
+      first = at.(fake_ticket(2, 2, 60_000, 0), 1_999_999)
+      second = at.(fake_ticket(2, 2, 60_000, 0), 2_000_001)
+      third = at.(fake_ticket(2, 2, 60_000, 0), 3_000_000)
+
+      {matches, remaining} = Matcher.form_matches([third, first, second])
+
+      assert [match] = matches
+      assert Enum.map(match, & &1.user_id) == [first.user_id, second.user_id]
+      assert Enum.map(remaining, & &1.user_id) == [third.user_id]
+    end
+
     test "waits for the timeout when between min and max" do
       tickets = [fake_ticket(2, 4, 60_000, 1), fake_ticket(2, 4, 60_000, 0)]
       {matches, remaining} = Matcher.form_matches(tickets)

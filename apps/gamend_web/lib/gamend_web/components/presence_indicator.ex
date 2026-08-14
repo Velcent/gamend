@@ -3,7 +3,7 @@ defmodule GamendWeb.PresenceIndicator do
   The online / idle / offline dot, shared by every surface that lists a user.
 
   Before this the web had exactly one presence indicator — a two-state pip on
-  the Polyglot world map — and none at all in chat, friends or groups. Two
+  one host's world map — and none at all in chat, friends or groups. Two
   states meant someone who closed the tab a minute ago rendered the same as
   someone last seen a week back; `:recent` is the state that distinguishes them.
 

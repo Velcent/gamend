@@ -27,7 +27,7 @@ defmodule GamendWeb.Plugs.ForceSSLTest do
     Application.put_env(:gamend_web, GamendWeb.Tls, Keyword.put(previous, :force, value))
   end
 
-  defp http(path), do: %{conn(:get, "http://polyglotpirates.com" <> path) | scheme: :http}
+  defp http(path), do: %{conn(:get, "http://example.com" <> path) | scheme: :http}
 
   test "redirects plain HTTP to HTTPS when the setting is on", %{opts: opts, previous: previous} do
     force(true, previous)
@@ -35,7 +35,7 @@ defmodule GamendWeb.Plugs.ForceSSLTest do
     conn = ForceSSL.call(http("/pl"), opts)
 
     assert conn.status == 301
-    assert get_resp_header(conn, "location") == ["https://polyglotpirates.com/pl"]
+    assert get_resp_header(conn, "location") == ["https://example.com/pl"]
     assert conn.halted
   end
 
@@ -44,7 +44,7 @@ defmodule GamendWeb.Plugs.ForceSSLTest do
 
     conn = ForceSSL.call(%{http("/play") | query_string: "mode=coop"}, opts)
 
-    assert get_resp_header(conn, "location") == ["https://polyglotpirates.com/play?mode=coop"]
+    assert get_resp_header(conn, "location") == ["https://example.com/play?mode=coop"]
   end
 
   test "does nothing when the setting is off", %{opts: opts, previous: previous} do
@@ -59,7 +59,7 @@ defmodule GamendWeb.Plugs.ForceSSLTest do
   test "leaves an HTTPS request alone", %{opts: opts, previous: previous} do
     force(true, previous)
 
-    conn = ForceSSL.call(conn(:get, "https://polyglotpirates.com/pl"), opts)
+    conn = ForceSSL.call(conn(:get, "https://example.com/pl"), opts)
 
     refute conn.halted
   end
@@ -88,7 +88,7 @@ defmodule GamendWeb.Plugs.ForceSSLTest do
   } do
     force(true, previous)
 
-    conn = ForceSSL.call(conn(:get, "https://polyglotpirates.com/pl"), opts)
+    conn = ForceSSL.call(conn(:get, "https://example.com/pl"), opts)
 
     assert get_resp_header(conn, "strict-transport-security") == []
   end
@@ -108,10 +108,10 @@ defmodule GamendWeb.Plugs.ForceSSLTest do
       force(true, previous)
 
       conn =
-        GamendWeb.Endpoint.call(%{conn(:get, "http://polyglotpirates.com/") | scheme: :http}, [])
+        GamendWeb.Endpoint.call(%{conn(:get, "http://example.com/") | scheme: :http}, [])
 
       assert conn.status == 301
-      assert get_resp_header(conn, "location") == ["https://polyglotpirates.com/"]
+      assert get_resp_header(conn, "location") == ["https://example.com/"]
     end
   end
 end

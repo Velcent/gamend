@@ -130,7 +130,7 @@ defmodule Gamend.LobbySnapshots do
   Record that a mutation happened somewhere capture cannot see.
 
   A plugin calls this from a tripwire that detects state being written outside
-  the chokepoints capture hangs off — polyglot's `warn_if_unserialized_write/1`
+  the chokepoints capture hangs off — a host's `warn_if_unserialized_write/1`
   is the first. Such a write is *by definition* a mutation missing from the
   snapshots, so this is the system reporting its own blind spots.
 

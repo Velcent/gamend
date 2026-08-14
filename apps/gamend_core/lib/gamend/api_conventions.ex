@@ -21,7 +21,7 @@ defmodule Gamend.ApiConventions do
           message: String.t()
         }
 
-  # The same checks run in every host repo (polyglot, the starter), where
+  # The same checks run in every host repo (the starter, downstream games), where
   # core/web live under deps and the host's own code under lib/ and
   # modules/*/lib - so the scan roots are discovered, not hardcoded. Only
   # directories that exist take part.

@@ -371,7 +371,8 @@ defmodule GamendWeb.PresentationPage do
 
     assigns =
       assign(assigns,
-        links: Enum.filter(links, &(non_empty_string(&1["label"]) && non_empty_string(&1["href"])))
+        links:
+          Enum.filter(links, &(non_empty_string(&1["label"]) && non_empty_string(&1["href"])))
       )
 
     ~H"""

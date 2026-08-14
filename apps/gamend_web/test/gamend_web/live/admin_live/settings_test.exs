@@ -93,11 +93,12 @@ defmodule GamendWeb.AdminLive.SettingsTest do
   test "no setting escapes the naming convention", %{conn: conn} do
     {:ok, _view, html} = live(conn, ~p"/admin/settings")
 
-    # Every declared variable is derived, so each is GAMEND_ or a plugin root.
+    # Every declared variable is derived from its own root, so the check needs
+    # no list of known hosts — naming one would only assert that that host is
+    # installed, and would miss any other plugin's settings entirely.
     for definition <- Settings.all() do
-      assert String.starts_with?(definition.env, "GAMEND_") or
-               String.starts_with?(definition.env, "POLYGLOT_"),
-             "#{definition.env} does not follow the convention"
+      assert String.starts_with?(definition.env, definition.root <> "_"),
+             "#{definition.env} does not follow the #{definition.root}_ convention"
     end
 
     refute html =~ "inherited"

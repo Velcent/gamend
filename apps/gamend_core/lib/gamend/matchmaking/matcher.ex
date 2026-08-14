@@ -50,6 +50,15 @@ defmodule Gamend.Matchmaking.Matcher do
 
   # Tickets of one party become a single group, ordered by the party's oldest
   # ticket so a party keeps the queue position it joined at.
+  #
+  # Both sorts name `DateTime` explicitly. Without it `sort_by` falls back to
+  # Erlang term order, which compares a `DateTime` struct field by field in
+  # *alphabetical key* order — `microsecond` before `minute` and `second`. So
+  # 10:00:01.999999 sorted *after* 10:00:02.000001, and any two tickets
+  # straddling a second boundary came out in reverse queue order: the anchor
+  # was whoever queued second, and the player who had waited longest was passed
+  # over. Same-second tickets compare correctly, which is why this only ever
+  # failed intermittently.
   defp group_tickets(tickets) do
     tickets
     |> Enum.with_index()
@@ -58,8 +67,8 @@ defmodule Gamend.Matchmaking.Matcher do
       fn {ticket, _index} -> ticket end
     )
     |> Map.values()
-    |> Enum.map(&Enum.sort_by(&1, fn ticket -> ticket.queued_at end))
-    |> Enum.sort_by(fn [oldest | _] -> oldest.queued_at end)
+    |> Enum.map(&Enum.sort_by(&1, fn ticket -> ticket.queued_at end, DateTime))
+    |> Enum.sort_by(fn [oldest | _] -> oldest.queued_at end, DateTime)
   end
 
   defp do_form_matches([], _blocked, matches), do: {Enum.reverse(matches), []}
