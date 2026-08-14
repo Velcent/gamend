@@ -43,9 +43,12 @@ defmodule GamendWeb.Plugs.CanonicalHost do
   @impl true
   def init(opts), do: opts
 
+  # An explicit `:canonical_host` in plug opts wins over the application env,
+  # so a caller (or a test) can pin the host without touching global config —
+  # the env stays mutable at runtime for everyone who doesn't pass one.
   @impl true
-  def call(conn, _opts) do
-    case canonical_host() do
+  def call(conn, opts) do
+    case opts[:canonical_host] || canonical_host() do
       host when is_binary(host) and host != "" ->
         maybe_redirect(conn, host)
 

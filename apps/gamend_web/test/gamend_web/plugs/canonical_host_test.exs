@@ -12,20 +12,11 @@ defmodule GamendWeb.Plugs.CanonicalHostTest do
 
   @canonical "example.com"
 
-  setup do
-    previous = Application.get_env(:gamend_web, :canonical_host)
-    Application.put_env(:gamend_web, :canonical_host, @canonical)
-
-    on_exit(fn ->
-      if previous,
-        do: Application.put_env(:gamend_web, :canonical_host, previous),
-        else: Application.delete_env(:gamend_web, :canonical_host)
-    end)
-
-    :ok
-  end
-
-  defp call(conn), do: CanonicalHost.call(conn, CanonicalHost.init([]))
+  # The host is injected through plug opts rather than `Application.put_env`:
+  # this module is async, and the endpoint reads :canonical_host on every
+  # request, so a global put_env here 301s every other async test's conn.
+  defp call(conn, opts \\ [canonical_host: @canonical]),
+    do: CanonicalHost.call(conn, CanonicalHost.init(opts))
 
   defp request(method, host, path, scheme \\ :https, port \\ 443) do
     :get
@@ -102,9 +93,7 @@ defmodule GamendWeb.Plugs.CanonicalHostTest do
 
   describe "when unset" do
     test "nothing is redirected" do
-      Application.delete_env(:gamend_web, :canonical_host)
-
-      conn = call(request("GET", "www." <> @canonical, "/"))
+      conn = call(request("GET", "www." <> @canonical, "/"), [])
 
       refute conn.halted
     end
