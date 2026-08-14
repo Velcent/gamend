@@ -829,6 +829,15 @@ defmodule Gamend.Quests do
     end
   end
 
+  # "quest_reward:<quest key>" so the wallet's transactions table names the
+  # quest a payout came from — a treasure find and a daily-city visit used to
+  # be indistinguishable rows. Sliced to the ledgers' 64-char reason cap.
+  defp quest_reward_reason(%{key: key}) when is_binary(key) and key != "" do
+    String.slice("quest_reward:" <> key, 0, 64)
+  end
+
+  defp quest_reward_reason(_quest), do: "quest_reward"
+
   # The single conditional UPDATE is the exactly-once gate: only one caller
   # ever sees the completed → claimed transition succeed.
   defp transition_to_claimed(progress, now) do
@@ -846,6 +855,8 @@ defmodule Gamend.Quests do
   # failure leaves rewards_granted_at unset so recovery can retry safely.
   #
   defp grant_rewards(user_id, quest, progress) do
+    reason = quest_reward_reason(quest)
+
     results =
       quest.rewards
       |> Enum.with_index()
@@ -856,13 +867,13 @@ defmodule Gamend.Quests do
           case reward.type do
             "currency" ->
               Gamend.Economy.grant(user_id, reward.code, reward.amount,
-                reason: "quest_reward",
+                reason: reason,
                 idempotency_key: key
               )
 
             "item" ->
               Gamend.Inventory.grant_item(user_id, reward.code, reward.amount,
-                reason: "quest_reward",
+                reason: reason,
                 idempotency_key: key
               )
           end
