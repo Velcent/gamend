@@ -5,7 +5,7 @@ Generic key/value storage.
 
 This is intentionally minimal and un-opinionated.
 
-If you want namespacing, encode it in `key` (e.g. `"polyglot_pirates:key1"`).
+If you want namespacing, encode it in `key` (e.g. `"my_game:key1"`).
 If you want per-user values, pass `user_id: ...` to `get/2`, `put/4`, and `delete/2`.
 If you want per-lobby values, pass `lobby_id: ...` to the same functions.
 You can also pass both to scope a key to a user within a lobby.

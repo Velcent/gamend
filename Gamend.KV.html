@@ -114,7 +114,7 @@ gamend_core
 
 
     <section id="moduledoc">
-<p>Generic key/value storage.</p><p>This is intentionally minimal and un-opinionated.</p><p>If you want namespacing, encode it in <code class="inline">key</code> (e.g. <code class="inline">&quot;polyglot_pirates:key1&quot;</code>).
+<p>Generic key/value storage.</p><p>This is intentionally minimal and un-opinionated.</p><p>If you want namespacing, encode it in <code class="inline">key</code> (e.g. <code class="inline">&quot;my_game:key1&quot;</code>).
 If you want per-user values, pass <code class="inline">user_id: ...</code> to <a href="#get/2"><code class="inline">get/2</code></a>, <a href="#put/4"><code class="inline">put/4</code></a>, and <a href="#delete/2"><code class="inline">delete/2</code></a>.
 If you want per-lobby values, pass <code class="inline">lobby_id: ...</code> to the same functions.
 You can also pass both to scope a key to a user within a lobby.</p><p>This module uses the app cache (<a href="Gamend.Cache.html"><code class="inline">Gamend.Cache</code></a>) as a best-effort read cache.

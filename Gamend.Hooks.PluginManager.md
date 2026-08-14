@@ -3,18 +3,18 @@
 
 Loads and manages hook plugins shipped as OTP applications under `modules/plugins/*`.
 
-Each plugin is expected to be a directory named after the OTP app name (e.g. `polyglot_hook`)
+Each plugin is expected to be a directory named after the OTP app name (e.g. `my_game_hook`)
 containing:
 
-    modules/plugins/polyglot_hook/
-      ebin/polyglot_hook.app
-      ebin/Elixir.Gamend.Modules.PolyglotHook.beam
+    modules/plugins/my_game_hook/
+      ebin/my_game_hook.app
+      ebin/Elixir.Gamend.Modules.MyGameHook.beam
       priv/**
       deps/*/ebin/*.beam
       deps/*/priv/**
 
 The plugin's `.app` env must include the key `:hooks_module`, whose value is either a
-charlist or string module name like `'Elixir.Gamend.Modules.PolyglotHook'`.
+charlist or string module name like `'Elixir.Gamend.Modules.MyGameHook'`.
 
 This manager is intentionally dependency-free: it only adds `ebin` directories to the code
 path and uses `Application.load/1` + `Application.ensure_all_started/1`.

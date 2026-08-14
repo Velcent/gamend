@@ -114,14 +114,14 @@ gamend_core
 
 
     <section id="moduledoc">
-<p>Loads and manages hook plugins shipped as OTP applications under <code class="inline">modules/plugins/*</code>.</p><p>Each plugin is expected to be a directory named after the OTP app name (e.g. <code class="inline">polyglot_hook</code>)
-containing:</p><pre><code class="makeup elixir" translate="no"><span class="n">modules</span><span class="o">/</span><span class="n">plugins</span><span class="o">/</span><span class="n">polyglot_hook</span><span class="o">/</span><span class="w">
-  </span><span class="n">ebin</span><span class="o">/</span><span class="n">polyglot_hook</span><span class="o">.</span><span class="n">app</span><span class="w">
-  </span><span class="n">ebin</span><span class="o">/</span><span class="nc">Elixir.Gamend.Modules.PolyglotHook</span><span class="o">.</span><span class="n">beam</span><span class="w">
+<p>Loads and manages hook plugins shipped as OTP applications under <code class="inline">modules/plugins/*</code>.</p><p>Each plugin is expected to be a directory named after the OTP app name (e.g. <code class="inline">my_game_hook</code>)
+containing:</p><pre><code class="makeup elixir" translate="no"><span class="n">modules</span><span class="o">/</span><span class="n">plugins</span><span class="o">/</span><span class="n">my_game_hook</span><span class="o">/</span><span class="w">
+  </span><span class="n">ebin</span><span class="o">/</span><span class="n">my_game_hook</span><span class="o">.</span><span class="n">app</span><span class="w">
+  </span><span class="n">ebin</span><span class="o">/</span><span class="nc">Elixir.Gamend.Modules.MyGameHook</span><span class="o">.</span><span class="n">beam</span><span class="w">
   </span><span class="n">priv</span><span class="o">/</span><span class="o">*</span><span class="o">*</span><span class="w">
   </span><span class="n">deps</span><span class="o">/</span><span class="o">*</span><span class="o">/</span><span class="n">ebin</span><span class="o">/</span><span class="o">*</span><span class="o">.</span><span class="n">beam</span><span class="w">
   </span><span class="n">deps</span><span class="o">/</span><span class="o">*</span><span class="o">/</span><span class="n">priv</span><span class="o">/</span><span class="o">*</span><span class="o">*</span></code></pre><p>The plugin's <code class="inline">.app</code> env must include the key <code class="inline">:hooks_module</code>, whose value is either a
-charlist or string module name like <code class="inline">'Elixir.Gamend.Modules.PolyglotHook'</code>.</p><p>This manager is intentionally dependency-free: it only adds <code class="inline">ebin</code> directories to the code
+charlist or string module name like <code class="inline">'Elixir.Gamend.Modules.MyGameHook'</code>.</p><p>This manager is intentionally dependency-free: it only adds <code class="inline">ebin</code> directories to the code
 path and uses <a href="https://hexdocs.pm/elixir/Application.html#load/1"><code class="inline">Application.load/1</code></a> + <a href="https://hexdocs.pm/elixir/Application.html#ensure_all_started/1"><code class="inline">Application.ensure_all_started/1</code></a>.</p>
     </section>
 
