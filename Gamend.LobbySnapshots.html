@@ -672,7 +672,7 @@ built from the snapshots themselves rather than joined against <code class="inli
       </div>
 
 <p>Record that a mutation happened somewhere capture cannot see.</p><p>A plugin calls this from a tripwire that detects state being written outside
-the chokepoints capture hangs off — polyglot's <code class="inline">warn_if_unserialized_write/1</code>
+the chokepoints capture hangs off — a host's <code class="inline">warn_if_unserialized_write/1</code>
 is the first. Such a write is <em>by definition</em> a mutation missing from the
 snapshots, so this is the system reporting its own blind spots.</p><p>Stored as an ordinary event, deliberately: a gap is most useful read in the
 timeline where it happened, next to the snapshots that are consequently

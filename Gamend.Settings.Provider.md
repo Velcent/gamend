@@ -37,7 +37,8 @@ host configures them the ordinary Elixir way and never needs an env var:
 - `:group` (required) — the middle segment of the env name, and the grouping
   the admin viewer renders. One word.
 - `:root` — first segment of the env name. Defaults to `"GAMEND"`; a plugin
-  passes its own (`root: "POLYGLOT"`).
+  passes its own (`root: "MY_GAME"`). Each definition carries it back, so
+  tooling can check the naming convention without knowing which hosts exist.
 - `:label` — display name for the group. Defaults to a capitalised `:group`.
 
 ## Options for `setting/3`

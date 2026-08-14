@@ -3,9 +3,9 @@
 
 Resolves every migration directory that belongs to a gamend deployment.
 
-A host application (the umbrella's `gamend_host`, or a downstream game
-such as gamend_polyglot) runs **core migrations plus its own**, and core can
-be present either as an umbrella app or as a dependency. Anything that walks
+A host application (the umbrella's `gamend_host`, or a downstream game) runs
+**core migrations plus its own**, and core can be present either as an
+umbrella app or as a dependency. Anything that walks
 migrations — the `host.*` mix tasks, the admin runtime page — must consider
 the same set, so the list lives here rather than being copied per caller.
 

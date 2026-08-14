@@ -114,9 +114,9 @@ gamend_core
 
 
     <section id="moduledoc">
-<p>Resolves every migration directory that belongs to a gamend deployment.</p><p>A host application (the umbrella's <code class="inline">gamend_host</code>, or a downstream game
-such as gamend_polyglot) runs <strong>core migrations plus its own</strong>, and core can
-be present either as an umbrella app or as a dependency. Anything that walks
+<p>Resolves every migration directory that belongs to a gamend deployment.</p><p>A host application (the umbrella's <code class="inline">gamend_host</code>, or a downstream game) runs
+<strong>core migrations plus its own</strong>, and core can be present either as an
+umbrella app or as a dependency. Anything that walks
 migrations — the <code class="inline">host.*</code> mix tasks, the admin runtime page — must consider
 the same set, so the list lives here rather than being copied per caller.</p>
     </section>
