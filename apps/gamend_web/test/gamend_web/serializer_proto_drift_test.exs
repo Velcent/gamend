@@ -78,10 +78,18 @@ defmodule GamendWeb.SerializerProtoDriftTest do
           {nil, start}
       end)
 
-    starts = Enum.map(bounds, &elem(&1, 1)) ++ [byte_size(@serializers_src)]
+    # Each bound paired with where the next one begins — the last runs to the
+    # end of the file. Streamed rather than `starts ++ [eof]` then `tl/1`: the
+    # append walked the whole list to add one element, and the offset the
+    # dropped head carried was never used.
+    nexts =
+      bounds
+      |> Enum.drop(1)
+      |> Enum.map(&elem(&1, 1))
+      |> Stream.concat([byte_size(@serializers_src)])
 
     bounds
-    |> Enum.zip(tl(starts))
+    |> Enum.zip(nexts)
     |> Enum.reduce(%{}, fn
       {{nil, _start}, _next}, acc ->
         acc
