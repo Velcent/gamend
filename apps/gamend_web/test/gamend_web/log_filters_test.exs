@@ -189,42 +189,34 @@ defmodule GamendWeb.LogFiltersTest do
       def drop?(_event), do: raise("boom")
     end
 
-    setup do
-      previous = Application.get_env(:gamend_web, :log_filters, [])
-      on_exit(fn -> Application.put_env(:gamend_web, :log_filters, previous) end)
-      :ok
-    end
+    # The filters go in through the logger filter's `extra` config rather than
+    # `Application.put_env`: this module is async, and the installed filter
+    # reads `:log_filters` on every log event, so a global put_env here would
+    # apply these test filters to every other concurrent test's logging.
 
     test "a host filter can drop an event core knows nothing about" do
-      Application.put_env(:gamend_web, :log_filters, [DropsGreetings])
-
       event = %{level: :info, msg: {:string, ~c"hello there"}}
 
-      assert LogFilters.filter_tls_alert(event, []) == :stop
+      assert LogFilters.filter_tls_alert(event, host_filters: [DropsGreetings]) == :stop
     end
 
     test "events it does not recognise are left alone" do
-      Application.put_env(:gamend_web, :log_filters, [DropsGreetings])
-
       event = %{level: :info, msg: {:string, ~c"something else"}}
 
-      assert LogFilters.filter_tls_alert(event, []) == :ignore
+      assert LogFilters.filter_tls_alert(event, host_filters: [DropsGreetings]) == :ignore
     end
 
     test "a raising host filter does not drop, and does not take the log down" do
-      Application.put_env(:gamend_web, :log_filters, [Raises])
-
       event = %{level: :error, msg: {:string, ~c"a real error"}}
 
-      assert LogFilters.filter_tls_alert(event, []) == :ignore
+      assert LogFilters.filter_tls_alert(event, host_filters: [Raises]) == :ignore
     end
 
     test "a raising host filter cannot stop core's own rules from applying" do
-      Application.put_env(:gamend_web, :log_filters, [Raises])
-
       alert = {:tls_alert, {:bad_record_mac, ~c"..."}}
 
-      assert LogFilters.filter_tls_alert(terminate_report(alert), []) == :stop
+      assert LogFilters.filter_tls_alert(terminate_report(alert), host_filters: [Raises]) ==
+               :stop
     end
   end
 

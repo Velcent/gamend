@@ -43,7 +43,7 @@ defmodule GamendWeb.ErrorHTML do
         locale: locale(assigns),
         color_mode: color_mode(assigns),
         home_path: home_path(assigns),
-        links: links(),
+        links: links(assigns),
         theme_css: theme_css(assigns)
       })
     )
@@ -66,13 +66,19 @@ defmodule GamendWeb.ErrorHTML do
   at render time; they resolve when the msgid already exists there (these are
   navigation labels, so it generally does) and fall back to the literal
   otherwise.
+
+  An `:error_page_links` assign wins over the application env, so a caller (or
+  a test) can pin the list for one render without touching global config.
   """
-  def links do
-    :gamend_web
-    |> Application.get_env(:error_page_links, [])
+  def links(assigns \\ %{}) do
+    assigns
+    |> configured_links()
     |> Enum.filter(&valid_link?/1)
     |> Enum.map(&%{label: translate(&1.label), path: String.trim_leading(&1.path, "/")})
   end
+
+  defp configured_links(%{error_page_links: links}) when is_list(links), do: links
+  defp configured_links(_assigns), do: Application.get_env(:gamend_web, :error_page_links, [])
 
   defp valid_link?(%{label: label, path: path}) when is_binary(label) and is_binary(path),
     do: label != "" and path != ""

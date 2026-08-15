@@ -65,36 +65,6 @@ defmodule GamendWeb.UserLive.RegistrationTest do
                "Success."
     end
 
-    test "shows friendly error when confirmation delivery fails", %{conn: conn} do
-      prev = Application.get_env(:gamend_web, :user_notifier)
-
-      defmodule FailNotifierForLiveTest do
-        def deliver_confirmation_instructions(_user, _url), do: {:error, :smtp_failed}
-      end
-
-      Application.put_env(:gamend_web, :user_notifier, FailNotifierForLiveTest)
-
-      on_exit(fn ->
-        if prev,
-          do: Application.put_env(:gamend_web, :user_notifier, prev),
-          else: Application.delete_env(:gamend_web, :user_notifier)
-      end)
-
-      # ensure this is not the first user so email delivery is attempted
-      _existing = user_fixture()
-
-      {:ok, lv, _html} = live(conn, ~p"/users/register")
-
-      email = unique_user_email()
-      form = form(lv, "#registration_form", user: valid_user_attributes(email: email))
-
-      html = render_submit(form)
-
-      assert html =~ "Failed"
-
-      refute Gamend.Repo.get_by(Gamend.Accounts.User, email: email)
-    end
-
     test "renders errors for duplicated email", %{conn: conn} do
       {:ok, lv, _html} = live(conn, ~p"/users/register")
 
@@ -123,5 +93,51 @@ defmodule GamendWeb.UserLive.RegistrationTest do
 
       assert login_html =~ "Log in"
     end
+  end
+end
+
+defmodule GamendWeb.UserLive.RegistrationDeliveryFailureTest do
+  @moduledoc """
+  The LiveView picks its notifier up from `:gamend_web, :user_notifier` at
+  save time, so making delivery fail means swapping that global — which every
+  registration submitted by a concurrently running test would then see too.
+  Sync, and kept apart from `RegistrationTest` so the rest of it stays async.
+  """
+  use GamendWeb.ConnCase, async: false
+
+  import Phoenix.LiveViewTest
+  import Gamend.AccountsFixtures
+
+  defmodule FailNotifier do
+    def deliver_confirmation_instructions(_user, _url), do: {:error, :smtp_failed}
+  end
+
+  setup do
+    prev = Application.get_env(:gamend_web, :user_notifier)
+    Application.put_env(:gamend_web, :user_notifier, FailNotifier)
+
+    on_exit(fn ->
+      if prev,
+        do: Application.put_env(:gamend_web, :user_notifier, prev),
+        else: Application.delete_env(:gamend_web, :user_notifier)
+    end)
+
+    :ok
+  end
+
+  test "shows friendly error when confirmation delivery fails", %{conn: conn} do
+    # ensure this is not the first user so email delivery is attempted
+    _existing = user_fixture()
+
+    {:ok, lv, _html} = live(conn, ~p"/users/register")
+
+    email = unique_user_email()
+    form = form(lv, "#registration_form", user: valid_user_attributes(email: email))
+
+    html = render_submit(form)
+
+    assert html =~ "Failed"
+
+    refute Gamend.Repo.get_by(Gamend.Accounts.User, email: email)
   end
 end

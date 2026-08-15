@@ -34,36 +34,6 @@ defmodule Gamend.LimitsTest do
         Limits.get(:nonexistent_limit)
       end
     end
-
-    test "returns override when set" do
-      original = Limits.get(:max_metadata_size)
-      current = Application.get_env(:gamend_core, Limits, [])
-
-      try do
-        Application.put_env(:gamend_core, Limits, max_metadata_size: 999)
-        assert Limits.get(:max_metadata_size) == 999
-      after
-        Application.put_env(:gamend_core, Limits, current)
-      end
-
-      assert Limits.get(:max_metadata_size) == original
-    end
-  end
-
-  describe "all/0" do
-    test "returns a map merging defaults with overrides" do
-      current = Application.get_env(:gamend_core, Limits, [])
-
-      try do
-        Application.put_env(:gamend_core, Limits, max_page_size: 42)
-        all = Limits.all()
-        assert all[:max_page_size] == 42
-        # Other keys still have defaults
-        assert all[:max_metadata_size] == Limits.defaults()[:max_metadata_size]
-      after
-        Application.put_env(:gamend_core, Limits, current)
-      end
-    end
   end
 
   describe "clamp_page_size/2" do
@@ -157,5 +127,42 @@ defmodule Gamend.LimitsTest do
 
       assert changeset.valid?
     end
+  end
+end
+
+defmodule Gamend.LimitsOverrideTest do
+  @moduledoc """
+  The host-config override path. What these test *is* the global
+  `Application` env, so they cannot inject it — and while it is set, every
+  `Limits.get/1` in every concurrently running test sees the override too.
+  Sync, and kept apart from the pure tests above so those stay async.
+  """
+  use ExUnit.Case, async: false
+
+  alias Gamend.Limits
+
+  setup do
+    current = Application.get_env(:gamend_core, Limits, [])
+    on_exit(fn -> Application.put_env(:gamend_core, Limits, current) end)
+    :ok
+  end
+
+  test "get/1 returns the override when set" do
+    original = Limits.get(:max_metadata_size)
+
+    Application.put_env(:gamend_core, Limits, max_metadata_size: 999)
+    assert Limits.get(:max_metadata_size) == 999
+
+    Application.delete_env(:gamend_core, Limits)
+    assert Limits.get(:max_metadata_size) == original
+  end
+
+  test "all/0 merges defaults with overrides" do
+    Application.put_env(:gamend_core, Limits, max_page_size: 42)
+
+    all = Limits.all()
+    assert all[:max_page_size] == 42
+    # Other keys still have defaults
+    assert all[:max_metadata_size] == Limits.defaults()[:max_metadata_size]
   end
 end

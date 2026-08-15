@@ -110,16 +110,21 @@ defmodule GamendWeb.LogFilters do
   Returns `:stop` to drop the event, or `:ignore` to leave it for the remaining
   filters and handlers — never the event itself, since this filter only ever
   rejects and must not short-circuit other filters by accepting.
+
+  `extra` is the filter config `:logger` was given at install. A `:host_filters`
+  list there wins over the application env; `install/0` passes none, so
+  production reads the host's config live, and a caller (or a test) can pin
+  its own list without touching global state.
   """
-  def filter_tls_alert(event, _extra) do
-    if peer_fault?(event), do: :stop, else: :ignore
+  def filter_tls_alert(event, extra) do
+    if peer_fault?(event, extra), do: :stop, else: :ignore
   end
 
-  defp peer_fault?(event) do
+  defp peer_fault?(event, extra) do
     reason = reason(event)
 
     benign_tls_alert?(reason) or dead_socket?(reason) or clear_channel_warning?(event) or
-      host_filters_drop?(event)
+      host_filters_drop?(event, extra)
   end
 
   @doc """
@@ -130,7 +135,13 @@ defmodule GamendWeb.LogFilters do
   """
   def host_filters, do: Application.get_env(:gamend_web, :log_filters, [])
 
-  defp host_filters_drop?(event), do: Enum.any?(host_filters(), &safe_drop?(&1, event))
+  defp host_filters(extra) when is_list(extra),
+    do: Keyword.get(extra, :host_filters) || host_filters()
+
+  defp host_filters(_extra), do: host_filters()
+
+  defp host_filters_drop?(event, extra),
+    do: Enum.any?(host_filters(extra), &safe_drop?(&1, event))
 
   # A raise here is treated as "do not drop". It deliberately goes unreported:
   # this runs inside the logging pipeline, so logging the failure would recurse

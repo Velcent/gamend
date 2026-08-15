@@ -71,49 +71,44 @@ defmodule GamendWeb.ErrorHTMLTest do
   end
 
   describe "host-supplied links" do
-    setup do
-      previous = Application.get_env(:gamend_web, :error_page_links, [])
-
-      on_exit(fn -> Application.put_env(:gamend_web, :error_page_links, previous) end)
-      :ok
-    end
+    # The links go in as an assign rather than through `Application.put_env`:
+    # this module is async, and a global put_env here would show up on every
+    # error page another concurrent test happens to render.
 
     test "core links nowhere but Home by default" do
       # "/vocabulary" means nothing to a Gamend server that is not this one, so
       # core must not invent routes on a host's behalf.
-      Application.put_env(:gamend_web, :error_page_links, [])
-      html = render("404.html")
+      html = render("404.html", %{error_page_links: []})
 
       assert html =~ ~s(href="/")
       refute html =~ "vocabulary"
     end
 
     test "a host's own pages are rendered" do
-      Application.put_env(:gamend_web, :error_page_links, [
-        %{label: "Vocabulary", path: "vocabulary"}
-      ])
+      html = render("404.html", %{error_page_links: [%{label: "Vocabulary", path: "vocabulary"}]})
 
-      assert render("404.html") =~ ~s(href="/vocabulary")
+      assert html =~ ~s(href="/vocabulary")
     end
 
     test "they keep the reader's locale prefix" do
-      Application.put_env(:gamend_web, :error_page_links, [
-        %{label: "Vocabulary", path: "vocabulary"}
-      ])
-
-      html = render("404.html", %{conn: %Plug.Conn{assigns: %{locale: "ro"}}})
+      html =
+        render("404.html", %{
+          conn: %Plug.Conn{assigns: %{locale: "ro"}},
+          error_page_links: [%{label: "Vocabulary", path: "vocabulary"}]
+        })
 
       assert html =~ ~s(href="/ro/vocabulary")
     end
 
     test "a malformed entry is skipped rather than crashing the error page" do
-      Application.put_env(:gamend_web, :error_page_links, [
-        %{label: "", path: "empty"},
-        "not a map",
-        %{label: "Play", path: "/play"}
-      ])
-
-      html = render("404.html")
+      html =
+        render("404.html", %{
+          error_page_links: [
+            %{label: "", path: "empty"},
+            "not a map",
+            %{label: "Play", path: "/play"}
+          ]
+        })
 
       assert html =~ ~s(href="/play")
       refute html =~ "empty"
