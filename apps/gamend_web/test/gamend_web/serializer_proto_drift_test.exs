@@ -13,7 +13,15 @@ defmodule GamendWeb.SerializerProtoDriftTest do
   """
   use ExUnit.Case, async: true
 
-  @serializers_src File.read!(Path.expand("../../lib/gamend_web/serializers.ex", __DIR__))
+  @serializers_src Enum.map_join(
+                     [
+                       "../../lib/gamend_web/serializers.ex",
+                       "../../../gamend_core/lib/gamend/accounts.ex",
+                       "../../../gamend_core/lib/gamend/accounts/user.ex"
+                     ],
+                     "\n",
+                     &File.read!(Path.expand(&1, __DIR__))
+                   )
   @proto_src File.read!(Path.expand("../../../../proto/gamend_realtime.proto", __DIR__))
 
   @pairs [
@@ -24,7 +32,9 @@ defmodule GamendWeb.SerializerProtoDriftTest do
     {"serialize_chat_message", "ChatMessage"},
     {"serialize_quest_progress", "QuestProgress"},
     {"serialize_ready_check", "ReadyCheckState"},
-    {"serialize_ready_participant", "ReadyCheckParticipant"}
+    {"serialize_ready_participant", "ReadyCheckParticipant"},
+    {"serialize_user_payload", "User"},
+    {"serialize_brief", "UserBrief"}
   ]
 
   test "every Serializers payload key is representable in its proto message" do
@@ -54,26 +64,36 @@ defmodule GamendWeb.SerializerProtoDriftTest do
   end
 
   # Map keys per serializer function, across all its clauses: `key: value`
-  # literals plus bare `:key` atoms threaded through maybe_put/Map.put.
+  # literals plus bare `:key` atoms threaded through maybe_put/Map.put. A
+  # body ends at the next def OR the next @doc/@spec, so a following
+  # function's typespec never leaks its keys into the previous body.
   defp keys_by_function do
     bounds =
-      Regex.scan(~r/^  defp? (\w+)/m, @serializers_src, return: :index)
-      |> Enum.map(fn [{start, _}, {ns, nl}] ->
-        {binary_part(@serializers_src, ns, nl), start}
+      Regex.scan(~r/^  (?:defp? (\w+)|@spec|@doc)/m, @serializers_src, return: :index)
+      |> Enum.map(fn
+        [{start, _}, {ns, nl}] when nl > 0 ->
+          {binary_part(@serializers_src, ns, nl), start}
+
+        [{start, _} | _] ->
+          {nil, start}
       end)
 
     starts = Enum.map(bounds, &elem(&1, 1)) ++ [byte_size(@serializers_src)]
 
     bounds
     |> Enum.zip(tl(starts))
-    |> Enum.reduce(%{}, fn {{name, start}, next}, acc ->
-      body = binary_part(@serializers_src, start, next - start)
+    |> Enum.reduce(%{}, fn
+      {{nil, _start}, _next}, acc ->
+        acc
 
-      keys =
-        (Regex.scan(~r/^\s+(\w+): /m, body) ++ Regex.scan(~r/:(\w+),$/m, body))
-        |> Enum.map(fn [_, k] -> k end)
+      {{name, start}, next}, acc ->
+        body = binary_part(@serializers_src, start, next - start)
 
-      Map.update(acc, name, MapSet.new(keys), &MapSet.union(&1, MapSet.new(keys)))
+        keys =
+          (Regex.scan(~r/^\s+(\w+): /m, body) ++ Regex.scan(~r/:(\w+),$/m, body))
+          |> Enum.map(fn [_, k] -> k end)
+
+        Map.update(acc, name, MapSet.new(keys), &MapSet.union(&1, MapSet.new(keys)))
     end)
   end
 

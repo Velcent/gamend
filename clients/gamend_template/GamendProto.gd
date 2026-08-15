@@ -333,6 +333,7 @@ static func _notification_payload(data: PackedByteArray) -> Variant:
 		"recipient_id": m.get_recipient_id(),
 		"title": m.get_title(),
 		"content": m.get_content(),
+		"icon_url": m.get_icon_url(),
 		"metadata": _json_bytes(m.get_metadata_json(), {}),
 		"inserted_at_ms": m.get_inserted_at_ms(),
 	})
@@ -381,6 +382,7 @@ static func _ready_check(data: PackedByteArray) -> Variant:
 				"user_id": p.get_user_id(),
 				"display_name": p.get_display_name(),
 				"state": p.get_state(),
+				"responded_at_ms": p.get_responded_at_ms(),
 			})
 		# `participants` stays empty for kind "accept": that check reports counts
 		# only, so a match that may still dissolve keeps its roster private.
@@ -395,6 +397,8 @@ static func _ready_check(data: PackedByteArray) -> Variant:
 			"ready_count": m.get_ready_count(),
 			"your_state": m.get_your_state(),
 			"reason": m.get_reason(),
+			"opened_by": m.get_opened_by(),
+			"metadata": _json_bytes(m.get_metadata_json(), {}),
 			"participants": participants,
 		})
 
@@ -409,6 +413,8 @@ static func _lobby_to_dict(l) -> Dictionary:
 	if l.has_max_users(): d["max_users"] = l.get_max_users()
 	if l.has_is_hidden(): d["is_hidden"] = l.get_is_hidden()
 	if l.has_is_locked(): d["is_locked"] = l.get_is_locked()
+	if l.has_state(): d["state"] = l.get_state()
+	if l.has_state_changed_at_ms(): d["state_changed_at_ms"] = l.get_state_changed_at_ms()
 	_put_meta(d, l, "lobby")
 	if l.has_is_passworded(): d["is_passworded"] = l.get_is_passworded()
 	if l.has_slowdown(): d["slowdown"] = l.get_slowdown()
@@ -431,6 +437,7 @@ static func _group_to_dict(g) -> Dictionary:
 	if g.has_creator_id(): d["creator_id"] = g.get_creator_id()
 	if g.has_creator_name(): d["creator_name"] = g.get_creator_name()
 	_put_meta(d, g, "group")
+	if g.has_icon_url(): d["icon_url"] = g.get_icon_url()
 	if g.has_member_count(): d["member_count"] = g.get_member_count()
 	if g.has_slowdown(): d["slowdown"] = g.get_slowdown()
 	if g.has_inserted_at_ms(): d["inserted_at_ms"] = g.get_inserted_at_ms()
