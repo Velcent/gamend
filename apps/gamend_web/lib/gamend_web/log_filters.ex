@@ -174,6 +174,15 @@ defmodule GamendWeb.LogFilters do
     end
   end
 
+  # Bandit logs protocol errors itself rather than letting the process crash:
+  # `Bandit.Logger.maybe_log_protocol_error/4` calls `Logger.error/2` with
+  # `Exception.format_banner/3` output. The event that reaches here is therefore
+  # a plain *string* — "** (Bandit.TransportError) Unable to obtain conn_data" —
+  # and the exception survives only in metadata, under `crash_reason`. Both
+  # report clauses above look at `msg`, so this path went unfiltered and the
+  # dead-socket trickle reached production logs despite being described here.
+  defp reason(%{meta: %{crash_reason: {reason, stack}}}) when is_list(stack), do: {reason, stack}
+
   defp reason(_event), do: nil
 
   defp benign_tls_alert?({:tls_alert, {alert, _description}}), do: alert in @benign_alerts

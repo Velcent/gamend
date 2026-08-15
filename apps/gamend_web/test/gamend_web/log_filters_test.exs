@@ -16,6 +16,19 @@ defmodule GamendWeb.LogFiltersTest do
     }
   end
 
+  # Built the way `Bandit.Logger.maybe_log_protocol_error/4` builds it, banner
+  # and all, so the test cannot drift from what Bandit really emits.
+  defp bandit_protocol_error(errno) do
+    error = %Bandit.TransportError{message: "Unable to obtain conn_data", error: errno}
+    stack = [{Bandit.SocketHelpers, :transport_error!, 2, []}]
+
+    %{
+      level: :error,
+      msg: {:string, Exception.format_banner(:error, error, stack)},
+      meta: %{domain: [:bandit], crash_reason: {error, stack}}
+    }
+  end
+
   describe "peer-initiated alerts" do
     test "a user_canceled terminate report is dropped" do
       # The actual flood: Safari and iOS send this on navigation away, and
@@ -99,6 +112,18 @@ defmodule GamendWeb.LogFiltersTest do
          [{Bandit.SocketHelpers, :transport_error!, 2, []}]}
 
       assert LogFilters.filter_tls_alert(terminate_report(reason), []) == :ignore
+    end
+
+    # The shape production actually emits. Bandit does not let the process
+    # crash — `Bandit.Logger.maybe_log_protocol_error/4` logs the banner itself
+    # — so the event is a string and the exception is only in `crash_reason`.
+    # The terminate-report tests above passed while this trickled into the logs.
+    test "Bandit's own protocol-error log is dropped" do
+      assert LogFilters.filter_tls_alert(bandit_protocol_error(:einval), []) == :stop
+    end
+
+    test "Bandit's protocol-error log survives when the socket was alive" do
+      assert LogFilters.filter_tls_alert(bandit_protocol_error(:eacces), []) == :ignore
     end
   end
 
