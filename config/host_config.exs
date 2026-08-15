@@ -44,7 +44,7 @@ config :gamend_web,
   host_static_app: :gamend_host,
   asset_static_app: :gamend_host,
   well_known_static_app: :gamend_host,
-  host_static_paths: ~w(images game favicon.ico robots.txt .well-known theme.css)
+  host_static_paths: ~w(images game favicon.ico robots.txt llms.txt .well-known theme.css)
 
 # MDEx's NIF only builds in the syntax highlighter when told to at compile
 # time. Every root that compiles the NIF needs this - the host app, and each

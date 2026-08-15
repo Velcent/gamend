@@ -369,4 +369,19 @@ defmodule GamendWeb.PageControllerTest do
 
     assert body =~ "href=\"/terms\""
   end
+
+  test "footer column labels are not headings", %{conn: conn} do
+    body = conn |> get("/") |> html_response(200)
+
+    # A footer column label names a group of links, not a section of this
+    # document. As an `<h2>` it landed in the page outline beside the page's
+    # real subject — and since the footer repeats on every page, that was most
+    # of the H2s on the site. `<nav aria-label>` keeps the group announced to
+    # screen readers, which is the part the heading was actually doing.
+    assert body =~ ~s(aria-label="Privacy &amp; Terms")
+    refute body =~ ~r{<h2[^>]*>\s*Privacy &amp; Terms\s*</h2>}
+
+    # The label still renders; this is about which element carries it.
+    assert body =~ "Privacy &amp; Terms"
+  end
 end

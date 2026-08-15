@@ -72,6 +72,11 @@ User-agent: Googlebot-Image
 User-agent: Googlebot-News
 User-agent: Googlebot-Video
 User-agent: Google-InspectionTool
+# GoogleOther is not the Search index — it is the fetcher behind
+# one-off and Search-adjacent product crawls. Unlisted it fell
+# through to the `User-agent: *` deny at the bottom. Note it is
+# NOT Google-Extended: training stays blocked in the group above.
+User-agent: GoogleOther
 # Other search indexes. Bingbot matters twice over: it is one of
 # the engines IndexNow reaches, so blocking it would make every
 # ping a dead end.
@@ -79,6 +84,11 @@ User-agent: Bingbot
 User-agent: SeznamBot
 User-agent: DuckDuckBot
 User-agent: Applebot
+# Yahoo. Its results come from Bing, but Slurp still crawls in its
+# own right — unlisted it fell through to the `User-agent: *` deny
+# at the bottom, the one engine this file blocked by omission
+# rather than on purpose.
+User-agent: Slurp
 User-agent: Yeti
 User-agent: MojeekBot
 User-agent: Qwantbot
@@ -155,4 +165,4 @@ Disallow: /
 # -----------------------------------------------------------
 # Sitemap
 # -----------------------------------------------------------
-Sitemap: https://gamend.appsinacup.com/sitemap.xml
+Sitemap: https://gamend.org/sitemap.xml

@@ -116,8 +116,9 @@ defmodule GamendWeb.Endpoint do
   # Files third parties fetch at a bare, un-fingerprinted path. They must stay
   # changeable: `robots.txt` under a year-long `immutable` meant a crawl-rule
   # change could not reach a client that had cached it, and `.well-known`
-  # carries app-association files with the same problem.
-  @revalidating_static ~w(robots.txt .well-known)
+  # carries app-association files with the same problem. `llms.txt` is fetched
+  # the same way and describes the site's current shape, so it belongs here too.
+  @revalidating_static ~w(robots.txt llms.txt .well-known)
 
   defp serve_host_static(conn, _opts) do
     paths = host_static_paths() -- ~w(game)

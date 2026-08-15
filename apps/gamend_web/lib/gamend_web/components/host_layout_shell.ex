@@ -144,11 +144,17 @@ defmodule GamendWeb.HostLayoutShell do
         <GamendWeb.HostLayouts.flash_group flash={@flash} />
         <footer class="px-4 py-8 sm:px-6 lg:px-8 text-sm text-base-content/70">
           <div class="mx-auto grid max-w-2xl gap-6 md:max-w-3xl md:grid-cols-2 lg:max-w-4xl xl:max-w-6xl xl:grid-cols-4">
-            <section :for={section <- footer_sections(@footer)} class="space-y-2">
-              <h2 class="text-sm font-semibold text-base-content">
+            <%!-- The column label is a `<p>`, not an `<h2>`: these name link
+                  groups, not document sections, and as headings they were half
+                  of every page's H2s — an outline where "Privacy & Terms" ranks
+                  beside the page's actual subject. `aria-label` keeps the
+                  grouping announced, which is what the heading was really
+                  doing. --%>
+            <div :for={section <- footer_sections(@footer)} class="space-y-2">
+              <p class="text-sm font-semibold text-base-content">
                 {section["title"]}
-              </h2>
-              <nav class="flex flex-col gap-1.5">
+              </p>
+              <nav aria-label={section["title"]} class="flex flex-col gap-1.5">
                 <a
                   :for={link <- visible_footer_links(section, @current_scope)}
                   href={link["href"]}
@@ -159,7 +165,7 @@ defmodule GamendWeb.HostLayoutShell do
                   {link["label"]}
                 </a>
               </nav>
-            </section>
+            </div>
           </div>
         </footer>
       <% end %>

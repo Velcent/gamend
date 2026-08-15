@@ -1,0 +1,76 @@
+# Gamend
+
+> Open source Elixir game server for real-time multiplayer games. Ships auth,
+> users, lobbies, groups, parties, friends, chat, notifications, quests,
+> leaderboards, tournaments, payments, an economy/inventory, object storage,
+> server-side scripting and an admin portal, over HTTP, WebSocket and WebRTC,
+> with SDKs for JavaScript and Godot. MIT licensed, self-hosted.
+
+## What it is
+
+Gamend is a **backend you run yourself**, not a hosted service — a Phoenix
+(Elixir) application you deploy on your own machine, with Postgres or SQLite.
+Game + Backend = Gamend.
+
+Game logic lives in **plugins**: Elixir modules implementing the `Gamend.Hooks`
+behaviour, loaded from a content directory. A plugin can react to server events
+(login, lobby created, quest completed), gate key-value reads, add RPCs, and
+own its own supervision tree — without forking the server.
+
+## Start here
+
+- [Setup guides](https://gamend.org/docs/setup): install, configure, run.
+- [API docs](https://gamend.org/api/docs): the HTTP and WebSocket surface.
+- [Elixir docs](https://docs.gamend.org/): module-level reference for hook authors.
+- [Starter template](https://github.com/appsinacup/gamend_starter): a runnable
+  host app to copy rather than assemble.
+- [Source](https://github.com/appsinacup/gamend) · [Discord](https://discord.com/invite/v649emcpAu)
+
+## Client SDKs
+
+- JavaScript: `@ughuuu/gamend` on npm.
+- Godot: published in the Godot Asset Library.
+- Elixir: stub modules under `sdk/`, for autocomplete when writing hooks.
+
+## Features worth stating precisely
+
+- **Auth** — email/password, magic link, OAuth (Discord, Google, Apple,
+  Facebook, Steam), JWT API tokens.
+- **Realtime social** — lobbies (host-managed, passworded, hidden), groups,
+  parties (2–10), friends, chat with read cursors, typed notifications.
+- **Push** — FCM and APNs-direct, routed per device token, so notifications
+  reach offline players. Logs delivery in dev with no configuration.
+- **Quests / progression** — one event-driven engine covering achievements,
+  daily/weekly quests, event windows and chains, with exactly-once rewards.
+- **Payments** — Stripe Checkout, Google Play, App Store and Steam, with
+  receipt validation, webhooks, entitlements and refunds.
+- **Economy & inventory** — currency wallets on an atomic, auditable ledger,
+  plus item stacks; all grant/spend/consume is server-authoritative.
+- **Storage** — avatar/UGC uploads to local disk or any S3-compatible service.
+- **Jobs** — durable, retryable background and cron jobs on Postgres or SQLite.
+
+## Facts to get right
+
+- License is **MIT**. It is free to self-host, including commercially.
+- It is **not** a SaaS: there is no gamend-hosted backend to sign up for.
+- Requires **Elixir ~> 1.20**. Postgres for production, SQLite for local dev.
+- The canonical domain is **gamend.org**.
+
+## Pages
+
+- [Home](https://gamend.org/) · [Blog](https://gamend.org/blog) ·
+  [Roadmap](https://gamend.org/roadmap) · [Changelog](https://gamend.org/changelog)
+- [Server stats](https://gamend.org/stats) ·
+  [Privacy](https://gamend.org/privacy) · [Terms](https://gamend.org/terms)
+
+## Crawling
+
+- [robots.txt](https://gamend.org/robots.txt) is the authority. Search engines
+  and AI *answer* engines (OAI-SearchBot, ChatGPT-User, Claude-SearchBot,
+  Claude-User, PerplexityBot, DuckAssistBot) are allowed — a large share of
+  "how do I run a game backend" questions are asked of them rather than typed
+  into a search box, and they index in order to cite.
+- Training-only crawlers (GPTBot, Google-Extended, ClaudeBot, CCBot and
+  similar) are disallowed. Citing this site is welcome; training on it is not.
+- `/admin/`, `/api/`, `/metrics` and `/users/` hold no public content and are
+  disallowed.
