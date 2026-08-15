@@ -330,7 +330,10 @@ defmodule Gamend.RetentionTest do
       Application.put_env(:gamend_core, Gamend.Retention, abandoned_lobby_minutes: 15)
 
       lobby = lobby_fixture()
-      put_member(lobby, AccountsFixtures.user_fixture(), online: true)
+      # A connected socket refreshes last_seen every few minutes; that recent
+      # heartbeat — not the is_online flag — is what "present" means here.
+      seen = DateTime.add(DateTime.utc_now(:second), -2, :minute)
+      put_member(lobby, AccountsFixtures.user_fixture(), online: true, last_seen: seen)
       age_lobby(lobby, 600)
 
       Retention.prune_all()
@@ -358,6 +361,24 @@ defmodule Gamend.RetentionTest do
       seen = DateTime.add(DateTime.utc_now(:second), -60, :minute)
       put_member(lobby, AccountsFixtures.user_fixture(), online: false, last_seen: seen)
       age_lobby(lobby, 60)
+
+      Retention.prune_all()
+
+      refute Repo.get(Lobby, lobby.id)
+    end
+
+    # A hard server stop skips every channel terminate, so users stay flagged
+    # is_online=true with a last_seen frozen at their final heartbeat. The
+    # flag alone must never keep a lobby alive: an eleven-hour-old solo run
+    # survived a restart this way and rejoined its player into yesterday's
+    # game. "Seen" is last_seen_at, which live sockets refresh continuously.
+    test "a stale is_online flag from a hard stop does not keep a lobby alive" do
+      Application.put_env(:gamend_core, Gamend.Retention, abandoned_lobby_minutes: 15)
+
+      lobby = lobby_fixture()
+      seen = DateTime.add(DateTime.utc_now(:second), -11 * 60, :minute)
+      put_member(lobby, AccountsFixtures.user_fixture(), online: true, last_seen: seen)
+      age_lobby(lobby, 11 * 60)
 
       Retention.prune_all()
 

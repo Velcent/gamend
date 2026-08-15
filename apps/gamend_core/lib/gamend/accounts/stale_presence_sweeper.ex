@@ -51,7 +51,12 @@ defmodule Gamend.Accounts.StalePresenceSweeper do
 
     if enabled do
       interval = Keyword.get(conf, :interval_ms, @default_interval_ms)
-      schedule_sweep(interval)
+      # A hard stop skips every UserChannel.terminate/2, so the node comes
+      # back with all previously connected users still is_online=true. Sweep
+      # right away (as a message, so init never blocks the supervision tree
+      # on the DB) instead of waiting a full interval — during that gap the
+      # stale flags read as live presence to everything gating on them.
+      schedule_sweep(0)
       Logger.info("StalePresenceSweeper started (interval=#{interval}ms)")
     else
       Logger.info("StalePresenceSweeper disabled by config")

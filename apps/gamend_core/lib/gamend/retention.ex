@@ -547,9 +547,15 @@ defmodule Gamend.Retention do
 
   # The one class that is not "delete rows older than N", and the one where
   # getting it wrong deletes a live game. A lobby is reaped only when nobody in
-  # it has been seen for `RETENTION_ABANDONED_LOBBY_MINUTES` - not online, and
-  # not online at any point inside the window - and the lobby itself has not
-  # been touched in that time.
+  # it has been SEEN for `RETENTION_ABANDONED_LOBBY_MINUTES` - and the lobby
+  # itself has not been touched in that time.
+  #
+  # "Seen" is `last_seen_at`, never the `is_online` flag on its own: connected
+  # sockets refresh last_seen every few minutes, so a live player is always
+  # inside the window, while a hard server stop leaves every connected user
+  # frozen at is_online=true with nothing to clear it until the presence
+  # sweeper's next pass. Trusting the flag let an 11-hour-old solo run survive
+  # a restart and rejoin the player into a game from the day before.
   #
   # Being over is not a reason to delete: a game that ends a match knows it
   # ended and can delete the lobby itself. Silence is the only signal core can
@@ -573,7 +579,7 @@ defmodule Gamend.Retention do
           from(u in User,
             where:
               u.lobby_id == parent_as(:lobby).id and
-                (u.is_online or u.last_seen_at > ^cutoff),
+                u.last_seen_at > ^cutoff,
             select: 1
           )
         ),
