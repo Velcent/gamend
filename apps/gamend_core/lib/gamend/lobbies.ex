@@ -1781,10 +1781,19 @@ defmodule Gamend.Lobbies do
     end)
   end
 
+  # A candidate that will not take this user is simply not a match: try the
+  # next one, and fall through to creating a lobby if none of them will.
+  #
+  # Only `:full` moved on before, so a game rejecting one candidate in
+  # `before_lobby_join` — the callback that owns "may this user join THIS
+  # lobby", e.g. because that lobby is already mid-match — failed the whole
+  # quick join and handed the player an error where a fresh lobby was the
+  # obvious answer.
   defp attempt_quick_join(user, lobby) do
     case do_join(user.id, lobby, %{}) do
       {:ok, _} -> {:halt, {:ok, lobby}}
       {:error, :full} -> {:cont, {:none, []}}
+      {:error, {:hook_rejected, _reason}} -> {:cont, {:none, []}}
       other -> {:halt, other}
     end
   end

@@ -377,6 +377,50 @@ defmodule Gamend.LobbiesTest do
       assert reloaded.lobby_id == matched.id
     end
 
+    # A candidate that will not take this user is not a match — matchmaking has
+    # to move on. One refusal used to abort the whole quick join, and the player
+    # got an error where a fresh lobby was the obvious answer: in the game that
+    # surfaced as "Could not start game" every time quick_join landed on a lobby
+    # already mid-match, which a stale one did to every player who tried.
+    defmodule RefuseJoinHook do
+      use GamendWeb.TestSupport.NoopHooks
+
+      @impl true
+      def before_lobby_join(user, lobby, opts) do
+        if lobby.state == "playing" do
+          {:error, :match_in_progress}
+        else
+          {:ok, {user, lobby, opts}}
+        end
+      end
+    end
+
+    test "quick_join skips a candidate the game refuses and opens a fresh lobby", %{
+      host: host,
+      other: other
+    } do
+      {:ok, running} =
+        Lobbies.create_lobby(%{title: "running-room", host_id: host.id, max_users: 4})
+
+      {:ok, running} = Lobbies.transition_state(running, "playing")
+
+      previous = Application.get_env(:gamend_core, :hooks_module)
+      Application.put_env(:gamend_core, :hooks_module, RefuseJoinHook)
+
+      on_exit(fn ->
+        if previous do
+          Application.put_env(:gamend_core, :hooks_module, previous)
+        else
+          Application.delete_env(:gamend_core, :hooks_module)
+        end
+      end)
+
+      assert {:ok, fresh} = Lobbies.quick_join(other, "fresh-room", 4, %{})
+
+      refute fresh.id == running.id
+      assert Gamend.Repo.get(Accounts.User, other.id).lobby_id == fresh.id
+    end
+
     test "quick_join creates a new lobby when none matches", %{other: other} do
       # ensure there are no existing matching lobbies
       assert {:ok, lobby} = Lobbies.quick_join(other, "my-quick-room", 5, %{mode: "coop"})
