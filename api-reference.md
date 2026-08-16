@@ -1,9 +1,17 @@
-# gamend_core v1.0.1163 - API Reference
+# gamend_core v1.0.1164 - API Reference
 
 ## Modules
 
 - [Gamend](Gamend.md): Gamend keeps the contexts that define your domain
 and business logic.
+- [Gamend.Analytics](Gamend.Analytics.md): The one place aggregate numbers come from. Four families
+- [Gamend.Analytics.ActivityDay](Gamend.Analytics.ActivityDay.md): A user was seen on a UTC day. One row per `(user_id, day)`; written once by
+`Gamend.Analytics.record_activity/2`, never updated.
+
+- [Gamend.Analytics.DailyCount](Gamend.Analytics.DailyCount.md): A named counter for one UTC day. Keys are free-form dotted strings owned by
+the game (`"level.finished"`, `"level.started.lang:ja"`); the engine only
+stores and sums them. Written by `Gamend.Analytics.count/3`.
+
 - [Gamend.ApiConventions](Gamend.ApiConventions.md): Mechanical checks for the conventions in `docs/specs/api-conventions.md`.
 - [Gamend.Captcha](Gamend.Captcha.md): Human verification for the unauthenticated browser forms, via
 [Cloudflare Turnstile](https://developers.cloudflare.com/turnstile/).

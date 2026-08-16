@@ -9,6 +9,9 @@ Gamend.Accounts.UserNotifier.html
 Gamend.Accounts.UserToken.html
 Gamend.Accounts.UsernameGenerator.html
 Gamend.Accounts.html
+Gamend.Analytics.ActivityDay.html
+Gamend.Analytics.DailyCount.html
+Gamend.Analytics.html
 Gamend.ApiConventions.html
 Gamend.Apple.html
 Gamend.Async.html
@@ -185,8 +188,8 @@ dist/lato-latin-700-normal-2XVSBPG4.woff2
 dist/lato-latin-ext-400-normal-N27NCBWW.woff2
 dist/lato-latin-ext-700-normal-Q2L5DVMW.woff2
 dist/remixicon-ZWU5GQ4X.woff2
-dist/search_data-91C72A7D.js
-dist/sidebar_items-012C8D3A.js
+dist/search_data-35EBAEF1.js
+dist/sidebar_items-52CFBEB4.js
 index.html
 readme.html
 search.html

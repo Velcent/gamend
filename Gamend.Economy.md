@@ -63,7 +63,7 @@ All non-zero balances for a user, as a `%{currency => balance}` map.
 # `grant`
 
 ```elixir
-@spec grant(user_id(), currency(), pos_integer(), keyword()) ::
+@spec grant(user_id(), currency(), non_neg_integer(), keyword()) ::
   {:ok, non_neg_integer()} | {:error, term()}
 ```
 
@@ -75,7 +75,7 @@ Returns `{:ok, new_balance}`.
 # `spend`
 
 ```elixir
-@spec spend(user_id(), currency(), pos_integer(), keyword()) ::
+@spec spend(user_id(), currency(), non_neg_integer(), keyword()) ::
   {:ok, non_neg_integer()} | {:error, :insufficient_funds | term()}
 ```
 

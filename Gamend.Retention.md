@@ -25,6 +25,11 @@ Retention is configured per table in days via env vars (see
 - `RETENTION_TOURNAMENTS_DAYS` / `RETENTION_LEDGER_DAYS` — finished
   tournaments and the wallet/inventory ledgers. Both default to `0`: they
   are history an operator may be required to keep.
+- `RETENTION_ACTIVITY_DAYS` — `user_activity_days` rows (one per user per
+  UTC day seen, behind DAU and D1/D7/D30) older than N days. Defaults to
+  `0`; the table grows by at most one row per active user per day, and a
+  window shorter than the analytics cohort span (60 days) blanks the
+  retention numbers.
 - `RETENTION_ABANDONED_LOBBY_MINUTES` (15) — lobbies nobody has been seen in
   for N minutes, in minutes rather than days. The same window releases a lobby
   seat held by a long-offline player and disbands a party everyone abandoned.

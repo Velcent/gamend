@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.3">
-    <meta name="project" content="gamend_core v1.0.1163">
+    <meta name="project" content="gamend_core v1.0.1164">
 
 
-    <title>Gamend.Retention — gamend_core v1.0.1163</title>
+    <title>Gamend.Retention — gamend_core v1.0.1164</title>
 
     <link rel="stylesheet" href="dist/html-elixir-NHQLCD6Y.css" />
 
-    <script defer src="dist/sidebar_items-012C8D3A.js"></script>
+    <script defer src="dist/sidebar_items-52CFBEB4.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-Y2MUTVIN.js"></script>
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1163
+          v1.0.1164
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr />Retention</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1163)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1164)</small>
 
     </h1>
 
@@ -126,7 +126,11 @@ or disabled) for N days. Defaults to 270 — Google's stale-token guidance
 N days after resolution (default 30). Pending rows are never pruned.</li><li><code class="inline">RETENTION_MATCHMAKING_TICKETS_HOURS</code> — tickets older than N hours
 (default 24), in any status.</li><li><code class="inline">RETENTION_TOURNAMENTS_DAYS</code> / <code class="inline">RETENTION_LEDGER_DAYS</code> — finished
 tournaments and the wallet/inventory ledgers. Both default to <code class="inline">0</code>: they
-are history an operator may be required to keep.</li><li><code class="inline">RETENTION_ABANDONED_LOBBY_MINUTES</code> (15) — lobbies nobody has been seen in
+are history an operator may be required to keep.</li><li><code class="inline">RETENTION_ACTIVITY_DAYS</code> — <code class="inline">user_activity_days</code> rows (one per user per
+UTC day seen, behind DAU and D1/D7/D30) older than N days. Defaults to
+<code class="inline">0</code>; the table grows by at most one row per active user per day, and a
+window shorter than the analytics cohort span (60 days) blanks the
+retention numbers.</li><li><code class="inline">RETENTION_ABANDONED_LOBBY_MINUTES</code> (15) — lobbies nobody has been seen in
 for N minutes, in minutes rather than days. The same window releases a lobby
 seat held by a long-offline player and disbands a party everyone abandoned.</li></ul><p>Expired IP bans, OAuth sessions older than a day, and user tokens past their
 own context's validity are always removed (independent of the env vars
@@ -225,7 +229,7 @@ the sweeper is not supervised (tests, or an instance with it disabled).</p></div
       <h1 class="signature" translate="no">child_spec(init_arg)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/retention.ex#L38" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/retention.ex#L43" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -247,7 +251,7 @@ the sweeper is not supervised (tests, or an instance with it disabled).</p></div
       <h1 class="signature" translate="no">prune_all()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/retention.ex#L153" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/retention.ex#L158" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -276,7 +280,7 @@ counts per table.</p>
       <h1 class="signature" translate="no">run_now()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/retention.ex#L118" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/retention.ex#L123" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -306,7 +310,7 @@ never overlap.</p>
       <h1 class="signature" translate="no">start_link(opts)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/retention.ex#L87" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/retention.ex#L92" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -328,7 +332,7 @@ never overlap.</p>
       <h1 class="signature" translate="no">status()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/retention.ex#L106" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/retention.ex#L111" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -360,9 +364,9 @@ the sweeper is not supervised (tests, or an instance with it disabled).</p>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1163">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1164">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1163">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1164">Hex Preview</a>
 
             </span>
 

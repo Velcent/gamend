@@ -622,6 +622,21 @@ to the player:
 @callback after_purchase_revoked(Gamend.Payments.Purchase.t()) :: any()
 ```
 
+# `before_purchase`
+*optional* 
+
+```elixir
+@callback before_purchase(Gamend.Accounts.User.t(), product :: struct()) ::
+  hook_result(term())
+```
+
+Veto a purchase before the player is charged.
+
+Runs when a checkout starts and again when a receipt is validated, so a game
+can refuse to sell — an unlinked account whose entitlement would be stranded
+on one device, a region it does not ship to, a player it has banned. Return
+`{:error, reason}` to stop it; the money never moves.
+
 # `after_inventory_changed`
 *optional* 
 

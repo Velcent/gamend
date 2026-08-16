@@ -8,6 +8,9 @@ Gamend.Accounts.UserNotifier.md
 Gamend.Accounts.UserToken.md
 Gamend.Accounts.UsernameGenerator.md
 Gamend.Accounts.md
+Gamend.Analytics.ActivityDay.md
+Gamend.Analytics.DailyCount.md
+Gamend.Analytics.md
 Gamend.ApiConventions.md
 Gamend.Apple.md
 Gamend.Async.md

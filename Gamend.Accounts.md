@@ -199,18 +199,6 @@ Counts tokens for a given user.
 
 Returns the total number of users.
 
-# `count_users_active_since`
-
-```elixir
-@spec count_users_active_since(integer()) :: non_neg_integer()
-```
-
-Count users active in the last N days.
-
-This metric is based on `users.updated_at` (any user record update,
-including registration/creation), so it reflects all users and not just
-session-token based authentication.
-
 # `count_users_in_lobbies`
 
 ```elixir
@@ -234,14 +222,6 @@ Count users currently in a party (`users.party_id`, indexed).
 ```
 
 Count users currently marked as online.
-
-# `count_users_registered_since`
-
-```elixir
-@spec count_users_registered_since(integer()) :: non_neg_integer()
-```
-
-Count users registered in the last N days.
 
 # `count_users_with_password`
 
@@ -901,7 +881,8 @@ than 20 minutes ago. The limit can be given as second argument in minutes.
 ```
 
 Updates `last_seen_at` to now for the given user. Fire-and-forget — errors are ignored.
-Call on login (session or JWT) to track activity.
+Call on login (session or JWT) to track activity. Also records the UTC day
+for `Gamend.Analytics` (DAU / retention).
 
 # `touch_last_seen_by_id`
 
