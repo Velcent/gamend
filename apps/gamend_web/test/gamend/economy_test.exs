@@ -24,12 +24,36 @@ defmodule Gamend.EconomyTest do
       assert Economy.balance(user.id, "gold") == 150
     end
 
+    test "granting nothing is a no-op, not a crash", %{user: user} do
+      {:ok, _} = Economy.grant(user.id, "gold", 100)
+
+      # Callers compute amounts — a payout after a cap, a price after a
+      # discount — and zero is an ordinary answer.
+      assert {:ok, 100} = Economy.grant(user.id, "gold", 0)
+      assert Economy.balance(user.id, "gold") == 100
+      # Nothing written means nothing to explain in the ledger later.
+      assert length(Economy.list_ledger(user_id: user.id)) == 1
+    end
+
     test "rejects an invalid currency", %{user: user} do
       assert {:error, :invalid_currency} = Economy.grant(user.id, "", 10)
     end
   end
 
   describe "spend/4" do
+    test "spending nothing succeeds and charges nothing", %{user: user} do
+      {:ok, _} = Economy.grant(user.id, "gold", 50)
+
+      # Free is a price: an item the player has already earned costs zero.
+      assert {:ok, 50} = Economy.spend(user.id, "gold", 0, reason: "free_item")
+      assert Economy.balance(user.id, "gold") == 50
+      assert length(Economy.list_ledger(user_id: user.id)) == 1
+    end
+
+    test "spending nothing works on an empty wallet too", %{user: user} do
+      assert {:ok, 0} = Economy.spend(user.id, "gems", 0)
+    end
+
     test "subtracts and records a negative delta", %{user: user} do
       Economy.grant(user.id, "gold", 100)
       assert {:ok, 70} = Economy.spend(user.id, "gold", 30, reason: "store")

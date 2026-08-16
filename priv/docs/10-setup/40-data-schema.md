@@ -313,6 +313,8 @@ ledger is the audit trail; the balance is a cache of it.
 | `lobby_snapshots`, `lobby_events`, `lobby_snapshot_blobs` | Opt-in per-run recording for debugging | — |
 | `purchases`, `entitlements`, `store_products`, `provider_products`, `provider_events`, `reconciliation_cursors` | Store catalogue, receipts and provider webhooks | Payments |
 | `push_tokens` | Device tokens for push, pruned when stale | Push notifications |
+| `user_activity_days` | One row per user per UTC day seen; source of DAU and D1/D7/D30 | Player analytics |
+| `analytics_daily_counts` | One row per `(day, key)` game-defined counter, incremented in place | Player analytics |
 
 Anything that grows without bound has a retention window; see the
 `RETENTION_*` variables in the Deployment guide.

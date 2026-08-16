@@ -288,6 +288,7 @@ defmodule GamendWeb.Router.Shared do
       scope "/api/v1", GamendWeb.Api.V1, as: :api_v1 do
         pipe_through [:api, :public_stats_gate]
 
+        get "/stats", StatsController, :show
         get "/users/stats", UserController, :stats
         get "/lobbies/stats", LobbyController, :stats
         get "/parties/stats", PartyController, :stats
@@ -655,6 +656,11 @@ defmodule GamendWeb.Router.Shared do
         post "/economy/consume_item", EconomyController, :consume_item
         get "/retention", RetentionController, :show
         post "/retention/run", RetentionController, :run
+        get "/analytics", AnalyticsController, :show
+        get "/analytics/daily", AnalyticsController, :daily
+        get "/analytics/snapshot", AnalyticsController, :snapshot
+        get "/analytics/economy", AnalyticsController, :economy
+        get "/analytics/counts", AnalyticsController, :counts
       end
     end
   end
@@ -801,6 +807,7 @@ defmodule GamendWeb.Router.Shared do
           live "/admin/runtime", AdminLive.Runtime, :index
           live "/admin/storage", AdminLive.Storage, :index
           live "/admin/economy", AdminLive.Economy, :index
+          live "/admin/analytics", AdminLive.Analytics, :index
         end
       end
     end

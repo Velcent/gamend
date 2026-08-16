@@ -7,18 +7,14 @@ defmodule GamendWeb.StatsLive do
   `:public_stats` flag, so turning stats off closes the page and the API
   together rather than leaving a second way in.
 
-  Rendered once on mount. The numbers come from the contexts' cached snapshots,
-  so live-updating would mostly re-render identical values — a page reload is
-  the refresh.
+  Rendered once on mount from `Gamend.Analytics.snapshot/0` — the same cached
+  composition the admin index and `/api/v1/stats` read, so every surface shows
+  one set of numbers. Live-updating would mostly re-render identical values;
+  a page reload is the refresh.
   """
   use GamendWeb, :live_view
 
-  alias Gamend.Accounts
-  alias Gamend.Lobbies
-  alias Gamend.Matchmaking
-  alias Gamend.Parties
-  alias Gamend.Quests
-  alias Gamend.Signaling
+  alias Gamend.Analytics
   alias GamendWeb.Plugs.FeatureGate
 
   @impl true
@@ -27,15 +23,18 @@ defmodule GamendWeb.StatsLive do
       raise GamendWeb.NotFoundError
     end
 
+    snapshot = Analytics.snapshot()
+
     {:ok,
      socket
      |> assign(:page_title, gettext("Server stats"))
-     |> assign(:players, Accounts.player_stats())
-     |> assign(:lobbies, Lobbies.stats())
-     |> assign(:parties, Parties.stats())
-     |> assign(:quests, Quests.stats())
-     |> assign(:signaling, Signaling.stats())
-     |> assign(:matchmaking, Matchmaking.stats())}
+     |> assign(:players, snapshot.players)
+     |> assign(:activity, snapshot.activity)
+     |> assign(:lobbies, snapshot.lobbies)
+     |> assign(:parties, snapshot.parties)
+     |> assign(:quests, snapshot.quests)
+     |> assign(:signaling, snapshot.signaling)
+     |> assign(:matchmaking, snapshot.matchmaking)}
   end
 
   attr :title, :string, required: true
@@ -83,6 +82,24 @@ defmodule GamendWeb.StatsLive do
             <.stat title={gettext("Total")} value={@players.players_total} />
             <.stat title={gettext("In lobbies")} value={@players.players_in_lobbies} />
             <.stat title={gettext("In parties")} value={@players.players_in_parties} />
+          </div>
+          <div class="stats stats-vertical sm:stats-horizontal shadow bg-base-200 w-full mt-3">
+            <.stat title={gettext("Active today")} value={@activity.dau} desc={gettext("UTC")} />
+            <.stat
+              title={gettext("Active this week")}
+              value={@activity.wau}
+              desc={gettext("last 7 days")}
+            />
+            <.stat
+              title={gettext("Active this month")}
+              value={@activity.mau}
+              desc={gettext("last 30 days")}
+            />
+            <.stat
+              title={gettext("New this week")}
+              value={@activity.new_users_7d}
+              desc={gettext("last 7 days")}
+            />
           </div>
         </.section>
 

@@ -870,13 +870,25 @@ defmodule Gamend.Payments do
          %ProviderProduct{product: %Product{} = product},
          attrs
        ) do
-    case ensure_single_ownership_quantity(product, attrs) do
-      :ok -> ensure_single_ownership_available(user, product)
-      other -> other
+    with :ok <- ensure_single_ownership_quantity(product, attrs),
+         :ok <- ensure_single_ownership_available(user, product) do
+      ensure_game_allows_purchase(user, product)
     end
   end
 
   defp ensure_checkout_allowed(_user, _provider_product, _attrs), do: :ok
+
+  # The game's veto, and the last one before money moves: a plugin can refuse to
+  # sell to this player — an unlinked account whose entitlement would be
+  # stranded on one device, a region it does not ship to, a player it has
+  # banned. Runs on every provider path, because a gate only one of them
+  # respects is not a gate.
+  defp ensure_game_allows_purchase(%User{} = user, %Product{} = product) do
+    case Gamend.Hooks.internal_call(:before_purchase, [user, product]) do
+      {:ok, _} -> :ok
+      {:error, reason} -> {:error, reason}
+    end
+  end
 
   defp ensure_single_ownership_quantity(%Product{kind: kind}, attrs)
        when kind in ["entitlement", "subscription"] do

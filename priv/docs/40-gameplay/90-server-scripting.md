@@ -293,7 +293,7 @@ change is committed and its return value is ignored.
 | Key-value | `before_kv_get` | — |
 | Wallets | — | `after_wallet_changed` |
 | Inventory | — | `after_inventory_changed` |
-| Purchases | — | `after_purchase_fulfilled` `after_purchase_revoked` |
+| Purchases | `before_purchase` | `after_purchase_fulfilled` `after_purchase_revoked` |
 | Entitlements | — | `after_entitlement_changed` |
 | Push | `before_push_send` | `after_push_sent` |
 

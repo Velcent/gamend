@@ -305,7 +305,11 @@ defmodule GamendWeb.ApiSpec do
           name: "Admin – Economy",
           description: "Admin currency & inventory grant/spend and browse"
         },
-        %Tag{name: "Admin – Storage", description: "Admin object storage management"}
+        %Tag{name: "Admin – Storage", description: "Admin object storage management"},
+        %Tag{
+          name: "Admin – Analytics",
+          description: "DAU / WAU / MAU, cohort retention and payer conversion"
+        }
       ],
       components: %Components{
         securitySchemes: %{

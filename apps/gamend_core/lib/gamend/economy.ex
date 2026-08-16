@@ -70,9 +70,18 @@ defmodule Gamend.Economy do
   Options: `:reason` (ledger label), `:idempotency_key`, `:metadata`.
   Returns `{:ok, new_balance}`.
   """
-  @spec grant(user_id(), currency(), pos_integer(), keyword()) ::
+  @spec grant(user_id(), currency(), non_neg_integer(), keyword()) ::
           {:ok, non_neg_integer()} | {:error, term()}
-  def grant(user_id, currency, amount, opts \\ []) when is_integer(amount) and amount > 0 do
+  def grant(user_id, currency, amount, opts \\ [])
+
+  # A reward that works out to nothing is a no-op, not a crash. Callers compute
+  # amounts (a price after a discount, a payout after a cap), and a zero is an
+  # ordinary answer; raising on it turned two harmless cases into 500s. Nothing
+  # is written, so there is no ledger entry to explain later.
+  def grant(user_id, currency, 0, _opts) when is_binary(user_id) and is_binary(currency),
+    do: {:ok, balance(user_id, currency)}
+
+  def grant(user_id, currency, amount, opts) when is_integer(amount) and amount > 0 do
     change_balance(user_id, currency, amount, opts)
   end
 
@@ -82,9 +91,15 @@ defmodule Gamend.Economy do
   Returns `{:ok, new_balance}` or `{:error, :insufficient_funds}` — the balance
   is never left negative.
   """
-  @spec spend(user_id(), currency(), pos_integer(), keyword()) ::
+  @spec spend(user_id(), currency(), non_neg_integer(), keyword()) ::
           {:ok, non_neg_integer()} | {:error, :insufficient_funds | term()}
-  def spend(user_id, currency, amount, opts \\ []) when is_integer(amount) and amount > 0 do
+  def spend(user_id, currency, amount, opts \\ [])
+
+  # Free is a price, so spending nothing succeeds and charges nothing.
+  def spend(user_id, currency, 0, _opts) when is_binary(user_id) and is_binary(currency),
+    do: {:ok, balance(user_id, currency)}
+
+  def spend(user_id, currency, amount, opts) when is_integer(amount) and amount > 0 do
     change_balance(user_id, currency, -amount, opts)
   end
 

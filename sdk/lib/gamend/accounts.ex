@@ -487,25 +487,6 @@ defmodule Gamend.Accounts do
   end
 
   @doc ~S"""
-    Count users active in the last N days.
-    
-    This metric is based on `users.updated_at` (any user record update,
-    including registration/creation), so it reflects all users and not just
-    session-token based authentication.
-    
-  """
-  @spec count_users_active_since(integer()) :: non_neg_integer()
-  def count_users_active_since(_days) do
-    case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
-      :placeholder ->
-        0
-
-      _ ->
-        raise "Gamend.Accounts.count_users_active_since/1 is a stub - only available at runtime on Gamend"
-    end
-  end
-
-  @doc ~S"""
     Count users currently seated in a lobby (`users.lobby_id`, indexed).
   """
   @spec count_users_in_lobbies() :: non_neg_integer()
@@ -545,21 +526,6 @@ defmodule Gamend.Accounts do
 
       _ ->
         raise "Gamend.Accounts.count_users_online/0 is a stub - only available at runtime on Gamend"
-    end
-  end
-
-  @doc ~S"""
-    Count users registered in the last N days.
-    
-  """
-  @spec count_users_registered_since(integer()) :: non_neg_integer()
-  def count_users_registered_since(_days) do
-    case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
-      :placeholder ->
-        0
-
-      _ ->
-        raise "Gamend.Accounts.count_users_registered_since/1 is a stub - only available at runtime on Gamend"
     end
   end
 
@@ -1900,7 +1866,8 @@ defmodule Gamend.Accounts do
 
   @doc ~S"""
     Updates `last_seen_at` to now for the given user. Fire-and-forget — errors are ignored.
-    Call on login (session or JWT) to track activity.
+    Call on login (session or JWT) to track activity. Also records the UTC day
+    for `Gamend.Analytics` (DAU / retention).
     
   """
   @spec touch_last_seen(Gamend.Accounts.User.t()) :: :ok

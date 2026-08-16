@@ -334,11 +334,13 @@ defmodule Gamend.Hooks do
 
   # Payment lifecycle. A game turns a fulfilled purchase into currency or items
   # here; core has already recorded the purchase and any entitlement.
+  @callback before_purchase(user(), product :: struct()) :: hook_result(term())
   @callback after_purchase_fulfilled(Gamend.Payments.Purchase.t()) :: any()
   @callback after_purchase_revoked(Gamend.Payments.Purchase.t()) :: any()
   @callback after_entitlement_changed(Gamend.Payments.Entitlement.t()) :: any()
 
-  @optional_callbacks after_purchase_fulfilled: 1,
+  @optional_callbacks before_purchase: 2,
+                      after_purchase_fulfilled: 1,
                       after_purchase_revoked: 1,
                       after_entitlement_changed: 1
 
@@ -665,6 +667,7 @@ defmodule Gamend.Hooks do
       def before_party_kick(admin, target, party), do: {:ok, {admin, target, party}}
 
       @impl true
+      def before_purchase(_user, product), do: {:ok, product}
       def after_purchase_fulfilled(_purchase), do: :ok
 
       @impl true
@@ -820,6 +823,7 @@ defmodule Gamend.Hooks do
                      before_group_kick: 3,
                      before_party_join: 2,
                      before_party_kick: 3,
+                     before_purchase: 2,
                      after_purchase_fulfilled: 1,
                      after_purchase_revoked: 1,
                      after_entitlement_changed: 1,

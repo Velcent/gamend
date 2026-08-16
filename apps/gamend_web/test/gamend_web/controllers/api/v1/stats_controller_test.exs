@@ -14,6 +14,7 @@ defmodule GamendWeb.Api.V1.StatsControllerTest do
   alias Gamend.Lobbies
 
   @paths [
+    "/api/v1/stats",
     "/api/v1/users/stats",
     "/api/v1/lobbies/stats",
     "/api/v1/parties/stats",
@@ -25,6 +26,7 @@ defmodule GamendWeb.Api.V1.StatsControllerTest do
   # Every cache key the stats endpoints read through. Counts are cached, so a
   # snapshot taken by an earlier test would mask the rows this one inserts.
   @stats_cache_keys [
+    {:analytics, :snapshot},
     {:accounts, :player_stats},
     {:accounts, :users_count},
     {:lobbies, :stats},
@@ -71,6 +73,22 @@ defmodule GamendWeb.Api.V1.StatsControllerTest do
       for path <- @paths do
         assert conn |> get(path) |> response(404)
       end
+    end
+
+    test "/stats composes every section from one snapshot", %{conn: conn} do
+      assert %{"data" => data} = conn |> get("/api/v1/stats") |> json_response(200)
+
+      for section <- ~w(players activity lobbies parties quests signaling matchmaking tournaments) do
+        assert is_map(data[section]), "missing #{section}"
+      end
+
+      # The matchmaking section is the public subset only.
+      assert Map.keys(data["matchmaking"]) |> Enum.sort() == ["queued", "queues"]
+      assert Map.has_key?(data["activity"], "dau")
+
+      # Same number as the per-resource endpoint (both read the same cache).
+      assert %{"data" => players} = conn |> get("/api/v1/users/stats") |> json_response(200)
+      assert data["players"]["players_total"] == players["players_total"]
     end
 
     # /users/:id is declared after this route; without the ordering it would

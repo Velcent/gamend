@@ -74,7 +74,7 @@ defmodule Gamend.Economy do
     Returns `{:ok, new_balance}`.
     
   """
-  @spec grant(user_id(), currency(), pos_integer(), keyword()) ::
+  @spec grant(user_id(), currency(), non_neg_integer(), keyword()) ::
           {:ok, non_neg_integer()} | {:error, term()}
   def grant(_user_id, _currency, _amount, _opts) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
@@ -93,7 +93,7 @@ defmodule Gamend.Economy do
     is never left negative.
     
   """
-  @spec spend(user_id(), currency(), pos_integer(), keyword()) ::
+  @spec spend(user_id(), currency(), non_neg_integer(), keyword()) ::
           {:ok, non_neg_integer()} | {:error, :insufficient_funds | term()}
   def spend(_user_id, _currency, _amount, _opts) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do

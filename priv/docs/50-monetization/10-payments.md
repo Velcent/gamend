@@ -145,6 +145,16 @@ Stripe refund and dispute events are callbacks. They update the purchase and rev
 
 Recommended webhook events also include `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`, `checkout.session.expired`, `customer.subscription.updated`, `customer.subscription.deleted`, and `charge.succeeded`.
 
+## Refusing a sale
+
+`before_purchase(user, product)` runs on every provider path before the player
+is charged — return `{:error, reason}` and no money moves. Use it for the
+conditions only the game knows: an account with no identity, whose entitlement
+would be stranded on one device; a region you do not ship to; a banned player.
+
+Refusing *after* the charge is not an option: the money has already moved, so
+declining to fulfil takes payment and gives nothing back.
+
 ## Play Store, App Store, And Steam
 
 Google, Apple, and Steam adapters are built in. They store normalized validation results in the same purchases, entitlements, and provider event tables.

@@ -39,7 +39,8 @@ defmodule GamendWeb.AdminPagesRenderTest do
     {"/admin/translations", "Translation"},
     {"/admin/lobby_snapshots", "Lobby snapshots"},
     {"/admin/storage", "Storage"},
-    {"/admin/economy", "Economy"}
+    {"/admin/economy", "Economy"},
+    {"/admin/analytics", "Analytics"}
   ]
 
   defp create_admin(_context) do

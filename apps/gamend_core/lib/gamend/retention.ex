@@ -24,6 +24,11 @@ defmodule Gamend.Retention do
   - `RETENTION_TOURNAMENTS_DAYS` / `RETENTION_LEDGER_DAYS` — finished
     tournaments and the wallet/inventory ledgers. Both default to `0`: they
     are history an operator may be required to keep.
+  - `RETENTION_ACTIVITY_DAYS` — `user_activity_days` rows (one per user per
+    UTC day seen, behind DAU and D1/D7/D30) older than N days. Defaults to
+    `0`; the table grows by at most one row per active user per day, and a
+    window shorter than the analytics cohort span (60 days) blanks the
+    retention numbers.
   - `RETENTION_ABANDONED_LOBBY_MINUTES` (15) — lobbies nobody has been seen in
     for N minutes, in minutes rather than days. The same window releases a lobby
     seat held by a long-offline player and disbands a party everyone abandoned.
@@ -177,6 +182,9 @@ defmodule Gamend.Retention do
         matchmaking_tickets: &prune_stale_tickets/0,
         finished_tournaments: &prune_finished_tournaments/0,
         ledger_entries: &prune_ledgers/0,
+        activity_days: fn ->
+          prune_older_than(Gamend.Analytics.ActivityDay, config(:activity_days))
+        end,
         quest_periods: &Gamend.Quests.prune_old_periods/0,
         quest_reward_recoveries: &Gamend.Quests.recover_pending_rewards/0,
         push_tokens: &prune_push_tokens/0,
@@ -799,6 +807,13 @@ defmodule Gamend.Retention do
   setting(:ledger_days, :integer,
     default: 0,
     doc: "Delete wallet/inventory ledger entries older than N days. 0 keeps forever."
+  )
+
+  setting(:activity_days, :integer,
+    default: 0,
+    doc:
+      "Delete per-user daily activity rows (DAU / D1-D7-D30 source) older than N days. " <>
+        "0 keeps forever. Below 60 the admin retention cohorts go blank."
   )
 
   defp config(key), do: Gamend.Settings.get(__MODULE__, key)

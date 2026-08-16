@@ -386,14 +386,6 @@ defmodule Gamend.Accounts do
   end
 
   @doc """
-  Count users registered in the last N days.
-  """
-  @spec count_users_registered_since(integer()) :: non_neg_integer()
-  def count_users_registered_since(days) when is_integer(days) do
-    count_users_registered_since_cached(days)
-  end
-
-  @doc """
   Ids of every admin user.
 
   Used to fan a moderation alert out to whoever can act on it. Not cached: the
@@ -403,28 +395,6 @@ defmodule Gamend.Accounts do
   @spec list_admin_ids() :: [Ecto.UUID.t()]
   def list_admin_ids do
     Repo.all(from u in User, where: u.is_admin == true, select: u.id)
-  end
-
-  @decorate cacheable(
-              key:
-                {:accounts, :stats, users_stats_cache_version(), :users_registered_since, days},
-              opts: [ttl: @stats_cache_ttl_ms]
-            )
-  defp count_users_registered_since_cached(days) do
-    cutoff = DateTime.utc_now() |> DateTime.add(-days, :day)
-    Repo.one(from u in User, where: u.inserted_at >= ^cutoff, select: count(u.id)) || 0
-  end
-
-  @doc """
-  Count users active in the last N days.
-
-  This metric is based on `users.updated_at` (any user record update,
-  including registration/creation), so it reflects all users and not just
-  session-token based authentication.
-  """
-  @spec count_users_active_since(integer()) :: non_neg_integer()
-  def count_users_active_since(days) when is_integer(days) do
-    count_users_active_since_cached(days)
   end
 
   @doc """
@@ -486,25 +456,10 @@ defmodule Gamend.Accounts do
     Repo.one(from u in User, where: u.is_activated == false, select: count(u.id)) || 0
   end
 
-  @decorate cacheable(
-              key: {:accounts, :stats, users_stats_cache_version(), :users_active_since, days},
-              opts: [ttl: @stats_cache_ttl_ms]
-            )
-  defp count_users_active_since_cached(days) do
-    cutoff = DateTime.utc_now() |> DateTime.add(-days, :day)
-
-    Repo.one(
-      from u in User,
-        where:
-          u.updated_at >= ^cutoff or
-            (not is_nil(u.last_seen_at) and u.last_seen_at >= ^cutoff),
-        select: count(u.id)
-    ) || 0
-  end
-
   @doc """
   Updates `last_seen_at` to now for the given user. Fire-and-forget — errors are ignored.
-  Call on login (session or JWT) to track activity.
+  Call on login (session or JWT) to track activity. Also records the UTC day
+  for `Gamend.Analytics` (DAU / retention).
   """
   @spec touch_last_seen(User.t()) :: :ok
   def touch_last_seen(%User{} = user) do
@@ -515,8 +470,9 @@ defmodule Gamend.Accounts do
       _ -> :ok
     end
 
-    invalidate_users_stats_cache()
-    :ok
+    # No stats-cache bust here any more: the only counter a login used to move
+    # ("active in the last N days") now lives in `Gamend.Analytics`.
+    Gamend.Analytics.record_activity(user.id, now)
   end
 
   @doc """
@@ -549,7 +505,8 @@ defmodule Gamend.Accounts do
         :ok
     end
 
-    :ok
+    # One cache read per heartbeat; a row only on the first touch of a UTC day.
+    Gamend.Analytics.record_activity(user_id, now)
   end
 
   @doc """
@@ -2667,6 +2624,7 @@ defmodule Gamend.Accounts do
         |> case do
           {:ok, updated} = ok ->
             invalidate_user_cache(updated)
+            Gamend.Analytics.record_activity(updated.id, now)
             broadcast_member_update(updated)
             # member_update only reaches the user's lobby and party channels.
             # A friends list, chat sidebar or group roster is neither, so the

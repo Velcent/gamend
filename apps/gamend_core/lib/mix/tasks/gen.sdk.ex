@@ -44,7 +44,10 @@ defmodule Mix.Tasks.Gen.Sdk do
     {Gamend.Realtime, "realtime.ex"},
     # So a hook asks "may this user?" the same way core does, instead of
     # reimplementing each context's ownership rule.
-    {Gamend.Policy, "policy.ex"}
+    {Gamend.Policy, "policy.ex"},
+    # `Analytics.count/3` is how a game reports its own daily counters (levels
+    # finished, hearts-empty starts) to the admin dashboard.
+    {Gamend.Analytics, "analytics.ex"}
   ]
 
   @impl Mix.Task

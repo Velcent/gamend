@@ -2,13 +2,11 @@ defmodule GamendWeb.AdminLive.Index do
   use GamendWeb, :live_view
 
   alias Gamend.Accounts
-  alias Gamend.Accounts.User
   alias Gamend.Accounts.UserToken
   alias Gamend.Chat.Reports
   alias Gamend.Groups
   alias Gamend.KV
   alias Gamend.Leaderboards.Leaderboard
-  alias Gamend.Lobbies.Lobby
   alias Gamend.Notifications
   alias Gamend.Parties
   alias Gamend.Payments
@@ -114,6 +112,9 @@ defmodule GamendWeb.AdminLive.Index do
           <.link navigate={~p"/admin/economy"} class="btn btn-outline">
             Economy ({@economy_stats.wallets})
           </.link>
+          <.link navigate={~p"/admin/analytics"} class="btn btn-outline">
+            Analytics (DAU {@analytics_stats.dau})
+          </.link>
         </div>
 
         <div class="card bg-base-200">
@@ -148,12 +149,12 @@ defmodule GamendWeb.AdminLive.Index do
               <div class="card bg-base-100 p-4">
                 <div class="text-sm font-semibold mb-2">Registration</div>
                 <div class="text-xs text-base-content/60 mt-2 space-y-1">
-                  <div class="font-semibold">Last 24 hours: {@users_registered_1d}</div>
+                  <div class="font-semibold">Today: {@snapshot.activity.new_users_1d}</div>
                   <div class="font-semibold mt-2">
-                    Last 7 days: {@users_registered_7d}
+                    Last 7 days: {@snapshot.activity.new_users_7d}
                   </div>
                   <div class="font-semibold mt-2">
-                    Last 30 days: {@users_registered_30d}
+                    Last 30 days: {@snapshot.activity.new_users_30d}
                   </div>
                   <%= if @users_unactivated > 0 do %>
                     <div class="mt-3 pt-2 border-t border-base-300">
@@ -171,11 +172,25 @@ defmodule GamendWeb.AdminLive.Index do
 
               <%!-- 3. Activity --%>
               <div class="card bg-base-100 p-4">
-                <div class="text-sm font-semibold mb-2">Activity</div>
+                <div class="flex items-center justify-between mb-2">
+                  <div class="text-sm font-semibold">Activity</div>
+                  <.link navigate={~p"/admin/analytics"} class="link link-primary text-xs">
+                    View →
+                  </.link>
+                </div>
                 <div class="text-xs text-base-content/60 mt-2 space-y-1">
-                  <div class="font-semibold">Last 24 hours: {@users_active_1d}</div>
-                  <div class="font-semibold mt-2">Last 7 days: {@users_active_7d}</div>
-                  <div class="font-semibold mt-2">Last 30 days: {@users_active_30d}</div>
+                  <div class="font-semibold">Today (DAU): {@snapshot.activity.dau}</div>
+                  <div class="font-semibold mt-2">Last 7 days (WAU): {@snapshot.activity.wau}</div>
+                  <div class="font-semibold mt-2">Last 30 days (MAU): {@snapshot.activity.mau}</div>
+                  <div class="mt-3 pt-2 border-t border-base-300">
+                    Stickiness: {pct(@analytics_stats.stickiness)}
+                  </div>
+                  <div>
+                    D1 / D7 / D30: {pct(@analytics_stats.d1)} / {pct(@analytics_stats.d7)} / {pct(
+                      @analytics_stats.d30
+                    )}
+                  </div>
+                  <div>Payers (30d): {pct(@analytics_stats.conversion_30d)}</div>
                 </div>
               </div>
 
@@ -707,15 +722,13 @@ defmodule GamendWeb.AdminLive.Index do
   def mount(_params, _session, socket) do
     # Fire all independent DB queries in parallel for fast mount
     tasks = %{
-      users_count: Task.async(fn -> Repo.aggregate(User, :count) end),
+      # Players / lobbies / parties / quests / matchmaking / tournaments come
+      # from the one cached composition every stats surface reads.
+      snapshot: Task.async(fn -> safe_snapshot() end),
       sessions_count: Task.async(fn -> Repo.aggregate(UserToken, :count) end),
-      lobbies_count: Task.async(fn -> Repo.aggregate(Lobby, :count) end),
       notifications_count: Task.async(fn -> Notifications.count_all_notifications() end),
       push_stats: Task.async(fn -> Gamend.Push.token_stats() end),
       leaderboards_count: Task.async(fn -> Repo.aggregate(Leaderboard, :count) end),
-      tournaments_count:
-        Task.async(fn -> Repo.aggregate(Gamend.Tournaments.Tournament, :count) end),
-      tournament_stats: Task.async(fn -> Gamend.Tournaments.stats() end),
       matchmaking_stats: Task.async(fn -> Gamend.Matchmaking.stats() end),
       ready_check_stats: Task.async(fn -> Gamend.ReadyChecks.stats() end),
       kv_count: Task.async(fn -> KV.count_entries() end),
@@ -748,15 +761,10 @@ defmodule GamendWeb.AdminLive.Index do
       quest_stats: Task.async(fn -> Gamend.Quests.dashboard_stats() end),
       payments_stats: Task.async(fn -> Payments.admin_stats() end),
       translation_stats: Task.async(fn -> TranslationStats.all_completeness() end),
-      users_registered_1d: Task.async(fn -> Accounts.count_users_registered_since(1) end),
-      users_registered_7d: Task.async(fn -> Accounts.count_users_registered_since(7) end),
-      users_registered_30d: Task.async(fn -> Accounts.count_users_registered_since(30) end),
-      users_active_1d: Task.async(fn -> Accounts.count_users_active_since(1) end),
-      users_active_7d: Task.async(fn -> Accounts.count_users_active_since(7) end),
-      users_active_30d: Task.async(fn -> Accounts.count_users_active_since(30) end),
       users_unactivated: Task.async(fn -> Accounts.count_unactivated_users() end),
       oban_stats: Task.async(fn -> safe_oban_stats() end),
-      economy_stats: Task.async(fn -> safe_economy_stats() end)
+      economy_stats: Task.async(fn -> safe_economy_stats() end),
+      analytics_stats: Task.async(fn -> safe_analytics_stats() end)
     }
 
     # Await all tasks (the DB pool handles concurrency)
@@ -775,14 +783,15 @@ defmodule GamendWeb.AdminLive.Index do
 
     {:ok,
      assign(socket,
-       users_count: r.users_count,
+       snapshot: r.snapshot,
+       users_count: r.snapshot.players.players_total,
        sessions_count: r.sessions_count,
-       lobbies_count: r.lobbies_count,
+       lobbies_count: r.snapshot.lobbies.lobbies_total,
        leaderboards_count: r.leaderboards_count,
-       tournaments_count: r.tournaments_count,
+       tournaments_count: r.snapshot.tournaments.tournaments |> Map.values() |> Enum.sum(),
        matchmaking_stats: r.matchmaking_stats,
        ready_check_stats: r.ready_check_stats,
-       tournament_stats: r.tournament_stats,
+       tournament_stats: r.snapshot.tournaments,
        kv_count: r.kv_count,
        kv_global: r.kv_global,
        kv_user: r.kv_count - r.kv_global,
@@ -810,7 +819,7 @@ defmodule GamendWeb.AdminLive.Index do
        parties_members: r.parties_members,
        chat_count: r.chat_count,
        chat_senders: r.chat_senders,
-       chat_silent: max(r.users_count - r.chat_senders, 0),
+       chat_silent: max(r.snapshot.players.players_total - r.chat_senders, 0),
        chat_by_lobby: Map.get(r.chat_by_type, "lobby", 0),
        chat_by_group: Map.get(r.chat_by_type, "group", 0),
        chat_by_friend: Map.get(r.chat_by_type, "friend", 0),
@@ -831,12 +840,7 @@ defmodule GamendWeb.AdminLive.Index do
        log_total_buffered: log_total_buffered,
        log_recent_errors: log_recent_errors,
        lobby_snapshot_runs: safe_lobby_snapshot_runs(),
-       users_registered_1d: r.users_registered_1d,
-       users_registered_7d: r.users_registered_7d,
-       users_registered_30d: r.users_registered_30d,
-       users_active_1d: r.users_active_1d,
-       users_active_7d: r.users_active_7d,
-       users_active_30d: r.users_active_30d,
+       analytics_stats: r.analytics_stats,
        users_unactivated: r.users_unactivated,
        oban_stats: r.oban_stats,
        economy_stats: r.economy_stats,
@@ -963,6 +967,44 @@ defmodule GamendWeb.AdminLive.Index do
   rescue
     _ -> %{wallets: 0, ledger: 0}
   end
+
+  defp safe_snapshot do
+    Gamend.Analytics.snapshot()
+  rescue
+    _ ->
+      %{
+        players: Gamend.Accounts.player_stats(),
+        activity: %{dau: 0, wau: 0, mau: 0, new_users_1d: 0, new_users_7d: 0, new_users_30d: 0},
+        lobbies: Gamend.Lobbies.stats(),
+        parties: Gamend.Parties.stats(),
+        quests: Gamend.Quests.stats(),
+        signaling: Gamend.Signaling.stats(),
+        matchmaking: %{queued: 0, queues: []},
+        tournaments: Gamend.Tournaments.stats()
+      }
+  end
+
+  # The dashboard must render before the `user_activity_days` migration has
+  # run on an upgraded host; missing table → zeros, not a crashed index.
+  defp safe_analytics_stats do
+    Gamend.Analytics.dashboard_stats()
+  rescue
+    _ ->
+      %{
+        dau: 0,
+        wau: 0,
+        mau: 0,
+        stickiness: nil,
+        d1: nil,
+        d7: nil,
+        d30: nil,
+        payers_30d: 0,
+        conversion_30d: nil
+      }
+  end
+
+  defp pct(nil), do: "—"
+  defp pct(rate) when is_float(rate), do: "#{Float.round(rate * 100, 1)}%"
 
   defp safe_storage_info do
     case Gamend.Storage.adapter() do

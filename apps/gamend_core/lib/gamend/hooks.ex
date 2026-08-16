@@ -227,10 +227,20 @@ defmodule Gamend.Hooks do
                       after_tournament_finished: 2
 
   # Payment lifecycle hooks
+  @doc """
+  Veto a purchase before the player is charged.
+
+  Runs when a checkout starts and again when a receipt is validated, so a game
+  can refuse to sell — an unlinked account whose entitlement would be stranded
+  on one device, a region it does not ship to, a player it has banned. Return
+  `{:error, reason}` to stop it; the money never moves.
+  """
+  @callback before_purchase(User.t(), product :: struct()) :: hook_result(term())
   @callback after_purchase_fulfilled(Purchase.t()) :: any()
   @callback after_purchase_revoked(Purchase.t()) :: any()
   @callback after_entitlement_changed(Entitlement.t()) :: any()
-  @optional_callbacks after_purchase_fulfilled: 1,
+  @optional_callbacks before_purchase: 2,
+                      after_purchase_fulfilled: 1,
                       after_purchase_revoked: 1,
                       after_entitlement_changed: 1
 
@@ -618,6 +628,7 @@ defmodule Gamend.Hooks do
       :after_matchmaking_cancel,
       :matchmaking_form_matches,
       :after_matchmaking_matched,
+      :before_purchase,
       :before_tournament_register,
       :after_tournament_register,
       :before_tournament_leave,
@@ -683,6 +694,7 @@ defmodule Gamend.Hooks do
       :before_party_join,
       :before_party_kick,
       :before_matchmaking_join,
+      :before_purchase,
       :before_tournament_register,
       :before_tournament_leave,
       :before_tournament_result,
@@ -842,6 +854,7 @@ defmodule Gamend.Hooks do
   # returns never rewrites the pipeline args.
   defp normalize_pipeline_args(name, _value, current_args)
        when name in [
+              :before_purchase,
               :before_tournament_register,
               :before_tournament_leave,
               :before_tournament_result,
@@ -1599,6 +1612,9 @@ defmodule Gamend.Hooks.Default do
 
   @impl true
   def after_matchmaking_matched(_tickets, _lobby_id), do: :ok
+
+  @impl true
+  def before_purchase(_user, product), do: {:ok, product}
 
   @impl true
   def before_tournament_register(_user, tournament), do: {:ok, tournament}
