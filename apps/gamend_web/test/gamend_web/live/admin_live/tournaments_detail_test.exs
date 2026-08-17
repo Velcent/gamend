@@ -51,10 +51,10 @@ defmodule GamendWeb.AdminLive.TournamentsDetailTest do
       view |> element("button[phx-click='open_detail'][phx-value-id='#{t.id}']") |> render_click()
 
     assert html =~ "Entries (27)"
-    assert html =~ "Page 1 of 2"
+    assert html =~ "1 / 2 (27)"
 
     html = view |> element("button[phx-click='detail_next']") |> render_click()
-    assert html =~ "Page 2 of 2"
+    assert html =~ "2 / 2 (27)"
   end
 
   test "matches are shown per bracket with a picker and tree link", %{conn: conn} do

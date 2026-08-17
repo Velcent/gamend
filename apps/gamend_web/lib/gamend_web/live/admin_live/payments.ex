@@ -561,22 +561,13 @@ defmodule GamendWeb.AdminLive.Payments do
   end
 
   @impl true
-  def handle_event("section_page", %{"section" => section, "dir" => dir}, socket) do
-    section = section_atom(section)
-    page = socket.assigns.pages[section] || 1
-    total_pages = socket.assigns.total_pages[section] || 1
+  def handle_event("section_prev_page", %{"section" => section}, socket) do
+    {:noreply, move_section_page(socket, section, -1)}
+  end
 
-    next_page =
-      case dir do
-        "prev" -> max(1, page - 1)
-        "next" -> min(total_pages, page + 1)
-        _ -> page
-      end
-
-    {:noreply,
-     socket
-     |> assign(:pages, Map.put(socket.assigns.pages, section, next_page))
-     |> reload_section(section)}
+  @impl true
+  def handle_event("section_next_page", %{"section" => section}, socket) do
+    {:noreply, move_section_page(socket, section, 1)}
   end
 
   @impl true
@@ -723,35 +714,19 @@ defmodule GamendWeb.AdminLive.Payments do
     end
   end
 
+  # Each section pages independently, so the section rides along as a
+  # phx-value on the shared bar's events.
   defp section_pager(assigns) do
     ~H"""
-    <div class="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm">
-      <div class="text-base-content/60">
-        Page {@page} / {@total_pages} · {@count} total
-      </div>
-      <div class="join">
-        <button
-          type="button"
-          class="btn btn-sm join-item"
-          phx-click="section_page"
-          phx-value-section={@section}
-          phx-value-dir="prev"
-          disabled={@page <= 1}
-        >
-          Prev
-        </button>
-        <button
-          type="button"
-          class="btn btn-sm join-item"
-          phx-click="section_page"
-          phx-value-section={@section}
-          phx-value-dir="next"
-          disabled={@page >= @total_pages}
-        >
-          Next
-        </button>
-      </div>
-    </div>
+    <.pagination
+      page={@page}
+      total_pages={@total_pages}
+      total_count={@count}
+      on_prev="section_prev_page"
+      on_next="section_next_page"
+      value={%{"section" => @section}}
+      class="mt-4"
+    />
     """
   end
 
@@ -905,6 +880,17 @@ defmodule GamendWeb.AdminLive.Payments do
 
   defp product_options(products) do
     Enum.map(products, fn product -> {"#{product.sku} (##{product.id})", product.id} end)
+  end
+
+  defp move_section_page(socket, section, step) do
+    section = section_atom(section)
+    page = socket.assigns.pages[section] || 1
+    total_pages = socket.assigns.total_pages[section] || 1
+    next_page = min(max(page + step, 1), total_pages)
+
+    socket
+    |> assign(:pages, Map.put(socket.assigns.pages, section, next_page))
+    |> reload_section(section)
   end
 
   defp section_atom(section) when is_binary(section) do

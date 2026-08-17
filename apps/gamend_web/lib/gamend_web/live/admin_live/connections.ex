@@ -297,30 +297,14 @@ defmodule GamendWeb.AdminLive.Connections do
                 </table>
               </div>
 
-              <%!-- Pagination controls --%>
-              <div class="flex items-center justify-between mt-4">
-                <span class="text-sm text-base-content/60">
-                  Page {@conn_page} / {@conn_total_pages} ({@conn_filtered_count} users)
-                </span>
-                <div class="join">
-                  <button
-                    class="join-item btn btn-sm"
-                    phx-click="page-connections"
-                    phx-value-page={@conn_page - 1}
-                    disabled={@conn_page <= 1}
-                  >
-                    &larr; Prev
-                  </button>
-                  <button
-                    class="join-item btn btn-sm"
-                    phx-click="page-connections"
-                    phx-value-page={@conn_page + 1}
-                    disabled={@conn_page >= @conn_total_pages}
-                  >
-                    Next &rarr;
-                  </button>
-                </div>
-              </div>
+              <.pagination
+                page={@conn_page}
+                total_pages={@conn_total_pages}
+                total_count={@conn_filtered_count}
+                on_prev="conn_prev_page"
+                on_next="conn_next_page"
+                class="mt-4"
+              />
             <% end %>
           </div>
         </div>
@@ -361,12 +345,19 @@ defmodule GamendWeb.AdminLive.Connections do
   end
 
   @impl true
-  def handle_event("page-connections", %{"page" => page}, socket) do
-    page = String.to_integer(page)
-
+  def handle_event("conn_prev_page", _params, socket) do
     {:noreply,
      socket
-     |> assign(conn_page: max(page, 1))
+     |> assign(conn_page: max(socket.assigns.conn_page - 1, 1))
+     |> assign_all()}
+  end
+
+  @impl true
+  def handle_event("conn_next_page", _params, socket) do
+    # assign_all/1 clamps to the last page, so no ceiling is needed here.
+    {:noreply,
+     socket
+     |> assign(conn_page: socket.assigns.conn_page + 1)
      |> assign_all()}
   end
 

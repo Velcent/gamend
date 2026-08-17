@@ -863,4 +863,59 @@ defmodule Gamend.QuestsTest do
       assert Quests.get_progress(user.id, "prune_daily") == nil
     end
   end
+
+  describe "host visibility filter" do
+    # The host filter is a module function; this one hides any quest whose
+    # metadata says "members only" unless the viewer is the named member.
+    def only_for_member(user_id, quests) do
+      Enum.reject(quests, fn q ->
+        q.metadata["members_only"] == true and q.metadata["member"] != user_id
+      end)
+    end
+
+    setup do
+      original = Application.get_env(:gamend_core, :quest_visibility_filter)
+      on_exit(fn -> restore(original) end)
+      :ok
+    end
+
+    defp restore(nil), do: Application.delete_env(:gamend_core, :quest_visibility_filter)
+    defp restore(value), do: Application.put_env(:gamend_core, :quest_visibility_filter, value)
+
+    test "hides quests from listings, counts and categories — but not from progress" do
+      member = user_fixture()
+      other = user_fixture()
+      Application.put_env(:gamend_core, :quest_visibility_filter, {__MODULE__, :only_for_member})
+
+      create_quest(%{key: "vis_open", category: "open"})
+
+      create_quest(%{
+        key: "vis_members",
+        category: "members",
+        metadata: %{"members_only" => true, "member" => member.id}
+      })
+
+      keys = fn user_id -> user_id |> Quests.list_user_quests() |> Enum.map(& &1.quest.key) end
+      assert "vis_members" in keys.(member.id)
+      refute "vis_members" in keys.(other.id)
+      assert "vis_open" in keys.(other.id)
+      assert Quests.count_user_quests(other.id) == length(keys.(other.id))
+      assert "members" in Quests.visible_categories(member.id)
+      refute "members" in Quests.visible_categories(other.id)
+      # The signed-out catalog asks the host with nil.
+      refute "members" in Quests.visible_categories(nil)
+
+      # Progress is not gated: the outsider still advances it, unseen.
+      {:ok, _} = Quests.report_event(other.id, "test_event", 1)
+      assert Quests.get_progress(other.id, "vis_members").status == "completed"
+    end
+
+    test "with no filter configured every active quest is visible" do
+      Application.delete_env(:gamend_core, :quest_visibility_filter)
+      user = user_fixture()
+      create_quest(%{key: "vis_plain", metadata: %{"members_only" => true}})
+
+      assert "vis_plain" in Enum.map(Quests.list_user_quests(user.id), & &1.quest.key)
+    end
+  end
 end

@@ -270,9 +270,11 @@ defmodule GamendWeb.LeaderboardsLive do
             </div>
             <div class="text-end">
               <span class="text-sm text-base-content/70">
-                {gettext("Score")}
+                {score_label(@leaderboard)}
               </span>
-              <div class="text-2xl font-bold">{format_score(@user_record.score)}</div>
+              <div class="text-2xl font-bold">
+                {format_score(@user_record.score, @leaderboard)}
+              </div>
             </div>
           </div>
         </div>
@@ -304,7 +306,7 @@ defmodule GamendWeb.LeaderboardsLive do
               <tr>
                 <th>{gettext("Rank")}</th>
                 <th>{gettext("Name")}</th>
-                <th class="text-end">{gettext("Score")}</th>
+                <th class="text-end">{score_label(@leaderboard)}</th>
               </tr>
             </thead>
             <tbody>
@@ -329,18 +331,21 @@ defmodule GamendWeb.LeaderboardsLive do
                     <%!-- A label-only record (an external scoreboard entry) has
                           no user behind it, so it gets no avatar. --%>
                     <.user_avatar :if={record.user} user={record.user} class="w-8 h-8" />
-                    <span class={[
-                      record.user_id != nil && record.user_id == @current_user_id && "font-bold"
-                    ]}>
-                      {record.label || LiveHelpers.public_user_name(record.user || record.user_id)}
-                    </span>
+                    <div class="flex flex-col leading-tight">
+                      <span class={[
+                        record.user_id != nil && record.user_id == @current_user_id && "font-bold"
+                      ]}>
+                        {record.label || LiveHelpers.public_user_name(record.user || record.user_id)}
+                      </span>
+                      <.user_title user={record.user} />
+                    </div>
                     <%= if record.user_id != nil and record.user_id == @current_user_id do %>
                       <span class="badge badge-primary badge-sm">{gettext("You")}</span>
                     <% end %>
                   </div>
                 </td>
                 <td class="text-end font-mono">
-                  {format_score(record.score)}
+                  {format_score(record.score, @leaderboard)}
                 </td>
               </tr>
             </tbody>
@@ -510,6 +515,19 @@ defmodule GamendWeb.LeaderboardsLive do
       ~p"/leaderboards/#{leaderboard.slug}/#{leaderboard.id}"
     end
   end
+
+  # What the score column is called, and what a value in it means. A board that
+  # counts kilometres was headed "Score" and printed a bare `500`, next to a
+  # column literally called "Rank" — three different senses of the word on one
+  # screen. `metadata` carries the board's own wording; anything without it
+  # keeps the generic pair.
+  defp score_label(%{metadata: %{"score_label" => label}}) when is_binary(label), do: label
+  defp score_label(_leaderboard), do: gettext("Score")
+
+  defp format_score(score, %{metadata: %{"score_unit" => unit}}) when is_binary(unit),
+    do: "#{format_score(score)} #{unit}"
+
+  defp format_score(score, _leaderboard), do: format_score(score)
 
   defp format_score(score) when is_integer(score) do
     score

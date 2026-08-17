@@ -270,9 +270,7 @@ defmodule GamendWeb.SignalingChannel do
   # Tracking happens after join so `Presence.track/3` sees a joined channel.
   # Subscribing to our own inbox is what makes relays work across nodes: the
   # sender broadcasts to `signaling:<room>:<user>` and whichever node holds
-  # that socket delivers it. The room topic is not subscribed to here —
-  # `Phoenix.Channel` already did that on join, and a second subscription
-  # delivers every broadcast twice.
+  # that socket delivers it.
   @impl true
   def handle_info(:after_signaling_join, socket) do
     %{signaling_room: room, signaling_user_id: user_id, signaling_role: role} = socket.assigns

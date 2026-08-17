@@ -1,6 +1,10 @@
 # August 2026
 
 - [fixed] **Realtime events arrived twice**
+- [fixed] **Scroll position** is restored without showing the top of the page first.
+- [fixed] **Language flags** are cached, so they no longer pop in after the text.
+- [fixed] **Deleting an account deletes its avatar** from storage.
+- [changed] **One heading scale** across the shipped pages.
 - [added] **Player analytics** — D1 / D7 / D30
 - [fixed] **Accessible theme colors**
 - [added] **RULES.md** — design & accessibility rules.

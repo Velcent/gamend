@@ -154,6 +154,16 @@ defmodule GamendWeb.HostLayoutNavigation do
         <.icon name="hero-chevron-down-solid" class="w-3 h-3" />
       </summary>
       <ul class="menu menu-sm dropdown-content mt-2 z-[1] p-2 shadow-lg bg-base-100 rounded-box w-56">
+        <%!-- The nearest thing the site has to a profile card: who you are,
+              and the game's own line under it (a rank, when the host stamps
+              one) — the same title that shows under this player everywhere
+              else, so it is not a surprise to see it here. --%>
+        <li class="menu-title px-2 py-1">
+          <span class="flex flex-col leading-tight text-base-content">
+            <span class="truncate font-semibold">{display_name(Scope.user(@current_scope))}</span>
+            <.user_title user={Scope.user(@current_scope)} />
+          </span>
+        </li>
         <li>
           <.link
             href={lp(~p"/users/settings")}

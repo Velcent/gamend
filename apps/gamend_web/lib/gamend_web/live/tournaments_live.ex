@@ -666,9 +666,12 @@ defmodule GamendWeb.TournamentsLive do
                 <td>
                   <div class="flex items-center gap-2">
                     <.user_avatar user={e.leader} class="w-8 h-8" />
-                    <span class={[e.leader_id == @current_user_id && "font-bold"]}>
-                      {player_name(e.leader)}
-                    </span>
+                    <div class="flex flex-col leading-tight">
+                      <span class={[e.leader_id == @current_user_id && "font-bold"]}>
+                        {player_name(e.leader)}
+                      </span>
+                      <.user_title user={e.leader} />
+                    </div>
                     <span :if={e.leader_id == @current_user_id} class="badge badge-primary badge-sm">
                       {gettext("You")}
                     </span>
@@ -804,6 +807,7 @@ defmodule GamendWeb.TournamentsLive do
             {player_name(@highlight.leader)}
             <span :if={@own?} class="badge badge-primary badge-sm">{gettext("You")}</span>
           </div>
+          <.user_title user={@highlight.leader} class="text-sm text-base-content/60" />
         </div>
         <div class="flex items-center gap-4 text-end">
           <div>
@@ -883,10 +887,11 @@ defmodule GamendWeb.TournamentsLive do
       @resolved && not @won? && @entry_id != nil && "opacity-50 line-through",
       @highlighted? && "bg-primary/20 ring-2 ring-primary ring-inset font-semibold"
     ]}>
-      <span class="truncate">
+      <span class="flex min-w-0 flex-col leading-tight">
         <%= cond do %>
           <% @entry_id -> %>
-            {slot_name(@entries, @entry_id)}
+            <span class="truncate">{slot_name(@entries, @entry_id)}</span>
+            <.user_title user={slot_leader(@entries, @entry_id)} class="text-xs font-normal text-base-content/60" />
           <% @round == 1 -> %>
             <span class="text-base-content/70">{gettext("bye")}</span>
           <% true -> %>
@@ -902,6 +907,13 @@ defmodule GamendWeb.TournamentsLive do
     case Map.get(entries, entry_id) do
       nil -> gettext("Player")
       entry -> player_name(entry.leader)
+    end
+  end
+
+  defp slot_leader(entries, entry_id) do
+    case Map.get(entries, entry_id) do
+      nil -> nil
+      entry -> entry.leader
     end
   end
 

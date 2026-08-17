@@ -91,17 +91,14 @@ defmodule GamendWeb.AdminLive.Tournaments do
               </table>
             </div>
 
-            <div class="flex gap-2 mt-2">
-              <button phx-click="prev_page" class="btn btn-xs" disabled={@page == 1}>Prev</button>
-              <span class="text-xs self-center">Page {@page}</span>
-              <button
-                phx-click="next_page"
-                class="btn btn-xs"
-                disabled={@page * @page_size >= @count}
-              >
-                Next
-              </button>
-            </div>
+            <.pagination
+              page={@page}
+              total_pages={@total_pages}
+              total_count={@count}
+              on_prev="prev_page"
+              on_next="next_page"
+              class="mt-2"
+            />
           </div>
         </div>
 
@@ -238,23 +235,13 @@ defmodule GamendWeb.AdminLive.Tournaments do
               </div>
             </div>
 
-            <div :if={@detail.entry_pages > 1} class="flex items-center gap-2">
-              <button
-                phx-click="detail_prev"
-                class="btn btn-xs"
-                disabled={@detail.entry_page <= 1}
-              >
-                Prev
-              </button>
-              <span class="text-xs">Page {@detail.entry_page} of {@detail.entry_pages}</span>
-              <button
-                phx-click="detail_next"
-                class="btn btn-xs"
-                disabled={@detail.entry_page >= @detail.entry_pages}
-              >
-                Next
-              </button>
-            </div>
+            <.pagination
+              page={@detail.entry_page}
+              total_pages={@detail.entry_pages}
+              total_count={@detail.entry_count}
+              on_prev="detail_prev"
+              on_next="detail_next"
+            />
 
             <div :if={@detail.brackets != []} class="flex items-center gap-2 flex-wrap">
               <span class="text-sm font-semibold">Brackets:</span>
@@ -362,7 +349,8 @@ defmodule GamendWeb.AdminLive.Tournaments do
   end
 
   def handle_event("next_page", _params, socket) do
-    {:noreply, socket |> assign(:page, socket.assigns.page + 1) |> reload()}
+    page = min(socket.assigns.page + 1, socket.assigns.total_pages)
+    {:noreply, socket |> assign(:page, page) |> reload()}
   end
 
   def handle_event("new_tournament", _params, socket) do
@@ -505,9 +493,12 @@ defmodule GamendWeb.AdminLive.Tournaments do
         end
       end)
 
+    count = Tournaments.count_tournaments(Keyword.drop(opts, [:page, :page_size]))
+
     socket
     |> assign(:tournaments, Tournaments.list_tournaments(opts))
-    |> assign(:count, Tournaments.count_tournaments(Keyword.drop(opts, [:page, :page_size])))
+    |> assign(:count, count)
+    |> assign(:total_pages, max(ceil_div(count, socket.assigns.page_size), 1))
   end
 
   @detail_page_size 25

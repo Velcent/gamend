@@ -635,21 +635,14 @@ defmodule GamendWeb.LobbyLive.Index do
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-4">
           <div class="card bg-base-200 p-4 rounded-lg">
             <div class="font-semibold">{gettext("Create")}</div>
-            <div class="mt-2 flex gap-2 items-center">
-              <button phx-click="lobbies_prev" class="btn btn-xs" disabled={@lobbies_page <= 1}>
-                {gettext("Prev")}
-              </button>
-              <div class="text-xs text-base-content/70">
-                {@lobbies_page} / {@lobbies_total_pages} ({@lobbies_total})
-              </div>
-              <button
-                phx-click="lobbies_next"
-                class="btn btn-xs"
-                disabled={@lobbies_page >= @lobbies_total_pages || @lobbies_total_pages == 0}
-              >
-                {gettext("Next")}
-              </button>
-            </div>
+            <.pagination
+              page={@lobbies_page}
+              total_pages={@lobbies_total_pages}
+              total_count={@lobbies_total}
+              on_prev="lobbies_prev"
+              on_next="lobbies_next"
+              class="mt-2"
+            />
 
             <form phx-submit="create" class="mt-4 space-y-3">
               <.input name="title" label={gettext("Title")} value={@title} />

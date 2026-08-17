@@ -319,6 +319,32 @@ defmodule GamendWeb.AdminLive.PaymentsTest do
   defp restore_app_env(key, nil), do: Application.delete_env(:gamend_core, key)
   defp restore_app_env(key, value), do: Application.put_env(:gamend_core, key, value)
 
+  test "each section pages on its own through the shared pagination bar", %{
+    conn: conn,
+    admin: admin
+  } do
+    for _ <- 1..26 do
+      {:ok, _} =
+        Payments.create_product(%{
+          "sku" => "admin_pay_page_#{System.unique_integer([:positive])}",
+          "title" => "Paged Product",
+          "kind" => "consumable",
+          "grant_config" => %{}
+        })
+    end
+
+    {:ok, view, html} = conn |> log_in_user(admin) |> live(~p"/admin/payments")
+
+    assert html =~ "1 / 2 (26)"
+
+    html =
+      view
+      |> element(~S(button[phx-click="section_next_page"][phx-value-section="products"]))
+      |> render_click()
+
+    assert html =~ "2 / 2 (26)"
+  end
+
   test "admin opens provider SKU edit form via its UUID id", %{conn: conn, admin: admin} do
     {_product, provider_product} = create_provider_product("stripe", "price_edit_form_test")
 

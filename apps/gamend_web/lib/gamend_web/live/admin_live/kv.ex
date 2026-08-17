@@ -34,9 +34,6 @@ defmodule GamendWeb.AdminLive.KV do
                 >
                   Delete selected ({MapSet.size(@selected_ids)})
                 </button>
-                <div class="text-xs text-base-content/60">
-                  page {@page} / {@total_pages}
-                </div>
               </div>
             </div>
 

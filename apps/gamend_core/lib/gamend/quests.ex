@@ -1144,6 +1144,7 @@ defmodule Gamend.Quests do
 
     active_quests()
     |> Enum.filter(&(within_window?(&1, now) and is_nil(&1.prerequisite_quest_key)))
+    |> host_visible(nil)
     |> category_names()
   end
 
@@ -1158,15 +1159,34 @@ defmodule Gamend.Quests do
     quests |> Enum.map(& &1.category) |> Enum.reject(&is_nil/1) |> Enum.uniq() |> Enum.sort()
   end
 
+  @doc """
+  The host's say on which quest definitions one viewer may see at all — a
+  premium-only daily, a quest for a country the player has not unlocked. Set
+  `config :gamend_core, :quest_visibility_filter, {Module, :function}`; it is
+  called as `function(user_id | nil, [Quest.t()])` and returns the quests to
+  keep. Applied to every per-user listing (`list_user_quests/2`,
+  `count_user_quests/2`, `visible_categories/1`) and to the signed-out catalog
+  with `nil`. Progress is NOT filtered: an event still advances a quest the
+  viewer cannot see, so a player who gains access later finds it where they
+  left it; veto the claim in `before_quest_claim` if that must not pay.
+  """
+  @spec host_visible([Quest.t()], user_id() | nil) :: [Quest.t()]
+  def host_visible(quests, user_id) do
+    case Application.get_env(:gamend_core, :quest_visibility_filter) do
+      {mod, fun} when is_atom(mod) and is_atom(fun) -> apply(mod, fun, [user_id, quests])
+      _ -> quests
+    end
+  end
+
   # Definitions are few (capped by max_quests) and cached, so visibility and
   # pagination are resolved in memory; the user's rows come from one query.
   defp visible_quests(user_id, now, opts) do
     category = Keyword.get(opts, :category)
 
     quests =
-      Enum.filter(active_quests(), fn q ->
-        within_window?(q, now) and category in [nil, q.category]
-      end)
+      active_quests()
+      |> Enum.filter(fn q -> within_window?(q, now) and category in [nil, q.category] end)
+      |> host_visible(user_id)
 
     keys = Enum.map(quests, & &1.key)
     periods = current_period_keys(now)

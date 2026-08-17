@@ -137,7 +137,15 @@ defmodule GamendWeb.HostLayoutShell do
             style={if length(@breadcrumbs) > 1, do: "--breadcrumb-offset: 2.25rem"}
           >
             <.breadcrumbs trail={@breadcrumbs} />
-            {render_slot(@inner_block)}
+            <%!-- The page's own frame, applied here so no page has to know it:
+                  one gap between blocks and one landing before the footer,
+                  whichever repo wrote the page. A page that set its own `py-6`
+                  used to sit lower than the page beside it in the nav, and
+                  `pb-10` was on six pages and off the rest. `page-stack` is the
+                  hook a host restyles; the utilities are the default. --%>
+            <div class="page-stack space-y-6 pb-10">
+              {render_slot(@inner_block)}
+            </div>
           </div>
         </main>
 

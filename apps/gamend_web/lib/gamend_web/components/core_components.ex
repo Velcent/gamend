@@ -898,6 +898,12 @@ defmodule GamendWeb.CoreComponents do
   @doc """
   Renders a pagination bar with Prev/Next buttons, page info, and optional page-size selector.
 
+  Renders **nothing** when the list fits on one page: two dead buttons and a
+  "1 / 1" counter are noise on every short list in the app. The size selector
+  survives a one-page list when a smaller size would actually split it —
+  otherwise raising the size until everything fits would hide the only control
+  that undoes it.
+
   ## Attributes
 
     * `page` — current page number (required)
@@ -930,15 +936,38 @@ defmodule GamendWeb.CoreComponents do
   attr :on_next, :string, required: true
   attr :on_page_size, :string, default: nil
   attr :page_sizes, :list, default: [25, 50, 100, 200]
+
+  attr :value, :map,
+    default: %{},
+    doc: "extra phx-value-* pairs sent with every event, e.g. which section the list belongs to"
+
   attr :class, :string, default: nil
 
   def pagination(assigns) do
+    assigns =
+      assigns
+      |> assign(:multi_page?, assigns.total_pages > 1)
+      |> assign(:show_page_size?, show_page_size?(assigns))
+      |> assign(
+        :value_attrs,
+        Map.new(assigns.value, fn {key, val} -> {"phx-value-#{key}", val} end)
+      )
+
     ~H"""
-    <div class={["flex flex-wrap items-center gap-2", @class]}>
-      <button phx-click={@on_prev} class="btn btn-xs" disabled={@page <= 1}>
+    <div
+      :if={@multi_page? || @show_page_size?}
+      class={["flex flex-wrap items-center gap-2", @class]}
+    >
+      <button
+        :if={@multi_page?}
+        phx-click={@on_prev}
+        class="btn btn-xs"
+        disabled={@page <= 1}
+        {@value_attrs}
+      >
         {gettext("Prev")}
       </button>
-      <div class="text-xs text-base-content/70">
+      <div :if={@multi_page?} class="text-xs text-base-content/70">
         <%= if @total_count do %>
           {@page} / {@total_pages} ({@total_count})
         <% else %>
@@ -946,26 +975,46 @@ defmodule GamendWeb.CoreComponents do
         <% end %>
       </div>
       <button
+        :if={@multi_page?}
         phx-click={@on_next}
         class="btn btn-xs"
-        disabled={@page >= @total_pages || @total_pages == 0}
+        disabled={@page >= @total_pages}
+        {@value_attrs}
       >
         {gettext("Next")}
       </button>
-      <%= if @on_page_size && @page_size do %>
-        <form id={"#{@on_page_size}-form"} phx-change={@on_page_size} class="inline">
-          <select
-            name="size"
-            class="select select-xs select-bordered w-18 ms-2"
-          >
-            <option :for={size <- @page_sizes} value={size} selected={@page_size == size}>
-              {size}
-            </option>
-          </select>
-        </form>
-      <% end %>
+      <form
+        :if={@show_page_size?}
+        id={"#{@on_page_size}-form"}
+        phx-change={@on_page_size}
+        class="inline"
+      >
+        <input :for={{key, val} <- @value} type="hidden" name={key} value={val} />
+        <select
+          name="size"
+          class="select select-xs select-bordered w-18 ms-2"
+        >
+          <option :for={size <- @page_sizes} value={size} selected={@page_size == size}>
+            {size}
+          </option>
+        </select>
+      </form>
     </div>
     """
+  end
+
+  defp show_page_size?(%{on_page_size: on_page_size, page_size: page_size})
+       when is_nil(on_page_size) or is_nil(page_size),
+       do: false
+
+  defp show_page_size?(%{total_pages: total_pages}) when total_pages > 1, do: true
+
+  defp show_page_size?(%{page_size: page_size, page_sizes: page_sizes, total_count: total_count}) do
+    smallest = if page_sizes == [], do: page_size, else: Enum.min(page_sizes)
+
+    # One page at the current size: only worth offering when a smaller size
+    # would split the list. Without a count, fall back to "a smaller size exists".
+    if is_nil(total_count), do: page_size > smallest, else: total_count > smallest
   end
 
   @doc """
@@ -983,6 +1032,49 @@ defmodule GamendWeb.CoreComponents do
   end
 
   def user_display(_), do: "-"
+
+  @doc """
+  The game's own line under a player's name — a rank, a title, a guild — read
+  from a metadata path the host configures:
+
+      config :gamend_web, :user_title_meta_path, ["player", "rank"]
+
+  Core knows nothing about what a rank IS; it only knows where the host keeps
+  it. Renders nothing when the path is unset, the user has no metadata, or the
+  value is blank, so a fresh account shows a bare name rather than an empty
+  badge. Takes a `%User{}`, a metadata map, or `nil`.
+
+  One component so every place that names a player — leaderboards, tournament
+  rosters, party lists, profile cards — says the same thing about them, and a
+  host that changes where the title lives changes one config key.
+  """
+  attr :user, :any, required: true
+  attr :class, :string, default: "text-xs text-base-content/60"
+
+  def user_title(assigns) do
+    assigns = assign(assigns, :title, user_title_text(assigns.user))
+
+    ~H"""
+    <span :if={@title} class={@class}>{@title}</span>
+    """
+  end
+
+  @doc "The title text `user_title/1` renders, or nil. Exposed for plain-text callers."
+  def user_title_text(user) do
+    with [_ | _] = path <- Application.get_env(:gamend_web, :user_title_meta_path),
+         %{} = metadata <- user_metadata(user),
+         value when is_binary(value) and value != "" <- get_in(metadata, path) do
+      value
+    else
+      _ -> nil
+    end
+  end
+
+  defp user_metadata(%Gamend.Accounts.User{metadata: %{} = metadata}), do: metadata
+  defp user_metadata(%{metadata: %{} = metadata}), do: metadata
+  defp user_metadata(%{"metadata" => %{} = metadata}), do: metadata
+  defp user_metadata(%{} = maybe_metadata), do: maybe_metadata
+  defp user_metadata(_), do: nil
 
   @doc """
   A user's avatar as a round image when they have one (`profile_url`), falling
