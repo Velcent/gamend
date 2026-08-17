@@ -80,10 +80,9 @@ defmodule GamendWeb.GroupsLive do
              |> push_navigate(to: ~p"/groups")}
 
           group ->
-            Groups.subscribe_group(group.id)
-
             {:noreply,
              socket
+             |> resubscribe_group(group.id)
              |> assign(
                page_title: group.title,
                selected_group: group,
@@ -94,7 +93,36 @@ defmodule GamendWeb.GroupsLive do
         end
 
       _ ->
-        {:noreply, assign(socket, selected_group: nil, page_title: gettext("Groups"))}
+        {:noreply,
+         socket
+         |> unsubscribe_group()
+         |> assign(selected_group: nil, page_title: gettext("Groups"))}
+    end
+  end
+
+  # `handle_params/3` runs on every navigation, and `Phoenix.PubSub` is a
+  # duplicate registry: subscribing here without dropping the last one meant a
+  # reader who opened the same group twice in a session handled its events
+  # twice, three times on the third visit. One subscription at a time, tracked
+  # in assigns — the same shape as `LobbyLive.Index.maybe_update_lobby_subscription/2`.
+  defp resubscribe_group(socket, group_id) do
+    case socket.assigns[:subscribed_group_id] do
+      ^group_id ->
+        socket
+
+      previous ->
+        if previous, do: Groups.unsubscribe_group(previous)
+        if connected?(socket), do: Groups.subscribe_group(group_id)
+        assign(socket, :subscribed_group_id, group_id)
+    end
+  end
+
+  defp unsubscribe_group(socket) do
+    if previous = socket.assigns[:subscribed_group_id] do
+      Groups.unsubscribe_group(previous)
+      assign(socket, :subscribed_group_id, nil)
+    else
+      socket
     end
   end
 

@@ -58,7 +58,7 @@ defmodule GamendWeb.LobbyChannel do
             user_id: user_id
           })
 
-          socket = subscribe_to_lobby(socket, lobby_id)
+          Chat.subscribe_lobby_chat(lobby_id)
           send(self(), {:after_join, lobby})
           {:ok, socket |> assign(:lobby_id, lobby_id) |> assign(:spectator, false)}
 
@@ -74,7 +74,7 @@ defmodule GamendWeb.LobbyChannel do
             spectator: true
           })
 
-          socket = subscribe_to_lobby(socket, lobby_id)
+          Chat.subscribe_lobby_chat(lobby_id)
           SpectatorTracker.track(lobby_id, user_id)
           send(self(), {:after_join, lobby})
           {:ok, socket |> assign(:lobby_id, lobby_id) |> assign(:spectator, true)}
@@ -86,17 +86,6 @@ defmodule GamendWeb.LobbyChannel do
     else
       _ ->
         {:error, %{reason: "invalid_topic_or_unauthenticated"}}
-    end
-  end
-
-  defp subscribe_to_lobby(socket, lobby_id) do
-    if Map.get(socket.assigns, :subscribed_lobby, false) do
-      socket
-    else
-      _ = Lobbies.unsubscribe_lobby(lobby_id)
-      Lobbies.subscribe_lobby(lobby_id)
-      Chat.subscribe_lobby_chat(lobby_id)
-      assign(socket, :subscribed_lobby, true)
     end
   end
 
@@ -273,11 +262,10 @@ defmodule GamendWeb.LobbyChannel do
       %{lobby_id: lobby_id, spectator: true, current_scope: %{user_id: user_id}}
       when is_binary(lobby_id) ->
         SpectatorTracker.untrack(lobby_id, user_id)
-        _ = Lobbies.unsubscribe_lobby(lobby_id)
+        _ = Chat.unsubscribe_lobby_chat(lobby_id)
         :ok
 
       %{lobby_id: lobby_id} when is_binary(lobby_id) ->
-        _ = Lobbies.unsubscribe_lobby(lobby_id)
         _ = Chat.unsubscribe_lobby_chat(lobby_id)
         :ok
 

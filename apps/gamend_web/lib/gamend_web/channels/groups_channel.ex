@@ -18,7 +18,6 @@ defmodule GamendWeb.GroupsChannel do
 
   import GamendWeb.ChannelPush
 
-  alias Gamend.Groups
   alias GamendWeb.ChannelUpdates
   alias GamendWeb.Plugs.FeatureGate
   alias GamendWeb.Serializers
@@ -30,7 +29,6 @@ defmodule GamendWeb.GroupsChannel do
     # Same flag as GET /api/v1/groups — the feed must not outlive the API.
     if FeatureGate.enabled?(:list_groups) do
       GamendWeb.ConnectionTracker.register(:groups_channel)
-      Groups.subscribe_groups()
       {:ok, socket}
     else
       {:error, %{reason: "listing_disabled"}}

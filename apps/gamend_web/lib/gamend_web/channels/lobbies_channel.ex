@@ -12,7 +12,6 @@ defmodule GamendWeb.LobbiesChannel do
 
   import GamendWeb.ChannelPush
 
-  alias Gamend.Lobbies
   alias GamendWeb.ChannelUpdates
   alias GamendWeb.Plugs.FeatureGate
   alias GamendWeb.Serializers
@@ -24,7 +23,6 @@ defmodule GamendWeb.LobbiesChannel do
     # Same flag as GET /api/v1/lobbies — the feed must not outlive the API.
     if FeatureGate.enabled?(:list_lobbies) do
       GamendWeb.ConnectionTracker.register(:lobbies_channel)
-      Lobbies.subscribe_lobbies()
       {:ok, socket}
     else
       {:error, %{reason: "listing_disabled"}}

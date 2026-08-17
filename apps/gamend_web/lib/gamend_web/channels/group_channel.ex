@@ -45,9 +45,6 @@ defmodule GamendWeb.GroupChannel do
     with {:ok, group_id} <- Ecto.UUID.cast(group_id_str),
          %Scope{user_id: user_id} <- current_scope,
          true <- Groups.member?(group_id, user_id) do
-      # Unsubscribe first to avoid duplicate subscriptions on reconnect
-      Groups.unsubscribe_group(group_id)
-      Groups.subscribe_group(group_id)
       Chat.subscribe_group_chat(group_id)
 
       GamendWeb.ConnectionTracker.register(:group_channel, %{
@@ -222,7 +219,6 @@ defmodule GamendWeb.GroupChannel do
   def terminate(_reason, socket) do
     case socket.assigns do
       %{group_id: group_id} when is_binary(group_id) ->
-        Groups.unsubscribe_group(group_id)
         Chat.unsubscribe_group_chat(group_id)
         :ok
 

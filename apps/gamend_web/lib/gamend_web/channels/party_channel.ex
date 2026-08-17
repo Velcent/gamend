@@ -45,16 +45,7 @@ defmodule GamendWeb.PartyChannel do
          %Scope{user_id: user_id} <- current_scope do
       case Accounts.get_user(user_id) do
         %User{party_id: ^party_id} ->
-          # Subscribe to party PubSub events to forward to WebSocket clients
-          socket =
-            if Map.get(socket.assigns, :subscribed_party, false) do
-              socket
-            else
-              _ = Parties.unsubscribe_party(party_id)
-              Parties.subscribe_party(party_id)
-              Chat.subscribe_party_chat(party_id)
-              assign(socket, :subscribed_party, true)
-            end
+          Chat.subscribe_party_chat(party_id)
 
           GamendWeb.ConnectionTracker.register(:party_channel, %{
             party_id: party_id,
@@ -236,7 +227,6 @@ defmodule GamendWeb.PartyChannel do
     case socket.assigns do
       %{party_id: party_id} when is_binary(party_id) ->
         _ = Chat.unsubscribe_party_chat(party_id)
-        _ = Parties.unsubscribe_party(party_id)
         :ok
 
       _ ->

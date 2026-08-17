@@ -138,7 +138,7 @@ defmodule GamendWeb.UserChannel do
       lobby_id = parse_optional_id(Map.get(payload, "lobby_id"))
 
       if kv_read_allowed?(socket, key, user_id, lobby_id) do
-        :ok = KV.subscribe(key, user_id: user_id, lobby_id: lobby_id)
+        socket = subscribe_kv_once(socket, key, user_id, lobby_id)
         {:reply, {:ok, kv_subscribe_reply(key, user_id, lobby_id, payload)}, socket}
       else
         {:reply, {:error, kv_reply_payload(%{error: "forbidden"}, payload)}, socket}
@@ -160,6 +160,7 @@ defmodule GamendWeb.UserChannel do
       lobby_id = parse_optional_id(Map.get(payload, "lobby_id"))
 
       :ok = KV.unsubscribe(key, user_id: user_id, lobby_id: lobby_id)
+      socket = forget_kv_subscription(socket, key, user_id, lobby_id)
 
       {:reply,
        {:ok,
@@ -649,6 +650,27 @@ defmodule GamendWeb.UserChannel do
   # connect-time snapshot, so live state (lobby_id/party_id/online) is current.
   # nil only if the account was deleted mid-session.
   defp current_user(socket), do: Scope.user(socket.assigns.current_scope)
+
+  # `Phoenix.PubSub` is a duplicate registry, so a client that asks twice for the
+  # same key would be registered twice and get every `kv_updated` twice. The
+  # reply is still `:ok` — asking again is not an error, it is the same
+  # subscription — so a client repeating itself sees no difference.
+  defp subscribe_kv_once(socket, key, user_id, lobby_id) do
+    scope = {key, user_id, lobby_id}
+    subscribed = Map.get(socket.assigns, :kv_subscriptions, MapSet.new())
+
+    if MapSet.member?(subscribed, scope) do
+      socket
+    else
+      :ok = KV.subscribe(key, user_id: user_id, lobby_id: lobby_id)
+      assign(socket, :kv_subscriptions, MapSet.put(subscribed, scope))
+    end
+  end
+
+  defp forget_kv_subscription(socket, key, user_id, lobby_id) do
+    subscribed = Map.get(socket.assigns, :kv_subscriptions, MapSet.new())
+    assign(socket, :kv_subscriptions, MapSet.delete(subscribed, {key, user_id, lobby_id}))
+  end
 
   defp kv_subscribe_reply(key, user_id, lobby_id, payload) do
     reply = %{subscribed: true, key: key, user_id: user_id, lobby_id: lobby_id}
