@@ -33,11 +33,12 @@ defmodule Gamend.Retention do
     for N minutes, in minutes rather than days. The same window releases a lobby
     seat held by a long-offline player and disbands a party everyone abandoned.
 
-  Expired IP bans, OAuth sessions older than a day, and user tokens past their
-  own context's validity are always removed (independent of the env vars
-  above). Deletes are idempotent, so running on several instances at once is
-  harmless; each class is batched and failure-isolated, and emits
-  `[:gamend, :retention, :pruned]` telemetry with its count.
+  Expired IP bans, OAuth sessions older than a day, user tokens past their own
+  context's validity, and stored avatars whose owner no longer exists are always
+  removed (independent of the env vars above). Deletes are idempotent, so
+  running on several instances at once is harmless; each class is batched and
+  failure-isolated, and emits `[:gamend, :retention, :pruned]` telemetry with
+  its count.
   """
 
   use GenServer
@@ -55,6 +56,7 @@ defmodule Gamend.Retention do
   alias Gamend.Parties.Party
   alias Gamend.Payments.{Entitlement, Purchase}
   alias Gamend.Repo
+  alias Gamend.Storage
 
   # First run shortly after boot, then every 6 hours.
   @initial_delay_ms :timer.minutes(5)
@@ -68,6 +70,14 @@ defmodule Gamend.Retention do
   # SQLite one large DELETE holds the write lock long enough to stall gameplay
   # writes, and on Postgres it bloats a single transaction.
   @batch 500
+
+  # How long a stored avatar is left alone before "its owner does not exist" is
+  # read as orphaned rather than as a write still in progress.
+  @orphan_avatar_grace_minutes 60
+
+  # Ceiling on how much of the `avatars/` prefix one sweep walks (`@batch` per
+  # page). A run that hits it says so and resumes from the start six hours later.
+  @orphan_avatar_max_pages 20
 
   # Invites and join requests are only garbage once they stop being actionable.
   @resolved_statuses ~w(accepted declined rejected cancelled expired)
@@ -190,7 +200,8 @@ defmodule Gamend.Retention do
         push_tokens: &prune_push_tokens/0,
         anonymous_users: &prune_anonymous_users/0,
         inactive_user_warnings: &warn_inactive_users/0,
-        inactive_users: &prune_inactive_users/0
+        inactive_users: &prune_inactive_users/0,
+        orphaned_avatars: &prune_orphaned_avatars/0
       }
       |> Map.new(fn {class, fun} -> {class, run_class(class, fun)} end)
 
@@ -403,6 +414,96 @@ defmodule Gamend.Retention do
   defp delete_users(users) do
     Enum.count(users, fn user -> match?({:ok, _}, Accounts.delete_user(user)) end)
   end
+
+  # Object storage neither cascades nor takes part in the deletion transaction.
+  # `Accounts.delete_user/1` drops the `avatars/<user_id>/` prefix itself, but
+  # anything that writes an object for an account that is already gone leaves
+  # bytes no code path can ever reach again: an avatar mirror whose download was
+  # still in flight when the account was deleted, a deletion that raised before
+  # reaching the cleanup, or a row deleted by a build older than that cleanup.
+  # Nothing else lists the prefix, so an object that survives once survives
+  # forever — and an avatar is personal data, which makes "forever" the wrong
+  # answer regardless of how it got there.
+  #
+  # Only keys whose owner segment parses as a user id are considered, and only
+  # after `@orphan_avatar_grace_minutes`, so an object mid-write is never
+  # mistaken for an orphan.
+  #
+  # Walked a page at a time so each pass asks the database about at most `@batch`
+  # ids. Both backends list in key order, so a single page would only ever see
+  # the users whose ids sort first and an orphan past it would never be reached;
+  # the offset advances by what the page left behind, since deleting from the
+  # current page shifts everything after it back.
+  defp prune_orphaned_avatars do
+    cutoff = DateTime.add(DateTime.utc_now(:second), -@orphan_avatar_grace_minutes, :minute)
+
+    sweep_avatar_page(0, 0, @orphan_avatar_max_pages, cutoff)
+  end
+
+  defp sweep_avatar_page(offset, deleted, pages_left, cutoff) do
+    page = Storage.list_objects(prefix: "avatars/", offset: offset, limit: @batch)
+    removed = delete_ownerless_avatars(page, cutoff)
+
+    cond do
+      length(page) < @batch ->
+        deleted + removed
+
+      pages_left <= 1 ->
+        Logger.info("retention stopped scanning avatars at #{offset + length(page)} objects")
+        deleted + removed
+
+      true ->
+        # What this page left in place is what the next offset has to skip.
+        sweep_avatar_page(
+          offset + length(page) - removed,
+          deleted + removed,
+          pages_left - 1,
+          cutoff
+        )
+    end
+  end
+
+  defp delete_ownerless_avatars(page, cutoff) do
+    candidates =
+      page
+      |> Enum.filter(&settled?(&1, cutoff))
+      |> Enum.flat_map(fn %{key: key} ->
+        case avatar_owner_id(key) do
+          {:ok, owner_id} -> [{owner_id, key}]
+          :error -> []
+        end
+      end)
+
+    live = live_owner_ids(candidates)
+
+    candidates
+    |> Enum.reject(fn {owner_id, _key} -> MapSet.member?(live, owner_id) end)
+    |> Enum.count(fn {_owner_id, key} -> Storage.delete(key) == :ok end)
+  end
+
+  defp live_owner_ids([]), do: MapSet.new()
+
+  defp live_owner_ids(candidates) do
+    owner_ids = candidates |> Enum.map(&elem(&1, 0)) |> Enum.uniq()
+
+    from(u in User, where: u.id in ^owner_ids, select: u.id)
+    |> Repo.all()
+    |> MapSet.new()
+  end
+
+  # A backend that cannot report `last_modified` reports nil; treat that as "not
+  # settled" rather than deleting an object on no information at all.
+  defp settled?(%{last_modified: %DateTime{} = at}, cutoff), do: DateTime.before?(at, cutoff)
+  defp settled?(_object, _cutoff), do: false
+
+  defp avatar_owner_id("avatars/" <> rest) do
+    case String.split(rest, "/", parts: 2) do
+      [owner, _object] -> Ecto.UUID.cast(owner)
+      _no_object -> :error
+    end
+  end
+
+  defp avatar_owner_id(_key), do: :error
 
   defp prune_expired_ip_bans do
     now = DateTime.utc_now(:second)

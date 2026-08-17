@@ -29,7 +29,7 @@ defmodule GamendWeb.BlogLive do
       ~H"""
       <Layouts.app flash={@flash} current_scope={@current_scope}>
         <section id="standalone-blog" class="space-y-4">
-          <h1 class="text-3xl font-semibold">Blog</h1>
+          <h1 class="text-4xl font-black text-base-content/95">Blog</h1>
           <p class="text-base-content/70">
             Host blog content is unavailable in standalone web mode.
           </p>

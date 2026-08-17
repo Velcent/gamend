@@ -434,7 +434,7 @@ defmodule GamendWeb.QuestsLive do
         <%!-- Header --%>
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 class="text-3xl font-bold">
+            <h1 class="text-4xl font-black text-base-content/95">
               {gettext("Quests")}
               <span class="text-base-content/70 font-normal">({@total_count})</span>
             </h1>

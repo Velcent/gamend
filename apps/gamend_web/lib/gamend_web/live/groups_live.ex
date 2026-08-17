@@ -390,7 +390,7 @@ defmodule GamendWeb.GroupsLive do
     <Layouts.app flash={@flash} current_scope={@current_scope} current_path={assigns[:current_path]}>
       <div class="space-y-6">
         <div>
-          <h1 class="text-3xl font-bold">{gettext("Groups")}</h1>
+          <h1 class="text-4xl font-black text-base-content/95">{gettext("Groups")}</h1>
         </div>
 
         <%= if @selected_group do %>
@@ -553,14 +553,14 @@ defmodule GamendWeb.GroupsLive do
           ← {gettext("Back")}
         </button>
         <div>
-          <h1 class="text-2xl font-bold flex items-center gap-2">
+          <h2 class="text-2xl font-bold flex items-center gap-2">
             <.entity_icon
               icon_url={@selected_group.icon_url}
               type={:group}
               class="w-7 h-7 text-base-content/60"
             />
             {@selected_group.title}
-          </h1>
+          </h2>
           <div class="flex items-center gap-2 mt-1">
             <%= if @selected_group.type == "public" do %>
               <span class="badge badge-success">{gettext("Public")}</span>

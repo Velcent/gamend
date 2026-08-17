@@ -52,7 +52,7 @@ defmodule GamendWeb.StoreLive.Index do
       <div class="flex flex-col gap-6">
         <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div>
-            <h1 class="text-3xl font-bold">{gettext("Store")}</h1>
+            <h1 class="text-4xl font-black text-base-content/95">{gettext("Store")}</h1>
             <div class="mt-2 flex flex-wrap items-center gap-2 text-sm text-base-content/70">
               <span class="badge badge-outline">{@payment_environment}</span>
               <span>{gettext("Subscriptions, one-time items, and consumables.")}</span>

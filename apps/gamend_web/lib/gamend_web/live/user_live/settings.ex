@@ -52,7 +52,7 @@ defmodule GamendWeb.UserLive.Settings do
     ~H"""
     <Layouts.app flash={@flash} current_scope={@current_scope} current_path={assigns[:current_path]}>
       <div>
-        <h1 class="text-3xl font-bold">{gettext("Account")}</h1>
+        <h1 class="text-4xl font-black text-base-content/95">{gettext("Account")}</h1>
       </div>
 
       <div class="text-center">

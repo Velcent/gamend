@@ -11,7 +11,7 @@ defmodule GamendWeb.UserLive.Login do
     <Layouts.app flash={@flash} current_scope={@current_scope} current_path={assigns[:current_path]}>
       <div class="mx-auto max-w-sm lg:max-w-4xl space-y-4">
         <div class="text-center">
-          <h1 class="text-3xl font-bold">{gettext("Log in")}</h1>
+          <h1 class="text-4xl font-black text-base-content/95">{gettext("Log in")}</h1>
           <p class="text-sm text-base-content/70 mt-2">
             <%= if @current_scope do %>
               {gettext("Confirm")}

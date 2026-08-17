@@ -73,7 +73,7 @@ defmodule GamendWeb.StatsLive do
     <Layouts.app flash={@flash} current_scope={@current_scope} current_path={assigns[:current_path]}>
       <div class="space-y-6">
         <div>
-          <h1 class="text-3xl font-bold">{gettext("Server stats")}</h1>
+          <h1 class="text-4xl font-black text-base-content/95">{gettext("Server stats")}</h1>
         </div>
 
         <.section title={gettext("Players")} icon="hero-users-solid">

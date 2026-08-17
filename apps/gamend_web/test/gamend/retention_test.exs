@@ -763,4 +763,80 @@ defmodule Gamend.RetentionTest do
       assert Repo.get(User, leader.id).party_id == party.id
     end
   end
+
+  describe "orphaned avatars" do
+    alias Gamend.Storage
+    alias Gamend.Storage.Local
+
+    setup do
+      dir =
+        Path.join(System.tmp_dir!(), "retention_avatars_#{System.unique_integer([:positive])}")
+
+      old = Application.get_env(:gamend_core, Local)
+      Application.put_env(:gamend_core, Local, dir: dir)
+
+      on_exit(fn ->
+        File.rm_rf(dir)
+
+        if old,
+          do: Application.put_env(:gamend_core, Local, old),
+          else: Application.delete_env(:gamend_core, Local)
+      end)
+
+      :ok
+    end
+
+    # Age is what separates an orphan from an object still being written, so the
+    # mtime has to be set explicitly rather than waiting out the grace window.
+    defp put_avatar(owner_id, minutes_old) do
+      key = Storage.build_key("avatars", owner_id, "avatar.jpg")
+      {:ok, ^key} = Storage.put(key, "BYTES", content_type: "image/jpeg")
+      backdate_object(key, minutes_old)
+      key
+    end
+
+    defp backdate_object(key, minutes_old) do
+      Local.root_dir()
+      |> Path.join(key)
+      |> File.touch!(System.os_time(:second) - minutes_old * 60)
+    end
+
+    test "deletes stored avatars whose owner no longer exists" do
+      live = AccountsFixtures.user_fixture()
+      live_key = put_avatar(live.id, 120)
+      orphan_key = put_avatar(Gamend.UUIDv7.generate(), 120)
+
+      results = Retention.prune_all()
+
+      assert results.orphaned_avatars == 1
+      refute Storage.exists?(orphan_key)
+      assert Storage.exists?(live_key)
+    end
+
+    test "leaves a just-written object alone — it may be mid-upload" do
+      fresh_key = put_avatar(Gamend.UUIDv7.generate(), 0)
+
+      assert Retention.prune_all().orphaned_avatars == 0
+      assert Storage.exists?(fresh_key)
+    end
+
+    test "reaches an orphan that sorts past the first page of objects" do
+      # Both backends list in key order, so an orphan whose owner id sorts last
+      # is only found if the sweep pages past the live users ahead of it.
+      live = AccountsFixtures.user_fixture()
+      for _ <- 1..500, do: put_avatar(live.id, 120)
+      orphan_key = put_avatar("ffffffff-ffff-7fff-8fff-ffffffffffff", 120)
+
+      assert Retention.prune_all().orphaned_avatars == 1
+      refute Storage.exists?(orphan_key)
+    end
+
+    test "never touches keys whose owner segment is not a user id" do
+      {:ok, foreign} = Storage.put("avatars/shared/branding.png", "BYTES")
+      backdate_object(foreign, 120)
+
+      assert Retention.prune_all().orphaned_avatars == 0
+      assert Storage.exists?(foreign)
+    end
+  end
 end

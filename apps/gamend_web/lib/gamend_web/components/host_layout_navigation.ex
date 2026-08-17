@@ -244,7 +244,19 @@ defmodule GamendWeb.HostLayoutNavigation do
             </path>
           </svg>
         </summary>
-        <ul class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-80 text-lg">
+        <%!-- The menu is taller than a phone once the Learn/Social/News groups
+              and the account section are expanded, and a dropdown does not
+              scroll on its own: the overflowing items were simply unreachable.
+              Cap it to the viewport (dvh, so the mobile URL bar collapsing does
+              not cut it off) and scroll inside. `overscroll-contain` keeps the
+              scroll from continuing into the page behind it.
+
+              `flex-nowrap` is what makes the cap scroll instead of reflow:
+              daisyUI's `.menu` is `flex-flow: column wrap`, so a max-height on
+              its own wrapped the items into a SECOND COLUMN off to the side —
+              vertically unscrollable and horizontally clipped, which is worse
+              than the overflow it was meant to fix. --%>
+        <ul class="menu menu-sm dropdown-content mt-3 z-[1] max-h-[calc(100dvh-5rem)] flex-nowrap overflow-y-auto overflow-x-hidden overscroll-contain p-2 shadow bg-base-100 rounded-box w-80 text-lg">
           <%= if @current_scope do %>
             <.mobile_account_menu
               current_scope={@current_scope}
@@ -352,14 +364,16 @@ defmodule GamendWeb.HostLayoutNavigation do
 
     ~H"""
     <div class="contents">
+      <%!-- `eager`: this flag is in the header of every page, so a lazy one
+            pops in after the label on each refresh. --%>
       <label for="lang-modal" class="btn gap-1 list-none btn-outline cursor-pointer sm:hidden">
-        <.flag code={@flag_code} class="rounded-[2px] ring-1 ring-base-content/10" />
+        <.flag code={@flag_code} eager class="rounded-[2px] ring-1 ring-base-content/10" />
         <.icon name="hero-chevron-down-solid" class="w-3 h-3" />
       </label>
 
       <details class="dropdown dropdown-end hidden sm:block" data-navbar-dropdown>
         <summary class="btn gap-1 list-none btn-outline">
-          <.flag code={@flag_code} class="rounded-[2px] ring-1 ring-base-content/10" />
+          <.flag code={@flag_code} eager class="rounded-[2px] ring-1 ring-base-content/10" />
           {@label}
           <.icon name="hero-chevron-down-solid" class="w-3 h-3" />
         </summary>

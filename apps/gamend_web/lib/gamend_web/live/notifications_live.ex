@@ -14,7 +14,7 @@ defmodule GamendWeb.NotificationsLive do
       <div class="space-y-6">
         <div class="flex items-center justify-between">
           <div>
-            <h1 class="text-3xl font-bold">{gettext("Notifications")}</h1>
+            <h1 class="text-4xl font-black text-base-content/95">{gettext("Notifications")}</h1>
             <p class="text-base-content/60 mt-1">
               {@notif_count} / {@notif_unread_count}
             </p>

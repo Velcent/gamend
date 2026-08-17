@@ -5,10 +5,13 @@ raw locale put `lang="es_ES"` on the page — not a valid language tag, so a
 crawler falls back to guessing the language of a page that is telling it. The
 hreflang links below already go through `url_locale/1`; this had been missed.
 --%>
+<%!-- No `scroll-smooth` here: app.js adds it on the reader's first input.
+Static in the markup, it made Chrome animate the scroll restoration of a
+reload — the page painted at the top and glided down to where it had been. --%>
 <html
   lang={GamendWeb.Plugs.LocalePath.url_locale(GamendWeb.HostLayouts.current_locale())}
   dir={GamendWeb.Plugs.LocalePath.text_direction(GamendWeb.HostLayouts.current_locale())}
-  class="motion-safe:scroll-smooth bg-base-100"
+  class="bg-base-100"
   data-theme={assigns[:color_mode]}
 >
   <head>

@@ -76,6 +76,30 @@ defmodule Gamend.Accounts.AvatarMirrorTest do
     assert_enqueued(worker: AvatarMirror, args: %{"user_id" => user.id})
   end
 
+  test "an account deleted while the download runs leaves nothing in storage" do
+    user = user_fixture() |> with_provider_avatar()
+
+    Req.Test.stub(__MODULE__, fn conn ->
+      # The account goes away after the worker's freshness check and before it
+      # writes the object — the window `Accounts.delete_user/1` cannot see, since
+      # it has already dropped this user's storage prefix.
+      {:ok, _} = Accounts.delete_user(user)
+
+      conn
+      |> Plug.Conn.put_resp_content_type("image/png")
+      |> Plug.Conn.send_resp(200, @png)
+    end)
+
+    assert {:cancel, :user_deleted} =
+             perform_job(AvatarMirror, %{
+               "user_id" => user.id,
+               "source_url" => user.profile_url
+             })
+
+    assert Storage.list_objects(prefix: "avatars/#{user.id}/") == [],
+           "the mirrored avatar outlived the account it belonged to"
+  end
+
   describe "a mirror that fails is not permanent" do
     test "a rate-limited provider is retried rather than given up on" do
       Req.Test.stub(__MODULE__, fn conn -> Plug.Conn.send_resp(conn, 429, "slow down") end)

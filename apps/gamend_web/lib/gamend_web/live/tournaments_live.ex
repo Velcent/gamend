@@ -413,7 +413,7 @@ defmodule GamendWeb.TournamentsLive do
     <Layouts.app flash={@flash} current_scope={@current_scope} current_path={assigns[:current_path]}>
       <div class="space-y-6">
         <div>
-          <h1 class="text-3xl font-bold">
+          <h1 class="text-4xl font-black text-base-content/95">
             {gettext("Tournaments")}
             <span :if={is_nil(@tournament)} class="text-base-content/70 font-normal">
               ({@count})
@@ -507,14 +507,14 @@ defmodule GamendWeb.TournamentsLive do
           {gettext("Back")}
         </.link>
         <div>
-          <h1 class="text-2xl font-bold flex items-center gap-2">
+          <h2 class="text-2xl font-bold flex items-center gap-2">
             <.entity_icon
               icon_url={@tournament.icon_url}
               type={:tournament}
               class="w-7 h-7 text-base-content/60"
             />
             {@tournament.title}
-          </h1>
+          </h2>
           <div class="flex items-center gap-2 mt-1">
             <.state_badge state={@tournament.state} />
             <span :if={@tournament.starts_at} class="text-sm text-base-content/60">
@@ -775,9 +775,9 @@ defmodule GamendWeb.TournamentsLive do
         {gettext("Back")}
       </.link>
       <div>
-        <h1 class="text-2xl font-bold">
+        <h2 class="text-2xl font-bold">
           {@tournament.title} — {gettext("Bracket")} {@bracket.index + 1}
-        </h1>
+        </h2>
         <div class="flex items-center gap-2 mt-1">
           <.state_badge state={@tournament.state} />
           <span class="text-sm text-base-content/60">

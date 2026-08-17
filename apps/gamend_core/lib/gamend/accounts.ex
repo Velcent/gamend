@@ -2108,7 +2108,15 @@ defmodule Gamend.Accounts do
         # Friend DMs sent *to* this user (chat_type "friend", chat_ref_id = user)
         # have no FK to cascade — the sender's own messages go via sender_id, so
         # remove the inbound half here to avoid orphaned half-conversations.
-        _ = Gamend.Chat.cleanup_chat("friend", user.id)
+        #
+        # Isolated like the steps above: the row is already gone, so a failure
+        # here must not skip the cleanups below — storage in particular, which
+        # nothing else would ever revisit.
+        try do
+          _ = Gamend.Chat.cleanup_chat("friend", user.id)
+        rescue
+          _ -> :ok
+        end
 
         # Deleting cache entries asynchronously can cause a short-lived race where
         # a delete followed immediately by a device login sees a stale cached user

@@ -1,5 +1,18 @@
 # August 2026
 
+- [changed] **One page-title style** — every player-facing `<h1>` (leaderboards,
+  tournaments, groups, quests, store, auth, legal pages) and `<.header>` use
+  `text-4xl font-black text-base-content/95`; `<.header>` takes a `class` for
+  layout extras and its inner block is the title text, not a nested `<h1>`.
+- [fixed] **Flags flashing in on load** — `<.flag eager>` fetches and decodes
+  with the page; the navbar locale button uses it, and hosts can for headings
+  and pickers. Lazy stays the default for lists in closed dropdowns.
+- [fixed] **Reload scroll jump** — `scroll-smooth` is no longer on `<html>` in
+  the markup; `app.js` arms it on the first pointerdown/keydown, so Chrome's
+  scroll restoration on refresh is instant while anchor clicks stay smooth.
+- [fixed] **Avatars go with the account** — a stored avatar orphaned by a mirror
+  that was still downloading, or by a deletion that raised on its way to the
+  cleanup, is now swept by retention instead of living in the bucket forever.
 - [added] **Player analytics** — D1 / D7 / D30
 - [fixed] **Accessible theme colors**
 - [added] **RULES.md** — design & accessibility rules.

@@ -11,7 +11,7 @@ defmodule GamendWeb.UserLive.Registration do
     <Layouts.app flash={@flash} current_scope={@current_scope} current_path={assigns[:current_path]}>
       <div class="mx-auto max-w-sm lg:max-w-4xl space-y-4">
         <div class="text-center">
-          <h1 class="text-3xl font-bold">{gettext("Register")}</h1>
+          <h1 class="text-4xl font-black text-base-content/95">{gettext("Register")}</h1>
           <p class="text-sm text-base-content/70 mt-2">
             <.link navigate={~p"/users/log_in"} class="font-semibold text-brand hover:underline">
               {gettext("Log in")}

@@ -47,10 +47,8 @@ defmodule Gamend.Accounts.AvatarMirror do
          content_type <- content_type(resp, source_url),
          :ok <- Storage.validate_upload(content_type, byte_size(body)),
          key <- Storage.build_key("avatars", user.id, "avatar#{extension(content_type)}"),
-         {:ok, ^key} <- Storage.put(key, body, content_type: content_type),
-         {:ok, _updated} <- Accounts.update_user_avatar(user, Storage.url(key)) do
-      _ = Accounts.prune_user_avatars(user.id, key)
-      :ok
+         {:ok, ^key} <- Storage.put(key, body, content_type: content_type) do
+      attach(user, key)
     else
       # Rate limits and provider hiccups are worth another go; Oban backs off.
       {:ok, %Req.Response{status: status}} when status in [408, 429] or status >= 500 ->
@@ -67,6 +65,32 @@ defmodule Gamend.Accounts.AvatarMirror do
         Logger.info("avatar mirror gave up user=#{user.id}: #{inspect(other)}")
         {:cancel, other}
     end
+  end
+
+  # The object is written before the row that points at it, so every way of
+  # failing here leaves bytes in storage that nothing references. The download
+  # takes long enough for the account to be deleted while it runs, and
+  # `Accounts.delete_user/1` has already dropped this user's storage prefix by
+  # then — so an object written afterwards would outlive the account. Delete what
+  # we just wrote instead of leaving it for the retention sweep to notice hours
+  # later; a deleted row raises `Ecto.StaleEntryError` rather than returning an
+  # error changeset, which is why both are handled.
+  defp attach(user, key) do
+    case Accounts.update_user_avatar(user, Storage.url(key)) do
+      {:ok, _updated} ->
+        _ = Accounts.prune_user_avatars(user.id, key)
+        :ok
+
+      {:error, changeset} ->
+        _ = Storage.delete(key)
+        Logger.info("avatar mirror discarded user=#{user.id}: #{inspect(changeset.errors)}")
+        {:cancel, :avatar_not_saved}
+    end
+  rescue
+    Ecto.StaleEntryError ->
+      _ = Storage.delete(key)
+      Logger.info("avatar mirror discarded user=#{user.id}: account deleted mid-mirror")
+      {:cancel, :user_deleted}
   end
 
   defp fetch(source_url, req_opts) do

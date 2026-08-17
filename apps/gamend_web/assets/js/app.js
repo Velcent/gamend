@@ -483,6 +483,24 @@ window.addEventListener("phx:page-loading-stop", _info => topbar.hide())
 // Started before the socket so static (non-LiveView) pages are covered too.
 startLocalTime()
 
+// Smooth scrolling for in-page anchors — armed on the reader's first input,
+// not in the markup. `scroll-behavior: smooth` on <html> also governs scrolls
+// the browser makes on its own, and Chrome applies it to the scroll
+// *restoration* of a reload: a page refreshed halfway down paints at the top
+// and then glides back to where it was. Nothing the reader did asked for
+// motion there, and it reads as a flash. A pointerdown or keydown precedes
+// every anchor click, so those stay smooth; every load-time scroll —
+// restoration, `#fragment` on arrival — is instant. Explicit
+// `scrollIntoView({behavior})` calls in hooks are unaffected either way.
+// `motion-safe:` keeps the reduced-motion preference in charge.
+function armSmoothScrolling() {
+  const arm = () => document.documentElement.classList.add("motion-safe:scroll-smooth")
+  const opts = {once: true, passive: true, capture: true}
+  window.addEventListener("pointerdown", arm, opts)
+  window.addEventListener("keydown", arm, opts)
+}
+armSmoothScrolling()
+
 loadExtraHooks().then((extraHooks) => {
   const liveSocket = createLiveSocket(extraHooks)
 

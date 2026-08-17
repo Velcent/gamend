@@ -38,6 +38,7 @@ defmodule GamendWeb.CoreComponents do
 
   attr :code, :any, required: true, doc: "ISO alpha-2 country code, or nil for none"
   attr :square, :boolean, default: false, doc: "1:1 box instead of 4:3"
+  attr :eager, :boolean, default: false, doc: "visible at load: fetch and decode with the page"
   attr :class, :any, default: nil
 
   @doc """
@@ -48,6 +49,14 @@ defmodule GamendWeb.CoreComponents do
   it flags, blocking the first paint of every page including the ones showing
   none. As files the browser fetches only what is on screen, in parallel, each
   cached on its own.
+
+  Lazy by default because most of a page's flags sit in a closed dropdown.
+  But lazy is the wrong default for a flag the reader sees at load — the
+  navbar's locale button, a heading, a picker's selected value: the preload
+  scanner skips lazy images, the fetch waits for layout, and the decode is
+  async, so even a cached flag pops in a frame or two after the text beside
+  it. That is the "flash" on every refresh. `eager` opts those few out: the
+  browser fetches them with the HTML and paints them with the first frame.
 
   Sized in `em` so the caller still controls it with a `text-*` class, exactly
   as the old `.fi`/`.fis` classes did.
@@ -64,8 +73,8 @@ defmodule GamendWeb.CoreComponents do
       src={"/flags/#{@code}.svg"}
       alt=""
       aria-hidden="true"
-      loading="lazy"
-      decoding="async"
+      loading={if(@eager, do: "eager", else: "lazy")}
+      decoding={if(@eager, do: "sync", else: "async")}
       class={[
         "inline-block h-[1em] shrink-0 object-contain",
         if(@square, do: "w-[1em]", else: "w-[1.3333em]"),
@@ -481,8 +490,20 @@ defmodule GamendWeb.CoreComponents do
   end
 
   @doc """
-  Renders a header with title.
+  Renders a page header: the `<h1>` in the one style every page title uses
+  (`text-4xl font-black text-base-content/95`), an optional subtitle and
+  actions.
+
+  The inner block IS the title text — pass words, an icon, a badge; never
+  another `<h1>`. A heading start tag inside an open heading is a parse error
+  the browser recovers from by closing the outer one first, so the page ended
+  up with an empty `<h1>` followed by the real one.
+
+  `class` extends the title (`flex items-center gap-3` for an icon,
+  `break-all` for an unbreakable string) — it does not replace the size, so
+  every page stays the same size without each caller restating it.
   """
+  attr :class, :any, default: nil, doc: "extra classes on the <h1>"
   slot :inner_block, required: true
   slot :subtitle
   slot :actions
@@ -491,10 +512,10 @@ defmodule GamendWeb.CoreComponents do
     ~H"""
     <header class={[@actions != [] && "flex items-center justify-between gap-6", "pb-4"]}>
       <div>
-        <h1 class="text-lg font-semibold leading-8">
+        <h1 class={["text-4xl font-black text-base-content/95", @class]}>
           {render_slot(@inner_block)}
         </h1>
-        <p :if={@subtitle != []} class="text-sm text-base-content/70">
+        <p :if={@subtitle != []} class="mt-1 text-sm text-base-content/70">
           {render_slot(@subtitle)}
         </p>
       </div>

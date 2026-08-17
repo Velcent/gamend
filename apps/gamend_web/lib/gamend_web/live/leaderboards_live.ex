@@ -101,7 +101,7 @@ defmodule GamendWeb.LeaderboardsLive do
     <Layouts.app flash={@flash} current_scope={@current_scope} current_path={assigns[:current_path]}>
       <div class="space-y-6">
         <div>
-          <h1 class="text-3xl font-bold">
+          <h1 class="text-4xl font-black text-base-content/95">
             {gettext("Leaderboards")}
             <span class="text-base-content/70 font-normal">({@count})</span>
           </h1>
@@ -192,14 +192,14 @@ defmodule GamendWeb.LeaderboardsLive do
           {gettext("Back")}
         </.link>
         <div>
-          <h1 class="text-2xl font-bold flex items-center gap-2">
+          <h2 class="text-2xl font-bold flex items-center gap-2">
             <.entity_icon
               icon_url={@leaderboard.icon_url}
               type={:leaderboard}
               class="w-7 h-7 text-base-content/60"
             />
             {@leaderboard.title}
-          </h1>
+          </h2>
           <div class="flex items-center gap-2 mt-1">
             <%= if Leaderboard.active?(@leaderboard) do %>
               <span class="badge badge-success">{gettext("Active")}</span>
