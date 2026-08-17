@@ -5,10 +5,10 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.3">
-    <meta name="project" content="gamend_core v1.0.1164">
+    <meta name="project" content="gamend_core v1.0.1167">
 
 
-    <title>Gamend.Retention — gamend_core v1.0.1164</title>
+    <title>Gamend.Retention — gamend_core v1.0.1167</title>
 
     <link rel="stylesheet" href="dist/html-elixir-NHQLCD6Y.css" />
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1164
+          v1.0.1167
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr />Retention</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1164)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1167)</small>
 
     </h1>
 
@@ -132,11 +132,12 @@ UTC day seen, behind DAU and D1/D7/D30) older than N days. Defaults to
 window shorter than the analytics cohort span (60 days) blanks the
 retention numbers.</li><li><code class="inline">RETENTION_ABANDONED_LOBBY_MINUTES</code> (15) — lobbies nobody has been seen in
 for N minutes, in minutes rather than days. The same window releases a lobby
-seat held by a long-offline player and disbands a party everyone abandoned.</li></ul><p>Expired IP bans, OAuth sessions older than a day, and user tokens past their
-own context's validity are always removed (independent of the env vars
-above). Deletes are idempotent, so running on several instances at once is
-harmless; each class is batched and failure-isolated, and emits
-<code class="inline">[:gamend, :retention, :pruned]</code> telemetry with its count.</p>
+seat held by a long-offline player and disbands a party everyone abandoned.</li></ul><p>Expired IP bans, OAuth sessions older than a day, user tokens past their own
+context's validity, and stored avatars whose owner no longer exists are always
+removed (independent of the env vars above). Deletes are idempotent, so
+running on several instances at once is harmless; each class is batched and
+failure-isolated, and emits <code class="inline">[:gamend, :retention, :pruned]</code> telemetry with
+its count.</p>
     </section>
 
 </div>
@@ -229,7 +230,7 @@ the sweeper is not supervised (tests, or an instance with it disabled).</p></div
       <h1 class="signature" translate="no">child_spec(init_arg)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/retention.ex#L43" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/retention.ex#L44" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -251,7 +252,7 @@ the sweeper is not supervised (tests, or an instance with it disabled).</p></div
       <h1 class="signature" translate="no">prune_all()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/retention.ex#L158" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/retention.ex#L168" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -280,7 +281,7 @@ counts per table.</p>
       <h1 class="signature" translate="no">run_now()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/retention.ex#L123" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/retention.ex#L133" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -310,7 +311,7 @@ never overlap.</p>
       <h1 class="signature" translate="no">start_link(opts)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/retention.ex#L92" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/retention.ex#L102" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -332,7 +333,7 @@ never overlap.</p>
       <h1 class="signature" translate="no">status()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/retention.ex#L111" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/retention.ex#L121" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -364,9 +365,9 @@ the sweeper is not supervised (tests, or an instance with it disabled).</p>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1164">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1167">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1164">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1167">Hex Preview</a>
 
             </span>
 

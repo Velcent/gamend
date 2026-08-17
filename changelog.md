@@ -1,5 +1,13 @@
 # August 2026
 
+- [fixed] **Realtime events arrived twice**
+- [fixed] **A LiveView could stack PubSub subscriptions** — `GroupsLive` subscribed
+  to the selected group on every `handle_params/3`, and `kv:subscribe` registered
+  again each time a client asked for the same key.
+- [fixed] **Scroll position** is restored without showing the top of the page first.
+- [fixed] **Language flags** are cached, so they no longer pop in after the text.
+- [fixed] **Deleting an account deletes its avatar** from storage.
+- [changed] **One heading scale** across the shipped pages.
 - [added] **Player analytics** — D1 / D7 / D30
 - [fixed] **Accessible theme colors**
 - [added] **RULES.md** — design & accessibility rules.

@@ -34,11 +34,12 @@ Retention is configured per table in days via env vars (see
   for N minutes, in minutes rather than days. The same window releases a lobby
   seat held by a long-offline player and disbands a party everyone abandoned.
 
-Expired IP bans, OAuth sessions older than a day, and user tokens past their
-own context's validity are always removed (independent of the env vars
-above). Deletes are idempotent, so running on several instances at once is
-harmless; each class is batched and failure-isolated, and emits
-`[:gamend, :retention, :pruned]` telemetry with its count.
+Expired IP bans, OAuth sessions older than a day, user tokens past their own
+context's validity, and stored avatars whose owner no longer exists are always
+removed (independent of the env vars above). Deletes are idempotent, so
+running on several instances at once is harmless; each class is batched and
+failure-isolated, and emits `[:gamend, :retention, :pruned]` telemetry with
+its count.
 
 # `child_spec`
 
