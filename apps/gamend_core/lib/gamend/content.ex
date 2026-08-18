@@ -345,7 +345,9 @@ defmodule Gamend.Content do
     * `:title` – extracted from the first `# ` heading (or humanised slug)
     * `:date`  – `Date.t()` parsed from filename prefix or file mtime
     * `:path`  – absolute path to the `.md` file
-    * `:excerpt` – first non-heading paragraph (≤ 200 chars)
+    * `:excerpt` – first non-heading paragraph (≤ 200 chars), for cards and
+      meta descriptions
+    * `:lede` – that same paragraph in full, which is what a post opens with
   """
   @spec list_blog_posts() :: [map()]
   def list_blog_posts do
@@ -403,7 +405,7 @@ defmodule Gamend.Content do
         post ->
           case render_markdown_file(post.path, "blog") do
             nil -> nil
-            html -> html |> strip_first_h1() |> strip_lede_paragraph(post.excerpt)
+            html -> html |> strip_first_h1() |> strip_lede_paragraph(post.lede)
           end
       end
     end)
@@ -684,14 +686,15 @@ defmodule Gamend.Content do
     {date, slug} = extract_date_and_slug(filename)
     content = File.read!(path)
     title = extract_title(content) || humanize_slug(slug)
-    excerpt = extract_excerpt(content)
+    lede = extract_lede(content)
 
     %{
       slug: slug,
       title: title,
       date: date,
       path: path,
-      excerpt: excerpt
+      excerpt: String.slice(lede, 0, 200),
+      lede: lede
     }
   end
 
@@ -721,7 +724,16 @@ defmodule Gamend.Content do
     end)
   end
 
-  defp extract_excerpt(content) do
+  # The whole first paragraph. `excerpt` is this cut to 200 chars for cards and
+  # meta descriptions; the post itself opens with the full thing, and cutting
+  # it here is what made a long opening paragraph print twice — the truncated
+  # copy as the lede, the full one at the top of the body, because
+  # `strip_lede_paragraph/2` could no longer recognise them as the same text.
+  # A short summary for a card or a meta description, where the full paragraph
+  # would not fit.
+  defp extract_excerpt(content), do: content |> extract_lede() |> String.slice(0, 200)
+
+  defp extract_lede(content) do
     content
     |> String.split("\n")
     |> Enum.reject(fn line ->
@@ -731,7 +743,6 @@ defmodule Gamend.Content do
     |> List.first("")
     |> String.trim()
     |> strip_markdown_inline()
-    |> String.slice(0, 200)
   end
 
   # Strip common inline markdown syntax so excerpts read as plain text.
@@ -765,14 +776,14 @@ defmodule Gamend.Content do
     Regex.replace(~r/<h1>.*?<\/h1>\s*/s, html, "", global: false)
   end
 
-  # The show page renders the excerpt as a lede above the body, and the excerpt
-  # *is* the body's first paragraph — so that paragraph is dropped here or every
-  # post opens by repeating itself. Only an exact match is removed; an edited
-  # opening paragraph stays.
-  defp strip_lede_paragraph(html, excerpt) when is_binary(excerpt) and excerpt != "" do
+  # The show page renders the lede above the body, and the lede *is* the body's
+  # first paragraph — so that paragraph is dropped here or every post opens by
+  # repeating itself. Only an exact match is removed; an edited opening
+  # paragraph stays.
+  defp strip_lede_paragraph(html, lede) when is_binary(lede) and lede != "" do
     case Regex.run(~r/\A\s*<p>(.*?)<\/p>\s*/s, html) do
       [full, text] ->
-        if normalize_text(text) == normalize_text(excerpt) do
+        if normalize_text(text) == normalize_text(lede) do
           String.replace(html, full, "", global: false)
         else
           html
@@ -783,7 +794,7 @@ defmodule Gamend.Content do
     end
   end
 
-  defp strip_lede_paragraph(html, _excerpt), do: html
+  defp strip_lede_paragraph(html, _lede), do: html
 
   defp normalize_text(text) do
     text

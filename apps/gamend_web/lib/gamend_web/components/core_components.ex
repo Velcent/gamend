@@ -504,6 +504,12 @@ defmodule GamendWeb.CoreComponents do
   every page stays the same size without each caller restating it.
   """
   attr :class, :any, default: nil, doc: "extra classes on the <h1>"
+
+  attr :back, :string,
+    default: nil,
+    doc: "path to go up to; renders a Back button on the title's own line"
+
+  attr :back_label, :string, default: nil, doc: ~s(overrides the "Back" wording)
   slot :inner_block, required: true
   slot :subtitle
   slot :actions
@@ -512,7 +518,18 @@ defmodule GamendWeb.CoreComponents do
     ~H"""
     <header class={[@actions != [] && "flex items-center justify-between gap-6", "pb-4"]}>
       <div>
-        <h1 class={["text-4xl font-black text-base-content/95", @class]}>
+        <%!-- The back button sits ON the title line, not above it as a stray
+              text link: one place, one shape, on every page that has a parent. --%>
+        <div :if={@back} class="flex flex-wrap items-center gap-3">
+          <.link navigate={@back} class="btn btn-outline btn-sm">
+            <.icon name="hero-arrow-left-solid" class="size-4" />
+            {@back_label || gettext("Back")}
+          </.link>
+          <h1 class={["text-4xl font-black text-base-content/95", @class]}>
+            {render_slot(@inner_block)}
+          </h1>
+        </div>
+        <h1 :if={!@back} class={["text-4xl font-black text-base-content/95", @class]}>
           {render_slot(@inner_block)}
         </h1>
         <p :if={@subtitle != []} class="mt-1 text-sm text-base-content/70">

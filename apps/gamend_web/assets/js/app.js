@@ -501,6 +501,55 @@ function armSmoothScrolling() {
 }
 armSmoothScrolling()
 
+// A reload is the browser's to restore, not LiveView's.
+//
+// LiveView sets `history.scrollRestoration = "manual"` on connect so it can
+// own the position across its live navigations. The setting lives on the
+// history entry and survives a reload, which turns the browser's native
+// restore — done before first paint, at the exact position — off for plain
+// refreshes too. What replaces it is LiveView's own bookkeeping: `scrollY`
+// written into `history.state.scroll` by a scroll listener debounced 100 ms,
+// and read back in `joinDeadView` after app.js, the hooks import and one
+// animation frame. Two symptoms, seen on every page: a refresh paints the
+// top and then jumps to the saved spot; and a refresh mid-scroll lands where
+// the reader was 100 ms ago, not where they let go.
+//
+// `pagehide` runs on every full navigation away, reload included, and the
+// mode it leaves on the entry is what the next document loads under: flip it
+// to `auto` there and the browser restores natively. (The state cannot be
+// edited at that point — a `replaceState` in `pagehide` does not survive the
+// reload, the entry is already committed — so the stale `scroll` is dropped
+// on the way IN instead.) LiveView flips back to `manual` when it connects,
+// so its live navigations are untouched; `pagehide` never fires for those.
+//
+// On the way in, before LiveView connects: `auto` on the entry means the
+// browser has restored, or will from its own record, and LiveView's saved
+// `scroll` would move the page a second time, to a position 100 ms stale —
+// drop it. `manual` means the browser did nothing (an entry left by a live
+// navigation, reached again cross-document) and LiveView's copy is the only
+// one there is — keep it. Reading the mode is what tells the two apart, so
+// this must run before `connect()` rewrites it.
+function nativeScrollRestoreOnReload() {
+  const state = history.state
+  if (
+    history.scrollRestoration === "auto" &&
+    state && typeof state === "object" && "scroll" in state
+  ) {
+    const {scroll: _scroll, ...rest} = state
+    history.replaceState(rest, "", window.location.href)
+  }
+  window.addEventListener("pagehide", () => {
+    if (history.scrollRestoration) history.scrollRestoration = "auto"
+  })
+  // Back from the bfcache: same document, no reload, and the entry is now
+  // `auto` from our own `pagehide`. LiveView's same-document `popstate`
+  // restore expects `manual`, so give it back.
+  window.addEventListener("pageshow", (e) => {
+    if (e.persisted && history.scrollRestoration) history.scrollRestoration = "manual"
+  })
+}
+nativeScrollRestoreOnReload()
+
 loadExtraHooks().then((extraHooks) => {
   const liveSocket = createLiveSocket(extraHooks)
 

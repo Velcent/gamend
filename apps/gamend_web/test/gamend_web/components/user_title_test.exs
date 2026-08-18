@@ -60,7 +60,9 @@ defmodule GamendWeb.Components.UserTitleTest do
     Application.put_env(:gamend_web, :user_title_meta_path, ["player", "rank"])
     metadata = %{"player" => %{"rank" => "Navigator 1"}}
 
-    assert CoreComponents.user_title_text(%Gamend.Accounts.User{metadata: metadata}) == "Navigator 1"
+    assert CoreComponents.user_title_text(%Gamend.Accounts.User{metadata: metadata}) ==
+             "Navigator 1"
+
     assert CoreComponents.user_title_text(%{metadata: metadata}) == "Navigator 1"
     assert CoreComponents.user_title_text(%{"metadata" => metadata}) == "Navigator 1"
     assert CoreComponents.user_title_text(metadata) == "Navigator 1"

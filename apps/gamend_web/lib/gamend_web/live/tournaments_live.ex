@@ -891,7 +891,10 @@ defmodule GamendWeb.TournamentsLive do
         <%= cond do %>
           <% @entry_id -> %>
             <span class="truncate">{slot_name(@entries, @entry_id)}</span>
-            <.user_title user={slot_leader(@entries, @entry_id)} class="text-xs font-normal text-base-content/60" />
+            <.user_title
+              user={slot_leader(@entries, @entry_id)}
+              class="text-xs font-normal text-base-content/60"
+            />
           <% @round == 1 -> %>
             <span class="text-base-content/70">{gettext("bye")}</span>
           <% true -> %>

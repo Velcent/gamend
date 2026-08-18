@@ -101,6 +101,11 @@ defmodule GamendHost.MixProject do
           local_web_commands([web_cmd("format --check-formatted"), web_cmd("credo --strict")]) ++
           plugin_commands("format --check-formatted"),
       "deps.audit": [&prune_vendored_lockfiles/1, "deps.audit"],
+      # `mix deps.update --all` only rewrites the lockfile of the project it runs
+      # in. apps/*, sdk, sdk_tools and modules/plugins/* are separate Mix projects
+      # with their own mix.lock, and CI builds each in its own directory, so a
+      # root-only update silently leaves them pinned to stale versions.
+      "deps.update.all": ["cmd bin/update-deps"],
       # The umbrella apps are path deps, so their modules sit in the *deps* PLT
       # while dialyxir keys its freshness on mix.lock alone — app source can
       # change without the hash moving. Skipping the recheck then reports every
