@@ -118,8 +118,24 @@ defmodule Gamend.Lobbies do
   end
 
   defp broadcast_lobbies(event) do
-    Phoenix.PubSub.broadcast(Gamend.PubSub, @lobbies_topic, event)
+    Phoenix.PubSub.broadcast(Gamend.PubSub, @lobbies_topic, load_host(event))
   end
+
+  # Every subscriber to the global list serializes the lobby independently, so
+  # anything the serializer has to look up is looked up once per subscriber: an
+  # unloaded `:host` sends each of them to `Accounts.get_user/1` for the host's
+  # display name. One lobby_created with a lobby-browser screen open on 1000
+  # clients was 1000 user reads. Resolve it once here, from the same cache
+  # those reads would have hit.
+  defp load_host({tag, %Lobby{host: %Ecto.Association.NotLoaded{}, host_id: host_id} = lobby})
+       when is_binary(host_id) do
+    case Accounts.get_user(host_id) do
+      %User{} = host -> {tag, %{lobby | host: host}}
+      _ -> {tag, lobby}
+    end
+  end
+
+  defp load_host(event), do: event
 
   defp broadcast_lobby(lobby_id, event) do
     Phoenix.PubSub.broadcast(Gamend.PubSub, "lobby:#{lobby_id}", event)

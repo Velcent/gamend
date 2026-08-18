@@ -31,6 +31,8 @@ defmodule Gamend.Analytics do
 
   import Ecto.Query
 
+  require Logger
+
   alias Gamend.Accounts
   alias Gamend.Accounts.User
   alias Gamend.Analytics.ActivityDay
@@ -139,7 +141,15 @@ defmodule Gamend.Analytics do
 
     :ok
   rescue
-    Ecto.ConstraintError -> :ok
+    Ecto.ConstraintError ->
+      :ok
+
+    # Same contract as `insert_day/2`, for the same reason: this rides along
+    # with a level end or a purchase, and a counter is never worth the write
+    # it rides on. SQLite raises `Database busy` on a contended write.
+    error ->
+      Logger.warning("analytics: daily count #{key} failed: #{Exception.message(error)}")
+      :ok
   end
 
   def count(_key, _n, _now), do: :ok
@@ -265,8 +275,14 @@ defmodule Gamend.Analytics do
         :ok
 
       _ ->
-        _ = insert_day(user_id, day)
-        _ = Cache.put(key, day, ttl: @seen_cache_ttl_ms)
+        # Only mark the day as handled once it is: a row landed, or it never
+        # can (the user is gone). A transient DB failure must not sit in the
+        # cache for 30 hours suppressing the retry that would record the day.
+        case insert_day(user_id, day) do
+          {:error, :unavailable} -> :ok
+          _ -> _ = Cache.put(key, day, ttl: @seen_cache_ttl_ms)
+        end
+
         :ok
     end
   end
@@ -281,7 +297,17 @@ defmodule Gamend.Analytics do
     # A user deleted between the touch and this insert. Postgres names the
     # violated constraint and the changeset turns it into `{:error, _}`;
     # SQLite reports it anonymously, which Ecto can only raise.
-    Ecto.ConstraintError -> {:error, :constraint}
+    Ecto.ConstraintError ->
+      {:error, :constraint}
+
+    # Anything the driver or the pool raises: SQLite answering a contended
+    # write with `Database busy`, a checkout timeout, a disconnect. A day
+    # marker rides along with a `last_seen_at` touch on the login path and is
+    # never worth the request it rides on — see `record_activity/2`, which
+    # promises it never raises. Drop the row, keep the login.
+    error ->
+      Logger.warning("analytics: activity day insert failed: #{Exception.message(error)}")
+      {:error, :unavailable}
   end
 
   defp seen_key(user_id), do: {:analytics, :seen_day, user_id}

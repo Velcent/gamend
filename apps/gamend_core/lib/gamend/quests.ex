@@ -372,6 +372,13 @@ defmodule Gamend.Quests do
     Gamend.Cache.get!(done_marker_key(user_id, quest, now)) == true
   end
 
+  # A `repeat` quest breaks the premise: it re-arms the instant its reward is
+  # paid, and `period_key/2` is the constant "static" for it, so a marker would
+  # never roll over and would suppress every later event for the whole TTL —
+  # one completion per hour instead of an endless quest. It pays for the lock
+  # it actually needs, and only while it sits completed and unclaimed.
+  defp mark_done(_user_id, %Quest{reset: "repeat"}, _now), do: :ok
+
   defp mark_done(user_id, quest, now) do
     _ = Gamend.Cache.put(done_marker_key(user_id, quest, now), true, ttl: @done_marker_ttl_ms)
     :ok

@@ -23,11 +23,23 @@ else
   config :gamend_core, Gamend.Repo,
     database: database_path,
     adapter: Ecto.Adapters.SQLite3,
-    # Match production: see the note in config/host_runtime.exs.
+    # Match production: see the note in config/host_runtime.exs. Top-level
+    # options, not a `pragmas:` list — ecto_sqlite3 has no such key and
+    # silently ignores it. Without an explicit busy_timeout exqlite waits
+    # 2000ms, which ten pooled writers on one file blow straight through:
+    # concurrent device logins raised `Exqlite.Error: Database busy`.
     default_transaction_mode: :immediate,
+    journal_mode: :wal,
+    busy_timeout: 10_000,
+    # Never let the query timeout fire before SQLite has stopped waiting.
+    timeout: 15_000,
     stacktrace: true,
     show_sensitive_data_on_connection_error: true,
-    pool_size: 10
+    # One connection, matching the production default for SQLite: more
+    # connections race for the single write lock rather than sharing it, and
+    # concurrent account creation went from 10s+ (and 500s) to ~60ms when this
+    # dropped from 10 to 1. See the note in `GamendWeb.HostRuntime`.
+    pool_size: 1
 end
 
 # For development, we disable any cache and enable

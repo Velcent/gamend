@@ -272,7 +272,7 @@ defmodule GamendWeb.UserChannel do
     # setting the flag directly is what makes a second socket on another node
     # count.
     {:ok, _ref} =
-      Gamend.Presence.track(self(), Gamend.Presence.users_topic(), user.id, %{
+      Gamend.Presence.track(self(), Gamend.Presence.users_topic(user.id), user.id, %{
         online_at: System.system_time(:second)
       })
 

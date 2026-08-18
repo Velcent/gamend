@@ -80,6 +80,11 @@ config :gamend_web, GamendWeb.Plugs.RateLimiter, enabled: false
 # keep logging after the test task itself is done.
 config :gamend_core, Gamend.Accounts.StalePresenceSweeper, enabled: false
 
+# Write is_online through synchronously instead of coalescing it, so a test can
+# assert on the flag immediately after set_user_online/1 and so a buffered write
+# can never outlive the sandbox owner.
+config :gamend_core, Gamend.Accounts.PresenceWriter, flush_ms: 0
+
 # The other periodic workers, for the same reason: neither owns a sandbox
 # connection, and on SQLite they collide with the test's open write transaction
 # ("database is locked"). Tests drive tick/0 and sweep/0 directly.

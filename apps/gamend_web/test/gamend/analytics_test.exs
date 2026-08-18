@@ -2,6 +2,7 @@ defmodule Gamend.AnalyticsTest do
   use Gamend.DataCase, async: true
 
   import Ecto.Query
+  import ExUnit.CaptureLog
 
   alias Gamend.Accounts
   alias Gamend.Accounts.User
@@ -48,6 +49,37 @@ defmodule Gamend.AnalyticsTest do
     test "is a no-op for a user that does not exist" do
       assert :ok = Analytics.record_activity(Ecto.UUID.generate(), at(@today))
       assert :ok = Analytics.record_activity("not-a-uuid", at(@today))
+    end
+
+    test "a DB failure in the insert cannot fail the caller" do
+      user = AccountsFixtures.user_fixture()
+
+      # The failure seen in the wild is SQLite answering a contended write with
+      # `Exqlite.Error: Database busy` under concurrent registration: it escaped
+      # the old `Ecto.ConstraintError`-only rescue and 500'd
+      # `POST /api/v1/login/device`. Any raise out of `Repo.insert` reaches the
+      # caller the same way, and a process with no sandbox connection provokes
+      # one (`DBConnection.OwnershipError`) without taking a lock on the
+      # database file for the rest of the suite. A plain `spawn`, not a `Task`:
+      # `$callers` would lend the child this test's connection and the insert
+      # would succeed.
+      test_pid = self()
+
+      log =
+        capture_log(fn ->
+          spawn(fn ->
+            send(test_pid, {:recorded, Analytics.record_activity(user.id, at(@today))})
+          end)
+
+          assert_receive {:recorded, :ok}, 5_000
+        end)
+
+      assert log =~ "activity day insert failed"
+
+      # The failure left nothing cached, so the next call still records the day.
+      assert rows(user.id) == []
+      seen(user, @today)
+      assert rows(user.id) == [@today]
     end
 
     test "rides along with the last_seen touches" do
@@ -184,6 +216,24 @@ defmodule Gamend.AnalyticsTest do
       assert :ok = Analytics.count(String.duplicate("k", 200), 1, at(~D[2031-03-10]))
       assert :ok = Analytics.count("x", 0, at(~D[2031-03-10]))
       assert Analytics.counts("*", 7, ~D[2031-03-10]) == %{}
+    end
+
+    test "count/3 drops a DB failure instead of raising" do
+      # A counter rides along with a level end or a purchase; a contended
+      # SQLite write there must not fail the write it rides on. Same setup as
+      # the `record_activity/2` case above.
+      test_pid = self()
+
+      log =
+        capture_log(fn ->
+          spawn(fn ->
+            send(test_pid, {:counted, Analytics.count("level.finished", 1, at(@today))})
+          end)
+
+          assert_receive {:counted, :ok}, 5_000
+        end)
+
+      assert log =~ "daily count level.finished failed"
     end
   end
 

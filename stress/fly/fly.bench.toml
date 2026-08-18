@@ -1,0 +1,91 @@
+# The load-test target. A separate app from production on purpose: it runs with
+# rate limiting off and gets its database wiped between cells, neither of which
+# belongs anywhere near `game-server-uro`.
+#
+#   fly apps create gamend-bench
+#   fly deploy -c stress/fly/fly.bench.toml
+#
+# Postgres cells use the `-postgres` image instead (the adapter is compile-time,
+# so it is a different image, not a flag) plus the GAMEND_DB_URL secret:
+#
+#   fly secrets set -a gamend-bench \
+#     GAMEND_DB_URL='ecto://postgres:<pw>@<pg-app>.flycast:5432/gamend' \
+#     GAMEND_DB_IPV6=true
+#
+# See stress/fly/matrix.sh, which drives the whole run.
+
+app = "gamend-bench"
+primary_region = "ams"
+
+[build]
+  image = "ghcr.io/appsinacup/gamend:latest"
+
+[env]
+  GAMEND_HTTP_PORT = "4000"
+  GAMEND_DB_SQLITE_PATH = "/data/bench.db"
+  GAMEND_STORAGE_DIR = "/data/storage"
+
+  # Every k6 VU comes from one machine, so it is one IP. The limiter buckets
+  # per IP at 10 auth/min and 240 req/min — left on, the run measures the
+  # limiter. Do one run with it ON (and the limits raised) to price the plug
+  # itself; leave it off for everything else.
+  GAMEND_RATELIMIT_ENABLED = "false"
+
+  GAMEND_AUTH_DEVICE_AUTH_ENABLED = "true"
+
+  # The public list routes AND the global `lobbies` / `groups` channels sit
+  # behind these flags, off by default. lobbies_storm.js needs them.
+  GAMEND_FEATURES_LIST_LOBBIES_ENABLED = "true"
+  GAMEND_FEATURES_LIST_GROUPS_ENABLED = "true"
+
+  # Both default to 1 and shard by topic, so they must match on every node and
+  # only pay off once there is more than one. The spec calls for one run each
+  # on cells B and H with these raised.
+  # GAMEND_REALTIME_PUBSUB_POOL_SIZE = "8"
+  # GAMEND_REALTIME_PRESENCE_POOL_SIZE = "8"
+
+  # Only stress_hook, not the whole example set: example_hook submits a
+  # leaderboard score on every login and gates matchmaking modes, which would
+  # charge core for a sample plugin's writes. matrix.sh stages this directory.
+  GAMEND_CONTENT_PLUGINS_DIR = "/data/bench_plugins"
+
+[http_service]
+  internal_port = 4000
+  force_https = true
+  # A bench machine that stops between runs measures its own cold start.
+  auto_stop_machines = false
+  auto_start_machines = false
+  min_machines_running = 1
+  max_machines_running = 1
+  processes = ["app"]
+
+  [http_service.concurrency]
+    # Production's 5000 is a sensible ceiling for a real app and a hard cap for
+    # a WebSocket test: ws_idle.js aims well past it. Only applies to traffic
+    # through the proxy — the in-region runs go direct over .internal.
+    type = "connections"
+    hard_limit = 50000
+    soft_limit = 25000
+
+  [[http_service.checks]]
+    interval = "15s"
+    timeout = "10s"
+    grace_period = "20s"
+    method = "GET"
+    path = "/api/v1/health"
+
+# Fly scrapes this into its own Prometheus, which fly-metrics.net graphs next
+# to machine CPU/RAM/net. `/metrics` allows private-network callers as long as
+# GAMEND_OBSERVABILITY_METRICS_TOKEN is unset, so nothing else is needed.
+[metrics]
+  port = 4000
+  path = "/metrics"
+
+# Sized per cell by matrix.sh (`fly scale vm`); this is the starting point.
+[[vm]]
+  size = "shared-cpu-4x"
+  memory = "2gb"
+
+[[mounts]]
+  source = "bench_data"
+  destination = "/data"

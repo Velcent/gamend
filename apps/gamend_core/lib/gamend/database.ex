@@ -37,10 +37,13 @@ defmodule Gamend.Database do
     doc: "Connect over IPv6, needed on platforms with IPv6-only private networking."
   )
 
-  # SQLite has a single-writer model: a large pool usually adds lock contention
-  # rather than throughput, which is why the default differs by adapter.
+  # SQLite has a single-writer model, so more connections means more of them
+  # racing for the same write lock — and SQLite's busy-retry backoff is not
+  # FIFO, so a waiting connection can be passed over repeatedly. One connection
+  # turns that race into a queue. See the measurements in
+  # `GamendWeb.HostRuntime` where the adapter default is applied.
   setting(:pool_size, :integer,
-    doc: "Connections in the pool. Defaults to 10 on Postgres, 5 on SQLite."
+    doc: "Connections in the pool. Defaults to 10 on Postgres, 1 on SQLite."
   )
 
   setting(:pool_timeout_ms, :integer,

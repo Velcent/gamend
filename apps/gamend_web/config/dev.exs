@@ -19,6 +19,12 @@ else
   config :gamend_core, Gamend.Repo,
     database: database_path,
     adapter: Ecto.Adapters.SQLite3,
+    # Same SQLite tuning as the umbrella root's config/dev.exs — see the note
+    # there, and in config/host_runtime.exs, for why each of these matters.
+    default_transaction_mode: :immediate,
+    journal_mode: :wal,
+    busy_timeout: 10_000,
+    timeout: 15_000,
     stacktrace: true,
     show_sensitive_data_on_connection_error: true,
     pool_size: 10
@@ -70,4 +76,5 @@ config :gamend_web, GamendWeb.Auth.Guardian,
 # The declared setting, not just the endpoint's copy: Gamend.Settings
 # validates `auth.secret_key_base` at boot, and dev should not warn about a
 # secret it demonstrably has.
-config :gamend_core, Gamend.Accounts, secret_key_base: "l/tTJZ4KUNjIfiUsNQDQLWOTgFlyiOz8RQ2EgSRa7mopMzPLJuu7/8s5pA7iiSgO"
+config :gamend_core, Gamend.Accounts,
+  secret_key_base: "l/tTJZ4KUNjIfiUsNQDQLWOTgFlyiOz8RQ2EgSRa7mopMzPLJuu7/8s5pA7iiSgO"

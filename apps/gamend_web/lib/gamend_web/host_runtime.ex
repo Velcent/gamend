@@ -391,11 +391,23 @@ defmodule GamendWeb.HostRuntime do
         (setting.(Gamend.Database, :postgres_host) &&
            setting.(Gamend.Database, :postgres_user))
 
-    # NOTE: SQLite has a single-writer concurrency model. A very large pool
-    # usually increases contention/lock waits rather than throughput. The
-    # declared setting has no default because the sensible one depends on the
-    # adapter, which is only known here.
-    default_pool_size = if has_postgres_config, do: 10, else: 5
+    # SQLite has one writer, so the useful pool size is 1: writes then queue in
+    # the BEAM, first-come-first-served and effectively free, instead of racing
+    # each other inside SQLite. Contending connections there fall into
+    # `sqlite3_busy_timeout`'s backoff, which is neither fair nor FIFO — a
+    # sleeping connection loses the lock to a newcomer and sleeps longer.
+    #
+    # Measured on the load-test harness (`stress/`, dev SQLite, concurrent
+    # `POST /login/device`, each creating a user):
+    #
+    #   pool 10    2 concurrent  30ms · 3  340ms · 6  10-21s, some 500s
+    #   pool  1    6 concurrent  44-66ms  · 12  38-94ms, no errors
+    #
+    # Reads are unaffected at these concurrencies (WAL, and most reads are
+    # cache hits), so the pool costs nothing to shrink. The declared setting
+    # still overrides this, and has no default of its own because the sensible
+    # one depends on the adapter, which is only known here.
+    default_pool_size = if has_postgres_config, do: 10, else: 1
     repo_pool_size = setting.(Gamend.Database, :pool_size) || default_pool_size
 
     # Backpressure/overload tuning:
@@ -561,7 +573,10 @@ defmodule GamendWeb.HostRuntime do
           # https://hexdocs.pm/bandit/Bandit.html#t:options/0 for IPv6 vs
           # IPv4 and loopback vs public addresses.
           ip: {0, 0, 0, 0, 0, 0, 0, 0},
-          port: port
+          port: port,
+          thousand_island_options: [
+            transport_options: socket_buffer_options(setting)
+          ]
         ],
         secret_key_base: secret_key_base
       ]
@@ -598,6 +613,17 @@ defmodule GamendWeb.HostRuntime do
   # read per request by `GamendWeb.Plugs.ForceSSL`, not from here — Phoenix's
   # `:force_ssl` endpoint option is compile-time only, so configuring it in
   # this (runtime) file wrote a key nothing read and no redirect ever happened.
+  # `buffer` is the Erlang inet driver's own buffer; `recbuf`/`sndbuf` are the
+  # kernel's. All three are set together because the driver sizes itself from
+  # the socket options when it is not told otherwise, which is how an untouched
+  # connection ends up holding several hundred KB of binary memory.
+  defp socket_buffer_options(setting) do
+    kb = setting.(GamendWeb.Realtime, :socket_buffer_kb) || 32
+    bytes = kb * 1024
+
+    [buffer: bytes, recbuf: bytes, sndbuf: bytes]
+  end
+
   defp put_https(endpoint_config, setting) do
     if ssl_files_ready?(setting) do
       https_opts = [

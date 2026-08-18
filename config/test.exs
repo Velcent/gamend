@@ -116,6 +116,11 @@ config :gamend_web, GamendWeb.Plugs.RateLimiter, enabled: false
 # keep logging after the test task itself is done.
 config :gamend_core, Gamend.Accounts.StalePresenceSweeper, enabled: false
 
+# Write is_online through synchronously instead of coalescing it, so a test can
+# assert on the flag immediately after set_user_online/1 and so a buffered write
+# can never outlive the sandbox owner.
+config :gamend_core, Gamend.Accounts.PresenceWriter, flush_ms: 0
+
 # Jobs run inline on demand in tests (no queues/plugins/cron); assert with
 # Oban.Testing helpers and drain explicitly. Keeps the Cron tick from firing
 # against the Sandbox.

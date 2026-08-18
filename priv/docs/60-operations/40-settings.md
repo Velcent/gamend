@@ -7,7 +7,7 @@ generated: by `mix gamend.settings.guide` - do not edit by hand; edit the
 # Settings
 
 Every setting the server has, with the environment variable that sets it.
-237 settings across 21 groups.
+240 settings across 21 groups.
 
 A setting is declared in the module that owns it, so this page and
 `.env.example` are generated from the same source the server reads. The
@@ -90,7 +90,7 @@ Live values, and where each one came from, are on the
 |---|---|---|---|
 | `GAMEND_DB_ADAPTER` | atom | `:sqlite` | sqlite or postgres. Compile-time; set as a build arg, not at boot. |
 | `GAMEND_DB_IPV6` | boolean | `false` | Connect over IPv6, needed on platforms with IPv6-only private networking. |
-| `GAMEND_DB_POOL_SIZE` | integer | - | Connections in the pool. Defaults to 10 on Postgres, 5 on SQLite. |
+| `GAMEND_DB_POOL_SIZE` | integer | - | Connections in the pool. Defaults to 10 on Postgres, 1 on SQLite. |
 | `GAMEND_DB_POOL_TIMEOUT_MS` | integer | `10000` | How long a request waits to check out a connection, in milliseconds. |
 | `GAMEND_DB_POSTGRES_DB` | string | - |  |
 | `GAMEND_DB_POSTGRES_HOST` | string | - |  |
@@ -347,6 +347,9 @@ Live values, and where each one came from, are on the
 | Variable | Type | Default | Notes |
 |---|---|---|---|
 | `GAMEND_REALTIME_DEBOUNCE_MS` | integer | `0` | Hold outbound state updates this long and push only the latest per object. 0 pushes immediately. |
+| `GAMEND_REALTIME_PRESENCE_POOL_SIZE` | integer | `1` | Phoenix.Presence tracker shards. Must match on every node in a cluster; needs a full restart to change. |
+| `GAMEND_REALTIME_PUBSUB_POOL_SIZE` | integer | `1` | Phoenix.PubSub shards. Raise on nodes holding many thousands of sockets. |
+| `GAMEND_REALTIME_SOCKET_BUFFER_KB` | integer | `32` | Per-connection socket buffer in KB (buffer/recbuf/sndbuf). Lower means more sockets per GB. |
 
 
 ## Retention

@@ -44,6 +44,10 @@ Not a plan; a living reference.
 - [discord-notifications.md](discord-notifications.md) — **Discord
   notifications.** One env var, Oban-delivered, rate-limit aware and redacted by
   construction — the concrete slice of the parked webhooks spec.
+- [load-testing.md](load-testing.md) — **Load testing, round two.** k6 harness
+  under `stress/`: isolated per-feature benchmarks + one weighted player
+  journey, run over a `SQLite | Postgres` × `1…16 vCPU` matrix on Fly from an
+  in-region generator machine.
 
 ## Resolved — shipped
 

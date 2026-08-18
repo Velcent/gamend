@@ -44,6 +44,29 @@ defmodule GamendWeb.ConnectionTracker do
   end
 
   @doc """
+  Registers a raw WebSocket under both the `:ws_socket` type (for counts and
+  the admin runtime page) and a per-user key.
+
+  The per-user key is what the connection limit is counted from: scanning the
+  `:ws_socket` duplicate key returns every socket on the node, which made each
+  new connection O(all sockets) and a connection storm O(n^2).
+  """
+  def register_ws_socket(user_id, metadata) do
+    _ = register(:ws_socket, metadata)
+    _ = register({:ws_socket, user_id}, %{})
+    :ok
+  end
+
+  @doc """
+  Counts this user's live WebSocket connections on this node.
+  """
+  def count_ws_sockets(user_id) do
+    @registry |> Registry.lookup({:ws_socket, user_id}) |> length()
+  rescue
+    ArgumentError -> 0
+  end
+
+  @doc """
   Registers a user channel under both the `:user_channel` type (for counts) and
   a per-user key, so the "does this user have any other socket?" check on
   disconnect is O(sockets-for-this-user) instead of O(all user channels).

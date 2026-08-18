@@ -23,7 +23,14 @@ defmodule Gamend.Accounts do
   alias Gamend.Repo
   alias Gamend.Types
 
-  alias Gamend.Accounts.{AvatarMirror, User, UsernameGenerator, UserNotifier, UserToken}
+  alias Gamend.Accounts.{
+    AvatarMirror,
+    PresenceWriter,
+    User,
+    UsernameGenerator,
+    UserNotifier,
+    UserToken
+  }
 
   @stats_cache_ttl_ms 60_000
   @users_count_cache_ttl_ms 60_000
@@ -2615,42 +2622,7 @@ defmodule Gamend.Accounts do
   Returns {:ok, user} on success.
   """
   @spec set_user_online(Ecto.UUID.t()) :: {:ok, User.t()} | {:error, term()}
-  def set_user_online(user_id) when is_binary(user_id) do
-    now = DateTime.utc_now(:second)
-
-    case Repo.get(User, user_id) do
-      nil ->
-        {:error, :not_found}
-
-      %User{is_online: true} = user ->
-        {:ok, user}
-
-      user ->
-        user
-        |> Ecto.Changeset.change(is_online: true, last_seen_at: now)
-        |> Repo.update()
-        |> case do
-          {:ok, updated} = ok ->
-            invalidate_user_cache(updated)
-            Gamend.Analytics.record_activity(updated.id, now)
-            broadcast_member_update(updated)
-            # member_update only reaches the user's lobby and party channels.
-            # A friends list, chat sidebar or group roster is neither, so the
-            # presence dot there never moved until a full reload; user:<id>
-            # is the topic those surfaces can subscribe to per friend.
-            broadcast_user_update(updated)
-
-            Gamend.Async.run(fn ->
-              Gamend.Hooks.internal_call(:after_user_online, [updated])
-            end)
-
-            ok
-
-          err ->
-            err
-        end
-    end
-  end
+  def set_user_online(user_id) when is_binary(user_id), do: set_presence(user_id, true)
 
   @doc """
   Mark a user as offline and update last_seen_at.
@@ -2660,39 +2632,93 @@ defmodule Gamend.Accounts do
   Returns {:ok, user} on success.
   """
   @spec set_user_offline(Ecto.UUID.t()) :: {:ok, User.t()} | {:error, term()}
-  def set_user_offline(user_id) when is_binary(user_id) do
+  def set_user_offline(user_id) when is_binary(user_id), do: set_presence(user_id, false)
+
+  # The no-op case — a reconnect, a second tab, a second device — is the common
+  # one and is answered from the cached read, not an uncached `Repo.get` per
+  # socket join. The cache is invalidated on every transition below, so a hit
+  # that already reports the target state is authoritative.
+  defp set_presence(user_id, target) do
     now = DateTime.utc_now(:second)
 
+    case get_user(user_id) do
+      nil ->
+        {:error, :not_found}
+
+      %User{} = user ->
+        # The buffered state, not the row: a player who disconnects inside the
+        # flush window has to see their own pending connect, or the disconnect
+        # reads as a no-op and the stale connect is what gets written.
+        effective = PresenceWriter.pending(user_id, user.is_online)
+
+        cond do
+          effective == target ->
+            {:ok, %{user | is_online: effective}}
+
+          PresenceWriter.flush_ms() == 0 ->
+            write_presence(user_id, target, now)
+
+          true ->
+            # The durable write is coalesced with every other transition in the
+            # window; the caller gets the struct it would have got, and the
+            # realtime push that follows it goes over PubSub, not the database.
+            :ok = PresenceWriter.mark(user_id, target)
+            pending = %{user | is_online: target, last_seen_at: now}
+            # Keep other readers consistent with what is about to be written.
+            _ = cache_user(pending)
+
+            {:ok, pending}
+        end
+    end
+  end
+
+  defp write_presence(user_id, target, now) do
     case Repo.get(User, user_id) do
       nil ->
         {:error, :not_found}
 
-      %User{is_online: false} = user ->
+      %User{is_online: ^target} = user ->
         {:ok, user}
 
       user ->
         user
-        |> Ecto.Changeset.change(is_online: false, last_seen_at: now)
+        |> Ecto.Changeset.change(is_online: target, last_seen_at: now)
         |> Repo.update()
         |> case do
           {:ok, updated} = ok ->
-            invalidate_user_cache(updated)
-            broadcast_member_update(updated)
-            # member_update only reaches the user's lobby and party channels.
-            # A friends list, chat sidebar or group roster is neither, so the
-            # presence dot there never moved until a full reload; user:<id>
-            # is the topic those surfaces can subscribe to per friend.
-            broadcast_user_update(updated)
-
-            Gamend.Async.run(fn ->
-              Gamend.Hooks.internal_call(:after_user_offline, [updated])
-            end)
-
+            after_presence_write(updated)
             ok
 
           err ->
             err
         end
     end
+  end
+
+  @doc false
+  # Everything a real is_online transition owes the rest of the system. Shared
+  # so a batched flush and a write-through produce identical side effects.
+  @spec after_presence_write(User.t()) :: :ok
+  def after_presence_write(%User{is_online: online?} = user) do
+    invalidate_user_cache(user)
+
+    if online? do
+      Gamend.Analytics.record_activity(user.id, user.last_seen_at || DateTime.utc_now(:second))
+    end
+
+    broadcast_member_update(user)
+    # member_update only reaches the user's lobby and party channels.
+    # A friends list, chat sidebar or group roster is neither, so the
+    # presence dot there never moved until a full reload; user:<id>
+    # is the topic those surfaces can subscribe to per friend.
+    broadcast_user_update(user)
+
+    hook = if online?, do: :after_user_online, else: :after_user_offline
+
+    Gamend.Async.run(fn ->
+      Gamend.Hooks.internal_call(hook, [user])
+    end)
+
+    :ok
   end
 end

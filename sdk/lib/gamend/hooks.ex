@@ -668,6 +668,8 @@ defmodule Gamend.Hooks do
 
       @impl true
       def before_purchase(_user, product), do: {:ok, product}
+
+      @impl true
       def after_purchase_fulfilled(_purchase), do: :ok
 
       @impl true

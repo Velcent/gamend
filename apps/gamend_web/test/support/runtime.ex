@@ -36,6 +36,7 @@ defmodule GamendWeb.TestSupport.Runtime do
       Gamend.Presence,
       Gamend.Cache.Sync,
       GamendWeb.ConnectionTracker,
+      Gamend.Accounts.PresenceWriter,
       {GamendWeb.RateLimit, clean_period: :timer.minutes(5)},
       GamendWeb.AdminLogBuffer,
       PluginManager,

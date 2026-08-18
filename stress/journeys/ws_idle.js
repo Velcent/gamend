@@ -1,0 +1,100 @@
+/**
+ * How many idle players fit in RAM.
+ *
+ * A connected player who is doing nothing still costs: a transport process, a
+ * `user:*` channel process, a Presence entry and a ConnectionTracker
+ * registration. That per-socket cost, multiplied by the player count, is the
+ * ceiling nothing else in the suite measures — every other scenario opens and
+ * closes sockets too quickly for the cost to accumulate.
+ *
+ * So this opens `SOCKETS` sockets, each with its own device user (which is
+ * both realistic and how `max_sockets_per_user` is meant to be respected),
+ * joins the user topic, and holds them for `DWELL` doing nothing but
+ * heartbeating.
+ *
+ *   SOCKETS=5000 DWELL=5m k6 run journeys/ws_idle.js
+ *
+ * The number to read is not in this summary: it is the server's RSS on the
+ * metrics dashboard, divided by SOCKETS. Watch it while this runs. What k6
+ * reports here is only whether the connections were accepted and stayed up —
+ * a failed join or a dropped socket is the other thing worth knowing.
+ */
+
+import { summaryHandler, RUN_TAG } from '../lib/config.js';
+import { deviceLogin } from '../lib/auth.js';
+import { me, data } from '../lib/api.js';
+import { callHook } from '../lib/hooks.js';
+import { session } from '../lib/phx.js';
+
+const SOCKETS = Number.parseInt(__ENV.SOCKETS || '200', 10);
+// Friends are a memory variable, not decoration: `UserChannel`'s join memoises
+// the caller's friend list on the socket's heap and keeps it for the socket's
+// whole life, so per-socket memory scales with it. Run the same SOCKETS at
+// FRIENDS=0 and FRIENDS=200 and the difference is that memo.
+const FRIENDS = Number.parseInt(__ENV.FRIENDS || '0', 10);
+const DWELL = __ENV.DWELL || '60s';
+const RAMP = __ENV.RAMP || '30s';
+
+export const options = {
+  scenarios: {
+    hold: {
+      // `per-vu-iterations` with one iteration: each VU opens exactly one
+      // socket and holds it, so VUs and open sockets are the same number.
+      // Anything rate-based would churn connections instead of accumulating
+      // them, which measures the opposite of what this is for.
+      executor: 'per-vu-iterations',
+      vus: SOCKETS,
+      iterations: 1,
+      maxDuration: `${parseSeconds(RAMP) + parseSeconds(DWELL) + 60}s`,
+      gracefulStop: '30s',
+    },
+  },
+  thresholds: {
+    checks: ['rate>0.99'],
+  },
+  summaryTrendStats: ['avg', 'min', 'med', 'p(95)', 'p(99)', 'max'],
+};
+
+export const handleSummary = summaryHandler('ws_idle');
+
+export default function () {
+  // Spread the opens across the ramp so the run measures a steady population
+  // rather than the server's ability to accept N connections in one burst.
+  // Floored at 1ms: k6 rejects a zero delay, which VU 1 would otherwise get.
+  const stagger = Math.max(
+    1,
+    (parseSeconds(RAMP) * 1000 * ((__VU - 1) % SOCKETS)) / SOCKETS,
+  );
+
+  const auth = deviceLogin({ fresh: true, id: `${RUN_TAG}-idle-${__VU}` });
+  if (!auth) return;
+
+  const userId = auth.userId || idFromMe(auth.token);
+  if (!userId) return;
+
+  if (FRIENDS > 0) callHook(auth.token, 'stress_seed_friends', [FRIENDS]);
+
+  session(
+    auth.token,
+    (client, done) => {
+      client.socket.setTimeout(() => {
+        client.join(`user:${userId}`, {}, () => {
+          client.socket.setTimeout(done, parseSeconds(DWELL) * 1000);
+        });
+      }, stagger);
+    },
+    { timeout: (parseSeconds(RAMP) + parseSeconds(DWELL) + 30) * 1000 },
+  );
+}
+
+function idFromMe(token) {
+  const user = data(me(token));
+  return user && user.id;
+}
+
+function parseSeconds(d) {
+  const m = String(d).match(/^(\d+)(s|m|h)?$/);
+  if (!m) return 60;
+  const n = Number.parseInt(m[1], 10);
+  return m[2] === 'm' ? n * 60 : m[2] === 'h' ? n * 3600 : n;
+}

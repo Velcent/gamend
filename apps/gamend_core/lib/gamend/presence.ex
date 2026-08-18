@@ -17,11 +17,27 @@ defmodule Gamend.Presence do
     otp_app: :gamend_core,
     pubsub_server: Gamend.PubSub
 
-  @users_topic "users"
+  # Connected users are spread over this many topics rather than tracked on one.
+  #
+  # `Phoenix.Tracker` shards its work by topic, so a single "users" topic pins
+  # every presence diff in the cluster to one shard no matter how large
+  # :pool_size is, and puts every connected user in one CRDT state. Bucketing
+  # by user id is what lets the pool actually spread.
+  #
+  # Compile-time constant on purpose: every node must bucket identically, so
+  # this is not configurable (a rolling deploy that changed it would split the
+  # tracker). :pool_size is configurable and carries the same constraint —
+  # see `config :gamend_core, Gamend.Presence, pool_size: n`, which needs a
+  # full restart rather than a rolling one.
+  @users_buckets 64
 
-  @doc "Topic every connected user is tracked on."
-  @spec users_topic() :: String.t()
-  def users_topic, do: @users_topic
+  @doc "Topic this user is tracked on."
+  @spec users_topic(Ecto.UUID.t()) :: String.t()
+  def users_topic(user_id), do: "users:#{:erlang.phash2(user_id, @users_buckets)}"
+
+  @doc "Number of topics connected users are spread over."
+  @spec users_buckets() :: pos_integer()
+  def users_buckets, do: @users_buckets
 
   @doc """
   Whether the calling process holds this user's only tracked socket.
@@ -30,7 +46,9 @@ defmodule Gamend.Presence do
   """
   @spec last_socket?(Ecto.UUID.t()) :: boolean()
   def last_socket?(user_id) do
-    @users_topic |> list() |> Map.get(user_id) |> meta_count() <= 1
+    # `get_by_key/2`, not `list/1`: listing the topic built a map of every user
+    # tracked in it just to read one key, on every disconnect.
+    user_id |> users_topic() |> get_by_key(user_id) |> meta_count() <= 1
   end
 
   defp meta_count(nil), do: 0

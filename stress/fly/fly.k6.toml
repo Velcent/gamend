@@ -1,0 +1,26 @@
+# The load generator machine.
+#
+#   fly apps create gamend-k6
+#   fly deploy -c stress/fly/fly.k6.toml --dockerfile stress/fly/Dockerfile ./stress
+#
+# No [http_service]: nothing should reach this from the internet, and it needs
+# no inbound port to be driven over SSH.
+#
+# Same region as the bench app, deliberately. A generator somewhere else adds
+# internet latency and jitter to every measurement, and at high VU counts the
+# path itself becomes the bottleneck being measured.
+
+app = "gamend-k6"
+primary_region = "ams"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  RESULTS_DIR = "/results"
+
+# 4 GB carries roughly 5k HTTP VUs at ~1-3 MB each. The 20k-socket ws_idle run
+# wants performance-4x; matrix.sh scales it for that one and back down after.
+[[vm]]
+  size = "performance-2x"
+  memory = "4gb"

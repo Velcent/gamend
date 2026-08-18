@@ -274,7 +274,20 @@ defmodule GamendWeb.Api.V1.SessionController do
   defp issue_tokens(conn, user) do
     # Only real logins reach here (password and device create); `refresh/2`
     # builds its own token. Same login side-effects as the web session path.
+    #
+    # `touch_last_seen/1` joins them rather than running inline: it is two more
+    # writes (the `last_seen_at` update, and the activity-day insert behind it)
+    # on a path that already wrote the user row, and both are fire-and-forget by
+    # construction — nothing in the response depends on either. On SQLite's
+    # single writer those writes were the difference between a login returning
+    # and a login waiting, and signup throughput fell as concurrency rose
+    # because of them. The work still happens, and still costs the same; the
+    # caller no longer holds a connection while it does.
+    #
+    # Tests run `Gamend.Async` inline, so anything asserting on `last_seen_at`
+    # straight after a login still sees it.
     Gamend.Async.run(fn ->
+      Accounts.touch_last_seen(user)
       Gamend.Hooks.internal_call(:after_user_logged_in, [user])
       Gamend.Quests.report_event(user.id, "login")
     end)
@@ -283,8 +296,6 @@ defmodule GamendWeb.Api.V1.SessionController do
 
     {:ok, refresh_token, _} =
       Guardian.encode_and_sign(user, %{}, token_type: "refresh", ttl: {30, :days})
-
-    Accounts.touch_last_seen(user)
 
     json(conn, %{
       data: %{

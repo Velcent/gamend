@@ -94,7 +94,7 @@ defmodule GamendWeb.HostSupervision do
       # Bounded: when full, Gamend.Async runs work inline (back-pressure)
       {Task.Supervisor, name: Gamend.TaskSupervisor, max_children: 200},
       {DNSCluster, query: Application.get_env(:gamend_web, :dns_cluster_query) || :ignore},
-      {Phoenix.PubSub, name: Gamend.PubSub},
+      {Phoenix.PubSub, name: Gamend.PubSub, pool_size: pool_size(:pubsub_pool_size)},
       # Apply cache invalidations broadcast by other instances
       Gamend.Cache.Sync,
       GamendWeb.ConnectionTracker,
@@ -111,6 +111,9 @@ defmodule GamendWeb.HostSupervision do
       plugin_children(plugins?) ++
       [
         GamendWeb.Endpoint,
+        # Coalesces is_online transitions into one write per window, so a
+        # connect storm of distinct players is not one transaction each.
+        Gamend.Accounts.PresenceWriter,
         # Periodically mark stale online users as offline (safety net for crashes)
         Gamend.Accounts.StalePresenceSweeper,
         # Prune old chat messages / notifications / payment events (RETENTION_* env vars)
@@ -130,9 +133,19 @@ defmodule GamendWeb.HostSupervision do
         # only one node runs it and start_link returns :ignore on the others.
         Gamend.LobbySnapshots.Writer,
         # Signaling relay for WebRTC user-to-user and client-server topologies
-        Gamend.Presence
+        {Gamend.Presence, pool_size: pool_size(:presence_pool_size)}
       ] ++
       extra
+  end
+
+  # Both pools shard by topic and default to 1, which is what a single-node
+  # deployment has always run. Read here rather than baked into config so the
+  # admin settings page reports the live value.
+  defp pool_size(setting) do
+    case Gamend.Settings.get(GamendWeb.Realtime, setting) do
+      n when is_integer(n) and n > 0 -> n
+      _ -> 1
+    end
   end
 
   # Load hook plugins (OTP apps) shipped under modules/plugins/*.

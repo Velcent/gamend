@@ -67,7 +67,9 @@ clients/node_modules/
 clients/godot/
 clients/addons/
 godot_addons/addons/gamend/
-stress/results/
+# Load-test output. The directory itself is tracked (k6 cannot create it).
+stress/results/*
+!stress/results/.gitkeep
 clients/gamend/
 sdk_tools/doc/
 
@@ -97,3 +99,6 @@ apps/gamend_web/priv/db/
 # Rotating log files (dev: log/dev.log, docker compose: logs/).
 /log/
 /logs/
+
+# Staged single-plugin dir for measurement runs (see stress/README.md)
+stress/.plugins/

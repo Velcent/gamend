@@ -63,7 +63,7 @@ defmodule GamendWeb.UserSocket do
       format = extract_format(params, socket)
       _ = warn_on_format_downgrade(params, format, user.id)
 
-      GamendWeb.ConnectionTracker.register(:ws_socket, %{
+      GamendWeb.ConnectionTracker.register_ws_socket(user.id, %{
         user_id: user.id,
         authenticated: true,
         # Surfaced on the admin Runtime page: "is this client actually getting
@@ -123,12 +123,15 @@ defmodule GamendWeb.UserSocket do
   defp normalize_format(_, _), do: "json"
 
   # 0 disables; counted per app instance.
+  #
+  # Counted from the per-user registry key, not by filtering every registered
+  # socket: the latter walked a list of every connection on the node on each
+  # new connection, which made a reconnect storm quadratic.
   defp socket_limit_reached?(user_id) do
     limit = Gamend.Limits.get(:max_sockets_per_user)
 
     is_integer(limit) and limit > 0 and
-      GamendWeb.ConnectionTracker.list_registered(:ws_socket)
-      |> Enum.count(fn {_pid, meta} -> Map.get(meta, :user_id) == user_id end) >= limit
+      GamendWeb.ConnectionTracker.count_ws_sockets(user_id) >= limit
   end
 
   # Extract token from various parameter shapes:
