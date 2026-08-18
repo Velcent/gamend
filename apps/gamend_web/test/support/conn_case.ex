@@ -39,7 +39,27 @@ defmodule GamendWeb.ConnCase do
 
   setup tags do
     DataCase.setup_sandbox(tags)
+    reset_rate_limits()
     {:ok, conn: ConnTest.build_conn()}
+  end
+
+  @doc """
+  Clear the rate limiter between tests.
+
+  Hammer's counters live in ETS, outside both the SQL sandbox and the test
+  process, so they carry over from one test to the next. Every LiveViewTest
+  connection reports `127.0.0.1` as its peer, which puts the whole suite in
+  one `lv_auth:127.0.0.1` bucket — and that bucket allows 10 hits per 60s
+  (`GamendWeb.Plugs.RateLimiter`, `:auth_limit`). Once a run makes more than
+  ten auth attempts inside a minute, whichever test lands past the limit gets
+  "Too many attempts" instead of the flow it was asserting, so the failure
+  lands on an innocent test and moves with the seed.
+  """
+  def reset_rate_limits do
+    case :ets.whereis(GamendWeb.RateLimit.ETS) do
+      :undefined -> :ok
+      _tid -> :ets.delete_all_objects(GamendWeb.RateLimit.ETS)
+    end
   end
 
   @doc """

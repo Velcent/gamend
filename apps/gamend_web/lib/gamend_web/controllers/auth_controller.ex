@@ -702,11 +702,10 @@ defmodule GamendWeb.AuthController do
   )
 
   def request(conn, %{"provider" => "discord"}) do
-    cfg = Application.get_env(:ueberauth, Ueberauth.Strategy.Discord.OAuth, [])
     client_id = Gamend.Settings.get(Gamend.OAuth.Providers, :discord_client_id)
 
     base = GamendWeb.endpoint().url()
-    redirect_uri = cfg[:redirect_uri] || "#{base}/auth/discord/callback"
+    redirect_uri = "#{base}/auth/discord/callback"
     scope = "identify email"
     {conn, state} = put_oauth_state(conn, "discord")
 
@@ -721,11 +720,10 @@ defmodule GamendWeb.AuthController do
   # Steam callback handlers live alongside other provider callbacks below
 
   def request(conn, %{"provider" => "google"}) do
-    cfg = Application.get_env(:ueberauth, Ueberauth.Strategy.Google.OAuth, [])
     client_id = Gamend.Settings.get(Gamend.OAuth.Providers, :google_client_id)
 
     base = GamendWeb.endpoint().url()
-    redirect_uri = cfg[:redirect_uri] || "#{base}/auth/google/callback"
+    redirect_uri = "#{base}/auth/google/callback"
     scope = "email profile"
     {conn, state} = put_oauth_state(conn, "google")
 
@@ -736,11 +734,10 @@ defmodule GamendWeb.AuthController do
   end
 
   def request(conn, %{"provider" => "facebook"}) do
-    cfg = Application.get_env(:ueberauth, Ueberauth.Strategy.Facebook.OAuth, [])
     client_id = Gamend.Settings.get(Gamend.OAuth.Providers, :facebook_client_id)
 
     base = GamendWeb.endpoint().url()
-    redirect_uri = cfg[:redirect_uri] || "#{base}/auth/facebook/callback"
+    redirect_uri = "#{base}/auth/facebook/callback"
     scope = "email"
     {conn, state} = put_oauth_state(conn, "facebook")
 

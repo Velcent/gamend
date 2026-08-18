@@ -78,32 +78,17 @@ defmodule GamendWeb.HostRuntime do
   end
 
   # ── OAuth providers ───────────────────────────────────────────────────────
-  # Ueberauth resolves credentials from its own application env, so the
-  # declared settings are written into it here — in every environment, for
-  # every provider. Nothing reads provider credentials from the environment
-  # directly.
+  # Only the providers Ueberauth actually serves get their credentials mirrored
+  # into its application env. Discord, Google and Facebook are exchanged by
+  # Gamend.OAuth.Exchanger, which reads Gamend.Settings at call time and never
+  # consults this env; mirroring them here was dead config.
   defp oauth_entries(setting, scheme, host) do
     [
-      {:ueberauth, Ueberauth.Strategy.Discord.OAuth,
-       [
-         client_id: setting.(Gamend.OAuth.Providers, :discord_client_id),
-         client_secret: setting.(Gamend.OAuth.Providers, :discord_client_secret)
-       ]},
       {:ueberauth, Ueberauth.Strategy.Apple.OAuth,
        [
          client_id: setting.(Gamend.OAuth.Providers, :apple_client_id),
          client_secret: {Gamend.Apple, :client_secret},
          redirect_uri: "#{scheme}://#{host}/auth/apple/callback"
-       ]},
-      {:ueberauth, Ueberauth.Strategy.Google.OAuth,
-       [
-         client_id: setting.(Gamend.OAuth.Providers, :google_client_id),
-         client_secret: setting.(Gamend.OAuth.Providers, :google_client_secret)
-       ]},
-      {:ueberauth, Ueberauth.Strategy.Facebook.OAuth,
-       [
-         client_id: setting.(Gamend.OAuth.Providers, :facebook_client_id),
-         client_secret: setting.(Gamend.OAuth.Providers, :facebook_client_secret)
        ]},
       {:ueberauth, Ueberauth.Strategy.Steam,
        [api_key: setting.(Gamend.OAuth.Providers, :steam_api_key)]}

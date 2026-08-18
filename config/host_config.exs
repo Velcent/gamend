@@ -231,12 +231,14 @@ config :mime, :types, %{
   "application/octet-stream" => ["pck"]
 }
 
+# Ueberauth drives Steam only: its OpenID 2.0 callback verification has no
+# OAuth-shaped equivalent. Discord, Google, Facebook and Apple run through
+# GamendWeb.AuthController and Gamend.OAuth.Exchanger directly, so that one
+# code path can serve the browser redirect flow, the SDK session-polling flow
+# and the native-token endpoints alike. ueberauth_apple stays a dependency for
+# its client-secret JWT generation (Gamend.Apple), not as a strategy.
 config :ueberauth, Ueberauth,
   providers: [
-    discord: {Ueberauth.Strategy.Discord, [default_scope: "identify email"]},
-    apple: {Ueberauth.Strategy.Apple, []},
-    google: {Ueberauth.Strategy.Google, []},
-    facebook: {Ueberauth.Strategy.Facebook, []},
     steam: {Ueberauth.Strategy.Steam, []}
   ]
 
