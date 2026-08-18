@@ -5,10 +5,10 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.3">
-    <meta name="project" content="gamend_core v1.0.1167">
+    <meta name="project" content="gamend_core v1.0.1168">
 
 
-    <title>Gamend.Tournaments — gamend_core v1.0.1167</title>
+    <title>Gamend.Tournaments — gamend_core v1.0.1168</title>
 
     <link rel="stylesheet" href="dist/html-elixir-NHQLCD6Y.css" />
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1167
+          v1.0.1168
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr />Tournaments</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1167)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1168)</small>
 
     </h1>
 
@@ -680,7 +680,7 @@ row. Called lazily from API paths and periodically from <a href="#tick/0"><code 
       <div class="specs">
 
           <pre translate="no"><span class="attribute">@spec</span> change_tournament(<a href="Gamend.Tournaments.Tournament.html#t:t/0">Gamend.Tournaments.Tournament.t</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()) ::
-  <a href="https://hexdocs.pm/ecto/3.14.1/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>()</pre>
+  <a href="https://hexdocs.pm/ecto/3.14.2/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>()</pre>
 
       </div>
 
@@ -708,7 +708,7 @@ row. Called lazily from API paths and periodically from <a href="#tick/0"><code 
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> count_brackets(<a href="https://hexdocs.pm/ecto/3.14.1/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>()</pre>
+          <pre translate="no"><span class="attribute">@spec</span> count_brackets(<a href="https://hexdocs.pm/ecto/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>()</pre>
 
       </div>
 
@@ -739,7 +739,7 @@ row. Called lazily from API paths and periodically from <a href="#tick/0"><code 
       <div class="specs">
 
           <pre translate="no"><span class="attribute">@spec</span> count_entries(
-  <a href="https://hexdocs.pm/ecto/3.14.1/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>(),
+  <a href="https://hexdocs.pm/ecto/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>(),
   <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">keyword</a>()
 ) :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>()</pre>
 
@@ -828,7 +828,7 @@ row. Called lazily from API paths and periodically from <a href="#tick/0"><code 
       <div class="specs">
 
           <pre translate="no"><span class="attribute">@spec</span> create_tournament(<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()) ::
-  {:ok, <a href="Gamend.Tournaments.Tournament.html#t:t/0">Gamend.Tournaments.Tournament.t</a>()} | {:error, <a href="https://hexdocs.pm/ecto/3.14.1/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>()}</pre>
+  {:ok, <a href="Gamend.Tournaments.Tournament.html#t:t/0">Gamend.Tournaments.Tournament.t</a>()} | {:error, <a href="https://hexdocs.pm/ecto/3.14.2/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>()}</pre>
 
       </div>
 
@@ -885,8 +885,8 @@ row. Called lazily from API paths and periodically from <a href="#tick/0"><code 
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> entries_by_id(<a href="https://hexdocs.pm/ecto/3.14.1/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>(), [<a href="https://hexdocs.pm/ecto/3.14.1/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()]) :: %{
-  required(<a href="https://hexdocs.pm/ecto/3.14.1/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) =&gt; <a href="Gamend.Tournaments.Entry.html#t:t/0">Gamend.Tournaments.Entry.t</a>()
+          <pre translate="no"><span class="attribute">@spec</span> entries_by_id(<a href="https://hexdocs.pm/ecto/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>(), [<a href="https://hexdocs.pm/ecto/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()]) :: %{
+  required(<a href="https://hexdocs.pm/ecto/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) =&gt; <a href="Gamend.Tournaments.Entry.html#t:t/0">Gamend.Tournaments.Entry.t</a>()
 }</pre>
 
       </div>
@@ -915,7 +915,7 @@ row. Called lazily from API paths and periodically from <a href="#tick/0"><code 
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> get_bracket(<a href="https://hexdocs.pm/ecto/3.14.1/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>()) :: Gamend.Tournaments.Bracket.t() | nil</pre>
+          <pre translate="no"><span class="attribute">@spec</span> get_bracket(<a href="https://hexdocs.pm/ecto/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>()) :: Gamend.Tournaments.Bracket.t() | nil</pre>
 
       </div>
 
@@ -943,7 +943,7 @@ row. Called lazily from API paths and periodically from <a href="#tick/0"><code 
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> get_entry(<a href="https://hexdocs.pm/ecto/3.14.1/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>(), <a href="https://hexdocs.pm/ecto/3.14.1/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) :: <a href="Gamend.Tournaments.Entry.html#t:t/0">Gamend.Tournaments.Entry.t</a>() | nil</pre>
+          <pre translate="no"><span class="attribute">@spec</span> get_entry(<a href="https://hexdocs.pm/ecto/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>(), <a href="https://hexdocs.pm/ecto/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) :: <a href="Gamend.Tournaments.Entry.html#t:t/0">Gamend.Tournaments.Entry.t</a>() | nil</pre>
 
       </div>
 
@@ -971,7 +971,7 @@ row. Called lazily from API paths and periodically from <a href="#tick/0"><code 
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> get_match(<a href="https://hexdocs.pm/ecto/3.14.1/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) :: <a href="Gamend.Tournaments.Match.html#t:t/0">Gamend.Tournaments.Match.t</a>() | nil</pre>
+          <pre translate="no"><span class="attribute">@spec</span> get_match(<a href="https://hexdocs.pm/ecto/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) :: <a href="Gamend.Tournaments.Match.html#t:t/0">Gamend.Tournaments.Match.t</a>() | nil</pre>
 
       </div>
 
@@ -999,7 +999,7 @@ row. Called lazily from API paths and periodically from <a href="#tick/0"><code 
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> get_tournament(<a href="https://hexdocs.pm/ecto/3.14.1/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) :: <a href="Gamend.Tournaments.Tournament.html#t:t/0">Gamend.Tournaments.Tournament.t</a>() | nil</pre>
+          <pre translate="no"><span class="attribute">@spec</span> get_tournament(<a href="https://hexdocs.pm/ecto/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) :: <a href="Gamend.Tournaments.Tournament.html#t:t/0">Gamend.Tournaments.Tournament.t</a>() | nil</pre>
 
       </div>
 
@@ -1027,7 +1027,7 @@ row. Called lazily from API paths and periodically from <a href="#tick/0"><code 
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> get_tournament!(<a href="https://hexdocs.pm/ecto/3.14.1/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) :: <a href="Gamend.Tournaments.Tournament.html#t:t/0">Gamend.Tournaments.Tournament.t</a>()</pre>
+          <pre translate="no"><span class="attribute">@spec</span> get_tournament!(<a href="https://hexdocs.pm/ecto/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) :: <a href="Gamend.Tournaments.Tournament.html#t:t/0">Gamend.Tournaments.Tournament.t</a>()</pre>
 
       </div>
 
@@ -1147,7 +1147,7 @@ pipeline (games gate/charge entry there) and fires
       <div class="specs">
 
           <pre translate="no"><span class="attribute">@spec</span> list_brackets(
-  <a href="https://hexdocs.pm/ecto/3.14.1/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>(),
+  <a href="https://hexdocs.pm/ecto/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>(),
   <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">keyword</a>()
 ) :: [Gamend.Tournaments.Bracket.t()]</pre>
 
@@ -1180,7 +1180,7 @@ pipeline (games gate/charge entry there) and fires
       <div class="specs">
 
           <pre translate="no"><span class="attribute">@spec</span> list_entries(
-  <a href="https://hexdocs.pm/ecto/3.14.1/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>(),
+  <a href="https://hexdocs.pm/ecto/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>(),
   <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">keyword</a>()
 ) :: [<a href="Gamend.Tournaments.Entry.html#t:t/0">Gamend.Tournaments.Entry.t</a>()]</pre>
 
@@ -1213,7 +1213,7 @@ pipeline (games gate/charge entry there) and fires
       <div class="specs">
 
           <pre translate="no"><span class="attribute">@spec</span> list_matches(
-  <a href="https://hexdocs.pm/ecto/3.14.1/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>(),
+  <a href="https://hexdocs.pm/ecto/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>(),
   <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">keyword</a>()
 ) :: [<a href="Gamend.Tournaments.Match.html#t:t/0">Gamend.Tournaments.Match.t</a>()]</pre>
 
@@ -1391,7 +1391,7 @@ editions exist.</p>
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> my_match(<a href="Gamend.Tournaments.Tournament.html#t:t/0">Gamend.Tournaments.Tournament.t</a>(), <a href="https://hexdocs.pm/ecto/3.14.1/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) ::
+          <pre translate="no"><span class="attribute">@spec</span> my_match(<a href="Gamend.Tournaments.Tournament.html#t:t/0">Gamend.Tournaments.Tournament.t</a>(), <a href="https://hexdocs.pm/ecto/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) ::
   <a href="Gamend.Tournaments.Match.html#t:t/0">Gamend.Tournaments.Match.t</a>() | nil</pre>
 
       </div>
@@ -1451,7 +1451,7 @@ throw away the draw. Any due transition is applied immediately afterwards.</p>
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> resolve_match(<a href="https://hexdocs.pm/ecto/3.14.1/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>(), <a href="https://hexdocs.pm/ecto/3.14.1/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>() | :no_winner) ::
+          <pre translate="no"><span class="attribute">@spec</span> resolve_match(<a href="https://hexdocs.pm/ecto/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>(), <a href="https://hexdocs.pm/ecto/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>() | :no_winner) ::
   {:ok, <a href="Gamend.Tournaments.Match.html#t:t/0">Gamend.Tournaments.Match.t</a>()} | {:error, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}</pre>
 
       </div>
@@ -1693,7 +1693,7 @@ due. Serialized cluster-wide so hooks fire once.</p>
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> update_match_metadata(<a href="https://hexdocs.pm/ecto/3.14.1/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()) ::
+          <pre translate="no"><span class="attribute">@spec</span> update_match_metadata(<a href="https://hexdocs.pm/ecto/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()) ::
   {:ok, <a href="Gamend.Tournaments.Match.html#t:t/0">Gamend.Tournaments.Match.t</a>()} | {:error, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}</pre>
 
       </div>
@@ -1725,7 +1725,7 @@ each other.</p>
       <div class="specs">
 
           <pre translate="no"><span class="attribute">@spec</span> update_tournament(<a href="Gamend.Tournaments.Tournament.html#t:t/0">Gamend.Tournaments.Tournament.t</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()) ::
-  {:ok, <a href="Gamend.Tournaments.Tournament.html#t:t/0">Gamend.Tournaments.Tournament.t</a>()} | {:error, <a href="https://hexdocs.pm/ecto/3.14.1/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>()}</pre>
+  {:ok, <a href="Gamend.Tournaments.Tournament.html#t:t/0">Gamend.Tournaments.Tournament.t</a>()} | {:error, <a href="https://hexdocs.pm/ecto/3.14.2/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>()}</pre>
 
       </div>
 
@@ -1741,9 +1741,9 @@ each other.</p>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1167">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1168">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1167">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1168">Hex Preview</a>
 
             </span>
 

@@ -5,10 +5,10 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.3">
-    <meta name="project" content="gamend_core v1.0.1167">
+    <meta name="project" content="gamend_core v1.0.1168">
 
 
-    <title>Gamend.Accounts — gamend_core v1.0.1167</title>
+    <title>Gamend.Accounts — gamend_core v1.0.1168</title>
 
     <link rel="stylesheet" href="dist/html-elixir-NHQLCD6Y.css" />
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1167
+          v1.0.1168
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr />Accounts</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1167)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1168)</small>
 
     </h1>
 
@@ -115,15 +115,15 @@ gamend_core
 
     <section id="moduledoc">
 <p>The Accounts context.</p><h2 id="module-usage" class="section-heading"><a href="#module-usage" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Usage</span></h2><pre><code class="makeup elixir" translate="no"><span class="c1"># Lookup by id or email</span><span class="w">
-</span><span class="n">user</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Gamend.Accounts</span><span class="o">.</span><span class="n">get_user</span><span class="p" data-group-id="3600540232-1">(</span><span class="mi">123</span><span class="p" data-group-id="3600540232-1">)</span><span class="w">
-</span><span class="n">user</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Gamend.Accounts</span><span class="o">.</span><span class="n">get_user_by_email</span><span class="p" data-group-id="3600540232-2">(</span><span class="s">&quot;me@example.com&quot;</span><span class="p" data-group-id="3600540232-2">)</span><span class="w">
+</span><span class="n">user</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Gamend.Accounts</span><span class="o">.</span><span class="n">get_user</span><span class="p" data-group-id="1486627044-1">(</span><span class="mi">123</span><span class="p" data-group-id="1486627044-1">)</span><span class="w">
+</span><span class="n">user</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Gamend.Accounts</span><span class="o">.</span><span class="n">get_user_by_email</span><span class="p" data-group-id="1486627044-2">(</span><span class="s">&quot;me@example.com&quot;</span><span class="p" data-group-id="1486627044-2">)</span><span class="w">
 
 </span><span class="c1"># Update a user</span><span class="w">
-</span><span class="p" data-group-id="3600540232-3">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">user</span><span class="p" data-group-id="3600540232-3">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Gamend.Accounts</span><span class="o">.</span><span class="n">update_user</span><span class="p" data-group-id="3600540232-4">(</span><span class="n">user</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="3600540232-5">%{</span><span class="ss">display_name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;NewName&quot;</span><span class="p" data-group-id="3600540232-5">}</span><span class="p" data-group-id="3600540232-4">)</span><span class="w">
+</span><span class="p" data-group-id="1486627044-3">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">user</span><span class="p" data-group-id="1486627044-3">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Gamend.Accounts</span><span class="o">.</span><span class="n">update_user</span><span class="p" data-group-id="1486627044-4">(</span><span class="n">user</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="1486627044-5">%{</span><span class="ss">display_name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;NewName&quot;</span><span class="p" data-group-id="1486627044-5">}</span><span class="p" data-group-id="1486627044-4">)</span><span class="w">
 
 </span><span class="c1"># Search (paginated) and count</span><span class="w">
-</span><span class="n">users</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Gamend.Accounts</span><span class="o">.</span><span class="n">search_users</span><span class="p" data-group-id="3600540232-6">(</span><span class="s">&quot;bob&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">page</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="ss">page_size</span><span class="p">:</span><span class="w"> </span><span class="mi">25</span><span class="p" data-group-id="3600540232-6">)</span><span class="w">
-</span><span class="n">count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Gamend.Accounts</span><span class="o">.</span><span class="n">count_search_users</span><span class="p" data-group-id="3600540232-7">(</span><span class="s">&quot;bob&quot;</span><span class="p" data-group-id="3600540232-7">)</span></code></pre>
+</span><span class="n">users</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Gamend.Accounts</span><span class="o">.</span><span class="n">search_users</span><span class="p" data-group-id="1486627044-6">(</span><span class="s">&quot;bob&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">page</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="ss">page_size</span><span class="p">:</span><span class="w"> </span><span class="mi">25</span><span class="p" data-group-id="1486627044-6">)</span><span class="w">
+</span><span class="n">count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Gamend.Accounts</span><span class="o">.</span><span class="n">count_search_users</span><span class="p" data-group-id="1486627044-7">(</span><span class="s">&quot;bob&quot;</span><span class="p" data-group-id="1486627044-7">)</span></code></pre>
     </section>
 
 </div>
@@ -1044,7 +1044,7 @@ tables that hold only a <code class="inline">user_id</code>). Nil/duplicate ids 
       <div class="specs">
 
           <pre translate="no"><span class="attribute">@spec</span> attach_device_to_user(<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>(), <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()) ::
-  {:ok, <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()} | {:error, <a href="https://hexdocs.pm/ecto/3.14.1/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>()}</pre>
+  {:ok, <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()} | {:error, <a href="https://hexdocs.pm/ecto/3.14.2/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>()}</pre>
 
       </div>
 
@@ -1222,7 +1222,7 @@ consistent instead of serving the pre-write struct until the TTL expires.</p>
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> change_user_display_name(<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()) :: <a href="https://hexdocs.pm/ecto/3.14.1/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>()</pre>
+          <pre translate="no"><span class="attribute">@spec</span> change_user_display_name(<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()) :: <a href="https://hexdocs.pm/ecto/3.14.2/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>()</pre>
 
       </div>
 
@@ -1255,12 +1255,12 @@ consistent instead of serving the pre-write struct until the TTL expires.</p>
       <div class="specs">
 
           <pre translate="no"><span class="attribute">@spec</span> change_user_email(<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">keyword</a>()) ::
-  <a href="https://hexdocs.pm/ecto/3.14.1/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>()</pre>
+  <a href="https://hexdocs.pm/ecto/3.14.2/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>()</pre>
 
       </div>
 
-<p>Returns an <code class="inline">%Ecto.Changeset{}</code> for changing the user email.</p><p>See <a href="Gamend.Accounts.User.html#email_changeset/3"><code class="inline">Gamend.Accounts.User.email_changeset/3</code></a> for a list of supported options.</p><h2 id="change_user_email/3-examples" class="section-heading"><a href="#change_user_email/3-examples" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Examples</span></h2><pre><code class="makeup elixir" translate="no"><span class="gp unselectable">iex&gt; </span><span class="n">change_user_email</span><span class="p" data-group-id="7387209944-1">(</span><span class="n">user</span><span class="p" data-group-id="7387209944-1">)</span><span class="w">
-</span><span class="p" data-group-id="7387209944-2">%</span><span class="nc" data-group-id="7387209944-2">Ecto.Changeset</span><span class="p" data-group-id="7387209944-2">{</span><span class="ss">data</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="7387209944-3">%</span><span class="nc" data-group-id="7387209944-3">User</span><span class="p" data-group-id="7387209944-3">{</span><span class="p" data-group-id="7387209944-3">}</span><span class="p" data-group-id="7387209944-2">}</span></code></pre>
+<p>Returns an <code class="inline">%Ecto.Changeset{}</code> for changing the user email.</p><p>See <a href="Gamend.Accounts.User.html#email_changeset/3"><code class="inline">Gamend.Accounts.User.email_changeset/3</code></a> for a list of supported options.</p><h2 id="change_user_email/3-examples" class="section-heading"><a href="#change_user_email/3-examples" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Examples</span></h2><pre><code class="makeup elixir" translate="no"><span class="gp unselectable">iex&gt; </span><span class="n">change_user_email</span><span class="p" data-group-id="8788655283-1">(</span><span class="n">user</span><span class="p" data-group-id="8788655283-1">)</span><span class="w">
+</span><span class="p" data-group-id="8788655283-2">%</span><span class="nc" data-group-id="8788655283-2">Ecto.Changeset</span><span class="p" data-group-id="8788655283-2">{</span><span class="ss">data</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="8788655283-3">%</span><span class="nc" data-group-id="8788655283-3">User</span><span class="p" data-group-id="8788655283-3">{</span><span class="p" data-group-id="8788655283-3">}</span><span class="p" data-group-id="8788655283-2">}</span></code></pre>
   </section>
 </section>
 <section class="detail" id="change_user_password/3">
@@ -1289,12 +1289,12 @@ consistent instead of serving the pre-write struct until the TTL expires.</p>
       <div class="specs">
 
           <pre translate="no"><span class="attribute">@spec</span> change_user_password(<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">keyword</a>()) ::
-  <a href="https://hexdocs.pm/ecto/3.14.1/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>()</pre>
+  <a href="https://hexdocs.pm/ecto/3.14.2/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>()</pre>
 
       </div>
 
-<p>Returns an <code class="inline">%Ecto.Changeset{}</code> for changing the user password.</p><p>See <a href="Gamend.Accounts.User.html#password_changeset/3"><code class="inline">Gamend.Accounts.User.password_changeset/3</code></a> for a list of supported options.</p><h2 id="change_user_password/3-examples" class="section-heading"><a href="#change_user_password/3-examples" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Examples</span></h2><pre><code class="makeup elixir" translate="no"><span class="gp unselectable">iex&gt; </span><span class="n">change_user_password</span><span class="p" data-group-id="6906471088-1">(</span><span class="n">user</span><span class="p" data-group-id="6906471088-1">)</span><span class="w">
-</span><span class="p" data-group-id="6906471088-2">%</span><span class="nc" data-group-id="6906471088-2">Ecto.Changeset</span><span class="p" data-group-id="6906471088-2">{</span><span class="ss">data</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="6906471088-3">%</span><span class="nc" data-group-id="6906471088-3">User</span><span class="p" data-group-id="6906471088-3">{</span><span class="p" data-group-id="6906471088-3">}</span><span class="p" data-group-id="6906471088-2">}</span></code></pre>
+<p>Returns an <code class="inline">%Ecto.Changeset{}</code> for changing the user password.</p><p>See <a href="Gamend.Accounts.User.html#password_changeset/3"><code class="inline">Gamend.Accounts.User.password_changeset/3</code></a> for a list of supported options.</p><h2 id="change_user_password/3-examples" class="section-heading"><a href="#change_user_password/3-examples" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Examples</span></h2><pre><code class="makeup elixir" translate="no"><span class="gp unselectable">iex&gt; </span><span class="n">change_user_password</span><span class="p" data-group-id="3738203075-1">(</span><span class="n">user</span><span class="p" data-group-id="3738203075-1">)</span><span class="w">
+</span><span class="p" data-group-id="3738203075-2">%</span><span class="nc" data-group-id="3738203075-2">Ecto.Changeset</span><span class="p" data-group-id="3738203075-2">{</span><span class="ss">data</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="3738203075-3">%</span><span class="nc" data-group-id="3738203075-3">User</span><span class="p" data-group-id="3738203075-3">{</span><span class="p" data-group-id="3738203075-3">}</span><span class="p" data-group-id="3738203075-2">}</span></code></pre>
   </section>
 </section>
 <section class="detail" id="change_user_registration/2">
@@ -1320,7 +1320,7 @@ consistent instead of serving the pre-write struct until the TTL expires.</p>
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> change_user_registration(<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()) :: <a href="https://hexdocs.pm/ecto/3.14.1/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>()</pre>
+          <pre translate="no"><span class="attribute">@spec</span> change_user_registration(<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()) :: <a href="https://hexdocs.pm/ecto/3.14.2/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>()</pre>
 
       </div>
 
@@ -1350,7 +1350,7 @@ consistent instead of serving the pre-write struct until the TTL expires.</p>
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> change_username(<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()) :: <a href="https://hexdocs.pm/ecto/3.14.1/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>()</pre>
+          <pre translate="no"><span class="attribute">@spec</span> change_username(<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()) :: <a href="https://hexdocs.pm/ecto/3.14.2/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>()</pre>
 
       </div>
 
@@ -1379,12 +1379,12 @@ consistent instead of serving the pre-write struct until the TTL expires.</p>
       <div class="specs">
 
           <pre translate="no"><span class="attribute">@spec</span> confirm_user(<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()) ::
-  {:ok, <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()} | {:error, <a href="https://hexdocs.pm/ecto/3.14.1/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>()}</pre>
+  {:ok, <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()} | {:error, <a href="https://hexdocs.pm/ecto/3.14.2/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>()}</pre>
 
       </div>
 
-<p>Confirms a user's email by setting confirmed_at timestamp.</p><h2 id="confirm_user/1-examples" class="section-heading"><a href="#confirm_user/1-examples" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Examples</span></h2><pre><code class="makeup elixir" translate="no"><span class="gp unselectable">iex&gt; </span><span class="n">confirm_user</span><span class="p" data-group-id="5020372230-1">(</span><span class="n">user</span><span class="p" data-group-id="5020372230-1">)</span><span class="w">
-</span><span class="p" data-group-id="5020372230-2">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="5020372230-3">%</span><span class="nc" data-group-id="5020372230-3">User</span><span class="p" data-group-id="5020372230-3">{</span><span class="p" data-group-id="5020372230-3">}</span><span class="p" data-group-id="5020372230-2">}</span></code></pre>
+<p>Confirms a user's email by setting confirmed_at timestamp.</p><h2 id="confirm_user/1-examples" class="section-heading"><a href="#confirm_user/1-examples" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Examples</span></h2><pre><code class="makeup elixir" translate="no"><span class="gp unselectable">iex&gt; </span><span class="n">confirm_user</span><span class="p" data-group-id="2269826158-1">(</span><span class="n">user</span><span class="p" data-group-id="2269826158-1">)</span><span class="w">
+</span><span class="p" data-group-id="2269826158-2">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="2269826158-3">%</span><span class="nc" data-group-id="2269826158-3">User</span><span class="p" data-group-id="2269826158-3">{</span><span class="p" data-group-id="2269826158-3">}</span><span class="p" data-group-id="2269826158-2">}</span></code></pre>
   </section>
 </section>
 <section class="detail" id="confirm_user_by_token/1">
@@ -1524,7 +1524,7 @@ Returns {:error, :not_found} or {:error, :expired} when token is invalid/expired
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> count_user_tokens(<a href="https://hexdocs.pm/ecto/3.14.1/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>()</pre>
+          <pre translate="no"><span class="attribute">@spec</span> count_user_tokens(<a href="https://hexdocs.pm/ecto/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>()</pre>
 
       </div>
 
@@ -1721,7 +1721,7 @@ Returns {:error, :not_found} or {:error, :expired} when token is invalid/expired
       <div class="specs">
 
           <pre translate="no"><span class="attribute">@spec</span> delete_user(<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()) ::
-  {:ok, <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()} | {:error, <a href="https://hexdocs.pm/ecto/3.14.1/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>()}</pre>
+  {:ok, <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()} | {:error, <a href="https://hexdocs.pm/ecto/3.14.2/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>()}</pre>
 
       </div>
 
@@ -1777,7 +1777,7 @@ Returns {:error, :not_found} or {:error, :expired} when token is invalid/expired
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> delete_user_storage(<a href="https://hexdocs.pm/ecto/3.14.1/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) :: :ok</pre>
+          <pre translate="no"><span class="attribute">@spec</span> delete_user_storage(<a href="https://hexdocs.pm/ecto/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) :: :ok</pre>
 
       </div>
 
@@ -1873,8 +1873,8 @@ not block an account deletion that has already happened at the database level.</
 
       </div>
 
-<p>Delivers the update email instructions to the given user.</p><h2 id="deliver_user_update_email_instructions/3-examples" class="section-heading"><a href="#deliver_user_update_email_instructions/3-examples" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Examples</span></h2><pre><code class="makeup elixir" translate="no"><span class="gp unselectable">iex&gt; </span><span class="n">deliver_user_update_email_instructions</span><span class="p" data-group-id="4711141889-1">(</span><span class="n">user</span><span class="p">,</span><span class="w"> </span><span class="n">current_email</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">url</span><span class="p" data-group-id="4711141889-2">(</span><span class="sx">~p&quot;/users/settings/confirm_email/</span><span class="si" data-group-id="4711141889-3">#{</span><span class="ni">&amp;1</span><span class="si" data-group-id="4711141889-3">}</span><span class="sx">&quot;</span><span class="p" data-group-id="4711141889-2">)</span><span class="p" data-group-id="4711141889-1">)</span><span class="w">
-</span><span class="p" data-group-id="4711141889-4">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="4711141889-5">%{</span><span class="ss">to</span><span class="p">:</span><span class="w"> </span><span class="n">...</span><span class="p">,</span><span class="w"> </span><span class="ss">body</span><span class="p">:</span><span class="w"> </span><span class="n">...</span><span class="p" data-group-id="4711141889-5">}</span><span class="p" data-group-id="4711141889-4">}</span></code></pre>
+<p>Delivers the update email instructions to the given user.</p><h2 id="deliver_user_update_email_instructions/3-examples" class="section-heading"><a href="#deliver_user_update_email_instructions/3-examples" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Examples</span></h2><pre><code class="makeup elixir" translate="no"><span class="gp unselectable">iex&gt; </span><span class="n">deliver_user_update_email_instructions</span><span class="p" data-group-id="7510051028-1">(</span><span class="n">user</span><span class="p">,</span><span class="w"> </span><span class="n">current_email</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">url</span><span class="p" data-group-id="7510051028-2">(</span><span class="sx">~p&quot;/users/settings/confirm_email/</span><span class="si" data-group-id="7510051028-3">#{</span><span class="ni">&amp;1</span><span class="si" data-group-id="7510051028-3">}</span><span class="sx">&quot;</span><span class="p" data-group-id="7510051028-2">)</span><span class="p" data-group-id="7510051028-1">)</span><span class="w">
+</span><span class="p" data-group-id="7510051028-4">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="7510051028-5">%{</span><span class="ss">to</span><span class="p">:</span><span class="w"> </span><span class="n">...</span><span class="p">,</span><span class="w"> </span><span class="ss">body</span><span class="p">:</span><span class="w"> </span><span class="n">...</span><span class="p" data-group-id="7510051028-5">}</span><span class="p" data-group-id="7510051028-4">}</span></code></pre>
   </section>
 </section>
 <section class="detail" id="device_auth_enabled?/0">
@@ -1926,7 +1926,7 @@ not block an account deletion that has already happened at the database level.</
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> display_label(<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>() | <a href="https://hexdocs.pm/ecto/3.14.1/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>() | nil) :: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()</pre>
+          <pre translate="no"><span class="attribute">@spec</span> display_label(<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>() | <a href="https://hexdocs.pm/ecto/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>() | nil) :: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()</pre>
 
       </div>
 
@@ -1959,12 +1959,12 @@ it sends you to name the same person the same way.</p><p>Never falls back to the
       <div class="specs">
 
           <pre translate="no"><span class="attribute">@spec</span> find_or_create_from_apple(<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()) ::
-  {:ok, <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()} | {:error, <a href="https://hexdocs.pm/ecto/3.14.1/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>() | <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}</pre>
+  {:ok, <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()} | {:error, <a href="https://hexdocs.pm/ecto/3.14.2/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>() | <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}</pre>
 
       </div>
 
-<p>Finds a user by Apple ID or creates a new user from OAuth data.</p><h2 id="find_or_create_from_apple/1-examples" class="section-heading"><a href="#find_or_create_from_apple/1-examples" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Examples</span></h2><pre><code class="makeup elixir" translate="no"><span class="gp unselectable">iex&gt; </span><span class="n">find_or_create_from_apple</span><span class="p" data-group-id="4241196763-1">(</span><span class="p" data-group-id="4241196763-2">%{</span><span class="ss">apple_id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;123&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">email</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;user@example.com&quot;</span><span class="p" data-group-id="4241196763-2">}</span><span class="p" data-group-id="4241196763-1">)</span><span class="w">
-</span><span class="p" data-group-id="4241196763-3">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="4241196763-4">%</span><span class="nc" data-group-id="4241196763-4">User</span><span class="p" data-group-id="4241196763-4">{</span><span class="p" data-group-id="4241196763-4">}</span><span class="p" data-group-id="4241196763-3">}</span></code></pre>
+<p>Finds a user by Apple ID or creates a new user from OAuth data.</p><h2 id="find_or_create_from_apple/1-examples" class="section-heading"><a href="#find_or_create_from_apple/1-examples" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Examples</span></h2><pre><code class="makeup elixir" translate="no"><span class="gp unselectable">iex&gt; </span><span class="n">find_or_create_from_apple</span><span class="p" data-group-id="2568876948-1">(</span><span class="p" data-group-id="2568876948-2">%{</span><span class="ss">apple_id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;123&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">email</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;user@example.com&quot;</span><span class="p" data-group-id="2568876948-2">}</span><span class="p" data-group-id="2568876948-1">)</span><span class="w">
+</span><span class="p" data-group-id="2568876948-3">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="2568876948-4">%</span><span class="nc" data-group-id="2568876948-4">User</span><span class="p" data-group-id="2568876948-4">{</span><span class="p" data-group-id="2568876948-4">}</span><span class="p" data-group-id="2568876948-3">}</span></code></pre>
   </section>
 </section>
 <section class="detail" id="find_or_create_from_device/2">
@@ -1992,7 +1992,7 @@ it sends you to name the same person the same way.</p><p>Never falls back to the
 
           <pre translate="no"><span class="attribute">@spec</span> find_or_create_from_device(<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()) ::
   {:ok, <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()}
-  | {:error, :disabled | <a href="https://hexdocs.pm/ecto/3.14.1/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>() | <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}</pre>
+  | {:error, :disabled | <a href="https://hexdocs.pm/ecto/3.14.2/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>() | <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}</pre>
 
       </div>
 
@@ -2022,12 +2022,12 @@ create an anonymous confirmed user and attach the device_id.</p>
       <div class="specs">
 
           <pre translate="no"><span class="attribute">@spec</span> find_or_create_from_discord(<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()) ::
-  {:ok, <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()} | {:error, <a href="https://hexdocs.pm/ecto/3.14.1/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>() | <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}</pre>
+  {:ok, <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()} | {:error, <a href="https://hexdocs.pm/ecto/3.14.2/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>() | <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}</pre>
 
       </div>
 
-<p>Finds a user by Discord ID or creates a new user from OAuth data.</p><h2 id="find_or_create_from_discord/1-examples" class="section-heading"><a href="#find_or_create_from_discord/1-examples" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Examples</span></h2><pre><code class="makeup elixir" translate="no"><span class="gp unselectable">iex&gt; </span><span class="n">find_or_create_from_discord</span><span class="p" data-group-id="9213464720-1">(</span><span class="p" data-group-id="9213464720-2">%{</span><span class="ss">discord_id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;123&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">email</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;user@example.com&quot;</span><span class="p" data-group-id="9213464720-2">}</span><span class="p" data-group-id="9213464720-1">)</span><span class="w">
-</span><span class="p" data-group-id="9213464720-3">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="9213464720-4">%</span><span class="nc" data-group-id="9213464720-4">User</span><span class="p" data-group-id="9213464720-4">{</span><span class="p" data-group-id="9213464720-4">}</span><span class="p" data-group-id="9213464720-3">}</span></code></pre>
+<p>Finds a user by Discord ID or creates a new user from OAuth data.</p><h2 id="find_or_create_from_discord/1-examples" class="section-heading"><a href="#find_or_create_from_discord/1-examples" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Examples</span></h2><pre><code class="makeup elixir" translate="no"><span class="gp unselectable">iex&gt; </span><span class="n">find_or_create_from_discord</span><span class="p" data-group-id="1432162105-1">(</span><span class="p" data-group-id="1432162105-2">%{</span><span class="ss">discord_id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;123&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">email</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;user@example.com&quot;</span><span class="p" data-group-id="1432162105-2">}</span><span class="p" data-group-id="1432162105-1">)</span><span class="w">
+</span><span class="p" data-group-id="1432162105-3">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="1432162105-4">%</span><span class="nc" data-group-id="1432162105-4">User</span><span class="p" data-group-id="1432162105-4">{</span><span class="p" data-group-id="1432162105-4">}</span><span class="p" data-group-id="1432162105-3">}</span></code></pre>
   </section>
 </section>
 <section class="detail" id="find_or_create_from_facebook/1">
@@ -2052,12 +2052,12 @@ create an anonymous confirmed user and attach the device_id.</p>
       <div class="specs">
 
           <pre translate="no"><span class="attribute">@spec</span> find_or_create_from_facebook(<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()) ::
-  {:ok, <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()} | {:error, <a href="https://hexdocs.pm/ecto/3.14.1/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>() | <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}</pre>
+  {:ok, <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()} | {:error, <a href="https://hexdocs.pm/ecto/3.14.2/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>() | <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}</pre>
 
       </div>
 
-<p>Finds a user by Facebook ID or creates a new user from OAuth data.</p><h2 id="find_or_create_from_facebook/1-examples" class="section-heading"><a href="#find_or_create_from_facebook/1-examples" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Examples</span></h2><pre><code class="makeup elixir" translate="no"><span class="gp unselectable">iex&gt; </span><span class="n">find_or_create_from_facebook</span><span class="p" data-group-id="1573595394-1">(</span><span class="p" data-group-id="1573595394-2">%{</span><span class="ss">facebook_id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;123&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">email</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;user@example.com&quot;</span><span class="p" data-group-id="1573595394-2">}</span><span class="p" data-group-id="1573595394-1">)</span><span class="w">
-</span><span class="p" data-group-id="1573595394-3">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="1573595394-4">%</span><span class="nc" data-group-id="1573595394-4">User</span><span class="p" data-group-id="1573595394-4">{</span><span class="p" data-group-id="1573595394-4">}</span><span class="p" data-group-id="1573595394-3">}</span></code></pre>
+<p>Finds a user by Facebook ID or creates a new user from OAuth data.</p><h2 id="find_or_create_from_facebook/1-examples" class="section-heading"><a href="#find_or_create_from_facebook/1-examples" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Examples</span></h2><pre><code class="makeup elixir" translate="no"><span class="gp unselectable">iex&gt; </span><span class="n">find_or_create_from_facebook</span><span class="p" data-group-id="7081277456-1">(</span><span class="p" data-group-id="7081277456-2">%{</span><span class="ss">facebook_id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;123&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">email</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;user@example.com&quot;</span><span class="p" data-group-id="7081277456-2">}</span><span class="p" data-group-id="7081277456-1">)</span><span class="w">
+</span><span class="p" data-group-id="7081277456-3">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="7081277456-4">%</span><span class="nc" data-group-id="7081277456-4">User</span><span class="p" data-group-id="7081277456-4">{</span><span class="p" data-group-id="7081277456-4">}</span><span class="p" data-group-id="7081277456-3">}</span></code></pre>
   </section>
 </section>
 <section class="detail" id="find_or_create_from_google/1">
@@ -2082,12 +2082,12 @@ create an anonymous confirmed user and attach the device_id.</p>
       <div class="specs">
 
           <pre translate="no"><span class="attribute">@spec</span> find_or_create_from_google(<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()) ::
-  {:ok, <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()} | {:error, <a href="https://hexdocs.pm/ecto/3.14.1/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>() | <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}</pre>
+  {:ok, <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()} | {:error, <a href="https://hexdocs.pm/ecto/3.14.2/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>() | <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}</pre>
 
       </div>
 
-<p>Finds a user by Google ID or creates a new user from OAuth data.</p><h2 id="find_or_create_from_google/1-examples" class="section-heading"><a href="#find_or_create_from_google/1-examples" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Examples</span></h2><pre><code class="makeup elixir" translate="no"><span class="gp unselectable">iex&gt; </span><span class="n">find_or_create_from_google</span><span class="p" data-group-id="6963117880-1">(</span><span class="p" data-group-id="6963117880-2">%{</span><span class="ss">google_id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;123&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">email</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;user@example.com&quot;</span><span class="p" data-group-id="6963117880-2">}</span><span class="p" data-group-id="6963117880-1">)</span><span class="w">
-</span><span class="p" data-group-id="6963117880-3">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="6963117880-4">%</span><span class="nc" data-group-id="6963117880-4">User</span><span class="p" data-group-id="6963117880-4">{</span><span class="p" data-group-id="6963117880-4">}</span><span class="p" data-group-id="6963117880-3">}</span></code></pre>
+<p>Finds a user by Google ID or creates a new user from OAuth data.</p><h2 id="find_or_create_from_google/1-examples" class="section-heading"><a href="#find_or_create_from_google/1-examples" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Examples</span></h2><pre><code class="makeup elixir" translate="no"><span class="gp unselectable">iex&gt; </span><span class="n">find_or_create_from_google</span><span class="p" data-group-id="2612832726-1">(</span><span class="p" data-group-id="2612832726-2">%{</span><span class="ss">google_id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;123&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">email</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;user@example.com&quot;</span><span class="p" data-group-id="2612832726-2">}</span><span class="p" data-group-id="2612832726-1">)</span><span class="w">
+</span><span class="p" data-group-id="2612832726-3">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="2612832726-4">%</span><span class="nc" data-group-id="2612832726-4">User</span><span class="p" data-group-id="2612832726-4">{</span><span class="p" data-group-id="2612832726-4">}</span><span class="p" data-group-id="2612832726-3">}</span></code></pre>
   </section>
 </section>
 <section class="detail" id="find_or_create_from_steam/1">
@@ -2112,12 +2112,12 @@ create an anonymous confirmed user and attach the device_id.</p>
       <div class="specs">
 
           <pre translate="no"><span class="attribute">@spec</span> find_or_create_from_steam(<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()) ::
-  {:ok, <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()} | {:error, <a href="https://hexdocs.pm/ecto/3.14.1/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>() | <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}</pre>
+  {:ok, <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()} | {:error, <a href="https://hexdocs.pm/ecto/3.14.2/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>() | <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}</pre>
 
       </div>
 
-<p>Finds a user by Steam ID or creates a new user from Steam OpenID data.</p><h2 id="find_or_create_from_steam/1-examples" class="section-heading"><a href="#find_or_create_from_steam/1-examples" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Examples</span></h2><pre><code class="makeup elixir" translate="no"><span class="gp unselectable">iex&gt; </span><span class="n">find_or_create_from_steam</span><span class="p" data-group-id="5877901040-1">(</span><span class="p" data-group-id="5877901040-2">%{</span><span class="ss">steam_id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;12345&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">email</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;user@example.com&quot;</span><span class="p" data-group-id="5877901040-2">}</span><span class="p" data-group-id="5877901040-1">)</span><span class="w">
-</span><span class="p" data-group-id="5877901040-3">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="5877901040-4">%</span><span class="nc" data-group-id="5877901040-4">User</span><span class="p" data-group-id="5877901040-4">{</span><span class="p" data-group-id="5877901040-4">}</span><span class="p" data-group-id="5877901040-3">}</span></code></pre>
+<p>Finds a user by Steam ID or creates a new user from Steam OpenID data.</p><h2 id="find_or_create_from_steam/1-examples" class="section-heading"><a href="#find_or_create_from_steam/1-examples" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Examples</span></h2><pre><code class="makeup elixir" translate="no"><span class="gp unselectable">iex&gt; </span><span class="n">find_or_create_from_steam</span><span class="p" data-group-id="7188073586-1">(</span><span class="p" data-group-id="7188073586-2">%{</span><span class="ss">steam_id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;12345&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">email</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;user@example.com&quot;</span><span class="p" data-group-id="7188073586-2">}</span><span class="p" data-group-id="7188073586-1">)</span><span class="w">
+</span><span class="p" data-group-id="7188073586-3">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="7188073586-4">%</span><span class="nc" data-group-id="7188073586-4">User</span><span class="p" data-group-id="7188073586-4">{</span><span class="p" data-group-id="7188073586-4">}</span><span class="p" data-group-id="7188073586-3">}</span></code></pre>
   </section>
 </section>
 <section class="detail" id="generate_user_session_token/1">
@@ -2204,14 +2204,14 @@ create an anonymous confirmed user and attach the device_id.</p>
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> get_user(<a href="https://hexdocs.pm/ecto/3.14.1/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) :: <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>() | nil</pre>
+          <pre translate="no"><span class="attribute">@spec</span> get_user(<a href="https://hexdocs.pm/ecto/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) :: <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>() | nil</pre>
 
       </div>
 
-<p>Gets a single user by ID.</p><p>Returns <code class="inline">nil</code> if the User does not exist.</p><h2 id="get_user/1-examples" class="section-heading"><a href="#get_user/1-examples" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Examples</span></h2><pre><code class="makeup elixir" translate="no"><span class="gp unselectable">iex&gt; </span><span class="n">get_user</span><span class="p" data-group-id="2334806797-1">(</span><span class="mi">123</span><span class="p" data-group-id="2334806797-1">)</span><span class="w">
-</span><span class="p" data-group-id="2334806797-2">%</span><span class="nc" data-group-id="2334806797-2">User</span><span class="p" data-group-id="2334806797-2">{</span><span class="p" data-group-id="2334806797-2">}</span><span class="w">
+<p>Gets a single user by ID.</p><p>Returns <code class="inline">nil</code> if the User does not exist.</p><h2 id="get_user/1-examples" class="section-heading"><a href="#get_user/1-examples" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Examples</span></h2><pre><code class="makeup elixir" translate="no"><span class="gp unselectable">iex&gt; </span><span class="n">get_user</span><span class="p" data-group-id="2132362824-1">(</span><span class="mi">123</span><span class="p" data-group-id="2132362824-1">)</span><span class="w">
+</span><span class="p" data-group-id="2132362824-2">%</span><span class="nc" data-group-id="2132362824-2">User</span><span class="p" data-group-id="2132362824-2">{</span><span class="p" data-group-id="2132362824-2">}</span><span class="w">
 
-</span><span class="gp unselectable">iex&gt; </span><span class="n">get_user</span><span class="p" data-group-id="2334806797-3">(</span><span class="nc">Ecto.UUID</span><span class="o">.</span><span class="n">generate</span><span class="p" data-group-id="2334806797-4">(</span><span class="p" data-group-id="2334806797-4">)</span><span class="p" data-group-id="2334806797-3">)</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">get_user</span><span class="p" data-group-id="2132362824-3">(</span><span class="nc">Ecto.UUID</span><span class="o">.</span><span class="n">generate</span><span class="p" data-group-id="2132362824-4">(</span><span class="p" data-group-id="2132362824-4">)</span><span class="p" data-group-id="2132362824-3">)</span><span class="w">
 </span><span class="no">nil</span></code></pre>
   </section>
 </section>
@@ -2236,14 +2236,14 @@ create an anonymous confirmed user and attach the device_id.</p>
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> get_user!(<a href="https://hexdocs.pm/ecto/3.14.1/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) :: <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()</pre>
+          <pre translate="no"><span class="attribute">@spec</span> get_user!(<a href="https://hexdocs.pm/ecto/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) :: <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()</pre>
 
       </div>
 
-<p>Gets a single user.</p><p>Raises <a href="https://hexdocs.pm/ecto/3.14.1/Ecto.NoResultsError.html"><code class="inline">Ecto.NoResultsError</code></a> if the User does not exist.</p><h2 id="get_user!/1-examples" class="section-heading"><a href="#get_user!/1-examples" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Examples</span></h2><pre><code class="makeup elixir" translate="no"><span class="gp unselectable">iex&gt; </span><span class="n">get_user!</span><span class="p" data-group-id="3373006271-1">(</span><span class="mi">123</span><span class="p" data-group-id="3373006271-1">)</span><span class="w">
-</span><span class="p" data-group-id="3373006271-2">%</span><span class="nc" data-group-id="3373006271-2">User</span><span class="p" data-group-id="3373006271-2">{</span><span class="p" data-group-id="3373006271-2">}</span><span class="w">
+<p>Gets a single user.</p><p>Raises <a href="https://hexdocs.pm/ecto/3.14.2/Ecto.NoResultsError.html"><code class="inline">Ecto.NoResultsError</code></a> if the User does not exist.</p><h2 id="get_user!/1-examples" class="section-heading"><a href="#get_user!/1-examples" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Examples</span></h2><pre><code class="makeup elixir" translate="no"><span class="gp unselectable">iex&gt; </span><span class="n">get_user!</span><span class="p" data-group-id="1369652021-1">(</span><span class="mi">123</span><span class="p" data-group-id="1369652021-1">)</span><span class="w">
+</span><span class="p" data-group-id="1369652021-2">%</span><span class="nc" data-group-id="1369652021-2">User</span><span class="p" data-group-id="1369652021-2">{</span><span class="p" data-group-id="1369652021-2">}</span><span class="w">
 
-</span><span class="gp unselectable">iex&gt; </span><span class="n">get_user!</span><span class="p" data-group-id="3373006271-3">(</span><span class="mi">456</span><span class="p" data-group-id="3373006271-3">)</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">get_user!</span><span class="p" data-group-id="1369652021-3">(</span><span class="mi">456</span><span class="p" data-group-id="1369652021-3">)</span><span class="w">
 </span><span class="gt">** (Ecto.NoResultsError)</span></code></pre>
   </section>
 </section>
@@ -2328,10 +2328,10 @@ create an anonymous confirmed user and attach the device_id.</p>
 
       </div>
 
-<p>Gets a user by email.</p><h2 id="get_user_by_email/1-examples" class="section-heading"><a href="#get_user_by_email/1-examples" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Examples</span></h2><pre><code class="makeup elixir" translate="no"><span class="gp unselectable">iex&gt; </span><span class="n">get_user_by_email</span><span class="p" data-group-id="2858217371-1">(</span><span class="s">&quot;foo@example.com&quot;</span><span class="p" data-group-id="2858217371-1">)</span><span class="w">
-</span><span class="p" data-group-id="2858217371-2">%</span><span class="nc" data-group-id="2858217371-2">User</span><span class="p" data-group-id="2858217371-2">{</span><span class="p" data-group-id="2858217371-2">}</span><span class="w">
+<p>Gets a user by email.</p><h2 id="get_user_by_email/1-examples" class="section-heading"><a href="#get_user_by_email/1-examples" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Examples</span></h2><pre><code class="makeup elixir" translate="no"><span class="gp unselectable">iex&gt; </span><span class="n">get_user_by_email</span><span class="p" data-group-id="0351921382-1">(</span><span class="s">&quot;foo@example.com&quot;</span><span class="p" data-group-id="0351921382-1">)</span><span class="w">
+</span><span class="p" data-group-id="0351921382-2">%</span><span class="nc" data-group-id="0351921382-2">User</span><span class="p" data-group-id="0351921382-2">{</span><span class="p" data-group-id="0351921382-2">}</span><span class="w">
 
-</span><span class="gp unselectable">iex&gt; </span><span class="n">get_user_by_email</span><span class="p" data-group-id="2858217371-3">(</span><span class="s">&quot;unknown@example.com&quot;</span><span class="p" data-group-id="2858217371-3">)</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">get_user_by_email</span><span class="p" data-group-id="0351921382-3">(</span><span class="s">&quot;unknown@example.com&quot;</span><span class="p" data-group-id="0351921382-3">)</span><span class="w">
 </span><span class="no">nil</span></code></pre>
   </section>
 </section>
@@ -2361,10 +2361,10 @@ create an anonymous confirmed user and attach the device_id.</p>
 
       </div>
 
-<p>Gets a user by email and password.</p><h2 id="get_user_by_email_and_password/2-examples" class="section-heading"><a href="#get_user_by_email_and_password/2-examples" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Examples</span></h2><pre><code class="makeup elixir" translate="no"><span class="gp unselectable">iex&gt; </span><span class="n">get_user_by_email_and_password</span><span class="p" data-group-id="7580568437-1">(</span><span class="s">&quot;foo@example.com&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;correct_password&quot;</span><span class="p" data-group-id="7580568437-1">)</span><span class="w">
-</span><span class="p" data-group-id="7580568437-2">%</span><span class="nc" data-group-id="7580568437-2">User</span><span class="p" data-group-id="7580568437-2">{</span><span class="p" data-group-id="7580568437-2">}</span><span class="w">
+<p>Gets a user by email and password.</p><h2 id="get_user_by_email_and_password/2-examples" class="section-heading"><a href="#get_user_by_email_and_password/2-examples" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Examples</span></h2><pre><code class="makeup elixir" translate="no"><span class="gp unselectable">iex&gt; </span><span class="n">get_user_by_email_and_password</span><span class="p" data-group-id="0758310746-1">(</span><span class="s">&quot;foo@example.com&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;correct_password&quot;</span><span class="p" data-group-id="0758310746-1">)</span><span class="w">
+</span><span class="p" data-group-id="0758310746-2">%</span><span class="nc" data-group-id="0758310746-2">User</span><span class="p" data-group-id="0758310746-2">{</span><span class="p" data-group-id="0758310746-2">}</span><span class="w">
 
-</span><span class="gp unselectable">iex&gt; </span><span class="n">get_user_by_email_and_password</span><span class="p" data-group-id="7580568437-3">(</span><span class="s">&quot;foo@example.com&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;invalid_password&quot;</span><span class="p" data-group-id="7580568437-3">)</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">get_user_by_email_and_password</span><span class="p" data-group-id="0758310746-3">(</span><span class="s">&quot;foo@example.com&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;invalid_password&quot;</span><span class="p" data-group-id="0758310746-3">)</span><span class="w">
 </span><span class="no">nil</span></code></pre>
   </section>
 </section>
@@ -2587,7 +2587,7 @@ are stored lowercase).</p>
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> invalidate_user_cache_by_id(<a href="https://hexdocs.pm/ecto/3.14.1/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) :: :ok</pre>
+          <pre translate="no"><span class="attribute">@spec</span> invalidate_user_cache_by_id(<a href="https://hexdocs.pm/ecto/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) :: :ok</pre>
 
       </div>
 
@@ -2618,9 +2618,9 @@ Accepts a user ID and clears both the primary and all index caches.</p>
 
           <pre translate="no"><span class="attribute">@spec</span> link_account(<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>(), (<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>(),
                                                        <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>() -&gt;
-                                                         <a href="https://hexdocs.pm/ecto/3.14.1/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>())) ::
+                                                         <a href="https://hexdocs.pm/ecto/3.14.2/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>())) ::
   {:ok, <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()}
-  | {:error, <a href="https://hexdocs.pm/ecto/3.14.1/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>() | {:conflict, <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()}}</pre>
+  | {:error, <a href="https://hexdocs.pm/ecto/3.14.2/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>() | {:conflict, <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()}}</pre>
 
       </div>
 
@@ -2651,7 +2651,7 @@ existing email or avatars.</p><p>Example: link_account(user, %{discord_id: &quot
       <div class="specs">
 
           <pre translate="no"><span class="attribute">@spec</span> link_device_id(<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>(), <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()) ::
-  {:ok, <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()} | {:error, <a href="https://hexdocs.pm/ecto/3.14.1/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>()}</pre>
+  {:ok, <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()} | {:error, <a href="https://hexdocs.pm/ecto/3.14.2/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>()}</pre>
 
       </div>
 
@@ -2681,7 +2681,7 @@ is already used by another account.</p>
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> list_admin_ids() :: [<a href="https://hexdocs.pm/ecto/3.14.1/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()]</pre>
+          <pre translate="no"><span class="attribute">@spec</span> list_admin_ids() :: [<a href="https://hexdocs.pm/ecto/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()]</pre>
 
       </div>
 
@@ -2753,7 +2753,7 @@ of <code class="inline">&quot;online&quot;</code>, <code class="inline">&quot;un
       <div class="specs">
 
           <pre translate="no"><span class="attribute">@spec</span> list_user_tokens(
-  <a href="https://hexdocs.pm/ecto/3.14.1/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>(),
+  <a href="https://hexdocs.pm/ecto/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>(),
   <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">keyword</a>()
 ) :: [<a href="Gamend.Accounts.UserToken.html#t:t/0">Gamend.Accounts.UserToken.t</a>()]</pre>
 
@@ -2785,7 +2785,7 @@ of <code class="inline">&quot;online&quot;</code>, <code class="inline">&quot;un
 
           <pre translate="no"><span class="attribute">@spec</span> login_user_by_magic_link(<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()) ::
   {:ok, {<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>(), [<a href="Gamend.Accounts.UserToken.html#t:t/0">Gamend.Accounts.UserToken.t</a>()]}}
-  | {:error, :not_found | <a href="https://hexdocs.pm/ecto/3.14.1/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>() | <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}</pre>
+  | {:error, :not_found | <a href="https://hexdocs.pm/ecto/3.14.2/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>() | <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}</pre>
 
       </div>
 
@@ -2891,7 +2891,7 @@ partial index over online rows, so it scans the smallest set; the unfiltered
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> prune_user_avatars(<a href="https://hexdocs.pm/ecto/3.14.1/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>(), <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()) :: :ok</pre>
+          <pre translate="no"><span class="attribute">@spec</span> prune_user_avatars(<a href="https://hexdocs.pm/ecto/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>(), <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()) :: :ok</pre>
 
       </div>
 
@@ -2923,15 +2923,15 @@ update that already succeeded.</p>
       <div class="specs">
 
           <pre translate="no"><span class="attribute">@spec</span> register_user(<a href="Gamend.Types.html#t:user_registration_attrs/0">Gamend.Types.user_registration_attrs</a>()) ::
-  {:ok, <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()} | {:error, <a href="https://hexdocs.pm/ecto/3.14.1/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>()}</pre>
+  {:ok, <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()} | {:error, <a href="https://hexdocs.pm/ecto/3.14.2/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>()}</pre>
 
       </div>
 
-<p>Registers a user.</p><h2 id="register_user/1-attributes" class="section-heading"><a href="#register_user/1-attributes" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Attributes</span></h2><p>See <a href="Gamend.Types.html#t:user_registration_attrs/0"><code class="inline">Gamend.Types.user_registration_attrs/0</code></a> for available fields.</p><h2 id="register_user/1-examples" class="section-heading"><a href="#register_user/1-examples" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Examples</span></h2><pre><code class="makeup elixir" translate="no"><span class="gp unselectable">iex&gt; </span><span class="n">register_user</span><span class="p" data-group-id="2767332456-1">(</span><span class="p" data-group-id="2767332456-2">%{</span><span class="ss">email</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;user@example.com&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">password</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;secret123&quot;</span><span class="p" data-group-id="2767332456-2">}</span><span class="p" data-group-id="2767332456-1">)</span><span class="w">
-</span><span class="p" data-group-id="2767332456-3">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="2767332456-4">%</span><span class="nc" data-group-id="2767332456-4">User</span><span class="p" data-group-id="2767332456-4">{</span><span class="p" data-group-id="2767332456-4">}</span><span class="p" data-group-id="2767332456-3">}</span><span class="w">
+<p>Registers a user.</p><h2 id="register_user/1-attributes" class="section-heading"><a href="#register_user/1-attributes" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Attributes</span></h2><p>See <a href="Gamend.Types.html#t:user_registration_attrs/0"><code class="inline">Gamend.Types.user_registration_attrs/0</code></a> for available fields.</p><h2 id="register_user/1-examples" class="section-heading"><a href="#register_user/1-examples" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Examples</span></h2><pre><code class="makeup elixir" translate="no"><span class="gp unselectable">iex&gt; </span><span class="n">register_user</span><span class="p" data-group-id="1524053917-1">(</span><span class="p" data-group-id="1524053917-2">%{</span><span class="ss">email</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;user@example.com&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">password</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;secret123&quot;</span><span class="p" data-group-id="1524053917-2">}</span><span class="p" data-group-id="1524053917-1">)</span><span class="w">
+</span><span class="p" data-group-id="1524053917-3">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="1524053917-4">%</span><span class="nc" data-group-id="1524053917-4">User</span><span class="p" data-group-id="1524053917-4">{</span><span class="p" data-group-id="1524053917-4">}</span><span class="p" data-group-id="1524053917-3">}</span><span class="w">
 
-</span><span class="gp unselectable">iex&gt; </span><span class="n">register_user</span><span class="p" data-group-id="2767332456-5">(</span><span class="p" data-group-id="2767332456-6">%{</span><span class="ss">email</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;invalid&quot;</span><span class="p" data-group-id="2767332456-6">}</span><span class="p" data-group-id="2767332456-5">)</span><span class="w">
-</span><span class="p" data-group-id="2767332456-7">{</span><span class="ss">:error</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="2767332456-8">%</span><span class="nc" data-group-id="2767332456-8">Ecto.Changeset</span><span class="p" data-group-id="2767332456-8">{</span><span class="p" data-group-id="2767332456-8">}</span><span class="p" data-group-id="2767332456-7">}</span></code></pre>
+</span><span class="gp unselectable">iex&gt; </span><span class="n">register_user</span><span class="p" data-group-id="1524053917-5">(</span><span class="p" data-group-id="1524053917-6">%{</span><span class="ss">email</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;invalid&quot;</span><span class="p" data-group-id="1524053917-6">}</span><span class="p" data-group-id="1524053917-5">)</span><span class="w">
+</span><span class="p" data-group-id="1524053917-7">{</span><span class="ss">:error</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="1524053917-8">%</span><span class="nc" data-group-id="1524053917-8">Ecto.Changeset</span><span class="p" data-group-id="1524053917-8">{</span><span class="p" data-group-id="1524053917-8">}</span><span class="p" data-group-id="1524053917-7">}</span></code></pre>
   </section>
 </section>
 <section class="detail" id="register_user_and_deliver/3">
@@ -2961,7 +2961,7 @@ update that already succeeded.</p>
   <a href="Gamend.Types.html#t:user_registration_attrs/0">Gamend.Types.user_registration_attrs</a>(),
   (<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>() -&gt; <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()),
   <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>()
-) :: {:ok, <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()} | {:error, <a href="https://hexdocs.pm/ecto/3.14.1/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>() | <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}</pre>
+) :: {:ok, <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()} | {:error, <a href="https://hexdocs.pm/ecto/3.14.2/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>() | <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}</pre>
 
       </div>
 
@@ -3021,7 +3021,7 @@ that receives the encoded token and returns the confirmation URL string.</p><p>I
 
           <pre translate="no"><span class="attribute">@spec</span> revoke_all_tokens(<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()) ::
   {:ok, {<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>(), [<a href="Gamend.Accounts.UserToken.html#t:t/0">Gamend.Accounts.UserToken.t</a>()]}}
-  | {:error, <a href="https://hexdocs.pm/ecto/3.14.1/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>()}</pre>
+  | {:error, <a href="https://hexdocs.pm/ecto/3.14.2/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>()}</pre>
 
       </div>
 
@@ -3051,7 +3051,7 @@ access and refresh tokens (&quot;log out everywhere&quot;).</p><p>Returns <code 
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> revoke_all_user_sessions(<a href="https://hexdocs.pm/ecto/3.14.1/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) :: {<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>(), nil}</pre>
+          <pre translate="no"><span class="attribute">@spec</span> revoke_all_user_sessions(<a href="https://hexdocs.pm/ecto/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) :: {<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>(), nil}</pre>
 
       </div>
 
@@ -3139,7 +3139,7 @@ access and refresh tokens (&quot;log out everywhere&quot;).</p><p>Returns <code 
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> set_user_offline(<a href="https://hexdocs.pm/ecto/3.14.1/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) ::
+          <pre translate="no"><span class="attribute">@spec</span> set_user_offline(<a href="https://hexdocs.pm/ecto/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) ::
   {:ok, <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()} | {:error, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}</pre>
 
       </div>
@@ -3168,7 +3168,7 @@ access and refresh tokens (&quot;log out everywhere&quot;).</p><p>Returns <code 
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> set_user_online(<a href="https://hexdocs.pm/ecto/3.14.1/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) ::
+          <pre translate="no"><span class="attribute">@spec</span> set_user_online(<a href="https://hexdocs.pm/ecto/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) ::
   {:ok, <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()} | {:error, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}</pre>
 
       </div>
@@ -3261,7 +3261,7 @@ for <a href="Gamend.Analytics.html"><code class="inline">Gamend.Analytics</code>
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> touch_last_seen_by_id(<a href="https://hexdocs.pm/ecto/3.14.1/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) :: :ok</pre>
+          <pre translate="no"><span class="attribute">@spec</span> touch_last_seen_by_id(<a href="https://hexdocs.pm/ecto/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) :: :ok</pre>
 
       </div>
 
@@ -3294,7 +3294,7 @@ Fire-and-forget — errors are ignored.</p>
 
           <pre translate="no"><span class="attribute">@spec</span> unlink_device_id(<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()) ::
   {:ok, <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()}
-  | {:error, :last_auth_method | <a href="https://hexdocs.pm/ecto/3.14.1/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>()}</pre>
+  | {:error, :last_auth_method | <a href="https://hexdocs.pm/ecto/3.14.2/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>()}</pre>
 
       </div>
 
@@ -3329,7 +3329,7 @@ This prevents users losing all login methods unexpectedly.</p>
   :discord | :apple | :google | :facebook | :steam
 ) ::
   {:ok, <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()}
-  | {:error, :last_provider | <a href="https://hexdocs.pm/ecto/3.14.1/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>() | <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}</pre>
+  | {:error, :last_provider | <a href="https://hexdocs.pm/ecto/3.14.2/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>() | <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}</pre>
 
       </div>
 
@@ -3361,17 +3361,17 @@ social logins unexpectedly.</p>
       <div class="specs">
 
           <pre translate="no"><span class="attribute">@spec</span> update_user(<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>(), <a href="Gamend.Types.html#t:user_update_attrs/0">Gamend.Types.user_update_attrs</a>()) ::
-  {:ok, <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()} | {:error, <a href="https://hexdocs.pm/ecto/3.14.1/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>()}</pre>
+  {:ok, <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()} | {:error, <a href="https://hexdocs.pm/ecto/3.14.2/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>()}</pre>
 
       </div>
 
 <p>Updates a user with the given attributes.</p><p>This function applies the <code class="inline">User.admin_changeset/2</code> then updates the user and
 broadcasts the update on success. It returns the same tuple shape as
-<code class="inline">Repo.update/1</code> so callers can pattern-match as before.</p><h2 id="update_user/2-attributes" class="section-heading"><a href="#update_user/2-attributes" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Attributes</span></h2><p>See <a href="Gamend.Types.html#t:user_update_attrs/0"><code class="inline">Gamend.Types.user_update_attrs/0</code></a> for available fields.</p><h2 id="update_user/2-examples" class="section-heading"><a href="#update_user/2-examples" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Examples</span></h2><pre><code class="makeup elixir" translate="no"><span class="gp unselectable">iex&gt; </span><span class="n">update_user</span><span class="p" data-group-id="1612057709-1">(</span><span class="n">user</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="1612057709-2">%{</span><span class="ss">display_name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;NewName&quot;</span><span class="p" data-group-id="1612057709-2">}</span><span class="p" data-group-id="1612057709-1">)</span><span class="w">
-</span><span class="p" data-group-id="1612057709-3">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="1612057709-4">%</span><span class="nc" data-group-id="1612057709-4">User</span><span class="p" data-group-id="1612057709-4">{</span><span class="p" data-group-id="1612057709-4">}</span><span class="p" data-group-id="1612057709-3">}</span><span class="w">
+<code class="inline">Repo.update/1</code> so callers can pattern-match as before.</p><h2 id="update_user/2-attributes" class="section-heading"><a href="#update_user/2-attributes" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Attributes</span></h2><p>See <a href="Gamend.Types.html#t:user_update_attrs/0"><code class="inline">Gamend.Types.user_update_attrs/0</code></a> for available fields.</p><h2 id="update_user/2-examples" class="section-heading"><a href="#update_user/2-examples" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Examples</span></h2><pre><code class="makeup elixir" translate="no"><span class="gp unselectable">iex&gt; </span><span class="n">update_user</span><span class="p" data-group-id="4828231957-1">(</span><span class="n">user</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="4828231957-2">%{</span><span class="ss">display_name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;NewName&quot;</span><span class="p" data-group-id="4828231957-2">}</span><span class="p" data-group-id="4828231957-1">)</span><span class="w">
+</span><span class="p" data-group-id="4828231957-3">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="4828231957-4">%</span><span class="nc" data-group-id="4828231957-4">User</span><span class="p" data-group-id="4828231957-4">{</span><span class="p" data-group-id="4828231957-4">}</span><span class="p" data-group-id="4828231957-3">}</span><span class="w">
 
-</span><span class="gp unselectable">iex&gt; </span><span class="n">update_user</span><span class="p" data-group-id="1612057709-5">(</span><span class="n">user</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="1612057709-6">%{</span><span class="ss">metadata</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="1612057709-7">%{</span><span class="ss">level</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p" data-group-id="1612057709-7">}</span><span class="p" data-group-id="1612057709-6">}</span><span class="p" data-group-id="1612057709-5">)</span><span class="w">
-</span><span class="p" data-group-id="1612057709-8">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="1612057709-9">%</span><span class="nc" data-group-id="1612057709-9">User</span><span class="p" data-group-id="1612057709-9">{</span><span class="p" data-group-id="1612057709-9">}</span><span class="p" data-group-id="1612057709-8">}</span></code></pre>
+</span><span class="gp unselectable">iex&gt; </span><span class="n">update_user</span><span class="p" data-group-id="4828231957-5">(</span><span class="n">user</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="4828231957-6">%{</span><span class="ss">metadata</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="4828231957-7">%{</span><span class="ss">level</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p" data-group-id="4828231957-7">}</span><span class="p" data-group-id="4828231957-6">}</span><span class="p" data-group-id="4828231957-5">)</span><span class="w">
+</span><span class="p" data-group-id="4828231957-8">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="4828231957-9">%</span><span class="nc" data-group-id="4828231957-9">User</span><span class="p" data-group-id="4828231957-9">{</span><span class="p" data-group-id="4828231957-9">}</span><span class="p" data-group-id="4828231957-8">}</span></code></pre>
   </section>
 </section>
 <section class="detail" id="update_user_avatar/2">
@@ -3396,7 +3396,7 @@ broadcasts the update on success. It returns the same tuple shape as
       <div class="specs">
 
           <pre translate="no"><span class="attribute">@spec</span> update_user_avatar(<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>(), <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()) ::
-  {:ok, <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()} | {:error, <a href="https://hexdocs.pm/ecto/3.14.1/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>()}</pre>
+  {:ok, <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()} | {:error, <a href="https://hexdocs.pm/ecto/3.14.2/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>()}</pre>
 
       </div>
 
@@ -3426,7 +3426,7 @@ by <a href="Gamend.Storage.html"><code class="inline">Gamend.Storage</code></a>.
       <div class="specs">
 
           <pre translate="no"><span class="attribute">@spec</span> update_user_display_name(<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()) ::
-  {:ok, <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()} | {:error, <a href="https://hexdocs.pm/ecto/3.14.1/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>()}</pre>
+  {:ok, <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()} | {:error, <a href="https://hexdocs.pm/ecto/3.14.2/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>()}</pre>
 
       </div>
 
@@ -3485,15 +3485,15 @@ by <a href="Gamend.Storage.html"><code class="inline">Gamend.Storage</code></a>.
 
           <pre translate="no"><span class="attribute">@spec</span> update_user_password(<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()) ::
   {:ok, {<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>(), [<a href="Gamend.Accounts.UserToken.html#t:t/0">Gamend.Accounts.UserToken.t</a>()]}}
-  | {:error, <a href="https://hexdocs.pm/ecto/3.14.1/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>()}</pre>
+  | {:error, <a href="https://hexdocs.pm/ecto/3.14.2/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>()}</pre>
 
       </div>
 
-<p>Updates the user password.</p><p>Returns a tuple with the updated user, as well as a list of expired tokens.</p><h2 id="update_user_password/2-examples" class="section-heading"><a href="#update_user_password/2-examples" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Examples</span></h2><pre><code class="makeup elixir" translate="no"><span class="gp unselectable">iex&gt; </span><span class="n">update_user_password</span><span class="p" data-group-id="2897458032-1">(</span><span class="n">user</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="2897458032-2">%{</span><span class="ss">password</span><span class="p">:</span><span class="w"> </span><span class="n">...</span><span class="p" data-group-id="2897458032-2">}</span><span class="p" data-group-id="2897458032-1">)</span><span class="w">
-</span><span class="p" data-group-id="2897458032-3">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="2897458032-4">{</span><span class="p" data-group-id="2897458032-5">%</span><span class="nc" data-group-id="2897458032-5">User</span><span class="p" data-group-id="2897458032-5">{</span><span class="p" data-group-id="2897458032-5">}</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="2897458032-6">[</span><span class="n">...</span><span class="p" data-group-id="2897458032-6">]</span><span class="p" data-group-id="2897458032-4">}</span><span class="p" data-group-id="2897458032-3">}</span><span class="w">
+<p>Updates the user password.</p><p>Returns a tuple with the updated user, as well as a list of expired tokens.</p><h2 id="update_user_password/2-examples" class="section-heading"><a href="#update_user_password/2-examples" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Examples</span></h2><pre><code class="makeup elixir" translate="no"><span class="gp unselectable">iex&gt; </span><span class="n">update_user_password</span><span class="p" data-group-id="6967417503-1">(</span><span class="n">user</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="6967417503-2">%{</span><span class="ss">password</span><span class="p">:</span><span class="w"> </span><span class="n">...</span><span class="p" data-group-id="6967417503-2">}</span><span class="p" data-group-id="6967417503-1">)</span><span class="w">
+</span><span class="p" data-group-id="6967417503-3">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="6967417503-4">{</span><span class="p" data-group-id="6967417503-5">%</span><span class="nc" data-group-id="6967417503-5">User</span><span class="p" data-group-id="6967417503-5">{</span><span class="p" data-group-id="6967417503-5">}</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="6967417503-6">[</span><span class="n">...</span><span class="p" data-group-id="6967417503-6">]</span><span class="p" data-group-id="6967417503-4">}</span><span class="p" data-group-id="6967417503-3">}</span><span class="w">
 
-</span><span class="gp unselectable">iex&gt; </span><span class="n">update_user_password</span><span class="p" data-group-id="2897458032-7">(</span><span class="n">user</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="2897458032-8">%{</span><span class="ss">password</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;too short&quot;</span><span class="p" data-group-id="2897458032-8">}</span><span class="p" data-group-id="2897458032-7">)</span><span class="w">
-</span><span class="p" data-group-id="2897458032-9">{</span><span class="ss">:error</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="2897458032-10">%</span><span class="nc" data-group-id="2897458032-10">Ecto.Changeset</span><span class="p" data-group-id="2897458032-10">{</span><span class="p" data-group-id="2897458032-10">}</span><span class="p" data-group-id="2897458032-9">}</span></code></pre>
+</span><span class="gp unselectable">iex&gt; </span><span class="n">update_user_password</span><span class="p" data-group-id="6967417503-7">(</span><span class="n">user</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="6967417503-8">%{</span><span class="ss">password</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;too short&quot;</span><span class="p" data-group-id="6967417503-8">}</span><span class="p" data-group-id="6967417503-7">)</span><span class="w">
+</span><span class="p" data-group-id="6967417503-9">{</span><span class="ss">:error</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="6967417503-10">%</span><span class="nc" data-group-id="6967417503-10">Ecto.Changeset</span><span class="p" data-group-id="6967417503-10">{</span><span class="p" data-group-id="6967417503-10">}</span><span class="p" data-group-id="6967417503-9">}</span></code></pre>
   </section>
 </section>
 <section class="detail" id="update_username/2">
@@ -3518,7 +3518,7 @@ by <a href="Gamend.Storage.html"><code class="inline">Gamend.Storage</code></a>.
       <div class="specs">
 
           <pre translate="no"><span class="attribute">@spec</span> update_username(<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()) ::
-  {:ok, <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()} | {:error, <a href="https://hexdocs.pm/ecto/3.14.1/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>() | <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}</pre>
+  {:ok, <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()} | {:error, <a href="https://hexdocs.pm/ecto/3.14.2/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>() | <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}</pre>
 
       </div>
 
@@ -3579,8 +3579,8 @@ the user's <code class="inline">is_activated</code> flag is <code class="inline"
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> users_by_ids([<a href="https://hexdocs.pm/ecto/3.14.1/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()]) :: %{
-  required(<a href="https://hexdocs.pm/ecto/3.14.1/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) =&gt; <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()
+          <pre translate="no"><span class="attribute">@spec</span> users_by_ids([<a href="https://hexdocs.pm/ecto/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()]) :: %{
+  required(<a href="https://hexdocs.pm/ecto/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) =&gt; <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()
 }</pre>
 
       </div>
@@ -3626,9 +3626,9 @@ tables that hold only a <code class="inline">user_id</code>). Nil/duplicate ids 
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1167">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1168">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1167">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1168">Hex Preview</a>
 
             </span>
 

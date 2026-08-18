@@ -5,10 +5,10 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.3">
-    <meta name="project" content="gamend_core v1.0.1167">
+    <meta name="project" content="gamend_core v1.0.1168">
 
 
-    <title>Gamend.Chat.Moderation — gamend_core v1.0.1167</title>
+    <title>Gamend.Chat.Moderation — gamend_core v1.0.1168</title>
 
     <link rel="stylesheet" href="dist/html-elixir-NHQLCD6Y.css" />
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1167
+          v1.0.1168
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr />Chat.<wbr />Moderation</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1167)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1168)</small>
 
     </h1>
 
@@ -574,7 +574,7 @@ covers) it is blocked rather than sent through half-masked.</p>
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> get_filter_word(<a href="https://hexdocs.pm/ecto/3.14.1/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) :: <a href="Gamend.Chat.FilterWord.html#t:t/0">Gamend.Chat.FilterWord.t</a>() | nil</pre>
+          <pre translate="no"><span class="attribute">@spec</span> get_filter_word(<a href="https://hexdocs.pm/ecto/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) :: <a href="Gamend.Chat.FilterWord.html#t:t/0">Gamend.Chat.FilterWord.t</a>() | nil</pre>
 
       </div>
 
@@ -602,7 +602,7 @@ covers) it is blocked rather than sent through half-masked.</p>
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> get_mute(<a href="https://hexdocs.pm/ecto/3.14.1/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) :: <a href="Gamend.Chat.Mute.html#t:t/0">Gamend.Chat.Mute.t</a>() | nil</pre>
+          <pre translate="no"><span class="attribute">@spec</span> get_mute(<a href="https://hexdocs.pm/ecto/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) :: <a href="Gamend.Chat.Mute.html#t:t/0">Gamend.Chat.Mute.t</a>() | nil</pre>
 
       </div>
 
@@ -793,7 +793,7 @@ true, only unexpired mutes).</p>
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> mute_user(<a href="https://hexdocs.pm/ecto/3.14.1/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>(), <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(), <a href="https://hexdocs.pm/ecto/3.14.1/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>() | nil, <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()) ::
+          <pre translate="no"><span class="attribute">@spec</span> mute_user(<a href="https://hexdocs.pm/ecto/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>(), <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(), <a href="https://hexdocs.pm/ecto/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>() | nil, <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()) ::
   {:ok, <a href="Gamend.Chat.Mute.html#t:t/0">Gamend.Chat.Mute.t</a>()} | {:error, <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()}</pre>
 
       </div>
@@ -825,7 +825,7 @@ can extend or shorten one without unmuting first.</p>
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> muted?(<a href="https://hexdocs.pm/ecto/3.14.1/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>(), <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(), <a href="https://hexdocs.pm/ecto/3.14.1/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>() | nil) :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()</pre>
+          <pre translate="no"><span class="attribute">@spec</span> muted?(<a href="https://hexdocs.pm/ecto/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>(), <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(), <a href="https://hexdocs.pm/ecto/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>() | nil) :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()</pre>
 
       </div>
 
@@ -884,7 +884,7 @@ never lets a mute outlive its expiry.</p>
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> unmute_user(<a href="https://hexdocs.pm/ecto/3.14.1/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>(), <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(), <a href="https://hexdocs.pm/ecto/3.14.1/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>() | nil) ::
+          <pre translate="no"><span class="attribute">@spec</span> unmute_user(<a href="https://hexdocs.pm/ecto/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>(), <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(), <a href="https://hexdocs.pm/ecto/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>() | nil) ::
   {:ok, <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>()}</pre>
 
       </div>
@@ -930,9 +930,9 @@ never lets a mute outlive its expiry.</p>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1167">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1168">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1167">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1168">Hex Preview</a>
 
             </span>
 

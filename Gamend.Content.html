@@ -5,10 +5,10 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.3">
-    <meta name="project" content="gamend_core v1.0.1167">
+    <meta name="project" content="gamend_core v1.0.1168">
 
 
-    <title>Gamend.Content — gamend_core v1.0.1167</title>
+    <title>Gamend.Content — gamend_core v1.0.1168</title>
 
     <link rel="stylesheet" href="dist/html-elixir-NHQLCD6Y.css" />
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1167
+          v1.0.1168
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr />Content</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1167)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1168)</small>
 
     </h1>
 
@@ -352,7 +352,7 @@ source. Returns <code class="inline">nil</code> when not found or path traversal
       <h1 class="signature" translate="no">blog_neighbours(slug)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L380" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L382" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -381,7 +381,7 @@ Either may be <code class="inline">nil</code>.</p>
       <h1 class="signature" translate="no">blog_post_html(slug)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L397" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L399" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -409,7 +409,7 @@ Either may be <code class="inline">nil</code>.</p>
       <h1 class="signature" translate="no">blog_posts_grouped()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L417" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L419" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -525,7 +525,7 @@ dependency for that would be its own liability.</p>
       <h1 class="signature" translate="no">get_blog_post(slug)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L371" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L373" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -581,7 +581,7 @@ dependency for that would be its own liability.</p>
       <h1 class="signature" translate="no">list_blog_posts()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L351" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L353" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -596,7 +596,8 @@ dependency for that would be its own liability.</p>
 
       </div>
 
-<p>Lists all blog posts sorted newest-first.</p><p>Each post is a map with keys:</p><ul><li><code class="inline">:slug</code>  – URL-safe identifier derived from the filename</li><li><code class="inline">:title</code> – extracted from the first <code class="inline">#</code> heading (or humanised slug)</li><li><code class="inline">:date</code>  – <code class="inline">Date.t()</code> parsed from filename prefix or file mtime</li><li><code class="inline">:path</code>  – absolute path to the <code class="inline">.md</code> file</li><li><code class="inline">:excerpt</code> – first non-heading paragraph (≤ 200 chars)</li></ul>
+<p>Lists all blog posts sorted newest-first.</p><p>Each post is a map with keys:</p><ul><li><code class="inline">:slug</code>  – URL-safe identifier derived from the filename</li><li><code class="inline">:title</code> – extracted from the first <code class="inline">#</code> heading (or humanised slug)</li><li><code class="inline">:date</code>  – <code class="inline">Date.t()</code> parsed from filename prefix or file mtime</li><li><code class="inline">:path</code>  – absolute path to the <code class="inline">.md</code> file</li><li><code class="inline">:excerpt</code> – first non-heading paragraph (≤ 200 chars), for cards and
+meta descriptions</li><li><code class="inline">:lede</code> – that same paragraph in full, which is what a post opens with</li></ul>
   </section>
 </section>
 <section class="detail" id="list_doc_categories/0">
@@ -784,9 +785,9 @@ not configured or the file doesn't exist.</p>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1167">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1168">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1167">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1168">Hex Preview</a>
 
             </span>
 

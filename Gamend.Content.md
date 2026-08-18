@@ -105,7 +105,9 @@ Each post is a map with keys:
   * `:title` – extracted from the first `# ` heading (or humanised slug)
   * `:date`  – `Date.t()` parsed from filename prefix or file mtime
   * `:path`  – absolute path to the `.md` file
-  * `:excerpt` – first non-heading paragraph (≤ 200 chars)
+  * `:excerpt` – first non-heading paragraph (≤ 200 chars), for cards and
+    meta descriptions
+  * `:lede` – that same paragraph in full, which is what a post opens with
 
 # `list_doc_categories`
 
