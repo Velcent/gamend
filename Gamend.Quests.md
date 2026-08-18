@@ -273,6 +273,24 @@ out too, so the count on the collapsed entry matches what opening it reveals.
 
 Returns `[]` for a group key nothing carries.
 
+# `host_visible`
+
+```elixir
+@spec host_visible([Gamend.Quests.Quest.t()], user_id() | nil) :: [
+  Gamend.Quests.Quest.t()
+]
+```
+
+The host's say on which quest definitions one viewer may see at all — a
+premium-only daily, a quest for a country the player has not unlocked. Set
+`config :gamend_core, :quest_visibility_filter, {Module, :function}`; it is
+called as `function(user_id | nil, [Quest.t()])` and returns the quests to
+keep. Applied to every per-user listing (`list_user_quests/2`,
+`count_user_quests/2`, `visible_categories/1`) and to the signed-out catalog
+with `nil`. Progress is NOT filtered: an event still advances a quest the
+viewer cannot see, so a player who gains access later finds it where they
+left it; veto the claim in `before_quest_claim` if that must not pay.
+
 # `list_progress`
 
 ```elixir

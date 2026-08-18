@@ -1,5 +1,8 @@
 # August 2026
 
+- [added] **A host can hide quests per viewer** — `config :gamend_core, :quest_visibility_filter, {Module, :fun}` is called with `(user_id | nil, quests)` on every per-user listing, count and category list (and the signed-out catalog with `nil`); progress is not filtered, so a quest a player cannot see yet still advances. For premium-only or unlock-gated quests.
+- [added] **`user_title/1`** — the line under a name (a rank, a title) read from a metadata path the host names in `config :gamend_web, :user_title_meta_path`; used on leaderboards, tournaments and the nav dropdown.
+- [changed] **Pagination hides itself** when a list fits on one page — no more disabled Prev/Next and a "1 / 1" counter under every short list. The page-size selector stays only when a smaller size would actually split the list.
 - [fixed] **Realtime events arrived twice**
 - [fixed] **A LiveView could stack PubSub subscriptions** — `GroupsLive` subscribed
   to the selected group on every `handle_params/3`, and `kv:subscribe` registered
