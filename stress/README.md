@@ -1,5 +1,8 @@
 # Load testing
 
+**[SUMMARY.md](SUMMARY.md) — what the stress test found, in one page.** Start
+there; the rest of this file is how to run it yourself.
+
 Two questions, two tools, one directory:
 
 - **What does each operation cost?** `scenarios/` — one isolated k6 scenario
@@ -137,6 +140,7 @@ Prometheus — watch them on fly-metrics.net while a run is in flight; RSS durin
 | `journeys/*.js` | mixed load: capacity ramp, idle sockets, connect storm, broadcast storm, soak |
 | `suite.sh` | runs every scenario in turn, then prints the table |
 | `sweep.sh` | one scenario up a ladder of VU counts — where it stops scaling |
+| `SUMMARY.md` | the findings, one page — authored, and rendered at the top of the report page |
 | `report.mjs` | `results/*.json` → table, `--md`/`--page` reports, `--diff before after` |
 | `page.mjs` | the Markdown and HTML report templates, including the SVG charts |
 | `fly/` | the bench app, the generator machine, and the matrix driver |
@@ -171,8 +175,13 @@ the point.
 someone, or put in a post, generate the full report:
 
 ```bash
-node report.mjs results/ --md results/report.md --page results/report.html
+node report.mjs results/ --md results/report.md --page results/report.html \
+  --summary SUMMARY.md
 ```
+
+`--summary` leads the page with `SUMMARY.md`, so whoever opens it reads what was
+learned before the tables. `--sweep <label>=<dir>` adds saturation curves, and
+two of them put two configurations on the same axes.
 
 - **`report.md`** — every table plus unicode bar charts, so it renders anywhere
   a Markdown file renders and needs no image assets.

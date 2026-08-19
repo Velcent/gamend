@@ -31,6 +31,7 @@ if (args.includes('--help') || args.length === 0) {
       '  node report.mjs <dir> --md <file>       write a full Markdown report',
       '  node report.mjs <dir> --page <file>     write a self-contained HTML report',
       '  node report.mjs <dir> --sweep <dir>     include sweep.sh curves in the page',
+      '  node report.mjs <dir> --summary <md>    lead the page with an authored summary',
     ].join('\n'),
   );
   process.exit(0);
@@ -47,6 +48,7 @@ if (args[0] === '--diff') {
   // `--sweep` may be given more than once, optionally as `label=dir`, so two
   // adapters (or two commits) land on the same axes instead of two pages.
   const sweepArgs = allFlagValues('--sweep');
+  const summaryPath = flagValue('--summary');
   const paths = args.filter((a, i) => !a.startsWith('--') && !isFlagValue(i));
 
   const rows = paths.flatMap(load);
@@ -58,7 +60,8 @@ if (args[0] === '--diff') {
       console.log(`wrote ${mdOut}`);
     }
     if (pageOut) {
-      writeFileSync(pageOut, renderPage(rows, agg, sweepArgs.flatMap(loadSweepArg)));
+      const summaryMd = summaryPath ? readFileSync(summaryPath, 'utf8') : null;
+      writeFileSync(pageOut, renderPage(rows, agg, sweepArgs.flatMap(loadSweepArg), summaryMd));
       console.log(`wrote ${pageOut}`);
     }
   } else if (args.includes('--json')) {

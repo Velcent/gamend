@@ -138,8 +138,9 @@ function bars(title, rows) {
 
 // ── HTML ──────────────────────────────────────────────────────────────
 
-export function renderPage(runs, agg, sweeps = []) {
+export function renderPage(runs, agg, sweeps = [], summaryMd = null) {
   const sweepsHtml = renderSweeps(sweeps);
+  const summaryHtml = summaryMd ? renderSummary(summaryMd) : '';
   const steps = runs
     .flatMap((r) => r.trends.filter((t) => !t.empty).map((t) => ({ ...t, scenario: r.name })))
     .sort((a, b) => b.med - a.med);
@@ -239,6 +240,19 @@ export function renderPage(runs, agg, sweeps = []) {
   .legend span { display: inline-flex; align-items: center; gap: 6px; }
   .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
 
+  .summary { border-bottom: 1px solid var(--line); padding-bottom: 8px; margin-bottom: 8px; }
+  .summary h2 { margin-top: 40px; }
+  .summary h3 { font-size: 17px; margin: 32px 0 4px; }
+  .summary p, .summary li { color: var(--ink-2); max-width: 72ch; }
+  .summary li { margin-bottom: 6px; }
+  /* Summary tables carry prose, not measurements: let every cell wrap and stay
+     left-aligned, and give the first column a floor so a long finding does not
+     squeeze into a two-word column. */
+  .summary th, .summary td { text-align: left; white-space: normal; vertical-align: top; }
+  .summary table { table-layout: fixed; }
+  .summary td:first-child { width: 38%; }
+  .summary a { color: var(--s1); }
+
   pre { background: var(--surface-2); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; overflow-x: auto; font-size: 13px; }
   footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--ink-3); font-size: 13px; }
 </style>
@@ -269,6 +283,8 @@ export function renderPage(runs, agg, sweeps = []) {
     <span>Started ${esc(agg.startedAt || 'unknown')}</span>
     <span>Iterations ${fmtInt(agg.iterations)}</span>
   </div>
+
+  ${summaryHtml}
 
   <h2>Throughput</h2>
   <p class="note">
@@ -478,6 +494,71 @@ function lines(sweeps, colors, dashes = []) {
     ${grid}${ticks}${series}
   </svg>
 </figure>`;
+}
+
+/**
+ * The authored half of the page: numbers alone do not say what was learned, and
+ * a reader who opens this cold needs the summary before the tables. Kept as
+ * Markdown on disk (`stress/SUMMARY.md`) so it is reviewable in a diff, and
+ * rendered here with a deliberately small subset — headings, tables, lists,
+ * code spans, bold, links. Anything else passes through as a paragraph.
+ */
+function renderSummary(md) {
+  const blocks = md.split(/\n{2,}/);
+  const out = ['<section class="summary">'];
+
+  for (const raw of blocks) {
+    const block = raw.trim();
+    if (!block) continue;
+
+    if (block.startsWith('# ')) {
+      out.push(`<h2>${inline(block.slice(2))}</h2>`);
+    } else if (block.startsWith('## ')) {
+      out.push(`<h3>${inline(block.slice(3))}</h3>`);
+    } else if (block.startsWith('|')) {
+      out.push(mdTable(block));
+    } else if (/^[-*] /m.test(block)) {
+      // Markdown wraps a long bullet across lines; a naive per-line filter
+      // keeps the first line and silently drops the rest of the sentence.
+      const items = [];
+      for (const line of block.split('\n')) {
+        if (/^[-*] /.test(line.trim())) items.push(line.trim().slice(2));
+        else if (items.length > 0) items[items.length - 1] += ` ${line.trim()}`;
+      }
+      out.push(`<ul>${items.map((i) => `<li>${inline(i)}</li>`).join('')}</ul>`);
+    } else {
+      out.push(`<p>${inline(block.replace(/\n/g, ' '))}</p>`);
+    }
+  }
+
+  out.push('</section>');
+  return out.join('\n');
+}
+
+function mdTable(block) {
+  const rows = block
+    .split('\n')
+    .map((l) => l.trim())
+    .filter((l) => l.startsWith('|'))
+    .map((l) => l.replace(/^\||\|$/g, '').split('|').map((c) => c.trim()));
+
+  if (rows.length < 2) return '';
+
+  const [head, , ...body] = rows;
+  const th = head.map((c) => `<th>${inline(c)}</th>`).join('');
+  const tb = body
+    .map((r) => `<tr class="plain">${r.map((c) => `<td>${inline(c)}</td>`).join('')}</tr>`)
+    .join('');
+
+  return `<div class="scroll"><table><thead><tr>${th}</tr></thead><tbody>${tb}</tbody></table></div>`;
+}
+
+function inline(text) {
+  return esc(text)
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/(^|[^*])\*([^*\n]+)\*/g, '$1<em>$2</em>')
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
 }
 
 // ── SVG builders ──────────────────────────────────────────────────────

@@ -1,5 +1,9 @@
 # Load testing — a benchmark suite, a capacity test, and a hardware/DB matrix on Fly
 
+> **Results so far:** [stress/SUMMARY.md](../../stress/SUMMARY.md) is the one-page
+> version; [stress/baselines/2026-08-19-macbook-air-m1.md](../../stress/baselines/2026-08-19-macbook-air-m1.md)
+> has every number. This document is the plan and the open questions.
+
 Plan for the second round of stress testing (the first is
 [blog/2025-12-14-gamend-stress-test.md](../../blog/2025-12-14-gamend-stress-test.md):
 one flow — device login + 10× `/me` — on a single `shared-cpu-4x` SQLite box,
