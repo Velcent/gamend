@@ -25,6 +25,24 @@ Returns a specification to start this module under a supervisor.
 
 See `Supervisor`.
 
+# `nudge`
+
+```elixir
+@spec nudge() :: :ok
+```
+
+Ask for a sweep now rather than at the next tick.
+
+Called when a ticket is created: the tick exists so nobody waits forever in a
+half-full bucket, but a join that *completes* a bucket should not sit out the
+remainder of an interval for no reason. Time-to-match was a flat ~3 s —
+a uniform draw over the interval — and none of it was work.
+
+Asynchronous and coalescing: a burst of joins produces one sweep, not one per
+ticket, and the caller never waits on the sweep. If the worker is not running
+(tests, a partial supervision tree) this is a no-op, because the tick would
+not have run either.
+
 # `start_link`
 
 # `sweep`

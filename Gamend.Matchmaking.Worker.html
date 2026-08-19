@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.3">
-    <meta name="project" content="gamend_core v1.0.1174">
+    <meta name="project" content="gamend_core v1.0.1175">
 
 
-    <title>Gamend.Matchmaking.Worker — gamend_core v1.0.1174</title>
+    <title>Gamend.Matchmaking.Worker — gamend_core v1.0.1175</title>
 
     <link rel="stylesheet" href="dist/html-elixir-NHQLCD6Y.css" />
 
-    <script defer src="dist/sidebar_items-45DACEE7.js"></script>
+    <script defer src="dist/sidebar_items-46886179.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-Y2MUTVIN.js"></script>
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1174
+          v1.0.1175
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr />Matchmaking.<wbr />Worker</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1174)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1175)</small>
 
     </h1>
 
@@ -146,6 +146,16 @@ call <a href="#sweep/0"><code class="inline">sweep/0</code></a> directly.</p>
       </div>
 
         <div class="summary-synopsis"><p>Returns a specification to start this module under a supervisor.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#nudge/0" data-no-tooltip="" translate="no">nudge()</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Ask for a sweep now rather than at the next tick.</p></div>
 
     </div>
 
@@ -204,6 +214,40 @@ demand without waiting for the timer.</p></div>
 <p>Returns a specification to start this module under a supervisor.</p><p>See <a href="https://hexdocs.pm/elixir/Supervisor.html"><code class="inline">Supervisor</code></a>.</p>
   </section>
 </section>
+<section class="detail" id="nudge/0">
+
+  <div class="detail-header">
+    <a href="#nudge/0" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">nudge()</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/matchmaking/worker.ex#L64" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> nudge() :: :ok</pre>
+
+      </div>
+
+<p>Ask for a sweep now rather than at the next tick.</p><p>Called when a ticket is created: the tick exists so nobody waits forever in a
+half-full bucket, but a join that <em>completes</em> a bucket should not sit out the
+remainder of an interval for no reason. Time-to-match was a flat ~3 s —
+a uniform draw over the interval — and none of it was work.</p><p>Asynchronous and coalescing: a burst of joins produces one sweep, not one per
+ticket, and the caller never waits on the sweep. If the worker is not running
+(tests, a partial supervision tree) this is a no-op, because the tick would
+not have run either.</p>
+  </section>
+</section>
 <section class="detail" id="start_link/1">
 
   <div class="detail-header">
@@ -214,7 +258,7 @@ demand without waiting for the timer.</p></div>
       <h1 class="signature" translate="no">start_link(opts)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/matchmaking/worker.ex#L32" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/matchmaking/worker.ex#L36" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -236,7 +280,7 @@ demand without waiting for the timer.</p></div>
       <h1 class="signature" translate="no">sweep()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/matchmaking/worker.ex#L72" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/matchmaking/worker.ex#L113" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -268,9 +312,9 @@ sweepers, and a failed lobby simply requeues them for the next tick.</p><p>Retur
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1174">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1175">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1174">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1175">Hex Preview</a>
 
             </span>
 

@@ -217,6 +217,21 @@ Intended for internal/admin usage.
 Gets a user's record with their rank.
 Returns `{:ok, record_with_rank}` or `{:error, :not_found}`.
 
+# `invalidate_cache`
+
+```elixir
+@spec invalidate_cache() :: :ok
+```
+
+Forget the cached leaderboard lookups.
+
+Every write in here does this already. It is public because a CALLER can also
+learn the cache is stale: `get_active_leaderboard_by_slug/1` is cached for a
+minute, so a board deleted (or rolled back, under a test sandbox) hands out an
+id whose row is gone, and the next `submit_score/4` fails on the foreign key.
+A caller that sees that can drop the lookup and try again rather than wait out
+the TTL.
+
 # `list_leaderboard_groups`
 
 ```elixir
