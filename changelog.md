@@ -2,6 +2,7 @@
 
 - [fixed] **Logins survive a busy database** — the analytics day-marker and daily counters drop a failed write instead of failing the request they ride on.
 - [fixed] **Repeat quests** re-arm right away again, instead of once an hour.
+- [added] **Socket buffer size** is configurable — the largest per-connection memory cost.
 - [changed] **Logins return sooner** — the last-seen and activity writes moved off the request path.
 - [fixed] **Concurrent signups** no longer queue behind each other on SQLite.
 - [added] **Load-test harness** — per-feature benchmarks and a capacity journey, in `stress/`.
