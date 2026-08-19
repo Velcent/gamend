@@ -24,6 +24,7 @@ reset period.
   completed_at: term(),
   id: term(),
   inserted_at: term(),
+  lock_version: term(),
   metadata: term(),
   objective_progress: term(),
   period_key: term(),

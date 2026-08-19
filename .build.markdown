@@ -36,6 +36,9 @@ Gamend.Chat.ReadCursor.md
 Gamend.Chat.Report.md
 Gamend.Chat.Reports.md
 Gamend.Chat.md
+Gamend.ClientLogs.Session.md
+Gamend.ClientLogs.SessionLobby.md
+Gamend.ClientLogs.md
 Gamend.Cluster.md
 Gamend.Config.md
 Gamend.Content.md

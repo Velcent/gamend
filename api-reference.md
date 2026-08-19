@@ -1,4 +1,4 @@
-# gamend_core v1.0.1177 - API Reference
+# gamend_core v1.0.1178 - API Reference
 
 ## Modules
 
@@ -15,6 +15,9 @@ stores and sums them. Written by `Gamend.Analytics.count/3`.
 - [Gamend.ApiConventions](Gamend.ApiConventions.md): Mechanical checks for the conventions in `docs/specs/api-conventions.md`.
 - [Gamend.Captcha](Gamend.Captcha.md): Human verification for the unauthenticated browser forms, via
 [Cloudflare Turnstile](https://developers.cloudflare.com/turnstile/).
+- [Gamend.ClientLogs](Gamend.ClientLogs.md): Logs from the game client, put where the server's own logs already are.
+- [Gamend.ClientLogs.Session](Gamend.ClientLogs.Session.md): One run of the game on one device, as seen from the server.
+- [Gamend.ClientLogs.SessionLobby](Gamend.ClientLogs.SessionLobby.md): A lobby a client session was in.
 - [Gamend.Cluster](Gamend.Cluster.md): Erlang distribution, needed for multi-node deployments and the partitioned
 L2 cache.
 - [Gamend.Database](Gamend.Database.md): Connection and tuning settings for `Gamend.Repo`.

@@ -15,6 +15,11 @@ Retention is configured per table in days via env vars (see
   forever": snapshots hold user metadata, and the window is what bounds that
   exposure. Runs flagged anomalous keep
   `RETENTION_LOBBY_SNAPSHOTS_FLAGGED_DAYS` instead (default 90).
+- Client log sessions (`Gamend.ClientLogs`), on their own settings rather
+  than a `RETENTION_*` var: `retention_days` (14) and
+  `retention_flagged_days` (90), keyed off `last_seen_at`. This prunes the
+  index over client logs, not the lines — those live in the host's log store
+  on its own retention.
 - `RETENTION_PUSH_TOKENS_DAYS` — push tokens untouched (registered, used,
   or disabled) for N days. Defaults to 270 — Google's stale-token guidance
   — so the table tracks live devices, not install history.

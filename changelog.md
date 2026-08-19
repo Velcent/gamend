@@ -1,5 +1,7 @@
 # August 2026
 
+- [added] **Client logs** — the game uploads its own log lines and they are re-emitted into the server's own log stream, so one search for a session id returns both sides of a failure. Browse sessions at `/admin/logs`; off by default.
+- [added] **Logs page filters by client session and user**, and separates client entries from the server's own tail.
 - [fixed] **Logins survive a busy database** — the analytics day-marker and daily counters drop a failed write instead of failing the request they ride on.
 - [fixed] **Repeat quests** re-arm right away again, instead of once an hour.
 - [changed] **Matchmaking is near-instant** — a join sweeps immediately instead of waiting for the tick.

@@ -48,6 +48,32 @@ so you will want to set those carefully.
 If you need connections to be restarted periodically, set the `:max_lifetime`
 option in your repository configuration instead.
 
+# `durable_transaction`
+
+```elixir
+@spec durable_transaction(
+  (-&gt; result),
+  keyword()
+) :: {:ok, result} | {:error, term()}
+when result: term()
+```
+
+Run `fun` in a transaction whose commit is on disk before it returns.
+
+`db.postgres_synchronous_commit` is an app-wide durability choice, and `off`
+is a reasonable one for game data: an OS crash loses a few hundred
+milliseconds of commits, nothing is corrupted, and a player re-earns a
+little progress. That trade is wrong for money — a purchase the provider has
+already charged for must not be the thing that disappears.
+
+`SET LOCAL` raises `synchronous_commit` back to `on` for this transaction
+only, so payments stay durable whatever the global setting is, and every
+other write keeps the faster commit. It costs one fsync per payment, which
+is not a path that needs throughput.
+
+A no-op on SQLite: durability there is `db.sqlite_synchronous`, a
+connection-wide pragma with no per-transaction override.
+
 # `escape_like`
 
 ```elixir

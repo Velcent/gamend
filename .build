@@ -37,6 +37,9 @@ Gamend.Chat.ReadCursor.html
 Gamend.Chat.Report.html
 Gamend.Chat.Reports.html
 Gamend.Chat.html
+Gamend.ClientLogs.Session.html
+Gamend.ClientLogs.SessionLobby.html
+Gamend.ClientLogs.html
 Gamend.Cluster.html
 Gamend.Config.html
 Gamend.Content.html
@@ -189,8 +192,8 @@ dist/lato-latin-700-normal-2XVSBPG4.woff2
 dist/lato-latin-ext-400-normal-N27NCBWW.woff2
 dist/lato-latin-ext-700-normal-Q2L5DVMW.woff2
 dist/remixicon-ZWU5GQ4X.woff2
-dist/search_data-157B3B66.js
-dist/sidebar_items-46886179.js
+dist/search_data-2BB780C2.js
+dist/sidebar_items-57FCBFEE.js
 index.html
 readme.html
 search.html

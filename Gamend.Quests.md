@@ -273,6 +273,27 @@ out too, so the count on the collapsed entry matches what opening it reveals.
 
 Returns `[]` for a group key nothing carries.
 
+# `host_lock_label`
+
+```elixir
+@spec host_lock_label(Gamend.Quests.Quest.t(), user_id() | nil) :: String.t() | nil
+```
+
+Why this viewer cannot claim this quest yet, as a short label to draw — or
+`nil` when they can. Set `config :gamend_core, :quest_lock_filter,
+{Module, :function}`; it is called as `function(user_id | nil, Quest.t())`.
+
+The display counterpart of `before_quest_claim`. A quest can be worth showing
+and still not claimable — a premium tier a player has not bought is an offer,
+and hiding it means only the people who already took the offer ever see it.
+`host_visible/2` cannot express that: it keeps a quest or drops it, and
+`hidden` is a column, the same for everyone, that draws "???" over the very
+title the offer is made of.
+
+A label here changes nothing about what pays: the veto in `before_quest_claim`
+is still the authority, and a lock filter that disagrees with it only makes
+the page lie. Return the reason from the same condition the veto tests.
+
 # `host_visible`
 
 ```elixir

@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.3">
-    <meta name="project" content="gamend_core v1.0.1177">
+    <meta name="project" content="gamend_core v1.0.1178">
 
 
-    <title>Gamend.Leaderboards — gamend_core v1.0.1177</title>
+    <title>Gamend.Leaderboards — gamend_core v1.0.1178</title>
 
     <link rel="stylesheet" href="dist/html-elixir-NHQLCD6Y.css" />
 
-    <script defer src="dist/sidebar_items-46886179.js"></script>
+    <script defer src="dist/sidebar_items-57FCBFEE.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-Y2MUTVIN.js"></script>
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1177
+          v1.0.1178
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr />Leaderboards</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1177)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1178)</small>
 
     </h1>
 
@@ -116,22 +116,22 @@ gamend_core
     <section id="moduledoc">
 <p>The Leaderboards context.</p><p>Provides server-authoritative leaderboard management. Scores can only be
 submitted via server-side code — there is no public API for score submission.</p><h2 id="module-usage" class="section-heading"><a href="#module-usage" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Usage</span></h2><pre><code class="makeup elixir" translate="no"><span class="c1"># Create a leaderboard</span><span class="w">
-</span><span class="p" data-group-id="6503166650-1">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">lb</span><span class="p" data-group-id="6503166650-1">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Leaderboards</span><span class="o">.</span><span class="n">create_leaderboard</span><span class="p" data-group-id="6503166650-2">(</span><span class="p" data-group-id="6503166650-3">%{</span><span class="w">
+</span><span class="p" data-group-id="9962030378-1">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">lb</span><span class="p" data-group-id="9962030378-1">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Leaderboards</span><span class="o">.</span><span class="n">create_leaderboard</span><span class="p" data-group-id="9962030378-2">(</span><span class="p" data-group-id="9962030378-3">%{</span><span class="w">
   </span><span class="ss">slug</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;weekly_kills&quot;</span><span class="p">,</span><span class="w">
   </span><span class="ss">title</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Weekly Kills&quot;</span><span class="p">,</span><span class="w">
   </span><span class="ss">sort_order</span><span class="p">:</span><span class="w"> </span><span class="ss">:desc</span><span class="p">,</span><span class="w">
   </span><span class="ss">operator</span><span class="p">:</span><span class="w"> </span><span class="ss">:incr</span><span class="w">
-</span><span class="p" data-group-id="6503166650-3">}</span><span class="p" data-group-id="6503166650-2">)</span><span class="w">
+</span><span class="p" data-group-id="9962030378-3">}</span><span class="p" data-group-id="9962030378-2">)</span><span class="w">
 
 </span><span class="c1"># Submit score (server-only): resolve the active leaderboard first and submit by ID</span><span class="w">
-</span><span class="n">leaderboard</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Leaderboards</span><span class="o">.</span><span class="n">get_active_leaderboard_by_slug</span><span class="p" data-group-id="6503166650-4">(</span><span class="s">&quot;weekly_kills&quot;</span><span class="p" data-group-id="6503166650-4">)</span><span class="w">
-</span><span class="p" data-group-id="6503166650-5">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">record</span><span class="p" data-group-id="6503166650-5">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Leaderboards</span><span class="o">.</span><span class="n">submit_score</span><span class="p" data-group-id="6503166650-6">(</span><span class="n">leaderboard</span><span class="o">.</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">user_id</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p" data-group-id="6503166650-6">)</span><span class="w">
+</span><span class="n">leaderboard</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Leaderboards</span><span class="o">.</span><span class="n">get_active_leaderboard_by_slug</span><span class="p" data-group-id="9962030378-4">(</span><span class="s">&quot;weekly_kills&quot;</span><span class="p" data-group-id="9962030378-4">)</span><span class="w">
+</span><span class="p" data-group-id="9962030378-5">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">record</span><span class="p" data-group-id="9962030378-5">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Leaderboards</span><span class="o">.</span><span class="n">submit_score</span><span class="p" data-group-id="9962030378-6">(</span><span class="n">leaderboard</span><span class="o">.</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">user_id</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p" data-group-id="9962030378-6">)</span><span class="w">
 
 </span><span class="c1"># List records with rank (use leaderboard id)</span><span class="w">
-</span><span class="n">records</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Leaderboards</span><span class="o">.</span><span class="n">list_records</span><span class="p" data-group-id="6503166650-7">(</span><span class="n">leaderboard</span><span class="o">.</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="ss">page</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="ss">limit</span><span class="p">:</span><span class="w"> </span><span class="mi">25</span><span class="p" data-group-id="6503166650-7">)</span><span class="w">
+</span><span class="n">records</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Leaderboards</span><span class="o">.</span><span class="n">list_records</span><span class="p" data-group-id="9962030378-7">(</span><span class="n">leaderboard</span><span class="o">.</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="ss">page</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="ss">limit</span><span class="p">:</span><span class="w"> </span><span class="mi">25</span><span class="p" data-group-id="9962030378-7">)</span><span class="w">
 
 </span><span class="c1"># Get user&#39;s record (use leaderboard id)</span><span class="w">
-</span><span class="p" data-group-id="6503166650-8">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">record</span><span class="p" data-group-id="6503166650-8">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Leaderboards</span><span class="o">.</span><span class="n">get_user_record</span><span class="p" data-group-id="6503166650-9">(</span><span class="n">leaderboard</span><span class="o">.</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">user_id</span><span class="p" data-group-id="6503166650-9">)</span></code></pre>
+</span><span class="p" data-group-id="9962030378-8">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">record</span><span class="p" data-group-id="9962030378-8">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Leaderboards</span><span class="o">.</span><span class="n">get_user_record</span><span class="p" data-group-id="9962030378-9">(</span><span class="n">leaderboard</span><span class="o">.</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">user_id</span><span class="p" data-group-id="9962030378-9">)</span></code></pre>
     </section>
 
 </div>
@@ -467,7 +467,7 @@ Returns <code class="inline">{:ok, record_with_rank}</code> or <code class="inli
       <h1 class="signature" translate="no">change_leaderboard(leaderboard, attrs \\ %{})</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L552" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L558" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -498,7 +498,7 @@ Returns <code class="inline">{:ok, record_with_rank}</code> or <code class="inli
       <h1 class="signature" translate="no">change_record(record, attrs \\ %{})</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L1163" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L1202" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -526,7 +526,7 @@ Returns <code class="inline">{:ok, record_with_rank}</code> or <code class="inli
       <h1 class="signature" translate="no">count_all_records()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L1036" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L1042" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -554,7 +554,7 @@ Returns <code class="inline">{:ok, record_with_rank}</code> or <code class="inli
       <h1 class="signature" translate="no">count_leaderboard_groups()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L368" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L374" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -584,7 +584,7 @@ Returns <code class="inline">{:ok, record_with_rank}</code> or <code class="inli
       <h1 class="signature" translate="no">count_leaderboards(opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L455" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L461" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -614,7 +614,7 @@ Returns <code class="inline">{:ok, record_with_rank}</code> or <code class="inli
       <h1 class="signature" translate="no">count_records(leaderboard_id, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L1004" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L1010" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -645,7 +645,7 @@ Returns <code class="inline">{:ok, record_with_rank}</code> or <code class="inli
       <h1 class="signature" translate="no">create_leaderboard(attrs)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L104" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L110" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -661,11 +661,11 @@ Returns <code class="inline">{:ok, record_with_rank}</code> or <code class="inli
 
       </div>
 
-<p>Creates a new leaderboard.</p><h2 id="create_leaderboard/1-attributes" class="section-heading"><a href="#create_leaderboard/1-attributes" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Attributes</span></h2><p>See <a href="Gamend.Types.html#t:leaderboard_create_attrs/0"><code class="inline">Gamend.Types.leaderboard_create_attrs/0</code></a> for available fields.</p><h2 id="create_leaderboard/1-examples" class="section-heading"><a href="#create_leaderboard/1-examples" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Examples</span></h2><pre><code class="makeup elixir" translate="no"><span class="gp unselectable">iex&gt; </span><span class="n">create_leaderboard</span><span class="p" data-group-id="5277887618-1">(</span><span class="p" data-group-id="5277887618-2">%{</span><span class="ss">slug</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;my_lb&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">title</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;My Leaderboard&quot;</span><span class="p" data-group-id="5277887618-2">}</span><span class="p" data-group-id="5277887618-1">)</span><span class="w">
-</span><span class="p" data-group-id="5277887618-3">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="5277887618-4">%</span><span class="nc" data-group-id="5277887618-4">Leaderboard</span><span class="p" data-group-id="5277887618-4">{</span><span class="p" data-group-id="5277887618-4">}</span><span class="p" data-group-id="5277887618-3">}</span><span class="w">
+<p>Creates a new leaderboard.</p><h2 id="create_leaderboard/1-attributes" class="section-heading"><a href="#create_leaderboard/1-attributes" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Attributes</span></h2><p>See <a href="Gamend.Types.html#t:leaderboard_create_attrs/0"><code class="inline">Gamend.Types.leaderboard_create_attrs/0</code></a> for available fields.</p><h2 id="create_leaderboard/1-examples" class="section-heading"><a href="#create_leaderboard/1-examples" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Examples</span></h2><pre><code class="makeup elixir" translate="no"><span class="gp unselectable">iex&gt; </span><span class="n">create_leaderboard</span><span class="p" data-group-id="3502220589-1">(</span><span class="p" data-group-id="3502220589-2">%{</span><span class="ss">slug</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;my_lb&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">title</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;My Leaderboard&quot;</span><span class="p" data-group-id="3502220589-2">}</span><span class="p" data-group-id="3502220589-1">)</span><span class="w">
+</span><span class="p" data-group-id="3502220589-3">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="3502220589-4">%</span><span class="nc" data-group-id="3502220589-4">Leaderboard</span><span class="p" data-group-id="3502220589-4">{</span><span class="p" data-group-id="3502220589-4">}</span><span class="p" data-group-id="3502220589-3">}</span><span class="w">
 
-</span><span class="gp unselectable">iex&gt; </span><span class="n">create_leaderboard</span><span class="p" data-group-id="5277887618-5">(</span><span class="p" data-group-id="5277887618-6">%{</span><span class="ss">slug</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">title</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="p" data-group-id="5277887618-6">}</span><span class="p" data-group-id="5277887618-5">)</span><span class="w">
-</span><span class="p" data-group-id="5277887618-7">{</span><span class="ss">:error</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="5277887618-8">%</span><span class="nc" data-group-id="5277887618-8">Ecto.Changeset</span><span class="p" data-group-id="5277887618-8">{</span><span class="p" data-group-id="5277887618-8">}</span><span class="p" data-group-id="5277887618-7">}</span></code></pre>
+</span><span class="gp unselectable">iex&gt; </span><span class="n">create_leaderboard</span><span class="p" data-group-id="3502220589-5">(</span><span class="p" data-group-id="3502220589-6">%{</span><span class="ss">slug</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">title</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="p" data-group-id="3502220589-6">}</span><span class="p" data-group-id="3502220589-5">)</span><span class="w">
+</span><span class="p" data-group-id="3502220589-7">{</span><span class="ss">:error</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="3502220589-8">%</span><span class="nc" data-group-id="3502220589-8">Ecto.Changeset</span><span class="p" data-group-id="3502220589-8">{</span><span class="p" data-group-id="3502220589-8">}</span><span class="p" data-group-id="3502220589-7">}</span></code></pre>
   </section>
 </section>
 <section class="detail" id="delete_leaderboard/1">
@@ -678,7 +678,7 @@ Returns <code class="inline">{:ok, record_with_rank}</code> or <code class="inli
       <h1 class="signature" translate="no">delete_leaderboard(leaderboard)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L149" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L155" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -707,7 +707,7 @@ Returns <code class="inline">{:ok, record_with_rank}</code> or <code class="inli
       <h1 class="signature" translate="no">delete_record(record)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L1113" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L1152" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -736,7 +736,7 @@ Returns <code class="inline">{:ok, record_with_rank}</code> or <code class="inli
       <h1 class="signature" translate="no">delete_user_record(id_or_slug, user_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L1132" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L1171" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -766,7 +766,7 @@ Accepts either leaderboard ID or slug (both strings).</p>
       <h1 class="signature" translate="no">end_leaderboard(leaderboard)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L534" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L540" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -796,7 +796,7 @@ Accepts either leaderboard ID or slug (both strings).</p>
       <h1 class="signature" translate="no">get_active_leaderboard_by_slug(slug)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L212" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L218" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -827,7 +827,7 @@ returns the most recently created one.</p>
       <h1 class="signature" translate="no">get_label_record(leaderboard_id, label)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L686" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L692" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -856,7 +856,7 @@ returns the most recently created one.</p>
       <h1 class="signature" translate="no">get_leaderboard(id_or_slug)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L174" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L180" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -871,10 +871,10 @@ returns the most recently created one.</p>
 
       </div>
 
-<p>Gets a leaderboard by its UUID, or the active leaderboard by slug.</p><h2 id="get_leaderboard/1-examples" class="section-heading"><a href="#get_leaderboard/1-examples" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Examples</span></h2><pre><code class="makeup elixir" translate="no"><span class="gp unselectable">iex&gt; </span><span class="n">get_leaderboard</span><span class="p" data-group-id="2787891584-1">(</span><span class="s">&quot;0198c0de-...&quot;</span><span class="p" data-group-id="2787891584-1">)</span><span class="w">
-</span><span class="p" data-group-id="2787891584-2">%</span><span class="nc" data-group-id="2787891584-2">Leaderboard</span><span class="p" data-group-id="2787891584-2">{</span><span class="p" data-group-id="2787891584-2">}</span><span class="w">
+<p>Gets a leaderboard by its UUID, or the active leaderboard by slug.</p><h2 id="get_leaderboard/1-examples" class="section-heading"><a href="#get_leaderboard/1-examples" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Examples</span></h2><pre><code class="makeup elixir" translate="no"><span class="gp unselectable">iex&gt; </span><span class="n">get_leaderboard</span><span class="p" data-group-id="6880907321-1">(</span><span class="s">&quot;0198c0de-...&quot;</span><span class="p" data-group-id="6880907321-1">)</span><span class="w">
+</span><span class="p" data-group-id="6880907321-2">%</span><span class="nc" data-group-id="6880907321-2">Leaderboard</span><span class="p" data-group-id="6880907321-2">{</span><span class="p" data-group-id="6880907321-2">}</span><span class="w">
 
-</span><span class="gp unselectable">iex&gt; </span><span class="n">get_leaderboard</span><span class="p" data-group-id="2787891584-3">(</span><span class="nc">Ecto.UUID</span><span class="o">.</span><span class="n">generate</span><span class="p" data-group-id="2787891584-4">(</span><span class="p" data-group-id="2787891584-4">)</span><span class="p" data-group-id="2787891584-3">)</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">get_leaderboard</span><span class="p" data-group-id="6880907321-3">(</span><span class="nc">Ecto.UUID</span><span class="o">.</span><span class="n">generate</span><span class="p" data-group-id="6880907321-4">(</span><span class="p" data-group-id="6880907321-4">)</span><span class="p" data-group-id="6880907321-3">)</span><span class="w">
 </span><span class="no">nil</span></code></pre>
   </section>
 </section>
@@ -888,7 +888,7 @@ returns the most recently created one.</p>
       <h1 class="signature" translate="no">get_leaderboard!(id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L185" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L191" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -916,7 +916,7 @@ returns the most recently created one.</p>
       <h1 class="signature" translate="no">get_record(leaderboard_id, user_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L828" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L834" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -972,7 +972,7 @@ returns the most recently created one.</p>
       <h1 class="signature" translate="no">get_user_record(leaderboard_id, user_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L842" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L848" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1002,7 +1002,7 @@ Returns <code class="inline">{:ok, record_with_rank}</code> or <code class="inli
       <h1 class="signature" translate="no">invalidate_cache()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L63" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L69" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1037,7 +1037,7 @@ the TTL.</p>
       <h1 class="signature" translate="no">list_leaderboard_groups(opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L293" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L299" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1067,7 +1067,7 @@ the TTL.</p>
       <h1 class="signature" translate="no">list_leaderboards(opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L423" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L429" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1082,14 +1082,14 @@ the TTL.</p>
 
       </div>
 
-<p>Lists leaderboards with optional filters.</p><h2 id="list_leaderboards/1-options" class="section-heading"><a href="#list_leaderboards/1-options" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Options</span></h2><ul><li><code class="inline">:slug</code> - Filter by slug (returns all seasons of that leaderboard)</li><li><code class="inline">:active</code> - If <code class="inline">true</code>, only active leaderboards. If <code class="inline">false</code>, only ended.</li><li><code class="inline">:order_by</code> - Order by field: <code class="inline">:ends_at</code> or <code class="inline">:inserted_at</code> (default)</li><li><code class="inline">:starts_after</code> - Only leaderboards that started after this DateTime</li><li><code class="inline">:starts_before</code> - Only leaderboards that started before this DateTime</li><li><code class="inline">:ends_after</code> - Only leaderboards that end after this DateTime</li><li><code class="inline">:ends_before</code> - Only leaderboards that end before this DateTime</li><li><code class="inline">:page</code> - Page number (default 1)</li><li><code class="inline">:page_size</code> - Page size (default 25)</li></ul><h2 id="list_leaderboards/1-examples" class="section-heading"><a href="#list_leaderboards/1-examples" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Examples</span></h2><pre><code class="makeup elixir" translate="no"><span class="gp unselectable">iex&gt; </span><span class="n">list_leaderboards</span><span class="p" data-group-id="9373945574-1">(</span><span class="ss">active</span><span class="p">:</span><span class="w"> </span><span class="no">true</span><span class="p" data-group-id="9373945574-1">)</span><span class="w">
-</span><span class="p" data-group-id="9373945574-2">[</span><span class="p" data-group-id="9373945574-3">%</span><span class="nc" data-group-id="9373945574-3">Leaderboard</span><span class="p" data-group-id="9373945574-3">{</span><span class="p" data-group-id="9373945574-3">}</span><span class="p">,</span><span class="w"> </span><span class="n">...</span><span class="p" data-group-id="9373945574-2">]</span><span class="w">
+<p>Lists leaderboards with optional filters.</p><h2 id="list_leaderboards/1-options" class="section-heading"><a href="#list_leaderboards/1-options" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Options</span></h2><ul><li><code class="inline">:slug</code> - Filter by slug (returns all seasons of that leaderboard)</li><li><code class="inline">:active</code> - If <code class="inline">true</code>, only active leaderboards. If <code class="inline">false</code>, only ended.</li><li><code class="inline">:order_by</code> - Order by field: <code class="inline">:ends_at</code> or <code class="inline">:inserted_at</code> (default)</li><li><code class="inline">:starts_after</code> - Only leaderboards that started after this DateTime</li><li><code class="inline">:starts_before</code> - Only leaderboards that started before this DateTime</li><li><code class="inline">:ends_after</code> - Only leaderboards that end after this DateTime</li><li><code class="inline">:ends_before</code> - Only leaderboards that end before this DateTime</li><li><code class="inline">:page</code> - Page number (default 1)</li><li><code class="inline">:page_size</code> - Page size (default 25)</li></ul><h2 id="list_leaderboards/1-examples" class="section-heading"><a href="#list_leaderboards/1-examples" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Examples</span></h2><pre><code class="makeup elixir" translate="no"><span class="gp unselectable">iex&gt; </span><span class="n">list_leaderboards</span><span class="p" data-group-id="0475656767-1">(</span><span class="ss">active</span><span class="p">:</span><span class="w"> </span><span class="no">true</span><span class="p" data-group-id="0475656767-1">)</span><span class="w">
+</span><span class="p" data-group-id="0475656767-2">[</span><span class="p" data-group-id="0475656767-3">%</span><span class="nc" data-group-id="0475656767-3">Leaderboard</span><span class="p" data-group-id="0475656767-3">{</span><span class="p" data-group-id="0475656767-3">}</span><span class="p">,</span><span class="w"> </span><span class="n">...</span><span class="p" data-group-id="0475656767-2">]</span><span class="w">
 
-</span><span class="gp unselectable">iex&gt; </span><span class="n">list_leaderboards</span><span class="p" data-group-id="9373945574-4">(</span><span class="ss">slug</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;weekly_kills&quot;</span><span class="p" data-group-id="9373945574-4">)</span><span class="w">
-</span><span class="p" data-group-id="9373945574-5">[</span><span class="p" data-group-id="9373945574-6">%</span><span class="nc" data-group-id="9373945574-6">Leaderboard</span><span class="p" data-group-id="9373945574-6">{</span><span class="p" data-group-id="9373945574-6">}</span><span class="p">,</span><span class="w"> </span><span class="n">...</span><span class="p" data-group-id="9373945574-5">]</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">list_leaderboards</span><span class="p" data-group-id="0475656767-4">(</span><span class="ss">slug</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;weekly_kills&quot;</span><span class="p" data-group-id="0475656767-4">)</span><span class="w">
+</span><span class="p" data-group-id="0475656767-5">[</span><span class="p" data-group-id="0475656767-6">%</span><span class="nc" data-group-id="0475656767-6">Leaderboard</span><span class="p" data-group-id="0475656767-6">{</span><span class="p" data-group-id="0475656767-6">}</span><span class="p">,</span><span class="w"> </span><span class="n">...</span><span class="p" data-group-id="0475656767-5">]</span><span class="w">
 
-</span><span class="gp unselectable">iex&gt; </span><span class="n">list_leaderboards</span><span class="p" data-group-id="9373945574-7">(</span><span class="ss">starts_after</span><span class="p">:</span><span class="w"> </span><span class="ld">~U[2025-01-01 00:00:00Z]</span><span class="p" data-group-id="9373945574-7">)</span><span class="w">
-</span><span class="p" data-group-id="9373945574-8">[</span><span class="p" data-group-id="9373945574-9">%</span><span class="nc" data-group-id="9373945574-9">Leaderboard</span><span class="p" data-group-id="9373945574-9">{</span><span class="p" data-group-id="9373945574-9">}</span><span class="p">,</span><span class="w"> </span><span class="n">...</span><span class="p" data-group-id="9373945574-8">]</span></code></pre>
+</span><span class="gp unselectable">iex&gt; </span><span class="n">list_leaderboards</span><span class="p" data-group-id="0475656767-7">(</span><span class="ss">starts_after</span><span class="p">:</span><span class="w"> </span><span class="ld">~U[2025-01-01 00:00:00Z]</span><span class="p" data-group-id="0475656767-7">)</span><span class="w">
+</span><span class="p" data-group-id="0475656767-8">[</span><span class="p" data-group-id="0475656767-9">%</span><span class="nc" data-group-id="0475656767-9">Leaderboard</span><span class="p" data-group-id="0475656767-9">{</span><span class="p" data-group-id="0475656767-9">}</span><span class="p">,</span><span class="w"> </span><span class="n">...</span><span class="p" data-group-id="0475656767-8">]</span></code></pre>
   </section>
 </section>
 <section class="detail" id="list_leaderboards_by_slug/2">
@@ -1104,7 +1104,7 @@ the TTL.</p>
       <h1 class="signature" translate="no">list_leaderboards_by_slug(slug, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L388" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L394" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1137,7 +1137,7 @@ the TTL.</p>
       <h1 class="signature" translate="no">list_records(leaderboard_id, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L910" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L916" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1170,7 +1170,7 @@ the TTL.</p>
       <h1 class="signature" translate="no">list_records_around_user(leaderboard_id, user_id, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L1052" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L1058" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1200,7 +1200,7 @@ the TTL.</p>
       <h1 class="signature" translate="no">resolve_slugs(slugs)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L249" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L255" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1218,11 +1218,11 @@ the TTL.</p>
       </div>
 
 <p>Resolves multiple slugs to their currently active leaderboards in a single query.</p><p>Returns a map of <code class="inline">slug =&gt; %Leaderboard{}</code> for each slug that has an active
-leaderboard. Slugs with no active leaderboard are omitted from the result.</p><h2 id="resolve_slugs/1-examples" class="section-heading"><a href="#resolve_slugs/1-examples" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Examples</span></h2><pre><code class="makeup elixir" translate="no"><span class="gp unselectable">iex&gt; </span><span class="n">resolve_slugs</span><span class="p" data-group-id="1078465353-1">(</span><span class="p" data-group-id="1078465353-2">[</span><span class="s">&quot;weekly_kills&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;monthly_score&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;nonexistent&quot;</span><span class="p" data-group-id="1078465353-2">]</span><span class="p" data-group-id="1078465353-1">)</span><span class="w">
-</span><span class="p" data-group-id="1078465353-3">%{</span><span class="w">
-  </span><span class="s">&quot;weekly_kills&quot;</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p" data-group-id="1078465353-4">%</span><span class="nc" data-group-id="1078465353-4">Leaderboard</span><span class="p" data-group-id="1078465353-4">{</span><span class="ss">id</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="ss">slug</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;weekly_kills&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">...</span><span class="p" data-group-id="1078465353-4">}</span><span class="p">,</span><span class="w">
-  </span><span class="s">&quot;monthly_score&quot;</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p" data-group-id="1078465353-5">%</span><span class="nc" data-group-id="1078465353-5">Leaderboard</span><span class="p" data-group-id="1078465353-5">{</span><span class="ss">id</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="ss">slug</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;monthly_score&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">...</span><span class="p" data-group-id="1078465353-5">}</span><span class="w">
-</span><span class="p" data-group-id="1078465353-3">}</span></code></pre>
+leaderboard. Slugs with no active leaderboard are omitted from the result.</p><h2 id="resolve_slugs/1-examples" class="section-heading"><a href="#resolve_slugs/1-examples" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Examples</span></h2><pre><code class="makeup elixir" translate="no"><span class="gp unselectable">iex&gt; </span><span class="n">resolve_slugs</span><span class="p" data-group-id="4665393632-1">(</span><span class="p" data-group-id="4665393632-2">[</span><span class="s">&quot;weekly_kills&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;monthly_score&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;nonexistent&quot;</span><span class="p" data-group-id="4665393632-2">]</span><span class="p" data-group-id="4665393632-1">)</span><span class="w">
+</span><span class="p" data-group-id="4665393632-3">%{</span><span class="w">
+  </span><span class="s">&quot;weekly_kills&quot;</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p" data-group-id="4665393632-4">%</span><span class="nc" data-group-id="4665393632-4">Leaderboard</span><span class="p" data-group-id="4665393632-4">{</span><span class="ss">id</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="ss">slug</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;weekly_kills&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">...</span><span class="p" data-group-id="4665393632-4">}</span><span class="p">,</span><span class="w">
+  </span><span class="s">&quot;monthly_score&quot;</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p" data-group-id="4665393632-5">%</span><span class="nc" data-group-id="4665393632-5">Leaderboard</span><span class="p" data-group-id="4665393632-5">{</span><span class="ss">id</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="ss">slug</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;monthly_score&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">...</span><span class="p" data-group-id="4665393632-5">}</span><span class="w">
+</span><span class="p" data-group-id="4665393632-3">}</span></code></pre>
   </section>
 </section>
 <section class="detail" id="submit_label_score/4">
@@ -1237,7 +1237,7 @@ leaderboard. Slugs with no active leaderboard are omitted from the result.</p><h
       <h1 class="signature" translate="no">submit_label_score(leaderboard_id, label, score, metadata \\ %{})</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L617" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L623" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1254,8 +1254,8 @@ leaderboard. Slugs with no active leaderboard are omitted from the result.</p><h
       </div>
 
 <p>Submit a score for a label-based (non-user) record.</p><p>Works just like <a href="#submit_score/4"><code class="inline">submit_score/4</code></a> but uses a string label instead of a user ID.
-This is useful for statistics, rankings by category, etc.</p><h2 id="submit_label_score/4-examples" class="section-heading"><a href="#submit_label_score/4-examples" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Examples</span></h2><pre><code class="makeup elixir" translate="no"><span class="gp unselectable">iex&gt; </span><span class="n">submit_label_score</span><span class="p" data-group-id="9778122459-1">(</span><span class="n">leaderboard_id</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;English&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">42</span><span class="p" data-group-id="9778122459-1">)</span><span class="w">
-</span><span class="p" data-group-id="9778122459-2">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="9778122459-3">%</span><span class="nc" data-group-id="9778122459-3">Record</span><span class="p" data-group-id="9778122459-3">{</span><span class="ss">label</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;English&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">score</span><span class="p">:</span><span class="w"> </span><span class="mi">42</span><span class="p" data-group-id="9778122459-3">}</span><span class="p" data-group-id="9778122459-2">}</span></code></pre>
+This is useful for statistics, rankings by category, etc.</p><h2 id="submit_label_score/4-examples" class="section-heading"><a href="#submit_label_score/4-examples" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Examples</span></h2><pre><code class="makeup elixir" translate="no"><span class="gp unselectable">iex&gt; </span><span class="n">submit_label_score</span><span class="p" data-group-id="4832526133-1">(</span><span class="n">leaderboard_id</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;English&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">42</span><span class="p" data-group-id="4832526133-1">)</span><span class="w">
+</span><span class="p" data-group-id="4832526133-2">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="4832526133-3">%</span><span class="nc" data-group-id="4832526133-3">Record</span><span class="p" data-group-id="4832526133-3">{</span><span class="ss">label</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;English&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">score</span><span class="p">:</span><span class="w"> </span><span class="mi">42</span><span class="p" data-group-id="4832526133-3">}</span><span class="p" data-group-id="4832526133-2">}</span></code></pre>
   </section>
 </section>
 <section class="detail" id="submit_score/4">
@@ -1270,7 +1270,7 @@ This is useful for statistics, rankings by category, etc.</p><h2 id="submit_labe
       <h1 class="signature" translate="no">submit_score(leaderboard_id, user_id, score, metadata \\ %{})</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L587" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L593" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1287,12 +1287,12 @@ This is useful for statistics, rankings by category, etc.</p><h2 id="submit_labe
       </div>
 
 <p>Submits a score for a user on a leaderboard.</p><p>This is a server-only function — there is no public API for score submission.
-The score is processed according to the leaderboard's operator:</p><ul><li><code class="inline">:set</code> — Always replace with new score</li><li><code class="inline">:best</code> — Only update if new score is better (respects sort_order)</li><li><code class="inline">:incr</code> — Add to existing score</li><li><code class="inline">:decr</code> — Subtract from existing score</li></ul><p>To submit to a leaderboard by slug, first get the active leaderboard ID:</p><pre><code class="makeup elixir" translate="no"><span class="n">leaderboard</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Leaderboards</span><span class="o">.</span><span class="n">get_active_leaderboard_by_slug</span><span class="p" data-group-id="1701696775-1">(</span><span class="s">&quot;weekly_kills&quot;</span><span class="p" data-group-id="1701696775-1">)</span><span class="w">
-</span><span class="nc">Leaderboards</span><span class="o">.</span><span class="n">submit_score</span><span class="p" data-group-id="1701696775-2">(</span><span class="n">leaderboard</span><span class="o">.</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">user_id</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p" data-group-id="1701696775-2">)</span></code></pre><h2 id="submit_score/4-examples" class="section-heading"><a href="#submit_score/4-examples" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Examples</span></h2><pre><code class="makeup elixir" translate="no"><span class="gp unselectable">iex&gt; </span><span class="n">submit_score</span><span class="p" data-group-id="7406178411-1">(</span><span class="mi">123</span><span class="p">,</span><span class="w"> </span><span class="n">user_id</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p" data-group-id="7406178411-1">)</span><span class="w">
-</span><span class="p" data-group-id="7406178411-2">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="7406178411-3">%</span><span class="nc" data-group-id="7406178411-3">Record</span><span class="p" data-group-id="7406178411-3">{</span><span class="ss">score</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p" data-group-id="7406178411-3">}</span><span class="p" data-group-id="7406178411-2">}</span><span class="w">
+The score is processed according to the leaderboard's operator:</p><ul><li><code class="inline">:set</code> — Always replace with new score</li><li><code class="inline">:best</code> — Only update if new score is better (respects sort_order)</li><li><code class="inline">:incr</code> — Add to existing score</li><li><code class="inline">:decr</code> — Subtract from existing score</li></ul><p>To submit to a leaderboard by slug, first get the active leaderboard ID:</p><pre><code class="makeup elixir" translate="no"><span class="n">leaderboard</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Leaderboards</span><span class="o">.</span><span class="n">get_active_leaderboard_by_slug</span><span class="p" data-group-id="5399437107-1">(</span><span class="s">&quot;weekly_kills&quot;</span><span class="p" data-group-id="5399437107-1">)</span><span class="w">
+</span><span class="nc">Leaderboards</span><span class="o">.</span><span class="n">submit_score</span><span class="p" data-group-id="5399437107-2">(</span><span class="n">leaderboard</span><span class="o">.</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">user_id</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p" data-group-id="5399437107-2">)</span></code></pre><h2 id="submit_score/4-examples" class="section-heading"><a href="#submit_score/4-examples" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Examples</span></h2><pre><code class="makeup elixir" translate="no"><span class="gp unselectable">iex&gt; </span><span class="n">submit_score</span><span class="p" data-group-id="6393568559-1">(</span><span class="mi">123</span><span class="p">,</span><span class="w"> </span><span class="n">user_id</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p" data-group-id="6393568559-1">)</span><span class="w">
+</span><span class="p" data-group-id="6393568559-2">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="6393568559-3">%</span><span class="nc" data-group-id="6393568559-3">Record</span><span class="p" data-group-id="6393568559-3">{</span><span class="ss">score</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p" data-group-id="6393568559-3">}</span><span class="p" data-group-id="6393568559-2">}</span><span class="w">
 
-</span><span class="gp unselectable">iex&gt; </span><span class="n">submit_score</span><span class="p" data-group-id="7406178411-4">(</span><span class="mi">123</span><span class="p">,</span><span class="w"> </span><span class="n">user_id</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="7406178411-5">%{</span><span class="ss">weapon</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;sword&quot;</span><span class="p" data-group-id="7406178411-5">}</span><span class="p" data-group-id="7406178411-4">)</span><span class="w">
-</span><span class="p" data-group-id="7406178411-6">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="7406178411-7">%</span><span class="nc" data-group-id="7406178411-7">Record</span><span class="p" data-group-id="7406178411-7">{</span><span class="ss">score</span><span class="p">:</span><span class="w"> </span><span class="mi">15</span><span class="p">,</span><span class="w"> </span><span class="ss">metadata</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="7406178411-8">%{</span><span class="ss">weapon</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;sword&quot;</span><span class="p" data-group-id="7406178411-8">}</span><span class="p" data-group-id="7406178411-7">}</span><span class="p" data-group-id="7406178411-6">}</span></code></pre>
+</span><span class="gp unselectable">iex&gt; </span><span class="n">submit_score</span><span class="p" data-group-id="6393568559-4">(</span><span class="mi">123</span><span class="p">,</span><span class="w"> </span><span class="n">user_id</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="6393568559-5">%{</span><span class="ss">weapon</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;sword&quot;</span><span class="p" data-group-id="6393568559-5">}</span><span class="p" data-group-id="6393568559-4">)</span><span class="w">
+</span><span class="p" data-group-id="6393568559-6">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="6393568559-7">%</span><span class="nc" data-group-id="6393568559-7">Record</span><span class="p" data-group-id="6393568559-7">{</span><span class="ss">score</span><span class="p">:</span><span class="w"> </span><span class="mi">15</span><span class="p">,</span><span class="w"> </span><span class="ss">metadata</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="6393568559-8">%{</span><span class="ss">weapon</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;sword&quot;</span><span class="p" data-group-id="6393568559-8">}</span><span class="p" data-group-id="6393568559-7">}</span><span class="p" data-group-id="6393568559-6">}</span></code></pre>
   </section>
 </section>
 <section class="detail" id="update_leaderboard/2">
@@ -1305,7 +1305,7 @@ The score is processed according to the leaderboard's operator:</p><ul><li><code
       <h1 class="signature" translate="no">update_leaderboard(leaderboard, attrs)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L129" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L135" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1337,7 +1337,7 @@ The score is processed according to the leaderboard's operator:</p><ul><li><code
       <h1 class="signature" translate="no">update_record(record, attrs)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L809" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L815" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1365,9 +1365,9 @@ The score is processed according to the leaderboard's operator:</p><ul><li><code
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1177">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1178">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1177">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1178">Hex Preview</a>
 
             </span>
 
