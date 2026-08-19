@@ -132,18 +132,18 @@ makes almost no requests. Neither is a throughput measurement.
 The last full run on a MacBook Air M1 (8 cores, production build, generator on
 the same machine, so a floor rather than a ceiling):
 
-| scenario | SQLite | PostgreSQL |
+| operation | SQLite | PostgreSQL |
 |---|---:|---:|
-| cached read | 16,131/s | 16,636/s |
-| plugin RPC | 3,541/s | 6,064/s |
-| profile write | 2,976/s | 5,827/s |
-| device signup | 1,585/s | 3,078/s |
-| lobby create + state | 1,396/s | 3,176/s |
-| chat + delivery | 896/s | 2,038/s |
+| cached read | 17,489/s | 16,422/s |
+| plugin call (no database) | 16,372/s | 12,616/s |
+| write | 4,266/s | 5,472/s |
+| write inside a lock | 966/s | 1,574/s |
 
-Reads tie — they are cache hits. Every write path is about twice as fast on
-PostgreSQL. [Performance](performance) has the rest: capacity per gigabyte,
-per-socket memory, and how this compares with other game backends.
+Reads all cost the same, plugin or not. Writes are ~4x a read, and a locked
+write ~4x again. Read the suite's **flows/s** column rather than req/s when
+comparing scenarios: a flow that spends five requests is not slower than one
+that spends one. [Performance](performance) has the flow table, capacity per
+gigabyte, per-socket memory, and the comparison with other game backends.
 
 ## What a laptop number means
 

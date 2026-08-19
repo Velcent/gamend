@@ -63,6 +63,11 @@ defmodule GamendWeb.Endpoint do
     cookie_key: "request_logger"
 
   plug Plug.RequestId
+  # Straight after RequestId, so everything logged for this request —
+  # including the rate limiter's rejections and the router's own errors —
+  # carries the client's session id and lands next to that client's own
+  # uploaded lines.
+  plug GamendWeb.Plugs.ClientSession
   plug GamendWeb.Plugs.RealIp
   plug GamendWeb.Plugs.GeoCountry
   plug GamendWeb.Plugs.IpBan

@@ -132,6 +132,16 @@ defmodule GamendWeb.AdminLive.LobbySnapshots do
             </.link>
             <span class="font-mono text-sm truncate">{@lobby_id}</span>
 
+            <%!-- The other half of this run. Server state is what happened;
+                  the client logs are what the players' devices thought was
+                  happening, which is where a divergence shows up first. --%>
+            <.link
+              navigate={~p"/admin/logs?lobby_id=#{@lobby_id}"}
+              class="btn btn-ghost btn-xs whitespace-nowrap"
+            >
+              Client logs &rarr;
+            </.link>
+
             <%!-- Filters everything on the page at once: diff paths and values,
                   event kinds and payloads. A real run puts hundreds of rows on
                   screen, so finding one field by eye is the slow path. --%>

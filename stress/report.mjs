@@ -158,6 +158,12 @@ function readSummary(file) {
     runMs: raw.run_ms ?? null,
     vus: raw.vus ?? null,
     requests: reqs.count ?? 0,
+    // Requests per iteration is what makes a table of scenarios comparable: a
+    // row at 3,500 req/s that spends six requests per flow is not faster than a
+    // row at 1,500 that spends one. Without it, composite scenarios read as
+    // though their slowest step were the cost of every step.
+    flowsPerSec: val(m.iterations).rate ?? 0,
+    steps: (val(m.iterations).count ?? 0) > 0 ? (reqs.count ?? 0) / val(m.iterations).count : 1,
     requestFailures: Math.round((reqs.count ?? 0) * failedRate),
     iterations: val(m.iterations).count ?? 0,
     bytesIn: val(m.data_received).count ?? 0,
@@ -209,13 +215,14 @@ function printTable(rows) {
   const cell = rows.find((r) => r.cell)?.cell;
   if (cell) console.log(`\n**Cell ${cell}**\n`);
 
-  console.log('| scenario | VUs | rps | med | p95 | p99 | errors | checks |');
-  console.log('|---|---:|---:|---:|---:|---:|---:|---:|');
+  console.log('| scenario | VUs | req/s | steps | flows/s | med | p95 | p99 | errors | checks |');
+  console.log('|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|');
   for (const r of rows) {
     console.log(
-      `| ${r.name} | ${r.vus ?? '—'} | ${num(r.rps, 1)} | ${ms(r.med)} | ${ms(r.p95)} | ${ms(
-        r.p99,
-      )} | ${pct(r.errorRate)} | ${checkCell(r)} |`,
+      `| ${r.name} | ${r.vus ?? '—'} | ${num(r.rps, 1)} | ${num(r.steps, 1)} | ${num(
+        r.flowsPerSec,
+        1,
+      )} | ${ms(r.med)} | ${ms(r.p95)} | ${ms(r.p99)} | ${pct(r.errorRate)} | ${checkCell(r)} |`,
     );
   }
 

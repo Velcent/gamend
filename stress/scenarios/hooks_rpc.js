@@ -13,8 +13,10 @@
  * Plus `GET /kv/:key` for the same read *without* the plugin layer — the
  * difference between it and `kv_read` is what the hook path itself costs.
  *
- * `MODE` picks one; the default walks all of them in each iteration so a
- * single short run produces the whole comparison.
+ * `MODE` picks one, and the suite runs them one at a time — that is the only
+ * way these numbers compare with each other, or with anything else in the
+ * table. `MODE=all` walks the whole ladder inside one iteration, which shows
+ * the deltas quickly but reports a *mix* rather than an operation.
  */
 
 import { sleep } from 'k6';
@@ -38,7 +40,24 @@ const t = {
 };
 
 export const options = constantVus();
-export const handleSummary = summaryHandler('hooks_rpc');
+
+// Named for what the run measured. A composite of six calls reported as
+// "hooks_rpc" invited the reading that a plugin RPC costs what the whole mix
+// costs — it does not. A no-op RPC is as cheap as a cached read; the mix is
+// dominated by the two writes and the lock inside it.
+// Named for the operation, not for the file. "kv" is not in the write names
+// because a KV write only exists through a plugin — there is no player-facing
+// endpoint for one — so the prefix would distinguish nothing.
+const SUMMARY_NAMES = {
+  noop: 'hook_noop',
+  memory: 'memory_read',
+  kv_read: 'hook_kv_read',
+  kv_write: 'kv_write',
+  kv_write_locked: 'kv_write_locked',
+  all: 'rpc_mixed',
+};
+
+export const handleSummary = summaryHandler(SUMMARY_NAMES[MODE] || `rpc_${MODE}`);
 
 export function setup() {
   const session = deviceLogin({ fresh: true, id: `${RUN_TAG}-setup` });

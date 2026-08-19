@@ -53,6 +53,10 @@ defmodule Gamend.Quests.QuestProgress do
     # Claims so far on THIS row. Only a `repeat` quest ever exceeds 1; it is
     # what keeps each re-armed claim's reward idempotency key distinct.
     field :claim_count, :integer, default: 0
+    # Optimistic lock. Deliberately not cast: `Ecto.Changeset.optimistic_lock/2`
+    # sets it, and a caller able to choose the version could defeat the check
+    # that keeps two concurrent objective merges from losing one another.
+    field :lock_version, :integer, default: 1
     field :metadata, :map, default: %{}
 
     timestamps(type: :utc_datetime)

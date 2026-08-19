@@ -54,6 +54,16 @@ defmodule GamendWeb.Plugs.RateLimiter do
     doc: "Auth HTTP window, in milliseconds."
   )
 
+  setting(:client_logs_limit, :integer,
+    default: 30,
+    doc: "Max client log batch uploads per window, per IP."
+  )
+
+  setting(:client_logs_window_ms, :integer,
+    default: 60_000,
+    doc: "Client log upload window, in milliseconds."
+  )
+
   setting(:ws_limit, :integer,
     default: 60,
     doc: "Max WebSocket channel messages per window, per user."
@@ -164,6 +174,14 @@ defmodule GamendWeb.Plugs.RateLimiter do
   # Browser OAuth request/callback
   defp bucket_for(%{path_info: ["auth" | _]} = _conn, ip) do
     auth_bucket(ip)
+  end
+
+  # Client log uploads get their own bucket. They are legitimately more frequent
+  # than ordinary API calls (a batch every few seconds per client) but must not
+  # be able to fill a log store, and sharing the general bucket would mean a
+  # device flushing diagnostics throttles its own gameplay requests.
+  defp bucket_for(%{path_info: ["api", "v1", "client_logs" | _], method: "POST"} = _conn, ip) do
+    {"client_logs:#{ip}", setting(:client_logs_window_ms), setting(:client_logs_limit)}
   end
 
   defp bucket_for(_conn, ip) do

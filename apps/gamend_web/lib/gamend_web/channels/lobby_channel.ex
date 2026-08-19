@@ -38,11 +38,16 @@ defmodule GamendWeb.LobbyChannel do
   alias Gamend.Lobbies.SpectatorTracker
   alias GamendWeb.ChannelUpdates
   alias GamendWeb.Serializers
+  alias GamendWeb.Plugs.ClientSession
 
   require Logger
 
   @impl true
   def join("lobby:" <> lobby_id_str, _payload, socket) do
+    # This channel runs in its own process, so it stamps its own metadata;
+    # the socket's connect-time call does not reach here.
+    ClientSession.put_metadata(socket.assigns[:client_session_id])
+
     current_scope = Map.get(socket.assigns, :current_scope)
 
     with {:ok, lobby_id} <- Ecto.UUID.cast(lobby_id_str),

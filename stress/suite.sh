@@ -33,7 +33,9 @@ SCENARIOS=(
   auth_device
   auth_refresh
   profile_write
-  hooks_rpc
+  hook_noop
+  kv_write
+  kv_write_locked
   lobbies_http
   lobby_ws
   ws_join_idle
@@ -69,7 +71,17 @@ failed=()
 skipped=()
 
 for name in "${SCENARIOS[@]}"; do
-  script="scenarios/${name}.js"
+  # Three rows come from one file run in different modes, each measuring a
+  # single plugin call so the numbers sit beside the rest of the table. There is
+  # deliberately no `hook_kv_read` row in the suite: it measured the same cached
+  # read as `kv_read`, and `hook_noop` beside `kv_read` already shows that the
+  # hook layer costs nothing.
+  case "$name" in
+    hook_noop) script="scenarios/hooks_rpc.js"; mode="noop" ;;
+    kv_write) script="scenarios/hooks_rpc.js"; mode="kv_write" ;;
+    kv_write_locked) script="scenarios/hooks_rpc.js"; mode="kv_write_locked" ;;
+    *) script="scenarios/${name}.js"; mode="" ;;
+  esac
 
   if [ ! -f "$script" ]; then
     echo "  ~ $name (no such scenario, skipping)"
@@ -81,7 +93,7 @@ for name in "${SCENARIOS[@]}"; do
   echo "── $name ─────────────────────────────────────────────"
 
   if ! BASE_URL="$BASE_URL" VUS="$VUS" DURATION="$DURATION" \
-       RESULTS_DIR="$RESULTS_DIR" CELL="$CELL" \
+       RESULTS_DIR="$RESULTS_DIR" CELL="$CELL" MODE="$mode" \
        k6 run --quiet "$script"; then
     # A threshold breach is a result, not a reason to stop: the whole point of
     # the run is to find which scenarios break first on this machine.

@@ -109,9 +109,13 @@ config :tailwind,
     cd: Path.expand("..", __DIR__)
   ]
 
+# `client_session` joins a server line to the game client that caused it (see
+# `GamendWeb.Plugs.ClientSession`). The formatter emits only the keys named
+# here, and stdout is what a log aggregator scrapes — so omitting it would mean
+# the correlation worked on the admin page and nowhere else.
 config :logger, :default_formatter,
   format: "$time $metadata[$level] $message\n",
-  metadata: [:request_id]
+  metadata: [:request_id, :client_session]
 
 config :phoenix, :json_library, Jason
 

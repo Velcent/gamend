@@ -81,10 +81,16 @@ neither adapter matters are the ones bound by something else — bcrypt
 
 Two things worth chasing, both visible only because the checks run:
 
-- **`leaderboards` failed 513 checks on Postgres and none on SQLite** — a
-  submitted score that the caller's own read-back does not always see. That is
-  either a visibility race or a cache keyed differently under Postgres, and it
-  is exactly the class of bug the read-your-write checks exist to catch.
+- **`leaderboards` failed 513 checks on Postgres and none on SQLite** — since
+  fixed, and neither of the two guesses recorded here was right. It was not a
+  visibility race and not adapter-specific caching: `records/around/:user_id`
+  read the caller's rank in one query and fetched the window at that offset in
+  another, so any score submitted in between moved them down the board and past
+  a few positions of drift they fell out of their own window. The failing check
+  was `around includes me`, never `records/me`. Ranking and windowing now share
+  one statement. Re-measured on the same box: **497 → 0**. Postgres showed it
+  and SQLite did not because SQLite's single writer hides the interleaving
+  rather than removing it.
 - **`hooks_rpc` p95 is 18.6 ms on Postgres against 1.0 ms on SQLite** while its
   median is lower. A fat tail on an otherwise faster adapter usually means
   connection-pool queueing rather than query cost.

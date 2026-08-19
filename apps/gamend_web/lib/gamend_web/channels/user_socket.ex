@@ -4,6 +4,7 @@ defmodule GamendWeb.UserSocket do
   require Logger
 
   alias Gamend.Accounts.Scope
+  alias GamendWeb.Plugs.ClientSession
   alias GamendWeb.Auth.Guardian
 
   # A Socket handler
@@ -72,16 +73,28 @@ defmodule GamendWeb.UserSocket do
         format: format
       })
 
+      client_session = ClientSession.sanitize(extract_client_session(params))
+      ClientSession.put_metadata(client_session)
+
       socket =
         socket
         |> assign(:current_scope, Scope.for_user(user))
         |> assign(:ws_format, format)
+        |> assign(:client_session_id, client_session)
 
       {:ok, socket}
     else
       _ -> :error
     end
   end
+
+  # The client's log session id, carried so server lines logged for this socket
+  # correlate with the client's own uploaded lines. Same param shapes as the
+  # token and format, because clients differ in how they nest connect params.
+  defp extract_client_session(%{params: %{"client_session" => v}}), do: v
+  defp extract_client_session(%{"params" => %{"client_session" => v}}), do: v
+  defp extract_client_session(%{"client_session" => v}), do: v
+  defp extract_client_session(_), do: nil
 
   # Server->client event payload format: "json" (default) or "protobuf".
   # Protobuf events are delivered as binary frames encoded per

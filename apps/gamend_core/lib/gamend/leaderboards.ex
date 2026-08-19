@@ -37,6 +37,12 @@ defmodule Gamend.Leaderboards do
   @leaderboards_cache_ttl_ms 60_000
   @records_cache_ttl_ms 10_000
 
+  # Name of the ranking CTE used by `list_records_around_user/3`. One
+  # attribute because the name has to match in three places — the `with_cte`
+  # that defines it, the join that reads it, and the subquery that finds the
+  # caller's row in it.
+  @rank_cte "leaderboard_ranks"
+
   defp leaderboards_cache_version do
     Gamend.Cache.get!({:leaderboards, :version}) || 1
   end
@@ -1062,6 +1068,20 @@ defmodule Gamend.Leaderboards do
     end
   end
 
+  # Ranked and windowed in one statement, deliberately.
+  #
+  # This used to be two queries: `get_user_record/2` for the rank (itself
+  # cached for 10s), then an OFFSET query that trusted it. Anyone submitting a
+  # better score in between pushed the caller down the board, so the second
+  # query windowed around a position the caller had already left — and once
+  # that drift passed `half`, the caller was missing from their own "around
+  # me" page. The load test caught it on 3.2% of reads under 30 concurrent
+  # writers on Postgres and on none under SQLite, whose single writer hides
+  # the race rather than removing it.
+  #
+  # One CTE means the rank and the window read the same snapshot, so the
+  # caller is in the result by construction — and it is one round trip where
+  # the old path was three.
   @decorate cacheable(
               key:
                 {:leaderboards, :around_user, records_cache_version(leaderboard_id),
@@ -1070,40 +1090,59 @@ defmodule Gamend.Leaderboards do
             )
   defp list_records_around_user_cached(leaderboard_id, sort_order, user_id, limit)
        when is_binary(leaderboard_id) and is_binary(user_id) and is_integer(limit) do
+    # `rank >= mine - half`, rearranged so the interpolated value sits on the
+    # side Ecto can type. `LIMIT` then does what `max(1, ...)` used to: a
+    # caller inside the top `half` simply starts the window at rank 1. A
+    # caller with no record on this board matches nothing — the subquery is
+    # empty, the comparison is NULL — which is the `[]` the old clause
+    # returned explicitly.
     half = div(limit, 2)
 
-    case get_user_record(leaderboard_id, user_id) do
-      {:error, :not_found} ->
-        []
+    my_rank =
+      from(m in @rank_cte,
+        where: m.user_id == type(^user_id, :binary_id),
+        select: m.rank
+      )
 
-      {:ok, user_record} ->
-        user_rank = user_record.rank
+    from(r in Record,
+      join: k in @rank_cte,
+      on: k.id == r.id,
+      where: k.rank + type(^half, :integer) >= subquery(my_rank),
+      order_by: [asc: k.rank],
+      limit: ^limit,
+      select: {r, k.rank},
+      preload: [:user]
+    )
+    |> with_cte(@rank_cte, as: ^ranked_records(leaderboard_id, sort_order))
+    |> Repo.all()
+    |> Enum.map(fn {record, rank} -> %{record | rank: rank} end)
+  end
 
-        # Calculate offset to center on user
-        start_rank = max(1, user_rank - half)
-        offset = start_rank - 1
+  # `row_number()` reproduces `calculate_rank/3` exactly — the number of rows
+  # sorting ahead, plus one — so a rank from here and a rank from there agree.
+  # Two clauses rather than one with an interpolated direction: a fragment's
+  # SQL is literal, and `ORDER BY ? DESC` cannot take the direction as a
+  # parameter.
+  defp ranked_records(leaderboard_id, :desc) do
+    from(r in Record,
+      where: r.leaderboard_id == ^leaderboard_id,
+      select: %{
+        id: r.id,
+        user_id: r.user_id,
+        rank: fragment("row_number() over (order by ? desc, ? asc)", r.score, r.inserted_at)
+      }
+    )
+  end
 
-        order_by =
-          case sort_order do
-            :desc -> [desc: :score, asc: :inserted_at]
-            :asc -> [asc: :score, asc: :inserted_at]
-          end
-
-        records =
-          from(r in Record,
-            where: r.leaderboard_id == ^leaderboard_id,
-            order_by: ^order_by,
-            offset: ^offset,
-            limit: ^limit,
-            preload: [:user]
-          )
-          |> Repo.all()
-
-        # Add rank to each record
-        records
-        |> Enum.with_index(start_rank)
-        |> Enum.map(fn {record, rank} -> %{record | rank: rank} end)
-    end
+  defp ranked_records(leaderboard_id, :asc) do
+    from(r in Record,
+      where: r.leaderboard_id == ^leaderboard_id,
+      select: %{
+        id: r.id,
+        user_id: r.user_id,
+        rank: fragment("row_number() over (order by ? asc, ? asc)", r.score, r.inserted_at)
+      }
+    )
   end
 
   @doc """

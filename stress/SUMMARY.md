@@ -29,16 +29,41 @@ while serving stale data fails. That is the point of the check column.
 MacBook Air M1, 8 cores, 16 GB, `MIX_ENV=prod`, k6 on the same machine — so a
 floor, not a ceiling.
 
-| | SQLite | Postgres |
+One operation per row, so the rows compare:
+
+| operation | SQLite | Postgres |
 |---|---:|---:|
-| cached read | 16,131/s | 16,636/s |
-| signup | 1,585/s | 3,078/s |
-| chat | 896/s | 2,038/s |
-| hook RPCs | 3,541/s | 6,064/s |
+| cached read | 17,489/s | 16,422/s |
+| plugin call, no database | 16,372/s | 12,616/s |
+| write | 4,266/s | 5,472/s |
+| write inside a lock | 966/s | 1,574/s |
 | email login (bcrypt) | 12/s | 11/s |
 
-Reads tie; **every write path is roughly 2x on Postgres**. Memory is ~24 KB of
+**Every read costs the same, plugin or not** — the hook layer adds nothing
+measurable. A write is ~4x a read; a locked write ~4x again, with a p99 of
+261 ms because the lock serialises writers for that key. Memory is ~24 KB of
 process memory per connected player, flat in account size.
+
+The two databases look closer on writes than they should because they are not
+doing the same work: gamend runs SQLite with `synchronous=NORMAL` (fsync
+deferred to a checkpoint) while PostgreSQL was measured on its default
+`synchronous_commit=on`. Serial commits on the same machine: **3,096/s with
+fsync, 7,448/s without**. PostgreSQL is doing more durability work per write and
+still winning, and its real advantage is committing across a pool while SQLite
+has one writer.
+
+That finding is now shipped rather than recommended: **PostgreSQL defaults to
+`synchronous_commit=off`** (consistent, not corruptible; the exposure is ~600 ms
+of commits on an OS crash), sent per connection via
+`GAMEND_DB_POSTGRES_SYNCHRONOUS_COMMIT`, with payments exempted automatically —
+`Repo.durable_transaction/2` forces `on` around the writes that must not be
+lost. The Postgres column above therefore understates what gamend now ships.
+See the Performance guide.
+
+Multi-step flows are reported as flows/s with their step count (signup 792/s,
+lobby create+start+leave 279/s, friend request+accept+read-back 134/s), because
+a flow spending seven requests is not slower than one spending a single request
+— it is doing seven times the work.
 
 **Capacity on this laptop:** ~10,000 concurrently active players on SQLite,
 ~20,000-30,000 on Postgres. Writes run out long before memory does.
@@ -61,7 +86,7 @@ than as a multiplier.
 | **Analytics writes failed the login they rode on** under a busy database. | fixed (separate session) |
 | **Socket memory is an OS default, not our code.** ~105 KB/socket of binary memory follows the kernel's ~400 KB receive buffer. | `GAMEND_REALTIME_SOCKET_BUFFER_KB` exists, **off by default** — see below. |
 | **Matchmaking took 3.1 s to match**, all of it waiting for the next sweep tick. | a join now nudges the worker (coalesced, 100 ms): **3,146 ms → 66 ms** time-to-match, and the scenario went 40 → 477 req/s. |
-| **`leaderboards` fails 513 read-back checks on Postgres**, none on SQLite. | open — a submitted score the caller cannot always read back. |
+| **`leaderboards` fails 513 read-back checks on Postgres**, none on SQLite. | fixed — and it was not the score. `records/around/:user_id` ranked the caller in one query and windowed at that offset in another; a score submitted in between moved them, and past `half` positions of drift they were missing from their own page. One CTE, one snapshot: **497 failures → 0**. |
 
 ## What was wrong along the way
 
@@ -92,6 +117,31 @@ per-(user, quest) advisory lock, because merging objective progress is a
 read-modify-write of a JSON map. That is the one hot path where the lock cost is
 real — but making it atomic across both adapters is a design change with
 correctness risk, not tuning, and it deserves its own scope.
+
+## What is left, in order of expected value
+
+1. **The quest progress lock.** `Quests.advance_quest` holds a per-(user, quest)
+   advisory lock because merging objective progress is a read-modify-write of a
+   JSON map. It is the one hot path still taking a lock, and it shows: quests is
+   the slowest flow per step in the suite. Both adapters can update JSON
+   atomically (`jsonb_set`, `json_set`), which would remove the lock — a design
+   change with correctness risk, so it needs its own scope.
+2. **`synchronous_commit = off` on PostgreSQL** — +71% on writes, already
+   documented with the payment caveat. A deployment decision rather than a code
+   change.
+3. **Pool sizing** — attempted here and inconclusive: `me` fell 11.0k → 8.8k →
+   5.6k req/s across the three pool levels, which is the laptop degrading, not
+   the pool. Belongs on the matrix, where the plan already calls for 10/20/40 on
+   the 8- and 16-vCPU cells.
+4. **bcrypt rounds** — 12 logins/s. Only matters for a login storm after a
+   restart; the lever is `config :bcrypt_elixir, :log_rounds`.
+
+Ahead of all of them was **`leaderboards` failing 513 read-back checks on
+PostgreSQL** — correctness outranks throughput. That one is now fixed; the
+per-check breakdown is what named it, because the aggregate check rate says
+only that *something* failed. It is worth re-reading the failing scenario's
+checks one at a time before theorising about the cause: the read-back everyone
+assumed was broken (`records/me`) never failed once.
 
 ## What is not done
 
