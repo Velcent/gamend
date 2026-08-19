@@ -56,6 +56,7 @@ defmodule GamendWeb.UserChannel do
   alias Gamend.Notifications
   alias Gamend.Parties
   alias GamendWeb.ChannelUpdates
+  alias GamendWeb.Plugs.ClientSession
   alias GamendWeb.Serializers
 
   # WebSocket message rate limits (per user) — defaults, overridden by config
@@ -71,7 +72,7 @@ defmodule GamendWeb.UserChannel do
   def join("user:" <> user_id_str, _payload, socket) do
     # This channel runs in its own process, so it stamps its own metadata;
     # the socket's connect-time call does not reach here.
-    GamendWeb.Plugs.ClientSession.put_metadata(socket.assigns[:client_session_id])
+    ClientSession.put_metadata(socket.assigns[:client_session_id])
 
     # ensure the socket has a current_scope assign created during socket connect
     current_scope = Map.get(socket.assigns, :current_scope)

@@ -114,7 +114,7 @@ defmodule GamendWeb.MixProject do
       # drops the hash file for the same reason.
       dialyzer: ["dialyzer --force-check"],
       precommit: [
-        "compile --warning-as-errors",
+        "compile --warnings-as-errors",
         "xref unreachable",
         "format",
         "gen.sdk",

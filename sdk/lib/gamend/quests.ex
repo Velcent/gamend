@@ -541,6 +541,34 @@ defmodule Gamend.Quests do
   end
 
   @doc ~S"""
+    Why this viewer cannot claim this quest yet, as a short label to draw — or
+    `nil` when they can. Set `config :gamend_core, :quest_lock_filter,
+    {Module, :function}`; it is called as `function(user_id | nil, Quest.t())`.
+    
+    The display counterpart of `before_quest_claim`. A quest can be worth showing
+    and still not claimable — a premium tier a player has not bought is an offer,
+    and hiding it means only the people who already took the offer ever see it.
+    `host_visible/2` cannot express that: it keeps a quest or drops it, and
+    `hidden` is a column, the same for everyone, that draws "???" over the very
+    title the offer is made of.
+    
+    A label here changes nothing about what pays: the veto in `before_quest_claim`
+    is still the authority, and a lock filter that disagrees with it only makes
+    the page lie. Return the reason from the same condition the veto tests.
+    
+  """
+  @spec host_lock_label(Gamend.Quests.Quest.t(), user_id() | nil) :: String.t() | nil
+  def host_lock_label(_quest, _user_id) do
+    case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        nil
+
+      _ ->
+        raise "Gamend.Quests.host_lock_label/2 is a stub - only available at runtime on Gamend"
+    end
+  end
+
+  @doc ~S"""
     The host's say on which quest definitions one viewer may see at all — a
     premium-only daily, a quest for a country the player has not unlocked. Set
     `config :gamend_core, :quest_visibility_filter, {Module, :function}`; it is

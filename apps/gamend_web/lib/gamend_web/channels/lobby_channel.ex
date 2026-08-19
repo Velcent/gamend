@@ -37,8 +37,8 @@ defmodule GamendWeb.LobbyChannel do
   alias Gamend.Lobbies
   alias Gamend.Lobbies.SpectatorTracker
   alias GamendWeb.ChannelUpdates
-  alias GamendWeb.Serializers
   alias GamendWeb.Plugs.ClientSession
+  alias GamendWeb.Serializers
 
   require Logger
 

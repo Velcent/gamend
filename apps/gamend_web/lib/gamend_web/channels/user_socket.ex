@@ -4,8 +4,8 @@ defmodule GamendWeb.UserSocket do
   require Logger
 
   alias Gamend.Accounts.Scope
-  alias GamendWeb.Plugs.ClientSession
   alias GamendWeb.Auth.Guardian
+  alias GamendWeb.Plugs.ClientSession
 
   # A Socket handler
   #

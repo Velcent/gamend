@@ -402,7 +402,9 @@ defmodule Gamend.LeaderboardsTest do
         # where the window shortens rather than sliding.
         expected = Enum.to_list(max(1, rank - 2)..min(10, max(1, rank - 2) + 4))
 
-        assert ranks == expected, "rank #{rank}: expected #{inspect(expected)}, got #{inspect(ranks)}"
+        assert ranks == expected,
+               "rank #{rank}: expected #{inspect(expected)}, got #{inspect(ranks)}"
+
         assert Enum.find(result, &(&1.user_id == user.id)).rank == rank
       end
     end

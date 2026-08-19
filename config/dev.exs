@@ -108,9 +108,22 @@ config :logger, level: :info
 # `client_session` is included so correlating a client's logs with the server's
 # behaves the same locally as in production. Without it the join silently works
 # only once deployed, which is the worst place to discover it.
+#
+# This list is a deliberate subset of host_config.exs's — `request_id` on every
+# line is noise locally — but any key a `Logger` call passes explicitly has to
+# be here or the formatter drops it, so the payment-failure keys are repeated.
+# `mix credo --strict` runs in dev and fails on a key that is logged but not
+# listed, which is what keeps the two in sync.
 config :logger, :default_formatter,
   format: "[$level] $metadata$message\n",
-  metadata: [:client_session]
+  metadata: [
+    :client_session,
+    :order_id,
+    :provider,
+    :provider_reason,
+    :purchase_id,
+    :reason
+  ]
 
 # Also persist dev logs to a rotating file (10MB x 5, see
 # GamendWeb.FileLogHandler). Without this the only copy of a run is the

@@ -530,6 +530,28 @@ defmodule Gamend.Leaderboards do
   end
 
   @doc ~S"""
+    Forget the cached leaderboard lookups.
+    
+    Every write in here does this already. It is public because a CALLER can also
+    learn the cache is stale: `get_active_leaderboard_by_slug/1` is cached for a
+    minute, so a board deleted (or rolled back, under a test sandbox) hands out an
+    id whose row is gone, and the next `submit_score/4` fails on the foreign key.
+    A caller that sees that can drop the lookup and try again rather than wait out
+    the TTL.
+    
+  """
+  @spec invalidate_cache() :: :ok
+  def invalidate_cache() do
+    case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        :ok
+
+      _ ->
+        raise "Gamend.Leaderboards.invalidate_cache/0 is a stub - only available at runtime on Gamend"
+    end
+  end
+
+  @doc ~S"""
     Lists unique leaderboard slugs with summary info.
     
     Returns a list of maps with:
