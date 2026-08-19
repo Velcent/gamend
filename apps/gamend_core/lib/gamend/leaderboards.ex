@@ -49,6 +49,19 @@ defmodule Gamend.Leaderboards do
     Gamend.Cache.get!({:leaderboards, :record_version, record_id}) || 1
   end
 
+  @doc """
+  Forget the cached leaderboard lookups.
+
+  Every write in here does this already. It is public because a CALLER can also
+  learn the cache is stale: `get_active_leaderboard_by_slug/1` is cached for a
+  minute, so a board deleted (or rolled back, under a test sandbox) hands out an
+  id whose row is gone, and the next `submit_score/4` fails on the foreign key.
+  A caller that sees that can drop the lookup and try again rather than wait out
+  the TTL.
+  """
+  @spec invalidate_cache() :: :ok
+  def invalidate_cache, do: invalidate_leaderboards_cache()
+
   defp invalidate_leaderboards_cache do
     _ = Gamend.Cache.bump_version({:leaderboards, :version})
     :ok

@@ -23,7 +23,10 @@ defmodule StressHook.MixProject do
   defp deps do
     [
       {:gamend_sdk, path: "../../../sdk", runtime: false, optional: true},
-      {:gamend_plugin_tools, path: "../../../sdk_tools", runtime: false}
+      {:gamend_plugin_tools, path: "../../../sdk_tools", runtime: false},
+      # Compile-time only — the server supplies telemetry at runtime; this is
+      # here so `:telemetry.attach/4` resolves when the plugin is built.
+      {:telemetry, "~> 1.3", runtime: false}
     ]
   end
 end

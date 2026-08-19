@@ -60,6 +60,7 @@ than as a multiplier.
 | **Repeat quests re-armed once an hour**, not immediately. | fixed (separate session) |
 | **Analytics writes failed the login they rode on** under a busy database. | fixed (separate session) |
 | **Socket memory is an OS default, not our code.** ~105 KB/socket of binary memory follows the kernel's ~400 KB receive buffer. | `GAMEND_REALTIME_SOCKET_BUFFER_KB` exists, **off by default** — see below. |
+| **Matchmaking took 3.1 s to match**, all of it waiting for the next sweep tick. | a join now nudges the worker (coalesced, 100 ms): **3,146 ms → 66 ms** time-to-match, and the scenario went 40 → 477 req/s. |
 | **`leaderboards` fails 513 read-back checks on Postgres**, none on SQLite. | open — a submitted score the caller cannot always read back. |
 
 ## What was wrong along the way
@@ -73,6 +74,24 @@ of these are easy to repeat:
   "fixes" were built against that phantom and reverted.
 - **"RSS says 400-530 KB per socket"** — those runs were writing thousands of
   friendship rows *inside* the measurement window.
+
+## Four bottleneck hypotheses, one survived
+
+Read from the numbers, then checked against the code. Worth recording because
+the check is the part that matters:
+
+| hypothesis | verdict |
+|---|---|
+| Matchmaking's 3.1 s is the sweep interval, not work | **true** — fixed, 48x faster |
+| Advisory locks (+8 ms on Postgres) are hurting hot write paths | **false** — `Economy.grant` is already lock-free (atomic upsert / conditional update). The 8 ms was `stress_kv_write_locked`, a synthetic probe of the lock primitive, not a production path |
+| `quest_claim` takes two locks | **false** — it takes none. `transition_to_claimed` is an atomic conditional `UPDATE`, and the reward grant is lock-free. Its 54 ms is several sequential *writes* |
+| `page_home` is 4.5x slower on Postgres, so N+1 | **false** — the home page issues **1 query** and renders in 6 ms warm. The 88 ms was the conditions of that run |
+
+What is left, and not attempted: `Quests.advance_quest` genuinely does hold a
+per-(user, quest) advisory lock, because merging objective progress is a
+read-modify-write of a JSON map. That is the one hot path where the lock cost is
+real — but making it atomic across both adapters is a design change with
+correctness risk, not tuning, and it deserves its own scope.
 
 ## What is not done
 

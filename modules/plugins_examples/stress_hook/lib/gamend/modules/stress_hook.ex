@@ -301,6 +301,84 @@ defmodule Gamend.Modules.StressHook do
   defp kb(bytes), do: Float.round(bytes / 1024, 1)
 
   @doc """
+  Count database queries over a window, grouped by source.
+
+  A page that is fast on SQLite and slow on Postgres is usually not doing
+  *expensive* work — it is doing many small queries, which cost microseconds
+  against a local file and a round trip over a socket. Counting them is the only
+  way to tell those two apart.
+
+  `stress_query_probe("start")` attaches a telemetry handler;
+  `stress_query_probe("read")` detaches and reports what it saw.
+  """
+  def stress_query_probe(action) when action in ["start", "read"] do
+    case action do
+      "start" -> start_query_probe()
+      "read" -> read_query_probe()
+    end
+  end
+
+  @probe_key {__MODULE__, :query_probe}
+  @probe_handler :stress_hook_query_probe
+
+  defp start_query_probe do
+    :persistent_term.put(@probe_key, :counters.new(1, [:write_concurrency]))
+    _ = :telemetry.detach(@probe_handler)
+
+    :telemetry.attach(
+      @probe_handler,
+      [:gamend, :repo, :query],
+      &__MODULE__.handle_query_event/4,
+      nil
+    )
+
+    %{"probe" => "started"}
+  end
+
+  @doc false
+  def handle_query_event(_event, _measurements, metadata, _config) do
+    case :persistent_term.get(@probe_key, nil) do
+      nil ->
+        :ok
+
+      ref ->
+        :counters.add(ref, 1, 1)
+        # A bounded ring of sources rather than every query: a diagnostic must
+        # not become a memory leak on a busy node.
+        slot = rem(:counters.get(ref, 1), 200)
+        :persistent_term.put({__MODULE__, :query_sample, slot}, metadata[:source])
+        :ok
+    end
+  end
+
+  defp read_query_probe do
+    count =
+      case :persistent_term.get(@probe_key, nil) do
+        nil -> 0
+        ref -> :counters.get(ref, 1)
+      end
+
+    sources =
+      0..199
+      |> Enum.flat_map(fn i ->
+        case :persistent_term.get({__MODULE__, :query_sample, i}, nil) do
+          nil -> []
+          source -> [to_string(source)]
+        end
+      end)
+      |> Enum.frequencies()
+      |> Enum.sort_by(&(-elem(&1, 1)))
+      |> Enum.take(8)
+      |> Map.new()
+
+    _ = :telemetry.detach(@probe_handler)
+    _ = :persistent_term.erase(@probe_key)
+    Enum.each(0..199, &:persistent_term.erase({__MODULE__, :query_sample, &1}))
+
+    %{"queries" => count, "top_sources" => sources}
+  end
+
+  @doc """
   Where the node's memory actually is: BEAM categories, the largest ETS tables,
   and how much of it the allocators are holding but not using.
 

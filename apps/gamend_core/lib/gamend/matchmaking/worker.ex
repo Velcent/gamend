@@ -29,6 +29,10 @@ defmodule Gamend.Matchmaking.Worker do
 
   @initial_delay_ms :timer.seconds(3)
 
+  # Long enough to absorb the joins of a party arriving together or a burst of
+  # players hitting queue at once, short enough that it reads as immediate.
+  @nudge_debounce_ms 100
+
   def start_link(_opts) do
     GenServer.start_link(__MODULE__, [], name: __MODULE__)
   end
@@ -43,17 +47,54 @@ defmodule Gamend.Matchmaking.Worker do
 
   defp enabled?, do: Application.get_env(:gamend_core, __MODULE__, [])[:enabled] != false
 
+  @doc """
+  Ask for a sweep now rather than at the next tick.
+
+  Called when a ticket is created: the tick exists so nobody waits forever in a
+  half-full bucket, but a join that *completes* a bucket should not sit out the
+  remainder of an interval for no reason. Time-to-match was a flat ~3 s —
+  a uniform draw over the interval — and none of it was work.
+
+  Asynchronous and coalescing: a burst of joins produces one sweep, not one per
+  ticket, and the caller never waits on the sweep. If the worker is not running
+  (tests, a partial supervision tree) this is a no-op, because the tick would
+  not have run either.
+  """
+  @spec nudge() :: :ok
+  def nudge do
+    case Process.whereis(__MODULE__) do
+      nil -> :ok
+      pid -> send(pid, :nudge) && :ok
+    end
+  end
+
   @impl true
   def handle_info(:tick, state) do
-    _ =
-      try do
-        sweep()
-      rescue
-        e -> Logger.error("matchmaking sweep failed: #{Exception.message(e)}")
-      end
+    run_sweep()
 
     Process.send_after(self(), :tick, Gamend.Limits.get(:matchmaking_tick_ms))
-    {:noreply, state}
+    {:noreply, Map.delete(state, :nudge_pending)}
+  end
+
+  # Coalesced: the first nudge in a window schedules one sweep, and further
+  # nudges before it fires are absorbed. Without this a hundred simultaneous
+  # joins would queue a hundred sweeps, each taking the cluster lock.
+  def handle_info(:nudge, %{nudge_pending: true} = state), do: {:noreply, state}
+
+  def handle_info(:nudge, state) do
+    Process.send_after(self(), :nudge_sweep, @nudge_debounce_ms)
+    {:noreply, Map.put(state, :nudge_pending, true)}
+  end
+
+  def handle_info(:nudge_sweep, state) do
+    run_sweep()
+    {:noreply, Map.delete(state, :nudge_pending)}
+  end
+
+  defp run_sweep do
+    sweep()
+  rescue
+    e -> Logger.error("matchmaking sweep failed: #{Exception.message(e)}")
   end
 
   @doc """

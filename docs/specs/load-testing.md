@@ -550,6 +550,24 @@ VM-wide memory cap — `+hmax` bounds one process, everything else is a cgroup o
 container limit where exceeding it kills the VM. A true ceiling test runs under
 such a limit and finds where it dies.
 
+## Bottlenecks: four read from the numbers, one real
+
+| hypothesis | verdict |
+|---|---|
+| matchmaking's 3.1 s is the sweep interval | **true** — a join now nudges the worker; 3,146 ms → **66 ms**, scenario 40 → 477 req/s |
+| advisory locks (+8 ms on PG) hurt hot write paths | false — `Economy.grant` is lock-free; the 8 ms was the synthetic `stress_kv_write_locked` probe |
+| `quest_claim` takes two locks | false — it takes none; atomic conditional `UPDATE` plus a lock-free grant |
+| `page_home` is 4.5x slower on PG, so N+1 | false — 1 query, 6 ms warm |
+
+The lesson for the matrix: a number that looks like a bottleneck is a
+*hypothesis about code*, and reading the code is cheaper than acting on the
+number. Three of four did not survive that step.
+
+Genuinely open: `Quests.advance_quest` holds a per-(user, quest) advisory lock
+because merging objective progress is a read-modify-write of a JSON map. It is
+the one hot path where the lock cost is real, and making it atomic across both
+adapters is a design change rather than tuning.
+
 ## Comparison with Nakama
 
 Their published figures are for **one node at 1 CPU / 3 GB** with the database
