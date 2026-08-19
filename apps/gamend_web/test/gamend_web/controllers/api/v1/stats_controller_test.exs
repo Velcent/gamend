@@ -101,7 +101,11 @@ defmodule GamendWeb.Api.V1.StatsControllerTest do
     # The flag closes the browser page with the API, so turning stats off does
     # not leave a second way to read the same numbers.
     test "the /stats page follows the same flag", %{conn: conn} do
-      assert conn |> get("/stats") |> html_response(200) =~ "Server stats"
+      html = conn |> get("/stats") |> html_response(200)
+
+      assert html =~ "Server stats"
+      assert html =~ "In queue"
+      refute html =~ "waiting for a match"
 
       disable(:public_stats)
 

@@ -108,11 +108,7 @@ defmodule GamendWeb.StatsLive do
             <.stat title={gettext("Lobbies")} value={@lobbies.lobbies_total} />
             <.stat title={gettext("Spectators")} value={@lobbies.spectators} />
             <.stat title={gettext("Parties")} value={@parties.parties_active} />
-            <.stat
-              title={gettext("In queue")}
-              value={@matchmaking.queued}
-              desc={gettext("waiting for a match")}
-            />
+            <.stat title={gettext("In queue")} value={@matchmaking.queued} />
           </div>
 
           <div :if={@lobbies.by_state != %{}} class="mt-3 flex flex-wrap gap-2">

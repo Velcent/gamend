@@ -75,6 +75,21 @@ defmodule GamendWeb.PlayerSearchTest do
       html = view |> form("#records-search-form", %{"search" => "zzz"}) |> render_change()
       assert html =~ "No results."
     end
+
+    test "leaderboards use a generic search placeholder", %{conn: conn} do
+      {:ok, leaderboard} =
+        Leaderboards.create_leaderboard(%{
+          slug: "language_stats_#{System.unique_integer([:positive])}",
+          title: "Languages"
+        })
+
+      {:ok, _} = Leaderboards.submit_label_score(leaderboard.id, "Spanish", 42)
+
+      {:ok, _view, html} = live(conn, ~p"/leaderboards/#{leaderboard.slug}")
+
+      assert html =~ ~s(placeholder="Search...")
+      refute html =~ ~s(placeholder="Search players...")
+    end
   end
 
   describe "group members" do

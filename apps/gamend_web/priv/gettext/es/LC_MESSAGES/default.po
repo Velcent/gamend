@@ -498,6 +498,7 @@ msgid "You"
 msgstr "Tú"
 
 #: lib/gamend_web/live/groups_live.ex:413
+#: lib/gamend_web/live/leaderboards_live.ex:296
 #: lib/gamend_web/live/user_live/settings/data_tab.ex:46
 #: lib/gamend_web/live/user_live/settings/friends_tab.ex:220
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:372
@@ -1330,7 +1331,6 @@ msgid "Result"
 msgstr "Resultado"
 
 #: lib/gamend_web/live/groups_live.ex:612
-#: lib/gamend_web/live/leaderboards_live.ex:294
 #: lib/gamend_web/live/tournaments_live.ex:642
 #, elixir-autogen, elixir-format
 msgid "Search players..."
@@ -2255,11 +2255,6 @@ msgstr "ahora mismo"
 #, elixir-autogen, elixir-format
 msgid "lang (optional)"
 msgstr "idioma (opcional)"
-
-#: lib/gamend_web/live/stats_live.ex:97
-#, elixir-autogen, elixir-format
-msgid "waiting for a match"
-msgstr "esperando partida"
 
 #: lib/gamend_web/live/admin_live/chat_filter.ex:460
 #, elixir-autogen, elixir-format

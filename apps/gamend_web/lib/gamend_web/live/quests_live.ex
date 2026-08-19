@@ -360,6 +360,9 @@ defmodule GamendWeb.QuestsLive do
 
   defp reset_label(_quest), do: ""
 
+  defp show_reset_badge?(quest),
+    do: quest.reset != "never" and not same_as_category?(quest) and reset_label(quest) != ""
+
   defp status_label(nil), do: gettext("All")
   defp status_label("in_progress"), do: gettext("In Progress")
   defp status_label("claimable"), do: gettext("Claimable")
@@ -764,7 +767,7 @@ defmodule GamendWeb.QuestsLive do
           {@quest.category}
         </span>
         <span
-          :if={@quest.reset != "never" and not same_as_category?(@quest)}
+          :if={show_reset_badge?(@quest)}
           class="badge badge-ghost badge-sm text-nowrap"
         >
           {reset_label(@quest)}

@@ -3,6 +3,14 @@ defmodule GamendWeb.HostLayoutsTest do
 
   alias GamendWeb.HostLayouts
 
+  test "locale labels use display casing for native language names" do
+    labels = HostLayouts.locale_labels()
+
+    assert labels["cs"] == "Čeština"
+    assert labels["fi"] == "Suomi"
+    assert labels["hu"] == "Magyar"
+  end
+
   test "theme image settings override host defaults" do
     theme =
       HostLayouts.resolve_theme("en", %{

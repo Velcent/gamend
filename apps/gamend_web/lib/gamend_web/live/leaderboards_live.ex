@@ -293,7 +293,7 @@ defmodule GamendWeb.LeaderboardsLive do
             <.input
               name="search"
               value={@records_search}
-              placeholder={gettext("Search players...")}
+              placeholder={gettext("Search...")}
               phx-debounce="300"
               type="text"
             />

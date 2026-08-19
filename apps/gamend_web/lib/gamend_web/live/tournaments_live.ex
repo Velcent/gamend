@@ -469,9 +469,6 @@ defmodule GamendWeb.TournamentsLive do
       >
         <:badges>
           <.state_badge state={group.state} />
-          <span :if={group.edition_count > 1} class="badge badge-ghost badge-sm text-nowrap">
-            {group.edition_count}
-          </span>
         </:badges>
 
         <div class="text-sm text-base-content/60">

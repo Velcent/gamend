@@ -69,10 +69,12 @@ defmodule GamendWeb.TournamentsLiveTest do
 
     {:ok, _view, html} = live(conn, ~p"/tournaments")
 
-    # one card, with the edition count badge, not two "Public Cup" cards
+    # one card, not two "Public Cup" cards. The edition count badge used to sit
+    # under the state badge as a context-free number.
     assert length(String.split(html, "card-title")) - 1 == 1
     assert html =~ "Public Cup"
     assert html =~ "Players: 2"
+    refute html =~ ~r/<span[^>]*badge-ghost[^>]*>\s*2\s*<\/span>/
   end
 
   test "detail resolves a 16-character slug (Ecto.UUID.cast accepts 16-byte binaries)", %{

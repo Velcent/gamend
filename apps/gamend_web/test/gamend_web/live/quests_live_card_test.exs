@@ -186,6 +186,25 @@ defmodule GamendWeb.QuestsLiveCardTest do
     assert String.contains?(weekly, "Weekly")
   end
 
+  test "repeat quests do not render an empty cadence badge", %{conn: conn} do
+    for {key, title} <- [{"repeat_cups", "Tournaments"}, {"repeat_treasures", "Treasures"}] do
+      {:ok, _} =
+        Quests.create_quest(%{
+          key: key,
+          title: title,
+          description: "Repeatable reward.",
+          category: "weekly",
+          reset: "repeat",
+          objectives: [%{event: key, target: 1}]
+        })
+    end
+
+    html = page(conn)
+
+    refute html =~ ~r/<span class="badge badge-ghost badge-sm text-nowrap">\s*<\/span>/,
+           "repeat quests have no cadence label, so they should not render an empty badge"
+  end
+
   test "a long chain reports its real length, not the walk limit", %{conn: conn} do
     # The depth walk used to stop at 20 hops to survive malformed cycles, which
     # cannot tell a cycle from a genuinely long chain: the 52-unit course showed
