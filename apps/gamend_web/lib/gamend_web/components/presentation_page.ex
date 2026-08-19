@@ -40,6 +40,69 @@ defmodule GamendWeb.PresentationPage do
 
   def page_title(_page, fallback), do: fallback
 
+  @doc """
+  `page/1` rendered to HTML, memoised per `{locale, path}`.
+
+  The body of a presentation page is the largest single cost in the response
+  and none of it depends on the reader: `page/1` reads only `hero`, `sections`
+  and `background_icons`, all derived from the theme config and the locale, and
+  the module references no conn, scope, user, gettext call, clock or random
+  source. Two anonymous visitors, or one visitor and the same visitor an hour
+  later, were being served bytes that had been built from scratch each time --
+  0.64 ms of a 1.9 ms home page, 57 KB of a 102 KB document.
+
+  The value carries a fingerprint of the inputs, so an edited theme cannot
+  serve a stale body: a changed `page` map hashes differently and re-renders.
+  The fingerprint lives in the value rather than the key so the key set stays
+  bounded -- a theme edit overwrites its entry instead of stranding the old
+  one. It is a fingerprint rather than the inputs themselves because a cache
+  read that hands back the page map costs more than the render it replaces:
+  measured at 0.66 ms against 0.47 ms to just render the thing.
+
+  A fingerprint is also why this does not key on a theme version.
+  `resolve_theme/2` merges `conn.assigns[:theme]`, so a host that varies the
+  theme per request would be served another request's page by a version-keyed
+  cache. Hashing the actual inputs cannot make that mistake.
+
+  `:persistent_term`, like the icon and theme caches beside it, and not the
+  application cache: `Gamend.Cache` is multilevel and would put a Redis round
+  trip in the render path, and reaching past it into `Gamend.Cache.L1` makes
+  every page on the site depend on another app's cache process being started
+  -- which in the web app's own test env it is not, so the site did not render
+  at all. `:persistent_term` has no owner and cannot be missing.
+
+  Its one cost is that every write scans every process on the node, so this is
+  only safe because the key set is bounded by configuration rather than by
+  traffic: `cached_body/4` is reached only for a path the theme actually
+  configures (an unknown path is a 404 before this point), so the entries are
+  configured pages times locales, each written once per theme version.
+  """
+  @spec cached_body(map(), list(), String.t() | nil, String.t()) :: iodata()
+  def cached_body(page_map, background_icons, locale, path) do
+    fingerprint = :erlang.phash2({page_map, background_icons})
+    key = {__MODULE__, :body, locale, path}
+
+    case :persistent_term.get(key, :miss) do
+      {^fingerprint, html} ->
+        html
+
+      _ ->
+        html =
+          %{
+            __changed__: nil,
+            page: page_map,
+            background_icons: background_icons,
+            full_bleed_hero: true
+          }
+          |> page()
+          |> Phoenix.HTML.Safe.to_iodata()
+          |> IO.iodata_to_binary()
+
+        :persistent_term.put(key, {fingerprint, html})
+        html
+    end
+  end
+
   attr :page, :map, required: true
   attr :background_icons, :list, default: []
   attr :full_bleed_hero, :boolean, default: true

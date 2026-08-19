@@ -21,6 +21,12 @@ defmodule GamendWeb.Features do
     doc: "GET /api/v1/users and /users/:id."
   )
 
+  setting(:public_user_metadata_keys, :list,
+    default: [],
+    doc:
+      "Top-level `user.metadata` keys GET /api/v1/users and /users/:id may return. Empty means none. Those endpoints are unauthenticated, so anything named here is world-readable and findable by name prefix — never list a key holding position, routing or contact data."
+  )
+
   setting(:list_lobbies, :boolean,
     default: true,
     doc: "GET /api/v1/lobbies and the \"lobbies\" channel."
@@ -67,5 +73,20 @@ defmodule GamendWeb.Features do
   @spec enabled?(atom()) :: boolean()
   def enabled?(feature) when is_atom(feature) do
     Gamend.Settings.get(__MODULE__, feature) != false
+  end
+
+  @doc """
+  Top-level `user.metadata` keys the public user endpoints may return.
+
+  Default-deny: an empty list — the default — strips metadata entirely. A host
+  that wants a badge on a search result opts that one section back in rather
+  than the whole map.
+  """
+  @spec public_user_metadata_keys() :: [String.t()]
+  def public_user_metadata_keys do
+    case Gamend.Settings.get(__MODULE__, :public_user_metadata_keys) do
+      keys when is_list(keys) -> Enum.filter(keys, &is_binary/1)
+      _other -> []
+    end
   end
 end

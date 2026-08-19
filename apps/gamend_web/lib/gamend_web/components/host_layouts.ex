@@ -135,9 +135,61 @@ defmodule GamendWeb.HostLayouts do
   end
 
   @doc false
-  def resolve_theme(locale \\ nil, assigned_theme \\ %{}) do
-    host_theme_settings = host_theme_settings()
-    theme = merge_assigned_theme(fetch_theme(locale), assigned_theme)
+  def resolve_theme(locale \\ nil, assigned_theme \\ %{})
+
+  # Memoised for the case that carries the traffic: no per-request theme
+  # overlay, so the answer depends on the locale and nothing else.
+  #
+  # A page calls this three or four times -- once in `LoadTheme`, twice in
+  # `prepare_app_assigns/1` (the viewer's locale and the English fallback the
+  # navigation reads through), once more in `PageController` -- and each call
+  # was running `translate_theme/2`, which walks the whole config including
+  # every presentation page and translates each string. That was the single
+  # largest cost left in a response, on every page of the site, and every
+  # repetition of it produced the map the call before it had just produced.
+  #
+  # Keyed on the locale, which the `Locale` plug validates against
+  # `known_locales/0` before it ever reaches gettext, so the entry count is the
+  # locale list and not something a URL can inflate. The value carries a
+  # fingerprint of everything the output is built from, so an edited theme or a
+  # newly deployed `theme.css` is picked up on the next read rather than
+  # surviving until restart.
+  #
+  # An overlay is not cached at all rather than folded into the key: a host
+  # that varies the theme per request would otherwise write a new entry per
+  # request, and `:persistent_term.put/2` scans every process on the node.
+  # Rendering it uncached is far cheaper than that.
+  def resolve_theme(locale, assigned_theme) when map_size(assigned_theme) == 0 do
+    base = fetch_theme(locale)
+    settings = host_theme_settings()
+    fingerprint = :erlang.phash2({base, settings})
+    key = {__MODULE__, :resolved_theme, resolved_theme_locale(locale)}
+
+    case :persistent_term.get(key, :miss) do
+      {^fingerprint, theme} ->
+        theme
+
+      _ ->
+        theme = build_theme(base, settings, assigned_theme, locale)
+        :persistent_term.put(key, {fingerprint, theme})
+        theme
+    end
+  end
+
+  def resolve_theme(locale, assigned_theme) do
+    build_theme(fetch_theme(locale), host_theme_settings(), assigned_theme, locale)
+  end
+
+  # `translate_theme/2` falls back to the process locale when it is not handed
+  # a usable one, so `nil` and an unknown string both mean "whatever this
+  # process is set to" -- and keying either of those literally would file two
+  # locales under one entry.
+  defp resolved_theme_locale(locale) do
+    (is_binary(locale) && GamendWeb.GettextSync.normalize_locale(locale)) || current_locale()
+  end
+
+  defp build_theme(base, host_theme_settings, assigned_theme, locale) do
+    theme = merge_assigned_theme(base, assigned_theme)
     missing? = Map.drop(theme, Map.keys(host_theme_settings)) == %{}
 
     theme
@@ -429,7 +481,31 @@ defmodule GamendWeb.HostLayouts do
     Map.put(@host_base_theme_settings, "css", host_theme_css_path())
   end
 
+  # Resolved once. This asks the code server where an app lives and then stats a
+  # file, and `resolve_theme/2` calls it three or four times per page -- a
+  # filesystem syscall on the render path of every request on the site, to
+  # answer a question whose answer is fixed the moment the release is built.
+  # File IO also crosses onto a dirty scheduler, so the cost under load is
+  # worse than the ~8us it measures on an idle box.
+  #
+  # The consequence is that dropping a `theme.css` into a running release is
+  # not picked up until restart, which is the same rule the rest of the static
+  # pipeline already follows.
   defp host_theme_css_path do
+    key = {__MODULE__, :host_theme_css_path}
+
+    case :persistent_term.get(key, :miss) do
+      :miss ->
+        path = compute_host_theme_css_path()
+        :persistent_term.put(key, path)
+        path
+
+      path ->
+        path
+    end
+  end
+
+  defp compute_host_theme_css_path do
     host_static_app = Application.get_env(:gamend_web, :host_static_app, :gamend_web)
     host_static_dir = Application.app_dir(host_static_app, "priv/static")
     theme_css_rel = String.trim_leading(@host_theme_css_path, "/")

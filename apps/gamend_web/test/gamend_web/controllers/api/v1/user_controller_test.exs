@@ -73,4 +73,84 @@ defmodule GamendWeb.Api.V1.UserControllerTest do
     conn = get(conn, "/api/v1/users/00000000-0000-0000-0000-000000000000")
     assert conn.status == 404
   end
+
+  describe "public metadata exposure" do
+    # Both endpoints are unauthenticated, so whatever they return about a user
+    # is world-readable and reachable by guessing a name prefix. They used to
+    # return `user.metadata` whole, which for a game that keeps position or
+    # routing in there is a stranger tracking a named player.
+
+    setup do
+      previous = Application.get_env(:gamend_web, GamendWeb.Features)
+
+      on_exit(fn ->
+        if previous,
+          do: Application.put_env(:gamend_web, GamendWeb.Features, previous),
+          else: Application.delete_env(:gamend_web, GamendWeb.Features)
+      end)
+
+      user = user_fixture(%{email: "meta-leak@example.com"})
+      {:ok, user} = Accounts.update_user_display_name(user, %{"display_name" => "MetaLeak"})
+
+      {:ok, user} =
+        Accounts.merge_metadata(user, %{
+          "learning" => %{"course_id" => "languages", "lesson_id" => "es_es"},
+          "map_route" => "es:madrid,sevilla",
+          "map_city_id" => "madrid"
+        })
+
+      %{user: user}
+    end
+
+    defp allow_keys(keys) do
+      config = Application.get_env(:gamend_web, GamendWeb.Features, [])
+
+      Application.put_env(
+        :gamend_web,
+        GamendWeb.Features,
+        Keyword.put(config, :public_user_metadata_keys, keys)
+      )
+    end
+
+    test "search strips metadata by default", %{conn: conn, user: user} do
+      allow_keys([])
+
+      row =
+        conn
+        |> get("/api/v1/users", %{q: "MetaLeak"})
+        |> json_response(200)
+        |> Map.fetch!("data")
+        |> Enum.find(&(&1["id"] == user.id))
+
+      assert row["display_name"] == "MetaLeak"
+      assert row["metadata"] == %{}
+    end
+
+    test "show strips metadata by default", %{conn: conn, user: user} do
+      allow_keys([])
+
+      resp =
+        conn
+        |> get("/api/v1/users/#{user.id}")
+        |> json_response(200)
+
+      assert resp["metadata"] == %{}
+    end
+
+    test "an allow-listed key is returned and everything else still is not", %{
+      conn: conn,
+      user: user
+    } do
+      allow_keys(["learning"])
+
+      resp =
+        conn
+        |> get("/api/v1/users/#{user.id}")
+        |> json_response(200)
+
+      assert resp["metadata"]["learning"]["lesson_id"] == "es_es"
+      refute Map.has_key?(resp["metadata"], "map_route")
+      refute Map.has_key?(resp["metadata"], "map_city_id")
+    end
+  end
 end

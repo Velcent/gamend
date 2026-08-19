@@ -45,9 +45,17 @@ defmodule GamendWeb.PageController do
         # every call to action on /fr drops the reader back to a clean URL.
         page = GamendWeb.HostLayouts.localize_hrefs(page, locale)
 
+        # Rendered here rather than in the template so the memo has a key: the
+        # body is a pure function of the theme page and the locale, and the
+        # template does not know either.
+        background_icons = Map.get(theme, "background_icons") || []
+
         conn
         |> assign(:page_title, PresentationPage.page_title(page, fallback_title))
-        |> render(:presentation_page, presentation_page: page, theme: theme)
+        |> render(:presentation_page,
+          presentation_body: PresentationPage.cached_body(page, background_icons, locale, path),
+          theme: theme
+        )
     end
   end
 

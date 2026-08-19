@@ -33,6 +33,14 @@ primary_region = "ams"
 
   GAMEND_AUTH_DEVICE_AUTH_ENABLED = "true"
 
+  # Unlimited sockets per account (0 disables the cap; the default is 20).
+  # `ws_idle.js` spreads tens of thousands of sockets over a hundred accounts,
+  # because one account per socket makes the ramp measure registration
+  # throughput instead of socket memory — the server saturates on account
+  # creation long before it runs out of RAM. The cap is a real and sensible
+  # limit for a game; it is only in the way of a memory-ceiling measurement.
+  GAMEND_LIMITS_MAX_SOCKETS_PER_USER = "0"
+
   # The public list routes AND the global `lobbies` / `groups` channels sit
   # behind these flags, off by default. lobbies_storm.js needs them.
   GAMEND_FEATURES_LIST_LOBBIES_ENABLED = "true"
@@ -81,7 +89,17 @@ primary_region = "ams"
   port = 4000
   path = "/metrics"
 
-# Sized per cell by matrix.sh (`fly scale vm`); this is the starting point.
+# The boot size only. `matrix.sh` resizes per cell with `fly scale vm`, so this
+# is what the machine comes up at during setup and what you get if you deploy
+# this config without the matrix.
+#
+# Matched to production (`game-server-uro` runs shared-cpu-4x) rather than to
+# the first cell, deliberately: a bench deployed on its own should look like the
+# thing it is standing in for. The first cell resizing it away is one machine
+# replacement, once.
+#
+# Memory is above this size's 1GB default on purpose — the matrix pins 2GB
+# across the shared sizes so CPU is the only variable between cells A-B.
 [[vm]]
   size = "shared-cpu-4x"
   memory = "2gb"

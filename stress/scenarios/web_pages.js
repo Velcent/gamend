@@ -14,6 +14,13 @@
  * 20 ms and then takes a second to connect looks perfect here. `lobby_ws.js`
  * is where socket cost gets measured.
  *
+ * Paced by `THINK` like every other scenario, which defaults to zero. It used
+ * to `sleep(0.5)` unconditionally, and that one line was the entire result:
+ * 30 VUs over a 585 ms iteration issuing 4 requests is 205 req/s, and the run
+ * reported 206. The number moved with the sleep and not with the server, so
+ * every "web pages are slow" reading of it was reading the metronome. One
+ * unpaced VU already served more of the home page than all 30 paced ones.
+ *
  * Run this at a low `VUS` relative to the API scenarios. These responses are
  * roughly a hundred times the size of an API payload, and past a few VUs the
  * bottleneck moves into the generator's own buffers, which measures k6.
@@ -26,7 +33,7 @@
 
 import { check, sleep } from 'k6';
 import { Trend } from 'k6/metrics';
-import { constantVus, summaryHandler } from '../lib/config.js';
+import { constantVus, summaryHandler, THINK } from '../lib/config.js';
 import { page } from '../lib/api.js';
 
 const t = {
@@ -53,7 +60,7 @@ export default function (ctx) {
   rendered(page('/users/log_in', 'GET /users/log_in (page)'), t.login, 'login');
   rendered(page(ctx.post, 'GET /blog/:slug (page)'), t.blog, 'blog post');
 
-  sleep(0.5);
+  sleep(THINK);
 }
 
 /**

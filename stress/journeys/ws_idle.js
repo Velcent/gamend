@@ -7,12 +7,28 @@
  * ceiling nothing else in the suite measures — every other scenario opens and
  * closes sockets too quickly for the cost to accumulate.
  *
- * So this opens `SOCKETS` sockets, each with its own device user (which is
- * both realistic and how `max_sockets_per_user` is meant to be respected),
- * joins the user topic, and holds them for `DWELL` doing nothing but
- * heartbeating.
+ * So this opens `SOCKETS` sockets, joins the user topic on each, and holds
+ * them for `DWELL` doing nothing but heartbeating.
  *
  *   SOCKETS=5000 DWELL=5m k6 run journeys/ws_idle.js
+ *
+ * `USERS` is how many device accounts those sockets are spread across, and it
+ * exists because the obvious version of this test measures the wrong thing.
+ * One account per socket is realistic, but it makes every socket cost a
+ * *registration* first — and registration is a write, so the ramp saturates on
+ * account creation long before it saturates on sockets. Measured on one core:
+ * ~589 registrations/s against a socket cost of ~57 KB, so filling 3 GB of RAM
+ * would take ten minutes of signups and never reach the memory ceiling at all.
+ * Four load generators produced *fewer* sockets than one, because they were
+ * competing for the same write path.
+ *
+ * With `USERS` well below `SOCKETS` the accounts are created once and shared,
+ * and the ramp measures what it is named after. The server must have
+ * `GAMEND_LIMITS_MAX_SOCKETS_PER_USER=0` (or a value above `SOCKETS / USERS`),
+ * since the default of 20 is a real limit that will otherwise reject the
+ * surplus — correctly, and confusingly if you have forgotten it is there.
+ *
+ *   SOCKETS=20000 USERS=100 DWELL=3m k6 run journeys/ws_idle.js
  *
  * The number to read is not in this summary: it is the server's RSS on the
  * metrics dashboard, divided by SOCKETS. Watch it while this runs. What k6
@@ -32,6 +48,9 @@ const SOCKETS = Number.parseInt(__ENV.SOCKETS || '200', 10);
 // whole life, so per-socket memory scales with it. Run the same SOCKETS at
 // FRIENDS=0 and FRIENDS=200 and the difference is that memo.
 const FRIENDS = Number.parseInt(__ENV.FRIENDS || '0', 10);
+// Accounts to spread the sockets over. Defaults to one each, which keeps the
+// old behaviour for small runs; set it low for a memory-ceiling run.
+const USERS = Math.max(1, Number.parseInt(__ENV.USERS || String(SOCKETS), 10));
 const DWELL = __ENV.DWELL || '60s';
 const RAMP = __ENV.RAMP || '30s';
 
@@ -66,7 +85,12 @@ export default function () {
     (parseSeconds(RAMP) * 1000 * ((__VU - 1) % SOCKETS)) / SOCKETS,
   );
 
-  const auth = deviceLogin({ fresh: true, id: `${RUN_TAG}-idle-${__VU}` });
+  // Sockets share accounts round-robin. Two VUs on the same account log in
+  // separately and hold separate sockets, which is what a player with a phone
+  // and a desktop open does — and what makes the socket count independent of
+  // how fast the server can create accounts.
+  const account = (__VU - 1) % USERS;
+  const auth = deviceLogin({ fresh: true, id: `${RUN_TAG}-idle-${account}` });
   if (!auth) return;
 
   const userId = auth.userId || idFromMe(auth.token);

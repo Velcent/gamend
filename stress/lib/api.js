@@ -165,4 +165,11 @@ export const markChatRead = (t, ids) => post('/api/v1/chat/read', t, { ids }, 'P
 
 // ── Web pages (dead render only) ──────────────────────────────────────
 
-export const page = (path, name) => http.get(`${BASE_URL}${path}`, { tags: { name } });
+// `Accept-Encoding: gzip`, because that is what a browser sends and Bandit
+// compresses by default. Without it k6 gets `identity` and the run measures a
+// path no real reader takes: 102 KB of home page on the wire instead of 9.6 KB,
+// and none of the CPU the server spends compressing it. k6 decompresses
+// transparently, so `res.body` is still the full document to check against --
+// only `data_received` changes, and it changes to the truth.
+export const page = (path, name) =>
+  http.get(`${BASE_URL}${path}`, { tags: { name }, headers: { 'Accept-Encoding': 'gzip' } });

@@ -69,17 +69,37 @@ defmodule Gamend.Theme.JSONConfig do
     end
   end
 
+  # Memoised per locale, because the walk is not cheap and its result cannot
+  # change between two reads of the same locale: `raw_theme/0` is already
+  # cached, and the only other input is the compiled `.po`. Uncached, every
+  # page render walked the whole config, ran a regex and a gettext lookup on
+  # every text leaf, and rebuilt a map identical to the one the previous
+  # request built -- roughly 500 lookups and 400 regex runs per page, all of
+  # it re-deriving a constant.
+  #
+  # `locale` is resolved before it becomes the key: a nil locale means "use
+  # the caller's", which is a different answer per process, and keying on nil
+  # would serve the first caller's language to everyone.
   defp translate(config, locale) do
     backend = gettext_backend()
+    resolved = locale || Gettext.get_locale(backend)
 
+    case :persistent_term.get({__MODULE__, :translated, backend, resolved}, :not_cached) do
+      :not_cached ->
+        result = do_translate(config, backend, resolved)
+        :persistent_term.put({__MODULE__, :translated, backend, resolved}, result)
+        result
+
+      cached ->
+        cached
+    end
+  end
+
+  defp do_translate(config, backend, locale) do
     translator = fn source ->
-      if locale do
-        Gettext.with_locale(backend, locale, fn ->
-          Gettext.dgettext(backend, "theme", source)
-        end)
-      else
+      Gettext.with_locale(backend, locale, fn ->
         Gettext.dgettext(backend, "theme", source)
-      end
+      end)
     end
 
     Translatable.walk(config, translator)
@@ -119,6 +139,15 @@ defmodule Gamend.Theme.JSONConfig do
   def reload do
     # Reset the cache so the next read comes from disk.
     :persistent_term.erase({__MODULE__, :theme_cache})
+
+    # And every translation derived from it. Scanning the whole table is fine
+    # here and a generation counter is not: reload is a rare admin action,
+    # while a counter would strand the old entries in a table that is never
+    # garbage collected.
+    for {{mod, :translated, _backend, _locale} = key, _value} <- :persistent_term.get(),
+        mod == __MODULE__,
+        do: :persistent_term.erase(key)
+
     :ok
   end
 

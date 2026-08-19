@@ -59,19 +59,28 @@ defmodule GamendWeb.Components.DynamicIcon do
   # its lookup crashed with "the table identifier does not refer to an existing
   # ETS table". `:persistent_term` has no owner and outlives every process.
   # Icons are immutable and few, so each one is written exactly once.
+  # The absent file is cached too, as `:absent`. Only caching hits made the
+  # miss free to look up but never free to *repeat*: `priv/static/heroicons/`
+  # does not ship in this build, so every name missed, nothing was ever
+  # written, and each render re-ran the lookup for every icon on the page --
+  # 139 of them on the home page. Each one is a `:code.priv_dir/1` round trip
+  # through the single `code_server` process plus a failing `File.read`, so
+  # the cost did not divide across schedulers: measured on an M1, the miss
+  # path runs ~100k/s on one process and ~79k/s on eight, which put a
+  # node-wide ceiling of roughly 600 renders/s on the page no matter how many
+  # cores it was given. The fallback markup was always what rendered; only
+  # the lookup was repeated.
   defp cached_svg_for(name) do
     case :persistent_term.get(cache_key(name), :missing) do
       :missing ->
-        case read_svg_from_priv(name) do
-          nil ->
-            nil
+        # Writes trigger a global GC scan, which is why this is only ever
+        # reached once per icon per boot.
+        svg = read_svg_from_priv(name)
+        :persistent_term.put(cache_key(name), svg || :absent)
+        svg
 
-          svg ->
-            # Writes trigger a global GC scan, which is why this is only ever
-            # reached once per icon per boot.
-            :persistent_term.put(cache_key(name), svg)
-            svg
-        end
+      :absent ->
+        nil
 
       svg ->
         svg

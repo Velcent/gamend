@@ -6,6 +6,7 @@ defmodule GamendWeb.Api.V1.UserController do
 
   alias Gamend.Accounts
   alias Gamend.Accounts.User
+  alias GamendWeb.Features
   alias GamendWeb.Pagination
   alias OpenApiSpex.Schema
 
@@ -38,7 +39,8 @@ defmodule GamendWeb.Api.V1.UserController do
                    profile_url: %Schema{type: :string},
                    metadata: %Schema{
                      type: :object,
-                     description: "User metadata (accessories, hat, color, etc.)"
+                     description:
+                       "User metadata, restricted to the keys named by the :public_user_metadata_keys setting. Empty by default."
                    },
                    lobby_id: %Schema{
                      type: :string,
@@ -91,7 +93,8 @@ defmodule GamendWeb.Api.V1.UserController do
              profile_url: %Schema{type: :string},
              metadata: %Schema{
                type: :object,
-               description: "User metadata (accessories, hat, color, etc.)"
+               description:
+                 "User metadata, restricted to the keys named by the :public_user_metadata_keys setting. Empty by default."
              },
              lobby_id: %Schema{
                type: :string,
@@ -159,11 +162,31 @@ defmodule GamendWeb.Api.V1.UserController do
     end
   end
 
+  # `serialize_brief/1` is built for party, lobby and friend member lists, where
+  # the caller is already in the room with the user. These two endpoints are
+  # public and unauthenticated, so handing back the same payload gives a
+  # name-prefix search the whole game-defined metadata map. For a game that
+  # keeps position, destination or study state in there, that is a stranger
+  # tracking a named player with no account.
+  #
+  # Metadata is therefore default-deny here, and a host opts individual
+  # sections back in through :public_user_metadata_keys.
   defp serialize_user(user) do
-    User.serialize_brief(user)
+    user
+    |> User.serialize_brief()
+    |> Map.put(:metadata, public_metadata(user.metadata))
     |> Map.merge(%{
       lobby_id: user.lobby_id || "",
       party_id: user.party_id || ""
     })
   end
+
+  defp public_metadata(metadata) when is_map(metadata) do
+    case Features.public_user_metadata_keys() do
+      [] -> %{}
+      keys -> Map.take(metadata, keys)
+    end
+  end
+
+  defp public_metadata(_metadata), do: %{}
 end

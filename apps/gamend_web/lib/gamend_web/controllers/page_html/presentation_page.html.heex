@@ -1,7 +1,5 @@
 <Layouts.app flash={@flash} current_scope={@current_scope} background_icons={false}>
-  <% background_icons = Map.get(@theme, "background_icons") || [] %>
-  <GamendWeb.PresentationPage.page
-    page={@presentation_page}
-    background_icons={background_icons}
-  />
+  <%!-- Already rendered and memoised by the controller, which is the only
+        place that holds the cache key (locale and path). --%>
+  {Phoenix.HTML.raw(@presentation_body)}
 </Layouts.app>
