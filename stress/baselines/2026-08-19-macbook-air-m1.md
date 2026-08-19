@@ -203,19 +203,24 @@ Two consequences worth carrying into the deployed run:
    and self-tune differently, so socket density on a Fly machine may be
    materially better than the projection here. Re-measure there before believing
    either number.
-2. **It is now a knob.** `GAMEND_REALTIME_SOCKET_BUFFER_KB` (default **32**)
-   sets `buffer`, `recbuf` and `sndbuf` on the listener through
-   `thousand_island_options.transport_options`. A game exchanging small JSON or
-   protobuf frames has no use for a 400 KB receive buffer, and if the smaller
-   value holds, socket density improves several-fold.
+2. **There is a knob, and it is off.** `GAMEND_REALTIME_SOCKET_BUFFER_KB`
+   (default **0** = leave the OS alone) caps `buffer`, the Erlang driver's
+   userspace read buffer, via `thousand_island_options.transport_options`.
 
-   **It does not hold on macOS.** The endpoint config provably carries
-   `[buffer: 32768, recbuf: 32768, sndbuf: 32768]`, and connected sockets still
-   report `recbuf` around 390-400 KB: macOS auto-tunes the receive buffer and
-   ignores the request. Linux honours `SO_RCVBUF` (doubling it, but respecting
-   it), so this is expected to bite on a Fly machine and not here — which makes
-   "measure per-socket memory on Linux before believing either number" the
-   actionable item rather than a caveat.
+   **It does not take effect on macOS.** The endpoint config provably carries
+   the value, and connected sockets still report `buffer: 408300` — an accepted
+   socket's buffer is recomputed from whatever `recbuf` the kernel negotiated
+   (~400 KB here), discarding the listen-time setting. Three attempts, no
+   movement. Linux does not auto-tune receive buffers the same way and is
+   expected to honour it, but that is a prediction, not a measurement, which is
+   why the default is off.
+
+   **The neighbouring knobs are a trap.** Capping `recbuf`/`sndbuf` would bound
+   the memory reliably — by shrinking the TCP window, which caps a connection's
+   throughput at window/RTT. 32 KB over a 100 ms link is ~2.6 Mbit/s: ample for
+   game traffic, ruinous for the same listener serving a multi-megabyte Godot
+   web export or an avatar upload. The setting deliberately leaves them to the
+   kernel.
 
 Ruled out along the way, both by measurement: **permessage-deflate compression**
 (`compress: false` changed binary memory not at all — 350 MB against 318 MB,

@@ -528,13 +528,18 @@ totals 3.8 MB). The binaries are **socket buffers**: a connected socket reports
 `buffer: 408_300` because macOS auto-tunes `recbuf` to ~470 KB and the inet
 driver sizes itself from that.
 
-So the socket ceiling is set by an OS default rather than by gamend. That is now
-configurable: `GAMEND_REALTIME_SOCKET_BUFFER_KB`, default **32**, sets
-`buffer`/`recbuf`/`sndbuf` on the listener. The config provably reaches Bandit,
-but **macOS ignores it** — connected sockets keep auto-tuning to ~400 KB — while
-Linux honours `SO_RCVBUF`. So the setting is expected to do its work on the Fly
-cells and nothing locally, and confirming that is the first thing to check
-there.
+So the socket ceiling is set by an OS default rather than by gamend.
+`GAMEND_REALTIME_SOCKET_BUFFER_KB` exists to cap the driver's read buffer but
+defaults to **0**, meaning off: on macOS an accepted socket recomputes its
+buffer from the kernel's negotiated `recbuf`, so the setting is discarded, and
+whether Linux honours it is a prediction. Confirming that on the first Fly cell
+— measuring per-socket memory with the setting off and on — is what would turn
+it on by default.
+
+The obvious alternative, capping `recbuf`/`sndbuf`, is deliberately not done:
+that bounds the memory by shrinking the TCP window, capping throughput at
+window/RTT (~2.6 Mbit/s for 32 KB over 100 ms), which the same listener's Godot
+web exports and avatar uploads would pay for.
 
 Ruled out by measurement: compression (no effect) and `max_frame_size`
 (8 % effect).

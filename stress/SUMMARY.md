@@ -59,7 +59,7 @@ than as a multiplier.
 | **Logins wrote three rows synchronously.** Two were fire-and-forget. | signup 687 req/s @ 36 ms → **1,215 req/s @ 2.4 ms**. |
 | **Repeat quests re-armed once an hour**, not immediately. | fixed (separate session) |
 | **Analytics writes failed the login they rode on** under a busy database. | fixed (separate session) |
-| **Socket memory is an OS default, not our code.** ~105 KB/socket of binary memory is the kernel's 400 KB receive buffer. | now configurable: `GAMEND_REALTIME_SOCKET_BUFFER_KB`, default 32. macOS ignores it; Linux should not. |
+| **Socket memory is an OS default, not our code.** ~105 KB/socket of binary memory follows the kernel's ~400 KB receive buffer. | `GAMEND_REALTIME_SOCKET_BUFFER_KB` exists, **off by default** — see below. |
 | **`leaderboards` fails 513 read-back checks on Postgres**, none on SQLite. | open — a submitted score the caller cannot always read back. |
 
 ## What was wrong along the way
@@ -81,5 +81,15 @@ of these are easy to repeat:
   every number here comes from one laptop sharing cores with the load generator.
 - **No horizontal test.** One node, no clustering. Nakama's 2M-CCU headline is a
   cluster result and has no counterpart here yet.
-- **The socket-buffer setting is unverified in practice**, because macOS
-  overrides it. First thing to confirm on a Linux machine.
+- **The socket-buffer setting is unverified and therefore off.** It caps the
+  Erlang driver's read buffer, but an accepted socket recomputes that from the
+  kernel's negotiated `recbuf`, so macOS discards it — three attempts, no
+  change. Linux does not auto-tune the same way and should honour it; nobody
+  has watched that happen. Turning it on without measuring per-socket memory
+  before and after would be cargo cult.
+
+  Capping `recbuf`/`sndbuf` instead *would* bound the memory — by shrinking the
+  TCP window, which caps throughput at window/RTT. At 32 KB over a 100 ms link
+  that is ~2.6 Mbit/s, ample for game messages and ruinous for the same listener
+  serving a multi-megabyte Godot web export. The setting deliberately does not
+  touch them.
