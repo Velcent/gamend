@@ -562,7 +562,15 @@ defmodule GamendWeb.HostRuntime do
     # nil lets Phoenix apply its own check_origin default; "*" is Corsica's
     # allow-any. Both mean "the operator did not restrict this".
     check_origin = if allowed_origins == [], do: nil, else: allowed_origins
-    cors_allowed_origins = if allowed_origins == [], do: "*", else: allowed_origins
+
+    # Corsica needs a different shape from Phoenix for the same allowlist.
+    # `check_origin` understands the protocol-agnostic `//host` form, but
+    # Corsica compares binary origins with *exact equality* — `"//gamend.org"`
+    # never equals `"https://gamend.org"`, so a configured allowlist silently
+    # emitted no CORS headers at all. A regex per host matches either scheme and
+    # is the form Corsica does understand.
+    cors_allowed_origins =
+      if allowed_origins == [], do: "*", else: Enum.map(allowed_origins, &to_cors_origin/1)
 
     endpoint_config =
       [
@@ -594,6 +602,15 @@ defmodule GamendWeb.HostRuntime do
       {:gamend_web, GamendWeb.Endpoint, endpoint_config}
     ] ++ acme_entries(setting)
   end
+
+  # A regex passes through; `//host` becomes a scheme-agnostic pattern; a fully
+  # qualified origin is already exact and needs nothing.
+  defp to_cors_origin(%Regex{} = regex), do: regex
+
+  defp to_cors_origin("//" <> host),
+    do: Regex.compile!("^https?://" <> Regex.escape(host) <> "$")
+
+  defp to_cors_origin(origin), do: origin
 
   defp normalize_origin(<<"regex:", pattern::binary>>), do: Regex.compile!(pattern)
 
