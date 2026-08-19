@@ -349,7 +349,7 @@ Live values, and where each one came from, are on the
 | `GAMEND_REALTIME_DEBOUNCE_MS` | integer | `0` | Hold outbound state updates this long and push only the latest per object. 0 pushes immediately. |
 | `GAMEND_REALTIME_PRESENCE_POOL_SIZE` | integer | `1` | Phoenix.Presence tracker shards. Must match on every node in a cluster; needs a full restart to change. |
 | `GAMEND_REALTIME_PUBSUB_POOL_SIZE` | integer | `1` | Phoenix.PubSub shards. Raise on nodes holding many thousands of sockets. |
-| `GAMEND_REALTIME_SOCKET_BUFFER_KB` | integer | `32` | Per-connection socket buffer in KB (buffer/recbuf/sndbuf). Lower means more sockets per GB. |
+| `GAMEND_REALTIME_SOCKET_BUFFER_KB` | integer | `0` | Cap the per-connection socket read buffer, in KB. 0 leaves the OS default. Only lowers memory on platforms that honour it; does not change the TCP window. |
 
 
 ## Retention

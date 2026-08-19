@@ -613,15 +613,18 @@ defmodule GamendWeb.HostRuntime do
   # read per request by `GamendWeb.Plugs.ForceSSL`, not from here — Phoenix's
   # `:force_ssl` endpoint option is compile-time only, so configuring it in
   # this (runtime) file wrote a key nothing read and no redirect ever happened.
-  # `buffer` is the Erlang inet driver's own buffer; `recbuf`/`sndbuf` are the
-  # kernel's. All three are set together because the driver sizes itself from
-  # the socket options when it is not told otherwise, which is how an untouched
-  # connection ends up holding several hundred KB of binary memory.
+  # Only `buffer`, deliberately. It is the Erlang inet driver's own read buffer,
+  # it lives in the emulator's binary memory, and it is the ~105 KB per idle
+  # socket this exists to reclaim. `recbuf`/`sndbuf` are the *kernel's* buffers
+  # and set the TCP window — shrinking those caps a connection's throughput at
+  # window/RTT, which for the same listener that serves multi-megabyte Godot web
+  # exports would be a bad trade for memory nobody was short of. The kernel
+  # keeps sizing those; only the userspace copy is bounded.
   defp socket_buffer_options(setting) do
-    kb = setting.(GamendWeb.Realtime, :socket_buffer_kb) || 32
-    bytes = kb * 1024
-
-    [buffer: bytes, recbuf: bytes, sndbuf: bytes]
+    case setting.(GamendWeb.Realtime, :socket_buffer_kb) do
+      kb when is_integer(kb) and kb > 0 -> [buffer: kb * 1024]
+      _leave_the_default -> []
+    end
   end
 
   defp put_https(endpoint_config, setting) do
