@@ -46,13 +46,21 @@ Cluster-wide, unlike the per-node registry count it replaces.
 
 # `update`
 
+# `users_buckets`
+
+```elixir
+@spec users_buckets() :: pos_integer()
+```
+
+Number of topics connected users are spread over.
+
 # `users_topic`
 
 ```elixir
-@spec users_topic() :: String.t()
+@spec users_topic(Ecto.UUID.t()) :: String.t()
 ```
 
-Topic every connected user is tracked on.
+Topic this user is tracked on.
 
 ---
 

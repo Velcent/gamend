@@ -8,7 +8,7 @@
     <meta name="project" content="gamend_core v1.0.1171">
 
 
-    <title>Gamend.Retention — gamend_core v1.0.1171</title>
+    <title>Gamend.Accounts.PresenceWriter — gamend_core v1.0.1171</title>
 
     <link rel="stylesheet" href="dist/html-elixir-NHQLCD6Y.css" />
 
@@ -93,19 +93,19 @@ gamend_core
 <div id="top-content">
   <div class="heading-with-actions top-heading">
     <h1>
-      <span translate="no">Gamend.<wbr />Retention</span> 
+      <span translate="no">Gamend.<wbr />Accounts.<wbr />PresenceWriter</span> 
       <small class="app-vsn" translate="no">(gamend_core v1.0.1171)</small>
 
     </h1>
 
-<a href="Gamend.Retention.md" title="Copy Markdown (hold Ctrl/Cmd and click it to open as Markdown)" class="copy-markdown icon-action" rel="help">
+<a href="Gamend.Accounts.PresenceWriter.md" title="Copy Markdown (hold Ctrl/Cmd and click it to open as Markdown)" class="copy-markdown icon-action" rel="help">
   <i class="ri-markdown-line" aria-hidden="true"></i>
   <span class="sr-only">Copy Markdown</span>
 </a>
 
 
 
-      <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/retention.ex#L1" title="View Source" class="icon-action" rel="help nofollow">
+      <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/presence_writer.ex#L1" title="View Source" class="icon-action" rel="help nofollow">
         <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         <span class="sr-only">View Source</span>
       </a>
@@ -114,30 +114,27 @@ gamend_core
 
 
     <section id="moduledoc">
-<p>Periodically prunes old rows from unbounded tables.</p><p>Retention is configured per table in days via env vars (see
-<code class="inline">config/host_runtime.exs</code>); <code class="inline">0</code> or unset keeps data forever:</p><ul><li><code class="inline">RETENTION_CHAT_DAYS</code> — <code class="inline">chat_messages</code> older than N days</li><li><code class="inline">RETENTION_NOTIFICATIONS_DAYS</code> — <code class="inline">notifications</code> older than N days</li><li><code class="inline">RETENTION_PAYMENT_EVENTS_DAYS</code> — payment provider webhook events older
-than N days (purchases/entitlements are never pruned)</li><li><code class="inline">RETENTION_LOBBY_SNAPSHOTS_DAYS</code> — lobby snapshots, events and their
-content blobs. Unlike the others this defaults to 30 rather than &quot;keep
-forever&quot;: snapshots hold user metadata, and the window is what bounds that
-exposure. Runs flagged anomalous keep
-<code class="inline">RETENTION_LOBBY_SNAPSHOTS_FLAGGED_DAYS</code> instead (default 90).</li><li><code class="inline">RETENTION_PUSH_TOKENS_DAYS</code> — push tokens untouched (registered, used,
-or disabled) for N days. Defaults to 270 — Google's stale-token guidance
-— so the table tracks live devices, not install history.</li><li><code class="inline">RETENTION_INVITES_DAYS</code> — resolved group/party invites and join requests,
-N days after resolution (default 30). Pending rows are never pruned.</li><li><code class="inline">RETENTION_MATCHMAKING_TICKETS_HOURS</code> — tickets older than N hours
-(default 24), in any status.</li><li><code class="inline">RETENTION_TOURNAMENTS_DAYS</code> / <code class="inline">RETENTION_LEDGER_DAYS</code> — finished
-tournaments and the wallet/inventory ledgers. Both default to <code class="inline">0</code>: they
-are history an operator may be required to keep.</li><li><code class="inline">RETENTION_ACTIVITY_DAYS</code> — <code class="inline">user_activity_days</code> rows (one per user per
-UTC day seen, behind DAU and D1/D7/D30) older than N days. Defaults to
-<code class="inline">0</code>; the table grows by at most one row per active user per day, and a
-window shorter than the analytics cohort span (60 days) blanks the
-retention numbers.</li><li><code class="inline">RETENTION_ABANDONED_LOBBY_MINUTES</code> (15) — lobbies nobody has been seen in
-for N minutes, in minutes rather than days. The same window releases a lobby
-seat held by a long-offline player and disbands a party everyone abandoned.</li></ul><p>Expired IP bans, OAuth sessions older than a day, user tokens past their own
-context's validity, and stored avatars whose owner no longer exists are always
-removed (independent of the env vars above). Deletes are idempotent, so
-running on several instances at once is harmless; each class is batched and
-failure-isolated, and emits <code class="inline">[:gamend, :retention, :pruned]</code> telemetry with
-its count.</p>
+<p>Coalesces <code class="inline">users.is_online</code> transitions into one write per flush window.</p><p><code class="inline">Accounts.set_user_online/1</code> and <code class="inline">set_user_offline/1</code> already skip the write
+entirely when the flag is unchanged, so a reconnect or a second socket for an
+already-online player costs nothing. What is left is the storm: N <em>distinct</em>
+players connecting at once is N separate transactions, and on single-writer
+SQLite those serialize behind each other.</p><p>This buffers the transitions and flushes them as one <code class="inline">SELECT</code> (which rows
+would actually change) plus one <code class="inline">UPDATE</code> per direction, then fires the same
+cache invalidation, broadcasts and hooks the synchronous path fires — once
+per user that really transitioned, never for a no-op.</p><h2 id="module-buffered-state-is-in-ets-not-in-the-genserver" class="section-heading"><a href="#module-buffered-state-is-in-ets-not-in-the-genserver" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Buffered state is in ETS, not in the GenServer</span></h2><p>Callers have to read the buffer to decide whether they are making a real
+transition: a player who disconnects inside the flush window must see their
+own pending connect, or the disconnect reads as a no-op and the stale connect
+is what reaches the database. Routing that read through the process would put
+a <code class="inline">GenServer.call</code> on every socket join — the exact serialization this module
+exists to remove — so the buffer is a public ETS table and the process only
+owns the timer.</p><h2 id="module-configuration" class="section-heading"><a href="#module-configuration" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Configuration</span></h2><pre><code class="makeup elixir" translate="no"><span class="n">config</span><span class="w"> </span><span class="ss">:gamend_core</span><span class="p">,</span><span class="w"> </span><span class="nc">Gamend.Accounts.PresenceWriter</span><span class="p">,</span><span class="w">
+  </span><span class="ss">flush_ms</span><span class="p">:</span><span class="w"> </span><span class="mi">200</span><span class="w">      </span><span class="c1"># 0 writes through synchronously</span></code></pre><p><code class="inline">flush_ms: 0</code> is exactly the old behaviour and is what the test environment
+runs, so a test can assert on <code class="inline">is_online</code> immediately after the call. In
+production the flag lags by at most one window — <code class="inline">StalePresenceSweeper</code> is
+the backstop that already tolerates far more drift than that, and realtime
+subscribers are told over PubSub from the channel, not from this write.</p><p>If the process is not running (some test setups start a partial tree),
+<a href="#flush_ms/0"><code class="inline">flush_ms/0</code></a> reports 0 and callers write through rather than dropping the
+transition on the floor.</p>
     </section>
 
 </div>
@@ -166,43 +163,50 @@ its count.</p>
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#prune_all/0" data-no-tooltip="" translate="no">prune_all()</a>
+        <a href="#flush/0" data-no-tooltip="" translate="no">flush()</a>
 
       </div>
 
-        <div class="summary-synopsis"><p>Runs all configured pruning steps once. Returns a map of deleted row
-counts per table.</p></div>
+        <div class="summary-synopsis"><p>Flushes everything buffered right now. Synchronous; used by tests.</p></div>
 
     </div>
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#run_now/0" data-no-tooltip="" translate="no">run_now()</a>
+        <a href="#flush_ms/0" data-no-tooltip="" translate="no">flush_ms()</a>
 
       </div>
 
-        <div class="summary-synopsis"><p>Sweeps now instead of waiting for the next cycle, and records the run like a
-scheduled one. Runs inside the GenServer so a manual run and the timer can
-never overlap.</p></div>
+        <div class="summary-synopsis"><p>Milliseconds to buffer transitions. 0 means callers write through.</p></div>
 
     </div>
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#start_link/1" data-no-tooltip="" translate="no">start_link(opts)</a>
+        <a href="#mark/2" data-no-tooltip="" translate="no">mark(user_id, online?)</a>
 
       </div>
+
+        <div class="summary-synopsis"><p>Queues an online/offline transition for <code class="inline">user_id</code>.</p></div>
 
     </div>
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#status/0" data-no-tooltip="" translate="no">status()</a>
+        <a href="#pending/2" data-no-tooltip="" translate="no">pending(user_id, default)</a>
 
       </div>
 
-        <div class="summary-synopsis"><p>What the last sweep did, for the admin page. Falls back to &quot;never run&quot; when
-the sweeper is not supervised (tests, or an instance with it disabled).</p></div>
+        <div class="summary-synopsis"><p>The state this user is buffered to become, or <code class="inline">default</code> when nothing is
+buffered for them.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#start_link/1" data-no-tooltip="" translate="no">start_link(opts \\ [])</a>
+
+      </div>
 
     </div>
 
@@ -230,7 +234,7 @@ the sweeper is not supervised (tests, or an instance with it disabled).</p></div
       <h1 class="signature" translate="no">child_spec(init_arg)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/retention.ex#L44" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/presence_writer.ex#L42" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -242,17 +246,17 @@ the sweeper is not supervised (tests, or an instance with it disabled).</p></div
 <p>Returns a specification to start this module under a supervisor.</p><p>See <a href="https://hexdocs.pm/elixir/Supervisor.html"><code class="inline">Supervisor</code></a>.</p>
   </section>
 </section>
-<section class="detail" id="prune_all/0">
+<section class="detail" id="flush/0">
 
   <div class="detail-header">
-    <a href="#prune_all/0" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+    <a href="#flush/0" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
       <i class="ri-link-m" aria-hidden="true"></i>
     </a>
     <div class="heading-with-actions">
-      <h1 class="signature" translate="no">prune_all()</h1>
+      <h1 class="signature" translate="no">flush()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/retention.ex#L168" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/presence_writer.ex#L103" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -263,25 +267,24 @@ the sweeper is not supervised (tests, or an instance with it disabled).</p></div
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> prune_all() :: %{required(<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>()) =&gt; <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>()}</pre>
+          <pre translate="no"><span class="attribute">@spec</span> flush() :: :ok</pre>
 
       </div>
 
-<p>Runs all configured pruning steps once. Returns a map of deleted row
-counts per table.</p>
+<p>Flushes everything buffered right now. Synchronous; used by tests.</p>
   </section>
 </section>
-<section class="detail" id="run_now/0">
+<section class="detail" id="flush_ms/0">
 
   <div class="detail-header">
-    <a href="#run_now/0" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+    <a href="#flush_ms/0" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
       <i class="ri-link-m" aria-hidden="true"></i>
     </a>
     <div class="heading-with-actions">
-      <h1 class="signature" translate="no">run_now()</h1>
+      <h1 class="signature" translate="no">flush_ms()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/retention.ex#L133" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/presence_writer.ex#L65" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -292,26 +295,84 @@ counts per table.</p>
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> run_now() :: %{required(<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>()) =&gt; <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>()}</pre>
+          <pre translate="no"><span class="attribute">@spec</span> flush_ms() :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>()</pre>
 
       </div>
 
-<p>Sweeps now instead of waiting for the next cycle, and records the run like a
-scheduled one. Runs inside the GenServer so a manual run and the timer can
-never overlap.</p>
+<p>Milliseconds to buffer transitions. 0 means callers write through.</p>
+  </section>
+</section>
+<section class="detail" id="mark/2">
+
+  <div class="detail-header">
+    <a href="#mark/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">mark(user_id, online?)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/presence_writer.ex#L96" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> mark(<a href="https://hexdocs.pm/ecto/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()) :: :ok</pre>
+
+      </div>
+
+<p>Queues an online/offline transition for <code class="inline">user_id</code>.</p><p>Later marks for the same user replace earlier ones, so a connect immediately
+followed by a disconnect flushes once, as the disconnect.</p>
+  </section>
+</section>
+<section class="detail" id="pending/2">
+
+  <div class="detail-header">
+    <a href="#pending/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">pending(user_id, default)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/presence_writer.ex#L80" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> pending(<a href="https://hexdocs.pm/ecto/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()) :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()</pre>
+
+      </div>
+
+<p>The state this user is buffered to become, or <code class="inline">default</code> when nothing is
+buffered for them.</p>
   </section>
 </section>
 <section class="detail" id="start_link/1">
+
+    <span id="start_link/0"></span>
 
   <div class="detail-header">
     <a href="#start_link/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
       <i class="ri-link-m" aria-hidden="true"></i>
     </a>
     <div class="heading-with-actions">
-      <h1 class="signature" translate="no">start_link(opts)</h1>
+      <h1 class="signature" translate="no">start_link(opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/retention.ex#L102" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/presence_writer.ex#L57" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -321,39 +382,6 @@ never overlap.</p>
   <section class="docstring">
 
 
-  </section>
-</section>
-<section class="detail" id="status/0">
-
-  <div class="detail-header">
-    <a href="#status/0" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
-      <i class="ri-link-m" aria-hidden="true"></i>
-    </a>
-    <div class="heading-with-actions">
-      <h1 class="signature" translate="no">status()</h1>
-
-
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/retention.ex#L121" class="icon-action" rel="help nofollow" aria-label="View Source">
-          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
-        </a>
-
-    </div>
-  </div>
-
-  <section class="docstring">
-
-      <div class="specs">
-
-          <pre translate="no"><span class="attribute">@spec</span> status() :: %{
-  last_run_at: <a href="https://hexdocs.pm/elixir/DateTime.html#t:t/0">DateTime.t</a>() | nil,
-  duration_ms: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>() | nil,
-  results: %{required(<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>()) =&gt; <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>()}
-}</pre>
-
-      </div>
-
-<p>What the last sweep did, for the admin page. Falls back to &quot;never run&quot; when
-the sweeper is not supervised (tests, or an instance with it disabled).</p>
   </section>
 </section>
 

@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.3">
-    <meta name="project" content="gamend_core v1.0.1170">
+    <meta name="project" content="gamend_core v1.0.1171">
 
 
-    <title>Gamend.Presence — gamend_core v1.0.1170</title>
+    <title>Gamend.Presence — gamend_core v1.0.1171</title>
 
     <link rel="stylesheet" href="dist/html-elixir-NHQLCD6Y.css" />
 
-    <script defer src="dist/sidebar_items-A842951E.js"></script>
+    <script defer src="dist/sidebar_items-45DACEE7.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-Y2MUTVIN.js"></script>
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1170
+          v1.0.1171
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr />Presence</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1170)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1171)</small>
 
     </h1>
 
@@ -254,11 +254,21 @@ table — and not for anything durable, since a full cluster restart empties it.
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#users_topic/0" data-no-tooltip="" translate="no">users_topic()</a>
+        <a href="#users_buckets/0" data-no-tooltip="" translate="no">users_buckets()</a>
 
       </div>
 
-        <div class="summary-synopsis"><p>Topic every connected user is tracked on.</p></div>
+        <div class="summary-synopsis"><p>Number of topics connected users are spread over.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#users_topic/1" data-no-tooltip="" translate="no">users_topic(user_id)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Topic this user is tracked on.</p></div>
 
     </div>
 
@@ -374,7 +384,7 @@ table — and not for anything durable, since a full cluster restart empties it.
       <h1 class="signature" translate="no">last_socket?(user_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/presence.ex#L32" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/presence.ex#L48" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -546,17 +556,17 @@ table — and not for anything durable, since a full cluster restart empties it.
 <p>Callback implementation for <a href="https://hexdocs.pm/phoenix/1.8.11/Phoenix.Presence.html#c:update/4"><code class="inline">Phoenix.Presence.update/4</code></a>.</p>
   </section>
 </section>
-<section class="detail" id="users_topic/0">
+<section class="detail" id="users_buckets/0">
 
   <div class="detail-header">
-    <a href="#users_topic/0" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+    <a href="#users_buckets/0" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
       <i class="ri-link-m" aria-hidden="true"></i>
     </a>
     <div class="heading-with-actions">
-      <h1 class="signature" translate="no">users_topic()</h1>
+      <h1 class="signature" translate="no">users_buckets()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/presence.ex#L24" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/presence.ex#L40" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -567,11 +577,39 @@ table — and not for anything durable, since a full cluster restart empties it.
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> users_topic() :: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()</pre>
+          <pre translate="no"><span class="attribute">@spec</span> users_buckets() :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pos_integer</a>()</pre>
 
       </div>
 
-<p>Topic every connected user is tracked on.</p>
+<p>Number of topics connected users are spread over.</p>
+  </section>
+</section>
+<section class="detail" id="users_topic/1">
+
+  <div class="detail-header">
+    <a href="#users_topic/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">users_topic(user_id)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/presence.ex#L36" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> users_topic(<a href="https://hexdocs.pm/ecto/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) :: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()</pre>
+
+      </div>
+
+<p>Topic this user is tracked on.</p>
   </section>
 </section>
 
@@ -583,9 +621,9 @@ table — and not for anything durable, since a full cluster restart empties it.
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1170">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1171">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1170">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1171">Hex Preview</a>
 
             </span>
 

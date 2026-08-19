@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.3">
-    <meta name="project" content="gamend_core v1.0.1170">
+    <meta name="project" content="gamend_core v1.0.1171">
 
 
-    <title>Gamend.Quests — gamend_core v1.0.1170</title>
+    <title>Gamend.Quests — gamend_core v1.0.1171</title>
 
     <link rel="stylesheet" href="dist/html-elixir-NHQLCD6Y.css" />
 
-    <script defer src="dist/sidebar_items-A842951E.js"></script>
+    <script defer src="dist/sidebar_items-45DACEE7.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-Y2MUTVIN.js"></script>
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1170
+          v1.0.1171
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr />Quests</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1170)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1171)</small>
 
     </h1>
 
@@ -120,11 +120,11 @@ weekly / monthly / every N days / repeat-on-claim), an optional <strong>window</
 (<code class="inline">prerequisite_quest_key</code>). Any combination works — a biweekly quest inside
 a seasonal window that also requires an earlier quest is just those three
 fields set. Rewards pay into <a href="Gamend.Economy.html"><code class="inline">Gamend.Economy</code></a> / <a href="Gamend.Inventory.html"><code class="inline">Gamend.Inventory</code></a>
-exactly once. <code class="inline">category</code> is a free-form label for your UI only.</p><h2 id="module-reporting-progress-server-side-hooks" class="section-heading"><a href="#module-reporting-progress-server-side-hooks" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Reporting progress (server-side / hooks)</span></h2><pre><code class="makeup elixir" translate="no"><span class="nc">Quests</span><span class="o">.</span><span class="n">report_event</span><span class="p" data-group-id="0756198237-1">(</span><span class="n">user_id</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;enemy_killed&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="0756198237-2">%{</span><span class="s">&quot;map&quot;</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;desert&quot;</span><span class="p" data-group-id="0756198237-2">}</span><span class="p" data-group-id="0756198237-1">)</span></code></pre><p>Every <strong>active</strong> quest with an objective on <code class="inline">&quot;enemy_killed&quot;</code> (whose <code class="inline">params</code>
+exactly once. <code class="inline">category</code> is a free-form label for your UI only.</p><h2 id="module-reporting-progress-server-side-hooks" class="section-heading"><a href="#module-reporting-progress-server-side-hooks" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Reporting progress (server-side / hooks)</span></h2><pre><code class="makeup elixir" translate="no"><span class="nc">Quests</span><span class="o">.</span><span class="n">report_event</span><span class="p" data-group-id="0939221774-1">(</span><span class="n">user_id</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;enemy_killed&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="0939221774-2">%{</span><span class="s">&quot;map&quot;</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;desert&quot;</span><span class="p" data-group-id="0939221774-2">}</span><span class="p" data-group-id="0939221774-1">)</span></code></pre><p>Every <strong>active</strong> quest with an objective on <code class="inline">&quot;enemy_killed&quot;</code> (whose <code class="inline">params</code>
 all match the meta) advances; a quest completes when every objective meets
 its target. There is deliberately <strong>no public endpoint</strong> for this — clients
 cannot advance their own quests. Core wires common events; games call it
-from their hooks for custom events.</p><h2 id="module-claiming" class="section-heading"><a href="#module-claiming" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Claiming</span></h2><pre><code class="makeup elixir" translate="no"><span class="p" data-group-id="8191948233-1">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="8191948233-2">%{</span><span class="ss">progress</span><span class="p">:</span><span class="w"> </span><span class="n">progress</span><span class="p">,</span><span class="w"> </span><span class="ss">rewards</span><span class="p">:</span><span class="w"> </span><span class="n">rewards</span><span class="p" data-group-id="8191948233-2">}</span><span class="p" data-group-id="8191948233-1">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Quests</span><span class="o">.</span><span class="n">claim</span><span class="p" data-group-id="8191948233-3">(</span><span class="n">user_id</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;daily_win_3&quot;</span><span class="p" data-group-id="8191948233-3">)</span></code></pre><p>Claiming is gated by an atomic <code class="inline">completed → claimed</code> status transition, so a
+from their hooks for custom events.</p><h2 id="module-claiming" class="section-heading"><a href="#module-claiming" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Claiming</span></h2><pre><code class="makeup elixir" translate="no"><span class="p" data-group-id="4410813225-1">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="4410813225-2">%{</span><span class="ss">progress</span><span class="p">:</span><span class="w"> </span><span class="n">progress</span><span class="p">,</span><span class="w"> </span><span class="ss">rewards</span><span class="p">:</span><span class="w"> </span><span class="n">rewards</span><span class="p" data-group-id="4410813225-2">}</span><span class="p" data-group-id="4410813225-1">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Quests</span><span class="o">.</span><span class="n">claim</span><span class="p" data-group-id="4410813225-3">(</span><span class="n">user_id</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;daily_win_3&quot;</span><span class="p" data-group-id="4410813225-3">)</span></code></pre><p>Claiming is gated by an atomic <code class="inline">completed → claimed</code> status transition, so a
 double-tap or a concurrent claim can't double-pay. Rewards are granted after
 the transition with a per-entry idempotency key (<code class="inline">&quot;quest:&lt;progress_id&gt;:&lt;i&gt;&quot;</code>,
 or <code class="inline">&quot;quest:&lt;progress_id&gt;:&lt;claim_count&gt;:&lt;i&gt;&quot;</code> once a <code class="inline">repeat</code> quest has been
@@ -655,7 +655,7 @@ lazily when they list their quests). Returns the number of rows retried.</p></di
       <h1 class="signature" translate="no">admin_claim(user_id, quest_key)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1526" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1533" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -685,7 +685,7 @@ lazily when they list their quests). Returns the number of rows retried.</p></di
       <h1 class="signature" translate="no">admin_complete(user_id, quest_key)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1441" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1448" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -715,7 +715,7 @@ its target and the normal completion side effects fire (hooks, auto-claim).</p>
       <h1 class="signature" translate="no">admin_reset(user_id, quest_key)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1508" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1515" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -744,7 +744,7 @@ its target and the normal completion side effects fire (hooks, auto-claim).</p>
       <h1 class="signature" translate="no">chain(user_id, quest_key)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L967" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L974" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -818,7 +818,7 @@ returns just its own entry.</p>
       <h1 class="signature" translate="no">claim(user_id, quest_key, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L615" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L622" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -850,7 +850,7 @@ returns just its own entry.</p>
       <h1 class="signature" translate="no">claimable_count(user_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1351" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1358" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -880,7 +880,7 @@ returns just its own entry.</p>
       <h1 class="signature" translate="no">count_progress(opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1397" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1404" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -940,7 +940,7 @@ returns just its own entry.</p>
       <h1 class="signature" translate="no">count_user_completions(user_id, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1332" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1339" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -973,7 +973,7 @@ returns just its own entry.</p>
       <h1 class="signature" translate="no">count_user_quests(user_id, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1126" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1133" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1032,7 +1032,7 @@ returns just its own entry.</p>
       <h1 class="signature" translate="no">dashboard_stats()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1557" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1564" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1089,7 +1089,7 @@ returns just its own entry.</p>
       <h1 class="signature" translate="no">funnel(quest_key)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1583" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1590" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1117,7 +1117,7 @@ returns just its own entry.</p>
       <h1 class="signature" translate="no">get_progress(user_id, quest_key)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1362" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1369" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1201,7 +1201,7 @@ returns just its own entry.</p>
       <h1 class="signature" translate="no">group(user_id, group_key)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1020" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1027" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1239,7 +1239,7 @@ out too, so the count on the collapsed entry matches what opening it reveals.</p
       <h1 class="signature" translate="no">host_visible(quests, user_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1174" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1181" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1279,7 +1279,7 @@ left it; veto the claim in <code class="inline">before_quest_claim</code> if tha
       <h1 class="signature" translate="no">list_progress(opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1387" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1394" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1339,7 +1339,7 @@ left it; veto the claim in <code class="inline">before_quest_claim</code> if tha
       <h1 class="signature" translate="no">list_user_completions(user_id, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1319" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1326" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1375,7 +1375,7 @@ left it; veto the claim in <code class="inline">before_quest_claim</code> if tha
       <h1 class="signature" translate="no">list_user_quests(user_id, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1108" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1115" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1416,7 +1416,7 @@ quests collapse to one entry carrying <code class="inline">:group_size</code>.</
       <h1 class="signature" translate="no">period_key(quest_or_reset, now)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1606" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1613" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1447,7 +1447,7 @@ from the clock, so a reset needs nothing to fire at midnight.</p>
       <h1 class="signature" translate="no">prerequisite_met?(user_id, quest)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L523" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L530" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1475,7 +1475,7 @@ from the clock, so a reset needs nothing to fire at midnight.</p>
       <h1 class="signature" translate="no">prune_old_periods()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1542" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1549" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1506,7 +1506,7 @@ from the clock, so a reset needs nothing to fire at midnight.</p>
       <h1 class="signature" translate="no">rearm_repeat_quests(opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L764" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L771" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1538,7 +1538,7 @@ back, without a job that has to be running for the feature to work.</p>
       <h1 class="signature" translate="no">recover_pending_rewards(opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L914" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L921" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1569,7 +1569,7 @@ lazily when they list their quests). Returns the number of rows retried.</p>
       <h1 class="signature" translate="no">render_counter(quest)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L727" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L734" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1634,7 +1634,7 @@ when every param key/value is present in <code class="inline">meta</code>.</p><p
       <h1 class="signature" translate="no">resolve_counter(quest, progress)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L708" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L715" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1767,7 +1767,7 @@ completed rows, and the group-by reads the same rows the listing already does.</
       <h1 class="signature" translate="no">visible_categories(user_id \\ nil)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1140" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1147" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1797,9 +1797,9 @@ the signed-out catalog.</p>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1170">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1171">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1170">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1171">Hex Preview</a>
 
             </span>
 
