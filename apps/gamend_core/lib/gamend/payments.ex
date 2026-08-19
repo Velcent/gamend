@@ -233,8 +233,12 @@ defmodule Gamend.Payments do
   @spec fulfill_purchase(Purchase.t(), map()) :: {:ok, Purchase.t()} | {:error, term()}
   def fulfill_purchase(%Purchase{} = purchase, provider_payload \\ %{})
       when is_map(provider_payload) do
+    # Durable, not just transactional: the provider has already taken the
+    # player's money by the time this runs, so this commit is the one write in
+    # the app that must survive a crash even when `db.postgres_synchronous_commit`
+    # is `off` for everything else.
     result =
-      Repo.transaction(fn ->
+      Repo.durable_transaction(fn ->
         purchase =
           Purchase
           |> Repo.get!(purchase.id)
@@ -275,7 +279,9 @@ defmodule Gamend.Payments do
     now = DateTime.utc_now(:second)
     attrs = normalize_params(attrs)
 
-    Repo.transaction(fn ->
+    # A revocation removes entitlements the player paid for; losing it to a
+    # crash leaves them holding goods a refund already took back.
+    Repo.durable_transaction(fn ->
       purchase =
         Purchase
         |> Repo.get!(purchase.id)

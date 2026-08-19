@@ -14,6 +14,11 @@ defmodule Gamend.Retention do
     forever": snapshots hold user metadata, and the window is what bounds that
     exposure. Runs flagged anomalous keep
     `RETENTION_LOBBY_SNAPSHOTS_FLAGGED_DAYS` instead (default 90).
+  - Client log sessions (`Gamend.ClientLogs`), on their own settings rather
+    than a `RETENTION_*` var: `retention_days` (14) and
+    `retention_flagged_days` (90), keyed off `last_seen_at`. This prunes the
+    index over client logs, not the lines — those live in the host's log store
+    on its own retention.
   - `RETENTION_PUSH_TOKENS_DAYS` — push tokens untouched (registered, used,
     or disabled) for N days. Defaults to 270 — Google's stale-token guidance
     — so the table tracks live devices, not install history.
@@ -49,6 +54,9 @@ defmodule Gamend.Retention do
 
   alias Gamend.Accounts
   alias Gamend.Accounts.{User, UserToken}
+  alias Gamend.ClientLogs
+  alias Gamend.ClientLogs.Session, as: ClientSession
+  alias Gamend.ClientLogs.SessionLobby
   alias Gamend.Lobbies
   alias Gamend.Lobbies.Lobby
   alias Gamend.LobbySnapshots.{Blob, Event, Snapshot}
@@ -183,6 +191,7 @@ defmodule Gamend.Retention do
         expired_ip_bans: &prune_expired_ip_bans/0,
         expired_user_tokens: &prune_expired_user_tokens/0,
         lobby_snapshots: &prune_lobby_snapshots/0,
+        client_sessions: &prune_client_sessions/0,
         lobby_snapshot_blobs: &prune_lobby_snapshot_blobs/0,
         offline_lobby_memberships: &release_offline_lobby_memberships/0,
         offline_party_memberships: &release_offline_party_memberships/0,
@@ -268,6 +277,57 @@ defmodule Gamend.Retention do
             where: s.lobby_id == parent_as(:row).lobby_id and s.flagged,
             select: 1
         )
+  end
+
+  # Client log sessions, on the same flagged/unflagged split as lobby snapshots
+  # and for the same reason: a session that errored is the one someone will
+  # come back to, and it is worth outliving the ordinary window.
+  #
+  # By `last_seen_at`, not `inserted_at` — a session is a run, and a long one
+  # should not start expiring from the moment it began.
+  #
+  # This prunes the *index*, not the log lines. Those live in the host's log
+  # store on its own retention, so a shorter window here loses the ability to
+  # find a session, not the ability to read one whose id you already have.
+  defp prune_client_sessions do
+    days = ClientLogs.resolved_config(:retention_days)
+
+    if is_integer(days) and days > 0 do
+      # Never shorter than the normal window, or flagged sessions would expire
+      # first — the opposite of the point.
+      flagged_days = max(ClientLogs.resolved_config(:retention_flagged_days) || days, days)
+
+      prune_client_sessions_before(cutoff(flagged_days), :all) +
+        prune_client_sessions_before(cutoff(days), :unflagged)
+    else
+      0
+    end
+  end
+
+  defp prune_client_sessions_before(cutoff, scope) do
+    query = from(s in ClientSession, where: s.last_seen_at < ^cutoff)
+
+    query =
+      case scope do
+        :all -> query
+        :unflagged -> from(s in query, where: s.flagged == false)
+      end
+
+    # Collect the ids first: the lobby rows are keyed by the client-generated
+    # session id, not by a foreign key, so nothing cascades.
+    ids = Repo.all(from(s in query, select: s.client_session_id))
+
+    if ids == [] do
+      0
+    else
+      {lobby_count, _} =
+        Repo.delete_all(from(l in SessionLobby, where: l.client_session_id in ^ids))
+
+      {session_count, _} =
+        Repo.delete_all(from(s in ClientSession, where: s.client_session_id in ^ids))
+
+      lobby_count + session_count
+    end
   end
 
   # Safe to prune by age only because the writer touches last_referenced_at on

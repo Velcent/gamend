@@ -381,6 +381,78 @@ defmodule Gamend.LeaderboardsTest do
 
       assert Leaderboards.list_records_around_user(lb.id, user.id, limit: 2) == []
     end
+
+    test "centres the window on the caller at every position on the board" do
+      {:ok, lb} = Leaderboards.create_leaderboard(%{slug: "around_positions_test", title: "Test"})
+
+      # Descending board, so the user given score i * 100 sits at rank 11 - i.
+      users =
+        for i <- 1..10 do
+          user = AccountsFixtures.user_fixture()
+          Leaderboards.submit_score(lb.id, user.id, i * 100)
+          user
+        end
+
+      for {user, i} <- Enum.with_index(users, 1) do
+        rank = 11 - i
+        result = Leaderboards.list_records_around_user(lb.id, user.id, limit: 5)
+        ranks = Enum.map(result, & &1.rank)
+
+        # Two above, the caller, two below — clamped at each end of the board,
+        # where the window shortens rather than sliding.
+        expected = Enum.to_list(max(1, rank - 2)..min(10, max(1, rank - 2) + 4))
+
+        assert ranks == expected, "rank #{rank}: expected #{inspect(expected)}, got #{inspect(ranks)}"
+        assert Enum.find(result, &(&1.user_id == user.id)).rank == rank
+      end
+    end
+
+    test "reads the rank and the window in one query" do
+      {:ok, lb} = Leaderboards.create_leaderboard(%{slug: "around_atomic_test", title: "Test"})
+
+      users =
+        for i <- 1..10 do
+          user = AccountsFixtures.user_fixture()
+          Leaderboards.submit_score(lb.id, user.id, i * 100)
+          user
+        end
+
+      target = Enum.at(users, 0)
+
+      # This is the actual bug, expressed as the only thing that can rule it
+      # out. The window used to be built from a rank query and then an OFFSET
+      # query that trusted it; any score submitted in between moved the caller
+      # and the second query windowed around where they had been, so past a
+      # few positions of drift the caller was missing from their own
+      # "around me" page — 3.2% of those reads under 30 concurrent writers on
+      # Postgres, and none on SQLite, whose single writer hid it.
+      #
+      # No test can schedule that interleaving reliably. Counting the
+      # statements can: with one, there is no interval for a write to land in.
+      handler = {__MODULE__, :around_query_count, System.unique_integer()}
+      parent = self()
+
+      :telemetry.attach(
+        handler,
+        [:gamend, :repo, :query],
+        fn _event, _measurements, meta, _config -> send(parent, {:repo_query, meta[:source]}) end,
+        nil
+      )
+
+      Leaderboards.list_records_around_user(lb.id, target.id, limit: 5)
+
+      :telemetry.detach(handler)
+
+      assert collect_query_sources() |> Enum.count(&(&1 == "leaderboard_records")) == 1
+    end
+  end
+
+  defp collect_query_sources(acc \\ []) do
+    receive do
+      {:repo_query, source} -> collect_query_sources([source | acc])
+    after
+      0 -> acc
+    end
   end
 
   describe "delete_record/1" do

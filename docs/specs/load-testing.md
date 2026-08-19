@@ -528,13 +528,18 @@ totals 3.8 MB). The binaries are **socket buffers**: a connected socket reports
 `buffer: 408_300` because macOS auto-tunes `recbuf` to ~470 KB and the inet
 driver sizes itself from that.
 
-So the socket ceiling is set by an OS default rather than by gamend. That is now
-configurable: `GAMEND_REALTIME_SOCKET_BUFFER_KB`, default **32**, sets
-`buffer`/`recbuf`/`sndbuf` on the listener. The config provably reaches Bandit,
-but **macOS ignores it** — connected sockets keep auto-tuning to ~400 KB — while
-Linux honours `SO_RCVBUF`. So the setting is expected to do its work on the Fly
-cells and nothing locally, and confirming that is the first thing to check
-there.
+So the socket ceiling is set by an OS default rather than by gamend.
+`GAMEND_REALTIME_SOCKET_BUFFER_KB` exists to cap the driver's read buffer but
+defaults to **0**, meaning off: on macOS an accepted socket recomputes its
+buffer from the kernel's negotiated `recbuf`, so the setting is discarded, and
+whether Linux honours it is a prediction. Confirming that on the first Fly cell
+— measuring per-socket memory with the setting off and on — is what would turn
+it on by default.
+
+The obvious alternative, capping `recbuf`/`sndbuf`, is deliberately not done:
+that bounds the memory by shrinking the TCP window, capping throughput at
+window/RTT (~2.6 Mbit/s for 32 KB over 100 ms), which the same listener's Godot
+web exports and avatar uploads would pay for.
 
 Ruled out by measurement: compression (no effect) and `max_frame_size`
 (8 % effect).
@@ -544,6 +549,24 @@ a measured marginal cost**, not runs against an enforced limit. The BEAM has no
 VM-wide memory cap — `+hmax` bounds one process, everything else is a cgroup or
 container limit where exceeding it kills the VM. A true ceiling test runs under
 such a limit and finds where it dies.
+
+## Bottlenecks: four read from the numbers, one real
+
+| hypothesis | verdict |
+|---|---|
+| matchmaking's 3.1 s is the sweep interval | **true** — a join now nudges the worker; 3,146 ms → **66 ms**, scenario 40 → 477 req/s |
+| advisory locks (+8 ms on PG) hurt hot write paths | false — `Economy.grant` is lock-free; the 8 ms was the synthetic `stress_kv_write_locked` probe |
+| `quest_claim` takes two locks | false — it takes none; atomic conditional `UPDATE` plus a lock-free grant |
+| `page_home` is 4.5x slower on PG, so N+1 | false — 1 query, 6 ms warm |
+
+The lesson for the matrix: a number that looks like a bottleneck is a
+*hypothesis about code*, and reading the code is cheaper than acting on the
+number. Three of four did not survive that step.
+
+Genuinely open: `Quests.advance_quest` holds a per-(user, quest) advisory lock
+because merging objective progress is a read-modify-write of a JSON map. It is
+the one hot path where the lock cost is real, and making it atomic across both
+adapters is a design change rather than tuning.
 
 ## Comparison with Nakama
 

@@ -127,15 +127,30 @@ Two numbers that are the scenario rather than the server: `matchmaking` waits on
 the matchmaking sweep tick, and `ws_join_idle` holds a socket for its dwell and
 makes almost no requests. Neither is a throughput measurement.
 
+## What it measures, in practice
+
+The last full run on a MacBook Air M1 (8 cores, production build, generator on
+the same machine, so a floor rather than a ceiling):
+
+| operation | SQLite | PostgreSQL |
+|---|---:|---:|
+| cached read | 17,489/s | 16,422/s |
+| plugin call (no database) | 16,372/s | 12,616/s |
+| write | 4,266/s | 5,472/s |
+| write inside a lock | 966/s | 1,574/s |
+
+Reads all cost the same, plugin or not. Writes are ~4x a read, and a locked
+write ~4x again. Read the suite's **flows/s** column rather than req/s when
+comparing scenarios: a flow that spends five requests is not slower than one
+that spends one. [Performance](performance) has the flow table, capacity per
+gigabyte, per-socket memory, and the comparison with other game backends.
+
 ## What a laptop number means
 
 Only one thing: the same laptop, before and after your change. k6 and the server
 share your cores, so past a few dozen virtual users you are partly measuring
 that. For a figure you intend to quote, run the server on its own machine with
 the generator in the same region — see the harness README for the Fly setup.
-
-A worked example, including hardware, is committed at
-[`stress/baselines/`](https://github.com/appsinacup/gamend/tree/main/stress/baselines).
 
 ## Writing your own scenario
 

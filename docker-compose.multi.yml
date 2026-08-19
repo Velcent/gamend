@@ -46,6 +46,15 @@ services:
       GAMEND_DB_POSTGRES_USER: postgres
       GAMEND_DB_POSTGRES_PASSWORD: postgres
       GAMEND_DB_POSTGRES_DB: gamend_dev
+      # `off` is gamend's default -- stated here because durability should be
+      # visible in a deploy file rather than inherited. It commits without
+      # waiting for the WAL fsync (+71% on write throughput, 3,096/s ->
+      # 7,448/s on the load-test harness) and exposes up to ~600ms of commits
+      # to an OS crash. Nothing is corrupted -- this is not `fsync = off` --
+      # a few recent writes are simply not there. Payments override it per
+      # transaction (Gamend.Repo.durable_transaction/2). Set "on" for
+      # PostgreSQL's durable default.
+      GAMEND_DB_POSTGRES_SYNCHRONOUS_COMMIT: "off"
       # Cache
       GAMEND_CACHE_MODE: multi
       GAMEND_CACHE_L2: redis

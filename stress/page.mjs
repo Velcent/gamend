@@ -75,7 +75,7 @@ export function renderMarkdown(runs, agg) {
   L.push('|---|---:|---:|---:|---:|---:|---:|---:|');
   for (const r of runs) {
     L.push(
-      `| ${r.name} | ${fmt(r.rps, 1)} | ${fmtInt(r.requests)} | ${ms(r.med)} | ${ms(r.p95)} | ` +
+      `| ${r.name} | ${fmt(r.rps, 1)} | ${fmt(r.steps, 1)} | ${fmt(r.flowsPerSec, 1)} | ${ms(r.med)} | ${ms(r.p95)} | ` +
         `${ms(r.p99)} | ${pct(r.errorRate)} | ${r.checkFails > 0 ? `${pct(r.checkRate)} (${r.checkFails} failed)` : pct(r.checkRate)} |`,
     );
   }
@@ -288,10 +288,12 @@ export function renderPage(runs, agg, sweeps = [], summaryMd = null) {
 
   <h2>Throughput</h2>
   <p class="note">
-    Scenarios run one at a time, each with the whole machine, so these are
-    comparable to each other rather than to a production mix. A low bar is not
-    always slow work — <code>matchmaking</code> waits on a periodic sweep, and
-    <code>auth_email</code> pays for a bcrypt verify on every iteration.
+    Scenarios run one at a time, each with the whole machine. Read
+    <strong>flows/s</strong> next to <strong>steps</strong>: a scenario that
+    spends six requests per flow is not faster than one that spends a single
+    request, it is just noisier in req/s. A low bar is not always slow work —
+    <code>matchmaking</code> waits on a periodic sweep and <code>auth_email</code>
+    pays for a bcrypt verify every iteration.
   </p>
   ${hbars(runs.map((r) => ({ label: r.name, value: r.rps })), 'req/s', 'var(--s1)')}
 
@@ -312,7 +314,7 @@ export function renderPage(runs, agg, sweeps = [], summaryMd = null) {
   <div class="scroll">
     <table>
       <thead><tr>
-        <th>scenario</th><th>req/s</th><th>requests</th><th>median</th><th>p95</th><th>p99</th><th>errors</th><th>checks</th>
+        <th>scenario</th><th>req/s</th><th>steps</th><th>flows/s</th><th>median</th><th>p95</th><th>p99</th><th>errors</th><th>checks</th>
       </tr></thead>
       <tbody>
         ${runs
@@ -320,7 +322,8 @@ export function renderPage(runs, agg, sweeps = [], summaryMd = null) {
             (r) => `<tr class="${r.checkFails > 0 || r.errorRate > 0.01 ? 'bad' : 'ok'}">
           <td class="mono">${esc(r.name)}</td>
           <td class="num">${fmt(r.rps, 1)}</td>
-          <td class="num">${fmtInt(r.requests)}</td>
+          <td class="num">${fmt(r.steps, 1)}</td>
+          <td class="num">${fmt(r.flowsPerSec, 1)}</td>
           <td class="num">${ms(r.med)}</td>
           <td class="num">${ms(r.p95)}</td>
           <td class="num">${ms(r.p99)}</td>

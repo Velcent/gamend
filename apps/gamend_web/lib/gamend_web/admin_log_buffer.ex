@@ -44,18 +44,41 @@ defmodule GamendWeb.AdminLogBuffer do
     :ok
   end
 
-  @doc "Returns buffered entries, newest first, with optional filters."
-  def list(opts \\ []) do
-    module_filter = Keyword.get(opts, :module)
-    level_filter = Keyword.get(opts, :level)
-    query_filter = Keyword.get(opts, :query)
-    limit = Keyword.get(opts, :limit, @max_entries)
+  @doc """
+  Returns buffered entries, newest first, with optional filters.
 
+  Beyond `:module`, `:level` and `:query`:
+
+  - `:source` — `"server"`, `"client"` or `"all"`. Client log uploads are
+    re-emitted through `Logger` (see `Gamend.ClientLogs`), so without this the
+    server's own tail is buried under every connected player's entries.
+  - `:session` — one client session id, the key that joins a client's lines to
+    the server lines logged while handling its requests.
+  - `:user` — a user id, matched against either a client entry's owner or a
+    server entry's logged user.
+  """
+  def list(opts \\ []) do
     entries()
-    |> maybe_filter_module(module_filter)
-    |> maybe_filter_level(level_filter)
-    |> maybe_filter_query(query_filter)
-    |> Enum.take(limit)
+    |> maybe_filter_source(Keyword.get(opts, :source))
+    |> maybe_filter_module(Keyword.get(opts, :module))
+    |> maybe_filter_level(Keyword.get(opts, :level))
+    |> maybe_filter_meta(:client_session, Keyword.get(opts, :session))
+    |> maybe_filter_user(Keyword.get(opts, :user))
+    |> maybe_filter_query(Keyword.get(opts, :query))
+    |> Enum.take(Keyword.get(opts, :limit, @max_entries))
+  end
+
+  @doc "How many buffered entries came from game clients rather than the server."
+  def count_by_source do
+    Enum.reduce(entries(), %{server: 0, client: 0}, fn entry, acc ->
+      key = if client_entry?(entry), do: :client, else: :server
+      Map.update!(acc, key, &(&1 + 1))
+    end)
+  end
+
+  @doc "Recent entries for one client session, oldest first — the session timeline."
+  def session_entries(session_id, limit \\ 500) when is_binary(session_id) do
+    [session: session_id, limit: limit] |> list() |> Enum.reverse()
   end
 
   @doc "Returns a map of level => count for all buffered entries."
@@ -118,6 +141,36 @@ defmodule GamendWeb.AdminLogBuffer do
     |> :ets.select_reverse([{{:"$1", :"$2"}, [{:is_integer, :"$1"}], [:"$2"]}])
   rescue
     ArgumentError -> []
+  end
+
+  defp client_entry?(entry), do: Map.get(entry[:meta] || %{}, :source) == :client
+
+  defp maybe_filter_source(entries, source) when source in [nil, "", "all"], do: entries
+  defp maybe_filter_source(entries, "client"), do: Enum.filter(entries, &client_entry?/1)
+  defp maybe_filter_source(entries, "server"), do: Enum.reject(entries, &client_entry?/1)
+  defp maybe_filter_source(entries, _), do: entries
+
+  defp maybe_filter_meta(entries, _key, value) when value in [nil, ""], do: entries
+
+  defp maybe_filter_meta(entries, key, value) when is_binary(value) do
+    Enum.filter(entries, fn entry ->
+      to_string(Map.get(entry[:meta] || %{}, key, "")) == value
+    end)
+  end
+
+  # A user id reaches a log line by two different routes: as the owner of a
+  # client session, or as whatever the server put in its own metadata. Matching
+  # only one of them would silently answer half the question.
+  defp maybe_filter_user(entries, value) when value in [nil, ""], do: entries
+
+  defp maybe_filter_user(entries, value) when is_binary(value) do
+    Enum.filter(entries, fn entry ->
+      meta = entry[:meta] || %{}
+
+      Enum.any?([:client_user_id, :user_id], fn key ->
+        to_string(Map.get(meta, key, "")) == value
+      end)
+    end)
   end
 
   defp maybe_filter_module(entries, nil), do: entries

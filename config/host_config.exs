@@ -201,10 +201,24 @@ config :tailwind,
     cd: host_root
   ]
 
-# Configures Elixir's Logger
+# Configures Elixir's Logger.
+#
+# `client_session` is what joins a server line to the game client that caused
+# it (see `GamendWeb.Plugs.ClientSession`). It has to be listed here to reach
+# stdout at all — the formatter emits only the keys named in this list — and
+# stdout is what a log aggregator scrapes, so leaving it out would mean the
+# correlation worked on the admin page and nowhere else.
 config :logger, :default_formatter,
   format: "$time $metadata[$level] $message\n",
-  metadata: [:request_id, :order_id, :provider, :provider_reason, :purchase_id, :reason]
+  metadata: [
+    :request_id,
+    :client_session,
+    :order_id,
+    :provider,
+    :provider_reason,
+    :purchase_id,
+    :reason
+  ]
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason

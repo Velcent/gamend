@@ -431,6 +431,15 @@ defmodule GamendWeb.HostRuntime do
       # disabled IPv6 for everyone.
       maybe_ipv6 = if setting.(Gamend.Database, :ipv6), do: [:inet6], else: []
 
+      # Sent in the connection's startup packet rather than as a `SET` after
+      # connecting: there is then no window in which a query could commit
+      # under the wrong durability, and a bad value fails the connection
+      # loudly at boot instead of silently leaving the server default in
+      # place. `synchronous_commit` is USERSET, so a session may raise it
+      # again — which is exactly what `Gamend.Repo.durable_transaction/2`
+      # does for payments.
+      synchronous_commit = setting.(Gamend.Database, :postgres_synchronous_commit)
+
       [
         {:gamend_core, Gamend.Repo,
          [
@@ -441,7 +450,8 @@ defmodule GamendWeb.HostRuntime do
            queue_target: repo_queue_target,
            queue_interval: repo_queue_interval,
            timeout: repo_query_timeout,
-           socket_options: maybe_ipv6
+           socket_options: maybe_ipv6,
+           parameters: [synchronous_commit: to_string(synchronous_commit)]
          ]}
       ]
     else
@@ -562,7 +572,15 @@ defmodule GamendWeb.HostRuntime do
     # nil lets Phoenix apply its own check_origin default; "*" is Corsica's
     # allow-any. Both mean "the operator did not restrict this".
     check_origin = if allowed_origins == [], do: nil, else: allowed_origins
-    cors_allowed_origins = if allowed_origins == [], do: "*", else: allowed_origins
+
+    # Corsica needs a different shape from Phoenix for the same allowlist.
+    # `check_origin` understands the protocol-agnostic `//host` form, but
+    # Corsica compares binary origins with *exact equality* — `"//gamend.org"`
+    # never equals `"https://gamend.org"`, so a configured allowlist silently
+    # emitted no CORS headers at all. A regex per host matches either scheme and
+    # is the form Corsica does understand.
+    cors_allowed_origins =
+      if allowed_origins == [], do: "*", else: Enum.map(allowed_origins, &to_cors_origin/1)
 
     endpoint_config =
       [
@@ -595,6 +613,15 @@ defmodule GamendWeb.HostRuntime do
     ] ++ acme_entries(setting)
   end
 
+  # A regex passes through; `//host` becomes a scheme-agnostic pattern; a fully
+  # qualified origin is already exact and needs nothing.
+  defp to_cors_origin(%Regex{} = regex), do: regex
+
+  defp to_cors_origin("//" <> host),
+    do: Regex.compile!("^https?://" <> Regex.escape(host) <> "$")
+
+  defp to_cors_origin(origin), do: origin
+
   defp normalize_origin(<<"regex:", pattern::binary>>), do: Regex.compile!(pattern)
 
   defp normalize_origin(origin) do
@@ -613,15 +640,18 @@ defmodule GamendWeb.HostRuntime do
   # read per request by `GamendWeb.Plugs.ForceSSL`, not from here — Phoenix's
   # `:force_ssl` endpoint option is compile-time only, so configuring it in
   # this (runtime) file wrote a key nothing read and no redirect ever happened.
-  # `buffer` is the Erlang inet driver's own buffer; `recbuf`/`sndbuf` are the
-  # kernel's. All three are set together because the driver sizes itself from
-  # the socket options when it is not told otherwise, which is how an untouched
-  # connection ends up holding several hundred KB of binary memory.
+  # Only `buffer`, deliberately. It is the Erlang inet driver's own read buffer,
+  # it lives in the emulator's binary memory, and it is the ~105 KB per idle
+  # socket this exists to reclaim. `recbuf`/`sndbuf` are the *kernel's* buffers
+  # and set the TCP window — shrinking those caps a connection's throughput at
+  # window/RTT, which for the same listener that serves multi-megabyte Godot web
+  # exports would be a bad trade for memory nobody was short of. The kernel
+  # keeps sizing those; only the userspace copy is bounded.
   defp socket_buffer_options(setting) do
-    kb = setting.(GamendWeb.Realtime, :socket_buffer_kb) || 32
-    bytes = kb * 1024
-
-    [buffer: bytes, recbuf: bytes, sndbuf: bytes]
+    case setting.(GamendWeb.Realtime, :socket_buffer_kb) do
+      kb when is_integer(kb) and kb > 0 -> [buffer: kb * 1024]
+      _leave_the_default -> []
+    end
   end
 
   defp put_https(endpoint_config, setting) do

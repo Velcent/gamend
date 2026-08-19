@@ -343,6 +343,11 @@ defmodule GamendWeb.Router.Shared do
         pipe_through [:api, :api_optional_auth]
 
         get "/tournaments/:id", TournamentController, :show
+
+        # Optional auth on purpose: the entries worth having most are from
+        # before the client has a token. See ClientLogController.
+        get "/client_logs/policy", ClientLogController, :policy
+        post "/client_logs", ClientLogController, :create
       end
 
       scope "/api/v1", GamendWeb.Api.V1, as: :api_v1 do

@@ -32,6 +32,35 @@ defmodule Gamend.Database do
   setting(:postgres_password, :string, secret: true)
   setting(:postgres_db, :string)
 
+  # PostgreSQL's own default is `on`: every commit waits for the WAL to reach
+  # disk. `off` returns as soon as the commit is in the WAL buffer, which on
+  # the load-test harness is +71% on KV writes (3,096/s with fsync, 7,448/s
+  # without) for a bounded exposure — an OS or hardware crash can lose the
+  # last `wal_writer_delay`-ish window of commits, about 600ms by default.
+  #
+  # The data stays *consistent* either way; this is not `fsync = off`. Nothing
+  # is corrupted, a recent commit is simply not there. That is the right trade
+  # for progress, inventory and leaderboard rows and the wrong one for money,
+  # so `Gamend.Repo.durable_transaction/2` forces `on` for the length of a
+  # payment regardless of what this is set to.
+  #
+  # Defaulted to `off` rather than to PostgreSQL's `on`, because gamend knows
+  # something a general-purpose database does not: which of its writes are
+  # money. `Gamend.Repo.durable_transaction/2` puts `on` back for the length
+  # of a payment, so the write that must not vanish never rides on this.
+  # Everything else is progress a player can re-earn in the seconds before a
+  # power cut. Set it to `on` to opt back into PostgreSQL's default.
+  #
+  # This also brings the two adapters level: SQLite already makes exactly this
+  # trade on your behalf with `synchronous = NORMAL`.
+  setting(:postgres_synchronous_commit, :atom,
+    default: :off,
+    doc:
+      "on | off | local | remote_write | remote_apply. Defaults to `off`: up to ~600ms " <>
+        "of commits are exposed to an OS crash in exchange for markedly faster writes. " <>
+        "Payments always commit synchronously regardless. Postgres only."
+  )
+
   setting(:ipv6, :boolean,
     default: false,
     doc: "Connect over IPv6, needed on platforms with IPv6-only private networking."

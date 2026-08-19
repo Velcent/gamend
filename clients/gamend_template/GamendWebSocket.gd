@@ -254,8 +254,15 @@ func _get_user_channel() -> PhoenixChannel:
 			return _channels[topic]
 	return null
 
+## Set by GamendApi before the socket starts. Sent as a connect param so server
+## lines logged while serving this socket carry the same id as the client's own
+## uploaded lines.
+var client_session_id := ""
+
 func _socket_params() -> Dictionary:
 	var params := {"token": _token_provider.call()}
+	if not client_session_id.is_empty():
+		params["client_session"] = client_session_id
 	if _format == "protobuf":
 		params["format"] = "protobuf"
 	return params

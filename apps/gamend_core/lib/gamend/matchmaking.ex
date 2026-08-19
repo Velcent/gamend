@@ -29,6 +29,7 @@ defmodule Gamend.Matchmaking do
   alias Gamend.Limits
   alias Gamend.Matchmaking.Constants
   alias Gamend.Matchmaking.Ticket
+  alias Gamend.Matchmaking.Worker
   alias Gamend.Repo
 
   @default_min_players 2
@@ -167,6 +168,11 @@ defmodule Gamend.Matchmaking do
           Gamend.Hooks.internal_call(:after_matchmaking_join, [member, ticket])
         end)
       end)
+
+      # This ticket may be the one that completes a bucket, so ask for a sweep
+      # instead of waiting out the tick. The worker coalesces and runs it in its
+      # own process; nothing here blocks on matching.
+      Worker.nudge()
 
       {:ok, Enum.find_value(inserted, fn {m, t} -> if m.id == caller.id, do: t end)}
     end

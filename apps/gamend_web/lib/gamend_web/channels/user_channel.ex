@@ -69,6 +69,10 @@ defmodule GamendWeb.UserChannel do
 
   @impl true
   def join("user:" <> user_id_str, _payload, socket) do
+    # This channel runs in its own process, so it stamps its own metadata;
+    # the socket's connect-time call does not reach here.
+    GamendWeb.Plugs.ClientSession.put_metadata(socket.assigns[:client_session_id])
+
     # ensure the socket has a current_scope assign created during socket connect
     current_scope = Map.get(socket.assigns, :current_scope)
 

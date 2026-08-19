@@ -1,10 +1,34 @@
 defmodule GamendWeb.AdminLive.Logs do
+  @moduledoc """
+  Logs, from both sides of the wire.
+
+  Two tabs over one stream. Client entries are re-emitted through `Logger`
+  (see `Gamend.ClientLogs`), so they land in the same ring buffer as the
+  server's own lines and can be read against them — which is the point, and
+  also why the server tab defaults to hiding them. A tail swamped by every
+  connected player's chatter is not a tail anyone can read.
+
+  ## What is durable here and what is not
+
+  The **client** tab's session list is a database table and survives restarts.
+  The lines themselves are not stored: they leave through `Logger` to whatever
+  the host runs (stdout, the rotating file, an aggregator), and what this page
+  can show of them is the in-memory ring buffer — recent, and lost on redeploy.
+
+  So a session's timeline here is "what is still in the buffer", and the page
+  says so rather than rendering an empty list that reads like "nothing
+  happened". For anything older, the session detail hands over the exact search
+  string to paste into the host's log store, where both halves are already
+  sitting next to each other under the same session id.
+  """
   use GamendWeb, :live_view
 
+  alias Gamend.ClientLogs
   alias GamendWeb.AdminLogBuffer
 
   @refresh_interval 3_000
   @page_size 200
+  @session_page_size 50
 
   @impl true
   def render(assigns) do
@@ -17,141 +41,472 @@ defmodule GamendWeb.AdminLive.Logs do
             <h1 class="text-xl font-bold">Logs</h1>
           </div>
 
-          <div class="flex items-center gap-2 text-xs text-base-content/60">
+          <div class="flex items-center gap-2 text-xs text-base-content/70">
             <span>Buffer: {@total_buffered} entries</span>
             <span>&middot;</span>
+            <span>{@source_counts.client} from clients</span>
             <span :if={@level_counts[:error]} class="text-error font-semibold">
-              {@level_counts[:error]} errors
-            </span>
-            <span :if={@level_counts[:warning]} class="text-warning font-semibold">
-              {@level_counts[:warning]} warnings
+              &middot; {@level_counts[:error]} errors
             </span>
           </div>
         </div>
 
-        <%!-- Level summary badges --%>
-        <div class="flex flex-wrap gap-2">
+        <%!-- Tabs --%>
+        <div role="tablist" class="tabs tabs-box w-fit">
           <button
-            :for={
-              {level, color} <- [
-                {"all", "badge-neutral"},
-                {"debug", "badge-ghost"},
-                {"info", "badge-info"},
-                {"warning", "badge-warning"},
-                {"error", "badge-error"}
-              ]
-            }
-            phx-click="filter_level"
-            phx-value-level={level}
-            class={[
-              "badge badge-sm cursor-pointer transition-all",
-              color,
-              @level_filter == level && "badge-outline ring-2 ring-offset-1 ring-primary"
-            ]}
+            :for={{tab, label} <- [{"server", "Server"}, {"client", "Client sessions"}]}
+            role="tab"
+            phx-click="switch_tab"
+            phx-value-tab={tab}
+            class={["tab", @tab == tab && "tab-active"]}
           >
-            {level}
-            <span :if={level != "all"} class="ml-1 opacity-70">
-              ({Map.get(@level_counts, String.to_existing_atom(level), 0)})
-            </span>
-            <span :if={level == "all"} class="ml-1 opacity-70">
-              ({@total_buffered})
-            </span>
+            {label}
           </button>
         </div>
 
-        <%!-- Filters --%>
-        <.form
-          for={%{}}
-          id="log-filters"
-          phx-change="update_filters"
-          class="flex flex-col sm:flex-row gap-2"
-        >
-          <input
-            id="log-module-filter"
-            name="module"
-            value={@module_filter}
-            placeholder="Filter by module (eg Gamend.Hooks)"
-            class="input input-sm flex-1"
-            phx-debounce="300"
-          />
-          <input
-            id="log-search"
-            name="query"
-            value={@search_query}
-            placeholder="Search message text (eg tournament, user_id=42)"
-            class="input input-sm flex-1"
-            phx-debounce="300"
-          />
-          <div class="flex items-center gap-2">
-            <label class="label cursor-pointer gap-2">
-              <input
-                type="checkbox"
-                name="auto_scroll"
-                value="true"
-                checked={@auto_scroll}
-                class="checkbox checkbox-sm checkbox-primary"
-              />
-              <span class="text-xs">Auto-scroll</span>
-            </label>
-            <button type="button" phx-click="clear_filters" class="btn btn-ghost btn-sm">
-              Clear
-            </button>
-          </div>
-        </.form>
-
-        <%!-- Log entries --%>
-        <div
-          id="log-container"
-          class="bg-base-100 border rounded-lg font-mono text-xs overflow-auto"
-          style="max-height: calc(100vh - 320px); min-height: 400px;"
-          phx-hook={if @auto_scroll, do: "AutoScroll", else: nil}
-        >
-          <div class="p-3 space-y-0.5">
-            <%= if @logs == [] do %>
-              <div class="text-center text-base-content/70 py-8 italic">
-                No logs match the current filters.
-              </div>
-            <% else %>
-              <div
-                :for={entry <- Enum.reverse(@logs)}
-                id={"log-#{entry_id(entry)}"}
-                class={[
-                  "flex gap-2 py-0.5 px-1 rounded hover:bg-base-200 transition-colors",
-                  entry.level == :error && "bg-error/5",
-                  entry.level == :warning && "bg-warning/5"
-                ]}
-              >
-                <span class="text-base-content/70 whitespace-nowrap shrink-0">
-                  <.timestamp at={entry.timestamp} format="time" empty="" />
-                </span>
-                <span class={[
-                  "whitespace-nowrap shrink-0 font-semibold w-14 text-right",
-                  level_color(entry.level)
-                ]}>
-                  [{entry.level}]
-                </span>
-                <span
-                  :if={entry.module}
-                  class="text-primary/60 whitespace-nowrap shrink-0 max-w-48 truncate"
-                  title={inspect(entry.module)}
-                >
-                  {format_module(entry.module)}
-                </span>
-                <span class="break-all">{entry.message}</span>
-              </div>
-            <% end %>
+        <%!-- A client can be told to collect `info`, and the server's own Logger
+              level can then throw it away before any handler runs. Two settings,
+              no shared owner, and the failure mode is a page that just looks
+              quiet — so say it outright. --%>
+        <div :if={@logger_blocks} class="alert alert-warning text-sm">
+          <div>
+            <span class="font-semibold">Client entries are being discarded.</span>
+            Collection asks for <span class="font-mono">{@policy.level}</span>
+            but this server's Logger level is <span class="font-mono">{@logger_level}</span>, which drops everything below <span class="font-mono">warn</span>. Lower the Logger level, or raise the client
+            capture level, or expect to see only warnings and errors.
           </div>
         </div>
 
-        <%!-- Footer stats --%>
-        <div class="flex items-center justify-between text-xs text-base-content/70">
-          <span>Showing {length(@logs)} of {@total_buffered} buffered entries</span>
-          <span>Errors in last hour: {@recent_errors}</span>
-        </div>
+        <.server_tab :if={@tab == "server"} {assigns} />
+        <.client_tab :if={@tab == "client"} {assigns} />
       </div>
     </Layouts.app>
     """
   end
+
+  # ── Server tab ──────────────────────────────────────────────────────────────
+
+  defp server_tab(assigns) do
+    ~H"""
+    <div class="space-y-4">
+      <div class="flex flex-wrap gap-2">
+        <button
+          :for={
+            {level, color} <- [
+              {"all", "badge-neutral"},
+              {"debug", "badge-ghost"},
+              {"info", "badge-info"},
+              {"warning", "badge-warning"},
+              {"error", "badge-error"}
+            ]
+          }
+          phx-click="filter_level"
+          phx-value-level={level}
+          class={[
+            "badge badge-sm cursor-pointer transition-all",
+            color,
+            @level_filter == level && "badge-outline ring-2 ring-offset-1 ring-primary"
+          ]}
+        >
+          {level}
+          <span :if={level != "all"} class="ml-1 opacity-70">
+            ({Map.get(@level_counts, String.to_existing_atom(level), 0)})
+          </span>
+          <span :if={level == "all"} class="ml-1 opacity-70">({@total_buffered})</span>
+        </button>
+      </div>
+
+      <.form
+        for={%{}}
+        id="log-filters"
+        phx-change="update_filters"
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2"
+      >
+        <select name="source" class="select select-sm">
+          <option
+            :for={
+              {value, label} <- [
+                {"server", "Server only"},
+                {"client", "Client only"},
+                {"all", "Both"}
+              ]
+            }
+            value={value}
+            selected={@source_filter == value}
+          >
+            {label}
+          </option>
+        </select>
+        <input
+          id="log-module-filter"
+          name="module"
+          value={@module_filter}
+          placeholder="Module (eg Gamend.Hooks)"
+          class="input input-sm"
+          phx-debounce="300"
+        />
+        <input
+          id="log-session-filter"
+          name="session"
+          value={@session_filter}
+          placeholder="Client session id"
+          class="input input-sm font-mono"
+          phx-debounce="300"
+        />
+        <input
+          id="log-user-filter"
+          name="user"
+          value={@user_filter}
+          placeholder="User id"
+          class="input input-sm font-mono"
+          phx-debounce="300"
+        />
+        <input
+          id="log-search"
+          name="query"
+          value={@search_query}
+          placeholder="Search message text"
+          class="input input-sm sm:col-span-2"
+          phx-debounce="300"
+        />
+        <div class="flex items-center gap-2 sm:col-span-2">
+          <label class="label cursor-pointer gap-2">
+            <input
+              type="checkbox"
+              name="auto_scroll"
+              value="true"
+              checked={@auto_scroll}
+              class="checkbox checkbox-sm checkbox-primary"
+            />
+            <span class="text-xs">Auto-scroll</span>
+          </label>
+          <button type="button" phx-click="clear_filters" class="btn btn-ghost btn-sm">Clear</button>
+        </div>
+      </.form>
+
+      <div
+        id="log-container"
+        class="bg-base-100 border rounded-lg font-mono text-xs overflow-auto"
+        style="max-height: calc(100vh - 380px); min-height: 400px;"
+        phx-hook={if @auto_scroll, do: "AutoScroll", else: nil}
+      >
+        <div class="p-3 space-y-0.5">
+          <div :if={@logs == []} class="text-center text-base-content/70 py-8 italic">
+            No logs match the current filters.
+          </div>
+          <div
+            :for={entry <- Enum.reverse(@logs)}
+            id={"log-#{entry_id(entry)}"}
+            class={[
+              "flex gap-2 py-0.5 px-1 rounded hover:bg-base-200 transition-colors",
+              entry.level == :error && "bg-error/5",
+              entry.level == :warning && "bg-warning/5"
+            ]}
+          >
+            <span class="text-base-content/70 whitespace-nowrap shrink-0">
+              <.timestamp at={entry.timestamp} format="time" empty="" />
+            </span>
+            <span class={[
+              "whitespace-nowrap shrink-0 font-semibold w-14 text-right",
+              level_color(entry.level)
+            ]}>
+              [{entry.level}]
+            </span>
+            <span
+              :if={client_entry?(entry)}
+              class="badge badge-xs badge-accent shrink-0"
+              title="Uploaded by a game client"
+            >
+              client
+            </span>
+            <span
+              :if={not client_entry?(entry) and entry.module}
+              class="text-primary/60 whitespace-nowrap shrink-0 max-w-48 truncate"
+              title={inspect(entry.module)}
+            >
+              {format_module(entry.module)}
+            </span>
+            <span class="break-all">{entry.message}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between text-xs text-base-content/70">
+        <span>Showing {length(@logs)} of {@total_buffered} buffered entries</span>
+        <span>Errors in last hour: {@recent_errors}</span>
+      </div>
+    </div>
+    """
+  end
+
+  # ── Client tab ──────────────────────────────────────────────────────────────
+
+  defp client_tab(assigns) do
+    ~H"""
+    <div class="space-y-4">
+      <div :if={not @policy.enabled} class="alert alert-info text-sm">
+        <div>
+          <span class="font-semibold">Client log collection is off.</span>
+          Clients are told to send nothing. Enable it in
+          <.link navigate={~p"/admin/config"} class="link">config</.link>
+          (<span class="font-mono">client_logs.enabled</span>).
+        </div>
+      </div>
+
+      <.selected_session :if={@selected} {assigns} />
+
+      <.form
+        for={%{}}
+        id="session-filters"
+        phx-change="update_session_filters"
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2"
+      >
+        <input
+          name="query"
+          value={@session_filters.query}
+          placeholder="Session or device id"
+          class="input input-sm font-mono"
+          phx-debounce="300"
+        />
+        <input
+          name="user_id"
+          value={@session_filters.user_id}
+          placeholder="User id"
+          class="input input-sm font-mono"
+          phx-debounce="300"
+        />
+        <input
+          name="lobby_id"
+          value={@session_filters.lobby_id}
+          placeholder="Lobby id"
+          class="input input-sm font-mono"
+          phx-debounce="300"
+        />
+        <select name="platform" class="select select-sm">
+          <option value="">Any platform</option>
+          <option
+            :for={p <- ClientLogs.Session.platforms()}
+            value={p}
+            selected={@session_filters.platform == p}
+          >
+            {p}
+          </option>
+        </select>
+        <input
+          name="app_version"
+          value={@session_filters.app_version}
+          placeholder="App version"
+          class="input input-sm"
+          phx-debounce="300"
+        />
+        <label class="input input-sm flex items-center gap-2">
+          <span class="text-xs opacity-70 whitespace-nowrap">From</span>
+          <input type="date" name="since" value={@session_filters.since} class="grow" />
+        </label>
+        <label class="input input-sm flex items-center gap-2">
+          <span class="text-xs opacity-70 whitespace-nowrap">To</span>
+          <input type="date" name="until" value={@session_filters.until} class="grow" />
+        </label>
+        <div class="flex items-center gap-3">
+          <label class="label cursor-pointer gap-2">
+            <input
+              type="checkbox"
+              name="errors_only"
+              value="true"
+              checked={@session_filters.errors_only}
+              class="checkbox checkbox-sm checkbox-error"
+            />
+            <span class="text-xs">Errors only</span>
+          </label>
+          <button type="button" phx-click="clear_session_filters" class="btn btn-ghost btn-sm">
+            Clear
+          </button>
+        </div>
+      </.form>
+
+      <div class="overflow-x-auto border rounded-lg">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>Last seen</th>
+              <th>Session</th>
+              <th>User</th>
+              <th>Build</th>
+              <th class="text-right">Entries</th>
+              <th class="text-right">Errors</th>
+              <th class="text-right">Dropped</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr :if={@sessions == []}>
+              <td colspan="7" class="text-center text-base-content/70 py-8 italic">
+                No client sessions match these filters.
+              </td>
+            </tr>
+            <tr
+              :for={session <- @sessions}
+              class={[
+                "hover cursor-pointer",
+                @selected && @selected.client_session_id == session.client_session_id &&
+                  "bg-base-200"
+              ]}
+              phx-click="select_session"
+              phx-value-id={session.client_session_id}
+            >
+              <td class="whitespace-nowrap">
+                <.timestamp at={session.last_seen_at} format="full" empty="—" />
+              </td>
+              <td class="font-mono text-xs">
+                <span class="flex items-center gap-1">
+                  {short(session.client_session_id)}
+                  <span :if={session.flagged} class="badge badge-xs badge-warning">flagged</span>
+                </span>
+              </td>
+              <td class="text-xs">
+                <span :if={session.user}>{session.user.username || short(session.user_id)}</span>
+                <span :if={is_nil(session.user_id)} class="opacity-60 italic">anonymous</span>
+              </td>
+              <td class="text-xs whitespace-nowrap">
+                {session.platform} &middot; {version(session)}
+              </td>
+              <td class="text-right tabular-nums">{session.entry_count}</td>
+              <td class={[
+                "text-right tabular-nums",
+                session.error_count > 0 && "text-error font-semibold"
+              ]}>
+                {session.error_count}
+              </td>
+              <td class={[
+                "text-right tabular-nums",
+                session.dropped_count > 0 && "text-warning"
+              ]}>
+                {session.dropped_count}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="flex items-center justify-between text-xs text-base-content/70">
+        <span>Showing {length(@sessions)} of {@session_total} sessions</span>
+        <div class="flex gap-2">
+          <button
+            phx-click="page"
+            phx-value-dir="prev"
+            disabled={@session_page == 0}
+            class="btn btn-ghost btn-xs"
+          >
+            &larr; Prev
+          </button>
+          <button
+            phx-click="page"
+            phx-value-dir="next"
+            disabled={(@session_page + 1) * @session_page_size >= @session_total}
+            class="btn btn-ghost btn-xs"
+          >
+            Next &rarr;
+          </button>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  defp selected_session(assigns) do
+    ~H"""
+    <div class="border rounded-lg bg-base-100 p-4 space-y-3">
+      <div class="flex items-start justify-between gap-3">
+        <div class="space-y-1">
+          <div class="flex items-center gap-2">
+            <h2 class="font-semibold font-mono text-sm">{@selected.client_session_id}</h2>
+            <span :if={@selected.flagged} class="badge badge-sm badge-warning">flagged</span>
+          </div>
+          <div class="text-xs text-base-content/70 flex flex-wrap gap-x-3 gap-y-1">
+            <span>{@selected.platform} &middot; {version(@selected)} &middot; {@selected.build}</span>
+            <span :if={@selected.locale != ""}>locale {@selected.locale}</span>
+            <span :if={@selected.device_id != ""} class="font-mono">device {short(@selected.device_id)}</span>
+            <span>
+              started <.timestamp at={@selected.started_at} format="full" empty="—" />
+            </span>
+            <span :if={@selected.dropped_count > 0} class="text-warning font-semibold">
+              {@selected.dropped_count} entries never arrived
+            </span>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <button phx-click="toggle_flag" class="btn btn-ghost btn-xs">
+            {if @selected.flagged, do: "Unflag", else: "Flag"}
+          </button>
+          <button phx-click="close_session" class="btn btn-ghost btn-xs">Close</button>
+        </div>
+      </div>
+
+      <%!-- What the device was. Rendered as a plain grid rather than being
+            summarised, because which of these matters is only obvious once you
+            know what broke — the renderer for a black texture, the OS version
+            for a crash, the browser for a web-only fault. --%>
+      <div :if={@selected.meta != %{}} class="rounded bg-base-200 p-2">
+        <dl class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-1 text-xs">
+          <div :for={{key, value} <- Enum.sort(@selected.meta)} class="min-w-0">
+            <dt class="opacity-60">{key}</dt>
+            <dd class="font-mono truncate" title={to_string(value)}>{value}</dd>
+          </div>
+        </dl>
+      </div>
+
+      <%!-- Lobbies are the join to the server's own run history, so they are
+            links rather than text. --%>
+      <div :if={@selected_lobbies != []} class="flex flex-wrap items-center gap-2 text-xs">
+        <span class="opacity-70">Lobbies:</span>
+        <.link
+          :for={lobby_id <- @selected_lobbies}
+          navigate={~p"/admin/lobby_snapshots?lobby_id=#{lobby_id}"}
+          class="link link-primary font-mono"
+        >
+          {short(lobby_id)}
+        </.link>
+      </div>
+
+      <%!-- The buffer is a ring and does not survive a restart, so what is
+            missing here is not evidence that nothing happened. --%>
+      <div class="space-y-1">
+        <div class="flex items-center justify-between text-xs text-base-content/70">
+          <span>
+            Recent lines still in the buffer: {length(@selected_entries)} of {@selected.entry_count} this session recorded
+          </span>
+        </div>
+        <div class="bg-base-200 rounded font-mono text-xs overflow-auto max-h-96 p-2 space-y-0.5">
+          <div :if={@selected_entries == []} class="italic opacity-70 py-4 text-center">
+            None of this session's lines are still buffered — the ring is capped and clears on
+            restart. Search the log store below.
+          </div>
+          <div
+            :for={entry <- Enum.reverse(@selected_entries)}
+            class={[
+              "flex gap-2 px-1 rounded",
+              entry.level == :error && "bg-error/10",
+              entry.level == :warning && "bg-warning/10"
+            ]}
+          >
+            <span class="opacity-60 whitespace-nowrap shrink-0">
+              <.timestamp at={entry.timestamp} format="time" empty="" />
+            </span>
+            <span class="break-all">{entry.message}</span>
+          </div>
+        </div>
+        <div class="text-xs text-base-content/70">
+          Full history lives in the log store. Search it for
+          <code class="bg-base-200 px-1 rounded font-mono select-all">
+            session={@selected.client_session_id}
+          </code>
+          — server lines carry the same id, so that one search returns both sides.
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  # ── Lifecycle ───────────────────────────────────────────────────────────────
 
   @impl true
   def mount(_params, _session, socket) do
@@ -160,113 +515,281 @@ defmodule GamendWeb.AdminLive.Logs do
       schedule_refresh()
     end
 
-    level_counts = safe_count_by_level()
-    logs = AdminLogBuffer.list(module: "", level: "all", query: "", limit: @page_size)
-
     {:ok,
-     assign(socket,
-       logs: logs,
+     socket
+     |> assign(
+       tab: "server",
        level_filter: "all",
        module_filter: "",
        search_query: "",
+       session_filter: "",
+       user_filter: "",
+       # Client entries share this buffer; showing them by default would bury
+       # the server's own tail.
+       source_filter: "server",
        auto_scroll: true,
-       level_counts: level_counts,
-       total_buffered: Enum.reduce(level_counts, 0, fn {_, v}, acc -> acc + v end),
-       recent_errors: safe_count_recent_errors()
-     )}
+       selected: nil,
+       selected_entries: [],
+       selected_lobbies: [],
+       session_page: 0,
+       session_page_size: @session_page_size,
+       session_filters: empty_session_filters()
+     )
+     |> refresh_logs()
+     |> refresh_counts()
+     |> load_sessions()}
   end
 
   @impl true
-  def handle_info({:admin_log, entry}, socket) do
-    # Check if entry matches current filters before prepending
-    if matches_filters?(entry, socket.assigns) do
-      logs =
-        [entry | socket.assigns.logs]
-        |> Enum.take(@page_size)
+  def handle_params(params, _uri, socket) do
+    # Deep link from a lobby's server-side history: "which clients were in this
+    # run". Same route, so the link does not need to know this page's internals.
+    case Map.get(params, "lobby_id") do
+      lobby_id when is_binary(lobby_id) and lobby_id != "" ->
+        filters = %{empty_session_filters() | lobby_id: lobby_id}
 
-      level_counts = safe_count_by_level()
+        {:noreply,
+         socket
+         |> assign(tab: "client", session_filters: filters, session_page: 0)
+         |> load_sessions()}
 
-      {:noreply,
-       assign(socket,
-         logs: logs,
-         level_counts: level_counts,
-         total_buffered: Enum.reduce(level_counts, 0, fn {_, v}, acc -> acc + v end)
-       )}
-    else
-      # Still update counts even if entry doesn't match filter
-      level_counts = safe_count_by_level()
-
-      {:noreply,
-       assign(socket,
-         level_counts: level_counts,
-         total_buffered: Enum.reduce(level_counts, 0, fn {_, v}, acc -> acc + v end)
-       )}
+      _ ->
+        {:noreply, socket}
     end
   end
 
   @impl true
-  def handle_info(:refresh_counts, socket) do
-    schedule_refresh()
+  def handle_info({:admin_log, entry}, socket) do
+    socket =
+      if socket.assigns.tab == "server" and matches_filters?(entry, socket.assigns) do
+        assign(socket, logs: Enum.take([entry | socket.assigns.logs], @page_size))
+      else
+        socket
+      end
 
-    {:noreply,
-     assign(socket,
-       recent_errors: safe_count_recent_errors()
-     )}
+    # A live line belonging to the open session extends its timeline.
+    socket =
+      if socket.assigns.selected && belongs_to_session?(entry, socket.assigns.selected) do
+        # Newest first here; the template reverses once for display. Appending
+        # per arriving line would walk the whole list on every log entry.
+        assign(socket,
+          selected_entries: Enum.take([entry | socket.assigns.selected_entries], 500)
+        )
+      else
+        socket
+      end
+
+    {:noreply, refresh_counts(socket)}
   end
 
-  @impl true
+  def handle_info(:refresh_counts, socket) do
+    schedule_refresh()
+    socket = if socket.assigns.tab == "client", do: load_sessions(socket), else: socket
+    {:noreply, refresh_counts(socket)}
+  end
+
   def handle_info(_msg, socket), do: {:noreply, socket}
 
-  @impl true
-  def handle_event("filter_level", %{"level" => level}, socket) do
-    logs =
-      AdminLogBuffer.list(
-        module: socket.assigns.module_filter,
-        level: level,
-        query: socket.assigns.search_query,
-        limit: @page_size
-      )
+  # ── Events ──────────────────────────────────────────────────────────────────
 
-    {:noreply, assign(socket, level_filter: level, logs: logs)}
+  @impl true
+  def handle_event("switch_tab", %{"tab" => tab}, socket) when tab in ["server", "client"] do
+    socket = assign(socket, tab: tab)
+    {:noreply, if(tab == "client", do: load_sessions(socket), else: socket)}
+  end
+
+  def handle_event("filter_level", %{"level" => level}, socket) do
+    {:noreply, socket |> assign(level_filter: level) |> refresh_logs()}
   end
 
   def handle_event("update_filters", params, socket) do
-    module = Map.get(params, "module", "")
-    query = Map.get(params, "query", "")
-    auto_scroll = Map.get(params, "auto_scroll") == "true"
-
-    logs =
-      AdminLogBuffer.list(
-        module: module,
-        level: socket.assigns.level_filter,
-        query: query,
-        limit: @page_size
-      )
-
     {:noreply,
-     assign(socket,
-       module_filter: module,
-       search_query: query,
-       auto_scroll: auto_scroll,
-       logs: logs
-     )}
+     socket
+     |> assign(
+       module_filter: Map.get(params, "module", ""),
+       search_query: Map.get(params, "query", ""),
+       session_filter: Map.get(params, "session", ""),
+       user_filter: Map.get(params, "user", ""),
+       source_filter: Map.get(params, "source", "server"),
+       auto_scroll: Map.get(params, "auto_scroll") == "true"
+     )
+     |> refresh_logs()}
   end
 
   def handle_event("clear_filters", _params, socket) do
-    logs = AdminLogBuffer.list(module: "", level: "all", query: "", limit: @page_size)
-
     {:noreply,
-     assign(socket,
+     socket
+     |> assign(
        module_filter: "",
        search_query: "",
+       session_filter: "",
+       user_filter: "",
        level_filter: "all",
-       logs: logs
-     )}
+       source_filter: "server"
+     )
+     |> refresh_logs()}
   end
+
+  def handle_event("update_session_filters", params, socket) do
+    filters = %{
+      query: Map.get(params, "query", ""),
+      user_id: Map.get(params, "user_id", ""),
+      lobby_id: Map.get(params, "lobby_id", ""),
+      platform: Map.get(params, "platform", ""),
+      app_version: Map.get(params, "app_version", ""),
+      since: Map.get(params, "since", ""),
+      until: Map.get(params, "until", ""),
+      errors_only: Map.get(params, "errors_only") == "true"
+    }
+
+    {:noreply, socket |> assign(session_filters: filters, session_page: 0) |> load_sessions()}
+  end
+
+  def handle_event("clear_session_filters", _params, socket) do
+    {:noreply,
+     socket
+     |> assign(session_filters: empty_session_filters(), session_page: 0)
+     |> load_sessions()}
+  end
+
+  def handle_event("page", %{"dir" => dir}, socket) do
+    page =
+      case dir do
+        "next" -> socket.assigns.session_page + 1
+        _ -> max(socket.assigns.session_page - 1, 0)
+      end
+
+    {:noreply, socket |> assign(session_page: page) |> load_sessions()}
+  end
+
+  def handle_event("select_session", %{"id" => id}, socket) do
+    {:noreply, select_session(socket, id)}
+  end
+
+  def handle_event("close_session", _params, socket) do
+    {:noreply, assign(socket, selected: nil, selected_entries: [], selected_lobbies: [])}
+  end
+
+  def handle_event("toggle_flag", _params, %{assigns: %{selected: nil}} = socket),
+    do: {:noreply, socket}
+
+  def handle_event("toggle_flag", _params, socket) do
+    session = socket.assigns.selected
+    :ok = ClientLogs.set_flagged(session.client_session_id, not session.flagged)
+
+    {:noreply, socket |> select_session(session.client_session_id) |> load_sessions()}
+  end
+
+  # ── Loading ─────────────────────────────────────────────────────────────────
+
+  defp refresh_logs(socket) do
+    assign(socket,
+      logs:
+        AdminLogBuffer.list(
+          module: socket.assigns.module_filter,
+          level: socket.assigns.level_filter,
+          query: socket.assigns.search_query,
+          session: socket.assigns.session_filter,
+          user: socket.assigns.user_filter,
+          source: socket.assigns.source_filter,
+          limit: @page_size
+        )
+    )
+  end
+
+  defp refresh_counts(socket) do
+    level_counts = safe(&AdminLogBuffer.count_by_level/0, %{})
+
+    assign(socket,
+      level_counts: level_counts,
+      source_counts: safe(&AdminLogBuffer.count_by_source/0, %{server: 0, client: 0}),
+      total_buffered: Enum.reduce(level_counts, 0, fn {_, v}, acc -> acc + v end),
+      recent_errors: safe(fn -> AdminLogBuffer.count_recent_errors(3600) end, 0),
+      policy: ClientLogs.capture_policy(),
+      logger_level: Logger.level(),
+      logger_blocks: ClientLogs.logger_level_blocks_collection?()
+    )
+  end
+
+  defp load_sessions(socket) do
+    opts = session_opts(socket.assigns.session_filters, socket.assigns.session_page)
+
+    assign(socket,
+      sessions: ClientLogs.list_sessions(opts),
+      session_total: ClientLogs.count_sessions(Keyword.drop(opts, [:limit, :offset]))
+    )
+  end
+
+  defp select_session(socket, id) do
+    case ClientLogs.get_session(id) do
+      nil ->
+        assign(socket, selected: nil, selected_entries: [], selected_lobbies: [])
+
+      session ->
+        assign(socket,
+          selected: session,
+          # Newest first, matching what live arrivals prepend.
+          selected_entries: safe(fn -> Enum.reverse(AdminLogBuffer.session_entries(id)) end, []),
+          selected_lobbies: ClientLogs.session_lobby_ids(id)
+        )
+    end
+  end
+
+  defp session_opts(filters, page) do
+    [limit: @session_page_size, offset: page * @session_page_size]
+    |> put_unless_blank(:query, filters.query)
+    |> put_unless_blank(:user_id, filters.user_id)
+    |> put_unless_blank(:lobby_id, filters.lobby_id)
+    |> put_unless_blank(:platform, filters.platform)
+    |> put_unless_blank(:app_version, filters.app_version)
+    |> put_date(:since, filters.since, ~T[00:00:00])
+    |> put_date(:until, filters.until, ~T[23:59:59])
+    |> then(fn opts -> if filters.errors_only, do: [{:errors_only, true} | opts], else: opts end)
+  end
+
+  defp put_unless_blank(opts, _key, value) when value in [nil, ""], do: opts
+  defp put_unless_blank(opts, key, value), do: [{key, value} | opts]
+
+  defp put_date(opts, _key, value, _time) when value in [nil, ""], do: opts
+
+  defp put_date(opts, key, value, time) do
+    case Date.from_iso8601(value) do
+      {:ok, date} -> [{key, DateTime.new!(date, time, "Etc/UTC")} | opts]
+      _ -> opts
+    end
+  end
+
+  defp empty_session_filters do
+    %{
+      query: "",
+      user_id: "",
+      lobby_id: "",
+      platform: "",
+      app_version: "",
+      since: "",
+      until: "",
+      errors_only: false
+    }
+  end
+
+  # ── Helpers ─────────────────────────────────────────────────────────────────
 
   defp schedule_refresh, do: Process.send_after(self(), :refresh_counts, @refresh_interval)
 
+  defp client_entry?(entry), do: Map.get(entry[:meta] || %{}, :source) == :client
+
+  defp belongs_to_session?(entry, session) do
+    to_string(Map.get(entry[:meta] || %{}, :client_session, "")) == session.client_session_id
+  end
+
   defp matches_filters?(entry, assigns) do
+    source_ok? =
+      case assigns.source_filter do
+        "client" -> client_entry?(entry)
+        "server" -> not client_entry?(entry)
+        _ -> true
+      end
+
     level_ok? =
       case assigns.level_filter do
         "all" -> true
@@ -275,12 +798,8 @@ defmodule GamendWeb.AdminLive.Logs do
 
     module_ok? =
       case String.trim(assigns.module_filter) do
-        "" ->
-          true
-
-        filter ->
-          mod_str = if entry.module, do: Atom.to_string(entry.module), else: ""
-          String.contains?(mod_str, filter)
+        "" -> true
+        filter -> String.contains?(module_string(entry.module), filter)
       end
 
     query_ok? =
@@ -295,8 +814,23 @@ defmodule GamendWeb.AdminLive.Logs do
           |> String.contains?(String.downcase(needle))
       end
 
-    level_ok? and module_ok? and query_ok?
+    session_ok? = meta_matches?(entry, :client_session, assigns.session_filter)
+
+    user_ok? =
+      assigns.user_filter in [nil, ""] or
+        Enum.any?([:client_user_id, :user_id], &meta_matches?(entry, &1, assigns.user_filter))
+
+    source_ok? and level_ok? and module_ok? and query_ok? and session_ok? and user_ok?
   end
+
+  defp meta_matches?(_entry, _key, filter) when filter in [nil, ""], do: true
+
+  defp meta_matches?(entry, key, filter),
+    do: to_string(Map.get(entry[:meta] || %{}, key, "")) == filter
+
+  defp module_string(nil), do: ""
+  defp module_string(mod) when is_atom(mod), do: Atom.to_string(mod)
+  defp module_string(other), do: to_string(other)
 
   defp entry_id(entry) do
     ts = if entry.timestamp, do: DateTime.to_unix(entry.timestamp, :microsecond), else: 0
@@ -304,12 +838,17 @@ defmodule GamendWeb.AdminLive.Logs do
   end
 
   defp format_module(mod) when is_atom(mod) do
-    mod
-    |> Atom.to_string()
-    |> String.replace_leading("Elixir.", "")
+    mod |> Atom.to_string() |> String.replace_leading("Elixir.", "")
   end
 
   defp format_module(_), do: ""
+
+  defp short(nil), do: "—"
+  defp short(""), do: "—"
+  defp short(id) when is_binary(id), do: String.slice(id, 0, 12)
+
+  defp version(%{app_version: ""}), do: "unknown"
+  defp version(%{app_version: version}), do: version
 
   defp level_color(:error), do: "text-error"
   defp level_color(:warning), do: "text-warning"
@@ -318,15 +857,11 @@ defmodule GamendWeb.AdminLive.Logs do
   defp level_color(:notice), do: "text-info"
   defp level_color(_), do: "text-base-content/70"
 
-  defp safe_count_by_level do
-    AdminLogBuffer.count_by_level()
+  # The buffer's ETS table may not exist yet during boot, and a log viewer that
+  # crashes the moment there is nothing to view is worse than an empty one.
+  defp safe(fun, default) do
+    fun.()
   rescue
-    _ -> %{}
-  end
-
-  defp safe_count_recent_errors do
-    AdminLogBuffer.count_recent_errors(3600)
-  rescue
-    _ -> 0
+    _ -> default
   end
 end

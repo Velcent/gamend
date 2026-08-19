@@ -7,7 +7,7 @@ generated: by `mix gamend.settings.guide` - do not edit by hand; edit the
 # Settings
 
 Every setting the server has, with the environment variable that sets it.
-240 settings across 21 groups.
+248 settings across 22 groups.
 
 A setting is declared in the module that owns it, so this page and
 `.env.example` are generated from the same source the server reads. The
@@ -66,6 +66,17 @@ Live values, and where each one came from, are on the
 | `GAMEND_CAPTCHA_TIMEOUT_MS` | integer | `5000` | How long to wait for Cloudflare before giving up on a verification. |
 
 
+## Client logs
+
+| Variable | Type | Default | Notes |
+|---|---|---|---|
+| `GAMEND_CLIENT_LOGS_CATEGORY_LEVELS` | list | `` | Per-category level overrides as category:level pairs, e.g. perf:off,network:warn. Overrides the floor for that category only; off drops it entirely. |
+| `GAMEND_CLIENT_LOGS_ENABLED` | boolean | `false` | Accept log batches from game clients and re-emit them into the server's own logs, indexed at /admin/logs. |
+| `GAMEND_CLIENT_LOGS_LEVEL` | string | `"info"` | Lowest client level to collect: trace, debug, info, warn or error. Clients gate their own uploads on this. |
+| `GAMEND_CLIENT_LOGS_RETENTION_DAYS` | integer | `14` | Delete client sessions after N days of inactivity. 0 keeps them forever. |
+| `GAMEND_CLIENT_LOGS_RETENTION_FLAGGED_DAYS` | integer | `90` | Retention for sessions marked flagged (any session that logged an error). |
+
+
 ## Clustering
 
 | Variable | Type | Default | Notes |
@@ -96,6 +107,7 @@ Live values, and where each one came from, are on the
 | `GAMEND_DB_POSTGRES_HOST` | string | - |  |
 | `GAMEND_DB_POSTGRES_PASSWORD` | string | - | Secret - never log or commit it. |
 | `GAMEND_DB_POSTGRES_PORT` | integer | `5432` |  |
+| `GAMEND_DB_POSTGRES_SYNCHRONOUS_COMMIT` | atom | `:off` | on \| off \| local \| remote_write \| remote_apply. Defaults to `off`: up to ~600ms of commits are exposed to an OS crash in exchange for markedly faster writes. Payments always commit synchronously regardless. Postgres only. |
 | `GAMEND_DB_POSTGRES_USER` | string | - |  |
 | `GAMEND_DB_QUERY_TIMEOUT_MS` | integer | `15000` |  |
 | `GAMEND_DB_QUEUE_INTERVAL_MS` | integer | `1000` |  |
@@ -330,6 +342,8 @@ Live values, and where each one came from, are on the
 | `GAMEND_RATELIMIT_AUTH_LIMIT` | integer | `10` | Max login/register requests per window, per IP. |
 | `GAMEND_RATELIMIT_AUTH_WINDOW_MS` | integer | `60000` | Auth HTTP window, in milliseconds. |
 | `GAMEND_RATELIMIT_BACKEND` | atom | `:ets` | ets (per-node counters) or redis (shared across instances). |
+| `GAMEND_RATELIMIT_CLIENT_LOGS_LIMIT` | integer | `30` | Max client log batch uploads per window, per IP. |
+| `GAMEND_RATELIMIT_CLIENT_LOGS_WINDOW_MS` | integer | `60000` | Client log upload window, in milliseconds. |
 | `GAMEND_RATELIMIT_DC_LIMIT` | integer | `300` | Max WebRTC DataChannel messages per window, per user. |
 | `GAMEND_RATELIMIT_DC_WINDOW_MS` | integer | `10000` | WebRTC DataChannel window, in milliseconds. |
 | `GAMEND_RATELIMIT_ENABLED` | boolean | `true` | Master switch for all request/message throttling. |
@@ -349,7 +363,7 @@ Live values, and where each one came from, are on the
 | `GAMEND_REALTIME_DEBOUNCE_MS` | integer | `0` | Hold outbound state updates this long and push only the latest per object. 0 pushes immediately. |
 | `GAMEND_REALTIME_PRESENCE_POOL_SIZE` | integer | `1` | Phoenix.Presence tracker shards. Must match on every node in a cluster; needs a full restart to change. |
 | `GAMEND_REALTIME_PUBSUB_POOL_SIZE` | integer | `1` | Phoenix.PubSub shards. Raise on nodes holding many thousands of sockets. |
-| `GAMEND_REALTIME_SOCKET_BUFFER_KB` | integer | `32` | Per-connection socket buffer in KB (buffer/recbuf/sndbuf). Lower means more sockets per GB. |
+| `GAMEND_REALTIME_SOCKET_BUFFER_KB` | integer | `0` | Cap the per-connection socket read buffer, in KB. 0 leaves the OS default. Only lowers memory on platforms that honour it; does not change the TCP window. |
 
 
 ## Retention

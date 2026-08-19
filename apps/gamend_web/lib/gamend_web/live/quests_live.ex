@@ -189,18 +189,42 @@ defmodule GamendWeb.QuestsLive do
         {catalog_entries, total, 0}
       end
 
+    entries = entries |> ContentText.translate() |> lock_labels(user)
+
     socket
     |> assign(:categories, [nil | Quests.visible_categories(user && user.id)])
     # Titles and descriptions are stored in the source language; translate on
     # the way to the page. Admin pages deliberately show the stored string.
-    |> assign(:entries, ContentText.translate(entries))
+    |> assign(:entries, entries)
     |> assign(:total_count, total_count)
     |> assign(:total_pages, max(ceil(total_count / page_size), 1))
-    |> assign(:claimable_count, claimable)
+    |> assign(:claimable_count, claimable - locked_claimable(entries))
     |> assign(:chain_positions, chain_positions(active))
     |> assign(:now, DateTime.utc_now(:second))
     |> refresh_chain()
   end
+
+  # The host's reason this viewer cannot claim this quest yet, resolved once per
+  # entry so the card stays a pure render. nil for everyone who can claim it,
+  # and for a host that registers no filter.
+  #
+  # Signed-in only, like the status badge beside it: a lock is a fact about an
+  # account, and a visitor with none has nothing it could be about. The catalog
+  # a guest (or a crawler) reads is the quests, not their standing in them.
+  defp lock_labels(entries, nil), do: entries
+
+  defp lock_labels(entries, user) do
+    Enum.map(entries, &Map.put(&1, :lock_label, Quests.host_lock_label(&1.quest, user.id)))
+  end
+
+  # "N quests ready to claim" must mean N buttons: a locked quest is finished
+  # and offers nothing, so counting it sends the reader hunting for a button
+  # that is deliberately not there.
+  defp locked_claimable(entries) do
+    Enum.count(entries, &(&1.claimable and locked?(&1)))
+  end
+
+  defp locked?(entry), do: is_binary(Map.get(entry, :lock_label))
 
   # Keep an open chain modal current when quest data changes underneath it
   # (a claim, a PubSub progress event). Closes it if the chain dissolved.
@@ -723,6 +747,7 @@ defmodule GamendWeb.QuestsLive do
       |> assign(:claimed?, claimed?)
       |> assign(:left, left)
       |> assign(:secret?, secret?)
+      |> assign(:lock_label, Map.get(assigns.entry, :lock_label))
       |> assign(:objective_rows, if(secret?, do: [], else: objective_rows(quest, progress)))
       |> assign(:grouped?, grouped?)
       |> assign(
@@ -762,6 +787,12 @@ defmodule GamendWeb.QuestsLive do
               reading "Not started" is noise, and it crowds the title. --%>
         <span :if={@logged_in} class={["badge text-nowrap", card_status_class(assigns)]}>
           {card_status_label(assigns)}
+        </span>
+        <%!-- The host's lock, next to the status it qualifies: "Ready to claim"
+              on a quest with no Claim button reads as a broken page otherwise. --%>
+        <span :if={@lock_label} class="badge badge-warning badge-sm gap-0.5 text-nowrap">
+          <.icon name="hero-lock-closed-solid" class="w-3 h-3" />
+          {@lock_label}
         </span>
         <span :if={@quest.category} class="badge badge-ghost badge-sm text-nowrap">
           {@quest.category}
@@ -825,6 +856,14 @@ defmodule GamendWeb.QuestsLive do
       <%= if @logged_in do %>
         <div class="mt-3">
           <%= cond do %>
+            <%!-- Locked outranks claimable: `before_quest_claim` would refuse
+                  this, and a button that always errors is worse than a reason.
+                  Progress still counts, so buying in mid-day finds it done. --%>
+            <% @lock_label -> %>
+              <div class="flex items-center gap-1.5 text-warning">
+                <.icon name="hero-lock-closed-solid" class="w-4 h-4" />
+                <span class="text-xs font-medium">{@lock_label}</span>
+              </div>
             <% @claimable -> %>
               <button
                 phx-click="claim"

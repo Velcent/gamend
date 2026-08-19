@@ -33,23 +33,35 @@ defmodule GamendWeb.Realtime do
       "Phoenix.Presence tracker shards. Must match on every node in a cluster; needs a full restart to change."
   )
 
-  # The dominant per-connection cost, and it is an operating-system default
-  # rather than anything this app chose. Left alone, the kernel sizes a
-  # connection's receive buffer for bulk transfer — measured at ~470 KB on
-  # macOS — and the Erlang inet driver sizes its own buffer to match, which
-  # showed up as ~105 KB of binary memory per idle socket, two thirds of what a
+  # The dominant per-connection memory cost, and it belongs to the operating
+  # system rather than to anything this app chose. Left alone, the kernel sizes
+  # a connection's receive buffer for bulk transfer — measured at ~400 KB on
+  # macOS — and the Erlang inet driver sizes its own read buffer to match, which
+  # showed up as ~105 KB of binary memory per idle socket: two thirds of what a
   # connected player costs.
   #
-  # A game exchanging small JSON or protobuf frames never needs that. 32 KB is
-  # comfortably above the 16 KB a large lobby state push occupies while leaving
-  # room for a burst, and small enough that socket density stops being decided
-  # by the kernel's idea of a good download.
+  # Off by default, for two reasons.
   #
-  # Raise it if a game sends genuinely large frames (`max_frame_size` is 128 KB);
-  # a value under 8 KB starts to cost throughput on anything bulky.
+  # It is unverified. Setting it caps `buffer`, the driver's userspace buffer,
+  # on the listening socket — but an accepted socket's buffer is recomputed from
+  # whatever `recbuf` the kernel negotiated, so on macOS the value is discarded
+  # and connections still report ~400 KB. Linux does not auto-tune the same way
+  # and is expected to honour it; nobody has watched that happen yet.
+  #
+  # And the neighbouring knobs are a trap. Capping `recbuf`/`sndbuf` instead
+  # *would* bound the memory, by shrinking the TCP window — which caps a
+  # connection's throughput at window/RTT. At 32 KB over a 100 ms link that is
+  # ~2.6 Mbit/s: ample for game messages, and ruinous for the same listener
+  # serving a multi-megabyte Godot web export. This setting deliberately does
+  # not touch them.
+  #
+  # So: leave it alone unless a node is holding tens of thousands of sockets and
+  # memory is the binding constraint, and measure per-socket memory before and
+  # after rather than assuming it worked.
   setting(:socket_buffer_kb, :integer,
-    default: 32,
+    default: 0,
     doc:
-      "Per-connection socket buffer in KB (buffer/recbuf/sndbuf). Lower means more sockets per GB."
+      "Cap the per-connection socket read buffer, in KB. 0 leaves the OS default. " <>
+        "Only lowers memory on platforms that honour it; does not change the TCP window."
   )
 end

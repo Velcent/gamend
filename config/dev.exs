@@ -105,7 +105,12 @@ config :gamend_web, dev_routes: true
 # Keep local development logs readable by default. Set GAMEND_OBSERVABILITY_LOG_LEVEL=debug when
 # request/SQL traces are needed.
 config :logger, level: :info
-config :logger, :default_formatter, format: "[$level] $message\n"
+# `client_session` is included so correlating a client's logs with the server's
+# behaves the same locally as in production. Without it the join silently works
+# only once deployed, which is the worst place to discover it.
+config :logger, :default_formatter,
+  format: "[$level] $metadata$message\n",
+  metadata: [:client_session]
 
 # Also persist dev logs to a rotating file (10MB x 5, see
 # GamendWeb.FileLogHandler). Without this the only copy of a run is the

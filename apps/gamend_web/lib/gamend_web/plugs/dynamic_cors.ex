@@ -39,7 +39,22 @@ defmodule GamendWeb.Plugs.DynamicCors do
       allow_headers: @default_allow_headers,
       allow_methods: @default_allow_methods,
       expose_headers: ["x-request-time"],
-      allow_credentials: true
+      # Credentials only when the operator named the origins they trust.
+      #
+      # `Access-Control-Allow-Origin: *` and credentials are mutually exclusive
+      # in the CORS specification, and claiming both produced a response no
+      # browser accepts: the preflight advertised `allow-credentials: true` with
+      # the origin echoed, then the actual response carried a bare `*` and no
+      # credentials header, and the request was blocked with nothing in it
+      # explaining why. (Corsica sends the bare `*` from a dedicated clause when
+      # it runs as a plug with `origins: "*"`, so the credentials-aware path
+      # documented for that combination never runs here.)
+      #
+      # Wildcard-without-credentials is also the safer default: a token in an
+      # `Authorization` header still works from any origin, which is how game
+      # clients authenticate, while cookies stay unusable cross-origin. Naming
+      # origins in `GAMEND_HTTP_ALLOWED_ORIGINS` is what opts into cookies.
+      allow_credentials: origins != "*"
     )
   end
 

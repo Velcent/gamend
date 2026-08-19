@@ -53,7 +53,12 @@ config :gamend_web, GamendWeb.Endpoint,
 
 config :gamend_web, dev_routes: true
 
-config :logger, :default_formatter, format: "[$level] $message\n"
+# `client_session` is included so correlating a client's logs with the server's
+# behaves the same locally as in production. Without it the join silently works
+# only once deployed, which is the worst place to discover it.
+config :logger, :default_formatter,
+  format: "[$level] $metadata$message\n",
+  metadata: [:client_session]
 
 config :phoenix, :stacktrace_depth, 20
 config :phoenix, :plug_init_mode, :runtime

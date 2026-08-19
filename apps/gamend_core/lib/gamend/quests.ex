@@ -75,6 +75,17 @@ defmodule Gamend.Quests do
 
   @statuses_done ~w(completed claimed)
 
+  # Attempts an objective merge gets before it reports contention.
+  #
+  # Every round of a race has exactly one winner, so a loser only has to
+  # outlast the writers ahead of it, and the field shrinks by one each round.
+  # What makes a bounded budget work is the jittered pause: without it a burst
+  # re-collides in lockstep and the same caller can lose repeatedly. Ten is
+  # sized for a client firing events far faster than a player can, not for the
+  # normal case, which wins on its first attempt.
+  @advance_attempts 10
+  @advance_retry_backoff_ms 4
+
   # ---------------------------------------------------------------------------
   # Cache helpers
   # ---------------------------------------------------------------------------
@@ -403,30 +414,38 @@ defmodule Gamend.Quests do
       (is_nil(ends_at) or DateTime.compare(ends_at, now) == :gt)
   end
 
-  # Advance one quest for one user under the per-(user, quest) advisory lock;
-  # the objective merge is a read-modify-write. Side effects run after the
-  # lock's transaction commits.
+  # Advance one quest for one user. Side effects run after the write lands.
+  #
+  # This used to hold a per-(user, quest) advisory lock for the whole
+  # read-modify-write, which cost a transaction and a lock round trip on the
+  # hottest write a player makes — the load test puts a locked write at 966/s
+  # against 4,266/s unlocked. What the lock actually protected is the objective
+  # merge: read the JSON map, add `amount` to the objectives this event
+  # matches, write it back. Two events arriving together both read the old map,
+  # and the second write drops the first's increment without a trace.
+  #
+  # `lock_version` closes that without the lock and without adapter-specific
+  # JSON SQL. The UPDATE carries the version it read, so the loser of a race
+  # matches no row and `do_advance/7` re-reads and merges again against what
+  # actually landed. Claiming, re-arming and reward grants bump the same
+  # counter, so a claim landing mid-merge is caught too — which the advisory
+  # lock never covered, because none of those paths ever took it.
   defp advance_quest(user_id, quest, event, amount, meta, now) do
-    result =
-      Gamend.Lock.serialize(:quest, "#{user_id}:#{quest.key}", fn ->
-        do_advance(user_id, quest, event, amount, meta, now)
-      end)
-
-    case result do
-      {:ok, {:advanced, progress}} ->
+    case do_advance(user_id, quest, event, amount, meta, now, @advance_attempts) do
+      {:advanced, progress} ->
         broadcast_progress(:quest_progress, user_id, progress)
         {:ok, progress}
 
-      {:ok, {:completed, progress}} ->
+      {:completed, progress} ->
         mark_done(user_id, quest, now)
         on_completed(user_id, quest, progress)
         {:ok, progress}
 
-      {:ok, :done} ->
+      :done ->
         mark_done(user_id, quest, now)
         :noop
 
-      {:ok, :noop} ->
+      :noop ->
         :noop
 
       {:error, reason} ->
@@ -435,7 +454,7 @@ defmodule Gamend.Quests do
     end
   end
 
-  defp do_advance(user_id, quest, event, amount, meta, now) do
+  defp do_advance(user_id, quest, event, amount, meta, now, attempts_left) do
     period_key = period_key(quest, now)
 
     progress =
@@ -445,19 +464,35 @@ defmodule Gamend.Quests do
         period_key: period_key
       )
 
-    case progress do
-      nil ->
-        if under_user_cap?(user_id, now) do
-          insert_progress(user_id, quest, event, amount, meta, now, period_key)
-        else
-          :noop
-        end
+    outcome =
+      case progress do
+        nil ->
+          if under_user_cap?(user_id, now) do
+            insert_progress(user_id, quest, event, amount, meta, now, period_key)
+          else
+            :noop
+          end
 
-      %QuestProgress{status: "active"} = progress ->
-        update_progress(progress, quest, event, amount, meta, now)
+        %QuestProgress{status: "active"} = progress ->
+          update_progress(progress, quest, event, amount, meta, now)
 
-      %QuestProgress{} ->
-        :done
+        %QuestProgress{} ->
+          :done
+      end
+
+    case outcome do
+      :stale when attempts_left > 1 ->
+        Process.sleep(:rand.uniform(@advance_retry_backoff_ms))
+        do_advance(user_id, quest, event, amount, meta, now, attempts_left - 1)
+
+      # Out of attempts. Reported rather than swallowed: at this point the
+      # caller's increment is genuinely not in the row, and a silent :noop is
+      # the lost update this whole path exists to prevent.
+      :stale ->
+        {:error, :contended}
+
+      other ->
+        other
     end
   end
 
@@ -476,9 +511,21 @@ defmodule Gamend.Quests do
     })
     |> Repo.insert()
     |> case do
-      {:ok, progress} -> {if(completed?, do: :completed, else: :advanced), progress}
-      {:error, changeset} -> Repo.rollback(changeset)
+      {:ok, progress} ->
+        {if(completed?, do: :completed, else: :advanced), progress}
+
+      {:error, changeset} ->
+        # Someone else created this user's row for this period first. Their
+        # merge is the row's state now, so re-read and add this event to it
+        # rather than reporting a conflict the caller cannot act on.
+        if unique_violation?(changeset), do: :stale, else: {:error, changeset}
     end
+  end
+
+  defp unique_violation?(%Ecto.Changeset{errors: errors}) do
+    Enum.any?(errors, fn {_field, {_message, opts}} ->
+      Keyword.get(opts, :constraint) == :unique
+    end)
   end
 
   defp update_progress(progress, quest, event, amount, meta, now) do
@@ -489,16 +536,24 @@ defmodule Gamend.Quests do
     else
       completed? = all_objectives_met?(objective_progress, quest)
 
-      progress
-      |> QuestProgress.changeset(%{
-        objective_progress: objective_progress,
-        status: if(completed?, do: "completed", else: "active"),
-        completed_at: if(completed?, do: now)
-      })
-      |> Repo.update()
-      |> case do
-        {:ok, updated} -> {if(completed?, do: :completed, else: :advanced), updated}
-        {:error, changeset} -> Repo.rollback(changeset)
+      changeset =
+        progress
+        |> QuestProgress.changeset(%{
+          objective_progress: objective_progress,
+          status: if(completed?, do: "completed", else: "active"),
+          completed_at: if(completed?, do: now)
+        })
+        |> Ecto.Changeset.optimistic_lock(:lock_version)
+
+      try do
+        case Repo.update(changeset) do
+          {:ok, updated} -> {if(completed?, do: :completed, else: :advanced), updated}
+          {:error, changeset} -> {:error, changeset}
+        end
+      rescue
+        # The version moved between the read and the write: this merge was
+        # computed against a row that no longer exists in that shape.
+        Ecto.StaleEntryError -> :stale
       end
     end
   end
@@ -678,7 +733,10 @@ defmodule Gamend.Quests do
           rewards_granted_at: nil,
           updated_at: now
         ],
-        inc: [claim_count: 1]
+        # Bumped, not just incremented for its own sake: this wipes
+        # `objective_progress`, and an advance that read the row before the
+        # re-arm would otherwise write the pre-reset counts back over it.
+        inc: [claim_count: 1, lock_version: 1]
       )
 
     count
@@ -798,7 +856,7 @@ defmodule Gamend.Quests do
             rewards_granted_at: nil,
             updated_at: now
           ],
-          inc: [claim_count: 1]
+          inc: [claim_count: 1, lock_version: 1]
         )
 
       count
@@ -850,7 +908,10 @@ defmodule Gamend.Quests do
   defp transition_to_claimed(progress, now) do
     {count, _} =
       from(p in QuestProgress, where: p.id == ^progress.id and p.status == "completed")
-      |> Repo.update_all(set: [status: "claimed", claimed_at: now, updated_at: now])
+      |> Repo.update_all(
+        set: [status: "claimed", claimed_at: now, updated_at: now],
+        inc: [lock_version: 1]
+      )
 
     case count do
       1 -> {:ok, %{progress | status: "claimed", claimed_at: now}}
@@ -898,7 +959,7 @@ defmodule Gamend.Quests do
       now = DateTime.utc_now(:second)
 
       from(p in QuestProgress, where: p.id == ^progress.id)
-      |> Repo.update_all(set: [rewards_granted_at: now, updated_at: now])
+      |> Repo.update_all(set: [rewards_granted_at: now, updated_at: now], inc: [lock_version: 1])
     else
       Enum.each(failed, fn {reward, error} ->
         Logger.error(
@@ -1185,6 +1246,44 @@ defmodule Gamend.Quests do
     end
   end
 
+  @doc """
+  Why this viewer cannot claim this quest yet, as a short label to draw — or
+  `nil` when they can. Set `config :gamend_core, :quest_lock_filter,
+  {Module, :function}`; it is called as `function(user_id | nil, Quest.t())`.
+
+  The display counterpart of `before_quest_claim`. A quest can be worth showing
+  and still not claimable — a premium tier a player has not bought is an offer,
+  and hiding it means only the people who already took the offer ever see it.
+  `host_visible/2` cannot express that: it keeps a quest or drops it, and
+  `hidden` is a column, the same for everyone, that draws "???" over the very
+  title the offer is made of.
+
+  A label here changes nothing about what pays: the veto in `before_quest_claim`
+  is still the authority, and a lock filter that disagrees with it only makes
+  the page lie. Return the reason from the same condition the veto tests.
+  """
+  @spec host_lock_label(Quest.t(), user_id() | nil) :: String.t() | nil
+  def host_lock_label(quest, user_id) do
+    case Application.get_env(:gamend_core, :quest_lock_filter) do
+      {mod, fun} when is_atom(mod) and is_atom(fun) ->
+        normalize_lock_label(apply(mod, fun, [user_id, quest]))
+
+      _ ->
+        nil
+    end
+  end
+
+  # A host returning "" (or anything but a binary) means "not locked": an empty
+  # badge is worse than none, and it is the shape a stubbed filter returns.
+  defp normalize_lock_label(label) when is_binary(label) do
+    case String.trim(label) do
+      "" -> nil
+      trimmed -> trimmed
+    end
+  end
+
+  defp normalize_lock_label(_label), do: nil
+
   # Definitions are few (capped by max_quests) and cached, so visibility and
   # pagination are resolved in memory; the user's rows come from one query.
   defp visible_quests(user_id, now, opts) do
@@ -1460,43 +1559,7 @@ defmodule Gamend.Quests do
           |> Enum.with_index()
           |> Map.new(fn {objective, index} -> {Integer.to_string(index), objective.target} end)
 
-        result =
-          Gamend.Lock.serialize(:quest, "#{user_id}:#{quest.key}", fn ->
-            progress =
-              Repo.get_by(QuestProgress,
-                user_id: user_id,
-                quest_key: quest.key,
-                period_key: period_key
-              )
-
-            case progress do
-              %QuestProgress{status: status} when status in @statuses_done ->
-                Repo.rollback(:already_completed)
-
-              %QuestProgress{} = progress ->
-                progress
-                |> QuestProgress.changeset(%{
-                  objective_progress: full,
-                  status: "completed",
-                  completed_at: now
-                })
-                |> Repo.update()
-                |> unwrap_or_rollback()
-
-              nil ->
-                %QuestProgress{}
-                |> QuestProgress.changeset(%{
-                  user_id: user_id,
-                  quest_key: quest.key,
-                  period_key: period_key,
-                  objective_progress: full,
-                  status: "completed",
-                  completed_at: now
-                })
-                |> Repo.insert()
-                |> unwrap_or_rollback()
-            end
-          end)
+        result = do_admin_complete(user_id, quest, period_key, full, now, @advance_attempts)
 
         case result do
           {:ok, progress} ->
@@ -1506,6 +1569,69 @@ defmodule Gamend.Quests do
           {:error, reason} ->
             {:error, reason}
         end
+    end
+  end
+
+  # Racing a player's own event on the same row is the ordinary case here — an
+  # admin grant lands while the player is playing — so this takes the same
+  # optimistic lock the advance path does rather than an advisory lock the
+  # advance path no longer holds.
+  defp do_admin_complete(user_id, quest, period_key, full, now, attempts_left) do
+    progress =
+      Repo.get_by(QuestProgress,
+        user_id: user_id,
+        quest_key: quest.key,
+        period_key: period_key
+      )
+
+    outcome =
+      case progress do
+        %QuestProgress{status: status} when status in @statuses_done ->
+          {:error, :already_completed}
+
+        %QuestProgress{} = progress ->
+          changeset =
+            progress
+            |> QuestProgress.changeset(%{
+              objective_progress: full,
+              status: "completed",
+              completed_at: now
+            })
+            |> Ecto.Changeset.optimistic_lock(:lock_version)
+
+          try do
+            Repo.update(changeset)
+          rescue
+            Ecto.StaleEntryError -> :stale
+          end
+
+        nil ->
+          %QuestProgress{}
+          |> QuestProgress.changeset(%{
+            user_id: user_id,
+            quest_key: quest.key,
+            period_key: period_key,
+            objective_progress: full,
+            status: "completed",
+            completed_at: now
+          })
+          |> Repo.insert()
+          |> case do
+            {:error, changeset} = error ->
+              if unique_violation?(changeset), do: :stale, else: error
+
+            ok ->
+              ok
+          end
+      end
+
+    case outcome do
+      :stale when attempts_left > 1 ->
+        do_admin_complete(user_id, quest, period_key, full, now, attempts_left - 1)
+
+      :stale -> {:error, :contended}
+      {:ok, progress} -> {:ok, progress}
+      {:error, reason} -> {:error, reason}
     end
   end
 
@@ -1533,9 +1659,6 @@ defmodule Gamend.Quests do
   def admin_claim(user_id, quest_key) do
     claim(user_id, quest_key, skip_hooks: true)
   end
-
-  defp unwrap_or_rollback({:ok, value}), do: value
-  defp unwrap_or_rollback({:error, changeset}), do: Repo.rollback(changeset)
 
   # ---------------------------------------------------------------------------
   # Retention & stats

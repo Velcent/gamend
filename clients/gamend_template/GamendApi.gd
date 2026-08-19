@@ -147,6 +147,13 @@ const SENSITIVE_LOG_KEYS := {
 }
 
 var _access_token := ""
+var _client_session_id := ""
+
+## Client log upload. Reachable as `gamend_api.logs`; call
+## [method start_logs] to begin, then feed it entries with
+## `logs.submit`. Created here rather than on demand because its
+## session id tags every request this api makes.
+var logs := GamendLogs.new()
 var _refresh_token := ""
 var _expires_at_ms := -1
 var _user_id = ""
@@ -174,6 +181,9 @@ func _init(host: String = "127.0.0.1", port: int = 4000, enable_ssl := false):
 	_config.polling_interval_ms = 1
 	_config.headers_override["Connection"] = "keep-alive"
 	_ensure_http_client_pool()
+	logs.name = "GamendLogs"
+	add_child.call_deferred(logs)
+	set_client_session(logs.session_id)
 	_refresh_timer = Timer.new()
 	_refresh_timer.one_shot = true
 	_refresh_timer.timeout.connect(_on_refresh_timer_timeout)
@@ -500,6 +510,7 @@ func realtime_start():
 	if _config.tls_enabled:
 		protocol = "wss://"
 	_realtime = GamendWebSocket.new(_get_realtime_access_token, protocol + _config.host + ":" + str(_config.port) + "/socket", realtime_format)
+	_realtime.client_session_id = _client_session_id
 	_realtime.enable_logs = enable_logs
 	_realtime.socket_opened.connect(_on_realtime_socket_opened)
 	_realtime.socket_closed.connect(_on_realtime_socket_closed)
@@ -858,6 +869,38 @@ func _handle_groups_event(event: String, payload: Dictionary):
 ## Authorize with access token
 func authorize():
 	_config.headers_base["Authorization"] = "Bearer " + _access_token
+
+## Start uploading client logs to this server. Address and bearer token come
+## from this instance, so there is nothing to keep in sync by hand:
+##
+##     gamend_api.start_logs()
+##     DebugLog.log_added.connect(gamend_api.logs.submit)
+##
+## Collection is off until the server says otherwise, so calling this in a build
+## whose server has client logs disabled costs one request and nothing else.
+func start_logs() -> void:
+	var scheme := "https://" if _config.tls_enabled else "http://"
+	logs.setup(scheme + _config.host + ":" + str(_config.port), get_access_token)
+
+## The client log session id, sent on every request and socket connect so the
+## server can tag its own log lines with it. One search for that id then returns
+## both what this client reported and what the server did about it, instead of
+## two lists to line up by timestamp. See GamendLogs.
+func set_client_session(session_id: String) -> void:
+	_client_session_id = session_id
+	if session_id.is_empty():
+		_config.headers_base.erase("x-gamend-session")
+	else:
+		_config.headers_base["x-gamend-session"] = session_id
+
+func get_client_session() -> String:
+	return _client_session_id
+
+## The current bearer token, or "" when not signed in. Public so callers that
+## need to authenticate a request themselves (GamendLogs uploads outside the
+## generated API layer) do not reach into a private field.
+func get_access_token() -> String:
+	return _access_token
 
 ### HEALTH
 
