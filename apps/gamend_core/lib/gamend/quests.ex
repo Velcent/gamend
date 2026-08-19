@@ -86,6 +86,12 @@ defmodule Gamend.Quests do
   @advance_attempts 10
   @advance_retry_backoff_ms 4
 
+  # Attempts the serialized fallback gets. It only competes with lock-free
+  # writers now — every other holder of this lock is queued behind it — and
+  # those are bounded by the requests in flight and each leaves once it wins,
+  # so this converges rather than needing to outlast an unbounded field.
+  @contended_attempts 25
+
   # ---------------------------------------------------------------------------
   # Cache helpers
   # ---------------------------------------------------------------------------
@@ -431,7 +437,13 @@ defmodule Gamend.Quests do
   # counter, so a claim landing mid-merge is caught too — which the advisory
   # lock never covered, because none of those paths ever took it.
   defp advance_quest(user_id, quest, event, amount, meta, now) do
-    case do_advance(user_id, quest, event, amount, meta, now, @advance_attempts) do
+    outcome =
+      case do_advance(user_id, quest, event, amount, meta, now, @advance_attempts) do
+        :contended -> advance_serialized(user_id, quest, event, amount, meta, now)
+        other -> other
+      end
+
+    case outcome do
       {:advanced, progress} ->
         broadcast_progress(:quest_progress, user_id, progress)
         {:ok, progress}
@@ -485,14 +497,40 @@ defmodule Gamend.Quests do
         Process.sleep(:rand.uniform(@advance_retry_backoff_ms))
         do_advance(user_id, quest, event, amount, meta, now, attempts_left - 1)
 
-      # Out of attempts. Reported rather than swallowed: at this point the
-      # caller's increment is genuinely not in the row, and a silent :noop is
-      # the lost update this whole path exists to prevent.
+      # Out of attempts. The caller decides what to do about it — this
+      # function has no business dropping the increment on the floor.
       :stale ->
-        {:error, :contended}
+        :contended
 
       other ->
         other
+    end
+  end
+
+  # The floor under the optimistic path.
+  #
+  # Every round of a version race has exactly one winner, so with enough
+  # writers on one row a given caller can lose its whole budget — 25 events
+  # arriving together for one player's quest does it, and the load test proved
+  # it does rather than leaving it as a worry. Returning an error there would
+  # drop a player's progress, which is the failure this path exists to prevent,
+  # so contention falls back to the advisory lock the optimistic write
+  # replaced: slower, but it queues instead of racing, so the increment lands.
+  #
+  # The optimistic guard stays on inside the lock. The lock excludes other
+  # *lock holders*, not the lock-free writers, so the version check is still
+  # what makes the merge safe — the lock only guarantees this caller stops
+  # competing with an unbounded field and eventually wins.
+  defp advance_serialized(user_id, quest, event, amount, meta, now) do
+    result =
+      Gamend.Lock.serialize(:quest, "#{user_id}:#{quest.key}", fn ->
+        do_advance(user_id, quest, event, amount, meta, now, @contended_attempts)
+      end)
+
+    case result do
+      {:ok, :contended} -> {:error, :contended}
+      {:ok, outcome} -> outcome
+      {:error, reason} -> {:error, reason}
     end
   end
 
@@ -1629,9 +1667,14 @@ defmodule Gamend.Quests do
       :stale when attempts_left > 1 ->
         do_admin_complete(user_id, quest, period_key, full, now, attempts_left - 1)
 
-      :stale -> {:error, :contended}
-      {:ok, progress} -> {:ok, progress}
-      {:error, reason} -> {:error, reason}
+      :stale ->
+        {:error, :contended}
+
+      {:ok, progress} ->
+        {:ok, progress}
+
+      {:error, reason} ->
+        {:error, reason}
     end
   end
 

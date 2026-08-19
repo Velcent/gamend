@@ -142,7 +142,7 @@ the same machine, so a floor rather than a ceiling):
 Reads all cost the same, plugin or not. Writes are ~4x a read, and a locked
 write ~4x again. Read the suite's **flows/s** column rather than req/s when
 comparing scenarios: a flow that spends five requests is not slower than one
-that spends one. [Performance](performance) has the flow table, capacity per
+that spends one. [Performance](performance) has the full operation table, capacity per
 gigabyte, per-socket memory, and the comparison with other game backends.
 
 ## What a laptop number means

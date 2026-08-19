@@ -191,6 +191,23 @@ function textSummary(data, name) {
     lines.push(`  checks        ${(checks.rate * 100).toFixed(2)}% passed (${checks.fails} failed)`);
   }
 
+  // Bytes, beside the rate. A scenario can be fast per request and still be
+  // the reason a phone on mobile data gives up, and that never shows in a
+  // latency percentile measured over loopback. Per-request is the number that
+  // travels: it is the same on any network, while the totals scale with how
+  // long the run happened to be.
+  const secs = (data.state && data.state.testRunDurationMs / 1000) || 0;
+  const reqs = m.http_reqs ? m.http_reqs.values.count : 0;
+  const inBytes = m.data_received ? m.data_received.values.count : 0;
+  const outBytes = m.data_sent ? m.data_sent.values.count : 0;
+
+  if (reqs > 0) {
+    lines.push(
+      `  transfer      in ${mb(inBytes)}  out ${mb(outBytes)}  ` +
+        `(${kb(inBytes / reqs)}/req in, ${rate(inBytes, secs)} down)`,
+    );
+  }
+
   // Every custom Trend (event delivery, time-to-match, per-endpoint splits).
   // An empty Trend summarises as all-zeros, so a step that never ran would
   // print as the fastest number here; `n_<name>` says how many samples there
@@ -212,6 +229,18 @@ function textSummary(data, name) {
 
 function fmt(v) {
   return v === undefined || v === null ? '—' : v.toFixed(1);
+}
+
+function mb(bytes) {
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+}
+
+function kb(bytes) {
+  return bytes >= 1024 ? `${(bytes / 1024).toFixed(1)} KB` : `${Math.round(bytes)} B`;
+}
+
+function rate(bytes, secs) {
+  return secs > 0 ? `${((bytes * 8) / secs / 1e6).toFixed(1)} Mbit/s` : '—';
 }
 
 function omit(obj, keys) {
