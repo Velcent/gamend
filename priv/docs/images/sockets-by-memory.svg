@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 940 500" font-family="ui-sans-serif,system-ui,sans-serif" font-size="12">
+<style>:root{--ink:#0f172a;--bg:#ffffff}@media (prefers-color-scheme:dark){:root{--ink:#e2e8f0;--bg:#0f172a}}</style>
+<rect width="940" height="500" rx="10" fill="var(--bg)"/>
+<text x="100" y="26" fill="var(--ink)" font-size="15" font-weight="600">Concurrent idle players, by machine</text>
+<line x1="100" y1="438" x2="725" y2="438" stroke="var(--ink)" stroke-opacity="0.09"/>
+<text x="84" y="442" text-anchor="end" fill="var(--ink)" fill-opacity="0.55">0k</text>
+<line x1="100" y1="374.3333333333333" x2="725" y2="374.3333333333333" stroke="var(--ink)" stroke-opacity="0.09"/>
+<text x="84" y="378.3333333333333" text-anchor="end" fill="var(--ink)" fill-opacity="0.55">10k</text>
+<line x1="100" y1="310.66666666666663" x2="725" y2="310.66666666666663" stroke="var(--ink)" stroke-opacity="0.09"/>
+<text x="84" y="314.66666666666663" text-anchor="end" fill="var(--ink)" fill-opacity="0.55">21k</text>
+<line x1="100" y1="247" x2="725" y2="247" stroke="var(--ink)" stroke-opacity="0.09"/>
+<text x="84" y="251" text-anchor="end" fill="var(--ink)" fill-opacity="0.55">31k</text>
+<line x1="100" y1="183.33333333333331" x2="725" y2="183.33333333333331" stroke="var(--ink)" stroke-opacity="0.09"/>
+<text x="84" y="187.33333333333331" text-anchor="end" fill="var(--ink)" fill-opacity="0.55">41k</text>
+<line x1="100" y1="119.66666666666669" x2="725" y2="119.66666666666669" stroke="var(--ink)" stroke-opacity="0.09"/>
+<text x="84" y="123.66666666666669" text-anchor="end" fill="var(--ink)" fill-opacity="0.55">52k</text>
+<line x1="100" y1="56" x2="725" y2="56" stroke="var(--ink)" stroke-opacity="0.09"/>
+<text x="84" y="60" text-anchor="end" fill="var(--ink)" fill-opacity="0.55">62k</text>
+<text x="225" y="460" text-anchor="middle" fill="var(--ink)" fill-opacity="0.55">1 GB</text>
+<text x="350" y="460" text-anchor="middle" fill="var(--ink)" fill-opacity="0.55">2 GB</text>
+<text x="475" y="460" text-anchor="middle" fill="var(--ink)" fill-opacity="0.55">3 GB</text>
+<text x="600" y="460" text-anchor="middle" fill="var(--ink)" fill-opacity="0.55">4 GB</text>
+<text x="725" y="460" text-anchor="middle" fill="var(--ink)" fill-opacity="0.55">5 GB</text>
+<text x="412.5" y="486" text-anchor="middle" fill="var(--ink)" fill-opacity="0.55">machine memory</text>
+<text x="20" y="247" transform="rotate(-90 20 247)" text-anchor="middle" fill="var(--ink)" fill-opacity="0.55">concurrent connections</text>
+<path d="M225,395.6904193548387 L225,382.20951612903224 L350,300.39990322580644 L350,300.23970967741934 L475,204.77051612903227 L600,122.38790322580644" fill="none" stroke="var(--ink)" stroke-opacity="0.45" stroke-width="2.5"/>
+<rect x="470" y="308.06751612903224" width="10" height="10" fill="none" stroke="var(--ink)" stroke-opacity="0.7" stroke-width="1.8"/>
+<text x="488" y="317.06751612903224" fill="var(--ink)" fill-opacity="0.75" font-weight="600">Nakama</text>
+<circle cx="225" cy="395.6904193548387" r="5.5" fill="#94a3b8"/>
+<circle cx="225" cy="382.20951612903224" r="5.5" fill="#06b6d4"/>
+<path d="M350,294.89990322580644 A5.5,5.5 0 0 0 350,305.89990322580644 Z" fill="#22c55e"/>
+<path d="M350,294.89990322580644 A5.5,5.5 0 0 1 350,305.89990322580644 Z" fill="#f97316"/>
+<circle cx="475" cy="204.77051612903227" r="5.5" fill="#ef4444"/>
+<circle cx="600" cy="122.38790322580644" r="5.5" fill="#a855f7"/>
+<text x="237" y="413.6904193548387" text-anchor="start" fill="#94a3b8" font-weight="600">shared-cpu-1x</text>
+<text x="213" y="374.20951612903224" text-anchor="end" fill="#06b6d4" font-weight="600">shared-cpu-4x</text>
+<text x="338" y="290.39990322580644" text-anchor="end" fill="#22c55e" font-weight="600">shared-cpu-8x</text>
+<text x="362" y="318.23970967741934" text-anchor="start" fill="#f97316" font-weight="600">performance-1x</text>
+<text x="463" y="194.77051612903227" text-anchor="end" fill="#ef4444" font-weight="600">performance-1x</text>
+<text x="588" y="112.38790322580644" text-anchor="end" fill="#a855f7" font-weight="600">performance-2x</text>
+<circle cx="759" cy="66" r="4.5" fill="#94a3b8"/>
+<text x="771" y="70" fill="var(--ink)" fill-opacity="0.85">shared-cpu-1x · 1 GB · $6</text>
+<circle cx="759" cy="88" r="4.5" fill="#06b6d4"/>
+<text x="771" y="92" fill="var(--ink)" fill-opacity="0.85">shared-cpu-4x · 1 GB · $8</text>
+<circle cx="759" cy="110" r="4.5" fill="#22c55e"/>
+<text x="771" y="114" fill="var(--ink)" fill-opacity="0.85">shared-cpu-8x · 2 GB · $16</text>
+<circle cx="759" cy="132" r="4.5" fill="#f97316"/>
+<text x="771" y="136" fill="var(--ink)" fill-opacity="0.85">performance-1x · 2 GB · $32</text>
+<circle cx="759" cy="154" r="4.5" fill="#ef4444"/>
+<text x="771" y="158" fill="var(--ink)" fill-opacity="0.85">performance-1x · 3 GB · $37</text>
+<circle cx="759" cy="176" r="4.5" fill="#a855f7"/>
+<text x="771" y="180" fill="var(--ink)" fill-opacity="0.85">performance-2x · 4 GB · $64</text>
+<rect x="754.5" y="207.5" width="9" height="9" fill="none" stroke="var(--ink)" stroke-opacity="0.7" stroke-width="1.6"/>
+<text x="771" y="216" fill="var(--ink)" fill-opacity="0.8">Nakama · 1 vCPU · 3 GB</text>
+<text x="771" y="230" fill="var(--ink)" fill-opacity="0.5">published figure</text>
+</svg>
