@@ -36,6 +36,7 @@
  * a failed join or a dropped socket is the other thing worth knowing.
  */
 
+import { sleep } from 'k6';
 import { summaryHandler, RUN_TAG } from '../lib/config.js';
 import { deviceLogin } from '../lib/auth.js';
 import { me, data } from '../lib/api.js';
@@ -76,21 +77,60 @@ export const options = {
 
 export const handleSummary = summaryHandler('ws_idle');
 
-export default function () {
-  // Spread the opens across the ramp so the run measures a steady population
-  // rather than the server's ability to accept N connections in one burst.
-  // Floored at 1ms: k6 rejects a zero delay, which VU 1 would otherwise get.
-  const stagger = Math.max(
-    1,
-    (parseSeconds(RAMP) * 1000 * ((__VU - 1) % SOCKETS)) / SOCKETS,
-  );
+/**
+ * Create the shared accounts once, before any VU starts.
+ *
+ * Without this, every VU assigned to an account races every other VU on that
+ * account to *create* it: `/login/device` is find-or-create, so fifty
+ * simultaneous first-logins for one device id all miss the lookup, all insert,
+ * and all but one lose to the unique constraint. Measured at 500 sockets over
+ * 10 accounts: 98% of logins failed. The sockets themselves were fine — the
+ * joins that got through took 3.5ms — which is exactly the kind of failure
+ * that reads as "the server cannot take it".
+ *
+ * Serial on purpose. It is `USERS` requests, not `SOCKETS`, so it costs a
+ * second or two and it happens before the clock that matters starts.
+ */
+export function setup() {
+  const ids = [];
+
+  for (let i = 0; i < USERS; i++) {
+    const id = `${RUN_TAG}-idle-${i}`;
+    if (deviceLogin({ fresh: true, id })) ids.push(id);
+  }
+
+  return { ids };
+}
+
+export default function (state) {
+  // Spread the CONNECTS across the ramp, not just the joins.
+  //
+  // This used to delay only the channel join, with `setTimeout` inside the
+  // socket callback — but the socket was already open by then, so every VU
+  // connected at once. `per-vu-iterations` starts all VUs immediately, so
+  // 24,000 sockets arrived in about 21 seconds against a configured 130-second
+  // ramp, and what got measured was a connect storm rather than a steady
+  // population. That distinction matters: the server OOMed above ~15,000 on
+  // both 3 GB and 4 GB, which is the signature of an arrival-rate problem
+  // rather than a capacity one.
+  //
+  // `sleep` blocks the VU before anything is opened, which is the only way to
+  // pace admission with this executor.
+  const stagger = (parseSeconds(RAMP) * ((__VU - 1) % SOCKETS)) / SOCKETS;
+  if (stagger > 0) sleep(stagger);
 
   // Sockets share accounts round-robin. Two VUs on the same account log in
   // separately and hold separate sockets, which is what a player with a phone
   // and a desktop open does — and what makes the socket count independent of
   // how fast the server can create accounts.
-  const account = (__VU - 1) % USERS;
-  const auth = deviceLogin({ fresh: true, id: `${RUN_TAG}-idle-${account}` });
+  //
+  // `setup()` has already created these, so this login finds an existing user
+  // rather than racing to insert one. The server needs
+  // `GAMEND_LIMITS_MAX_SOCKETS_PER_USER=0` for the surplus to be accepted.
+  const ids = (state && state.ids) || [];
+  const id = ids.length ? ids[(__VU - 1) % ids.length] : `${RUN_TAG}-idle-${(__VU - 1) % USERS}`;
+
+  const auth = deviceLogin({ fresh: true, id });
   if (!auth) return;
 
   const userId = auth.userId || idFromMe(auth.token);
@@ -101,11 +141,9 @@ export default function () {
   session(
     auth.token,
     (client, done) => {
-      client.socket.setTimeout(() => {
-        client.join(`user:${userId}`, {}, () => {
-          client.socket.setTimeout(done, parseSeconds(DWELL) * 1000);
-        });
-      }, stagger);
+      client.join(`user:${userId}`, {}, () => {
+        client.socket.setTimeout(done, parseSeconds(DWELL) * 1000);
+      });
     },
     { timeout: (parseSeconds(RAMP) + parseSeconds(DWELL) + 30) * 1000 },
   );

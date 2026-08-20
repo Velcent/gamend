@@ -36,7 +36,6 @@ defmodule GamendWeb.Api.V1.UserController do
                    id: %Schema{type: :string, format: :uuid},
                    username: %Schema{type: :string},
                    display_name: %Schema{type: :string},
-                   profile_url: %Schema{type: :string},
                    metadata: %Schema{
                      type: :object,
                      description:
@@ -90,7 +89,6 @@ defmodule GamendWeb.Api.V1.UserController do
              id: %Schema{type: :string, format: :uuid},
              username: %Schema{type: :string},
              display_name: %Schema{type: :string},
-             profile_url: %Schema{type: :string},
              metadata: %Schema{
                type: :object,
                description:
@@ -171,9 +169,15 @@ defmodule GamendWeb.Api.V1.UserController do
   #
   # Metadata is therefore default-deny here, and a host opts individual
   # sections back in through :public_user_metadata_keys.
+  # `profile_url` goes with the metadata, for the same reason and one of its
+  # own: it is set from an upload *or* imported verbatim from a Google, Discord,
+  # Steam or Facebook profile, which means it is frequently a photograph of the
+  # account holder. Handing that out from an unauthenticated endpoint, keyed to
+  # a name prefix, is the picture and the name together.
   defp serialize_user(user) do
     user
     |> User.serialize_brief()
+    |> Map.drop([:profile_url])
     |> Map.put(:metadata, public_metadata(user.metadata))
     |> Map.merge(%{
       lobby_id: user.lobby_id || "",

@@ -85,5 +85,18 @@ RUN echo -n "${GAMEND_CONTENT_APP_VERSION}" > /app/VERSION
 # Expose ports (HTTP + HTTPS)
 EXPOSE 4000 443
 
-# Default command - create DB (if needed), run migrations, and start server
-CMD ["sh", "-c", "mix ecto.create --quiet -r Gamend.Repo 2>/dev/null; mix db.migrate && mix phx.server"]
+# Default command - raise the file-descriptor limit, create DB (if needed), run
+# migrations, and start server.
+#
+# `ulimit -n` first, because every WebSocket is a file descriptor and the
+# default on most container hosts is 1024-10240. Measured on Fly: the server
+# held 10,175 concurrent idle sockets and then stopped accepting, with the BEAM
+# using 480 MB of a 3 GB machine — 16%, climbing linearly, nowhere near
+# trouble. The wall was the descriptor limit, not memory or the app, and it
+# arrives as a cliff rather than a slowdown.
+#
+# 262144 is well under the 1,048,576 `fs.nr_open` allows and far above what any
+# single node should need. Failure is tolerated on purpose: a host that pins
+# the hard limit lower should still start the server, just with fewer sockets
+# available.
+CMD ["sh", "-c", "ulimit -n 262144 2>/dev/null || true; mix ecto.create --quiet -r Gamend.Repo 2>/dev/null; mix db.migrate && mix phx.server"]

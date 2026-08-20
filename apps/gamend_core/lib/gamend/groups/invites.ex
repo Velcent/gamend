@@ -54,6 +54,18 @@ defmodule Gamend.Groups.Invites do
     |> Kernel.||(0)
   end
 
+  # Deliberately stricter than the party rule, which also accepts
+  # `Groups.shared_group_member?/2`. Accepting a shared group here would be
+  # circular on the surface it is meant to protect: anyone can join a public
+  # group, so "we are in a group together" is a connection a stranger can grant
+  # themselves. A friendship cannot be — it needs the other person to accept.
+  #
+  # Classes do not lose anything to this: a student joins a class by entering
+  # the code their teacher gives out, which is a pull, not an invite.
+  defp connected?(admin_id, target_user_id) do
+    Friends.friends?(admin_id, target_user_id)
+  end
+
   @doc """
   Invite a user to a group. Creates a `GroupInvite` record and sends
   an informational notification. The invite record is independent of the
@@ -62,6 +74,14 @@ defmodule Gamend.Groups.Invites do
   If the target user already has a pending join request for this group,
   the request is automatically approved instead of creating an invite.
   In that case, returns `{:ok, :request_approved}`.
+
+  The admin must already be connected to the target — a friendship, or a group
+  they are both already in. Without that an admin could put any user id at all
+  into a group with them, which made a group invite a weaker control than a
+  party invite, where `Parties.check_leader_connected_to_target/2` has always
+  required a connection. On a service children can reach, being addable to a
+  stranger's group is the contact path that matters, so the two now agree.
+  Returns `{:error, :not_connected}`.
   """
   @spec invite_to_group(Ecto.UUID.t(), Ecto.UUID.t(), Ecto.UUID.t()) ::
           {:ok, GroupInvite.t()} | {:ok, :request_approved} | {:error, atom()}
@@ -81,6 +101,9 @@ defmodule Gamend.Groups.Invites do
 
       Friends.blocked?(admin_id, target_user_id) ->
         {:error, :blocked}
+
+      not connected?(admin_id, target_user_id) ->
+        {:error, :not_connected}
 
       true ->
         import Ecto.Query

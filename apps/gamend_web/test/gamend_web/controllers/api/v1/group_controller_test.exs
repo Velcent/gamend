@@ -298,6 +298,7 @@ defmodule GamendWeb.Api.V1.GroupControllerTest do
     test "admin can kick a member", %{conn: conn} do
       owner = create_user()
       target = create_user()
+      :ok = AccountsFixtures.befriend(owner, target)
       {:ok, group} = Groups.create_group(owner.id, %{"title" => "KickGrp", "type" => "public"})
       {:ok, _} = Groups.join_group(target.id, group.id)
 
@@ -339,6 +340,7 @@ defmodule GamendWeb.Api.V1.GroupControllerTest do
     test "admin can promote member", %{conn: conn} do
       owner = create_user()
       target = create_user()
+      :ok = AccountsFixtures.befriend(owner, target)
       {:ok, group} = Groups.create_group(owner.id, %{"title" => "PromoGrp", "type" => "public"})
       {:ok, _} = Groups.join_group(target.id, group.id)
 
@@ -356,6 +358,7 @@ defmodule GamendWeb.Api.V1.GroupControllerTest do
     test "admin can demote another admin", %{conn: conn} do
       owner = create_user()
       target = create_user()
+      :ok = AccountsFixtures.befriend(owner, target)
       {:ok, group} = Groups.create_group(owner.id, %{"title" => "DemoGrp", "type" => "public"})
       {:ok, _} = Groups.join_group(target.id, group.id)
       {:ok, _} = Groups.promote_member(owner.id, group.id, target.id)
@@ -559,6 +562,7 @@ defmodule GamendWeb.Api.V1.GroupControllerTest do
     test "admin can invite user to group", %{conn: conn} do
       owner = create_user()
       target = create_user()
+      :ok = AccountsFixtures.befriend(owner, target)
       {:ok, group} = Groups.create_group(owner.id, %{"title" => "InvAPI", "type" => "hidden"})
 
       conn =
@@ -572,6 +576,7 @@ defmodule GamendWeb.Api.V1.GroupControllerTest do
     test "auto-approves pending join request via invite endpoint", %{conn: conn} do
       owner = create_user()
       target = create_user()
+      :ok = AccountsFixtures.befriend(owner, target)
 
       {:ok, group} =
         Groups.create_group(owner.id, %{"title" => "AutoAPI", "type" => "private"})
@@ -606,6 +611,7 @@ defmodule GamendWeb.Api.V1.GroupControllerTest do
     test "user can accept invite and join hidden group", %{conn: conn} do
       owner = create_user()
       target = create_user()
+      :ok = AccountsFixtures.befriend(owner, target)
       {:ok, group} = Groups.create_group(owner.id, %{"title" => "AccInv", "type" => "hidden"})
       {:ok, invite} = Groups.invite_to_group(owner.id, group.id, target.id)
 
@@ -621,6 +627,7 @@ defmodule GamendWeb.Api.V1.GroupControllerTest do
     test "accepts invite for non-hidden group", %{conn: conn} do
       owner = create_user()
       target = create_user()
+      :ok = AccountsFixtures.befriend(owner, target)
       {:ok, group} = Groups.create_group(owner.id, %{"title" => "PubAccInv", "type" => "public"})
       {:ok, invite} = Groups.invite_to_group(owner.id, group.id, target.id)
 
@@ -649,6 +656,7 @@ defmodule GamendWeb.Api.V1.GroupControllerTest do
     test "user can decline invite", %{conn: conn} do
       owner = create_user()
       target = create_user()
+      :ok = AccountsFixtures.befriend(owner, target)
       {:ok, group} = Groups.create_group(owner.id, %{"title" => "DecInv", "type" => "hidden"})
       {:ok, invite} = Groups.invite_to_group(owner.id, group.id, target.id)
 
@@ -681,6 +689,7 @@ defmodule GamendWeb.Api.V1.GroupControllerTest do
     test "lists invitations sent by user", %{conn: conn} do
       owner = create_user()
       target = create_user()
+      :ok = AccountsFixtures.befriend(owner, target)
       {:ok, group} = Groups.create_group(owner.id, %{"title" => "InvGrp", "type" => "hidden"})
       {:ok, _} = Groups.invite_to_group(owner.id, group.id, target.id)
 
@@ -714,6 +723,7 @@ defmodule GamendWeb.Api.V1.GroupControllerTest do
     test "sender can cancel their own invitation", %{conn: conn} do
       owner = create_user()
       target = create_user()
+      :ok = AccountsFixtures.befriend(owner, target)
       {:ok, group} = Groups.create_group(owner.id, %{"title" => "CnclInv", "type" => "hidden"})
       {:ok, _} = Groups.invite_to_group(owner.id, group.id, target.id)
 
@@ -731,6 +741,7 @@ defmodule GamendWeb.Api.V1.GroupControllerTest do
     test "cannot cancel another user's invitation", %{conn: conn} do
       owner = create_user()
       target = create_user()
+      :ok = AccountsFixtures.befriend(owner, target)
       third = create_user()
       {:ok, group} = Groups.create_group(owner.id, %{"title" => "NoCancel", "type" => "hidden"})
       {:ok, _} = Groups.invite_to_group(owner.id, group.id, target.id)

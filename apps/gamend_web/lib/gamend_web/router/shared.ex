@@ -157,6 +157,10 @@ defmodule GamendWeb.Router.Shared do
         plug GamendWeb.Plugs.FeatureGate, feature: :list_users
       end
 
+      pipeline :user_image_uploads_gate do
+        plug GamendWeb.Plugs.FeatureGate, feature: :user_image_uploads
+      end
+
       pipeline :list_lobbies_gate do
         plug GamendWeb.Plugs.FeatureGate, feature: :list_lobbies
       end
@@ -451,8 +455,6 @@ defmodule GamendWeb.Router.Shared do
         patch "/me/password", MeController, :update_password
         patch "/me/display_name", MeController, :update_display_name
         patch "/me/username", MeController, :update_username
-        post "/me/avatar/upload_url", MeController, :avatar_upload_url
-        post "/me/avatar", MeController, :set_avatar
         put "/storage/upload", StorageController, :upload
         get "/me/wallet", EconomyController, :wallet
         get "/me/wallet/ledger", EconomyController, :ledger
@@ -468,6 +470,17 @@ defmodule GamendWeb.Router.Shared do
         post "/me/push_tokens", PushTokenController, :create
         get "/me/push_tokens", PushTokenController, :index
         delete "/me/push_tokens/:id", PushTokenController, :delete
+      end
+
+      # Avatars are player-supplied images served from public storage, so they
+      # are gated separately from the rest of the account routes: a host whose
+      # game does not use them should not be left running an unscreened image
+      # surface it never asked for.
+      scope "/api/v1", GamendWeb.Api.V1, as: :api_v1 do
+        pipe_through [:api, :api_auth, :user_image_uploads_gate]
+
+        post "/me/avatar/upload_url", MeController, :avatar_upload_url
+        post "/me/avatar", MeController, :set_avatar
       end
     end
   end
@@ -516,6 +529,12 @@ defmodule GamendWeb.Router.Shared do
         post "/groups/:id/join_requests/:request_id/reject", GroupController, :reject_request
         delete "/groups/:id/join_requests/:request_id", GroupController, :cancel_request
         post "/groups/:id/invite", GroupController, :invite
+      end
+
+      # Group icons are the other player-supplied image surface — same gate.
+      scope "/api/v1", GamendWeb.Api.V1, as: :api_v1 do
+        pipe_through [:api, :api_auth, :user_image_uploads_gate]
+
         post "/groups/:id/icon/upload_url", GroupController, :icon_upload_url
         post "/groups/:id/icon", GroupController, :set_icon
       end

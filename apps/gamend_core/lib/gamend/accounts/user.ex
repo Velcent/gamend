@@ -19,7 +19,14 @@ defmodule Gamend.Accounts.User do
           lobby_id: Ecto.UUID.t() | nil,
           party_id: Ecto.UUID.t() | nil,
           is_online: boolean(),
-          last_seen_at: DateTime.t() | nil
+          last_seen_at: DateTime.t() | nil,
+          birth_year: integer() | nil,
+          birth_month: integer() | nil,
+          age_country: String.t() | nil,
+          age_method: String.t() | nil,
+          age_locked_at: DateTime.t() | nil,
+          account_class: String.t() | nil,
+          grandfathered_at: DateTime.t() | nil
         }
   use Gamend.Schema
   import Ecto.Changeset
@@ -47,6 +54,17 @@ defmodule Gamend.Accounts.User do
     field :is_online, :boolean, default: false
     field :last_seen_at, :utc_datetime
     field :token_version, :integer, default: 0
+
+    # Age. Year and month only — never the day; see the migration for why.
+    # `account_class` is derived and written by `Gamend.Accounts.AgePolicy`,
+    # and `grandfathered_at` marks an account that predates the age gate.
+    field :birth_year, :integer
+    field :birth_month, :integer
+    field :age_country, :string
+    field :age_method, :string
+    field :age_locked_at, :utc_datetime
+    field :account_class, :string, default: "unknown"
+    field :grandfathered_at, :utc_datetime
 
     # membership via users.lobby_id (each user can be in one lobby)
     belongs_to :lobby, Gamend.Lobbies.Lobby
@@ -77,6 +95,34 @@ defmodule Gamend.Accounts.User do
   @doc false
   @spec identity_fields() :: [atom()]
   def identity_fields, do: @identity_fields
+
+  @doc """
+  Record an age answer.
+
+  Takes a year and a month and nothing finer — a caller that collected a full
+  date discards the day before it gets here, so the day is never written and
+  never stored. See the migration for why.
+
+  Validation only: whether the answer is *allowed* to replace an existing one is
+  `AgePolicy.may_change_age?/4`, and `Accounts.set_age/2` is what asks. A
+  changeset that enforced it too would make the rule two things to keep in step.
+  """
+  def age_changeset(user, attrs) do
+    this_year = Date.utc_today().year
+
+    user
+    |> cast(attrs, [:birth_year, :birth_month, :age_country, :age_method])
+    |> validate_required([:birth_year, :birth_month, :age_method])
+    # A person older than the oldest person is a typo or a probe, not an age.
+    |> validate_inclusion(:birth_year, (this_year - 120)..this_year)
+    |> validate_inclusion(:birth_month, 1..12)
+    |> validate_inclusion(:age_method, Gamend.Accounts.AgePolicy.methods())
+    |> update_change(:age_country, fn
+      nil -> nil
+      country -> String.upcase(country)
+    end)
+    |> validate_length(:age_country, is: 2)
+  end
 
   @doc """
   A user changeset for registering a new user.

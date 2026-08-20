@@ -46,7 +46,25 @@ defmodule GamendWeb.Sitemap.Source do
   """
   @callback urls(key :: String.t()) :: [String.t()]
 
-  @optional_callbacks urls: 1
+  @doc """
+  Everything besides the manifest that changes the rendered sitemap.
+
+  Read by `GamendWeb.Sitemap.Cache` to build the signature its keys and ETags
+  are scoped by. Core covers what every host shares — the manifest's stamp, the
+  endpoint URL, the locale set — so this is for the host's own inputs: how many
+  pages of each kind exist, the newest date of anything the manifest does not
+  track, and **a version number bumped by hand**, since pages decided by code
+  rather than data change the output and nothing derived from content notices.
+
+  Cheap: it runs on every sitemap request. Prefer a count or an mtime to a hash
+  of the thing being counted.
+
+  Terms only — the list is hashed through `:erlang.term_to_binary/1`, so
+  anything comparable works and nothing needs to be a string.
+  """
+  @callback signature_inputs() :: [term()]
+
+  @optional_callbacks urls: 1, signature_inputs: 0
 
   @doc """
   URLs for the keys that changed, via the source's `c:urls/1`.
@@ -60,6 +78,24 @@ defmodule GamendWeb.Sitemap.Source do
 
     if module && function_exported?(module, :urls, 1) do
       Enum.flat_map(keys, &module.urls/1)
+    else
+      []
+    end
+  end
+
+  @doc """
+  The source's `c:signature_inputs/0`, or an empty list when it has none.
+
+  Empty is safe rather than silently wrong: the signature still covers the
+  manifest and the endpoint, so a host without host-specific inputs simply
+  caches on those.
+  """
+  @spec signature_inputs() :: [term()]
+  def signature_inputs do
+    module = source()
+
+    if module && function_exported?(module, :signature_inputs, 0) do
+      module.signature_inputs()
     else
       []
     end

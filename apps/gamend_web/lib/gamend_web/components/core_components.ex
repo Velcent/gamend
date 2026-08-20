@@ -811,6 +811,36 @@ defmodule GamendWeb.CoreComponents do
     |> Enum.join(" ")
   end
 
+  @doc """
+  The "there is nothing here" panel: an icon, a heading and a line of prose.
+
+  For a page that legitimately has no content — no changelog file, no results,
+  an empty list — not for an error. Both halves of the copy are attributes, and
+  both should be translated: the `text` on the changelog page was an English
+  literal on every host for exactly as long as it was written inline.
+
+  ## Example
+
+      <.empty_state
+        icon="hero-document-text"
+        title={gettext("No results.")}
+        text={gettext("Add a changelog file at CHANGELOG.md to display it here.")}
+      />
+  """
+  attr :icon, :string, required: true
+  attr :title, :string, required: true
+  attr :text, :string, default: nil
+
+  def empty_state(assigns) do
+    ~H"""
+    <div class="py-20 text-center">
+      <.icon name={@icon} class="mx-auto mb-4 h-16 w-16 text-base-content/50" />
+      <h2 class="mb-2 text-xl font-semibold text-base-content/60">{@title}</h2>
+      <p :if={@text} class="text-base-content/50">{@text}</p>
+    </div>
+    """
+  end
+
   ## JS Commands
 
   def show(js \\ %JS{}, selector) do

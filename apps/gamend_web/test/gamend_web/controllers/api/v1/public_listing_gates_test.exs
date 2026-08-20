@@ -53,6 +53,53 @@ defmodule GamendWeb.Api.V1.PublicListingGatesTest do
     end
   end
 
+  describe "USER_IMAGE_UPLOADS_ENABLED=false" do
+    # Avatars and group icons are the only surfaces on which a player can put an
+    # arbitrary image into public, unauthenticated storage. A host whose game
+    # does not use them should be able to close them outright rather than run an
+    # unscreened image surface it never asked for.
+    setup do
+      user = AccountsFixtures.user_fixture()
+      {:ok, token, _} = Guardian.encode_and_sign(user)
+
+      %{
+        authed:
+          Plug.Conn.put_req_header(
+            Phoenix.ConnTest.build_conn(),
+            "authorization",
+            "Bearer " <> token
+          ),
+        user: user
+      }
+    end
+
+    test "avatar upload endpoints return 404", %{authed: authed} do
+      disable(:user_image_uploads)
+
+      assert authed |> post("/api/v1/me/avatar/upload_url", %{}) |> response(404)
+      assert authed |> post("/api/v1/me/avatar", %{}) |> response(404)
+    end
+
+    test "group icon endpoints return 404", %{authed: authed, user: user} do
+      # A real group the caller owns: a made-up id 404s whether or not the gate
+      # is closed, so the test would pass for the wrong reason.
+      {:ok, group} = Gamend.Groups.create_group(user.id, %{"title" => "Crew"})
+
+      disable(:user_image_uploads)
+
+      assert authed |> post("/api/v1/groups/#{group.id}/icon/upload_url", %{}) |> response(404)
+      assert authed |> post("/api/v1/groups/#{group.id}/icon", %{}) |> response(404)
+    end
+
+    test "the rest of the account routes are unaffected", %{authed: authed} do
+      disable(:user_image_uploads)
+
+      # The gate must not take the whole /me surface with it — these share a
+      # path prefix but not the risk.
+      assert authed |> get("/api/v1/me") |> json_response(200)
+    end
+  end
+
   describe "LIST_LOBBIES_ENABLED=false" do
     test "GET /lobbies returns 404", %{conn: conn} do
       disable(:list_lobbies)

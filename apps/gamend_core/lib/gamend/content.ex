@@ -42,6 +42,7 @@ defmodule Gamend.Content do
     * `:path` - single candidate path
     * `:candidates` - ordered candidate paths
     * `:asset_root` - `:self` or `:dirname` when serving assets
+    * `:post_render` - `{module, function}` applied to rendered guide HTML
   """
   @spec register_path(atom() | String.t(), keyword()) :: :ok
   def register_path(name, opts) when is_atom(name) or is_binary(name) do
@@ -176,7 +177,7 @@ defmodule Gamend.Content do
   # ---------------------------------------------------------------------------
 
   @doc """
-  Lists every guide, grouped into categories in reading order.
+  Lists every guide in a collection, grouped into categories in reading order.
 
   Structure comes from the file tree rather than front matter, so a guide is a
   file and nothing else has to be edited to add one:
@@ -187,11 +188,20 @@ defmodule Gamend.Content do
   slug; the folder name is the category; the title is the first `# ` heading.
   Returns `[%{category: String.t(), guides: [guide]}]`, each guide a map of
   `:slug`, `:title`, `:summary` and `:path`.
+
+  ## Collections
+
+  A *collection* is the registered path name the guides are read from, so one
+  app can serve several unrelated sets — gamend serves `:docs`, Polyglot
+  Pirates serves both `:docs` (engineering, admin-only) and `:guide` (the
+  player guide). The collection is part of every cache key, so the sets never
+  see each other's entries. Everything defaults to `:docs`, which is what the
+  single-collection callers already had.
   """
-  @spec list_doc_categories() :: [%{category: String.t(), guides: [map()]}]
-  def list_doc_categories do
-    cached(:doc_categories, fn ->
-      case path(:docs) do
+  @spec list_doc_categories(atom()) :: [%{category: String.t(), guides: [map()]}]
+  def list_doc_categories(collection \\ :docs) when is_atom(collection) do
+    cached({:doc_categories, collection}, fn ->
+      case path(collection) do
         nil ->
           []
 
@@ -210,38 +220,102 @@ defmodule Gamend.Content do
     end)
   end
 
-  @doc "Every guide as a flat list, in the same order as `list_doc_categories/0`."
-  @spec list_docs() :: [map()]
-  def list_docs do
-    Enum.flat_map(list_doc_categories(), & &1.guides)
+  @doc "Every guide as a flat list, in the same order as `list_doc_categories/1`."
+  @spec list_docs(atom()) :: [map()]
+  def list_docs(collection \\ :docs) when is_atom(collection) do
+    Enum.flat_map(list_doc_categories(collection), & &1.guides)
   end
 
   @doc "Returns a single guide map by slug, or `nil`."
-  @spec get_doc(String.t()) :: map() | nil
-  def get_doc(slug) when is_binary(slug) do
-    Enum.find(list_docs(), fn doc -> doc.slug == slug end)
+  @spec get_doc(atom(), String.t()) :: map() | nil
+  def get_doc(collection \\ :docs, slug)
+
+  def get_doc(collection, slug) when is_atom(collection) and is_binary(slug) do
+    Enum.find(list_docs(collection), fn doc -> doc.slug == slug end)
   end
+
+  def get_doc(_collection, _slug), do: nil
+
+  @doc """
+  The category a guide belongs to — its display title, icon and colour — or
+  `nil`.
+
+  Found by membership rather than by name: a guide carries its category's
+  *folder* ("10-setup") while the category carries the display title ("Setup").
+  Both pages that render a guide need this, so deriving it twice by hand was
+  how the two drifted apart.
+  """
+  @spec doc_category(atom(), String.t()) :: map() | nil
+  def doc_category(collection \\ :docs, slug)
+
+  def doc_category(collection, slug) when is_atom(collection) and is_binary(slug) do
+    Enum.find(list_doc_categories(collection), fn category ->
+      Enum.any?(category.guides, &(&1.slug == slug))
+    end)
+  end
+
+  def doc_category(_collection, _slug), do: nil
+
+  @doc """
+  `{previous, next}` guides around `slug` in reading order, either possibly
+  `nil`.
+
+  Across categories, not within one: the collections are written to be read
+  front to back, and stopping at a category boundary would strand the reader on
+  the last page of each section.
+  """
+  @spec doc_neighbours(atom(), String.t()) :: {map() | nil, map() | nil}
+  def doc_neighbours(collection \\ :docs, slug)
+
+  def doc_neighbours(collection, slug) when is_atom(collection) and is_binary(slug) do
+    docs = list_docs(collection)
+
+    case Enum.find_index(docs, &(&1.slug == slug)) do
+      nil -> {nil, nil}
+      0 -> {nil, Enum.at(docs, 1)}
+      index -> {Enum.at(docs, index - 1), Enum.at(docs, index + 1)}
+    end
+  end
+
+  def doc_neighbours(_collection, _slug), do: {nil, nil}
 
   @doc """
   Renders a guide's markdown to HTML, or `nil`.
 
-  The leading `# ` heading is dropped: the page renders the title itself, in
-  the disclosure summary you click to open the guide.
+  The leading `# ` heading is dropped: the page renders the title itself, so
+  leaving it in would print it twice.
+
+  A collection registered with `:post_render` runs that `{module, function}`
+  over the finished HTML — the hook Polyglot Pirates' guide uses to turn
+  `[coins:250]` into a badge. It runs *after* markdown rendering because the
+  sanitiser strips raw HTML out of the markdown, and inside the cache because
+  the result is as static as the markdown it came from.
   """
-  @spec doc_html(String.t()) :: String.t() | nil
-  def doc_html(slug) do
-    cached({:doc_html, slug}, fn ->
-      case get_doc(slug) do
+  @spec doc_html(atom(), String.t()) :: String.t() | nil
+  def doc_html(collection \\ :docs, slug)
+
+  def doc_html(collection, slug) when is_atom(collection) and is_binary(slug) do
+    cached({:doc_html, collection, slug}, fn ->
+      case get_doc(collection, slug) do
         nil ->
           nil
 
         doc ->
-          case render_markdown_file(doc.path, "docs") do
+          case render_markdown_file(doc.path, Atom.to_string(collection)) do
             nil -> nil
-            html -> strip_first_h1(html)
+            html -> html |> strip_first_h1() |> post_render(collection)
           end
       end
     end)
+  end
+
+  def doc_html(_collection, _slug), do: nil
+
+  defp post_render(html, collection) do
+    case Map.get(registered_paths(), normalize_registered_name(collection)) do
+      %{post_render: {module, function}} -> apply(module, function, [html])
+      _entry -> html
+    end
   end
 
   defp parse_doc(path, root) do
@@ -484,8 +558,19 @@ defmodule Gamend.Content do
     %{
       kind: kind,
       candidates: candidates,
-      asset_root: asset_root
+      asset_root: asset_root,
+      post_render: normalize_post_render!(Keyword.get(opts, :post_render))
     }
+  end
+
+  defp normalize_post_render!(nil), do: nil
+
+  defp normalize_post_render!({module, function} = hook)
+       when is_atom(module) and is_atom(function),
+       do: hook
+
+  defp normalize_post_render!(_other) do
+    raise ArgumentError, "registered content path post_render must be {module, function}"
   end
 
   defp normalize_registered_name(name) when is_atom(name), do: Atom.to_string(name)
@@ -733,14 +818,17 @@ defmodule Gamend.Content do
   # would not fit.
   defp extract_excerpt(content), do: content |> extract_lede() |> String.slice(0, 200)
 
+  # The whole first paragraph, not its first line. Markdown is hard-wrapped, so
+  # taking one line cut every excerpt off mid-sentence — "Measured numbers, not
+  # estimates. Everything below comes from the k6 harness in" was what a card
+  # and a `<meta name="description">` actually said.
   defp extract_lede(content) do
     content
     |> String.split("\n")
-    |> Enum.reject(fn line ->
-      trimmed = String.trim(line)
-      trimmed == "" or String.starts_with?(trimmed, "#")
-    end)
-    |> List.first("")
+    |> Enum.map(&String.trim/1)
+    |> Enum.drop_while(&(&1 == "" or String.starts_with?(&1, "#")))
+    |> Enum.take_while(&(&1 != ""))
+    |> Enum.join(" ")
     |> String.trim()
     |> strip_markdown_inline()
   end
@@ -827,9 +915,21 @@ defmodule Gamend.Content do
     "planned" => {"plan", "Planned"}
   }
 
-  # Convert `[tag]` markers in changelog HTML into colored pill badges.
-  # Matches patterns like `[fix]`, `[added]`, etc. at the start of list items.
-  defp apply_changelog_pills(html) do
+  @doc """
+  Converts `[tag]` markers in changelog or roadmap HTML into coloured badges.
+
+  A catch-all: any `[word]` becomes a pill, known tags in their own colour and
+  everything else in the neutral one. That is deliberate for a changelog, where
+  every line opens with a marker and an unrecognised one is a typo worth
+  seeing — unlike the guide, where brackets are prose.
+
+  Applied inside `changelog_html/0` and `roadmap_html/0`, so the result is
+  cached. Labels here are **English literals and must stay that way**: a
+  translated label baked into the cache would be served to every other locale.
+  A host that wants translated pills re-labels them per request — see `pill/2`.
+  """
+  @spec apply_changelog_pills(String.t()) :: String.t()
+  def apply_changelog_pills(html) do
     Regex.replace(
       ~r/\[([a-zA-Z]+)\]/,
       html,
@@ -837,14 +937,47 @@ defmodule Gamend.Content do
         key = String.downcase(tag)
 
         case Map.get(@changelog_tags, key) do
-          {class_suffix, label} ->
-            ~s(<span class="changelog-pill changelog-pill-#{class_suffix}">#{label}</span>)
-
-          nil ->
-            label = String.capitalize(tag)
-            ~s(<span class="changelog-pill changelog-pill-other">#{label}</span>)
+          {class_suffix, label} -> pill(class_suffix, label)
+          nil -> pill("other", String.capitalize(tag))
         end
       end
     )
+  end
+
+  @doc """
+  One pill badge: `class_suffix` picks the colour, `label` is what it reads.
+
+  The markup lives here rather than at each call site because a host that adds
+  its own tags — Polyglot Pirates re-labels the roadmap's in the reader's
+  language — was copying this line, class name and all, and would not notice
+  the day the stylesheet changed underneath it.
+  """
+  @spec pill(String.t(), String.t()) :: String.t()
+  def pill(class_suffix, label),
+    do: ~s(<span class="changelog-pill changelog-pill-#{class_suffix}">#{label}</span>)
+
+  @doc """
+  Re-labels pills that `apply_changelog_pills/1` rendered as neutral `other`.
+
+  The one seam a translated pill can use. `apply_changelog_pills/1` runs inside
+  the cache with English labels, so a host cannot translate there; this runs on
+  the way out, per request, and takes `%{"tag" => {class_suffix, label}}` with
+  the label already translated.
+
+  Both spellings are handled: a marker that reached the cache is already a
+  neutral `<span>`, while one written after the fact is still `[Tag]` — the
+  roadmap has had both, and handling only the first left `[Beta]` printed
+  verbatim in the middle of a heading.
+  """
+  @spec relabel_pills(String.t() | nil, %{optional(String.t()) => {String.t(), String.t()}}) ::
+          String.t() | nil
+  def relabel_pills(nil, _tags), do: nil
+
+  def relabel_pills(html, tags) when is_map(tags) do
+    Enum.reduce(tags, html, fn {tag, {class_suffix, label}}, acc ->
+      acc
+      |> String.replace(pill("other", tag), pill(class_suffix, label))
+      |> String.replace("[#{tag}]", pill(class_suffix, label))
+    end)
   end
 end

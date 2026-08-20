@@ -152,5 +152,24 @@ defmodule GamendWeb.Api.V1.UserControllerTest do
       refute Map.has_key?(resp["metadata"], "map_route")
       refute Map.has_key?(resp["metadata"], "map_city_id")
     end
+
+    test "the profile picture is never returned", %{conn: conn, user: user} do
+      # profile_url is imported verbatim from Google/Discord/Steam/Facebook at
+      # OAuth sign-in, so it is routinely a photograph of the account holder.
+      # An unauthenticated name search must not return it.
+      allow_keys(["learning"])
+
+      row =
+        conn
+        |> get("/api/v1/users", %{q: "MetaLeak"})
+        |> json_response(200)
+        |> Map.fetch!("data")
+        |> Enum.find(&(&1["id"] == user.id))
+
+      refute Map.has_key?(row, "profile_url")
+
+      resp = conn |> get("/api/v1/users/#{user.id}") |> json_response(200)
+      refute Map.has_key?(resp, "profile_url")
+    end
   end
 end

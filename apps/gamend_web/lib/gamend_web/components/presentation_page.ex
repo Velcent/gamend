@@ -521,19 +521,42 @@ defmodule GamendWeb.PresentationPage do
       |> assign(:image, Map.merge(empty_image_config(), assigns.image))
 
     ~H"""
-    <video
-      :if={@video.src}
-      src={@video.src}
-      poster={@video.poster}
-      width={@video.width}
-      height={@video.height}
-      aria-label={@video.alt}
-      preload={@video.preload}
-      muted={@video.muted}
-      controls
-      playsinline
-      class={media_video_class(@size)}
-    ></video>
+    <%!-- `controls` is added on the first click, not rendered here — see
+          assets/js/video_click_to_play.js. Every browser paints its own dark
+          chrome over an unplayed video (Chrome a black gradient along the
+          bottom, Safari a dim over the whole frame), so the poster a visitor
+          actually sees is far darker than the video it advertises, and no
+          choice of poster frame can change that.
+
+          The overlay is a real <button>: without `controls` the video is not
+          focusable or operable by keyboard, and the poster alone gives no hint
+          that it is playable. --%>
+    <div :if={@video.src} class="relative w-full" data-video-cta>
+      <video
+        src={@video.src}
+        poster={@video.poster}
+        width={@video.width}
+        height={@video.height}
+        aria-label={@video.alt}
+        preload={@video.preload}
+        muted={@video.muted}
+        playsinline
+        class={media_video_class(@size)}
+      ></video>
+      <button
+        type="button"
+        data-video-cta-play
+        aria-label={gettext("Play video")}
+        class={[
+          "group absolute inset-0 grid cursor-pointer place-items-center rounded-lg",
+          "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        ]}
+      >
+        <span class="grid size-16 place-items-center rounded-full bg-base-100/85 text-base-content shadow-lg ring-1 ring-base-content/10 backdrop-blur-sm transition group-hover:scale-105 group-hover:bg-base-100">
+          <.icon name="hero-play-solid" class="size-7" />
+        </span>
+      </button>
+    </div>
     <img
       :if={!@video.src && @image.light && !@image.dark}
       src={@image.light}

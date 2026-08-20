@@ -57,7 +57,13 @@ DWELL="${DWELL:-3m}"
 # journeys on top, which is where "45 minutes a cell" came from.
 PROFILE="${PROFILE:-core}"
 
-CORE_SCENARIOS="${CORE_SCENARIOS:-me hook_noop kv_write kv_write_locked auth_device auth_email}"
+#
+# `web_pages` is in here despite being a flow (four page loads an iteration)
+# because it is the only scenario that measures rendered HTML rather than API
+# JSON — the marketing pages, the blog, the login form. Those are what a search
+# engine and a first-time visitor see, they go through LiveView rather than the
+# JSON pipeline, and nothing else in the suite touches them.
+CORE_SCENARIOS="${CORE_SCENARIOS:-me hook_noop kv_write kv_write_locked auth_device auth_email web_pages}"
 
 DRY_RUN="${DRY_RUN:-}"
 

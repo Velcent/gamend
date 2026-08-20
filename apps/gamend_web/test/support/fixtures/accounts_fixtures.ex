@@ -86,6 +86,19 @@ defmodule Gamend.AccountsFixtures do
     {encoded_token, user_token.token}
   end
 
+  @doc """
+  Make two users friends.
+
+  Group and party invites both require an existing connection, so any test that
+  invites someone has to establish one first — otherwise it is asserting against
+  `{:error, :not_connected}` rather than against the behaviour it means to test.
+  """
+  def befriend(%Accounts.User{} = a, %Accounts.User{} = b) do
+    {:ok, friendship} = Gamend.Friends.create_request(a.id, b.id)
+    {:ok, _} = Gamend.Friends.accept_friend_request(friendship.id, b)
+    :ok
+  end
+
   def offset_user_token(token, amount_to_add, unit) do
     dt = DateTime.add(DateTime.utc_now(:second), amount_to_add, unit)
 

@@ -57,6 +57,13 @@ primary_region = "ams"
   # charge core for a sample plugin's writes. matrix.sh stages this directory.
   GAMEND_CONTENT_PLUGINS_DIR = "/data/bench_plugins"
 
+# Overrides the image CMD so the bench gets the raised descriptor limit without
+# waiting for a new image to be published. The Dockerfile carries the same
+# thing; this is here so a bench run against `:latest` still measures the
+# socket ceiling rather than the fd limit.
+[processes]
+  app = "sh -c 'ulimit -n 262144 2>/dev/null || true; mix ecto.create --quiet -r Gamend.Repo 2>/dev/null; mix db.migrate && mix phx.server'"
+
 [http_service]
   internal_port = 4000
   force_https = true

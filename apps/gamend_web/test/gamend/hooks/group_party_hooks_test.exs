@@ -200,6 +200,10 @@ defmodule Gamend.Hooks.GroupPartyHooksTest do
     other = AccountsFixtures.user_fixture() |> AccountsFixtures.set_password()
     third = AccountsFixtures.user_fixture() |> AccountsFixtures.set_password()
 
+    # Invites require a connection between the two accounts.
+    :ok = AccountsFixtures.befriend(owner, other)
+    :ok = AccountsFixtures.befriend(owner, third)
+
     %{owner: owner, other: other, third: third}
   end
 

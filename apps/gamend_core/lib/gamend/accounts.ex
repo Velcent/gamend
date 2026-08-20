@@ -24,6 +24,7 @@ defmodule Gamend.Accounts do
   alias Gamend.Types
 
   alias Gamend.Accounts.{
+    AgePolicy,
     AvatarMirror,
     PresenceWriter,
     User,
@@ -2484,6 +2485,117 @@ defmodule Gamend.Accounts do
 
       {:error, reason} ->
         {:error, reason}
+    end
+  end
+
+  @doc """
+  Record a user's age answer and re-derive what it permits.
+
+  Three things happen together, and they have to: the answer is stored, the
+  denormalised `account_class` is recomputed from it, and `grandfathered_at` is
+  cleared. That last one is the point — an account that predated the age gate
+  stops being treated as an adult-by-default the moment it tells us what it
+  actually is, in whichever direction that goes.
+
+  Refuses with `{:error, :age_change_not_allowed}` when the answer would raise
+  the user's age without a stronger signal than the one already recorded. See
+  `AgePolicy.may_change_age?/4`: lowering is always allowed, because it only
+  ever increases protection.
+
+  `attrs` must carry `birth_year`, `birth_month` and `age_method`, and should
+  carry `age_country` — without it the highest digital-consent age in the table
+  applies, which is the safe reading but not always the right one.
+  """
+  @spec set_user_age(User.t(), map()) :: {:ok, User.t()} | {:error, term()}
+  def set_user_age(%User{} = user, attrs) when is_map(attrs) do
+    attrs = normalize_age_attrs(attrs)
+
+    with {:ok, year} <- fetch_age_field(attrs, "birth_year"),
+         {:ok, month} <- fetch_age_field(attrs, "birth_month"),
+         method when is_binary(method) <- attrs["age_method"],
+         true <- AgePolicy.may_change_age?(user, year, month, method) do
+      country = attrs["age_country"] || user.age_country
+
+      class =
+        year
+        |> AgePolicy.age_in_years(month, Date.utc_today())
+        |> AgePolicy.class_for_age(country)
+
+      changeset =
+        user
+        |> User.age_changeset(attrs)
+        |> Ecto.Changeset.put_change(:account_class, Atom.to_string(class))
+        |> Ecto.Changeset.put_change(
+          :age_locked_at,
+          DateTime.utc_now() |> DateTime.truncate(:second)
+        )
+        |> Ecto.Changeset.put_change(:grandfathered_at, nil)
+
+      case Repo.update(changeset) do
+        {:ok, updated} = ok ->
+          invalidate_user_cache_sync(user)
+          invalidate_user_cache_sync(updated)
+          ok
+
+        err ->
+          err
+      end
+    else
+      false -> {:error, :age_change_not_allowed}
+      :error -> {:error, :invalid_age}
+      nil -> {:error, :invalid_age}
+      other -> other
+    end
+  end
+
+  # Accepts either string or atom keys, because this is reached from an RPC
+  # payload and from internal callers.
+  defp normalize_age_attrs(attrs) do
+    Map.new(attrs, fn {k, v} -> {to_string(k), v} end)
+  end
+
+  defp fetch_age_field(attrs, key) do
+    case attrs[key] do
+      value when is_integer(value) -> {:ok, value}
+      value when is_binary(value) -> parse_age_integer(value)
+      _ -> :error
+    end
+  end
+
+  defp parse_age_integer(value) do
+    case Integer.parse(value) do
+      {parsed, ""} -> {:ok, parsed}
+      _ -> :error
+    end
+  end
+
+  @doc """
+  Re-derive `account_class` for a user whose stored answer has not changed.
+
+  An account graduates on the first of its birth month, and nothing writes to it
+  on that day — the derivation is a function of the calendar, not of an event.
+  Call this to bring the denormalised column back in step, from a scheduled
+  sweep or on login.
+  """
+  @spec refresh_account_class(User.t()) :: {:ok, User.t()} | {:error, term()}
+  def refresh_account_class(%User{} = user) do
+    current = user.account_class
+    derived = user |> AgePolicy.classify() |> Atom.to_string()
+
+    if current == derived do
+      {:ok, user}
+    else
+      user
+      |> Ecto.Changeset.change(account_class: derived)
+      |> Repo.update()
+      |> case do
+        {:ok, updated} = ok ->
+          invalidate_user_cache_sync(updated)
+          ok
+
+        err ->
+          err
+      end
     end
   end
 

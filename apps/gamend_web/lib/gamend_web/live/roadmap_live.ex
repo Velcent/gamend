@@ -1,38 +1,34 @@
 defmodule GamendWeb.RoadmapLive do
-  @moduledoc false
+  @moduledoc """
+  `/roadmap`, rendered from the registered `:roadmap` markdown file.
+
+  See `GamendWeb.ChangelogLive` for why this is no longer a shim looking up a
+  host module by name. The page itself is `GamendWeb.ContentPages.roadmap/1`.
+  """
 
   use GamendWeb, :live_view
 
+  alias Gamend.Content
+
   @impl true
-  def mount(params, session, socket) do
-    if host_live_available?(:mount, 3) do
-      host_live().mount(params, session, socket)
-    else
-      {:ok, assign(socket, :page_title, "Roadmap")}
-    end
+  def mount(_params, _session, socket) do
+    {:ok,
+     socket
+     |> assign(:page_title, gettext("Roadmap"))
+     |> assign(:html, Content.roadmap_html())
+     |> assign(:changelog_available?, Content.path(:changelog) != nil)}
   end
 
   @impl true
   def render(assigns) do
-    if host_live_available?(:render, 1) do
-      host_live().render(assigns)
-    else
-      ~H"""
-      <Layouts.app flash={@flash} current_scope={@current_scope}>
-        <section id="standalone-roadmap" class="space-y-4">
-          <h1 class="text-4xl font-black text-base-content/95">Roadmap</h1>
-          <p class="text-base-content/70">
-            Host roadmap content is unavailable in standalone web mode.
-          </p>
-        </section>
-      </Layouts.app>
-      """
-    end
-  end
-
-  defp host_live, do: Module.concat(GamendWeb, HostRoadmapLive)
-
-  defp host_live_available?(function_name, arity) do
-    Code.ensure_loaded?(host_live()) and function_exported?(host_live(), function_name, arity)
+    ~H"""
+    <GamendWeb.ContentPages.roadmap
+      flash={@flash}
+      current_scope={@current_scope}
+      current_path={assigns[:current_path]}
+      html={@html}
+      changelog_available?={@changelog_available?}
+    />
+    """
   end
 end

@@ -26,8 +26,17 @@ defmodule GamendWeb.Components.PresentationPageVideoTest do
     html = render_media(%{"video" => %{"src" => "/video/teaser.mp4"}})
 
     assert html =~ "muted", "must start silent"
-    assert html =~ "controls", "the user needs a way to start it"
     assert html =~ "playsinline", "without this iOS Safari forces fullscreen on play"
+
+    # `controls` is turned on by the first click rather than rendered, because
+    # every browser paints its own dark chrome over an unplayed video -- Chrome
+    # a black gradient along the bottom, Safari a dim over the whole frame -- so
+    # the poster a visitor sees is far darker than the video it advertises.
+    # The overlay button is what starts it, and it has to be a real focusable
+    # control: without `controls` the video takes no keyboard focus at all.
+    refute html =~ ~r/<video[^>]*\scontrols/, "controls must not be rendered up front"
+    assert html =~ "data-video-cta-play", "the user needs a way to start it"
+    assert html =~ "<button", "the starter must be focusable and announced"
 
     refute html =~ "autoplay", "the trailer must not start on its own"
   end

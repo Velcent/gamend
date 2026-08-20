@@ -35,6 +35,12 @@ defmodule Gamend.GroupsTest do
     owner = AccountsFixtures.user_fixture() |> AccountsFixtures.set_password()
     other = AccountsFixtures.user_fixture() |> AccountsFixtures.set_password()
     third = AccountsFixtures.user_fixture() |> AccountsFixtures.set_password()
+
+    # Invites require a connection, so the fixtures are connected. Tests that
+    # care about the *absence* of one establish that themselves.
+    :ok = AccountsFixtures.befriend(owner, other)
+    :ok = AccountsFixtures.befriend(owner, third)
+
     %{owner: owner, other: other, third: third}
   end
 
@@ -447,6 +453,37 @@ defmodule Gamend.GroupsTest do
       assert {:error, :already_member} = Groups.invite_to_group(owner.id, group.id, other.id)
     end
 
+    test "cannot invite a user you have no connection to", %{owner: owner} do
+      # The point of the rule. A group admin used to be able to put any user id
+      # at all into a group with them, which made a group invite a weaker
+      # control than a party invite — and being addable to a stranger's group
+      # is a contact path, not just an annoyance.
+      stranger = AccountsFixtures.user_fixture()
+      {:ok, group} = Groups.create_group(owner.id, %{"title" => "Strangers", "type" => "private"})
+
+      assert {:error, :not_connected} =
+               Groups.invite_to_group(owner.id, group.id, stranger.id)
+
+      # ...and it works once they are actually connected.
+      :ok = AccountsFixtures.befriend(owner, stranger)
+      assert {:ok, _} = Groups.invite_to_group(owner.id, group.id, stranger.id)
+    end
+
+    test "sharing a public group is not a connection", %{owner: owner} do
+      # Anyone can join a public group, so "we are in a group together" is a
+      # connection a stranger can grant themselves. Parties accept it; invites
+      # deliberately do not.
+      stranger = AccountsFixtures.user_fixture()
+      {:ok, shared} = Groups.create_group(owner.id, %{"title" => "Open", "type" => "public"})
+      {:ok, _} = Groups.join_group(stranger.id, shared.id)
+
+      {:ok, target_group} =
+        Groups.create_group(owner.id, %{"title" => "Mine", "type" => "private"})
+
+      assert {:error, :not_connected} =
+               Groups.invite_to_group(owner.id, target_group.id, stranger.id)
+    end
+
     test "cannot invite to non-existent group", %{owner: owner, other: other} do
       assert {:error, :not_found} =
                Groups.invite_to_group(owner.id, Ecto.UUID.generate(), other.id)
@@ -455,9 +492,9 @@ defmodule Gamend.GroupsTest do
     test "cannot invite a blocked user", %{owner: owner, other: other} do
       {:ok, group} = Groups.create_group(owner.id, %{"title" => "BlockGrp", "type" => "hidden"})
 
-      # Create a friend request and block it
-      {:ok, f} = Gamend.Friends.create_request(owner.id, other.id)
-      {:ok, _blocked} = Gamend.Friends.block_friend_request(f.id, other)
+      # block_user/2 supersedes whatever row already exists between the pair,
+      # which is what makes it usable on two accounts the setup has befriended.
+      {:ok, _} = Gamend.Friends.block_user(owner, other.id)
 
       assert {:error, :blocked} = Groups.invite_to_group(owner.id, group.id, other.id)
     end
@@ -465,9 +502,8 @@ defmodule Gamend.GroupsTest do
     test "cannot invite if target has blocked the admin", %{owner: owner, other: other} do
       {:ok, group} = Groups.create_group(owner.id, %{"title" => "BlockGrp2", "type" => "hidden"})
 
-      # Target blocks the admin
-      {:ok, f} = Gamend.Friends.create_request(other.id, owner.id)
-      {:ok, _blocked} = Gamend.Friends.block_friend_request(f.id, owner)
+      # Target blocks the admin.
+      {:ok, _} = Gamend.Friends.block_user(other, owner.id)
 
       assert {:error, :blocked} = Groups.invite_to_group(owner.id, group.id, other.id)
     end

@@ -21,6 +21,12 @@ defmodule GamendWeb.Features do
     doc: "GET /api/v1/users and /users/:id."
   )
 
+  setting(:user_image_uploads, :boolean,
+    default: true,
+    doc:
+      "Player-supplied images: avatars (POST /api/v1/me/avatar*) and group icons (POST /api/v1/groups/:id/icon*). Objects land in public storage and are served without authentication, so on a service children can reach this is an unscreened image surface — turn it off unless the game actually uses it and you have a way to screen what arrives."
+  )
+
   setting(:public_user_metadata_keys, :list,
     default: [],
     doc:

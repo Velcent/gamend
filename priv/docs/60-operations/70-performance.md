@@ -51,26 +51,48 @@ vs 1,930, bcrypt 4.0 vs 4.0). gamend is CPU-bound at this scale. Buy cores.
 
 ## How many players
 
-About **57 KB of server memory per idle socket**, measured rather than
-extrapolated: 7,000 sockets took the BEAM from 29 MB to 383 MB of process memory
-plus 50 MB of binary memory on a 1-core / 3 GB machine.
+![Idle sockets held on 1 core / 3 GB](/docs/images/idle-sockets-perf1x-3gb.svg)
 
-| what | measured |
+On one dedicated core with 3 GB, SQLite:
+
+| | measured |
 |---|---:|
-| idle sockets held on 1 core / 3 GB | **~10,000** |
-| memory per idle socket | ~57 KB |
-| server errors or OOM at that level | none |
+| peak concurrent idle sockets | **28,240** |
+| held above 25,000 | 68 s |
+| held above 20,000 | **246 s** |
+| memory at peak | 1,048 MB processes + 912 MB binary ≈ **2.0 GB** of 3 GB |
+| OOM | none |
 
-The honest limit of that measurement: **the ramp is registration-bound, not
-socket-bound.** Every socket in the test signs up its own device user first, and
-at ~589 registrations/s on one core the generator cannot open sockets faster
-than the server can create accounts. Ten thousand is what one generator reached
-before the *generator* ran out of memory (k6 holds 1-3 MB per virtual user); the
-server was still idle-cool at that point. Finding the real ceiling needs
-pre-created users and several load generators, and is not yet done.
+For comparison, Nakama publishes 20,277 on the same 1 vCPU / 3 GB shape.
 
-In practice the write ceiling binds first anyway: what sizes a server is how
-often players write, not how many are connected.
+### Two things that will cost you ten thousand players each
+
+**Raise the file-descriptor limit.** Every socket is a descriptor and the
+default on Fly — and most container hosts — is 10,240. Below that the server
+plateaus at exactly 10,240 and falls off a cliff, which reads as a capacity
+ceiling and is not one. gamend's Dockerfile now sets `ulimit -n 262144` at
+startup; if you build your own image, do the same, and check with
+`ulimit -n` inside the container. The same limit applies to whatever generates
+your load, which is a much easier mistake to make than it sounds.
+
+**Pace reconnects.** The count above is with connections arriving over a ramp.
+Opening the same number in a burst OOMs the server well below it, and adding a
+fourth gigabyte does not help — the failure is arrival *rate*, not connection
+count. A client fleet that reconnects simultaneously after a deploy is exactly
+this shape, so a jittered reconnect backoff is worth more here than RAM.
+
+### Why 2 GB at peak does not mean there is room for 50% more
+
+The BEAM's own accounting under-reports what a connection costs. During the
+unpaced runs `:erlang.memory()` reported about 1 GB while the kernel killed the
+process at 2.7 GB RSS. Allocator overhead and binary fragmentation live in that
+gap, and the OOM killer reads RSS. Size from RSS, not from `:erlang.memory()`,
+and leave more headroom than the numbers appear to need.
+
+### The write ceiling usually binds first
+
+What sizes a server is how often players write, not how many are connected. The
+box holding 28,000 idle players still only does ~840 writes/s on its one core.
 
 ## Which database
 

@@ -47,6 +47,37 @@ defmodule GamendHost.PagesSmokeTest do
     end
   end
 
+  # A 200 is not enough for these two: `GamendWeb.ContentPages` renders an
+  # empty state when the markdown is missing, so a broken content-path
+  # registration or a renamed assign would still pass the smoke test above
+  # while serving "Add a changelog file at CHANGELOG.md to display it here."
+  test "the changelog and roadmap render their file, not the empty state" do
+    for {path, file} <- [{"/changelog", "CHANGELOG.md"}, {"/roadmap", "ROADMAP.md"}] do
+      body = html_response(get(build_conn(), path), 200)
+
+      # `markdown-content` only renders when there is markdown, so this is the
+      # real assertion; the refute names the failure if it ever does not hold.
+      assert body =~ "markdown-content", "#{path} rendered no article"
+      refute body =~ "to display it here", "#{path} fell back to the empty state"
+
+      # And it is *this* host's file, read from disk rather than a phrase
+      # copied into the test that goes stale the next time someone edits it.
+      assert body =~ first_bold(file), "#{path} did not render #{file}"
+    end
+  end
+
+  # The first `**bold**` run in a markdown file — every entry in both of ours
+  # opens with one, and it survives rendering as plain text inside a <strong>.
+  defp first_bold(file) do
+    [_, text] = Regex.run(~r/\*\*(.+?)\*\*/, File.read!(file))
+    text
+  end
+
+  test "each of the two links across to the other" do
+    assert html_response(get(build_conn(), "/changelog"), 200) =~ ~s(href="/roadmap")
+    assert html_response(get(build_conn(), "/roadmap"), 200) =~ ~s(href="/changelog")
+  end
+
   test "a post does not open by repeating its own lede" do
     for post <- Gamend.Content.list_blog_posts(),
         html = Gamend.Content.blog_post_html(post.slug),
