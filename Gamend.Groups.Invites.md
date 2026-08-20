@@ -69,6 +69,14 @@ If the target user already has a pending join request for this group,
 the request is automatically approved instead of creating an invite.
 In that case, returns `{:ok, :request_approved}`.
 
+The admin must already be connected to the target — a friendship, or a group
+they are both already in. Without that an admin could put any user id at all
+into a group with them, which made a group invite a weaker control than a
+party invite, where `Parties.check_leader_connected_to_target/2` has always
+required a connection. On a service children can reach, being addable to a
+stranger's group is the contact path that matters, so the two now agree.
+Returns `{:error, :not_connected}`.
+
 # `list_invitations`
 
 ```elixir

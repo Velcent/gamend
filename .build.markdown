@@ -1,3 +1,4 @@
+Gamend.Accounts.AgePolicy.md
 Gamend.Accounts.AvatarMirror.md
 Gamend.Accounts.InactivityNotifier.md
 Gamend.Accounts.PresenceStatus.md

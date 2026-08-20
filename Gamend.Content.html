@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.3">
-    <meta name="project" content="gamend_core v1.0.1183">
+    <meta name="project" content="gamend_core v1.0.1185">
 
 
-    <title>Gamend.Content — gamend_core v1.0.1183</title>
+    <title>Gamend.Content — gamend_core v1.0.1185</title>
 
     <link rel="stylesheet" href="dist/html-elixir-NHQLCD6Y.css" />
 
-    <script defer src="dist/sidebar_items-57FCBFEE.js"></script>
+    <script defer src="dist/sidebar_items-734653A6.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-Y2MUTVIN.js"></script>
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1183
+          v1.0.1185
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr />Content</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1183)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1185)</small>
 
     </h1>
 
@@ -133,6 +133,16 @@ Call <a href="#reload/0"><code class="inline">reload/0</code></a> to invalidate 
   <h3>
     <a href="#functions">Functions</a>
   </h3>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#apply_changelog_pills/1" data-no-tooltip="" translate="no">apply_changelog_pills(html)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Converts <code class="inline">[tag]</code> markers in changelog or roadmap HTML into coloured badges.</p></div>
+
+    </div>
 
     <div class="summary-row">
       <div class="summary-signature">
@@ -190,11 +200,33 @@ not configured or the file doesn't exist.</p></div>
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#doc_html/1" data-no-tooltip="" translate="no">doc_html(slug)</a>
+        <a href="#doc_category/2" data-no-tooltip="" translate="no">doc_category(collection \\ :docs, slug)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>The category a guide belongs to — its display title, icon and colour — or
+<code class="inline">nil</code>.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#doc_html/2" data-no-tooltip="" translate="no">doc_html(collection \\ :docs, slug)</a>
 
       </div>
 
         <div class="summary-synopsis"><p>Renders a guide's markdown to HTML, or <code class="inline">nil</code>.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#doc_neighbours/2" data-no-tooltip="" translate="no">doc_neighbours(collection \\ :docs, slug)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p><code class="inline">{previous, next}</code> guides around <code class="inline">slug</code> in reading order, either possibly
+<code class="inline">nil</code>.</p></div>
 
     </div>
 
@@ -220,7 +252,7 @@ not configured or the file doesn't exist.</p></div>
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#get_doc/1" data-no-tooltip="" translate="no">get_doc(slug)</a>
+        <a href="#get_doc/2" data-no-tooltip="" translate="no">get_doc(collection \\ :docs, slug)</a>
 
       </div>
 
@@ -240,21 +272,21 @@ not configured or the file doesn't exist.</p></div>
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#list_doc_categories/0" data-no-tooltip="" translate="no">list_doc_categories()</a>
+        <a href="#list_doc_categories/1" data-no-tooltip="" translate="no">list_doc_categories(collection \\ :docs)</a>
 
       </div>
 
-        <div class="summary-synopsis"><p>Lists every guide, grouped into categories in reading order.</p></div>
+        <div class="summary-synopsis"><p>Lists every guide in a collection, grouped into categories in reading order.</p></div>
 
     </div>
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#list_docs/0" data-no-tooltip="" translate="no">list_docs()</a>
+        <a href="#list_docs/1" data-no-tooltip="" translate="no">list_docs(collection \\ :docs)</a>
 
       </div>
 
-        <div class="summary-synopsis"><p>Every guide as a flat list, in the same order as <a href="#list_doc_categories/0"><code class="inline">list_doc_categories/0</code></a>.</p></div>
+        <div class="summary-synopsis"><p>Every guide as a flat list, in the same order as <a href="#list_doc_categories/1"><code class="inline">list_doc_categories/1</code></a>.</p></div>
 
     </div>
 
@@ -270,11 +302,31 @@ not configured or the file doesn't exist.</p></div>
 
     <div class="summary-row">
       <div class="summary-signature">
+        <a href="#pill/2" data-no-tooltip="" translate="no">pill(class_suffix, label)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>One pill badge: <code class="inline">class_suffix</code> picks the colour, <code class="inline">label</code> is what it reads.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
         <a href="#register_path/2" data-no-tooltip="" translate="no">register_path(name, opts)</a>
 
       </div>
 
         <div class="summary-synopsis"><p>Registers a named content source.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#relabel_pills/2" data-no-tooltip="" translate="no">relabel_pills(html, tags)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Re-labels pills that <a href="#apply_changelog_pills/1"><code class="inline">apply_changelog_pills/1</code></a> rendered as neutral <code class="inline">other</code>.</p></div>
 
     </div>
 
@@ -313,6 +365,40 @@ not configured or the file doesn't exist.</p></div>
     </h2>
 
     <div class="functions-list">
+<section class="detail" id="apply_changelog_pills/1">
+
+  <div class="detail-header">
+    <a href="#apply_changelog_pills/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">apply_changelog_pills(html)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L932" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> apply_changelog_pills(<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()) :: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()</pre>
+
+      </div>
+
+<p>Converts <code class="inline">[tag]</code> markers in changelog or roadmap HTML into coloured badges.</p><p>A catch-all: any <code class="inline">[word]</code> becomes a pill, known tags in their own colour and
+everything else in the neutral one. That is deliberate for a changelog, where
+every line opens with a marker and an unrecognised one is a typo worth
+seeing — unlike the guide, where brackets are prose.</p><p>Applied inside <a href="#changelog_html/0"><code class="inline">changelog_html/0</code></a> and <a href="#roadmap_html/0"><code class="inline">roadmap_html/0</code></a>, so the result is
+cached. Labels here are <strong>English literals and must stay that way</strong>: a
+translated label baked into the cache would be served to every other locale.
+A host that wants translated pills re-labels them per request — see <a href="#pill/2"><code class="inline">pill/2</code></a>.</p>
+  </section>
+</section>
 <section class="detail" id="asset_path/2">
 
   <div class="detail-header">
@@ -323,7 +409,7 @@ not configured or the file doesn't exist.</p></div>
       <h1 class="signature" translate="no">asset_path(name, relative)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L76" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L77" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -352,7 +438,7 @@ source. Returns <code class="inline">nil</code> when not found or path traversal
       <h1 class="signature" translate="no">blog_neighbours(slug)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L382" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L456" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -381,7 +467,7 @@ Either may be <code class="inline">nil</code>.</p>
       <h1 class="signature" translate="no">blog_post_html(slug)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L399" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L473" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -409,7 +495,7 @@ Either may be <code class="inline">nil</code>.</p>
       <h1 class="signature" translate="no">blog_posts_grouped()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L419" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L493" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -438,7 +524,7 @@ Returns a list of <code class="inline">{year, [{month, [posts]}]}</code>.</p>
       <h1 class="signature" translate="no">changelog_html()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L131" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L132" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -457,17 +543,19 @@ Returns a list of <code class="inline">{year, [{month, [posts]}]}</code>.</p>
 not configured or the file doesn't exist.</p>
   </section>
 </section>
-<section class="detail" id="doc_html/1">
+<section class="detail" id="doc_category/2">
+
+    <span id="doc_category/1"></span>
 
   <div class="detail-header">
-    <a href="#doc_html/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+    <a href="#doc_category/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
       <i class="ri-link-m" aria-hidden="true"></i>
     </a>
     <div class="heading-with-actions">
-      <h1 class="signature" translate="no">doc_html(slug)</h1>
+      <h1 class="signature" translate="no">doc_category(collection \\ :docs, slug)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L232" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L249" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -478,12 +566,83 @@ not configured or the file doesn't exist.</p>
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> doc_html(<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()) :: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>() | nil</pre>
+          <pre translate="no"><span class="attribute">@spec</span> doc_category(<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>(), <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()) :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>() | nil</pre>
 
       </div>
 
-<p>Renders a guide's markdown to HTML, or <code class="inline">nil</code>.</p><p>The leading <code class="inline">#</code> heading is dropped: the page renders the title itself, in
-the disclosure summary you click to open the guide.</p>
+<p>The category a guide belongs to — its display title, icon and colour — or
+<code class="inline">nil</code>.</p><p>Found by membership rather than by name: a guide carries its category's
+<em>folder</em> (&quot;10-setup&quot;) while the category carries the display title (&quot;Setup&quot;).
+Both pages that render a guide need this, so deriving it twice by hand was
+how the two drifted apart.</p>
+  </section>
+</section>
+<section class="detail" id="doc_html/2">
+
+    <span id="doc_html/1"></span>
+
+  <div class="detail-header">
+    <a href="#doc_html/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">doc_html(collection \\ :docs, slug)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L295" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> doc_html(<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>(), <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()) :: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>() | nil</pre>
+
+      </div>
+
+<p>Renders a guide's markdown to HTML, or <code class="inline">nil</code>.</p><p>The leading <code class="inline">#</code> heading is dropped: the page renders the title itself, so
+leaving it in would print it twice.</p><p>A collection registered with <code class="inline">:post_render</code> runs that <code class="inline">{module, function}</code>
+over the finished HTML — the hook Polyglot Pirates' guide uses to turn
+<code class="inline">[coins:250]</code> into a badge. It runs <em>after</em> markdown rendering because the
+sanitiser strips raw HTML out of the markdown, and inside the cache because
+the result is as static as the markdown it came from.</p>
+  </section>
+</section>
+<section class="detail" id="doc_neighbours/2">
+
+    <span id="doc_neighbours/1"></span>
+
+  <div class="detail-header">
+    <a href="#doc_neighbours/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">doc_neighbours(collection \\ :docs, slug)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L268" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> doc_neighbours(<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>(), <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()) :: {<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>() | nil, <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>() | nil}</pre>
+
+      </div>
+
+<p><code class="inline">{previous, next}</code> guides around <code class="inline">slug</code> in reading order, either possibly
+<code class="inline">nil</code>.</p><p>Across categories, not within one: the collections are written to be read
+front to back, and stopping at a category boundary would strand the reader on
+the last page of each section.</p>
   </section>
 </section>
 <section class="detail" id="frontmatter/1">
@@ -496,7 +655,7 @@ the disclosure summary you click to open the guide.</p>
       <h1 class="signature" translate="no">frontmatter(arg1)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L289" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L363" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -525,7 +684,7 @@ dependency for that would be its own liability.</p>
       <h1 class="signature" translate="no">get_blog_post(slug)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L373" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L447" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -543,17 +702,19 @@ dependency for that would be its own liability.</p>
 <p>Returns a single blog post map by slug, or <code class="inline">nil</code>.</p>
   </section>
 </section>
-<section class="detail" id="get_doc/1">
+<section class="detail" id="get_doc/2">
+
+    <span id="get_doc/1"></span>
 
   <div class="detail-header">
-    <a href="#get_doc/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+    <a href="#get_doc/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
       <i class="ri-link-m" aria-hidden="true"></i>
     </a>
     <div class="heading-with-actions">
-      <h1 class="signature" translate="no">get_doc(slug)</h1>
+      <h1 class="signature" translate="no">get_doc(collection \\ :docs, slug)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L221" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L231" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -564,7 +725,7 @@ dependency for that would be its own liability.</p>
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> get_doc(<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()) :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>() | nil</pre>
+          <pre translate="no"><span class="attribute">@spec</span> get_doc(<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>(), <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()) :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>() | nil</pre>
 
       </div>
 
@@ -581,7 +742,7 @@ dependency for that would be its own liability.</p>
       <h1 class="signature" translate="no">list_blog_posts()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L353" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L427" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -600,17 +761,19 @@ dependency for that would be its own liability.</p>
 meta descriptions</li><li><code class="inline">:lede</code> – that same paragraph in full, which is what a post opens with</li></ul>
   </section>
 </section>
-<section class="detail" id="list_doc_categories/0">
+<section class="detail" id="list_doc_categories/1">
+
+    <span id="list_doc_categories/0"></span>
 
   <div class="detail-header">
-    <a href="#list_doc_categories/0" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+    <a href="#list_doc_categories/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
       <i class="ri-link-m" aria-hidden="true"></i>
     </a>
     <div class="heading-with-actions">
-      <h1 class="signature" translate="no">list_doc_categories()</h1>
+      <h1 class="signature" translate="no">list_doc_categories(collection \\ :docs)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L192" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L202" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -621,28 +784,35 @@ meta descriptions</li><li><code class="inline">:lede</code> – that same paragr
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> list_doc_categories() :: [%{category: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(), guides: [<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()]}]</pre>
+          <pre translate="no"><span class="attribute">@spec</span> list_doc_categories(<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>()) :: [%{category: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(), guides: [<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()]}]</pre>
 
       </div>
 
-<p>Lists every guide, grouped into categories in reading order.</p><p>Structure comes from the file tree rather than front matter, so a guide is a
+<p>Lists every guide in a collection, grouped into categories in reading order.</p><p>Structure comes from the file tree rather than front matter, so a guide is a
 file and nothing else has to be edited to add one:</p><pre><code class="makeup elixir" translate="no"><span class="n">priv</span><span class="o">/</span><span class="n">docs</span><span class="o">/</span><span class="mi">10</span><span class="o">-</span><span class="n">core</span><span class="o">-</span><span class="n">setup</span><span class="o">/</span><span class="mi">20</span><span class="o">-</span><span class="n">deployment</span><span class="o">.</span><span class="n">md</span></code></pre><p>The numeric prefixes order categories and guides and are stripped from the
 slug; the folder name is the category; the title is the first <code class="inline">#</code> heading.
 Returns <code class="inline">[%{category: String.t(), guides: [guide]}]</code>, each guide a map of
-<code class="inline">:slug</code>, <code class="inline">:title</code>, <code class="inline">:summary</code> and <code class="inline">:path</code>.</p>
+<code class="inline">:slug</code>, <code class="inline">:title</code>, <code class="inline">:summary</code> and <code class="inline">:path</code>.</p><h2 id="list_doc_categories/1-collections" class="section-heading"><a href="#list_doc_categories/1-collections" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Collections</span></h2><p>A <em>collection</em> is the registered path name the guides are read from, so one
+app can serve several unrelated sets — gamend serves <code class="inline">:docs</code>, Polyglot
+Pirates serves both <code class="inline">:docs</code> (engineering, admin-only) and <code class="inline">:guide</code> (the
+player guide). The collection is part of every cache key, so the sets never
+see each other's entries. Everything defaults to <code class="inline">:docs</code>, which is what the
+single-collection callers already had.</p>
   </section>
 </section>
-<section class="detail" id="list_docs/0">
+<section class="detail" id="list_docs/1">
+
+    <span id="list_docs/0"></span>
 
   <div class="detail-header">
-    <a href="#list_docs/0" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+    <a href="#list_docs/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
       <i class="ri-link-m" aria-hidden="true"></i>
     </a>
     <div class="heading-with-actions">
-      <h1 class="signature" translate="no">list_docs()</h1>
+      <h1 class="signature" translate="no">list_docs(collection \\ :docs)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L215" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L225" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -653,11 +823,11 @@ Returns <code class="inline">[%{category: String.t(), guides: [guide]}]</code>, 
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> list_docs() :: [<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()]</pre>
+          <pre translate="no"><span class="attribute">@spec</span> list_docs(<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>()) :: [<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()]</pre>
 
       </div>
 
-<p>Every guide as a flat list, in the same order as <a href="#list_doc_categories/0"><code class="inline">list_doc_categories/0</code></a>.</p>
+<p>Every guide as a flat list, in the same order as <a href="#list_doc_categories/1"><code class="inline">list_doc_categories/1</code></a>.</p>
   </section>
 </section>
 <section class="detail" id="path/1">
@@ -670,7 +840,7 @@ Returns <code class="inline">[%{category: String.t(), guides: [guide]}]</code>, 
       <h1 class="signature" translate="no">path(name)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L63" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L64" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -688,6 +858,37 @@ Returns <code class="inline">[%{category: String.t(), guides: [guide]}]</code>, 
 <p>Returns the resolved absolute path for a registered content source, or <code class="inline">nil</code>.</p>
   </section>
 </section>
+<section class="detail" id="pill/2">
+
+  <div class="detail-header">
+    <a href="#pill/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">pill(class_suffix, label)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L956" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> pill(<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(), <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()) :: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()</pre>
+
+      </div>
+
+<p>One pill badge: <code class="inline">class_suffix</code> picks the colour, <code class="inline">label</code> is what it reads.</p><p>The markup lives here rather than at each call site because a host that adds
+its own tags — Polyglot Pirates re-labels the roadmap's in the reader's
+language — was copying this line, class name and all, and would not notice
+the day the stylesheet changed underneath it.</p>
+  </section>
+</section>
 <section class="detail" id="register_path/2">
 
   <div class="detail-header">
@@ -698,7 +899,7 @@ Returns <code class="inline">[%{category: String.t(), guides: [guide]}]</code>, 
       <h1 class="signature" translate="no">register_path(name, opts)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L47" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L48" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -716,7 +917,44 @@ Returns <code class="inline">[%{category: String.t(), guides: [guide]}]</code>, 
 
       </div>
 
-<p>Registers a named content source.</p><p>Supported options:</p><ul><li><code class="inline">:kind</code> - <code class="inline">:file</code> or <code class="inline">:dir</code></li><li><code class="inline">:path</code> - single candidate path</li><li><code class="inline">:candidates</code> - ordered candidate paths</li><li><code class="inline">:asset_root</code> - <code class="inline">:self</code> or <code class="inline">:dirname</code> when serving assets</li></ul>
+<p>Registers a named content source.</p><p>Supported options:</p><ul><li><code class="inline">:kind</code> - <code class="inline">:file</code> or <code class="inline">:dir</code></li><li><code class="inline">:path</code> - single candidate path</li><li><code class="inline">:candidates</code> - ordered candidate paths</li><li><code class="inline">:asset_root</code> - <code class="inline">:self</code> or <code class="inline">:dirname</code> when serving assets</li><li><code class="inline">:post_render</code> - <code class="inline">{module, function}</code> applied to rendered guide HTML</li></ul>
+  </section>
+</section>
+<section class="detail" id="relabel_pills/2">
+
+  <div class="detail-header">
+    <a href="#relabel_pills/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">relabel_pills(html, tags)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L974" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> relabel_pills(<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>() | nil, %{
+  optional(<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()) =&gt; {<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(), <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()}
+}) ::
+  <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>() | nil</pre>
+
+      </div>
+
+<p>Re-labels pills that <a href="#apply_changelog_pills/1"><code class="inline">apply_changelog_pills/1</code></a> rendered as neutral <code class="inline">other</code>.</p><p>The one seam a translated pill can use. <a href="#apply_changelog_pills/1"><code class="inline">apply_changelog_pills/1</code></a> runs inside
+the cache with English labels, so a host cannot translate there; this runs on
+the way out, per request, and takes <code class="inline">%{&quot;tag&quot; =&gt; {class_suffix, label}}</code> with
+the label already translated.</p><p>Both spellings are handled: a marker that reached the cache is already a
+neutral <code class="inline">&lt;span&gt;</code>, while one written after the fact is still <code class="inline">[Tag]</code> — the
+roadmap has had both, and handling only the first left <code class="inline">[Beta]</code> printed
+verbatim in the middle of a heading.</p>
   </section>
 </section>
 <section class="detail" id="reload/0">
@@ -757,7 +995,7 @@ Returns <code class="inline">[%{category: String.t(), guides: [guide]}]</code>, 
       <h1 class="signature" translate="no">roadmap_html()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L155" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L156" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -785,9 +1023,9 @@ not configured or the file doesn't exist.</p>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1183">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1185">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1183">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1185">Hex Preview</a>
 
             </span>
 

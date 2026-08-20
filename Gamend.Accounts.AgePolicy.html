@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.40.3">
+    <meta name="project" content="gamend_core v1.0.1185">
+
+
+    <title>Gamend.Accounts.AgePolicy — gamend_core v1.0.1185</title>
+
+    <link rel="stylesheet" href="dist/html-elixir-NHQLCD6Y.css" />
+
+    <script defer src="dist/sidebar_items-734653A6.js"></script>
+    <script defer src="docs_config.js"></script>
+    <script defer src="dist/html-Y2MUTVIN.js"></script>
+
+  </head>
+  <body>
+    <script>(()=>{var t="ex_doc:settings",e="dark";var o="dark",s="light";var E="sidebar_state",n="closed";var r="sidebar_width";var a="sidebar-open";var i=new URLSearchParams(window.location.search),S=i.get("theme")||JSON.parse(localStorage.getItem(t)||"{}").theme;(S===o||S!==s&&window.matchMedia("(prefers-color-scheme: dark)").matches)&&document.body.classList.add(e);var d=sessionStorage.getItem(E),A=d!==n&&!window.matchMedia(`screen and (max-width: ${768}px)`).matches;document.body.classList.toggle(a,A);var c=sessionStorage.getItem(r);c&&document.body.style.setProperty("--sidebarWidth",`${c}px`);var p=/(Macintosh|iPhone|iPad|iPod)/.test(window.navigator.userAgent);document.documentElement.classList.toggle("apple-os",p);})();
+</script>
+
+<div class="body-wrapper">
+
+<button id="sidebar-menu" class="sidebar-button sidebar-toggle" aria-label="toggle sidebar" aria-controls="sidebar">
+  <i class="ri-menu-line ri-lg" title="Collapse/expand sidebar"></i>
+</button>
+
+<nav id="sidebar" class="sidebar">
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectInfo">
+
+      <div>
+        <a href="readme.html" class="sidebar-projectName" translate="no">
+gamend_core
+        </a>
+        <div class="sidebar-projectVersion" translate="no">
+          v1.0.1185
+        </div>
+      </div>
+    </div>
+    <ul id="sidebar-list-nav" class="sidebar-list-nav" role="tablist" data-extras="Pages"></ul>
+  </div>
+</nav>
+
+<output role="status" id="toast"></output>
+
+<main class="content page-module" id="main" data-type="modules">
+  <div id="content" class="content-inner">
+    <div class="top-search">
+      <div class="search-settings">
+        <form class="search-bar" action="search.html">
+          <label class="search-label">
+            <span class="sr-only">Search documentation of gamend_core</span>
+            <div class="search-input-wrapper">
+              <input name="q" type="text" class="search-input" placeholder="Press / to search" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+              <button type="button" tabindex="-1" class="search-close-button" aria-hidden="true">
+                <i class="ri-close-line ri-lg" title="Cancel search"></i>
+              </button>
+            </div>
+          </label>
+        </form>
+        <div class="autocomplete">
+        </div>
+        <div class="engine-selector" data-multiple="false">
+          <button type="button" class="engine-button" aria-label="Select search engine" aria-haspopup="true" aria-expanded="false">
+            <i class="ri-search-2-line" aria-hidden="true"></i>
+            <span class="engine-name">Default</span>
+            <i class="ri-arrow-down-s-line" aria-hidden="true"></i>
+          </button>
+          <div class="engine-dropdown" hidden role="menu">
+
+              <button type="button"
+                      class="engine-option"
+                      data-engine-url="search.html?q="
+                      role="menuitemradio"
+                      aria-checked="true">
+                <span class="name">Default</span>
+                <span class="help">In-browser search</span>
+              </button>
+
+          </div>
+        </div>
+        <button class="icon-settings display-settings">
+          <i class="ri-settings-3-line"></i>
+          <span class="sr-only">Settings</span>
+        </button>
+      </div>
+    </div>
+
+<div id="top-content">
+  <div class="heading-with-actions top-heading">
+    <h1>
+      <span translate="no">Gamend.<wbr />Accounts.<wbr />AgePolicy</span> 
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1185)</small>
+
+    </h1>
+
+<a href="Gamend.Accounts.AgePolicy.md" title="Copy Markdown (hold Ctrl/Cmd and click it to open as Markdown)" class="copy-markdown icon-action" rel="help">
+  <i class="ri-markdown-line" aria-hidden="true"></i>
+  <span class="sr-only">Copy Markdown</span>
+</a>
+
+
+
+      <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/age_policy.ex#L1" title="View Source" class="icon-action" rel="help nofollow">
+        <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        <span class="sr-only">View Source</span>
+      </a>
+
+  </div>
+
+
+    <section id="moduledoc">
+<p>What a user's age permits.</p><p>One module owns two things: deriving an account's bracket from the age fields
+on <code class="inline">users</code>, and saying what that bracket may do. Everything that gates on age
+asks here rather than re-deriving a threshold, because the thresholds are not
+a single number and getting them slightly different in two places is how a
+child ends up treated as an adult on one surface and not another.</p><h2 id="module-the-brackets" class="section-heading"><a href="#module-the-brackets" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">The brackets</span></h2><ul><li><code class="inline">:adult</code> — 18 or over.</li><li><code class="inline">:teen</code> — old enough for their country's digital-consent age, but under 18.</li><li><code class="inline">:child</code> — under 13, <strong>or</strong> under their country's digital-consent age,
+whichever is higher. This is Epic's rule after the FTC action, and it is
+the one that survives contact with the EU: a 14-year-old is a teen in the
+US and a child in Romania, because Romania's Article 8 age is 16.</li><li><code class="inline">:unknown</code> — no age answer. Treated as <code class="inline">:child</code>, with one exception.</li></ul><h2 id="module-the-exception-grandfathered-accounts" class="section-heading"><a href="#module-the-exception-grandfathered-accounts" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">The exception: grandfathered accounts</span></h2><p>An account created before the age gate existed has <code class="inline">grandfathered_at</code> set and
+no age answer. Restricting those on deploy would take chat, purchasing and
+leaderboard identity away from every existing player at once, so they keep
+adult capability until they answer the prompt. <code class="inline">grandfathered_at</code> records
+a fact — this account predates the gate — rather than granting a permission,
+and answering clears it.</p><p>This is a deliberate, dated decision with a real cost: a child already playing
+keeps an unrestricted account until they answer. See the migration.</p><h2 id="module-which-direction-an-age-may-move" class="section-heading"><a href="#module-which-direction-an-age-may-move" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Which direction an age may move</span></h2><p>Down is free; up is not. A user may always lower their stated age, because
+that only ever increases protection. Raising it needs a stronger signal than
+the one that set it — a platform age bracket, a guardian's action, or a
+verified check — so the same session that answered &quot;under 13&quot; cannot simply
+answer again. Google's shipped behaviour is the reference: an under-13
+account's birthdate cannot be corrected by the user at all.</p><p>Graduation is automatic and needs no signal: an account leaves <code class="inline">:child</code> on the
+first of its birth month, which is conservative by up to 30 days.</p>
+    </section>
+
+</div>
+
+  <section id="summary" class="details-list">
+    <h2 class="section-heading">
+      <a class="hover-link" href="#summary">
+        <i class="ri-link-m" aria-hidden="true"></i>
+      </a>
+      <span class="text">Summary</span>
+    </h2>
+<div class="summary-types summary">
+  <h3>
+    <a href="#types">Types</a>
+  </h3>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#t:class/0" data-no-tooltip="" translate="no">class()</a>
+
+      </div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#t:t/0" data-no-tooltip="" translate="no">t()</a>
+
+      </div>
+
+    </div>
+
+</div>
+<div class="summary-functions summary">
+  <h3>
+    <a href="#functions">Functions</a>
+  </h3>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#age_in_years/3" data-no-tooltip="" translate="no">age_in_years(birth_year, birth_month, on)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Age in whole years from a birth year and month, on a given date.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#class_for_age/2" data-no-tooltip="" translate="no">class_for_age(age, country)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>The bracket an age falls in for a country.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#classify/2" data-no-tooltip="" translate="no">classify(user, on \\ nil)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>The bracket for a user, as of <code class="inline">on</code> (defaults to today, UTC).</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#digital_consent_age/1" data-no-tooltip="" translate="no">digital_consent_age(country)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>The digital-consent age for a country, defaulting to 16.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#effective_class/2" data-no-tooltip="" translate="no">effective_class(user, on \\ nil)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>The effective bracket a caller should enforce.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#grandfathered?/1" data-no-tooltip="" translate="no">grandfathered?(user)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Whether this account predates the age gate and so keeps adult capability
+while its age is still unknown.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#known_countries/0" data-no-tooltip="" translate="no">known_countries()</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Every country whose threshold is known, for tests and admin display.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#may_change_age?/4" data-no-tooltip="" translate="no">may_change_age?(user, year, month, method)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Whether a proposed age answer may replace the one already recorded.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#methods/0" data-no-tooltip="" translate="no">methods()</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Every age-collection method, strongest last.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#policy/2" data-no-tooltip="" translate="no">policy(user, on \\ nil)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>What a user may do.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#policy_for/1" data-no-tooltip="" translate="no">policy_for(class)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>The policy for a bracket, without a user.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#stronger_signal?/2" data-no-tooltip="" translate="no">stronger_signal?(method, current)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Whether <code class="inline">method</code> is a stronger age signal than <code class="inline">current</code>.</p></div>
+
+    </div>
+
+</div>
+
+  </section>
+
+
+  <section id="types" class="details-list">
+    <h2 class="section-heading">
+      <a class="hover-link" href="#types">
+        <i class="ri-link-m" aria-hidden="true"></i>
+      </a>
+      <span class="text">Types</span>
+    </h2>
+
+    <div class="types-list">
+<section class="detail" id="t:class/0">
+
+  <div class="detail-header">
+    <a href="#t:class/0" class="detail-link" data-no-tooltip="" aria-label="Link to this type">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">class()</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/age_policy.ex#L48" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@type</span> class() :: :unknown | :child | :teen | :adult</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:t/0">
+
+  <div class="detail-header">
+    <a href="#t:t/0" class="detail-link" data-no-tooltip="" aria-label="Link to this type">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">t()</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/age_policy.ex#L206" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@type</span> t() :: %Gamend.Accounts.AgePolicy{
+  avatar_upload?: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+  chat_default_on?: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+  class: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+  custom_display_name?: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+  discoverable?: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+  leaderboard_identity: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+  map_presence_published?: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+  public_groups?: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+  purchases?: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+  third_party_egress?: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+  timers_enforced?: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()
+}</pre>
+
+      </div>
+
+
+  </section>
+</section>
+
+    </div>
+  </section>
+
+  <section id="functions" class="details-list">
+    <h2 class="section-heading">
+      <a class="hover-link" href="#functions">
+        <i class="ri-link-m" aria-hidden="true"></i>
+      </a>
+      <span class="text">Functions</span>
+    </h2>
+
+    <div class="functions-list">
+<section class="detail" id="age_in_years/3">
+
+  <div class="detail-header">
+    <a href="#age_in_years/3" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">age_in_years(birth_year, birth_month, on)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/age_policy.ex#L127" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> age_in_years(<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>(), <a href="https://hexdocs.pm/elixir/Date.html#t:t/0">Date.t</a>()) :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>()</pre>
+
+      </div>
+
+<p>Age in whole years from a birth year and month, on a given date.</p><p>Rolls on the first of the birth month rather than an exact day, because the
+day is deliberately not stored. An account is therefore up to 30 days older
+than this says, never younger.</p>
+  </section>
+</section>
+<section class="detail" id="class_for_age/2">
+
+  <div class="detail-header">
+    <a href="#class_for_age/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">class_for_age(age, country)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/age_policy.ex#L140" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> class_for_age(<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>(), <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>() | nil) :: <a href="#t:class/0">class</a>()</pre>
+
+      </div>
+
+<p>The bracket an age falls in for a country.</p><p><code class="inline">child</code> is the higher of 13 and the country's Article 8 age, so the same age
+can be a teen in one country and a child in another.</p>
+  </section>
+</section>
+<section class="detail" id="classify/2">
+
+    <span id="classify/1"></span>
+
+  <div class="detail-header">
+    <a href="#classify/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">classify(user, on \\ nil)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/age_policy.ex#L158" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> classify(<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>(), <a href="https://hexdocs.pm/elixir/Date.html#t:t/0">Date.t</a>() | nil) :: <a href="#t:class/0">class</a>()</pre>
+
+      </div>
+
+<p>The bracket for a user, as of <code class="inline">on</code> (defaults to today, UTC).</p><p>Returns <code class="inline">:unknown</code> for an account with no age answer — which callers must
+treat as <code class="inline">:child</code> unless <a href="#grandfathered?/1"><code class="inline">grandfathered?/1</code></a> says otherwise. Use <a href="#policy/2"><code class="inline">policy/2</code></a>
+rather than reading this directly; it resolves that rule for you.</p>
+  </section>
+</section>
+<section class="detail" id="digital_consent_age/1">
+
+  <div class="detail-header">
+    <a href="#digital_consent_age/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">digital_consent_age(country)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/age_policy.ex#L109" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> digital_consent_age(<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>() | nil) :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">pos_integer</a>()</pre>
+
+      </div>
+
+<p>The digital-consent age for a country, defaulting to 16.</p>
+  </section>
+</section>
+<section class="detail" id="effective_class/2">
+
+    <span id="effective_class/1"></span>
+
+  <div class="detail-header">
+    <a href="#effective_class/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">effective_class(user, on \\ nil)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/age_policy.ex#L187" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> effective_class(<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>(), <a href="https://hexdocs.pm/elixir/Date.html#t:t/0">Date.t</a>() | nil) :: <a href="#t:class/0">class</a>()</pre>
+
+      </div>
+
+<p>The effective bracket a caller should enforce.</p><p>This is the one to call. It collapses the <code class="inline">:unknown</code> question: an account with
+no age answer is a <code class="inline">:child</code>, unless it predates the gate, in which case it is
+treated as an adult until it answers.</p>
+  </section>
+</section>
+<section class="detail" id="grandfathered?/1">
+
+  <div class="detail-header">
+    <a href="#grandfathered?/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">grandfathered?(user)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/age_policy.ex#L176" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> grandfathered?(<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()) :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()</pre>
+
+      </div>
+
+<p>Whether this account predates the age gate and so keeps adult capability
+while its age is still unknown.</p><p>Answering the age prompt clears <code class="inline">grandfathered_at</code>, at which point the answer
+governs and this returns false.</p>
+  </section>
+</section>
+<section class="detail" id="known_countries/0">
+
+  <div class="detail-header">
+    <a href="#known_countries/0" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">known_countries()</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/age_policy.ex#L117" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> known_countries() :: [<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()]</pre>
+
+      </div>
+
+<p>Every country whose threshold is known, for tests and admin display.</p>
+  </section>
+</section>
+<section class="detail" id="may_change_age?/4">
+
+  <div class="detail-header">
+    <a href="#may_change_age?/4" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">may_change_age?(user, year, month, method)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/age_policy.ex#L271" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> may_change_age?(<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>(), <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()) ::
+  <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()</pre>
+
+      </div>
+
+<p>Whether a proposed age answer may replace the one already recorded.</p><p>Lowering is always allowed. Raising needs a stronger signal than set the
+current answer, so a user cannot simply re-answer their way out of a
+restriction in the same session.</p>
+  </section>
+</section>
+<section class="detail" id="methods/0">
+
+  <div class="detail-header">
+    <a href="#methods/0" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">methods()</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/age_policy.ex#L300" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> methods() :: [<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()]</pre>
+
+      </div>
+
+<p>Every age-collection method, strongest last.</p>
+  </section>
+</section>
+<section class="detail" id="policy/2">
+
+    <span id="policy/1"></span>
+
+  <div class="detail-header">
+    <a href="#policy/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">policy(user, on \\ nil)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/age_policy.ex#L216" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> policy(<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>(), <a href="https://hexdocs.pm/elixir/Date.html#t:t/0">Date.t</a>() | nil) :: <a href="#t:t/0">t</a>()</pre>
+
+      </div>
+
+<p>What a user may do.</p><p>The defaults on the struct are the child defaults, so a field nobody
+remembered to set is closed rather than open — the same default-deny posture
+as <code class="inline">before_kv_get/2</code>.</p>
+  </section>
+</section>
+<section class="detail" id="policy_for/1">
+
+  <div class="detail-header">
+    <a href="#policy_for/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">policy_for(class)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/age_policy.ex#L220" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> policy_for(<a href="#t:class/0">class</a>()) :: <a href="#t:t/0">t</a>()</pre>
+
+      </div>
+
+<p>The policy for a bracket, without a user.</p>
+  </section>
+</section>
+<section class="detail" id="stronger_signal?/2">
+
+  <div class="detail-header">
+    <a href="#stronger_signal?/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">stronger_signal?(method, current)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/age_policy.ex#L294" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> stronger_signal?(<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>() | nil, <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>() | nil) :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()</pre>
+
+      </div>
+
+<p>Whether <code class="inline">method</code> is a stronger age signal than <code class="inline">current</code>.</p>
+  </section>
+</section>
+
+    </div>
+  </section>
+
+    <footer class="footer">
+
+        <p>
+
+            <span class="line">
+              <a href="https://hex.pm/packages/gamend_core/1.0.1185">Hex Package</a>
+
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1185">Hex Preview</a>
+
+            </span>
+
+          <span class="line">
+            <button class="a-main footer-button display-quick-switch" title="Go to package docs">
+              Go to package docs
+            </button>
+
+              <a href="llms.txt" target="_blank">
+                View llms.txt
+              </a>
+
+
+              <a href="gamend_core.epub">
+                Download ePub version
+              </a>
+
+          </span>
+        </p>
+
+        <p class="built-using">
+          Built using
+          <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener" translate="no">ExDoc</a> (v0.40.3) for the
+
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank" translate="no">Elixir programming language</a>
+
+        </p>
+
+
+    </footer>
+  </div>
+</main>
+</div>
+
+  </body>
+</html>

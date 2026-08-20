@@ -741,6 +741,20 @@ without this the previous upload or mirror copy lingers in storage forever.
 Best-effort: a failed cleanup leaves the old object rather than failing the
 update that already succeeded.
 
+# `refresh_account_class`
+
+```elixir
+@spec refresh_account_class(Gamend.Accounts.User.t()) ::
+  {:ok, Gamend.Accounts.User.t()} | {:error, term()}
+```
+
+Re-derive `account_class` for a user whose stored answer has not changed.
+
+An account graduates on the first of its birth month, and nothing writes to it
+on that day — the derivation is a function of the calendar, not of an event.
+Call this to bring the denormalised column back in step, from a scheduled
+sweep or on login.
+
 # `register_user`
 
 ```elixir
@@ -833,6 +847,30 @@ See `t:Gamend.Types.pagination_opts/0` for available options.
 ```
 
 Serialize a user into the compact payload used by realtime updates.
+
+# `set_user_age`
+
+```elixir
+@spec set_user_age(Gamend.Accounts.User.t(), map()) ::
+  {:ok, Gamend.Accounts.User.t()} | {:error, term()}
+```
+
+Record a user's age answer and re-derive what it permits.
+
+Three things happen together, and they have to: the answer is stored, the
+denormalised `account_class` is recomputed from it, and `grandfathered_at` is
+cleared. That last one is the point — an account that predated the age gate
+stops being treated as an adult-by-default the moment it tells us what it
+actually is, in whichever direction that goes.
+
+Refuses with `{:error, :age_change_not_allowed}` when the answer would raise
+the user's age without a stronger signal than the one already recorded. See
+`AgePolicy.may_change_age?/4`: lowering is always allowed, because it only
+ever increases protection.
+
+`attrs` must carry `birth_year`, `birth_month` and `age_method`, and should
+carry `age_country` — without it the highest digital-consent age in the table
+applies, which is the safe reading but not always the right one.
 
 # `set_user_offline`
 

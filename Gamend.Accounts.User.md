@@ -12,8 +12,14 @@ validations so other domains can reuse them safely.
 ```elixir
 @type t() :: %Gamend.Accounts.User{
   __meta__: term(),
+  account_class: String.t() | nil,
+  age_country: String.t() | nil,
+  age_locked_at: DateTime.t() | nil,
+  age_method: String.t() | nil,
   apple_id: term(),
   authenticated_at: term(),
+  birth_month: integer() | nil,
+  birth_year: integer() | nil,
   confirmed_at: DateTime.t() | nil,
   device_id: term(),
   discord_id: term(),
@@ -21,6 +27,7 @@ validations so other domains can reuse them safely.
   email: String.t() | nil,
   facebook_id: term(),
   google_id: term(),
+  grandfathered_at: DateTime.t() | nil,
   hashed_password: String.t() | nil,
   id: Ecto.UUID.t() | nil,
   inserted_at: term(),
@@ -47,6 +54,18 @@ The public user struct used across the application.
 # `admin_changeset`
 
 A user changeset for admin updates.
+
+# `age_changeset`
+
+Record an age answer.
+
+Takes a year and a month and nothing finer — a caller that collected a full
+date discards the day before it gets here, so the day is never written and
+never stored. See the migration for why.
+
+Validation only: whether the answer is *allowed* to replace an existing one is
+`AgePolicy.may_change_age?/4`, and `Accounts.set_age/2` is what asks. A
+changeset that enforced it too would make the rule two things to keep in step.
 
 # `anonymous?`
 
