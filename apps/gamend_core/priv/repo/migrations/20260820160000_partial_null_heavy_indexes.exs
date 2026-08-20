@@ -21,7 +21,7 @@ defmodule Gamend.Repo.Migrations.PartialNullHeavyIndexes do
 
     * `users.last_seen_at` — the admin list sorts on it, and an ORDER BY needs
       every row.
-    * `users_is_online_last_seen_at` — the presence sweeper reads
+    * `users.is_online` + `last_seen_at` — the presence sweeper reads
       `is_nil(last_seen_at) or last_seen_at < cutoff`, so a NOT NULL predicate
       on `last_seen_at` would hide exactly the rows it is looking for. It is
       made partial on `is_online` instead: the sweeper filters
@@ -40,7 +40,6 @@ defmodule Gamend.Repo.Migrations.PartialNullHeavyIndexes do
   @indexes [
     {:users, [:party_id], "party_id IS NOT NULL", false},
     {:users, [:lobby_id], "lobby_id IS NOT NULL", false},
-    {:users, [:is_online, :last_seen_at], "is_online", false},
     # Expression index: anonymous device accounts have no display name at all,
     # so this one is empty for the majority of a device-auth database.
     {:users, ["lower(display_name)"], "display_name IS NOT NULL", false},
@@ -53,15 +52,28 @@ defmodule Gamend.Repo.Migrations.PartialNullHeavyIndexes do
      "provider_original_transaction_id IS NOT NULL", false}
   ]
 
+  # `users(is_online, last_seen_at)` exists on SQLite only. 20260716120000
+  # branched on the adapter: Postgres got `users_online_last_seen_index`,
+  # already partial on `is_online = true`, while SQLite got a plain composite
+  # under the default name. So Postgres has nothing to convert here, and
+  # looking for the SQLite name there fails outright.
+  @sqlite_only [{:users, [:is_online, :last_seen_at], "is_online", false}]
+
+  defp indexes do
+    if repo().__adapter__() == Ecto.Adapters.Postgres,
+      do: @indexes,
+      else: @indexes ++ @sqlite_only
+  end
+
   def up do
-    for {table, columns, where, unique?} <- @indexes do
+    for {table, columns, where, unique?} <- indexes() do
       drop index(table, columns)
       create index_for(table, columns, unique?, where: where)
     end
   end
 
   def down do
-    for {table, columns, _where, unique?} <- @indexes do
+    for {table, columns, _where, unique?} <- indexes() do
       drop index(table, columns)
       create index_for(table, columns, unique?, [])
     end
