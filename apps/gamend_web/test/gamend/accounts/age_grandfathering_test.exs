@@ -22,7 +22,7 @@ defmodule Gamend.Accounts.AgeGrandfatheringTest do
   import Gamend.AccountsFixtures
 
   defp backfill_sql do
-    now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second) |> NaiveDateTime.to_string()
+    now = NaiveDateTime.utc_now(:second) |> NaiveDateTime.to_string()
     "UPDATE users SET grandfathered_at = '#{now}' WHERE grandfathered_at IS NULL"
   end
 

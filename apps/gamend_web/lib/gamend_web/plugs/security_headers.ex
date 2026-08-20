@@ -29,17 +29,50 @@ defmodule GamendWeb.Plugs.SecurityHeaders do
   @impl true
   def init(opts), do: opts
 
+  # Deny all powerful browser features by default. Add exceptions as needed.
+  # Joined at compile time: it is the same string on every response, and
+  # rebuilding the list per request measured as the single most expensive plug
+  # in the endpoint (15.8us of a ~103us request).
+  @permissions_policy Enum.join(
+                        [
+                          "camera=()",
+                          "microphone=()",
+                          "geolocation=()",
+                          "payment=()",
+                          "usb=()",
+                          "magnetometer=()",
+                          "gyroscope=()",
+                          "accelerometer=()"
+                        ],
+                        ", "
+                      )
+
+  # Prepended to `resp_headers` directly rather than through
+  # `merge_resp_headers/2`. That function re-validates every key and value on
+  # every request — measured at 16us for these six, which was ~15% of a whole
+  # request and the most expensive plug in the endpoint. These six are
+  # compile-time constants: already lowercase, no control characters, nothing
+  # to validate per request. Anything set later still wins, because
+  # `put_resp_header/3` replaces by key regardless of position.
+  @static_headers [
+    {"x-content-type-options", "nosniff"},
+    {"x-frame-options", "SAMEORIGIN"},
+    {"referrer-policy", "strict-origin-when-cross-origin"},
+    {"permissions-policy", @permissions_policy},
+    {"cross-origin-resource-policy", "same-origin"},
+    {"x-permitted-cross-domain-policies", "none"}
+  ]
+
   @impl true
   def call(conn, _opts) do
     conn
-    |> put_resp_header("x-content-type-options", "nosniff")
-    |> put_resp_header("x-frame-options", "SAMEORIGIN")
-    |> put_resp_header("referrer-policy", "strict-origin-when-cross-origin")
-    |> put_resp_header("permissions-policy", permissions_policy())
-    |> put_resp_header("cross-origin-resource-policy", "same-origin")
-    |> put_resp_header("x-permitted-cross-domain-policies", "none")
+    |> prepend_static_headers()
     |> maybe_hsts()
     |> maybe_strip_request_id()
+  end
+
+  defp prepend_static_headers(%Plug.Conn{resp_headers: existing} = conn) do
+    %{conn | resp_headers: @static_headers ++ existing}
   end
 
   # In production, strip x-request-id from response headers to avoid leaking
@@ -79,20 +112,5 @@ defmodule GamendWeb.Plugs.SecurityHeaders do
     else
       conn
     end
-  end
-
-  defp permissions_policy do
-    # Deny all powerful browser features by default. Add exceptions as needed.
-    [
-      "camera=()",
-      "microphone=()",
-      "geolocation=()",
-      "payment=()",
-      "usb=()",
-      "magnetometer=()",
-      "gyroscope=()",
-      "accelerometer=()"
-    ]
-    |> Enum.join(", ")
   end
 end

@@ -10,7 +10,11 @@ defmodule GamendHost.MixProject do
       elixirc_paths: ["lib"],
       start_permanent: Mix.env() == :prod,
       listeners: [Phoenix.CodeReloader],
-      dialyzer: [plt_add_apps: [:mix]],
+      # The umbrella apps carry the modules this root app calls into
+      # (GamendWeb.DocsLive, GamendWeb.Sitemap.Xml). Without them in the PLT,
+      # dialyzer analyses lib/ against a world where those modules do not
+      # exist and reports every call as unknown_function.
+      dialyzer: [plt_add_apps: [:mix, :gamend_core, :gamend_web]],
       aliases: aliases(),
       deps: deps()
     ]

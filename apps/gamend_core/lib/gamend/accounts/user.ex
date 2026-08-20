@@ -31,6 +31,8 @@ defmodule Gamend.Accounts.User do
   use Gamend.Schema
   import Ecto.Changeset
 
+  alias Gamend.Accounts.AgePolicy
+
   @last_seen_fallback ~U[1970-01-01 00:00:00Z]
 
   schema "users" do
@@ -116,7 +118,7 @@ defmodule Gamend.Accounts.User do
     # A person older than the oldest person is a typo or a probe, not an age.
     |> validate_inclusion(:birth_year, (this_year - 120)..this_year)
     |> validate_inclusion(:birth_month, 1..12)
-    |> validate_inclusion(:age_method, Gamend.Accounts.AgePolicy.methods())
+    |> validate_inclusion(:age_method, AgePolicy.methods())
     |> update_change(:age_country, fn
       nil -> nil
       country -> String.upcase(country)

@@ -5,6 +5,8 @@ defmodule GamendWeb.PresentationPage do
 
   use GamendWeb, :html
 
+  alias Phoenix.HTML.Safe
+
   @bold_pattern ~r/\*\*(.+?)\*\*/
   @italic_pattern ~r/(?<!\*)\*([^*\n]+)\*(?!\*)/
   @link_pattern ~r/\[([^\]]+)\]\(([^)\s]+)\)/
@@ -95,7 +97,7 @@ defmodule GamendWeb.PresentationPage do
             full_bleed_hero: true
           }
           |> page()
-          |> Phoenix.HTML.Safe.to_iodata()
+          |> Safe.to_iodata()
           |> IO.iodata_to_binary()
 
         :persistent_term.put(key, {fingerprint, html})
