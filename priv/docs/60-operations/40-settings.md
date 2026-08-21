@@ -7,7 +7,7 @@ generated: by `mix gamend.settings.guide` - do not edit by hand; edit the
 # Settings
 
 Every setting the server has, with the environment variable that sets it.
-249 settings across 22 groups.
+252 settings across 22 groups.
 
 A setting is declared in the module that owns it, so this page and
 `.env.example` are generated from the same source the server reads. The
@@ -38,6 +38,8 @@ Live values, and where each one came from, are on the
 | Variable | Type | Default | Notes |
 |---|---|---|---|
 | `GAMEND_AUTH_ANONYMOUS_CAN_UPLOAD_AVATAR` | boolean | `false` | Allow device-only accounts to upload an avatar. Off by default: an anonymous account costs one request to create, so this is the cheapest way for a bot to burn object storage. |
+| `GAMEND_AUTH_ARGON2_MEMORY_LOG2` | integer | `14` | Argon2id memory per hash, as a power of two in KiB — 14 is 16 MiB. Peak use is this times the vCPU count, not times the request rate, because the BEAM runs at most one hash per dirty CPU scheduler. Below 12 (4 MiB) it stops being meaningfully memory-hard. |
+| `GAMEND_AUTH_ARGON2_TIME_COST` | integer | `3` | Argon2id passes over memory. Raise to compensate when lowering memory. |
 | `GAMEND_AUTH_DEVICE_AUTH_ENABLED` | boolean | `true` | Allow POST /api/v1/login/device. When on, any unknown device_id creates an anonymous account. |
 | `GAMEND_AUTH_GUARDIAN_SECRET_KEY` | string | - | JWT signing key. Defaults to secret_key_base when unset. Secret - never log or commit it. |
 | `GAMEND_AUTH_MIN_PASSWORD_LENGTH` | integer | `8` | Minimum password length enforced at registration and change. |
@@ -134,6 +136,7 @@ Live values, and where each one came from, are on the
 | `GAMEND_FEATURES_OPENAPI` | boolean | `true` | OpenAPI spec + Swagger UI. A complete map of your API — consider off in production. |
 | `GAMEND_FEATURES_PUBLIC_STATS` | boolean | `true` | The unauthenticated stats endpoints: GET /api/v1/users/stats, /api/v1/lobbies/stats, /api/v1/parties/stats, /api/v1/quests/stats, /api/v1/signaling/stats and /api/v1/matchmaking/stats. Aggregate counts only, never per-row data — but they do reveal how busy the server is. |
 | `GAMEND_FEATURES_PUBLIC_USER_METADATA_KEYS` | list | `` | Top-level `user.metadata` keys GET /api/v1/users and /users/:id may return. Empty means none. Those endpoints are unauthenticated, so anything named here is world-readable and findable by name prefix — never list a key holding position, routing or contact data. |
+| `GAMEND_FEATURES_USER_IMAGE_UPLOADS` | boolean | `true` | Player-supplied images: avatars (POST /api/v1/me/avatar*) and group icons (POST /api/v1/groups/:id/icon*). Objects land in public storage and are served without authentication, so on a service children can reach this is an unscreened image surface — turn it off unless the game actually uses it and you have a way to screen what arrives. |
 
 
 ## Server & HTTP

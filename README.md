@@ -8,6 +8,33 @@ Game + Backend = Gamend
 
 [Discord](https://discord.com/invite/v649emcpAu) | [Guides](https://gamend.org/docs/setup) | [API Docs](https://gamend.org/api/docs) | [Elixir Docs](https://docs.gamend.org/) | [Starter Template](https://github.com/appsinacup/gamend_starter)
 
+## What is Gamend?
+
+A **backend for multiplayer games** — accounts, lobbies, chat, leaderboards and
+everything else players expect around the game itself.
+
+Your game still renders and simulates, but server-side scripting means real logic runs on the
+server: hooks in Elixir fire on your events, so scoring, rewards, matchmaking
+rules and validation are decided somewhere the player cannot edit. Background and
+scheduled jobs run there too. Connect from Godot, from JavaScript, or over plain
+HTTP.
+
+It is written in Elixir — the language behind Discord's messaging — which is why
+one small server holds tens of thousands of connections. **You run it on your
+own server**; there is no hosted service to buy.
+
+## Performance
+
+![Concurrent idle players by machine size, memory and monthly price, with Nakama's published figure for comparison](https://github.com/appsinacup/gamend/blob/main/priv/docs/images/sockets-by-memory.svg?raw=true)
+
+Measured on Fly, one machine at a time, hardware read back off the machine
+before load was applied. **37,854 concurrent idle players on one core with
+3 GB**, against Nakama's published 20,277 on the hardware.
+
+Full per-size tables, the operations breakdown, and how to reproduce any of it:
+[Performance](https://gamend.org/docs/performance), 
+[Load Testing](https://gamend.org/docs/load-testing)
+
 ## Features
 
 - **Auth** — Email/password, magic link, OAuth (Discord, Google, Apple, Facebook, Steam), JWT API tokens

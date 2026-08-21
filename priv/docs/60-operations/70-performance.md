@@ -11,28 +11,14 @@ We compared **Gamend** and **Nakama** on various machine sizes. Overall, **Gamen
 | cores | 0.06 | 0.25 | 0.5 | 1 | 1 | 1 | 2 |
 | memory | 1 GB | 1 GB | 2 GB | 2 GB | 3 GB | 3 GB | 4 GB |
 | idle sockets | 6,867 | 9,055 | 22,333 | 22,359 | **37,854** | 20,277 | 51,225 |
-| cached read (`GET /me`) | 1,411 | 6,242 | 8,087 | 1,940 | 1,930 | — | 3,746 |
-| plugin call, no database | 125 | 4,918 | 7,783 | 1,989 | **1,982** | 700–825 | 3,553 |
-| write | 41 | 87 | 694 | 753 | 762 | — | 945 |
-| write inside a lock | 30 | 57 | 206 | 462 | 462 | — | 517 |
-| registration (device) | 44 | 125 | 184 | 495 | **589** | 528 | 712 |
-| email login (see below) | 0.3 | 1.2 | 2.1 | 4.0 | 4.0 | — | 7.9 |
+| cached read (`GET /me`) | 1,999 | 6,228 | 6,296 | 2,218 | 2,189 | — | 4,255 |
+| plugin call, no database | 155 | 6,005 | 6,911 | 2,200 | **2,184** | 700–825 | 3,854 |
+| write | 41 | 209 | 1,950 | 836 | 839 | — | 1,071 |
+| write inside a lock | 32 | 73 | 152 | 584 | 575 | — | 653 |
+| registration (device) | 42 | 92 | 167 | 539 | **680** | 528 | 843 |
+| email login (Argon2id) | 1.0 | 5.8 | 10.9 | 23.7 | 24.0 | — | 46.5 |
+| page loads | 10 | 47 | 97 | 244 | 249 | — | 425 |
 | cost / month | $6 | $8 | $16 | $32 | $37 | — | $64 |
-
-The email-login row was measured against **bcrypt at cost 12**, which is what
-that path used at the time. It has since moved to **Argon2id** (16 MiB, t=3,
-p=1) — measured locally at **21.5ms a hash against bcrypt's 253.4ms, 11.8x**,
-and stronger, because Argon2id is memory-hard where bcrypt works in 4 KB. The
-machines above have not been re-run, so treat that row as a floor rather than
-scaling it by hand.
-
-Argon2id costs memory where bcrypt did not, but it does not grow with traffic:
-the hash runs on a dirty CPU scheduler and the BEAM has one per vCPU, so at
-most that many hashes hold memory at once and the rest queue. Measured, 8
-concurrent hashes added 112 MB of RSS and **512 concurrent added the same
-112 MB**. The ceiling is `vCPUs x 16 MiB` — 16 MB on a one-core box, 128 MB on
-`shared-cpu-8x` — a few percent of the machine either way. A login flood gets
-slow rather than fatal. `GAMEND_AUTH_ARGON2_MEMORY_LOG2` lowers it further.
 
 The Nakama column is their own
 [published benchmarks](https://heroiclabs.com/docs/nakama/getting-started/benchmarks/),

@@ -50,6 +50,27 @@
       "sections_height": "half",
       "sections": [
         {
+          "title": "What is Gamend?",
+          "text": "The **backend for your multiplayer game** — accounts, lobbies, chat, leaderboards and everything players expect around the game itself. Server-side scripting in Elixir runs your own logic where players cannot reach it: scoring, rewards, matchmaking rules, validation. **You run it on your own server** — there is no hosted service.",
+          "icon": "hero-question-mark-circle-solid",
+          "media_width": "third",
+          "image_position_desktop": "right",
+          "image_position_mobile": "top",
+          "text_align": "left",
+          "buttons": [
+            {
+              "label": "Benchmarks",
+              "href": "/docs/performance",
+              "icon": "hero-chart-bar-solid"
+            },
+            {
+              "label": "Godot SDK",
+              "href": "/docs/godot-sdk",
+              "icon": "hero-puzzle-piece-solid"
+            }
+          ]
+        },
+        {
           "title": "Authentication & Users",
           "text": "Email, Magic-link, OAuth, JWT and Session. Register, login, reset password and verify email.",
           "icon": "hero-lock-closed-solid",

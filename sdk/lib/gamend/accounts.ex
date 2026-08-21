@@ -1558,6 +1558,36 @@ defmodule Gamend.Accounts do
   end
 
   @doc ~S"""
+    Re-derive `account_class` for a user whose stored answer has not changed.
+    
+    An account graduates on the first of its birth month, and nothing writes to it
+    on that day — the derivation is a function of the calendar, not of an event.
+    Call this to bring the denormalised column back in step, from a scheduled
+    sweep or on login.
+    
+  """
+  @spec refresh_account_class(Gamend.Accounts.User.t()) ::
+          {:ok, Gamend.Accounts.User.t()} | {:error, term()}
+  def refresh_account_class(_user) do
+    case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        {:ok,
+         %Gamend.Accounts.User{
+           id: 0,
+           email: "",
+           display_name: nil,
+           metadata: %{},
+           is_admin: false,
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
+
+      _ ->
+        raise "Gamend.Accounts.refresh_account_class/1 is a stub - only available at runtime on Gamend"
+    end
+  end
+
+  @doc ~S"""
     Registers a user.
     
     ## Attributes
@@ -1766,6 +1796,46 @@ defmodule Gamend.Accounts do
 
       _ ->
         raise "Gamend.Accounts.serialize_user_payload/1 is a stub - only available at runtime on Gamend"
+    end
+  end
+
+  @doc ~S"""
+    Record a user's age answer and re-derive what it permits.
+    
+    Three things happen together, and they have to: the answer is stored, the
+    denormalised `account_class` is recomputed from it, and `grandfathered_at` is
+    cleared. That last one is the point — an account that predated the age gate
+    stops being treated as an adult-by-default the moment it tells us what it
+    actually is, in whichever direction that goes.
+    
+    Refuses with `{:error, :age_change_not_allowed}` when the answer would raise
+    the user's age without a stronger signal than the one already recorded. See
+    `AgePolicy.may_change_age?/4`: lowering is always allowed, because it only
+    ever increases protection.
+    
+    `attrs` must carry `birth_year`, `birth_month` and `age_method`, and should
+    carry `age_country` — without it the highest digital-consent age in the table
+    applies, which is the safe reading but not always the right one.
+    
+  """
+  @spec set_user_age(Gamend.Accounts.User.t(), map()) ::
+          {:ok, Gamend.Accounts.User.t()} | {:error, term()}
+  def set_user_age(_user, _attrs) do
+    case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        {:ok,
+         %Gamend.Accounts.User{
+           id: 0,
+           email: "",
+           display_name: nil,
+           metadata: %{},
+           is_admin: false,
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
+
+      _ ->
+        raise "Gamend.Accounts.set_user_age/2 is a stub - only available at runtime on Gamend"
     end
   end
 

@@ -94,6 +94,18 @@ msgstr ""
 msgid "**Open source** Elixir game server for **real-time** multiplayer games."
 msgstr ""
 
+msgid "Benchmarks"
+msgstr ""
+
+msgid "Godot SDK"
+msgstr ""
+
+msgid "The **backend for your multiplayer game** — accounts, lobbies, chat, leaderboards and everything players expect around the game itself. Server-side scripting in Elixir runs your own logic where players cannot reach it: scoring, rewards, matchmaking rules, validation. **You run it on your own server** — there is no hosted service."
+msgstr ""
+
+msgid "What is Gamend?"
+msgstr ""
+
 msgid "Log in"
 msgstr ""
 
