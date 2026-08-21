@@ -8,7 +8,7 @@
     <meta name="project" content="gamend_core v1.0.1191">
 
 
-    <title>Gamend.LobbySnapshots.Event — gamend_core v1.0.1191</title>
+    <title>Gamend.Release — gamend_core v1.0.1191</title>
 
     <link rel="stylesheet" href="dist/html-elixir-NHQLCD6Y.css" />
 
@@ -93,19 +93,19 @@ gamend_core
 <div id="top-content">
   <div class="heading-with-actions top-heading">
     <h1>
-      <span translate="no">Gamend.<wbr />LobbySnapshots.<wbr />Event</span> 
+      <span translate="no">Gamend.<wbr />Release</span> 
       <small class="app-vsn" translate="no">(gamend_core v1.0.1191)</small>
 
     </h1>
 
-<a href="Gamend.LobbySnapshots.Event.md" title="Copy Markdown (hold Ctrl/Cmd and click it to open as Markdown)" class="copy-markdown icon-action" rel="help">
+<a href="Gamend.Release.md" title="Copy Markdown (hold Ctrl/Cmd and click it to open as Markdown)" class="copy-markdown icon-action" rel="help">
   <i class="ri-markdown-line" aria-hidden="true"></i>
   <span class="sr-only">Copy Markdown</span>
 </a>
 
 
 
-      <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/lobby_snapshots/event.ex#L1" title="View Source" class="icon-action" rel="help nofollow">
+      <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/release.ex#L1" title="View Source" class="icon-action" rel="help nofollow">
         <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         <span class="sr-only">View Source</span>
       </a>
@@ -114,11 +114,16 @@ gamend_core
 
 
     <section id="moduledoc">
-<p>A decision worth explaining, recorded between two snapshots.</p><p>Snapshots record <em>what</em> changed; they cannot record <em>why</em>. A snapshot shows
-<code class="inline">speed: 100 -&gt; 50</code>; only an event carries the <code class="inline">gap</code> and <code class="inline">targets_ahead</code> that
-produced it.</p><p>Which interval an event falls in is derived at read time by <code class="inline">timeline/1</code> —
-the latest snapshot at or before the event — rather than stored. See the
-migration.</p>
+<p>Release-time equivalents of the <code class="inline">host.*</code> mix tasks.</p><p>A release ships compiled <code class="inline">.beam</code> files and nothing else — no Mix, no project
+tree, no <code class="inline">mix</code> binary — so <code class="inline">mix db.migrate</code> cannot run inside an image built
+from <code class="inline">Dockerfile.release</code>. These functions are what the release's own
+entrypoint calls instead:</p><pre><code class="makeup elixir" translate="no"><span class="n">bin</span><span class="o">/</span><span class="n">gamend_host</span><span class="w"> </span><span class="n">eval</span><span class="w"> </span><span class="s">&quot;Gamend.Release.createdb()&quot;</span><span class="w">
+</span><span class="n">bin</span><span class="o">/</span><span class="n">gamend_host</span><span class="w"> </span><span class="n">eval</span><span class="w"> </span><span class="s">&quot;Gamend.Release.migrate()&quot;</span></code></pre><p>Under Mix the <code class="inline">host.*</code> tasks stay the entry point. Both funnel through
+<a href="Gamend.Repo.MigrationPaths.html"><code class="inline">Gamend.Repo.MigrationPaths</code></a>, so the two cannot drift on which migrations
+they consider.</p><p><code class="inline">eval</code> starts a fresh node, applies <code class="inline">config/runtime.exs</code> and runs the
+expression <strong>without starting the application</strong>, which is the point: a
+migration that fails takes the command down instead of half-booting an
+endpoint against a database it does not match.</p>
     </section>
 
 </div>
@@ -130,20 +135,6 @@ migration.</p>
       </a>
       <span class="text">Summary</span>
     </h2>
-<div class="summary-types summary">
-  <h3>
-    <a href="#types">Types</a>
-  </h3>
-
-    <div class="summary-row">
-      <div class="summary-signature">
-        <a href="#t:t/0" data-no-tooltip="" translate="no">t()</a>
-
-      </div>
-
-    </div>
-
-</div>
 <div class="summary-functions summary">
   <h3>
     <a href="#functions">Functions</a>
@@ -151,9 +142,31 @@ migration.</p>
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#changeset/2" data-no-tooltip="" translate="no">changeset(event, attrs)</a>
+        <a href="#createdb/0" data-no-tooltip="" translate="no">createdb()</a>
 
       </div>
+
+        <div class="summary-synopsis"><p>Creates the database when it does not exist yet, mirroring <a href="https://hexdocs.pm/ecto/3.14.2/Mix.Tasks.Ecto.Create.html"><code class="inline">mix ecto.create</code></a>.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#migrate/0" data-no-tooltip="" translate="no">migrate()</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Runs every pending migration — core's and the host's — on each repo.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#rollback/2" data-no-tooltip="" translate="no">rollback(repo, version)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Rolls <code class="inline">repo</code> back down to <code class="inline">version</code>.</p></div>
 
     </div>
 
@@ -161,56 +174,6 @@ migration.</p>
 
   </section>
 
-
-  <section id="types" class="details-list">
-    <h2 class="section-heading">
-      <a class="hover-link" href="#types">
-        <i class="ri-link-m" aria-hidden="true"></i>
-      </a>
-      <span class="text">Types</span>
-    </h2>
-
-    <div class="types-list">
-<section class="detail" id="t:t/0">
-
-  <div class="detail-header">
-    <a href="#t:t/0" class="detail-link" data-no-tooltip="" aria-label="Link to this type">
-      <i class="ri-link-m" aria-hidden="true"></i>
-    </a>
-    <div class="heading-with-actions">
-      <h1 class="signature" translate="no">t()</h1>
-
-
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/lobby_snapshots/event.ex#L17" class="icon-action" rel="help nofollow" aria-label="View Source">
-          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
-        </a>
-
-    </div>
-  </div>
-
-  <section class="docstring">
-
-      <div class="specs">
-
-          <pre translate="no"><span class="attribute">@type</span> t() :: %Gamend.LobbySnapshots.Event{
-  __meta__: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
-  id: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
-  inserted_at: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
-  kind: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
-  lobby_id: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
-  payload: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
-  user: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
-  user_id: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()
-}</pre>
-
-      </div>
-
-
-  </section>
-</section>
-
-    </div>
-  </section>
 
   <section id="functions" class="details-list">
     <h2 class="section-heading">
@@ -221,17 +184,17 @@ migration.</p>
     </h2>
 
     <div class="functions-list">
-<section class="detail" id="changeset/2">
+<section class="detail" id="createdb/0">
 
   <div class="detail-header">
-    <a href="#changeset/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+    <a href="#createdb/0" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
       <i class="ri-link-m" aria-hidden="true"></i>
     </a>
     <div class="heading-with-actions">
-      <h1 class="signature" translate="no">changeset(event, attrs)</h1>
+      <h1 class="signature" translate="no">createdb()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/lobby_snapshots/event.ex#L30" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/release.ex#L62" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -242,11 +205,68 @@ migration.</p>
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> changeset(<a href="#t:t/0">t</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()) :: <a href="https://hexdocs.pm/ecto/3.14.2/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>()</pre>
+          <pre translate="no"><span class="attribute">@spec</span> createdb() :: :ok</pre>
 
       </div>
 
+<p>Creates the database when it does not exist yet, mirroring <a href="https://hexdocs.pm/ecto/3.14.2/Mix.Tasks.Ecto.Create.html"><code class="inline">mix ecto.create</code></a>.</p><p>Idempotent: an existing database is left alone. Postgres deployments where
+the server provisions the database already can skip this entirely.</p>
+  </section>
+</section>
+<section class="detail" id="migrate/0">
 
+  <div class="detail-header">
+    <a href="#migrate/0" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">migrate()</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/release.ex#L31" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> migrate() :: :ok</pre>
+
+      </div>
+
+<p>Runs every pending migration — core's and the host's — on each repo.</p>
+  </section>
+</section>
+<section class="detail" id="rollback/2">
+
+  <div class="detail-header">
+    <a href="#rollback/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">rollback(repo, version)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/release.ex#L46" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> rollback(<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">module</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>()) :: :ok</pre>
+
+      </div>
+
+<p>Rolls <code class="inline">repo</code> back down to <code class="inline">version</code>.</p>
   </section>
 </section>
 

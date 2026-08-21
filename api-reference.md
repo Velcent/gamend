@@ -1,4 +1,4 @@
-# gamend_core v1.0.1190 - API Reference
+# gamend_core v1.0.1191 - API Reference
 
 ## Modules
 
@@ -25,6 +25,7 @@ L2 cache.
 - [Gamend.Policy](Gamend.Policy.md): One question — "may this user do this to this thing?" — asked the same way
 everywhere.
 - [Gamend.Presence](Gamend.Presence.md): Cluster-wide tracking of who is connected where.
+- [Gamend.Release](Gamend.Release.md): Release-time equivalents of the `host.*` mix tasks.
 - [Gamend.Signaling](Gamend.Signaling.md): WebRTC signaling: who is in a room, and relaying offers between them.
 - [Gamend.Time](Gamend.Time.md): The server's wall clock, in milliseconds since the epoch, for sending to
 clients.

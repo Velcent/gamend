@@ -29,6 +29,20 @@ It runs `mix` commands on the server host/container.
 }
 ```
 
+# `available?`
+
+```elixir
+@spec available?() :: boolean()
+```
+
+Whether this image can build plugin bundles at all.
+
+The build shells out to `mix`, which a release image built from
+`Dockerfile.release` does not ship: it carries compiled `.beam` files and no
+build toolchain. Callers check this so an image without Mix presents a
+disabled control with a reason, instead of three `System.cmd/3` calls that
+fail on :enoent and surface as a build error.
+
 # `build`
 
 ```elixir
