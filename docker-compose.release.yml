@@ -1,0 +1,21 @@
+# Opt-in override that builds the `release` target — an OTP release, ~11x
+# smaller than the default `full` target.
+#
+# Everything else comes from docker-compose.yml unchanged; this file only
+# redirects the build target. Both targets share the same builder stage, so
+# switching between them recompiles nothing.
+#
+#   docker compose -f docker-compose.yml -f docker-compose.release.yml build
+#   docker compose -f docker-compose.yml -f docker-compose.release.yml up -d
+#
+# Drop the second -f to go back. The one behaviour that differs at runtime is
+# the admin UI's "Build bundle" control, which shells out to a `mix` the
+# release image does not carry; it disables itself and explains why.
+#
+# Published equivalents (built by .github/workflows/build-and-check.yml):
+#   ghcr.io/appsinacup/gamend:latest-slim
+#   ghcr.io/appsinacup/gamend:latest-postgres-slim
+services:
+  app:
+    build:
+      target: release

@@ -18,8 +18,14 @@ end
 # expect — ships with GamendWeb.HostRuntime so host repos share one
 # implementation instead of forking this file. Host-specific runtime config
 # goes below the loop.
-for entry <-
-      GamendWeb.HostRuntime.config(config_env(), host_root: Path.expand("..", __DIR__)) do
+# Under Mix this file sits in config/, so the host root is one level up. In a
+# release it is copied to releases/<vsn>/, where the same expansion would point
+# at releases/ — and every host-relative default (db/, data/) would silently
+# resolve to a directory no volume is mounted on. RELEASE_ROOT is exported by
+# the release's own boot script and is unset under Mix.
+host_root = System.get_env("RELEASE_ROOT") || Path.expand("..", __DIR__)
+
+for entry <- GamendWeb.HostRuntime.config(config_env(), host_root: host_root) do
   case entry do
     {app, opts} -> config app, opts
     {app, key, value} -> config app, key, value

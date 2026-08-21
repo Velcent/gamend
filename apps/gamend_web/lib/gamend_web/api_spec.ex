@@ -332,8 +332,22 @@ defmodule GamendWeb.ApiSpec do
     # Docker layer cache. Falls back to the vsn, then the Mix project version.
     case Gamend.Settings.get(Gamend.ContentSettings, :app_version) ||
            Application.spec(:gamend, :vsn) do
-      nil -> Mix.Project.config()[:version] || "1.0.0"
+      nil -> project_version()
       vsn -> to_string(vsn)
+    end
+  end
+
+  # Mix is absent from a release, so reaching for it there raises rather than
+  # falling through to the literal. The setting is unset by default and
+  # :gamend is not one of this stack's applications, so a release that does
+  # not export GAMEND_CONTENT_APP_VERSION lands here on the first request for
+  # the spec.
+  defp project_version do
+    with true <- Code.ensure_loaded?(Mix.Project),
+         vsn when is_binary(vsn) <- Mix.Project.config()[:version] do
+      vsn
+    else
+      _no_mix_project -> "1.0.0"
     end
   end
 

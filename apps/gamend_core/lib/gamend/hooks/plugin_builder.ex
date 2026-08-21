@@ -21,6 +21,18 @@ defmodule Gamend.Hooks.PluginBuilder do
           steps: [step_result()]
         }
 
+  @doc """
+  Whether this image can build plugin bundles at all.
+
+  The build shells out to `mix`, which a release image built from
+  `Dockerfile.release` does not ship: it carries compiled `.beam` files and no
+  build toolchain. Callers check this so an image without Mix presents a
+  disabled control with a reason, instead of three `System.cmd/3` calls that
+  fail on :enoent and surface as a build error.
+  """
+  @spec available?() :: boolean()
+  def available?, do: System.find_executable("mix") != nil
+
   @spec sources_dir() :: String.t()
   def sources_dir do
     # Mirror the loader's default (Gamend.Hooks.PluginManager.plugins_dir/0)
@@ -53,10 +65,15 @@ defmodule Gamend.Hooks.PluginBuilder do
     source_dir = sources_dir()
     plugin_dir = Path.join(source_dir, plugin_name)
 
-    if File.exists?(Path.join(plugin_dir, "mix.exs")) do
-      run_build_steps(plugin_name, source_dir, plugin_dir)
-    else
-      return_error({:missing_mix_project, plugin_dir})
+    cond do
+      not available?() ->
+        return_error(:mix_unavailable)
+
+      File.exists?(Path.join(plugin_dir, "mix.exs")) ->
+        run_build_steps(plugin_name, source_dir, plugin_dir)
+
+      true ->
+        return_error({:missing_mix_project, plugin_dir})
     end
   rescue
     e ->

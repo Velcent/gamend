@@ -108,7 +108,10 @@ defmodule GamendWeb.AdminLive.Config do
                             id="plugins-build-btn"
                             type="submit"
                             class="btn btn-outline btn-sm"
-                            disabled={@plugin_build_running? or @plugin_build_options == []}
+                            disabled={
+                              @plugin_build_running? or @plugin_build_options == [] or
+                                not @plugin_build_available?
+                            }
                           >
                             {if @plugin_build_running?, do: "Building…", else: "Build bundle"}
                           </button>
@@ -117,6 +120,14 @@ defmodule GamendWeb.AdminLive.Config do
                             SRC: {PluginBuilder.sources_dir()} — MIX_ENV: {System.get_env("MIX_ENV") ||
                               "<unset>"}
                           </div>
+
+                          <%= if not @plugin_build_available? do %>
+                            <div class="text-xs opacity-70 max-w-md">
+                              Bundling runs <code>mix</code>, which this image does not ship. Build the
+                              bundle where the plugin sources live and mount the result, or run an
+                              image built from the non-release Dockerfile.
+                            </div>
+                          <% end %>
                         </.form>
                       </div>
 
@@ -1866,6 +1877,7 @@ defmodule GamendWeb.AdminLive.Config do
         plugins_last_reloaded_at: nil,
         plugins_reload_result: nil,
         plugin_build_options: plugin_build_options(),
+        plugin_build_available?: PluginBuilder.available?(),
         plugin_build_running?: false,
         plugin_build_result: nil,
         plugin_build_form:
@@ -2029,6 +2041,14 @@ defmodule GamendWeb.AdminLive.Config do
     cond do
       socket.assigns.plugin_build_running? ->
         {:noreply, socket}
+
+      not socket.assigns.plugin_build_available? ->
+        {:noreply,
+         put_flash(
+           socket,
+           :error,
+           "This image has no mix executable, so it cannot build plugin bundles."
+         )}
 
       socket.assigns.plugin_build_options == [] ->
         {:noreply,

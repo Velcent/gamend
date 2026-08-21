@@ -6,8 +6,14 @@ defmodule Gamend.Repo do
 
   # Use compile-time access so the adapter selection is fixed at compile time
   # and picked up from the config files.
-  repo_conf = Application.compile_env(:gamend_core, __MODULE__, []) || []
-  @adapter Keyword.get(repo_conf, :adapter, Ecto.Adapters.SQLite3)
+  #
+  # Scoped to the :adapter sub-key rather than the whole Gamend.Repo entry.
+  # `Application.compile_env/3` records what it reads and a release re-checks it
+  # at boot, aborting when the runtime value differs — and the whole entry
+  # always differs, because runtime.exs is what fills in :database, :pool_size
+  # and the rest. Only the adapter has to be fixed at compile time, so only the
+  # adapter is what we depend on.
+  @adapter Application.compile_env(:gamend_core, [__MODULE__, :adapter], Ecto.Adapters.SQLite3)
 
   use Ecto.Repo,
     otp_app: :gamend_core,

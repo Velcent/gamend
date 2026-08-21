@@ -16,8 +16,31 @@ defmodule GamendHost.MixProject do
       # exist and reports every call as unknown_function.
       dialyzer: [plt_add_apps: [:mix, :gamend_core, :gamend_web]],
       aliases: aliases(),
+      releases: releases(),
       deps: deps()
     ]
+  end
+
+  # `mix release` copies config/runtime.exs to releases/<vsn>/runtime.exs and
+  # nothing else from config/. Ours is a two-line shim that requires
+  # host_runtime.exs from its own directory, so without this step the release
+  # boots into a Code.LoadError before any application starts. Ship the file
+  # beside the shim that reads it.
+  defp releases do
+    [
+      gamend_host: [
+        steps: [:assemble, &copy_host_runtime_config/1]
+      ]
+    ]
+  end
+
+  defp copy_host_runtime_config(release) do
+    source = Path.join([__DIR__, "config", "host_runtime.exs"])
+    target = Path.join([release.path, "releases", release.version, "host_runtime.exs"])
+
+    File.cp!(source, target)
+
+    release
   end
 
   def application do

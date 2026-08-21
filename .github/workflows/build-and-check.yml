@@ -21,18 +21,36 @@ env:
 
 jobs:
   build:
-    name: Build and publish (${{ matrix.adapter }})
+    name: Build and publish (${{ matrix.adapter }}${{ matrix.name_suffix }})
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
         include:
           - adapter: sqlite
+            target: full
+            name_suffix: ""
             tags_suffix: ""
             extra_tag_suffix: ""
           - adapter: postgres
+            target: full
+            name_suffix: ""
             tags_suffix: "-postgres"
             extra_tag_suffix: "-postgres"
+          # Opt-in slim variants: same source, packaged as an OTP release
+          # instead of running `mix phx.server`. Deliberately never tagged
+          # :latest — they ship no `mix`, so the admin UI cannot build plugin
+          # bundles, and that should be a choice rather than a surprise.
+          - adapter: sqlite
+            target: release
+            name_suffix: ", slim"
+            tags_suffix: "-slim"
+            extra_tag_suffix: "-slim"
+          - adapter: postgres
+            target: release
+            name_suffix: ", slim"
+            tags_suffix: "-postgres-slim"
+            extra_tag_suffix: "-postgres-slim"
 
     steps:
       - name: Checkout repository (full history for commit count)
@@ -70,6 +88,7 @@ jobs:
         with:
           context: .
           file: Dockerfile
+          target: ${{ matrix.target }}
           build-args: |
             GAMEND_CONTENT_APP_VERSION=${{ env.APP_VERSION }}
             GAMEND_DB_ADAPTER=${{ matrix.adapter }}
@@ -77,6 +96,10 @@ jobs:
           # amd64 reuses the smoke build's layers; arm64 keeps its own scope.
           # Without this every run rebuilt the Rust toolchain, every dependency
           # and every NIF from scratch.
+          #
+          # Scoped on the adapter alone, not the target: `full` and `release`
+          # share the whole builder stage, so pointing them at one scope is
+          # what makes the second variant nearly free.
           cache-from: type=gha,scope=${{ matrix.adapter }}
           cache-to: type=gha,mode=max,scope=${{ matrix.adapter }}
           push: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
@@ -85,7 +108,7 @@ jobs:
             ${{ env.IMAGE }}:${{ github.sha }}${{ matrix.extra_tag_suffix }}
 
   smoke:
-    name: Boot the image (${{ matrix.adapter }})
+    name: Boot the image (${{ matrix.adapter }}, ${{ matrix.target }})
     runs-on: ubuntu-latest
 
     # Deliberately independent of `build`: this proves the image starts and
@@ -96,6 +119,10 @@ jobs:
       fail-fast: false
       matrix:
         adapter: [sqlite, postgres]
+        # The release target is where boot-time breakage hides: config
+        # providers, the compile_env check, and every ENV that has to cross a
+        # stage boundary are all things a green build says nothing about.
+        target: [full, release]
 
     steps:
       - uses: actions/checkout@v4
@@ -107,11 +134,12 @@ jobs:
         with:
           context: .
           file: Dockerfile
+          target: ${{ matrix.target }}
           build-args: |
             GAMEND_DB_ADAPTER=${{ matrix.adapter }}
           platforms: linux/amd64
           load: true
-          tags: gamend-smoke:${{ matrix.adapter }}
+          tags: gamend-smoke:${{ matrix.adapter }}-${{ matrix.target }}
           cache-from: type=gha,scope=${{ matrix.adapter }}
           cache-to: type=gha,mode=max,scope=${{ matrix.adapter }}
 
@@ -151,7 +179,7 @@ jobs:
 
           docker run -d --name gamend-smoke --network smoke-net \
             -p 4000:4000 --env-file smoke.env \
-            gamend-smoke:${{ matrix.adapter }}
+            gamend-smoke:${{ matrix.adapter }}-${{ matrix.target }}
 
           for _ in $(seq 1 60); do
             if curl -fsS http://localhost:4000/api/v1/health | grep -q '"status":"ok"'; then
@@ -175,13 +203,43 @@ jobs:
       - name: Verify the image compiled against the expected adapter
         run: |
           set -euo pipefail
-          adapter=$(docker exec gamend-smoke sh -c \
-            'mix run --no-start -e "IO.puts(inspect(Gamend.Repo.__adapter__()))"' | tail -1)
+          if [ "${{ matrix.target }}" = "release" ]; then
+            probe='bin/gamend_host eval "IO.puts(inspect(Gamend.Repo.__adapter__()))"'
+          else
+            probe='mix run --no-start -e "IO.puts(inspect(Gamend.Repo.__adapter__()))"'
+          fi
+          adapter=$(docker exec gamend-smoke sh -c "$probe" | tail -1)
           echo "compiled adapter: $adapter"
           case "${{ matrix.adapter }}" in
             postgres) echo "$adapter" | grep -q "Ecto.Adapters.Postgres" ;;
             sqlite)   echo "$adapter" | grep -q "Ecto.Adapters.SQLite3" ;;
           esac
+
+      # Two failures a release can produce that the full image cannot, both
+      # silent in production: an ENV lost across the stage boundary leaves the
+      # compiled adapter disagreeing with the runtime one, and migration paths
+      # resolved through the code server can come back empty — at which point
+      # Ecto.Migrator runs nothing and reports success.
+      - name: Verify release-only invariants
+        if: matrix.target == 'release'
+        run: |
+          set -euo pipefail
+          docker exec gamend-smoke bin/gamend_host eval '
+            compiled = Gamend.Repo.__adapter__()
+            runtime = Gamend.Repo.config()[:adapter]
+
+            if compiled != runtime do
+              raise "adapter mismatch: compiled #{inspect(compiled)}, runtime #{inspect(runtime)}"
+            end
+
+            paths = Gamend.Repo.MigrationPaths.all()
+
+            if paths == [] do
+              raise "no migration paths resolved: Ecto.Migrator would run nothing and report success"
+            end
+
+            IO.puts("adapter #{inspect(compiled)}, #{length(paths)} migration paths")
+          '
 
       - name: Teardown
         if: always()
