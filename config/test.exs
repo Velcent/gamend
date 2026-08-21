@@ -1,7 +1,14 @@
 import Config
 
-# Only in tests, remove the complexity from the password hashing algorithm
+# Only in tests, remove the complexity from the password hashing algorithms.
+# bcrypt is still reachable through PasswordHash for pre-Argon2id rows.
 config :bcrypt_elixir, :log_rounds, 1
+
+# 256 KiB / 1 pass. Argon2id at the production settings is ~24ms a hash, which
+# any suite that registers users pays over and over.
+config :gamend_core, Gamend.Accounts.PasswordHash,
+  argon2_memory_log2: 8,
+  argon2_time_cost: 1
 
 # Configure your database
 # Use PostgreSQL if environment variables are set, otherwise use SQLite

@@ -26,6 +26,7 @@ defmodule Gamend.Accounts do
   alias Gamend.Accounts.{
     AgePolicy,
     AvatarMirror,
+    PasswordHash,
     PresenceWriter,
     User,
     UsernameGenerator,
@@ -537,8 +538,35 @@ defmodule Gamend.Accounts do
   def get_user_by_email_and_password(email, password)
       when is_binary(email) and is_binary(password) do
     user = get_user_by_email(email)
-    if User.valid_password?(user, password), do: user
+
+    if User.valid_password?(user, password) do
+      maybe_upgrade_password_hash(user, password)
+      user
+    end
   end
+
+  # A correct login is the only moment the plaintext exists on the server, so
+  # it is the only chance to move a row off bcrypt. Run off the request: the
+  # user who happens to trigger the migration should not be the one who waits
+  # for a second hash. Two concurrent logins race to write the same thing,
+  # which is harmless — either hash verifies the same password.
+  defp maybe_upgrade_password_hash(%User{hashed_password: hash} = user, password)
+       when is_binary(hash) do
+    if PasswordHash.needs_rehash?(hash) do
+      Gamend.Async.run(fn ->
+        case user
+             |> Ecto.Changeset.change(hashed_password: PasswordHash.hash(password))
+             |> Repo.update() do
+          {:ok, updated} -> invalidate_user_cache(updated)
+          {:error, _} -> :ok
+        end
+      end)
+    end
+
+    :ok
+  end
+
+  defp maybe_upgrade_password_hash(_user, _password), do: :ok
 
   @doc """
   Returns true when `password` matches the user's current password.

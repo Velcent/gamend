@@ -32,6 +32,7 @@ defmodule Gamend.Accounts.User do
   import Ecto.Changeset
 
   alias Gamend.Accounts.AgePolicy
+  alias Gamend.Accounts.PasswordHash
 
   @last_seen_fallback ~U[1970-01-01 00:00:00Z]
 
@@ -238,11 +239,13 @@ defmodule Gamend.Accounts.User do
 
     if hash_password? && password && changeset.valid? do
       changeset
-      # If using Bcrypt, then further validate it is at most 72 bytes long
+      # bcrypt silently truncates past 72 bytes; Argon2id does not, but the
+      # limit stays so a password set today still verifies if a hash written
+      # before the switch is ever compared against it.
       |> validate_length(:password, max: 72, count: :bytes)
       # Hashing could be done with `Ecto.Changeset.prepare_changes/2`, but that
       # would keep the database transaction open longer and hurt performance.
-      |> put_change(:hashed_password, Bcrypt.hash_pwd_salt(password))
+      |> put_change(:hashed_password, PasswordHash.hash(password))
       |> delete_change(:password)
     else
       changeset
@@ -472,17 +475,16 @@ defmodule Gamend.Accounts.User do
   @doc """
   Verifies the password.
 
-  If there is no user or the user doesn't have a password, we call
-  `Bcrypt.no_user_verify/0` to avoid timing attacks.
+  If there is no user or the user doesn't have a password, we burn the same
+  time a real verification would to avoid timing attacks.
   """
   def valid_password?(%Gamend.Accounts.User{hashed_password: hashed_password}, password)
       when is_binary(hashed_password) and byte_size(password) > 0 do
-    Bcrypt.verify_pass(password, hashed_password)
+    PasswordHash.verify(password, hashed_password)
   end
 
   def valid_password?(_, _) do
-    Bcrypt.no_user_verify()
-    false
+    PasswordHash.no_user_verify()
   end
 
   @doc """

@@ -26,6 +26,8 @@ defmodule GamendCore.MixProject do
 
   defp deps do
     [
+      {:argon2_elixir, "~> 4.0"},
+      # Kept so hashes written before the Argon2id switch still verify.
       {:bcrypt_elixir, "~> 3.0"},
       {:nebulex, "~> 3.0.0-rc.2"},
       {:nebulex_local, "~> 3.0.0-rc.2"},

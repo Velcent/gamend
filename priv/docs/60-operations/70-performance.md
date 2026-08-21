@@ -16,8 +16,23 @@ We compared **Gamend** and **Nakama** on various machine sizes. Overall, **Gamen
 | write | 41 | 87 | 694 | 753 | 762 | — | 945 |
 | write inside a lock | 30 | 57 | 206 | 462 | 462 | — | 517 |
 | registration (device) | 44 | 125 | 184 | 495 | **589** | 528 | 712 |
-| email login (bcrypt) | 0.3 | 1.2 | 2.1 | 4.0 | 4.0 | — | 7.9 |
+| email login (see below) | 0.3 | 1.2 | 2.1 | 4.0 | 4.0 | — | 7.9 |
 | cost / month | $6 | $8 | $16 | $32 | $37 | — | $64 |
+
+The email-login row was measured against **bcrypt at cost 12**, which is what
+that path used at the time. It has since moved to **Argon2id** (16 MiB, t=3,
+p=1) — measured locally at **21.5ms a hash against bcrypt's 253.4ms, 11.8x**,
+and stronger, because Argon2id is memory-hard where bcrypt works in 4 KB. The
+machines above have not been re-run, so treat that row as a floor rather than
+scaling it by hand.
+
+Argon2id costs memory where bcrypt did not, but it does not grow with traffic:
+the hash runs on a dirty CPU scheduler and the BEAM has one per vCPU, so at
+most that many hashes hold memory at once and the rest queue. Measured, 8
+concurrent hashes added 112 MB of RSS and **512 concurrent added the same
+112 MB**. The ceiling is `vCPUs x 16 MiB` — 16 MB on a one-core box, 128 MB on
+`shared-cpu-8x` — a few percent of the machine either way. A login flood gets
+slow rather than fatal. `GAMEND_AUTH_ARGON2_MEMORY_LOG2` lowers it further.
 
 The Nakama column is their own
 [published benchmarks](https://heroiclabs.com/docs/nakama/getting-started/benchmarks/),
