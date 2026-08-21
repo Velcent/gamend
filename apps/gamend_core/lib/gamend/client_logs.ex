@@ -283,11 +283,19 @@ defmodule Gamend.ClientLogs do
   defp to_message(message) when is_binary(message) do
     message
     |> String.slice(0, @max_message_bytes)
+    |> single_line()
     |> scrub()
     |> String.trim()
   end
 
   defp to_message(_), do: ""
+
+  # One entry, one line. Everything downstream — `grep session=`, the rotating
+  # file, a line-oriented aggregator — reads a newline as the start of a new
+  # event, and that "event" would carry no `[client] session=` prefix: a client
+  # could write what looks like a server line. Folded onto one line with the
+  # indentation collapsed, a stack trace still reads.
+  defp single_line(value), do: String.replace(value, ~r/\s*[\r\n]+\s*/, " ")
 
   # Client messages are written at ~100 call sites by people not thinking about
   # where the string ends up. Something will eventually interpolate a token into
@@ -635,7 +643,9 @@ defmodule Gamend.ClientLogs do
     end
   end
 
-  defp clamp(value, max, _default) when is_binary(value), do: String.slice(value, 0, max)
+  defp clamp(value, max, _default) when is_binary(value),
+    do: value |> String.slice(0, max) |> single_line()
+
   defp clamp(_value, _max, default), do: default
 
   # ── Settings ───────────────────────────────────────────────────────────────

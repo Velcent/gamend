@@ -113,6 +113,22 @@ defmodule GamendWeb.StoreLive.Index do
                     {provider_product.product.description || gettext("Store item")}
                   </p>
 
+                  <%!-- What a game says about its own product. A SKU whose
+                        contents the server decides — a rotating bundle, say —
+                        has a fixed title and price in the store and nothing
+                        here without this. --%>
+                  <div :if={detail = product_detail(provider_product.product)} class="space-y-1">
+                    <ul class="text-sm space-y-0.5">
+                      <li :for={line <- detail.lines} class="flex items-center gap-1.5">
+                        <.icon name="hero-check" class="size-3.5 text-success" />
+                        {line}
+                      </li>
+                    </ul>
+                    <p :if={detail.closes_at} class="text-xs font-medium text-warning">
+                      {closes_in(detail.closes_at)}
+                    </p>
+                  </div>
+
                   <div class="grid grid-cols-2 gap-2 text-sm">
                     <div>
                       <div class="text-xs uppercase text-base-content/70">{gettext("Provider")}</div>
@@ -148,13 +164,24 @@ defmodule GamendWeb.StoreLive.Index do
                     <button
                       :if={
                         provider_product.provider == "stripe" and
-                          not owned?(provider_product, @owned_entitlement_keys)
+                          not owned?(provider_product, @owned_entitlement_keys) and
+                          not closed?(provider_product.product)
                       }
                       phx-click="buy"
                       phx-value-id={provider_product.id}
                       class="btn btn-primary btn-sm"
                     >
                       {gettext("Buy")}
+                    </button>
+                    <%!-- A window the host says is shut. `before_purchase` also
+                          refuses it, but a button that only fails when pressed
+                          is a worse way to learn that. --%>
+                    <button
+                      :if={closed?(provider_product.product)}
+                      class="btn btn-sm btn-disabled"
+                      disabled
+                    >
+                      {gettext("Closed")}
                     </button>
                     <button
                       :if={
@@ -270,6 +297,52 @@ defmodule GamendWeb.StoreLive.Index do
     |> Payments.list_user_entitlements()
     |> Enum.map(& &1.key)
     |> MapSet.new()
+  end
+
+  # A game's own answer about one of its products: the lines to list under the
+  # description, and when the offer shuts. Configure with
+  #
+  #     config :gamend_web, :store_product_detail, {MyApp.Store, :detail}
+  #
+  # returning `nil` for products it has nothing to add about. Core cannot know
+  # what is in a bundle whose contents the game rotates server-side, and a
+  # fixed `description` cannot say it either.
+  defp product_detail(product) do
+    case Application.get_env(:gamend_web, :store_product_detail) do
+      {module, fun} ->
+        case apply(module, fun, [product]) do
+          %{lines: lines} = detail when is_list(lines) and lines != [] ->
+            Map.put_new(detail, :closes_at, nil)
+
+          _other ->
+            nil
+        end
+
+      _unset ->
+        nil
+    end
+  rescue
+    # A game's display helper must never take the store down with it.
+    _error -> nil
+  end
+
+  defp closed?(product) do
+    case product_detail(product) do
+      %{closes_at: closes_at} when is_integer(closes_at) ->
+        closes_at <= System.system_time(:second)
+
+      _other ->
+        false
+    end
+  end
+
+  defp closes_in(closes_at) do
+    case closes_at - System.system_time(:second) do
+      seconds when seconds <= 0 -> gettext("Closed")
+      seconds when seconds < 3600 -> gettext("Closes in under an hour")
+      seconds when seconds < 86_400 -> gettext("Closes in %{n}h", n: div(seconds, 3600))
+      seconds -> gettext("Closes in %{n} days", n: div(seconds, 86_400))
+    end
   end
 
   defp download_hint(product) do

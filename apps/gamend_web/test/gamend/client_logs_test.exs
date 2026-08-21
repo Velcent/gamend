@@ -170,6 +170,30 @@ defmodule Gamend.ClientLogsTest do
       assert log =~ "[redacted]"
     end
 
+    test "folds a multi-line message onto one line" do
+      # A newline would end the log line early, and whatever followed it would
+      # carry no `[client]` prefix — a client forging a server line to anything
+      # that reads the file line by line.
+      sid = session_id()
+
+      log =
+        capture_info(fn ->
+          ClientLogs.ingest(
+            batch(sid, [
+              entry(1,
+                message: "boom\n  at: _ready (res://boat.gd:42)\r\n[error] Repo is down",
+                category: "net\nwork"
+              )
+            ])
+          )
+        end)
+
+      assert [line] = log |> String.split("\n") |> Enum.filter(&(&1 =~ "[client]"))
+      assert line =~ "boom at: _ready (res://boat.gd:42) [error] Repo is down"
+      assert line =~ "cat=net work"
+      refute log =~ "\n[error]"
+    end
+
     test "caps the batch and counts the overflow as dropped" do
       sid = session_id()
       entries = Enum.map(1..250, &entry/1)

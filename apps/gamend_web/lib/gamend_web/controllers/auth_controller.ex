@@ -898,11 +898,14 @@ defmodule GamendWeb.AuthController do
     end
   end
 
-  # Catch-all for missing code or unsupported providers
+  # Catch-all for missing code or unsupported providers. A warning, not an
+  # error: this is a reloaded or bookmarked callback URL, or a crawler
+  # following one — the user's dead end, not a fault here, and it must not
+  # count as one on the admin Logs page.
   def callback(conn, params) do
     require Logger
 
-    Logger.error(
+    Logger.warning(
       "OAuth callback with invalid params. Provider: #{params["provider"]}, Params: #{inspect(params)}"
     )
 

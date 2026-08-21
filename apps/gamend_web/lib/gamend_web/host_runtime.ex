@@ -558,6 +558,21 @@ defmodule GamendWeb.HostRuntime do
     end
   end
 
+  # Bandit logs every malformed request it turns away at `:error`: a request
+  # line with no HTTP version, a proxy-style `http://host/` target, a
+  # `Connection:` header on an HTTP/2 stream, a body that ends before its
+  # declared length. A listener bound straight to the internet gets those all
+  # day from scanners — one bot produced a hundred in ninety seconds — and they
+  # are noise by construction: a protocol error is the peer's fault, nothing
+  # here can change to prevent the next one, and the line does not even name
+  # the peer. They crowded real errors out of the admin log buffer.
+  #
+  # Off at the source rather than dropped afterwards in `GamendWeb.LogFilters`,
+  # which would mean matching on Bandit's message strings. On both listeners.
+  # A request that reaches the router and fails still logs exactly as before;
+  # this covers only what never became a request.
+  @bandit_http_options [log_protocol_errors: false]
+
   defp cors_and_endpoint_entries(setting, host, scheme) do
     secret_key_base = setting.(Gamend.Accounts, :secret_key_base)
     port = setting.(GamendWeb.Http, :port)
@@ -592,6 +607,7 @@ defmodule GamendWeb.HostRuntime do
           # IPv4 and loopback vs public addresses.
           ip: {0, 0, 0, 0, 0, 0, 0, 0},
           port: port,
+          http_options: @bandit_http_options,
           thousand_island_options: [
             transport_options: socket_buffer_options(setting)
           ]
@@ -662,6 +678,7 @@ defmodule GamendWeb.HostRuntime do
         cipher_suite: :strong,
         certfile: setting.(GamendWeb.Tls, :certfile),
         keyfile: setting.(GamendWeb.Tls, :keyfile),
+        http_options: @bandit_http_options,
         thousand_island_options: [
           # A public listener spends its day being probed. Both of these are
           # about connections that never became a request, and neither says

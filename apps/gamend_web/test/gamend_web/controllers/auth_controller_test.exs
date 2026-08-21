@@ -103,6 +103,21 @@ defmodule GamendWeb.AuthControllerTest do
     assert Phoenix.Flash.get(conn.assigns.flash, :error) =~ "Failed to authenticate"
   end
 
+  test "callback with neither code nor state logs a warning, not an error", %{conn: conn} do
+    # A reloaded or bookmarked callback URL, or a crawler following one: the
+    # user's dead end, not a server fault, so it must not inflate the error
+    # count on the admin Logs page.
+    log =
+      ExUnit.CaptureLog.capture_log(fn ->
+        conn = post(conn, "/auth/google/callback", %{})
+        assert redirected_to(conn) =~ "log_in"
+      end)
+
+    assert log =~ "[warning]"
+    assert log =~ "OAuth callback with invalid params"
+    refute log =~ "[error]"
+  end
+
   test "callback (discord) success browser and api flows", %{conn: conn} do
     orig = Application.get_env(:gamend_web, :oauth_exchanger)
 

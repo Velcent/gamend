@@ -62,6 +62,14 @@ defmodule GamendWeb.LogFilters do
   Bandit's "Connection that looks like TLS received on a clear channel" is a
   client speaking TLS to port 80. This app serves 80 only to redirect and to
   answer ACME challenges, so that is the client's mistake, not a fault here.
+
+  Bandit's own protocol-error lines — malformed request lines, forbidden HTTP/2
+  headers, bodies cut short — are deliberately *not* handled here. They are
+  switched off at the source, `log_protocol_errors: false` on both listeners in
+  `GamendWeb.HostRuntime`, because every one of them is the peer's fault by
+  construction and matching their message strings here would be a patch on top
+  of a patch. The dead-socket rule below still applies to a host that builds
+  its own endpoint config and leaves Bandit's default in place.
   """
 
   @filter_id :drop_benign_tls_alerts
