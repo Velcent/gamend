@@ -1,6 +1,7 @@
 Gamend.Accounts.AgePolicy.md
 Gamend.Accounts.AvatarMirror.md
 Gamend.Accounts.InactivityNotifier.md
+Gamend.Accounts.PasswordHash.md
 Gamend.Accounts.PresenceStatus.md
 Gamend.Accounts.PresenceWriter.md
 Gamend.Accounts.Scope.md

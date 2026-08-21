@@ -2,6 +2,7 @@
 Gamend.Accounts.AgePolicy.html
 Gamend.Accounts.AvatarMirror.html
 Gamend.Accounts.InactivityNotifier.html
+Gamend.Accounts.PasswordHash.html
 Gamend.Accounts.PresenceStatus.html
 Gamend.Accounts.PresenceWriter.html
 Gamend.Accounts.Scope.html
@@ -193,8 +194,8 @@ dist/lato-latin-700-normal-2XVSBPG4.woff2
 dist/lato-latin-ext-400-normal-N27NCBWW.woff2
 dist/lato-latin-ext-700-normal-Q2L5DVMW.woff2
 dist/remixicon-ZWU5GQ4X.woff2
-dist/search_data-7BC158E7.js
-dist/sidebar_items-734653A6.js
+dist/search_data-FE90D072.js
+dist/sidebar_items-2281B245.js
 index.html
 readme.html
 search.html

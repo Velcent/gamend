@@ -206,8 +206,8 @@ Uniqueness is enforced by the DB unique index.
 
 Verifies the password.
 
-If there is no user or the user doesn't have a password, we call
-`Bcrypt.no_user_verify/0` to avoid timing attacks.
+If there is no user or the user doesn't have a password, we burn the same
+time a real verification would to avoid timing attacks.
 
 ---
 
