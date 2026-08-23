@@ -1,0 +1,7 @@
+name = "example_gleam"
+version = "1.0.0"
+description = "Example Gamend hooks plugin written in Gleam"
+licences = ["MIT"]
+
+[dependencies]
+gleam_stdlib = ">= 1.0.0 and < 2.0.0"

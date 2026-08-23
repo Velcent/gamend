@@ -1,0 +1,6 @@
+/build/
+/ebin/
+/deps/
+*.beam
+*.ez
+erl_crash.dump

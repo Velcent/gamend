@@ -270,6 +270,44 @@ end
 - Tests that modify global plugin configuration (eg. `GAMEND_CONTENT_PLUGINS_DIR` ) should run serially (`async: false`) and restore env via `on_exit` to avoid cross-test races.
 - Be careful modifying user or lobby data from hooks — reuse high-level domain functions (eg. `Gamend.Accounts.update_user/2`, `Gamend.Lobbies.update_lobby/2` ) so changes are validated and broadcast consistently.
 
+## Other BEAM languages (Gleam, LFE, Erlang)
+
+Hooks are dispatched with `function_exported?/3`, so a plugin only has to
+*export* the callbacks it implements — it never has to be an Elixir module. Any
+language that compiles to BEAM bytecode works, with no bridge and no runtime
+cost.
+
+A Gleam plugin is an ordinary Gleam project plus a bundling step. `gleam export
+erlang-shipment` already emits one directory per OTP app with a real `.app`
+file; the only key it cannot express is `hooks_module`, so the bundle script
+patches that in.
+
+```gleam
+// An Elixir module is the atom `Elixir.<Name>` on the BEAM, so a gamend
+// context needs no shim -- only a type signature.
+@external(erlang, "Elixir.Gamend.Economy", "grant")
+fn economy_grant(user_id: String, currency: String, amount: Int,
+                 opts: List(#(Dynamic, String))) -> Dynamic
+
+pub fn after_user_register(user: Dynamic) -> Dynamic {
+  let user_id = string_field(user, "id")
+  let _ = economy_grant(user_id, "gold", 250, [#(atom("reason"), "starter")])
+  atom("ok")
+}
+```
+
+Hook payloads arrive as Elixir structs, which on the BEAM are maps with atom
+keys — `maps:get/2` plus a decoder reads a field out. A Gleam `Dict` *is* an
+Erlang map, so anything gamend guards with `is_map/1` takes one directly.
+
+The trade-off is the SDK: `sdk/` ships Elixir stub modules with typespecs, so
+an Elixir plugin gets autocomplete, `mix gen.sdk` and Dialyzer. From another
+language every context call is a hand-written `@external` declaration, and
+nothing checks it until it runs.
+
+A complete, runnable example is in
+[`modules/plugins_examples/example_gleam`](https://github.com/appsinacup/gamend/tree/main/modules/plugins_examples/example_gleam).
+
 ## Every hook
 
 79 callbacks, all optional — implement only what you need. A `before_*`

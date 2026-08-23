@@ -542,7 +542,8 @@ defmodule Gamend.Hooks.PluginManager do
   end
 
   defp resolve_function_atom(mod, fn_name, arity) when is_atom(mod) and is_binary(fn_name) do
-    mod.__info__(:functions)
+    mod
+    |> exported_functions()
     |> Enum.find_value({:error, :not_implemented}, fn {name, a} ->
       if a == arity and Atom.to_string(name) == fn_name do
         {:ok, name}
@@ -550,6 +551,19 @@ defmodule Gamend.Hooks.PluginManager do
         false
       end
     end)
+  end
+
+  # `__info__/1` is injected by the Elixir compiler, so it does not exist on a
+  # plugin built from any other BEAM language (Gleam, LFE, Erlang). Lifecycle
+  # hooks already dispatch through `function_exported?/3` and work regardless;
+  # only this RPC name lookup was Elixir-only. `module_info/1` is emitted by the
+  # BEAM itself and is the portable equivalent.
+  defp exported_functions(mod) do
+    if function_exported?(mod, :__info__, 1) do
+      mod.__info__(:functions)
+    else
+      mod.module_info(:exports)
+    end
   end
 
   defp safe_apply_with_caller(mod, fun, args, opts, timeout)

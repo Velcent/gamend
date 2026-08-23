@@ -48,6 +48,10 @@ Not a plan; a living reference.
   under `stress/`: isolated per-feature benchmarks + one weighted player
   journey, run over a `SQLite | Postgres` × `1…16 vCPU` matrix on Fly from an
   in-region generator machine.
+- [gdscript-plugins.md](gdscript-plugins.md) — **GDScript plugins.** GDScript
+  transpiled to readable Elixir source and compiled into an ordinary OTP
+  plugin — the same `ebin/*.beam` `plugin.bundle` produces, at native speed,
+  removing Elixir as the price of entry.
 
 ## Resolved — shipped
 

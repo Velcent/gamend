@@ -50,7 +50,7 @@ Full per-size tables, the operations breakdown, and how to reproduce any of it:
 - **Leaderboards** — Global and per-user rankings
 - **Payments** — Stripe Checkout, Google Play, App Store, and Steam provider flows with receipt validation, webhooks, entitlements, refunds, and admin tools
 - **Key-Value Store** — Server-side key-value storage with access control hooks
-- **Server Scripting** — Elixir hooks on server events (login, lobby created, quest completed, etc.)
+- **Server Scripting** — Elixir (or [Gleam](modules/plugins_examples/example_gleam/)) hooks on server events (login, lobby created, quest completed, etc.)
 - **Background Jobs** — Durable, retryable background and scheduled (cron) jobs from server hooks, on Postgres or SQLite
 - **Economy & Inventory** — Virtual-currency wallets (`gold`, `gems`, …) with an atomic, auditable ledger, plus item stacks (`health_potion`, …); server-authoritative grant/spend/consume with live balance updates
 - **Object Storage** — Avatar/UGC uploads with a pluggable backend: local disk or any S3-compatible service (AWS S3, Cloudflare R2, MinIO, …)
