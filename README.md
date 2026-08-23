@@ -97,3 +97,7 @@ See the [Deployment Tutorial](https://appsinacup.com/gamend-deploy/) and [Starte
 ## AI instructions file
 
 This project has a [.github/copilot-instructions.md](.github/copilot-instructions.md) file you can use.
+
+## Star History
+
+[![Star History Chart](https://star-history.dera.page/svg?repos=appsinacup/gamend&type=date&legend=top-left)](https://star-history.dera.page/#appsinacup/gamend&type=date&legend=top-left)
