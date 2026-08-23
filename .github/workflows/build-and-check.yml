@@ -293,6 +293,19 @@ jobs:
             (cd "$plugin" && MIX_ENV=dev mix format --check-formatted)
           done
 
+      - name: Check code formatting (plugin tools)
+        working-directory: sdk_tools
+        run: MIX_ENV=dev mix format --check-formatted
+
+      # `gen/` is committed, so a script edited without recompiling would ship
+      # stale Elixir. This is the same shape as the settings `--check` below.
+      - name: Generated GDScript is in sync with its scripts
+        working-directory: modules/plugins_examples/example_gdscript
+        run: |
+          MIX_ENV=dev mix deps.get
+          MIX_ENV=dev mix gamend.gdscript.compile --check
+          MIX_ENV=dev mix format --check-formatted
+
       - name: Credo (strict)
         run: MIX_ENV=dev mix credo --strict
 
@@ -473,6 +486,16 @@ jobs:
 
       - name: Run tests
         run: MIX_ENV=test mix test
+
+      # sdk_tools is its own mix project (the published gamend_plugin_tools
+      # package), so the umbrella's `mix test` never reaches it. It holds the
+      # GDScript compiler, which is real logic and needs a gate.
+      - name: Run tests (plugin tools / GDScript compiler)
+        working-directory: sdk_tools
+        run: |
+          MIX_ENV=test mix deps.get
+          MIX_ENV=test mix compile --warnings-as-errors
+          MIX_ENV=test mix test
 
   test-postgres:
     name: Test with PostgreSQL

@@ -837,7 +837,7 @@ defmodule Gamend.Leaderboards do
   """
   @spec submit_label_score(String.t(), String.t(), integer(), map()) ::
           {:ok, Gamend.Leaderboards.Record.t()} | {:error, term()}
-  def submit_label_score(_leaderboard_id, _label, _score, _metadata) do
+  def submit_label_score(_leaderboard_id, _label, _score, _metadata \\ %{}) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         {:ok,

@@ -416,7 +416,7 @@ defmodule Gamend.Accounts do
     Row count for `list_all_users/2` under the same filters.
   """
   @spec count_list_all_users(map()) :: non_neg_integer()
-  def count_list_all_users(_filters) do
+  def count_list_all_users(_filters \\ %{}) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         0
@@ -1419,7 +1419,7 @@ defmodule Gamend.Accounts do
           map(),
           keyword()
         ) :: [Gamend.Accounts.User.t()]
-  def list_all_users(_filters, _opts) do
+  def list_all_users(_filters \\ %{}, _opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         []
@@ -1437,7 +1437,7 @@ defmodule Gamend.Accounts do
           Ecto.UUID.t(),
           keyword()
         ) :: [Gamend.Accounts.UserToken.t()]
-  def list_user_tokens(_user_id, _opts) do
+  def list_user_tokens(_user_id, _opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         []

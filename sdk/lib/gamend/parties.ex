@@ -163,7 +163,7 @@ defmodule Gamend.Parties do
     Count all parties matching the given filters.
   """
   @spec count_all_parties(map()) :: non_neg_integer()
-  def count_all_parties(_filters) do
+  def count_all_parties(_filters \\ %{}) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         0
@@ -210,7 +210,7 @@ defmodule Gamend.Parties do
   """
   @spec create_lobby_with_party(Gamend.Accounts.User.t(), map()) ::
           {:ok, map()} | {:error, term()}
-  def create_lobby_with_party(_user, _lobby_attrs) do
+  def create_lobby_with_party(_user, _lobby_attrs \\ %{}) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         {:ok, nil}
@@ -228,7 +228,7 @@ defmodule Gamend.Parties do
   """
   @spec create_party(Gamend.Accounts.User.t(), map()) ::
           {:ok, Gamend.Parties.Party.t()} | {:error, term()}
-  def create_party(_user, _attrs) do
+  def create_party(_user, _attrs \\ %{}) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         {:ok, nil}
@@ -364,7 +364,7 @@ defmodule Gamend.Parties do
   """
   @spec join_lobby_with_party(Gamend.Accounts.User.t(), Ecto.UUID.t(), map()) ::
           {:ok, map()} | {:error, term()}
-  def join_lobby_with_party(_user, _lobby_id, _opts) do
+  def join_lobby_with_party(_user, _lobby_id, _opts \\ %{}) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         {:ok, nil}
@@ -428,7 +428,7 @@ defmodule Gamend.Parties do
           map(),
           keyword()
         ) :: [Gamend.Parties.Party.t()]
-  def list_all_parties(_filters, _opts) do
+  def list_all_parties(_filters \\ %{}, _opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         []
@@ -483,7 +483,7 @@ defmodule Gamend.Parties do
   """
   @spec quick_join_with_party(Gamend.Accounts.User.t(), map()) ::
           {:ok, Gamend.Lobbies.Lobby.t()} | {:error, term()}
-  def quick_join_with_party(_user, _params) do
+  def quick_join_with_party(_user, _params \\ %{}) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         {:ok,

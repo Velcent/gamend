@@ -75,7 +75,7 @@ defmodule Gamend.Notifications do
     Count all notifications matching the given filters (admin).
   """
   @spec count_all_notifications(map()) :: non_neg_integer()
-  def count_all_notifications(_filters) do
+  def count_all_notifications(_filters \\ %{}) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         0
@@ -217,7 +217,7 @@ defmodule Gamend.Notifications do
           map(),
           keyword()
         ) :: [Gamend.Notifications.Notification.t()]
-  def list_all_notifications(_filters, _opts) do
+  def list_all_notifications(_filters \\ %{}, _opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         []
@@ -238,7 +238,7 @@ defmodule Gamend.Notifications do
           user_id(),
           keyword()
         ) :: [Gamend.Notifications.Notification.t()]
-  def list_notifications(_user_id, _opts) do
+  def list_notifications(_user_id, _opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         []

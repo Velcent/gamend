@@ -43,7 +43,7 @@ defmodule Gamend.Payments do
 
   @doc false
   @spec count_entitlements(keyword()) :: non_neg_integer()
-  def count_entitlements(_opts) do
+  def count_entitlements(_opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         0
@@ -55,7 +55,7 @@ defmodule Gamend.Payments do
 
   @doc false
   @spec count_products(keyword()) :: non_neg_integer()
-  def count_products(_opts) do
+  def count_products(_opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         0
@@ -67,7 +67,7 @@ defmodule Gamend.Payments do
 
   @doc false
   @spec count_provider_events(keyword()) :: non_neg_integer()
-  def count_provider_events(_opts) do
+  def count_provider_events(_opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         0
@@ -79,7 +79,7 @@ defmodule Gamend.Payments do
 
   @doc false
   @spec count_provider_products(keyword()) :: non_neg_integer()
-  def count_provider_products(_opts) do
+  def count_provider_products(_opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         0
@@ -91,7 +91,7 @@ defmodule Gamend.Payments do
 
   @doc false
   @spec count_purchases(keyword()) :: non_neg_integer()
-  def count_purchases(_opts) do
+  def count_purchases(_opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         0
@@ -103,7 +103,7 @@ defmodule Gamend.Payments do
 
   @doc false
   @spec count_reconciliation_cursors(keyword()) :: non_neg_integer()
-  def count_reconciliation_cursors(_opts) do
+  def count_reconciliation_cursors(_opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         0
@@ -141,7 +141,7 @@ defmodule Gamend.Payments do
   @doc false
   @spec create_purchase(Gamend.Accounts.User.t(), Gamend.Payments.ProviderProduct.t(), map()) ::
           {:ok, Gamend.Payments.Purchase.t()} | {:error, Ecto.Changeset.t()}
-  def create_purchase(_user, _provider_product, _attrs) do
+  def create_purchase(_user, _provider_product, _attrs \\ %{}) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         {:ok, nil}
@@ -205,7 +205,7 @@ defmodule Gamend.Payments do
   @doc false
   @spec fulfill_purchase(Gamend.Payments.Purchase.t(), map()) ::
           {:ok, Gamend.Payments.Purchase.t()} | {:error, term()}
-  def fulfill_purchase(_purchase, _provider_payload) do
+  def fulfill_purchase(_purchase, _provider_payload \\ %{}) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         {:ok, nil}
@@ -389,7 +389,7 @@ defmodule Gamend.Payments do
 
   @doc false
   @spec list_admin_entitlements(keyword()) :: [Gamend.Payments.Entitlement.t()]
-  def list_admin_entitlements(_opts) do
+  def list_admin_entitlements(_opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         []
@@ -401,7 +401,7 @@ defmodule Gamend.Payments do
 
   @doc false
   @spec list_admin_products(keyword()) :: [Gamend.Payments.Product.t()]
-  def list_admin_products(_opts) do
+  def list_admin_products(_opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         []
@@ -413,7 +413,7 @@ defmodule Gamend.Payments do
 
   @doc false
   @spec list_admin_provider_products(keyword()) :: [Gamend.Payments.ProviderProduct.t()]
-  def list_admin_provider_products(_opts) do
+  def list_admin_provider_products(_opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         []
@@ -425,7 +425,7 @@ defmodule Gamend.Payments do
 
   @doc false
   @spec list_admin_purchases(keyword()) :: [Gamend.Payments.Purchase.t()]
-  def list_admin_purchases(_opts) do
+  def list_admin_purchases(_opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         []
@@ -437,7 +437,7 @@ defmodule Gamend.Payments do
 
   @doc false
   @spec list_catalog(String.t() | nil) :: [Gamend.Payments.ProviderProduct.t()]
-  def list_catalog(_provider) do
+  def list_catalog(_provider \\ nil) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         []
@@ -449,7 +449,7 @@ defmodule Gamend.Payments do
 
   @doc false
   @spec list_products(keyword()) :: [Gamend.Payments.Product.t()]
-  def list_products(_opts) do
+  def list_products(_opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         []
@@ -461,7 +461,7 @@ defmodule Gamend.Payments do
 
   @doc false
   @spec list_provider_events(keyword()) :: [Gamend.Payments.ProviderEvent.t()]
-  def list_provider_events(_opts) do
+  def list_provider_events(_opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         []
@@ -473,7 +473,7 @@ defmodule Gamend.Payments do
 
   @doc false
   @spec list_reconciliation_cursors(keyword()) :: [Gamend.Payments.ReconciliationCursor.t()]
-  def list_reconciliation_cursors(_opts) do
+  def list_reconciliation_cursors(_opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         []
@@ -488,7 +488,7 @@ defmodule Gamend.Payments do
           Ecto.UUID.t(),
           keyword()
         ) :: [Gamend.Payments.Entitlement.t()]
-  def list_user_entitlements(_user_id, _opts) do
+  def list_user_entitlements(_user_id, _opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         []
@@ -503,7 +503,7 @@ defmodule Gamend.Payments do
           Ecto.UUID.t(),
           keyword()
         ) :: [Gamend.Payments.Purchase.t()]
-  def list_user_purchases(_user_id, _opts) do
+  def list_user_purchases(_user_id, _opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         []
@@ -554,7 +554,7 @@ defmodule Gamend.Payments do
   @doc false
   @spec record_provider_event(String.t(), String.t(), String.t(), map(), map()) ::
           {:ok, Gamend.Payments.ProviderEvent.t(), boolean()} | {:error, Ecto.Changeset.t()}
-  def record_provider_event(_provider, _event_id, _event_type, _payload, _metadata) do
+  def record_provider_event(_provider, _event_id, _event_type, _payload, _metadata \\ %{}) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         {:ok, nil}
@@ -567,7 +567,7 @@ defmodule Gamend.Payments do
   @doc false
   @spec revoke_purchase(Gamend.Payments.Purchase.t(), map()) ::
           {:ok, Gamend.Payments.Purchase.t()} | {:error, term()}
-  def revoke_purchase(_purchase, _attrs) do
+  def revoke_purchase(_purchase, _attrs \\ %{}) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         {:ok, nil}

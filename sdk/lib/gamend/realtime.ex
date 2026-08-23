@@ -31,7 +31,7 @@ defmodule Gamend.Realtime do
     
   """
   @spec push_to_user(Ecto.UUID.t(), String.t(), map()) :: :ok | {:error, :undeclared_event}
-  def push_to_user(_user_id, _event, _payload) do
+  def push_to_user(_user_id, _event, _payload \\ %{}) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         :ok

@@ -76,7 +76,7 @@ defmodule Gamend.Economy do
   """
   @spec grant(user_id(), currency(), non_neg_integer(), keyword()) ::
           {:ok, non_neg_integer()} | {:error, term()}
-  def grant(_user_id, _currency, _amount, _opts) do
+  def grant(_user_id, _currency, _amount, _opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         {:ok, nil}
@@ -95,7 +95,7 @@ defmodule Gamend.Economy do
   """
   @spec spend(user_id(), currency(), non_neg_integer(), keyword()) ::
           {:ok, non_neg_integer()} | {:error, :insufficient_funds | term()}
-  def spend(_user_id, _currency, _amount, _opts) do
+  def spend(_user_id, _currency, _amount, _opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         {:ok, nil}

@@ -1062,7 +1062,7 @@ defmodule Gamend.Lobbies do
   @spec transition_state(Gamend.Lobbies.Lobby.t(), String.t(), keyword()) ::
           {:ok, Gamend.Lobbies.Lobby.t()}
           | {:error, :invalid_state | {:hook_rejected, term()} | term()}
-  def transition_state(_lobby, _state, _opts) do
+  def transition_state(_lobby, _state, _opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         {:ok,

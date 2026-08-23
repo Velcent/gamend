@@ -12,6 +12,11 @@ file.
 
 Not a plan; a living reference.
 
+- [load-testing.md](load-testing.md) — **Load testing.** The measurement design
+  behind the `stress/` harness: what each scenario costs, the sweep and journey
+  shapes, and what was deliberately left out. Shipped, but kept rather than
+  deleted — `stress/README.md`, `SUMMARY.md` and the baselines all cite it as
+  the record of *why* the harness measures what it does.
 - [api-conventions.md](api-conventions.md) — **API conventions.** The
   vocabulary and shapes every schema, serializer and route follows —
   identifiers, names, time, lifecycle, the never-null policy, response shapes,
@@ -19,8 +24,6 @@ Not a plan; a living reference.
 
 ## Open
 
-- [chat-moderation.md](chat-moderation.md) — **Chat moderation.** Word filter +
-  report queue + mute, enforced in the existing `before_chat_message` pipeline.
 - [cloud-saves.md](cloud-saves.md) — **Cloud saves.** Versioned save-slots on
   object storage with lock-free optimistic conflict detection.
 - [skill-matchmaking.md](skill-matchmaking.md) — **Skill matchmaking.** Rating +
@@ -44,10 +47,6 @@ Not a plan; a living reference.
 - [discord-notifications.md](discord-notifications.md) — **Discord
   notifications.** One env var, Oban-delivered, rate-limit aware and redacted by
   construction — the concrete slice of the parked webhooks spec.
-- [load-testing.md](load-testing.md) — **Load testing, round two.** k6 harness
-  under `stress/`: isolated per-feature benchmarks + one weighted player
-  journey, run over a `SQLite | Postgres` × `1…16 vCPU` matrix on Fly from an
-  in-region generator machine.
 - [gdscript-plugins.md](gdscript-plugins.md) — **GDScript plugins.** GDScript
   transpiled to readable Elixir source and compiled into an ordinary OTP
   plugin — the same `ebin/*.beam` `plugin.bundle` produces, at native speed,
@@ -68,6 +67,7 @@ Spec deleted; the code, its moduledocs and the CHANGELOG are the record.
 | Lobby state | server-owned lifecycle column with legal transitions |
 | i18n | one theme config plus a `theme` PO domain; content translated at render |
 | Locking on SQLite | `Lock.serialize/3` per-key on both adapters, via a `:global` mutex |
+| Chat moderation | word filter, report queue and mutes in `before_chat_message`; three admin pages |
 
 ## Resolved — rejected
 

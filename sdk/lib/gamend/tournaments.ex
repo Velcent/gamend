@@ -27,7 +27,7 @@ defmodule Gamend.Tournaments do
   """
   @spec advance_lifecycle(Gamend.Tournaments.Tournament.t(), DateTime.t()) ::
           Gamend.Tournaments.Tournament.t()
-  def advance_lifecycle(_tournament, _now) do
+  def advance_lifecycle(_tournament, _now \\ DateTime.utc_now()) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         nil
@@ -101,7 +101,7 @@ defmodule Gamend.Tournaments do
 
   @doc false
   @spec change_tournament(Gamend.Tournaments.Tournament.t(), map()) :: Ecto.Changeset.t()
-  def change_tournament(_tournament, _attrs) do
+  def change_tournament(_tournament, _attrs \\ %{}) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         nil
@@ -130,7 +130,7 @@ defmodule Gamend.Tournaments do
           Ecto.UUID.t(),
           keyword()
         ) :: non_neg_integer()
-  def count_entries(_tournament_id, _opts) do
+  def count_entries(_tournament_id, _opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         0
@@ -156,7 +156,7 @@ defmodule Gamend.Tournaments do
 
   @doc false
   @spec count_tournaments(keyword()) :: non_neg_integer()
-  def count_tournaments(_opts) do
+  def count_tournaments(_opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         0
@@ -472,7 +472,7 @@ defmodule Gamend.Tournaments do
           Ecto.UUID.t(),
           keyword()
         ) :: [Gamend.Tournaments.Bracket.t()]
-  def list_brackets(_tournament_id, _opts) do
+  def list_brackets(_tournament_id, _opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         []
@@ -497,7 +497,7 @@ defmodule Gamend.Tournaments do
           Ecto.UUID.t(),
           keyword()
         ) :: [Gamend.Tournaments.Entry.t()]
-  def list_entries(_tournament_id, _opts) do
+  def list_entries(_tournament_id, _opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         []
@@ -517,7 +517,7 @@ defmodule Gamend.Tournaments do
           Ecto.UUID.t(),
           keyword()
         ) :: [Gamend.Tournaments.Match.t()]
-  def list_matches(_tournament_id, _opts) do
+  def list_matches(_tournament_id, _opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         []
@@ -551,7 +551,7 @@ defmodule Gamend.Tournaments do
     
   """
   @spec list_tournament_groups(keyword()) :: [map()]
-  def list_tournament_groups(_opts) do
+  def list_tournament_groups(_opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         %{}
@@ -563,7 +563,7 @@ defmodule Gamend.Tournaments do
 
   @doc false
   @spec list_tournaments(keyword()) :: [Gamend.Tournaments.Tournament.t()]
-  def list_tournaments(_opts) do
+  def list_tournaments(_opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         []
@@ -817,7 +817,7 @@ defmodule Gamend.Tournaments do
     
   """
   @spec tick(DateTime.t()) :: :ok
-  def tick(_now) do
+  def tick(_now \\ DateTime.utc_now()) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         :ok

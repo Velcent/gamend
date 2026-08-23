@@ -69,7 +69,7 @@ defmodule Gamend.Jobs do
     
   """
   @spec enqueue_hook(atom(), args(), keyword()) :: {:ok, integer()} | {:error, term()}
-  def enqueue_hook(_hook_fn, _args, _opts) do
+  def enqueue_hook(_hook_fn, _args \\ %{}, _opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         {:ok, nil}
@@ -87,7 +87,7 @@ defmodule Gamend.Jobs do
   """
   @spec enqueue_in(non_neg_integer(), atom(), args(), keyword()) ::
           {:ok, integer()} | {:error, term()}
-  def enqueue_in(_seconds, _hook_fn, _args, _opts) do
+  def enqueue_in(_seconds, _hook_fn, _args \\ %{}, _opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         {:ok, nil}

@@ -65,7 +65,7 @@ defmodule Gamend.Push do
     Count for `list_all_tokens/2` (same filters).
   """
   @spec count_all_tokens(map()) :: non_neg_integer()
-  def count_all_tokens(_filters) do
+  def count_all_tokens(_filters \\ %{}) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         0
@@ -162,7 +162,7 @@ defmodule Gamend.Push do
           map(),
           keyword()
         ) :: [Gamend.Push.PushToken.t()]
-  def list_all_tokens(_filters, _opts) do
+  def list_all_tokens(_filters \\ %{}, _opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         []
@@ -183,7 +183,7 @@ defmodule Gamend.Push do
           user_id(),
           keyword()
         ) :: [Gamend.Push.PushToken.t()]
-  def list_tokens(_user_id, _opts) do
+  def list_tokens(_user_id, _opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         []
@@ -297,7 +297,7 @@ defmodule Gamend.Push do
     
   """
   @spec send_to_user(user_id(), map(), keyword()) :: :ok | {:error, map()}
-  def send_to_user(_user_id, _message_attrs, _opts) do
+  def send_to_user(_user_id, _message_attrs, _opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         :ok
@@ -316,7 +316,7 @@ defmodule Gamend.Push do
     
   """
   @spec send_to_users([user_id()], map(), keyword()) :: :ok | {:error, map() | term()}
-  def send_to_users(_user_ids, _message_attrs, _opts) do
+  def send_to_users(_user_ids, _message_attrs, _opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         :ok

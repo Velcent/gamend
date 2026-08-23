@@ -8,6 +8,8 @@ icon: hero-command-line
 
 The application exposes a lightweight server-side scripting surface via the `Gamend.Hooks` behaviour. Hooks let you run custom code on lifecycle events (eg. user register/login, lobby create/update) and optionally expose RPC functions.
 
+Hooks can be written in **Elixir** (this guide), in **GDScript** (see [GDScript hooks](95-gdscript-hooks.md)), or in any other BEAM language — see [Other BEAM languages](#other-beam-languages-gleam-lfe-erlang) below.
+
 ## Add a lifecycle callback
 
 Implement the behaviour in a hooks module:

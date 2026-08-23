@@ -44,7 +44,7 @@ defmodule Gamend.Inventory do
   """
   @spec consume_item(user_id(), item(), pos_integer(), keyword()) ::
           {:ok, non_neg_integer()} | {:error, :insufficient_items | term()}
-  def consume_item(_user_id, _item, _qty, _opts) do
+  def consume_item(_user_id, _item, _qty, _opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         {:ok, nil}
@@ -63,7 +63,7 @@ defmodule Gamend.Inventory do
   """
   @spec grant_item(user_id(), item(), pos_integer(), keyword()) ::
           {:ok, non_neg_integer()} | {:error, term()}
-  def grant_item(_user_id, _item, _qty, _opts) do
+  def grant_item(_user_id, _item, _qty, _opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         {:ok, nil}

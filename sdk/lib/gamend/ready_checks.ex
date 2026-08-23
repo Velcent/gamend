@@ -120,7 +120,7 @@ defmodule Gamend.ReadyChecks do
   """
   @spec cancel(Gamend.ReadyChecks.Check.t(), String.t()) ::
           {:ok, Gamend.ReadyChecks.Check.t()} | {:error, term()}
-  def cancel(_check, _reason) do
+  def cancel(_check, _reason \\ "cancelled") do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         {:ok,
@@ -176,7 +176,7 @@ defmodule Gamend.ReadyChecks do
     Counts checks matching the same filters as `list_checks/1`.
   """
   @spec count_checks(keyword()) :: non_neg_integer()
-  def count_checks(_opts) do
+  def count_checks(_opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         0
@@ -209,7 +209,7 @@ defmodule Gamend.ReadyChecks do
     
   """
   @spec expire_due(DateTime.t()) :: non_neg_integer()
-  def expire_due(_now) do
+  def expire_due(_now \\ DateTime.utc_now()) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         0
@@ -229,7 +229,7 @@ defmodule Gamend.ReadyChecks do
   """
   @spec for_user(Gamend.Accounts.User.t() | Ecto.UUID.t(), scope() | :any) ::
           Gamend.ReadyChecks.Check.t() | nil
-  def for_user(_user, _scope) do
+  def for_user(_user, _scope \\ :any) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         if :erlang.phash2(make_ref(), 2) == 0,
@@ -291,7 +291,7 @@ defmodule Gamend.ReadyChecks do
     
   """
   @spec list_checks(keyword()) :: [Gamend.ReadyChecks.Check.t()]
-  def list_checks(_opts) do
+  def list_checks(_opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         []
@@ -339,7 +339,7 @@ defmodule Gamend.ReadyChecks do
   """
   @spec open(subject(), [Ecto.UUID.t()], keyword()) ::
           {:ok, Gamend.ReadyChecks.Check.t()} | {:error, term()}
-  def open(_subject, _user_ids, _opts) do
+  def open(_subject, _user_ids, _opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         {:ok,
@@ -485,7 +485,7 @@ defmodule Gamend.ReadyChecks do
   """
   @spec reset(subject(), [Ecto.UUID.t()], keyword()) ::
           {:ok, Gamend.ReadyChecks.Check.t()} | {:error, term()}
-  def reset(_subject, _user_ids, _opts) do
+  def reset(_subject, _user_ids, _opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         {:ok,
@@ -534,7 +534,7 @@ defmodule Gamend.ReadyChecks do
   """
   @spec respond(Gamend.Accounts.User.t() | Ecto.UUID.t(), answer(), scope()) ::
           {:ok, Gamend.ReadyChecks.Check.t()} | {:error, term()}
-  def respond(_user, _ready?, _scope) do
+  def respond(_user, _ready?, _scope \\ :match) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         {:ok,
@@ -564,7 +564,7 @@ defmodule Gamend.ReadyChecks do
     
   """
   @spec stats(pos_integer()) :: %{required(String.t()) => non_neg_integer()}
-  def stats(_hours) do
+  def stats(_hours \\ 24) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         0

@@ -190,7 +190,7 @@ defmodule Gamend.Quests do
     Returns a changeset for tracking quest changes (used by forms).
   """
   @spec change_quest(Gamend.Quests.Quest.t(), map()) :: Ecto.Changeset.t()
-  def change_quest(_quest, _attrs) do
+  def change_quest(_quest, _attrs \\ %{}) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         nil
@@ -212,7 +212,7 @@ defmodule Gamend.Quests do
   """
   @spec claim(user_id(), String.t(), keyword()) ::
           {:ok, %{progress: Gamend.Quests.QuestProgress.t(), rewards: [map()]}} | {:error, term()}
-  def claim(_user_id, _quest_key, _opts) do
+  def claim(_user_id, _quest_key, _opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         {:ok,
@@ -257,7 +257,7 @@ defmodule Gamend.Quests do
     Count progress rows (same filters as `list_progress/1`).
   """
   @spec count_progress(keyword()) :: non_neg_integer()
-  def count_progress(_opts) do
+  def count_progress(_opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         0
@@ -271,7 +271,7 @@ defmodule Gamend.Quests do
     Count quest definitions (same filters as `list_quests/1`).
   """
   @spec count_quests(keyword()) :: non_neg_integer()
-  def count_quests(_opts) do
+  def count_quests(_opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         0
@@ -288,7 +288,7 @@ defmodule Gamend.Quests do
           user_id(),
           keyword()
         ) :: non_neg_integer()
-  def count_user_completions(_user_id, _opts) do
+  def count_user_completions(_user_id, _opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         0
@@ -305,7 +305,7 @@ defmodule Gamend.Quests do
           user_id(),
           keyword()
         ) :: non_neg_integer()
-  def count_user_quests(_user_id, _opts) do
+  def count_user_quests(_user_id, _opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         0
@@ -601,7 +601,7 @@ defmodule Gamend.Quests do
     
   """
   @spec list_progress(keyword()) :: [Gamend.Quests.QuestProgress.t()]
-  def list_progress(_opts) do
+  def list_progress(_opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         []
@@ -622,7 +622,7 @@ defmodule Gamend.Quests do
     
   """
   @spec list_quests(keyword()) :: [Gamend.Quests.Quest.t()]
-  def list_quests(_opts) do
+  def list_quests(_opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         []
@@ -645,7 +645,7 @@ defmodule Gamend.Quests do
           user_id(),
           keyword()
         ) :: [%{quest: Gamend.Quests.Quest.t(), progress: Gamend.Quests.QuestProgress.t()}]
-  def list_user_completions(_user_id, _opts) do
+  def list_user_completions(_user_id, _opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         %{}
@@ -681,7 +681,7 @@ defmodule Gamend.Quests do
             claimable: boolean()
           }
         ]
-  def list_user_quests(_user_id, _opts) do
+  def list_user_quests(_user_id, _opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         []
@@ -750,7 +750,7 @@ defmodule Gamend.Quests do
     
   """
   @spec rearm_repeat_quests(keyword()) :: non_neg_integer()
-  def rearm_repeat_quests(_opts) do
+  def rearm_repeat_quests(_opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         0
@@ -768,7 +768,7 @@ defmodule Gamend.Quests do
     
   """
   @spec recover_pending_rewards(keyword()) :: non_neg_integer()
-  def recover_pending_rewards(_opts) do
+  def recover_pending_rewards(_opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         0
@@ -809,7 +809,7 @@ defmodule Gamend.Quests do
   """
   @spec report_event(user_id(), String.t(), pos_integer(), map()) ::
           {:ok, [Gamend.Quests.QuestProgress.t()]}
-  def report_event(_user_id, _event, _amount, _meta) do
+  def report_event(_user_id, _event, _amount \\ 1, _meta \\ %{}) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         {:ok, []}
@@ -936,7 +936,7 @@ defmodule Gamend.Quests do
     
   """
   @spec visible_categories(user_id() | nil) :: [String.t()]
-  def visible_categories(_user_id) do
+  def visible_categories(_user_id \\ nil) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         ""

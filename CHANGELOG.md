@@ -1,5 +1,6 @@
 # August 2026
 
+- [added] **Plugins can be written in GDScript**
 - [added] **Plugins can be written in Gleam**
 - [added] **Client logs**
 - [added] **Logs page filters by client session and user**, and separates client entries from the server's own tail.

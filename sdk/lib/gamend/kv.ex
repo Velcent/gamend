@@ -321,7 +321,7 @@ defmodule Gamend.KV do
           String.t(),
           keyword()
         ) :: :ok | {:error, term()}
-  def subscribe(_key, _opts) do
+  def subscribe(_key, _opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         :ok
@@ -339,7 +339,7 @@ defmodule Gamend.KV do
           String.t(),
           keyword()
         ) :: :ok | {:error, term()}
-  def unsubscribe(_key, _opts) do
+  def unsubscribe(_key, _opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         :ok

@@ -192,7 +192,7 @@ defmodule Gamend.Groups do
     Return a changeset for tracking group changes (admin edit forms).
   """
   @spec change_group(Gamend.Groups.Group.t(), map()) :: Ecto.Changeset.t()
-  def change_group(_group, _attrs) do
+  def change_group(_group, _attrs \\ %{}) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         nil
@@ -206,7 +206,7 @@ defmodule Gamend.Groups do
     Count ALL groups matching filters (admin).
   """
   @spec count_all_groups(map()) :: non_neg_integer()
-  def count_all_groups(_filters) do
+  def count_all_groups(_filters \\ %{}) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         0
@@ -321,7 +321,7 @@ defmodule Gamend.Groups do
     Count groups matching public filters (excludes hidden).
   """
   @spec count_list_groups(map()) :: non_neg_integer()
-  def count_list_groups(_filters) do
+  def count_list_groups(_filters \\ %{}) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         0
@@ -529,7 +529,7 @@ defmodule Gamend.Groups do
           Ecto.UUID.t(),
           keyword()
         ) :: [Gamend.Groups.GroupMember.t()]
-  def get_group_members_paginated(_group_id, _opts) do
+  def get_group_members_paginated(_group_id, _opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         []
@@ -661,7 +661,7 @@ defmodule Gamend.Groups do
           map(),
           keyword()
         ) :: [Gamend.Groups.Group.t()]
-  def list_all_groups(_filters, _opts) do
+  def list_all_groups(_filters \\ %{}, _opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         []
@@ -692,7 +692,7 @@ defmodule Gamend.Groups do
           map(),
           keyword()
         ) :: [Gamend.Groups.Group.t()]
-  def list_groups(_filters, _opts) do
+  def list_groups(_filters \\ %{}, _opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         []
@@ -709,7 +709,7 @@ defmodule Gamend.Groups do
           Ecto.UUID.t(),
           keyword()
         ) :: [map()]
-  def list_invitations(_user_id, _opts) do
+  def list_invitations(_user_id, _opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         %{}
@@ -724,7 +724,7 @@ defmodule Gamend.Groups do
   """
   @spec list_join_requests(Ecto.UUID.t(), Ecto.UUID.t(), keyword()) ::
           {:ok, [Gamend.Groups.GroupJoinRequest.t()]} | {:error, atom()}
-  def list_join_requests(_admin_id, _group_id, _opts) do
+  def list_join_requests(_admin_id, _group_id, _opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         {:ok, nil}
@@ -741,7 +741,7 @@ defmodule Gamend.Groups do
           Ecto.UUID.t(),
           keyword()
         ) :: [map()]
-  def list_sent_invitations(_user_id, _opts) do
+  def list_sent_invitations(_user_id, _opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         %{}
@@ -758,7 +758,7 @@ defmodule Gamend.Groups do
           Ecto.UUID.t(),
           keyword()
         ) :: [Gamend.Groups.Group.t()]
-  def list_user_groups(_user_id, _opts) do
+  def list_user_groups(_user_id, _opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         []
@@ -841,7 +841,7 @@ defmodule Gamend.Groups do
   """
   @spec notify_group(Ecto.UUID.t(), Ecto.UUID.t(), String.t(), map()) ::
           {:ok, non_neg_integer()} | {:error, atom()}
-  def notify_group(_sender_id, _group_id, _content, _metadata) do
+  def notify_group(_sender_id, _group_id, _content, _metadata \\ %{}) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         {:ok, nil}

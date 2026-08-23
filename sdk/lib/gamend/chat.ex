@@ -90,7 +90,7 @@ defmodule Gamend.Chat do
     Count all messages matching filters (admin).
   """
   @spec count_all_messages(map()) :: non_neg_integer()
-  def count_all_messages(_filters) do
+  def count_all_messages(_filters \\ %{}) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         0
@@ -149,7 +149,7 @@ defmodule Gamend.Chat do
     Count mutes matching `filters`.
   """
   @spec count_mutes(map()) :: non_neg_integer()
-  def count_mutes(_filters) do
+  def count_mutes(_filters \\ %{}) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         0
@@ -163,7 +163,7 @@ defmodule Gamend.Chat do
     Count reports matching `filters`.
   """
   @spec count_reports(map()) :: non_neg_integer()
-  def count_reports(_filters) do
+  def count_reports(_filters \\ %{}) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         0
@@ -360,7 +360,7 @@ defmodule Gamend.Chat do
           map(),
           keyword()
         ) :: [Gamend.Chat.Message.t()]
-  def list_all_messages(_filters, _opts) do
+  def list_all_messages(_filters \\ %{}, _opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         []
@@ -382,7 +382,7 @@ defmodule Gamend.Chat do
     
   """
   @spec list_friend_messages(String.t(), String.t(), keyword()) :: [Gamend.Chat.Message.t()]
-  def list_friend_messages(_user_a_id, _user_b_id, _opts) do
+  def list_friend_messages(_user_a_id, _user_b_id, _opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         []
@@ -405,7 +405,7 @@ defmodule Gamend.Chat do
     
   """
   @spec list_messages(String.t(), Ecto.UUID.t(), keyword()) :: [Gamend.Chat.Message.t()]
-  def list_messages(_chat_type, _chat_ref_id, _opts) do
+  def list_messages(_chat_type, _chat_ref_id, _opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         []
@@ -422,7 +422,7 @@ defmodule Gamend.Chat do
           map(),
           keyword()
         ) :: [Gamend.Chat.Mute.t()]
-  def list_mutes(_filters, _opts) do
+  def list_mutes(_filters \\ %{}, _opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         []
@@ -439,7 +439,7 @@ defmodule Gamend.Chat do
           map(),
           keyword()
         ) :: [Gamend.Chat.Report.t()]
-  def list_reports(_filters, _opts) do
+  def list_reports(_filters \\ %{}, _opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         []
@@ -476,7 +476,7 @@ defmodule Gamend.Chat do
   """
   @spec mute_user(Ecto.UUID.t(), String.t(), Ecto.UUID.t() | nil, map()) ::
           {:ok, Gamend.Chat.Mute.t()} | {:error, term()}
-  def mute_user(_user_id, _scope, _scope_ref_id, _attrs) do
+  def mute_user(_user_id, _scope, _scope_ref_id, _attrs \\ %{}) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         {:ok,
@@ -516,7 +516,7 @@ defmodule Gamend.Chat do
   """
   @spec report_message(Ecto.UUID.t(), Ecto.UUID.t(), String.t() | nil) ::
           {:ok, Gamend.Chat.Report.t()} | {:error, term()}
-  def report_message(_reporter_id, _message_id, _reason) do
+  def report_message(_reporter_id, _message_id, _reason \\ nil) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         {:ok,
@@ -545,7 +545,7 @@ defmodule Gamend.Chat do
   """
   @spec resolve_report(Gamend.Chat.Report.t() | Ecto.UUID.t(), String.t(), map()) ::
           {:ok, Gamend.Chat.Report.t()} | {:error, term()}
-  def resolve_report(_report, _status, _attrs) do
+  def resolve_report(_report, _status, _attrs \\ %{}) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         {:ok,
@@ -689,7 +689,7 @@ defmodule Gamend.Chat do
     Lift a mute. Returns `{:ok, count}` — 0 when the user was not muted.
   """
   @spec unmute_user(Ecto.UUID.t(), String.t(), Ecto.UUID.t() | nil) :: {:ok, non_neg_integer()}
-  def unmute_user(_user_id, _scope, _scope_ref_id) do
+  def unmute_user(_user_id, _scope, _scope_ref_id \\ nil) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         {:ok, nil}

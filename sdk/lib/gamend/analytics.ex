@@ -60,7 +60,7 @@ defmodule Gamend.Analytics do
     
   """
   @spec count(String.t(), pos_integer(), DateTime.t()) :: :ok
-  def count(_key, _n, _now) do
+  def count(_key, _n \\ 1, _now \\ DateTime.utc_now()) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         :ok
@@ -74,7 +74,7 @@ defmodule Gamend.Analytics do
     Totals of `counts/3` per key over the window, largest first.
   """
   @spec count_totals(String.t(), pos_integer(), Date.t()) :: [{String.t(), integer()}]
-  def count_totals(_key, _days, _today) do
+  def count_totals(_key, _days \\ 7, _today \\ Date.utc_today()) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         0
@@ -93,7 +93,7 @@ defmodule Gamend.Analytics do
   @spec counts(String.t(), pos_integer(), Date.t()) :: %{
           required(String.t()) => %{required(Date.t()) => integer()}
         }
-  def counts(_key, _days, _today) do
+  def counts(_key, _days \\ 7, _today \\ Date.utc_today()) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         nil
@@ -110,7 +110,7 @@ defmodule Gamend.Analytics do
     
   """
   @spec daily_series(pos_integer(), Date.t()) :: [map()]
-  def daily_series(_days, _today) do
+  def daily_series(_days \\ 30, _today \\ Date.utc_today()) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         %{}
@@ -138,7 +138,7 @@ defmodule Gamend.Analytics do
     Daily active users on `day` (default: today, UTC).
   """
   @spec dau(Date.t()) :: non_neg_integer()
-  def dau(_day) do
+  def dau(_day \\ Date.utc_today()) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         0
@@ -159,7 +159,7 @@ defmodule Gamend.Analytics do
           pos_integer(),
           keyword()
         ) :: [map()]
-  def economy_flow(_days, _opts) do
+  def economy_flow(_days \\ 7, _opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         %{}
@@ -178,7 +178,7 @@ defmodule Gamend.Analytics do
           pos_integer(),
           keyword()
         ) :: [map()]
-  def economy_totals(_days, _opts) do
+  def economy_totals(_days \\ 7, _opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         %{}
@@ -192,7 +192,7 @@ defmodule Gamend.Analytics do
     Monthly active users: distinct users seen in the 30 days ending on `day`.
   """
   @spec mau(Date.t()) :: non_neg_integer()
-  def mau(_day) do
+  def mau(_day \\ Date.utc_today()) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         0
@@ -238,7 +238,7 @@ defmodule Gamend.Analytics do
     
   """
   @spec record_activity(Ecto.UUID.t(), DateTime.t()) :: :ok
-  def record_activity(_user_id, _now) do
+  def record_activity(_user_id, _now \\ DateTime.utc_now()) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         :ok
@@ -288,7 +288,7 @@ defmodule Gamend.Analytics do
     
   """
   @spec summary(Date.t()) :: map()
-  def summary(_today) do
+  def summary(_today \\ Date.utc_today()) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         %{}
@@ -302,7 +302,7 @@ defmodule Gamend.Analytics do
     Weekly active users: distinct users seen in the 7 days ending on `day`.
   """
   @spec wau(Date.t()) :: non_neg_integer()
-  def wau(_day) do
+  def wau(_day \\ Date.utc_today()) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         0

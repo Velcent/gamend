@@ -191,7 +191,7 @@ defmodule Gamend.Friends do
     Count every block across all users, honouring the same filters as `list_all_blocks/1`.
   """
   @spec count_all_blocks(keyword()) :: non_neg_integer()
-  def count_all_blocks(_opts) do
+  def count_all_blocks(_opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         0
@@ -425,7 +425,7 @@ defmodule Gamend.Friends do
     
   """
   @spec list_all_blocks(keyword()) :: [Gamend.Friends.Friendship.t()]
-  def list_all_blocks(_opts) do
+  def list_all_blocks(_opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         []
