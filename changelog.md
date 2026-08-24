@@ -1,9 +1,8 @@
 # August 2026
 
-- [changed] **Changelog and roadmap pages** carry the same layout everywhere, and their "nothing here yet" text is translated instead of English-only.
-- [changed] **Guide pages read like a book** — a Back button on the title line, and links to the previous and next guide at the foot, alongside the rest of the section.
-- [fixed] **Guide summaries are whole sentences** — cards and search results used to cut off wherever the source file happened to wrap a line.
-- [added] **Client logs** — the game uploads its own log lines and they are re-emitted into the server's own log stream, so one search for a session id returns both sides of a failure. Browse sessions at `/admin/logs`; off by default.
+- [added] **Plugins can be written in GDScript**
+- [added] **Plugins can be written in Gleam**
+- [added] **Client logs**
 - [added] **Logs page filters by client session and user**, and separates client entries from the server's own tail.
 - [fixed] **Logins survive a busy database** — the analytics day-marker and daily counters drop a failed write instead of failing the request they ride on.
 - [fixed] **Repeat quests** re-arm right away again, instead of once an hour.

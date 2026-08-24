@@ -8,7 +8,7 @@
     <meta name="project" content="gamend_core v1.0.1195">
 
 
-    <title>Gamend.Push.Message — gamend_core v1.0.1195</title>
+    <title>Gamend.Signals — gamend_core v1.0.1195</title>
 
     <link rel="stylesheet" href="dist/html-elixir-NHQLCD6Y.css" />
 
@@ -93,19 +93,19 @@ gamend_core
 <div id="top-content">
   <div class="heading-with-actions top-heading">
     <h1>
-      <span translate="no">Gamend.<wbr />Push.<wbr />Message</span> 
+      <span translate="no">Gamend.<wbr />Signals</span> 
       <small class="app-vsn" translate="no">(gamend_core v1.0.1195)</small>
 
     </h1>
 
-<a href="Gamend.Push.Message.md" title="Copy Markdown (hold Ctrl/Cmd and click it to open as Markdown)" class="copy-markdown icon-action" rel="help">
+<a href="Gamend.Signals.md" title="Copy Markdown (hold Ctrl/Cmd and click it to open as Markdown)" class="copy-markdown icon-action" rel="help">
   <i class="ri-markdown-line" aria-hidden="true"></i>
   <span class="sr-only">Copy Markdown</span>
 </a>
 
 
 
-      <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/push/message.ex#L1" title="View Source" class="icon-action" rel="help nofollow">
+      <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signals.ex#L1" title="View Source" class="icon-action" rel="help nofollow">
         <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         <span class="sr-only">View Source</span>
       </a>
@@ -114,15 +114,17 @@ gamend_core
 
 
     <section id="moduledoc">
-<p>A validated push message: what <a href="Gamend.Push.html#send_to_user/3"><code class="inline">Gamend.Push.send_to_user/3</code></a> accepts and
-what the delivery workers carry through job args.</p><p>Fields:</p><ul><li><code class="inline">title</code> – required, capped by <code class="inline">max_push_title</code> <strong>bytes</strong></li><li><code class="inline">body</code> – optional, capped by <code class="inline">max_push_body</code> <strong>bytes</strong></li><li><code class="inline">data</code> – optional custom key/value map, serialized size capped by
-<code class="inline">max_push_data_size</code> bytes. FCM requires string values on the wire, so
-non-string values are JSON-encoded by the FCM provider; clients decode
-them back.</li></ul><p>Caps are bytes, not characters, because the provider limits are bytes (FCM
-and APNs both cap the payload at 4096) — a character cap would let multibyte
-text through validation only to fail on the wire.</p><ul><li><code class="inline">image</code> – optional image URL</li><li><code class="inline">sound</code> – optional sound name</li><li><code class="inline">badge</code> – optional iOS badge count</li><li><code class="inline">collapse_key</code> – optional dedupe key (<code class="inline">apns-collapse-id</code> / FCM
-<code class="inline">collapse_key</code>), which is what makes an at-least-once redelivery invisible
-on-device</li></ul>
+<p>Server-side signals: a plugin emits a named event, another part of the plugin
+waits for it.</p><p>This is the server's answer to Godot's <code class="inline">signal</code> / <code class="inline">emit</code> / <code class="inline">await</code>. Nothing
+on the server emits engine signals, so a hook that wants to wait for
+something needs a source of its own:</p><pre><code class="makeup elixir" translate="no"><span class="nc">Gamend.Signals</span><span class="o">.</span><span class="n">subscribe</span><span class="p" data-group-id="9844333925-1">(</span><span class="s">&quot;my_game&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;level_up&quot;</span><span class="p" data-group-id="9844333925-1">)</span><span class="w">
+</span><span class="nc">Gamend.Signals</span><span class="o">.</span><span class="n">emit</span><span class="p" data-group-id="9844333925-2">(</span><span class="s">&quot;my_game&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;level_up&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="9844333925-3">[</span><span class="n">user_id</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p" data-group-id="9844333925-3">]</span><span class="p" data-group-id="9844333925-2">)</span><span class="w">
+</span><span class="p" data-group-id="9844333925-4">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="9844333925-5">[</span><span class="n">user_id</span><span class="p">,</span><span class="w"> </span><span class="n">level</span><span class="p" data-group-id="9844333925-5">]</span><span class="p" data-group-id="9844333925-4">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Gamend.Signals</span><span class="o">.</span><span class="n">await</span><span class="p" data-group-id="9844333925-6">(</span><span class="s">&quot;my_game&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;level_up&quot;</span><span class="p" data-group-id="9844333925-6">)</span></code></pre><p>Signals are scoped to one plugin, so two plugins may use the same name
+without colliding, and they ride <a href="https://hexdocs.pm/phoenix_pubsub/2.2.0/Phoenix.PubSub.html"><code class="inline">Phoenix.PubSub</code></a>, so an emit reaches every
+node in a cluster.</p><p><a href="#subscribe/2"><code class="inline">subscribe/2</code></a> before <a href="#await/3"><code class="inline">await/3</code></a>, not inside it: a signal emitted between the
+two would otherwise be missed. The GDScript front end does this
+automatically, subscribing at function entry for every signal the function
+awaits.</p>
     </section>
 
 </div>
@@ -141,9 +143,11 @@ on-device</li></ul>
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#t:t/0" data-no-tooltip="" translate="no">t()</a>
+        <a href="#t:payload/0" data-no-tooltip="" translate="no">payload()</a>
 
       </div>
+
+        <div class="summary-synopsis"><p>Whatever the emitter passed, unchanged.</p></div>
 
     </div>
 
@@ -155,43 +159,41 @@ on-device</li></ul>
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#from_map/1" data-no-tooltip="" translate="no">from_map(map)</a>
+        <a href="#await/3" data-no-tooltip="" translate="no">await(plugin, name, timeout \\ 30000)</a>
 
       </div>
 
-        <div class="summary-synopsis"><p>Rebuild from job args. Args were validated at enqueue time.</p></div>
+        <div class="summary-synopsis"><p>Waits for the next <code class="inline">name</code>, returning <code class="inline">{:ok, payload}</code> or <code class="inline">{:error, :timeout}</code>.</p></div>
 
     </div>
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#new/1" data-no-tooltip="" translate="no">new(attrs)</a>
+        <a href="#emit/3" data-no-tooltip="" translate="no">emit(plugin, name, payload \\ nil)</a>
 
       </div>
 
-        <div class="summary-synopsis"><p>Build and validate a message from a map (string or atom keys).</p></div>
+        <div class="summary-synopsis"><p>Emits <code class="inline">name</code> with <code class="inline">payload</code> to every subscriber, on every node.</p></div>
 
     </div>
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#to_map/1" data-no-tooltip="" translate="no">to_map(message)</a>
+        <a href="#subscribe/2" data-no-tooltip="" translate="no">subscribe(plugin, name)</a>
 
       </div>
 
-        <div class="summary-synopsis"><p>Serialize for Oban job args (string keys, nils dropped).</p></div>
+        <div class="summary-synopsis"><p>Subscribes the calling process to <code class="inline">name</code>.</p></div>
 
     </div>
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#truncate/2" data-no-tooltip="" translate="no">truncate(string, max_bytes)</a>
+        <a href="#topic/2" data-no-tooltip="" translate="no">topic(plugin, name)</a>
 
       </div>
 
-        <div class="summary-synopsis"><p>Truncate a UTF-8 string to at most <code class="inline">max_bytes</code> without splitting a
-character. For callers bridging longer content (notification bodies,
-personalized titles) into the push byte caps.</p></div>
+        <div class="summary-synopsis"><p>Topic a signal rides on. Public so a plugin can subscribe by hand.</p></div>
 
     </div>
 
@@ -209,17 +211,17 @@ personalized titles) into the push byte caps.</p></div>
     </h2>
 
     <div class="types-list">
-<section class="detail" id="t:t/0">
+<section class="detail" id="t:payload/0">
 
   <div class="detail-header">
-    <a href="#t:t/0" class="detail-link" data-no-tooltip="" aria-label="Link to this type">
+    <a href="#t:payload/0" class="detail-link" data-no-tooltip="" aria-label="Link to this type">
       <i class="ri-link-m" aria-hidden="true"></i>
     </a>
     <div class="heading-with-actions">
-      <h1 class="signature" translate="no">t()</h1>
+      <h1 class="signature" translate="no">payload()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/push/message.ex#L29" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signals.ex#L27" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -230,19 +232,11 @@ personalized titles) into the push byte caps.</p></div>
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@type</span> t() :: %Gamend.Push.Message{
-  badge: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>() | nil,
-  body: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>() | nil,
-  collapse_key: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>() | nil,
-  data: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>() | nil,
-  image: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>() | nil,
-  sound: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>() | nil,
-  title: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()
-}</pre>
+          <pre translate="no"><span class="attribute">@type</span> payload() :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()</pre>
 
       </div>
 
-
+<p>Whatever the emitter passed, unchanged.</p>
   </section>
 </section>
 
@@ -258,17 +252,19 @@ personalized titles) into the push byte caps.</p></div>
     </h2>
 
     <div class="functions-list">
-<section class="detail" id="from_map/1">
+<section class="detail" id="await/3">
+
+    <span id="await/2"></span>
 
   <div class="detail-header">
-    <a href="#from_map/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+    <a href="#await/3" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
       <i class="ri-link-m" aria-hidden="true"></i>
     </a>
     <div class="heading-with-actions">
-      <h1 class="signature" translate="no">from_map(map)</h1>
+      <h1 class="signature" translate="no">await(plugin, name, timeout \\ 30000)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/push/message.ex#L169" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signals.ex#L66" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -279,24 +275,27 @@ personalized titles) into the push byte caps.</p></div>
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> from_map(<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()) :: <a href="#t:t/0">t</a>()</pre>
+          <pre translate="no"><span class="attribute">@spec</span> await(<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(), <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">timeout</a>()) ::
+  {:ok, <a href="#t:payload/0">payload</a>()} | {:error, :timeout}</pre>
 
       </div>
 
-<p>Rebuild from job args. Args were validated at enqueue time.</p>
+<p>Waits for the next <code class="inline">name</code>, returning <code class="inline">{:ok, payload}</code> or <code class="inline">{:error, :timeout}</code>.</p><p>Only sees signals emitted after <a href="#subscribe/2"><code class="inline">subscribe/2</code></a> ran in this process.</p>
   </section>
 </section>
-<section class="detail" id="new/1">
+<section class="detail" id="emit/3">
+
+    <span id="emit/2"></span>
 
   <div class="detail-header">
-    <a href="#new/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+    <a href="#emit/3" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
       <i class="ri-link-m" aria-hidden="true"></i>
     </a>
     <div class="heading-with-actions">
-      <h1 class="signature" translate="no">new(attrs)</h1>
+      <h1 class="signature" translate="no">emit(plugin, name, payload \\ nil)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/push/message.ex#L48" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signals.ex#L52" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -307,25 +306,25 @@ personalized titles) into the push byte caps.</p></div>
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> new(<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()) :: {:ok, <a href="#t:t/0">t</a>()} | {:error, %{required(<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>()) =&gt; <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()}}</pre>
+          <pre translate="no"><span class="attribute">@spec</span> emit(<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(), <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(), <a href="#t:payload/0">payload</a>()) :: :ok</pre>
 
       </div>
 
-<p>Build and validate a message from a map (string or atom keys).</p><p>Returns <code class="inline">{:ok, %Message{}}</code> or <code class="inline">{:error, errors}</code> where <code class="inline">errors</code> maps a
-field to its problem, e.g. <code class="inline">%{title: &quot;can't be blank&quot;}</code>.</p>
+<p>Emits <code class="inline">name</code> with <code class="inline">payload</code> to every subscriber, on every node.</p><p>Returns <code class="inline">:ok</code> whether or not anyone was listening -- a signal with no
+listener is dropped, as in Godot.</p>
   </section>
 </section>
-<section class="detail" id="to_map/1">
+<section class="detail" id="subscribe/2">
 
   <div class="detail-header">
-    <a href="#to_map/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+    <a href="#subscribe/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
       <i class="ri-link-m" aria-hidden="true"></i>
     </a>
     <div class="heading-with-actions">
-      <h1 class="signature" translate="no">to_map(message)</h1>
+      <h1 class="signature" translate="no">subscribe(plugin, name)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/push/message.ex#L160" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signals.ex#L41" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -336,24 +335,25 @@ field to its problem, e.g. <code class="inline">%{title: &quot;can't be blank&qu
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> to_map(<a href="#t:t/0">t</a>()) :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()</pre>
+          <pre translate="no"><span class="attribute">@spec</span> subscribe(<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(), <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()) :: :ok</pre>
 
       </div>
 
-<p>Serialize for Oban job args (string keys, nils dropped).</p>
+<p>Subscribes the calling process to <code class="inline">name</code>.</p><p>Idempotent, and scoped to the process that calls it -- when a hook's Task
+ends, the subscription goes with it.</p>
   </section>
 </section>
-<section class="detail" id="truncate/2">
+<section class="detail" id="topic/2">
 
   <div class="detail-header">
-    <a href="#truncate/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+    <a href="#topic/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
       <i class="ri-link-m" aria-hidden="true"></i>
     </a>
     <div class="heading-with-actions">
-      <h1 class="signature" translate="no">truncate(string, max_bytes)</h1>
+      <h1 class="signature" translate="no">topic(plugin, name)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/push/message.ex#L140" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/signals.ex#L31" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -364,13 +364,11 @@ field to its problem, e.g. <code class="inline">%{title: &quot;can't be blank&qu
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> truncate(<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(), <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>()) :: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()</pre>
+          <pre translate="no"><span class="attribute">@spec</span> topic(<a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(), <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()) :: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()</pre>
 
       </div>
 
-<p>Truncate a UTF-8 string to at most <code class="inline">max_bytes</code> without splitting a
-character. For callers bridging longer content (notification bodies,
-personalized titles) into the push byte caps.</p>
+<p>Topic a signal rides on. Public so a plugin can subscribe by hand.</p>
   </section>
 </section>
 

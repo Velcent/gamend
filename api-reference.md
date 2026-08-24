@@ -1,4 +1,4 @@
-# gamend_core v1.0.1193 - API Reference
+# gamend_core v1.0.1195 - API Reference
 
 ## Modules
 
@@ -27,6 +27,8 @@ everywhere.
 - [Gamend.Presence](Gamend.Presence.md): Cluster-wide tracking of who is connected where.
 - [Gamend.Release](Gamend.Release.md): Release-time equivalents of the `host.*` mix tasks.
 - [Gamend.Signaling](Gamend.Signaling.md): WebRTC signaling: who is in a room, and relaying offers between them.
+- [Gamend.Signals](Gamend.Signals.md): Server-side signals: a plugin emits a named event, another part of the plugin
+waits for it.
 - [Gamend.Time](Gamend.Time.md): The server's wall clock, in milliseconds since the epoch, for sending to
 clients.
 
