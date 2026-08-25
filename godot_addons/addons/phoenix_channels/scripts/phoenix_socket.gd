@@ -60,6 +60,19 @@ var _last_reconnect_try_at := -1
 var _should_reconnect := false
 var _reconnect_after_pos := 0
 
+## Background keepalive (web only). Browsers pause requestAnimationFrame — and
+## with it the whole engine loop, including _process — while the tab is hidden,
+## so nothing polls the socket or sends heartbeats and the server's idle
+## timeout reaps a perfectly healthy connection. JS timers still fire in hidden
+## tabs (Worker timers aren't throttled at all) and calls from JS into the
+## engine still run, so a worker-driven tick keeps pumping the socket while the
+## page is hidden.
+const BG_PUMP_INTERVAL_MS := 15000
+var _bg_pump_cb = null
+var _bg_pump_worker = null
+var _bg_worker_name := ""
+var _bg_pump_interval_id := -1
+
 # TODO: refactor as SocketStates, just like ChannelStates
 @export var is_connected := false : get = get_is_connected
 @export var is_connecting := false : get = get_is_connecting
@@ -87,6 +100,7 @@ func _init(endpoint,opts = {}):
 
 func _ready():
 	set_process(true)
+	_install_background_pump()
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_APPLICATION_FOCUS_IN:
@@ -158,6 +172,7 @@ func _enter_tree():
 func _exit_tree():
 	if get_tree().is_connected("node_removed", _on_node_removed):
 		get_tree().disconnect("node_removed", _on_node_removed)
+	_teardown_background_pump()
 	var payload = {message = "exit tree"}
 	_close(true, payload)
 	
@@ -169,11 +184,71 @@ func _exit_tree():
 	emit_signal("on_close", payload)
 	
 #
+# Background keepalive (web)
+#
+
+func _install_background_pump() -> void:
+	if not OS.has_feature("web"):
+		return
+	_bg_pump_cb = JavaScriptBridge.create_callback(_on_background_pump)
+	_bg_worker_name = "__phxSocketPump_%d" % get_instance_id()
+	# Worker timers are exempt from hidden-tab throttling, and worker messages
+	# reach the page promptly even while it is hidden. Created inside a
+	# try/catch so a CSP that forbids blob workers degrades to the interval
+	# fallback instead of an uncaught exception.
+	var made_worker = JavaScriptBridge.eval("""
+		(function(){
+			try {
+				var src = 'setInterval(function(){postMessage(0);}, %d);';
+				window["%s"] = new Worker(URL.createObjectURL(new Blob([src], {type: 'application/javascript'})));
+				return true;
+			} catch (e) { return false; }
+		})()
+	""" % [BG_PUMP_INTERVAL_MS, _bg_worker_name], true)
+	if made_worker is bool and made_worker:
+		_bg_pump_worker = JavaScriptBridge.get_interface(_bg_worker_name)
+	if _bg_pump_worker != null:
+		_bg_pump_worker.onmessage = _bg_pump_cb
+		return
+	# Fallback: a main-thread interval, throttled to one fire per minute in a
+	# hidden tab — still several heartbeats inside the server idle timeout,
+	# though Chrome's intensive throttling can stretch it further after ~5min.
+	var window = JavaScriptBridge.get_interface("window")
+	if window != null:
+		_bg_pump_interval_id = window.setInterval(_bg_pump_cb, BG_PUMP_INTERVAL_MS)
+
+func _teardown_background_pump() -> void:
+	if _bg_pump_worker != null:
+		_bg_pump_worker.terminate()
+		_bg_pump_worker = null
+	if not _bg_worker_name.is_empty():
+		JavaScriptBridge.eval("delete window[\"%s\"];" % _bg_worker_name, true)
+		_bg_worker_name = ""
+	if _bg_pump_interval_id != -1:
+		var window = JavaScriptBridge.get_interface("window")
+		if window != null:
+			window.clearInterval(_bg_pump_interval_id)
+		_bg_pump_interval_id = -1
+	_bg_pump_cb = null
+
+func _on_background_pump(_args) -> void:
+	# Fired by a JS timer. Only needed while the tab is hidden — when visible
+	# the engine loop is already calling _process — but it is the same pump,
+	# just driven from a different clock, so running it twice is harmless.
+	if _socket == null or not is_processing():
+		return
+	var hidden = JavaScriptBridge.eval("document.hidden", true)
+	if hidden is bool and not hidden:
+		return
+	_process(0.0)
+
+#
 # Public
 #
 
 func shutdown() -> void:
 	set_process(false)
+	_teardown_background_pump()
 	_should_reconnect = false
 	for channel in _channels.duplicate():
 		channel.close({message = "socket shutdown"}, false)
@@ -204,8 +279,16 @@ func connect_socket():
 	else:
 		_socket.connect_to_url(_endpoint_url)
 	
-func disconnect_socket():	
+func disconnect_socket():
 	_close(true, {message = "disconnect requested"})
+
+## Transmit any queued outbound frames now. Native WebSocketPeer only writes
+## queued frames to the wire on poll(), so a push made right before the
+## platform stops ticking us (mobile background, web tab freeze) would
+## otherwise sit in the queue until processing resumes.
+func flush() -> void:
+	if _socket != null and _socket.get_ready_state() == WebSocketPeer.STATE_OPEN:
+		_socket.poll()
 
 func get_is_connected() -> bool:
 	return is_connected
