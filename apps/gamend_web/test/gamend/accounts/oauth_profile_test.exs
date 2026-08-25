@@ -86,5 +86,65 @@ defmodule Gamend.Accounts.OAuthProfileTest do
       assert {:ok, updated2} = Accounts.find_or_create_from_google(attrs)
       assert updated2.display_name == "Local Name"
     end
+
+    test "an over-long provider profile_url is dropped rather than failing the sign-in" do
+      long_url = oversized_url("x")
+      assert String.length(long_url) > Gamend.Limits.get(:max_profile_url)
+
+      attrs = %{
+        google_id: "g_long_url",
+        email: "glongurl@example.com",
+        email_verified: true,
+        profile_url: long_url
+      }
+
+      assert {:ok, user} = Accounts.find_or_create_from_google(attrs)
+      assert user.google_id == "g_long_url"
+      assert user.profile_url == nil
+    end
+
+    test "a profile_url exactly at the limit is still saved" do
+      max = Gamend.Limits.get(:max_profile_url)
+      prefix = "https://example.com/"
+      url = prefix <> String.duplicate("y", max - String.length(prefix))
+      assert String.length(url) == max
+
+      attrs = %{
+        google_id: "g_max_url",
+        email: "gmaxurl@example.com",
+        email_verified: true,
+        profile_url: url
+      }
+
+      assert {:ok, user} = Accounts.find_or_create_from_google(attrs)
+      assert user.profile_url == url
+    end
+
+    test "an over-long provider profile_url leaves an existing avatar untouched" do
+      {:ok, user} = Gamend.Accounts.register_user(%{email: "keepavatar@example.com"})
+
+      user =
+        Ecto.Changeset.change(user, profile_url: "https://existing.example/keep.png")
+        |> Gamend.Repo.update!()
+
+      attrs = %{
+        google_id: "g_keep_avatar",
+        email: user.email,
+        email_verified: true,
+        profile_url: oversized_url("z")
+      }
+
+      assert {:ok, updated} = Accounts.find_or_create_from_google(attrs)
+      assert updated.id == user.id
+      assert updated.profile_url == "https://existing.example/keep.png"
+    end
+
+    # Built from the configured limit rather than a literal, so raising
+    # max_profile_url cannot quietly turn these into tests of nothing.
+    defp oversized_url(char) do
+      prefix = "https://lh3.googleusercontent.com/a/"
+      pad = Gamend.Limits.get(:max_profile_url) - String.length(prefix) + 1
+      prefix <> String.duplicate(char, pad)
+    end
   end
 end

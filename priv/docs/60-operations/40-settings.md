@@ -206,7 +206,7 @@ Live values, and where each one came from, are on the
 | `GAMEND_LIMITS_MAX_PARTY_PENDING_INVITES` | integer | `20` |  |
 | `GAMEND_LIMITS_MAX_PARTY_SIZE` | integer | `32` |  |
 | `GAMEND_LIMITS_MAX_PENDING_FRIEND_REQUESTS` | integer | `100` |  |
-| `GAMEND_LIMITS_MAX_PROFILE_URL` | integer | `512` |  |
+| `GAMEND_LIMITS_MAX_PROFILE_URL` | integer | `2048` |  |
 | `GAMEND_LIMITS_MAX_PUSH_BODY` | integer | `4000` |  |
 | `GAMEND_LIMITS_MAX_PUSH_DATA_SIZE` | integer | `4096` | Serialized byte size of a push message's custom data map. |
 | `GAMEND_LIMITS_MAX_PUSH_TITLE` | integer | `255` |  |

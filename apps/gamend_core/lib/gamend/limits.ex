@@ -64,7 +64,13 @@ defmodule Gamend.Limits do
   )
 
   setting(:max_email, :integer, default: 160)
-  setting(:max_profile_url, :integer, default: 512)
+
+  # Also caps `icon_url` on groups, leaderboards, tournaments and notifications.
+  # 512 was too tight for real OAuth avatars — Google hands back `picture` URLs
+  # past it for some account types, which used to fail the whole sign-in. Google
+  # documents no maximum, so this is headroom rather than a guarantee; the OAuth
+  # changesets drop an avatar URL that still exceeds it instead of erroring.
+  setting(:max_profile_url, :integer, default: 2048)
   setting(:max_device_id, :integer, default: 256)
 
   # ── Groups ──────────────────────────────────────────────

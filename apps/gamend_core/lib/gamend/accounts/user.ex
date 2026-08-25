@@ -260,6 +260,27 @@ defmodule Gamend.Accounts.User do
     change(user, confirmed_at: now)
   end
 
+  # The provider owns the avatar URL, not us: Google in particular hands back
+  # `picture` URLs that run past max_profile_url. Rejecting the changeset over
+  # one failed the whole sign-in ("Failed to create user from Google:
+  # [profile_url: ...]") for a purely cosmetic field, and truncating a URL only
+  # produces one that 404s — so drop it and let the account through without a
+  # picture. avatar_changeset/2 keeps its hard validation: there the URL comes
+  # from the user, so it is ours to reject.
+  defp discard_oversized_profile_url(changeset) do
+    case get_change(changeset, :profile_url) do
+      url when is_binary(url) ->
+        if String.length(url) > Gamend.Limits.get(:max_profile_url) do
+          delete_change(changeset, :profile_url)
+        else
+          changeset
+        end
+
+      _ ->
+        changeset
+    end
+  end
+
   @doc """
   A user changeset for Discord OAuth registration.
 
@@ -282,7 +303,7 @@ defmodule Gamend.Accounts.User do
     |> unique_constraint(:email)
     |> unique_constraint(:discord_id)
     |> validate_length(:display_name, max: Gamend.Limits.get(:max_display_name))
-    |> validate_length(:profile_url, max: Gamend.Limits.get(:max_profile_url))
+    |> discard_oversized_profile_url()
     |> put_change(:confirmed_at, DateTime.utc_now(:second))
   end
 
@@ -308,7 +329,7 @@ defmodule Gamend.Accounts.User do
     |> unique_constraint(:email)
     |> unique_constraint(:steam_id)
     |> validate_length(:display_name, max: Gamend.Limits.get(:max_display_name))
-    |> validate_length(:profile_url, max: Gamend.Limits.get(:max_profile_url))
+    |> discard_oversized_profile_url()
     |> put_change(:confirmed_at, DateTime.utc_now(:second))
   end
 
@@ -359,7 +380,7 @@ defmodule Gamend.Accounts.User do
     |> unique_constraint(:email)
     |> unique_constraint(:google_id)
     |> validate_length(:display_name, max: Gamend.Limits.get(:max_display_name))
-    |> validate_length(:profile_url, max: Gamend.Limits.get(:max_profile_url))
+    |> discard_oversized_profile_url()
     |> put_change(:confirmed_at, DateTime.utc_now(:second))
   end
 
@@ -385,7 +406,7 @@ defmodule Gamend.Accounts.User do
     |> unique_constraint(:email)
     |> unique_constraint(:facebook_id)
     |> validate_length(:display_name, max: Gamend.Limits.get(:max_display_name))
-    |> validate_length(:profile_url, max: Gamend.Limits.get(:max_profile_url))
+    |> discard_oversized_profile_url()
     |> put_change(:confirmed_at, DateTime.utc_now(:second))
   end
 
