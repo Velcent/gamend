@@ -182,7 +182,10 @@ defmodule GamendHost.MixProject do
         "esbuild gamend_host_hooks --minify",
         # Last: phx.digest hashes whatever bytes are on disk, so anything that
         # rewrites an asset has to have run already.
-        "phx.digest"
+        "phx.digest",
+        # After the digest, because it is the hashed copies that get served.
+        # phx.digest writes .gz; this adds the .br that brotli_static wants.
+        "cmd bin/compress-static"
       ]
     ]
   end

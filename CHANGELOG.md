@@ -1,5 +1,8 @@
 # August 2026
 
+- [fixed] **Server scripting works in a release.** Plugins were loaded at runtime but a release boots in embedded mode, which refuses to load them — every plugin failed with `{:error, :embedded}` while the startup banner still counted them as loaded.
+- [added] **Brotli for static assets**, alongside the gzip files the digest already wrote.
+
 - [added] **Hero tour video** — a click-to-play walkthrough of the admin panel, quests, store, matchmaking and server hooks; `scripts/screenshots/record_tour.js` re-records it.
 - [added] **Image lightbox** — clicking a home-page screenshot opens it full-size (ported from the Polyglot Pirates host).
 - [changed] **Home page shows the product** — real screenshots (light and dark) of the admin dashboard, quests, groups, login, store, matchmaking, analytics, runtime hooks and economy pages instead of icons; the hero states that Gamend is backend, player website and admin panel in one. `scripts/screenshots/` recaptures them.
