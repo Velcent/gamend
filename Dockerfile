@@ -41,7 +41,11 @@ FROM ${BUILDER_IMAGE} AS builder
 RUN apt-get update && \
     # Install build tools + sqlite dev headers so Exqlite NIF builds in-image
     # libssl-dev is required by ex_dtls (WebRTC DTLS encryption)
-    apt-get install -y git build-essential libsqlite3-dev sqlite3 pkg-config ca-certificates curl libssl-dev && \
+    # optipng/pngquant/imagemagick are for assets.deploy: host.optimize_images
+    # degrades gracefully without them, but host.responsive_images raises the
+    # moment a theme/config.json image declares "widths" — which it now does,
+    # so the build needs ImageMagick to cut those srcset variants.
+    apt-get install -y git build-essential libsqlite3-dev sqlite3 pkg-config ca-certificates curl libssl-dev optipng pngquant imagemagick && \
     rm -rf /var/lib/apt/lists/*
 
 # Install Rust toolchain (required by ex_sctp for WebRTC DataChannels)
