@@ -44,6 +44,10 @@ gamend-*.tar
 # Stray output when host_config.exs is evaluated with host_root pointing at apps/
 /apps/priv/
 
+# Pre-optimization copies of priv/static/images, written by
+# mix host.optimize_images before it rewrites a source in place.
+/priv/image_backups/
+
 # Object storage, local backend (Gamend.Storage.Local) — user uploads,
 # avatars and other stored objects live here in dev; never source-controlled.
 /apps/gamend_core/priv/storage/

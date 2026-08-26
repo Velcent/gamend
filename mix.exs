@@ -168,10 +168,20 @@ defmodule GamendHost.MixProject do
         "esbuild gamend_web",
         "esbuild gamend_host_hooks"
       ],
+      # No `--required` on optimize_images: the release Dockerfile's builder
+      # stage does not install optipng/pngquant/imagemagick, so demanding them
+      # would fail every image build. Missing tools mean images ship unoptimized,
+      # not that the build is broken.
       "assets.deploy": [
+        "host.optimize_images",
+        # After optimize_images, which rewrites the sources these are cut from.
+        # A no-op until a theme/config.json image declares "widths".
+        "host.responsive_images",
         "tailwind gamend_web --minify",
         "esbuild gamend_web --minify",
         "esbuild gamend_host_hooks --minify",
+        # Last: phx.digest hashes whatever bytes are on disk, so anything that
+        # rewrites an asset has to have run already.
         "phx.digest"
       ]
     ]
