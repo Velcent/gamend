@@ -93,11 +93,11 @@ func _ready() -> void:
 
 `start_logs()` takes the address and bearer token from the same API instance, so
 there is nothing to keep in sync. `gamend_api.logs` is a `GamendLogs` node; feed
-it any dictionary with `message`, and optionally `level` (`0`-`4`, low to high),
+it any dictionary with `message`, and optionally `severity` (`0`-`4`, low to high),
 `category`, `time`, `lobby_id` and `screen`:
 
 ```gdscript
-gamend_api.logs.submit({"message": "Game starting", "level": 2, "category": "game"})
+gamend_api.logs.submit({"message": "Game starting", "severity": 2, "category": "game"})
 ```
 
 Wiring it to your own logger instead is the same call — `submit` is what the
@@ -108,7 +108,7 @@ signal connects to, nothing about it is specific to `DebugLog`.
 The client fetches a policy at startup and drops everything below it **on the
 device**, so verbosity is a server-side decision and an unused level costs
 nothing. Set it under `client_logs` in
-[settings](/docs/operations/settings):
+[settings](/docs/settings):
 
 | setting | default | what it does |
 |---|---|---|

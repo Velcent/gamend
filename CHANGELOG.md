@@ -1,5 +1,10 @@
 # August 2026
 
+- [added] **News dropdown** in the navigation — blog, changelog, roadmap and guides.
+- [changed] **Home page reflects the current feature set** — quests instead of achievements, GDScript/Gleam scripting, and new economy/storage and analytics/observability sections.
+- [added] **Friends admin page**
+- [added] **Retention admin page**
+- [added] **16 new guides**
 - [added] **Plugins can be written in GDScript**
 - [added] **Plugins can be written in Gleam**
 - [added] **Client logs**

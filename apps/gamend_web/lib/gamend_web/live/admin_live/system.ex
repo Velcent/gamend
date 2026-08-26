@@ -258,49 +258,19 @@ defmodule GamendWeb.AdminLive.System do
           </div>
         </div>
 
-        <%!-- Data retention --%>
+        <%!-- Data retention (own page) --%>
         <div class="card bg-base-200 shadow">
           <div class="card-body">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
                 <h2 class="card-title text-lg">Data Retention</h2>
                 <p class="text-sm text-base-content/60">
-                  Sweeps every 6 hours. Windows are set per class with
-                  <code class="text-xs">RETENTION_*</code>
-                  env vars; a class missing below is configured to keep forever.
+                  Windows, last sweep and manual runs live on their own page.
                 </p>
               </div>
-              <div class="flex items-center gap-3">
-                <div class="text-right">
-                  <div class="text-xs text-base-content/60">Last run</div>
-                  <div class="text-sm font-mono">
-                    <.timestamp at={@retention.last_run_at} format="full" empty="never" />
-                  </div>
-                </div>
-                <button phx-click="prune_now" class="btn btn-primary" disabled={@retention_running}>
-                  {if @retention_running, do: "Running...", else: "Run now"}
-                </button>
-              </div>
-            </div>
-
-            <div :if={@retention.last_run_at} class="overflow-x-auto mt-2">
-              <table class="table table-sm">
-                <thead>
-                  <tr>
-                    <th>Class</th>
-                    <th class="text-right">Rows pruned</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr :for={{class, count} <- @retention_rows} id={"retention-#{class}"}>
-                    <td class="font-mono text-xs">{class}</td>
-                    <td class="text-right font-mono">{count}</td>
-                  </tr>
-                </tbody>
-              </table>
-              <div class="text-xs text-base-content/70 mt-1">
-                Took {@retention.duration_ms} ms. Classes that pruned nothing are hidden.
-              </div>
+              <.link navigate={~p"/admin/retention"} class="btn btn-primary">
+                Open Retention
+              </.link>
             </div>
           </div>
         </div>
@@ -335,66 +305,18 @@ defmodule GamendWeb.AdminLive.System do
   def mount(_params, _session, socket) do
     if connected?(socket), do: schedule_refresh()
 
-    {:ok,
-     socket
-     |> assign(:retention_running, false)
-     |> assign_retention()
-     |> assign_all_stats()}
+    {:ok, assign_all_stats(socket)}
   end
 
   @impl true
-  def handle_event("prune_now", _params, socket) do
-    # Off the LiveView process: a sweep with a backlog can take minutes, and
-    # the page must stay live while it runs.
-    parent = self()
-    Task.start(fn -> send(parent, {:pruned, run_sweep()}) end)
-
-    {:noreply, assign(socket, :retention_running, true)}
-  end
-
-  @impl true
-  def handle_info({:pruned, {:ok, results}}, socket) do
-    pruned = results |> Map.values() |> Enum.sum()
-
-    {:noreply,
-     socket
-     |> assign(:retention_running, false)
-     |> assign_retention()
-     |> put_flash(:info, "Retention pruned #{pruned} rows.")}
-  end
-
-  def handle_info({:pruned, :unavailable}, socket) do
-    {:noreply,
-     socket
-     |> assign(:retention_running, false)
-     |> put_flash(:error, "Retention sweeper is not running.")}
-  end
-
   def handle_info(:refresh, socket) do
     schedule_refresh()
     {:noreply, assign_all_stats(socket)}
   end
 
-  @impl true
   def handle_info(_msg, socket), do: {:noreply, socket}
 
   defp schedule_refresh, do: Process.send_after(self(), :refresh, @refresh_interval)
-
-  # The button must resolve either way: a sweeper that is down or dies mid-run
-  # would otherwise leave the page stuck on "Running...".
-  defp run_sweep do
-    {:ok, Gamend.Retention.run_now()}
-  catch
-    :exit, _reason -> :unavailable
-  end
-
-  defp assign_retention(socket) do
-    status = Gamend.Retention.status()
-
-    socket
-    |> assign(:retention, status)
-    |> assign(:retention_rows, Enum.sort(for {class, n} <- status.results, n > 0, do: {class, n}))
-  end
 
   defp assign_all_stats(socket) do
     sys = ConnectionTracker.system_stats()

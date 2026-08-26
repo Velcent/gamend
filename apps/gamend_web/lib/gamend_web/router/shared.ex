@@ -815,6 +815,7 @@ defmodule GamendWeb.Router.Shared do
           live "/admin/groups", AdminLive.Groups, :index
           live "/admin/parties", AdminLive.Parties, :index
           live "/admin/blacklist", AdminLive.Blacklist, :index
+          live "/admin/friends", AdminLive.Friends, :index
           live "/admin/chat", AdminLive.Chat, :index
           live "/admin/chat/reports", AdminLive.ChatReports, :index
           live "/admin/chat/mutes", AdminLive.ChatMutes, :index
@@ -828,6 +829,7 @@ defmodule GamendWeb.Router.Shared do
           live "/admin/lobby_snapshots", AdminLive.LobbySnapshots, :index
           live "/admin/geo", AdminLive.Geo, :index
           live "/admin/system", AdminLive.System, :index
+          live "/admin/retention", AdminLive.Retention, :index
           live "/admin/runtime", AdminLive.Runtime, :index
           live "/admin/storage", AdminLive.Storage, :index
           live "/admin/economy", AdminLive.Economy, :index

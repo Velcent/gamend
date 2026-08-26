@@ -80,7 +80,7 @@ that wants a closed vocabulary rejects the move in `before_lobby_state_change`.
 The `webrtc_*` columns are the WebRTC signaling room: a room *is* a lobby, with
 no separate record. Like `state` they are server-owned — only
 `Gamend.Signaling.configure/2` writes them. The star host is always
-`host_id`. See the [WebRTC](/docs/setup?guide=webrtc) guide.
+`host_id`. See the [WebRTC](/docs/webrtc) guide.
 
 ## parties
 

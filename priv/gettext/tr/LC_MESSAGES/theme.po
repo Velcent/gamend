@@ -7,6 +7,9 @@ msgstr ""
 msgid "Open source Elixir game server for real-time multiplayer games."
 msgstr "Gerçek zamanlı çok oyunculu oyunlar için açık kaynaklı Elixir oyun sunucusu."
 
+msgid "GitHub"
+msgstr ""
+
 msgid "Discord"
 msgstr "Discord"
 
@@ -22,20 +25,32 @@ msgstr "Değişiklik günlüğü"
 msgid "Social"
 msgstr "Sosyal"
 
-msgid "Elixir Docs"
-msgstr "Elixir Belgeleri"
-
-msgid "About"
-msgstr "Hakkında"
-
 msgid "Guides"
 msgstr "Kılavuzlar"
 
 msgid "API Docs"
 msgstr "API Belgeleri"
 
+msgid "Elixir Docs"
+msgstr "Elixir Belgeleri"
+
+msgid "Deployment Tutorial"
+msgstr ""
+
+msgid "Scaling Guide"
+msgstr ""
+
+msgid "Docs"
+msgstr ""
+
+msgid "Starter Template"
+msgstr ""
+
 msgid "Store"
 msgstr "Mağaza"
+
+msgid "Server Stats"
+msgstr ""
 
 msgid "Help"
 msgstr "Yardım"
@@ -64,6 +79,9 @@ msgstr "Turnuvalar"
 msgid "Groups"
 msgstr "Gruplar"
 
+msgid "News"
+msgstr ""
+
 msgid "Getting Started"
 msgstr "Başlarken"
 
@@ -75,6 +93,18 @@ msgstr "Gamend"
 
 msgid "**Open source** Elixir game server for **real-time** multiplayer games."
 msgstr "**Gerçek zamanlı** çok oyunculu oyunlar için **açık kaynaklı** Elixir oyun sunucusu."
+
+msgid "Benchmarks"
+msgstr ""
+
+msgid "Godot SDK"
+msgstr ""
+
+msgid "The **backend for your multiplayer game** — accounts, lobbies, chat, leaderboards and everything players expect around the game itself. Server-side scripting in Elixir runs your own logic where players cannot reach it: scoring, rewards, matchmaking rules, validation. **You run it on your own server** — there is no hosted service."
+msgstr ""
+
+msgid "What is Gamend?"
+msgstr ""
 
 msgid "Log in"
 msgstr "Giriş yap"
@@ -88,8 +118,14 @@ msgstr "E-posta, sihirli bağlantı, OAuth, JWT ve oturum. Kayıt, giriş, parol
 msgid "Authentication & Users"
 msgstr "Kimlik doğrulama ve kullanıcılar"
 
-msgid "Real-time lobbies and ephemeral parties. Customizable settings with live updates."
-msgstr "Gerçek zamanlı lobiler ve geçici gruplar. Canlı güncellenen özelleştirilebilir ayarlar."
+msgid "Lobbies"
+msgstr ""
+
+msgid "Matchmaking"
+msgstr ""
+
+msgid "Real-time lobbies with passwords, quick join and live updates. Ephemeral parties that join and get matched **as one unit**, a ticket-queue matchmaker and ready checks before anything starts."
+msgstr ""
 
 msgid "Lobbies, Parties & Matchmaking"
 msgstr "Lobiler, gruplar ve eşleştirme"
@@ -100,19 +136,27 @@ msgstr "Arkadaşlık istekleri, engelleme, gerçek zamanlı çevrimiçi durumu. 
 msgid "Friends, Groups & Chat"
 msgstr "Arkadaşlar, gruplar ve sohbet"
 
-msgid "Server-authoritative achievements, bracket tournaments and leaderboards. Real-time notifications across features and payment events."
-msgstr "Sunucu tarafından doğrulanan başarımlar, eleme turnuvaları ve skor tabloları. Tüm özellikler ve ödeme olayları için gerçek zamanlı bildirimler."
+msgid "One server-authoritative quest engine for achievements, dailies, seasonal events and quest chains. Bracket tournaments, leaderboards with seasons, and real-time plus push notifications across every feature."
+msgstr ""
 
-msgid "Achievements, Tournaments, Leaderboards & Notifications"
-msgstr "Başarımlar, turnuvalar, skor tabloları ve bildirimler"
+msgid "Quests, Tournaments & Leaderboards"
+msgstr ""
 
-msgid "Extend server logic with Elixir scripts. Schedule automated tasks and cron jobs."
-msgstr "Sunucu mantığını Elixir betikleriyle genişletin. Otomatik görevleri ve cron işlerini zamanlayın."
+#, fuzzy
+msgid "Server Scripting"
+msgstr "Sunucu betikleri ve zamanlama"
+
+msgid "GDScript Hooks"
+msgstr ""
+
+msgid "Write server hooks in **Elixir, GDScript or Gleam** — scoring, rewards, matchmaking rules, validation — where players cannot reach them. Durable background jobs and cron scheduling built in."
+msgstr ""
 
 msgid "Server Scripting & Scheduling"
 msgstr "Sunucu betikleri ve zamanlama"
 
-msgid "REST API, real-time WebSocket channels and low-latency WebRTC DataChannels. Admin portal and web UI."
+#, fuzzy
+msgid "REST API, real-time WebSocket channels and low-latency WebRTC DataChannels, with an opt-in protobuf realtime format. Admin portal and web UI, translated into 30 languages."
 msgstr "REST API, gerçek zamanlı WebSocket kanalları ve düşük gecikmeli WebRTC DataChannel'ları. Yönetim portalı ve web arayüzü."
 
 msgid "HTTP, WebSocket & WebRTC"
@@ -129,6 +173,30 @@ msgstr "Stripe, Google Play, App Store ve Steam ile sunucu tarafı ödemeler. Ma
 
 msgid "Payments & Store Integrations"
 msgstr "Ödemeler ve mağaza entegrasyonları"
+
+msgid "Economy"
+msgstr ""
+
+msgid "Key-Value Store"
+msgstr ""
+
+msgid "Virtual currency wallets with an atomic, append-only ledger. Item stacks with grant and consume. A per-player and per-lobby **key-value store**, and object storage with presigned uploads on local disk or any S3-compatible backend."
+msgstr ""
+
+msgid "Economy, Inventory & Storage"
+msgstr ""
+
+msgid "Player Analytics"
+msgstr ""
+
+msgid "Client Logs"
+msgstr ""
+
+msgid "D1 / D7 / D30 retention, DAU and payer conversion built in. Client log sessions correlated with the server's own tail for per-player debugging. Prometheus metrics with Grafana, and a load-test harness with published benchmarks."
+msgstr ""
+
+msgid "Analytics, Logs & Observability"
+msgstr ""
 
 msgid "Game + Backend"
 msgstr "Oyun + arka uç"

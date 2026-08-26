@@ -9,7 +9,7 @@ defmodule GamendWeb.HostPublicDocs do
 
   ## Why a page per guide
 
-  All 32 guides used to render on `/docs/setup` as `<details>` sections, with
+  The guides all used to render on `/docs/setup` as `<details>` sections, with
   the open one in the query string. That gave the whole of the documentation a
   single `<title>`, a single description and a single `<h1>`, so nothing could
   match a query about any one topic — and body text collapsed behind a

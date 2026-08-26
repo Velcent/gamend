@@ -7,6 +7,9 @@ msgstr ""
 msgid "Open source Elixir game server for real-time multiplayer games."
 msgstr "面向实时多人游戏的开源 Elixir 游戏服务器。"
 
+msgid "GitHub"
+msgstr ""
+
 msgid "Discord"
 msgstr "Discord"
 
@@ -22,20 +25,32 @@ msgstr "更新日志"
 msgid "Social"
 msgstr "社交"
 
-msgid "Elixir Docs"
-msgstr "Elixir 文档"
-
-msgid "About"
-msgstr "关于"
-
 msgid "Guides"
 msgstr "指南"
 
 msgid "API Docs"
 msgstr "API 文档"
 
+msgid "Elixir Docs"
+msgstr "Elixir 文档"
+
+msgid "Deployment Tutorial"
+msgstr ""
+
+msgid "Scaling Guide"
+msgstr ""
+
+msgid "Docs"
+msgstr ""
+
+msgid "Starter Template"
+msgstr ""
+
 msgid "Store"
 msgstr "商店"
+
+msgid "Server Stats"
+msgstr ""
 
 msgid "Help"
 msgstr "帮助"
@@ -64,6 +79,9 @@ msgstr "锦标赛"
 msgid "Groups"
 msgstr "群组"
 
+msgid "News"
+msgstr ""
+
 msgid "Getting Started"
 msgstr "快速开始"
 
@@ -75,6 +93,18 @@ msgstr "Gamend"
 
 msgid "**Open source** Elixir game server for **real-time** multiplayer games."
 msgstr "面向**实时**多人游戏的**开源** Elixir 游戏服务器。"
+
+msgid "Benchmarks"
+msgstr ""
+
+msgid "Godot SDK"
+msgstr ""
+
+msgid "The **backend for your multiplayer game** — accounts, lobbies, chat, leaderboards and everything players expect around the game itself. Server-side scripting in Elixir runs your own logic where players cannot reach it: scoring, rewards, matchmaking rules, validation. **You run it on your own server** — there is no hosted service."
+msgstr ""
+
+msgid "What is Gamend?"
+msgstr ""
 
 msgid "Log in"
 msgstr "登录"
@@ -88,8 +118,14 @@ msgstr "邮箱、魔法链接、OAuth、JWT 与会话。注册、登录、重置
 msgid "Authentication & Users"
 msgstr "身份验证与用户"
 
-msgid "Real-time lobbies and ephemeral parties. Customizable settings with live updates."
-msgstr "实时房间与临时队伍。可自定义设置，实时同步。"
+msgid "Lobbies"
+msgstr ""
+
+msgid "Matchmaking"
+msgstr ""
+
+msgid "Real-time lobbies with passwords, quick join and live updates. Ephemeral parties that join and get matched **as one unit**, a ticket-queue matchmaker and ready checks before anything starts."
+msgstr ""
 
 msgid "Lobbies, Parties & Matchmaking"
 msgstr "房间、队伍与匹配"
@@ -100,19 +136,27 @@ msgstr "好友请求、拉黑、实时在线状态。公开、私密和隐藏群
 msgid "Friends, Groups & Chat"
 msgstr "好友、群组与聊天"
 
-msgid "Server-authoritative achievements, bracket tournaments and leaderboards. Real-time notifications across features and payment events."
-msgstr "由服务器判定的成就、淘汰赛和排行榜。覆盖各项功能与支付事件的实时通知。"
+msgid "One server-authoritative quest engine for achievements, dailies, seasonal events and quest chains. Bracket tournaments, leaderboards with seasons, and real-time plus push notifications across every feature."
+msgstr ""
 
-msgid "Achievements, Tournaments, Leaderboards & Notifications"
-msgstr "成就、锦标赛、排行榜与通知"
+msgid "Quests, Tournaments & Leaderboards"
+msgstr ""
 
-msgid "Extend server logic with Elixir scripts. Schedule automated tasks and cron jobs."
-msgstr "用 Elixir 脚本扩展服务器逻辑。安排自动任务和定时任务。"
+#, fuzzy
+msgid "Server Scripting"
+msgstr "服务器脚本与定时任务"
+
+msgid "GDScript Hooks"
+msgstr ""
+
+msgid "Write server hooks in **Elixir, GDScript or Gleam** — scoring, rewards, matchmaking rules, validation — where players cannot reach them. Durable background jobs and cron scheduling built in."
+msgstr ""
 
 msgid "Server Scripting & Scheduling"
 msgstr "服务器脚本与定时任务"
 
-msgid "REST API, real-time WebSocket channels and low-latency WebRTC DataChannels. Admin portal and web UI."
+#, fuzzy
+msgid "REST API, real-time WebSocket channels and low-latency WebRTC DataChannels, with an opt-in protobuf realtime format. Admin portal and web UI, translated into 30 languages."
 msgstr "REST API、实时 WebSocket 频道和低延迟 WebRTC 数据通道。管理后台与网页界面。"
 
 msgid "HTTP, WebSocket & WebRTC"
@@ -129,6 +173,30 @@ msgstr "支持 Stripe、Google Play、App Store 和 Steam 的服务端支付。�
 
 msgid "Payments & Store Integrations"
 msgstr "支付与商店集成"
+
+msgid "Economy"
+msgstr ""
+
+msgid "Key-Value Store"
+msgstr ""
+
+msgid "Virtual currency wallets with an atomic, append-only ledger. Item stacks with grant and consume. A per-player and per-lobby **key-value store**, and object storage with presigned uploads on local disk or any S3-compatible backend."
+msgstr ""
+
+msgid "Economy, Inventory & Storage"
+msgstr ""
+
+msgid "Player Analytics"
+msgstr ""
+
+msgid "Client Logs"
+msgstr ""
+
+msgid "D1 / D7 / D30 retention, DAU and payer conversion built in. Client log sessions correlated with the server's own tail for per-player debugging. Prometheus metrics with Grafana, and a load-test harness with published benchmarks."
+msgstr ""
+
+msgid "Analytics, Logs & Observability"
+msgstr ""
 
 msgid "Game + Backend"
 msgstr "游戏 + 后端"

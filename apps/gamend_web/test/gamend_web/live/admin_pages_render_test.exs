@@ -30,6 +30,7 @@ defmodule GamendWeb.AdminPagesRenderTest do
     {"/admin/groups", "Groups"},
     {"/admin/parties", "Parties"},
     {"/admin/blacklist", "Blacklist"},
+    {"/admin/friends", "Friends"},
     {"/admin/chat", "Chat"},
     {"/admin/chat/reports", "reports"},
     {"/admin/chat/mutes", "mutes"},
@@ -38,6 +39,7 @@ defmodule GamendWeb.AdminPagesRenderTest do
     {"/admin/payments", "Payments"},
     {"/admin/translations", "Translation"},
     {"/admin/lobby_snapshots", "Lobby snapshots"},
+    {"/admin/retention", "Retention"},
     {"/admin/storage", "Storage"},
     {"/admin/economy", "Economy"},
     {"/admin/analytics", "Analytics"}

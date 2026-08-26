@@ -4,7 +4,7 @@ icon: hero-square-3-stack-3d
 
 # Elixir App Starter
 
-A ready-made starter repository. Instead of assembling this by hand, start from the maintained example repository: [github.com/appsinacup/gamend_starter](https://github.com/appsinacup/gamend_starter). Clone it, run it locally with `mix dev.start`, then customize. To deploy it, follow the [Deployment](/docs/setup?guide=deployment) guide.
+A ready-made starter repository. Instead of assembling this by hand, start from the maintained example repository: [github.com/appsinacup/gamend_starter](https://github.com/appsinacup/gamend_starter). Clone it, run it locally with `mix dev.start`, then customize. To deploy it, follow the [Deployment](/docs/deployment) guide.
 
 ## Recommended project shape
 

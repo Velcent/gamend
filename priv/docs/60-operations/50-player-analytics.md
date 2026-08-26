@@ -42,7 +42,7 @@ the first week". A dash means no cohort has reached that horizon yet — never
   dimension after a colon (`level.started.lang:ja`) so `counts/3` can pull a
   family with `level.started.lang:*`.
 - `client_sessions` — one row per run of the game on a device, written by
-  [client log](/docs/clients/godot-sdk) uploads. Bounded by *players ×
+  [client log](/docs/godot-sdk) uploads. Bounded by *players ×
   sessions per day*; the log lines themselves are **not** stored here, they go
   out through `Logger` to whatever log store the host runs. Pruned by
   `client_logs.retention_days` (14), or `retention_flagged_days` (90) for

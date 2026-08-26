@@ -94,7 +94,7 @@ docker compose logs -f app
 
 A sweep runs every 6 hours and prunes tables that would otherwise grow forever.
 Each class has its own window; `0` keeps that class forever. The current values
-and their variables are in the [Settings](/docs/setup?guide=settings) guide
+and their variables are in the [Settings](/docs/settings) guide
 under **Retention**; the last run and its per-class counts are on
 Admin -> System, which can also sweep on demand.
 

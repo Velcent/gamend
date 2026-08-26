@@ -711,6 +711,106 @@ defmodule Gamend.Friends do
   end
 
   @doc """
+  List every friendship row that is not a block, newest first, for admin views.
+
+  Covers pending, accepted and rejected rows; blocks belong to the Blacklist
+  and are listed with `list_all_blocks/1`.
+
+  ## Options
+
+    * `:user_id` - only rows where this user is the requester or the target
+    * `:status` - only rows with this status ("pending" | "accepted" | "rejected")
+    * `:page`, `:page_size` - see `t:Gamend.Types.pagination_opts/0`
+  """
+  @spec list_all_friendships(keyword()) :: [Friendship.t()]
+  def list_all_friendships(opts \\ []) do
+    page = Keyword.get(opts, :page, 1)
+    page_size = Keyword.get(opts, :page_size, 25)
+    offset = (page - 1) * page_size
+
+    opts
+    |> all_friendships_query()
+    |> order_by([f], desc: f.inserted_at)
+    |> limit(^page_size)
+    |> offset(^offset)
+    |> preload([:requester, :target])
+    |> Repo.all()
+  end
+
+  @doc "Count every non-block friendship row, honouring the same filters as `list_all_friendships/1`."
+  @spec count_all_friendships(keyword()) :: non_neg_integer()
+  def count_all_friendships(opts \\ []) do
+    Repo.one(from f in all_friendships_query(opts), select: count(f.id)) || 0
+  end
+
+  defp all_friendships_query(opts) do
+    query = from f in Friendship, where: f.status != "blocked"
+
+    query =
+      case Keyword.get(opts, :status) do
+        nil ->
+          query
+
+        "" ->
+          query
+
+        status ->
+          from f in query, where: f.status == ^status
+      end
+
+    case Keyword.get(opts, :user_id) do
+      nil ->
+        query
+
+      "" ->
+        query
+
+      user_id ->
+        from f in query,
+          where: f.requester_id == ^user_id or f.target_id == ^user_id
+    end
+  end
+
+  @doc """
+  Remove a non-block friendship row by its id, regardless of who created it.
+
+  For admin use — force-unfriend an accepted pair or cancel a request without
+  being either side of it. Blocked rows belong to the Blacklist; remove those
+  with `delete_block/1`.
+  """
+  @spec delete_friendship(Ecto.UUID.t()) :: {:ok, :removed} | {:error, :not_found}
+  def delete_friendship(friendship_id) when is_binary(friendship_id) do
+    case get_friendship(friendship_id) do
+      %Friendship{status: "blocked"} ->
+        {:error, :not_found}
+
+      %Friendship{} = f ->
+        {:ok, _} = Repo.delete(f)
+
+        _ = invalidate_friendship_cache(f.id)
+        _ = invalidate_friends_cache_pair(f.requester_id, f.target_id)
+
+        # An accepted pair leaves a DM history behind, same as remove_friend/2.
+        if f.status == "accepted" do
+          Gamend.Chat.cleanup_friend_chat(f.requester_id, f.target_id)
+        end
+
+        # A cancelled request and a removed friendship are different events to
+        # a connected client, so broadcast whichever the row actually was.
+        event = if f.status == "pending", do: :request_cancelled, else: :friend_removed
+        broadcast_user(f.requester_id, {event, f})
+        broadcast_user(f.target_id, {event, f})
+        broadcast_all({event, f})
+        if f.status == "pending", do: retract_friend_request_notification(f)
+
+        {:ok, :removed}
+
+      nil ->
+        {:error, :not_found}
+    end
+  end
+
+  @doc """
   Returns true if `user_id` is on a block with any of `other_ids`, in either
   direction. One query, regardless of how many others are checked.
   """

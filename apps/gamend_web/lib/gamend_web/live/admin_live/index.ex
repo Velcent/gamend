@@ -67,6 +67,9 @@ defmodule GamendWeb.AdminLive.Index do
           <.link navigate={~p"/admin/blacklist"} class="btn btn-outline">
             Blacklist ({@blacklist_count})
           </.link>
+          <.link navigate={~p"/admin/friends"} class="btn btn-outline">
+            Friends ({@friends_count})
+          </.link>
           <.link navigate={~p"/admin/parties"} class="btn btn-outline">
             Parties ({@parties_count})
           </.link>
@@ -99,6 +102,9 @@ defmodule GamendWeb.AdminLive.Index do
           </.link>
           <.link navigate={~p"/admin/system"} class="btn btn-outline">
             System
+          </.link>
+          <.link navigate={~p"/admin/retention"} class="btn btn-outline">
+            Retention
           </.link>
           <.link navigate={~p"/admin/runtime"} class="btn btn-outline">
             Runtime
@@ -752,6 +758,7 @@ defmodule GamendWeb.AdminLive.Index do
       groups_members: Task.async(fn -> Groups.count_all_members() end),
       parties_count: Task.async(fn -> Parties.count_all_parties() end),
       blacklist_count: Task.async(fn -> Gamend.Friends.count_all_blocks() end),
+      friends_count: Task.async(fn -> Gamend.Friends.count_all_friendships() end),
       parties_members: Task.async(fn -> Parties.count_all_party_members() end),
       chat_count: Task.async(fn -> Gamend.Chat.count_all_messages() end),
       chat_senders: Task.async(fn -> Gamend.Chat.count_unique_senders() end),
@@ -816,6 +823,7 @@ defmodule GamendWeb.AdminLive.Index do
        groups_members: r.groups_members,
        parties_count: r.parties_count,
        blacklist_count: r.blacklist_count,
+       friends_count: r.friends_count,
        parties_members: r.parties_members,
        chat_count: r.chat_count,
        chat_senders: r.chat_senders,

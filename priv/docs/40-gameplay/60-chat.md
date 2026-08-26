@@ -274,7 +274,7 @@ limits, per-lobby etiquette, or a call out to a classifier. It can still reject
 or rewrite anything core let through. Two observation hooks watch what core did:
 after_chat_message_reported fires for every report (player-filed or
 filter-filed) and after_user_muted for every mute, which is where a strike
-policy belongs — see the [Server scripting](/docs/setup?guide=server-scripting)
+policy belongs — see the [Server scripting](/docs/server-scripting)
 guide.
 
 ```elixir

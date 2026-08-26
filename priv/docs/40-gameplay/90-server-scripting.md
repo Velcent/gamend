@@ -272,6 +272,33 @@ end
 - Tests that modify global plugin configuration (eg. `GAMEND_CONTENT_PLUGINS_DIR` ) should run serially (`async: false`) and restore env via `on_exit` to avoid cross-test races.
 - Be careful modifying user or lobby data from hooks — reuse high-level domain functions (eg. `Gamend.Accounts.update_user/2`, `Gamend.Lobbies.update_lobby/2` ) so changes are validated and broadcast consistently.
 
+## Server signals
+
+Hooks are request-shaped: something happens, your code runs, it returns. When
+one part of a plugin needs to *wait* for another part, use `Gamend.Signals` —
+the server's answer to Godot's `signal` / `emit` / `await`. Signals are scoped
+to your plugin, so two plugins can use the same name without colliding, and
+they ride `Phoenix.PubSub`, so an emit reaches every node in a cluster.
+
+```elixir
+# One hook finishes a level and announces it — :ok whether or not
+# anyone is listening; an unheard signal is dropped, as in Godot.
+Gamend.Signals.emit("my_game", "level_up", [user_id, 5])
+
+# Another waits for it. Subscribe BEFORE await, not inside it —
+# a signal emitted between the two would otherwise be missed.
+Gamend.Signals.subscribe("my_game", "level_up")
+{:ok, [user_id, level]} = Gamend.Signals.await("my_game", "level_up", 10_000)
+```
+
+`await/3` returns `{:ok, payload}` — whatever the emitter passed, unchanged —
+or `{:error, :timeout}` after the given timeout (30 seconds by default). A
+subscription belongs to the process that made it, so when a hook's task ends
+the subscription goes with it; `Gamend.Signals.topic/2` names the underlying
+PubSub topic for a plugin that wants to subscribe by hand. GDScript plugins
+get the subscribe-first rule for free: the GDScript front end subscribes at
+function entry for every signal the function awaits.
+
 ## Other BEAM languages (Gleam, LFE, Erlang)
 
 Hooks are dispatched with `function_exported?/3`, so a plugin only has to

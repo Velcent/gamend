@@ -7,6 +7,9 @@ msgstr ""
 msgid "Open source Elixir game server for real-time multiplayer games."
 msgstr "실시간 멀티플레이 게임을 위한 오픈 소스 Elixir 게임 서버."
 
+msgid "GitHub"
+msgstr ""
+
 msgid "Discord"
 msgstr "Discord"
 
@@ -22,20 +25,32 @@ msgstr "변경 내역"
 msgid "Social"
 msgstr "소셜"
 
-msgid "Elixir Docs"
-msgstr "Elixir 문서"
-
-msgid "About"
-msgstr "소개"
-
 msgid "Guides"
 msgstr "가이드"
 
 msgid "API Docs"
 msgstr "API 문서"
 
+msgid "Elixir Docs"
+msgstr "Elixir 문서"
+
+msgid "Deployment Tutorial"
+msgstr ""
+
+msgid "Scaling Guide"
+msgstr ""
+
+msgid "Docs"
+msgstr ""
+
+msgid "Starter Template"
+msgstr ""
+
 msgid "Store"
 msgstr "스토어"
+
+msgid "Server Stats"
+msgstr ""
 
 msgid "Help"
 msgstr "도움말"
@@ -64,6 +79,9 @@ msgstr "토너먼트"
 msgid "Groups"
 msgstr "그룹"
 
+msgid "News"
+msgstr ""
+
 msgid "Getting Started"
 msgstr "시작하기"
 
@@ -75,6 +93,18 @@ msgstr "Gamend"
 
 msgid "**Open source** Elixir game server for **real-time** multiplayer games."
 msgstr "**실시간** 멀티플레이 게임을 위한 **오픈 소스** Elixir 게임 서버."
+
+msgid "Benchmarks"
+msgstr ""
+
+msgid "Godot SDK"
+msgstr ""
+
+msgid "The **backend for your multiplayer game** — accounts, lobbies, chat, leaderboards and everything players expect around the game itself. Server-side scripting in Elixir runs your own logic where players cannot reach it: scoring, rewards, matchmaking rules, validation. **You run it on your own server** — there is no hosted service."
+msgstr ""
+
+msgid "What is Gamend?"
+msgstr ""
 
 msgid "Log in"
 msgstr "로그인"
@@ -88,8 +118,14 @@ msgstr "이메일, 매직 링크, OAuth, JWT, 세션. 가입, 로그인, 비밀�
 msgid "Authentication & Users"
 msgstr "인증 및 사용자"
 
-msgid "Real-time lobbies and ephemeral parties. Customizable settings with live updates."
-msgstr "실시간 로비와 일시적인 파티. 실시간으로 반영되는 사용자 지정 설정."
+msgid "Lobbies"
+msgstr ""
+
+msgid "Matchmaking"
+msgstr ""
+
+msgid "Real-time lobbies with passwords, quick join and live updates. Ephemeral parties that join and get matched **as one unit**, a ticket-queue matchmaker and ready checks before anything starts."
+msgstr ""
 
 msgid "Lobbies, Parties & Matchmaking"
 msgstr "로비, 파티, 매치메이킹"
@@ -100,19 +136,27 @@ msgstr "친구 요청, 차단, 실시간 접속 상태. 공개, 비공개, 숨�
 msgid "Friends, Groups & Chat"
 msgstr "친구, 그룹, 채팅"
 
-msgid "Server-authoritative achievements, bracket tournaments and leaderboards. Real-time notifications across features and payment events."
-msgstr "서버가 판정하는 업적, 토너먼트 대진, 리더보드. 모든 기능과 결제 이벤트에 대한 실시간 알림."
+msgid "One server-authoritative quest engine for achievements, dailies, seasonal events and quest chains. Bracket tournaments, leaderboards with seasons, and real-time plus push notifications across every feature."
+msgstr ""
 
-msgid "Achievements, Tournaments, Leaderboards & Notifications"
-msgstr "업적, 토너먼트, 리더보드, 알림"
+msgid "Quests, Tournaments & Leaderboards"
+msgstr ""
 
-msgid "Extend server logic with Elixir scripts. Schedule automated tasks and cron jobs."
-msgstr "Elixir 스크립트로 서버 로직을 확장하세요. 자동 작업과 cron 작업을 예약할 수 있습니다."
+#, fuzzy
+msgid "Server Scripting"
+msgstr "서버 스크립팅 및 스케줄링"
+
+msgid "GDScript Hooks"
+msgstr ""
+
+msgid "Write server hooks in **Elixir, GDScript or Gleam** — scoring, rewards, matchmaking rules, validation — where players cannot reach them. Durable background jobs and cron scheduling built in."
+msgstr ""
 
 msgid "Server Scripting & Scheduling"
 msgstr "서버 스크립팅 및 스케줄링"
 
-msgid "REST API, real-time WebSocket channels and low-latency WebRTC DataChannels. Admin portal and web UI."
+#, fuzzy
+msgid "REST API, real-time WebSocket channels and low-latency WebRTC DataChannels, with an opt-in protobuf realtime format. Admin portal and web UI, translated into 30 languages."
 msgstr "REST API, 실시간 WebSocket 채널, 저지연 WebRTC DataChannel. 관리자 포털과 웹 UI."
 
 msgid "HTTP, WebSocket & WebRTC"
@@ -129,6 +173,30 @@ msgstr "Stripe, Google Play, App Store, Steam을 지원하는 서버 측 결제.
 
 msgid "Payments & Store Integrations"
 msgstr "결제 및 스토어 연동"
+
+msgid "Economy"
+msgstr ""
+
+msgid "Key-Value Store"
+msgstr ""
+
+msgid "Virtual currency wallets with an atomic, append-only ledger. Item stacks with grant and consume. A per-player and per-lobby **key-value store**, and object storage with presigned uploads on local disk or any S3-compatible backend."
+msgstr ""
+
+msgid "Economy, Inventory & Storage"
+msgstr ""
+
+msgid "Player Analytics"
+msgstr ""
+
+msgid "Client Logs"
+msgstr ""
+
+msgid "D1 / D7 / D30 retention, DAU and payer conversion built in. Client log sessions correlated with the server's own tail for per-player debugging. Prometheus metrics with Grafana, and a load-test harness with published benchmarks."
+msgstr ""
+
+msgid "Analytics, Logs & Observability"
+msgstr ""
 
 msgid "Game + Backend"
 msgstr "게임 + 백엔드"
