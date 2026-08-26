@@ -118,6 +118,14 @@ Cancel an outgoing friend request (only the requester may cancel).
 
 Count every block across all users, honouring the same filters as `list_all_blocks/1`.
 
+# `count_all_friendships`
+
+```elixir
+@spec count_all_friendships(keyword()) :: non_neg_integer()
+```
+
+Count every non-block friendship row, honouring the same filters as `list_all_friendships/1`.
+
 # `count_blocked_for_user`
 
 ```elixir
@@ -187,6 +195,18 @@ Remove a block by its friendship id, regardless of who created it.
 For admin use — `unblock_user/2` is the player-facing path and only lets the
 blocker lift their own block.
 
+# `delete_friendship`
+
+```elixir
+@spec delete_friendship(Ecto.UUID.t()) :: {:ok, :removed} | {:error, :not_found}
+```
+
+Remove a non-block friendship row by its id, regardless of who created it.
+
+For admin use — force-unfriend an accepted pair or cancel a request without
+being either side of it. Blocked rows belong to the Blacklist; remove those
+with `delete_block/1`.
+
 # `friend_ids`
 
 ```elixir
@@ -241,6 +261,23 @@ List every block across all users, newest first, for admin views.
 ## Options
 
   * `:user_id` - only blocks where this user is the blocker or the blocked
+  * `:page`, `:page_size` - see `t:Gamend.Types.pagination_opts/0`
+
+# `list_all_friendships`
+
+```elixir
+@spec list_all_friendships(keyword()) :: [Gamend.Friends.Friendship.t()]
+```
+
+List every friendship row that is not a block, newest first, for admin views.
+
+Covers pending, accepted and rejected rows; blocks belong to the Blacklist
+and are listed with `list_all_blocks/1`.
+
+## Options
+
+  * `:user_id` - only rows where this user is the requester or the target
+  * `:status` - only rows with this status ("pending" | "accepted" | "rejected")
   * `:page`, `:page_size` - see `t:Gamend.Types.pagination_opts/0`
 
 # `list_blocked_for_user`

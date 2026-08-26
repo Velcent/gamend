@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.3">
-    <meta name="project" content="gamend_core v1.0.1198">
+    <meta name="project" content="gamend_core v1.0.1202">
 
 
-    <title>Gamend.Friends — gamend_core v1.0.1198</title>
+    <title>Gamend.Friends — gamend_core v1.0.1202</title>
 
     <link rel="stylesheet" href="dist/html-elixir-NHQLCD6Y.css" />
 
-    <script defer src="dist/sidebar_items-13787474.js"></script>
+    <script defer src="dist/sidebar_items-1B28CE9E.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-Y2MUTVIN.js"></script>
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1198
+          v1.0.1202
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr />Friends</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1198)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1202)</small>
 
     </h1>
 
@@ -117,19 +117,19 @@ gamend_core
 <p>Friends context - handles friend requests and relationships.</p><p>Basic semantics:</p><ul><li>A single <code class="inline">friendships</code> row represents a directed request from requester -&gt; target.</li><li><p>status: &quot;pending&quot; | &quot;accepted&quot; | &quot;rejected&quot; | &quot;blocked&quot;</p></li><li>When a user accepts a pending incoming request, that request becomes <code class="inline">accepted</code>.
 If a reverse pending request exists, it will be removed to avoid duplicate rows.</li><li>Listing friends returns the other user from rows with status <code class="inline">accepted</code> in either
 direction.</li></ul><h2 id="module-usage" class="section-heading"><a href="#module-usage" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Usage</span></h2><pre><code class="makeup elixir" translate="no"><span class="c1"># Create a friend request (requester -&gt; target)</span><span class="w">
-</span><span class="p" data-group-id="9589355380-1">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">friendship</span><span class="p" data-group-id="9589355380-1">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Gamend.Friends</span><span class="o">.</span><span class="n">create_request</span><span class="p" data-group-id="9589355380-2">(</span><span class="n">requester_id</span><span class="p">,</span><span class="w"> </span><span class="n">target_id</span><span class="p" data-group-id="9589355380-2">)</span><span class="w">
+</span><span class="p" data-group-id="4754461925-1">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">friendship</span><span class="p" data-group-id="4754461925-1">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Gamend.Friends</span><span class="o">.</span><span class="n">create_request</span><span class="p" data-group-id="4754461925-2">(</span><span class="n">requester_id</span><span class="p">,</span><span class="w"> </span><span class="n">target_id</span><span class="p" data-group-id="4754461925-2">)</span><span class="w">
 
 </span><span class="c1"># Accept a pending incoming request (performed by the target)</span><span class="w">
-</span><span class="p" data-group-id="9589355380-3">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">accepted</span><span class="p" data-group-id="9589355380-3">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Gamend.Friends</span><span class="o">.</span><span class="n">accept_friend_request</span><span class="p" data-group-id="9589355380-4">(</span><span class="n">friendship</span><span class="o">.</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="9589355380-5">%</span><span class="nc" data-group-id="9589355380-5">Gamend.Accounts.User</span><span class="p" data-group-id="9589355380-5">{</span><span class="ss">id</span><span class="p">:</span><span class="w"> </span><span class="n">target_id</span><span class="p" data-group-id="9589355380-5">}</span><span class="p" data-group-id="9589355380-4">)</span><span class="w">
+</span><span class="p" data-group-id="4754461925-3">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">accepted</span><span class="p" data-group-id="4754461925-3">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Gamend.Friends</span><span class="o">.</span><span class="n">accept_friend_request</span><span class="p" data-group-id="4754461925-4">(</span><span class="n">friendship</span><span class="o">.</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="4754461925-5">%</span><span class="nc" data-group-id="4754461925-5">Gamend.Accounts.User</span><span class="p" data-group-id="4754461925-5">{</span><span class="ss">id</span><span class="p">:</span><span class="w"> </span><span class="n">target_id</span><span class="p" data-group-id="4754461925-5">}</span><span class="p" data-group-id="4754461925-4">)</span><span class="w">
 
 </span><span class="c1"># List accepted friends for a user (paginated)</span><span class="w">
-</span><span class="n">friends</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Gamend.Friends</span><span class="o">.</span><span class="n">list_friends_for_user</span><span class="p" data-group-id="9589355380-6">(</span><span class="n">user_id</span><span class="p">,</span><span class="w"> </span><span class="ss">page</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="ss">page_size</span><span class="p">:</span><span class="w"> </span><span class="mi">25</span><span class="p" data-group-id="9589355380-6">)</span><span class="w">
+</span><span class="n">friends</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Gamend.Friends</span><span class="o">.</span><span class="n">list_friends_for_user</span><span class="p" data-group-id="4754461925-6">(</span><span class="n">user_id</span><span class="p">,</span><span class="w"> </span><span class="ss">page</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="ss">page_size</span><span class="p">:</span><span class="w"> </span><span class="mi">25</span><span class="p" data-group-id="4754461925-6">)</span><span class="w">
 
 </span><span class="c1"># Count accepted friends for a user</span><span class="w">
-</span><span class="n">count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Gamend.Friends</span><span class="o">.</span><span class="n">count_friends_for_user</span><span class="p" data-group-id="9589355380-7">(</span><span class="n">user_id</span><span class="p" data-group-id="9589355380-7">)</span><span class="w">
+</span><span class="n">count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Gamend.Friends</span><span class="o">.</span><span class="n">count_friends_for_user</span><span class="p" data-group-id="4754461925-7">(</span><span class="n">user_id</span><span class="p" data-group-id="4754461925-7">)</span><span class="w">
 
 </span><span class="c1"># Remove a friendship (either direction)</span><span class="w">
-</span><span class="p" data-group-id="9589355380-8">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="bp">_</span><span class="p" data-group-id="9589355380-8">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Gamend.Friends</span><span class="o">.</span><span class="n">remove_friend</span><span class="p" data-group-id="9589355380-9">(</span><span class="n">user_id</span><span class="p">,</span><span class="w"> </span><span class="n">friend_id</span><span class="p" data-group-id="9589355380-9">)</span></code></pre>
+</span><span class="p" data-group-id="4754461925-8">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="bp">_</span><span class="p" data-group-id="4754461925-8">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Gamend.Friends</span><span class="o">.</span><span class="n">remove_friend</span><span class="p" data-group-id="4754461925-9">(</span><span class="n">user_id</span><span class="p">,</span><span class="w"> </span><span class="n">friend_id</span><span class="p" data-group-id="4754461925-9">)</span></code></pre>
     </section>
 
 </div>
@@ -244,6 +244,16 @@ direction. One query, regardless of how many others are checked.</p></div>
 
     <div class="summary-row">
       <div class="summary-signature">
+        <a href="#count_all_friendships/1" data-no-tooltip="" translate="no">count_all_friendships(opts \\ [])</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Count every non-block friendship row, honouring the same filters as <a href="#list_all_friendships/1"><code class="inline">list_all_friendships/1</code></a>.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
         <a href="#count_blocked_for_user/1" data-no-tooltip="" translate="no">count_blocked_for_user(user_id)</a>
 
       </div>
@@ -316,6 +326,16 @@ direction. One query, regardless of how many others are checked.</p></div>
 
     <div class="summary-row">
       <div class="summary-signature">
+        <a href="#delete_friendship/1" data-no-tooltip="" translate="no">delete_friendship(friendship_id)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Remove a non-block friendship row by its id, regardless of who created it.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
         <a href="#friend_ids/1" data-no-tooltip="" translate="no">friend_ids(user_id)</a>
 
       </div>
@@ -371,6 +391,16 @@ direction. One query, regardless of how many others are checked.</p></div>
       </div>
 
         <div class="summary-synopsis"><p>List every block across all users, newest first, for admin views.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#list_all_friendships/1" data-no-tooltip="" translate="no">list_all_friendships(opts \\ [])</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>List every friendship row that is not a block, newest first, for admin views.</p></div>
 
     </div>
 
@@ -594,7 +624,7 @@ direction. One query, regardless of how many others are checked.</p></div>
       <h1 class="signature" translate="no">any_blocked?(user_id, other_ids)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/friends.ex#L718" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/friends.ex#L818" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -793,6 +823,36 @@ which is what makes per-pair filtering cheap in matchmaking.</p>
 <p>Count every block across all users, honouring the same filters as <a href="#list_all_blocks/1"><code class="inline">list_all_blocks/1</code></a>.</p>
   </section>
 </section>
+<section class="detail" id="count_all_friendships/1">
+
+    <span id="count_all_friendships/0"></span>
+
+  <div class="detail-header">
+    <a href="#count_all_friendships/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">count_all_friendships(opts \\ [])</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/friends.ex#L742" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> count_all_friendships(<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">keyword</a>()) :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>()</pre>
+
+      </div>
+
+<p>Count every non-block friendship row, honouring the same filters as <a href="#list_all_friendships/1"><code class="inline">list_all_friendships/1</code></a>.</p>
+  </section>
+</section>
 <section class="detail" id="count_blocked_for_user/1">
 
   <div class="detail-header">
@@ -803,7 +863,7 @@ which is what makes per-pair filtering cheap in matchmaking.</p>
       <h1 class="signature" translate="no">count_blocked_for_user(user_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/friends.ex#L763" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/friends.ex#L863" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -859,7 +919,7 @@ which is what makes per-pair filtering cheap in matchmaking.</p>
       <h1 class="signature" translate="no">count_friends_for_user(user_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/friends.ex#L887" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/friends.ex#L987" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -887,7 +947,7 @@ which is what makes per-pair filtering cheap in matchmaking.</p>
       <h1 class="signature" translate="no">count_incoming_requests(user_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/friends.ex#L940" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/friends.ex#L1040" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -915,7 +975,7 @@ which is what makes per-pair filtering cheap in matchmaking.</p>
       <h1 class="signature" translate="no">count_outgoing_requests(user_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/friends.ex#L985" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/friends.ex#L1085" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -999,6 +1059,36 @@ which is what makes per-pair filtering cheap in matchmaking.</p>
 blocker lift their own block.</p>
   </section>
 </section>
+<section class="detail" id="delete_friendship/1">
+
+  <div class="detail-header">
+    <a href="#delete_friendship/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">delete_friendship(friendship_id)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/friends.ex#L782" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> delete_friendship(<a href="https://hexdocs.pm/ecto/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) :: {:ok, :removed} | {:error, :not_found}</pre>
+
+      </div>
+
+<p>Remove a non-block friendship row by its id, regardless of who created it.</p><p>For admin use — force-unfriend an accepted pair or cancel a request without
+being either side of it. Blocked rows belong to the Blacklist; remove those
+with <a href="#delete_block/1"><code class="inline">delete_block/1</code></a>.</p>
+  </section>
+</section>
 <section class="detail" id="friend_ids/1">
 
   <div class="detail-header">
@@ -1009,7 +1099,7 @@ blocker lift their own block.</p>
       <h1 class="signature" translate="no">friend_ids(user_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/friends.ex#L1027" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/friends.ex#L1127" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1066,7 +1156,7 @@ and does <em>not</em> paginate – it returns all friend IDs.</p>
       <h1 class="signature" translate="no">get_by_pair(requester_id, target_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/friends.ex#L1016" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/friends.ex#L1116" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1170,6 +1260,37 @@ and does <em>not</em> paginate – it returns all friend IDs.</p>
 <p>List every block across all users, newest first, for admin views.</p><h2 id="list_all_blocks/1-options" class="section-heading"><a href="#list_all_blocks/1-options" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Options</span></h2><ul><li><code class="inline">:user_id</code> - only blocks where this user is the blocker or the blocked</li><li><code class="inline">:page</code>, <code class="inline">:page_size</code> - see <a href="Gamend.Types.html#t:pagination_opts/0"><code class="inline">Gamend.Types.pagination_opts/0</code></a></li></ul>
   </section>
 </section>
+<section class="detail" id="list_all_friendships/1">
+
+    <span id="list_all_friendships/0"></span>
+
+  <div class="detail-header">
+    <a href="#list_all_friendships/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">list_all_friendships(opts \\ [])</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/friends.ex#L726" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> list_all_friendships(<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">keyword</a>()) :: [<a href="Gamend.Friends.Friendship.html#t:t/0">Gamend.Friends.Friendship.t</a>()]</pre>
+
+      </div>
+
+<p>List every friendship row that is not a block, newest first, for admin views.</p><p>Covers pending, accepted and rejected rows; blocks belong to the Blacklist
+and are listed with <a href="#list_all_blocks/1"><code class="inline">list_all_blocks/1</code></a>.</p><h2 id="list_all_friendships/1-options" class="section-heading"><a href="#list_all_friendships/1-options" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Options</span></h2><ul><li><code class="inline">:user_id</code> - only rows where this user is the requester or the target</li><li><p><code class="inline">:status</code> - only rows with this status (&quot;pending&quot; | &quot;accepted&quot; | &quot;rejected&quot;)</p></li><li><code class="inline">:page</code>, <code class="inline">:page_size</code> - see <a href="Gamend.Types.html#t:pagination_opts/0"><code class="inline">Gamend.Types.pagination_opts/0</code></a></li></ul>
+  </section>
+</section>
 <section class="detail" id="list_blocked_for_user/2">
 
     <span id="list_blocked_for_user/1"></span>
@@ -1182,7 +1303,7 @@ and does <em>not</em> paginate – it returns all friend IDs.</p>
       <h1 class="signature" translate="no">list_blocked_for_user(user_id, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/friends.ex#L739" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/friends.ex#L839" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1247,7 +1368,7 @@ underlying friendship rows.</p><p>See <a href="Gamend.Types.html#t:pagination_op
       <h1 class="signature" translate="no">list_friends_for_user(user_id, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/friends.ex#L807" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/friends.ex#L907" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1279,7 +1400,7 @@ underlying friendship rows.</p><p>See <a href="Gamend.Types.html#t:pagination_op
       <h1 class="signature" translate="no">list_friends_with_friendship(user_id, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/friends.ex#L855" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/friends.ex#L955" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1311,7 +1432,7 @@ underlying friendship rows.</p><p>See <a href="Gamend.Types.html#t:pagination_op
       <h1 class="signature" translate="no">list_incoming_requests(user_id, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/friends.ex#L916" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/friends.ex#L1016" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1343,7 +1464,7 @@ underlying friendship rows.</p><p>See <a href="Gamend.Types.html#t:pagination_op
       <h1 class="signature" translate="no">list_outgoing_requests(user_id, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/friends.ex#L961" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/friends.ex#L1061" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1373,7 +1494,7 @@ underlying friendship rows.</p><p>See <a href="Gamend.Types.html#t:pagination_op
       <h1 class="signature" translate="no">pair_key(a, b)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/friends.ex#L733" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/friends.ex#L833" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1487,7 +1608,7 @@ underlying friendship rows.</p><p>See <a href="Gamend.Types.html#t:pagination_op
       <h1 class="signature" translate="no">unblock_friendship(friendship_id, user)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/friends.ex#L777" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/friends.ex#L877" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1572,9 +1693,9 @@ underlying friendship rows.</p><p>See <a href="Gamend.Types.html#t:pagination_op
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1198">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1202">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1198">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1202">Hex Preview</a>
 
             </span>
 
