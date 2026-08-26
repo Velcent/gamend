@@ -162,10 +162,16 @@ defmodule GamendHost.MixProject do
             web_cmd("credo --strict")
           ]) ++ plugin_commands("format"),
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
-      "assets.build": ["compile", "tailwind gamend_web", "esbuild gamend_web"],
+      "assets.build": [
+        "compile",
+        "tailwind gamend_web",
+        "esbuild gamend_web",
+        "esbuild gamend_host_hooks"
+      ],
       "assets.deploy": [
         "tailwind gamend_web --minify",
         "esbuild gamend_web --minify",
+        "esbuild gamend_host_hooks --minify",
         "phx.digest"
       ]
     ]

@@ -1,5 +1,7 @@
 # August 2026
 
+- [added] **Image lightbox** — clicking a home-page screenshot opens it full-size (ported from the Polyglot Pirates host).
+- [changed] **Home page shows the product** — real screenshots (light and dark) of the admin dashboard, quests, groups, login, store, matchmaking, analytics, runtime hooks and economy pages instead of icons; the hero states that Gamend is backend, player website and admin panel in one. `scripts/screenshots/` recaptures them.
 - [added] **News dropdown** in the navigation — blog, changelog, roadmap and guides.
 - [changed] **Home page reflects the current feature set** — quests instead of achievements, GDScript/Gleam scripting, and new economy/storage and analytics/observability sections.
 - [added] **Friends admin page**

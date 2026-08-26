@@ -88,11 +88,15 @@ msgstr "시작하기"
 msgid "Presentation Video"
 msgstr "소개 영상"
 
+msgid "The Gamend admin dashboard with live counts for every feature"
+msgstr ""
+
+#, fuzzy
+msgid "**Open source** Elixir game server for **real-time** multiplayer games — backend, player website and admin panel in one."
+msgstr "**실시간** 멀티플레이 게임을 위한 **오픈 소스** Elixir 게임 서버."
+
 msgid "Gamend"
 msgstr "Gamend"
-
-msgid "**Open source** Elixir game server for **real-time** multiplayer games."
-msgstr "**실시간** 멀티플레이 게임을 위한 **오픈 소스** Elixir 게임 서버."
 
 msgid "Benchmarks"
 msgstr ""
@@ -100,7 +104,8 @@ msgstr ""
 msgid "Godot SDK"
 msgstr ""
 
-msgid "The **backend for your multiplayer game** — accounts, lobbies, chat, leaderboards and everything players expect around the game itself. Server-side scripting in Elixir runs your own logic where players cannot reach it: scoring, rewards, matchmaking rules, validation. **You run it on your own server** — there is no hosted service."
+#, fuzzy
+msgid "The **backend for your multiplayer game** — accounts, lobbies, chat, leaderboards and everything players expect around the game itself — plus the **web UI around it**: a ready-made player website (store, leaderboards, tournaments, quests, groups, chat) and a full **admin panel**. Server-side scripting runs your own logic where players cannot reach it. **You run it on your own server** — there is no hosted service."
 msgstr ""
 
 msgid "What is Gamend?"
@@ -111,6 +116,9 @@ msgstr "로그인"
 
 msgid "Register"
 msgstr "가입하기"
+
+msgid "The login page with magic link, password and five OAuth providers"
+msgstr ""
 
 msgid "Email, Magic-link, OAuth, JWT and Session. Register, login, reset password and verify email."
 msgstr "이메일, 매직 링크, OAuth, JWT, 세션. 가입, 로그인, 비밀번호 재설정, 이메일 인증."
@@ -124,17 +132,26 @@ msgstr ""
 msgid "Matchmaking"
 msgstr ""
 
+msgid "The matchmaking admin page with live queues, tickets and ready checks"
+msgstr ""
+
 msgid "Real-time lobbies with passwords, quick join and live updates. Ephemeral parties that join and get matched **as one unit**, a ticket-queue matchmaker and ready checks before anything starts."
 msgstr ""
 
 msgid "Lobbies, Parties & Matchmaking"
 msgstr "로비, 파티, 매치메이킹"
 
+msgid "The public groups browser"
+msgstr ""
+
 msgid "Friend requests, blocking, real-time presence. Public, private and hidden groups. Direct and group messaging."
 msgstr "친구 요청, 차단, 실시간 접속 상태. 공개, 비공개, 숨김 그룹. 1:1 및 그룹 메시지."
 
 msgid "Friends, Groups & Chat"
 msgstr "친구, 그룹, 채팅"
+
+msgid "The quests page with daily, achievement and event quests"
+msgstr ""
 
 msgid "One server-authoritative quest engine for achievements, dailies, seasonal events and quest chains. Bracket tournaments, leaderboards with seasons, and real-time plus push notifications across every feature."
 msgstr ""
@@ -147,6 +164,9 @@ msgid "Server Scripting"
 msgstr "서버 스크립팅 및 스케줄링"
 
 msgid "GDScript Hooks"
+msgstr ""
+
+msgid "Runtime introspection listing every hook with its implementing plugins"
 msgstr ""
 
 msgid "Write server hooks in **Elixir, GDScript or Gleam** — scoring, rewards, matchmaking rules, validation — where players cannot reach them. Durable background jobs and cron scheduling built in."
@@ -168,6 +188,9 @@ msgstr "스토어 열기"
 msgid "Payment Docs"
 msgstr "결제 문서"
 
+msgid "The built-in store page with priced products"
+msgstr ""
+
 msgid "Server-side payments with Stripe, Google Play, App Store, and Steam providers. Validate receipts, process signed webhooks, grant entitlements, revoke refunds, and inspect everything in admin."
 msgstr "Stripe, Google Play, App Store, Steam을 지원하는 서버 측 결제. 영수증 검증, 서명된 웹훅 처리, 권한 부여, 환불 취소까지 모두 관리자에서 확인할 수 있습니다."
 
@@ -180,6 +203,9 @@ msgstr ""
 msgid "Key-Value Store"
 msgstr ""
 
+msgid "The economy admin page with wallets and grant and spend controls"
+msgstr ""
+
 msgid "Virtual currency wallets with an atomic, append-only ledger. Item stacks with grant and consume. A per-player and per-lobby **key-value store**, and object storage with presigned uploads on local disk or any S3-compatible backend."
 msgstr ""
 
@@ -190,6 +216,9 @@ msgid "Player Analytics"
 msgstr ""
 
 msgid "Client Logs"
+msgstr ""
+
+msgid "The analytics admin page with DAU and D1, D7 and D30 retention"
 msgstr ""
 
 msgid "D1 / D7 / D30 retention, DAU and payer conversion built in. Client log sessions correlated with the server's own tail for per-player debugging. Prometheus metrics with Grafana, and a load-test harness with published benchmarks."

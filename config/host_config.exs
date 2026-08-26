@@ -190,6 +190,36 @@ config :esbuild,
     }
   ]
 
+# Host-side browser extras (e.g. the image lightbox that picks up the
+# `data-lightbox` presentation images). The web app reads this list from the
+# `gamend-extra-hooks` meta tag and imports each module at boot; the bundle
+# below is its own esbuild entry, separate from the web app's.
+host_hooks_entry = Path.join(host_root, "assets/js/host_hooks.js")
+host_has_extra_hooks = File.exists?(host_hooks_entry)
+host_extra_hook_modules = if host_has_extra_hooks, do: ["/assets/js/host_hooks.js"], else: []
+
+config :gamend_web, :extra_hook_modules, host_extra_hook_modules
+
+if host_has_extra_hooks do
+  config :esbuild, :gamend_host_hooks,
+    args: [
+      "assets/js/host_hooks.js",
+      "--bundle",
+      "--format=esm",
+      "--target=es2022",
+      "--outfile=priv/static/assets/js/host_hooks.js",
+      "--alias:@=."
+    ],
+    cd: host_root,
+    env: %{
+      "NODE_PATH" => [
+        Path.join(host_root, "deps"),
+        Mix.Project.build_path(),
+        Path.join(Mix.Project.build_path(), Atom.to_string(config_env()))
+      ]
+    }
+end
+
 # Configure tailwind (the version is required)
 config :tailwind,
   version: "4.1.7",

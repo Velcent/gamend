@@ -58,6 +58,10 @@ config :gamend_web, GamendWeb.Endpoint,
   secret_key_base: "l/tTJZ4KUNjIfiUsNQDQLWOTgFlyiOz8RQ2EgSRa7mopMzPLJuu7/8s5pA7iiSgO",
   watchers: [
     esbuild: {Esbuild, :install_and_run, [:gamend_web, ~w(--sourcemap=inline --watch)]},
+    # `assets/js/host_hooks.js` is its own bundle, not part of the web app's, so
+    # the watcher above never sees it. Without this entry an edit there is
+    # invisible in dev until someone runs `mix assets.build`.
+    host_hooks: {Esbuild, :install_and_run, [:gamend_host_hooks, ~w(--sourcemap=inline --watch)]},
     tailwind: {Tailwind, :install_and_run, [:gamend_web, ~w(--watch)]}
   ]
 

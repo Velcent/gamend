@@ -11,10 +11,11 @@
       "path": "/",
       "hero": {
         "title": "Gamend",
-        "text": "**Open source** Elixir game server for **real-time** multiplayer games.",
+        "text": "**Open source** Elixir game server for **real-time** multiplayer games — backend, player website and admin panel in one.",
         "image": {
-          "light": "/images/banner.png",
-          "alt": "Gamend"
+          "light": "/images/screenshots/admin-overview-light.png",
+          "dark": "/images/screenshots/admin-overview-dark.png",
+          "alt": "The Gamend admin dashboard with live counts for every feature"
         },
         "image_position_desktop": "left",
         "image_position_mobile": "top",
@@ -51,7 +52,11 @@
       "sections": [
         {
           "title": "What is Gamend?",
-          "text": "The **backend for your multiplayer game** — accounts, lobbies, chat, leaderboards and everything players expect around the game itself. Server-side scripting in Elixir runs your own logic where players cannot reach it: scoring, rewards, matchmaking rules, validation. **You run it on your own server** — there is no hosted service.",
+          "text": "The **backend for your multiplayer game** — accounts, lobbies, chat, leaderboards and everything players expect around the game itself — plus the **web UI around it**: a ready-made player website (store, leaderboards, tournaments, quests, groups, chat) and a full **admin panel**. Server-side scripting runs your own logic where players cannot reach it. **You run it on your own server** — there is no hosted service.",
+          "image": {
+            "light": "/images/banner.png",
+            "alt": "Gamend"
+          },
           "icon": "hero-question-mark-circle-solid",
           "media_width": "third",
           "image_position_desktop": "right",
@@ -73,6 +78,11 @@
         {
           "title": "Authentication & Users",
           "text": "Email, Magic-link, OAuth, JWT and Session. Register, login, reset password and verify email.",
+          "image": {
+            "light": "/images/screenshots/login-light.png",
+            "dark": "/images/screenshots/login-dark.png",
+            "alt": "The login page with magic link, password and five OAuth providers"
+          },
           "icon": "hero-lock-closed-solid",
           "media_width": "third",
           "image_position_desktop": "left",
@@ -94,6 +104,11 @@
         {
           "title": "Lobbies, Parties & Matchmaking",
           "text": "Real-time lobbies with passwords, quick join and live updates. Ephemeral parties that join and get matched **as one unit**, a ticket-queue matchmaker and ready checks before anything starts.",
+          "image": {
+            "light": "/images/screenshots/admin-matchmaking-light.png",
+            "dark": "/images/screenshots/admin-matchmaking-dark.png",
+            "alt": "The matchmaking admin page with live queues, tickets and ready checks"
+          },
           "icon": "hero-home-solid",
           "media_width": "third",
           "image_position_desktop": "right",
@@ -115,6 +130,11 @@
         {
           "title": "Friends, Groups & Chat",
           "text": "Friend requests, blocking, real-time presence. Public, private and hidden groups. Direct and group messaging.",
+          "image": {
+            "light": "/images/screenshots/groups-light.png",
+            "dark": "/images/screenshots/groups-dark.png",
+            "alt": "The public groups browser"
+          },
           "icon": "hero-user-group-solid",
           "media_width": "third",
           "image_position_desktop": "left",
@@ -131,6 +151,11 @@
         {
           "title": "Quests, Tournaments & Leaderboards",
           "text": "One server-authoritative quest engine for achievements, dailies, seasonal events and quest chains. Bracket tournaments, leaderboards with seasons, and real-time plus push notifications across every feature.",
+          "image": {
+            "light": "/images/screenshots/quests-light.png",
+            "dark": "/images/screenshots/quests-dark.png",
+            "alt": "The quests page with daily, achievement and event quests"
+          },
           "icon": "hero-trophy-solid",
           "media_width": "third",
           "image_position_desktop": "right",
@@ -157,6 +182,11 @@
         {
           "title": "Server Scripting & Scheduling",
           "text": "Write server hooks in **Elixir, GDScript or Gleam** — scoring, rewards, matchmaking rules, validation — where players cannot reach them. Durable background jobs and cron scheduling built in.",
+          "image": {
+            "light": "/images/screenshots/admin-runtime-light.png",
+            "dark": "/images/screenshots/admin-runtime-dark.png",
+            "alt": "Runtime introspection listing every hook with its implementing plugins"
+          },
           "icon": "hero-puzzle-piece-solid",
           "media_width": "third",
           "image_position_desktop": "left",
@@ -187,6 +217,11 @@
         {
           "title": "Payments & Store Integrations",
           "text": "Server-side payments with Stripe, Google Play, App Store, and Steam providers. Validate receipts, process signed webhooks, grant entitlements, revoke refunds, and inspect everything in admin.",
+          "image": {
+            "light": "/images/screenshots/store-light.png",
+            "dark": "/images/screenshots/store-dark.png",
+            "alt": "The built-in store page with priced products"
+          },
           "icon": "hero-credit-card-solid",
           "media_width": "third",
           "image_position_desktop": "left",
@@ -208,6 +243,11 @@
         {
           "title": "Economy, Inventory & Storage",
           "text": "Virtual currency wallets with an atomic, append-only ledger. Item stacks with grant and consume. A per-player and per-lobby **key-value store**, and object storage with presigned uploads on local disk or any S3-compatible backend.",
+          "image": {
+            "light": "/images/screenshots/admin-economy-light.png",
+            "dark": "/images/screenshots/admin-economy-dark.png",
+            "alt": "The economy admin page with wallets and grant and spend controls"
+          },
           "icon": "hero-banknotes-solid",
           "media_width": "third",
           "image_position_desktop": "right",
@@ -229,6 +269,11 @@
         {
           "title": "Analytics, Logs & Observability",
           "text": "D1 / D7 / D30 retention, DAU and payer conversion built in. Client log sessions correlated with the server's own tail for per-player debugging. Prometheus metrics with Grafana, and a load-test harness with published benchmarks.",
+          "image": {
+            "light": "/images/screenshots/admin-analytics-light.png",
+            "dark": "/images/screenshots/admin-analytics-dark.png",
+            "alt": "The analytics admin page with DAU and D1, D7 and D30 retention"
+          },
           "icon": "hero-chart-bar-solid",
           "media_width": "third",
           "image_position_desktop": "left",
