@@ -4,30 +4,43 @@ defmodule GamendWeb.FileLogHandler do
   admin log buffer (`GamendWeb.AdminLogBuffer`) is in-memory only and is
   lost on redeploy/restart.
 
-  Disabled unless a path is configured, either as `:gamend_web, :log_file`
-  or via the `LOG_FILE_PATH` environment variable. Runs *alongside* the default
-  stdout handler, so `fly logs` still receives everything. On a Fly deploy,
-  point it at the mounted volume, e.g.
-  `LOG_FILE_PATH=/data/log/gamend.log`.
+  Disabled unless a path is configured. Runs *alongside* the default stdout
+  handler, so `fly logs` still receives everything. On a Fly deploy, point it at
+  the mounted volume.
+
+      config :gamend_web, GamendWeb.Observability, log_file_path: "log/dev.log"
 
   Backed by OTP's built-in `:logger_std_h`, which handles size-based rotation
   (`max_no_bytes` per file, `max_no_files` kept). Defaults to 10MB x 5 files.
 
-  ## Why the env is read here
+  ## Where the settings come from
 
-  This used to require each host to wire `LOG_FILE_PATH` into `:log_file` in its
-  own runtime config. A host loads its own runtime config and never core's, so
-  the block core shipped reached only the hosts that had copied it — and the two
-  that had not got no file logging at all while the env var looked set. Reading
-  the environment here means a host needs no config for this to work. Explicit
-  `:gamend_web` app config still wins, so a host can override.
+  Every knob is a declared `GamendWeb.Observability` setting, so it is read
+  through `Gamend.Settings.get/2` — which looks at
+  `Application.get_env(:gamend_web, GamendWeb.Observability)` and then the
+  compiled default. **Nothing else.** In particular `get/2` does not read the
+  environment: a host that wants env-driven settings has to splat
+  `Gamend.Settings.from_env/0` into its own `runtime.exs`, and a host that does
+  not gets app config only, however the variables are set.
 
-  | setting | app config | env |
+  | setting | config key | env (only via `from_env/0`) |
   | --- | --- | --- |
-  | path | `:log_file` | `LOG_FILE_PATH` |
-  | level | `:log_file_level` | `LOG_FILE_LEVEL` |
-  | bytes per file | `:log_file_max_bytes` | `LOG_FILE_MAX_BYTES` |
-  | files kept | `:log_file_max_files` | `LOG_FILE_MAX_FILES` |
+  | path | `:log_file_path` | `GAMEND_OBSERVABILITY_LOG_FILE_PATH` |
+  | level | `:log_file_level` | `GAMEND_OBSERVABILITY_LOG_FILE_LEVEL` |
+  | bytes per file | `:log_file_max_bytes` | `GAMEND_OBSERVABILITY_LOG_FILE_MAX_BYTES` |
+  | files kept | `:log_file_max_files` | `GAMEND_OBSERVABILITY_LOG_FILE_MAX_FILES` |
+
+  Both columns used to read differently — a flat `:gamend_web, :log_file` key
+  and a bare `LOG_FILE_PATH`, from before these moved behind
+  `Gamend.Settings`. Neither has resolved to anything since, and because an
+  unconfigured path disables the handler *silently*, a host carrying the old
+  line logged to stdout only and lost every run to terminal scrollback. The
+  polyglot host was doing exactly that, undetected, until a client-side bug
+  needed the server's account of a run and there was none to read.
+
+  A misconfigured path is still silent by design — this handler must never be
+  the reason a boot fails — so when adding a knob here, prefer one whose
+  absence is visible in `GamendWeb.Observability` rather than only at runtime.
   """
 
   require Logger
