@@ -88,15 +88,15 @@ msgstr "시작하기"
 msgid "Presentation Video"
 msgstr "소개 영상"
 
-msgid "The Gamend admin dashboard with live counts for every feature"
-msgstr ""
-
 #, fuzzy
 msgid "**Open source** Elixir game server for **real-time** multiplayer games — backend, player website and admin panel in one."
 msgstr "**실시간** 멀티플레이 게임을 위한 **오픈 소스** Elixir 게임 서버."
 
 msgid "Gamend"
 msgstr "Gamend"
+
+msgid "A tour of the Gamend admin panel, quests, store and server hooks"
+msgstr ""
 
 msgid "Benchmarks"
 msgstr ""

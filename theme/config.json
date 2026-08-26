@@ -12,10 +12,13 @@
       "hero": {
         "title": "Gamend",
         "text": "**Open source** Elixir game server for **real-time** multiplayer games — backend, player website and admin panel in one.",
-        "image": {
-          "light": "/images/screenshots/admin-overview-light.png",
-          "dark": "/images/screenshots/admin-overview-dark.png",
-          "alt": "The Gamend admin dashboard with live counts for every feature"
+        "video": {
+          "src": "/images/hero-tour.mp4",
+          "poster": "/images/hero-tour-poster.png",
+          "alt": "A tour of the Gamend admin panel, quests, store and server hooks",
+          "width": 1280,
+          "height": 800,
+          "preload": "none"
         },
         "image_position_desktop": "left",
         "image_position_mobile": "top",

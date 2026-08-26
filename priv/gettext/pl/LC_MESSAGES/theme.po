@@ -88,15 +88,15 @@ msgstr "Pierwsze kroki"
 msgid "Presentation Video"
 msgstr "Wideo prezentacyjne"
 
-msgid "The Gamend admin dashboard with live counts for every feature"
-msgstr ""
-
 #, fuzzy
 msgid "**Open source** Elixir game server for **real-time** multiplayer games — backend, player website and admin panel in one."
 msgstr "Serwer gier w Elixirze **open source** do gier wieloosobowych **w czasie rzeczywistym**."
 
 msgid "Gamend"
 msgstr "Gamend"
+
+msgid "A tour of the Gamend admin panel, quests, store and server hooks"
+msgstr ""
 
 msgid "Benchmarks"
 msgstr ""
