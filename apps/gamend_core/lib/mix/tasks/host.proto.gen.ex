@@ -61,7 +61,14 @@ defmodule Mix.Tasks.Host.Proto.Gen do
         Mix.shell().info("No .proto files found in: #{Enum.join(@search_globs, ", ")}")
 
       protos ->
-        Enum.each(protos, &generate(&1, targets, opts))
+        # Exit 1 on a failed target. Printing FAILED and exiting 0 is the same
+        # silent success one level up: the godobuf breakage below went unnoticed
+        # partly because `mix host.proto.gen` always looked like it worked. A
+        # SKIP is different and stays green — missing protoc or GODOT_BIN means
+        # "not generating that here", not "generation is broken".
+        results = Enum.flat_map(protos, &generate(&1, targets, opts))
+
+        if Enum.any?(results, &(&1 == :error)), do: exit({:shutdown, 1})
     end
   end
 
@@ -86,9 +93,13 @@ defmodule Mix.Tasks.Host.Proto.Gen do
 
   defp generate(proto, targets, opts) do
     Mix.shell().info("\n#{proto}")
-    if "elixir" in targets, do: gen_elixir(proto, opts)
-    if "js" in targets, do: gen_js(proto, opts)
-    if "godot" in targets, do: gen_godot(proto, opts)
+
+    [
+      if("elixir" in targets, do: gen_elixir(proto, opts)),
+      if("js" in targets, do: gen_js(proto, opts)),
+      if("godot" in targets, do: gen_godot(proto, opts))
+    ]
+    |> Enum.reject(&is_nil/1)
   end
 
   # ── Elixir ──────────────────────────────────────────────────────────────
@@ -107,14 +118,42 @@ defmodule Mix.Tasks.Host.Proto.Gen do
         File.mkdir_p!(out)
         env = [{"PATH", "#{Path.dirname(protoc_gen_elixir())}:#{System.get_env("PATH")}"}]
 
-        cmd(
-          "protoc",
-          ["--elixir_out=#{out}", "-I", Path.dirname(proto), proto],
-          env,
-          "elixir",
-          out
-        )
+        result =
+          cmd(
+            "protoc",
+            ["--elixir_out=#{out}", "-I", Path.dirname(proto), proto],
+            env,
+            "elixir",
+            out
+          )
+
+        if result == :ok, do: format_elixir(out)
+        result
     end
+  end
+
+  # protoc-gen-elixir emits `field :key, 1, ...`; a project that formats its
+  # `lib/**` rewrites that to `field(:key, 1, ...)` the first time anyone runs
+  # `mix format`. After that every regeneration reverses it again, and a
+  # three-line proto change arrives as a six-hundred-line diff that nobody can
+  # review. Formatting here means the generated file is already in the shape
+  # the project keeps it in.
+  defp format_elixir(out) do
+    plugin_dir = Path.dirname(out)
+
+    if File.exists?(Path.join(plugin_dir, ".formatter.exs")) do
+      # Absolute: `cd:` moves mix into the plugin, so a path relative to the
+      # caller would resolve against the wrong directory and match nothing —
+      # silently, since `mix format` on zero files is not an error.
+      System.cmd("mix", ["format", Path.join(Path.expand(out), "**/*.pb.ex")],
+        cd: plugin_dir,
+        stderr_to_stdout: true
+      )
+    end
+
+    :ok
+  rescue
+    _ -> :ok
   end
 
   defp protoc_gen_elixir do
@@ -159,16 +198,34 @@ defmodule Mix.Tasks.Host.Proto.Gen do
       true ->
         File.mkdir_p!(Path.dirname(out))
         args = ~w(--headless -s addons/godobuf/godobuf_cmdln.gd)
-        args = args ++ ["--input=#{Path.expand(proto)}", "--output=#{Path.expand(out)}"]
+        args = args ++ ["--input=#{godobuf_input(proto)}", "--output=#{Path.expand(out)}"]
 
-        case System.cmd(godot, args, cd: godobuf, stderr_to_stdout: true) do
-          {_output, 0} ->
+        {output, code} = System.cmd(godot, args, cd: godobuf, stderr_to_stdout: true)
+
+        # Godot's headless script runner exits 0 whether or not the script
+        # succeeded, so the exit code proves nothing on its own. A `reserved`
+        # field godobuf cannot parse fails the whole file this way, and did:
+        # it went unnoticed for weeks while every proto change reached the
+        # Elixir and JS bindings and never reached Godot. What godobuf
+        # actually wrote is the honest signal, so that is what is checked.
+        cond do
+          code != 0 ->
+            Mix.shell().error("  godot   FAILED (#{code})\n#{output}")
+            :error
+
+          String.contains?(output, "Compilation failed") ->
+            Mix.shell().error("  godot   FAILED (godobuf could not compile the proto)\n#{output}")
+            :error
+
+          not File.exists?(out) ->
+            Mix.shell().error("  godot   FAILED (godobuf wrote no #{out})\n#{output}")
+            :error
+
+          true ->
             # godobuf's proto3-optional presence checks are wrong; see the module.
             rewritten = GodobufPresence.fix_file!(out)
             Mix.shell().info("  godot   #{out} (#{rewritten} presence checks fixed)")
-
-          {output, code} ->
-            Mix.shell().error("  godot   FAILED (#{code})\n#{output}")
+            :ok
         end
     end
   end
@@ -177,13 +234,48 @@ defmodule Mix.Tasks.Host.Proto.Gen do
 
   defp cmd(exe, args, env, label, out) do
     case System.cmd(exe, args, env: env, stderr_to_stdout: true) do
-      {_output, 0} -> Mix.shell().info("  #{String.pad_trailing(label, 7)} #{out}")
-      {output, code} -> Mix.shell().error("  #{label} FAILED (#{code})\n#{output}")
+      {_output, 0} ->
+        Mix.shell().info("  #{String.pad_trailing(label, 7)} #{out}")
+        :ok
+
+      {output, code} ->
+        Mix.shell().error("  #{label} FAILED (#{code})\n#{output}")
+        :error
     end
   end
 
-  defp skip(label, reason),
-    do: Mix.shell().info("  #{String.pad_trailing(label, 7)} skipped — #{reason}")
+  # godobuf cannot parse `reserved` and fails the ENTIRE file when it meets
+  # one — which is how a single `reserved 4;` froze this game's Godot bindings
+  # for weeks while Elixir and JS kept regenerating fine.
+  #
+  # `reserved` is a compile-time guard (these tag numbers must never be reused)
+  # and emits no code, so godobuf loses nothing by not seeing it. Stripping it
+  # for godobuf alone is what keeps the .proto able to carry the guard at all:
+  # the alternative, and what was done before, is deleting `reserved` from the
+  # source of truth so that protoc stops protecting the tags too.
+  defp godobuf_input(proto) do
+    source = File.read!(proto)
+    stripped = Regex.replace(~r/^[ \t]*reserved\b[^;]*;[ \t]*\R?/m, source, "")
+
+    if stripped == source do
+      Path.expand(proto)
+    else
+      # Same basename, temp directory: godobuf is given a file that differs
+      # from the real one only by the lines it cannot read.
+      dir = Path.join(System.tmp_dir!(), "gamend-proto-#{System.unique_integer([:positive])}")
+      File.mkdir_p!(dir)
+      path = Path.join(dir, Path.basename(proto))
+      File.write!(path, stripped)
+      path
+    end
+  end
+
+  # `:skip`, not `:error`: missing protoc or GODOT_BIN means this machine does
+  # not generate that target, which is a setup fact, not a broken proto.
+  defp skip(label, reason) do
+    Mix.shell().info("  #{String.pad_trailing(label, 7)} skipped — #{reason}")
+    :skip
+  end
 
   defp base(proto), do: proto |> Path.basename(".proto")
 
