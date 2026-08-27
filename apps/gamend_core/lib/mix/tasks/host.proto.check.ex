@@ -52,6 +52,11 @@ defmodule Mix.Tasks.Host.Proto.Check do
   """
   use Mix.Task
 
+  alias Gamend.Hooks.HookSchemas
+  alias Gamend.Hooks.KvSchemas
+  alias Gamend.Hooks.MetadataSchemas
+  alias Gamend.Hooks.PluginManager
+
   @shortdoc "Check protobuf schemas against the JSON values they encode"
 
   @default_limit 50
@@ -110,7 +115,7 @@ defmodule Mix.Tasks.Host.Proto.Check do
     |> group_by([e], e.key)
     |> select([e], {e.key, count(e.id)})
     |> Gamend.Repo.all()
-    |> Enum.reject(fn {key, _count} -> Gamend.Hooks.KvSchemas.module_for(key) end)
+    |> Enum.reject(fn {key, _count} -> KvSchemas.module_for(key) end)
     |> Enum.group_by(fn {key, _count} -> kv_pattern(key) end)
     |> Enum.map(fn {pattern, rows} ->
       {pattern, Enum.sum(Enum.map(rows, &elem(&1, 1))), length(rows)}
@@ -128,9 +133,9 @@ defmodule Mix.Tasks.Host.Proto.Check do
   end
 
   defp untyped_metadata do
-    registered = Gamend.Hooks.MetadataSchemas.all()
+    registered = MetadataSchemas.all()
 
-    for entity <- Gamend.Hooks.MetadataSchemas.entities(),
+    for entity <- MetadataSchemas.entities(),
         not Map.has_key?(registered, entity),
         rows = length(sample_metadata(entity, @default_limit)),
         rows > 0,
@@ -142,9 +147,9 @@ defmodule Mix.Tasks.Host.Proto.Check do
   # `:hook_schema_missing`. So this list is also the list of hooks a protobuf
   # DataChannel cannot call at all.
   defp untyped_hooks do
-    typed = Gamend.Hooks.HookSchemas.all()
+    typed = HookSchemas.all()
 
-    for {plugin, mod} <- Gamend.Hooks.PluginManager.hook_modules(),
+    for {plugin, mod} <- PluginManager.hook_modules(),
         f <- Gamend.Hooks.exported_functions(mod),
         not Map.has_key?(typed, {plugin, f.name}),
         do: {plugin, f.name}
@@ -167,7 +172,7 @@ defmodule Mix.Tasks.Host.Proto.Check do
   }
 
   defp check_metadata(opts, limit) do
-    registered = Gamend.Hooks.MetadataSchemas.all()
+    registered = MetadataSchemas.all()
 
     registered
     |> Enum.filter(fn {entity, _mod} ->
@@ -199,7 +204,7 @@ defmodule Mix.Tasks.Host.Proto.Check do
   end
 
   defp check_kv(opts, limit) do
-    %{exact: exact, prefixes: prefixes} = Gamend.Hooks.KvSchemas.all()
+    %{exact: exact, prefixes: prefixes} = KvSchemas.all()
 
     contracts =
       Enum.map(exact, fn {key, mod} -> {key, mod, :exact} end) ++
@@ -297,9 +302,10 @@ defmodule Mix.Tasks.Host.Proto.Check do
   # value this task passes is a value that really does encode. Re-deriving the
   # rule here would let the two drift, which is the whole failure mode.
   defp encode_failure(value, mod) do
-    cond do
-      not keys_known?(value, mod) -> :unknown_keys
-      true -> from_decoded_failure(value, mod)
+    if keys_known?(value, mod) do
+      from_decoded_failure(value, mod)
+    else
+      :unknown_keys
     end
   end
 
@@ -360,7 +366,7 @@ defmodule Mix.Tasks.Host.Proto.Check do
       Mix.shell().info("  every sampled value encodes as protobuf")
       :ok
     else
-      names = broken |> Enum.map(& &1.name) |> Enum.join(", ")
+      names = Enum.map_join(broken, ", ", & &1.name)
       Mix.shell().error("  falling back to JSON: #{names}")
       exit({:shutdown, 1})
     end

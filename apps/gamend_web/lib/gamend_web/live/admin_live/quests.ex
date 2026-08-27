@@ -147,7 +147,11 @@ defmodule GamendWeb.AdminLive.Quests do
           <div class="card-body">
             <h2 class="card-title">User Progress ({@progress_count})</h2>
 
-            <form phx-change="filter_progress" class="flex flex-wrap gap-2 mt-2">
+            <form
+              id="progress-filter-form"
+              phx-change="filter_progress"
+              class="flex flex-wrap gap-2 mt-2"
+            >
               <input
                 type="text"
                 name="user_id"

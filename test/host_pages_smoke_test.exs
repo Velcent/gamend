@@ -66,11 +66,17 @@ defmodule GamendHost.PagesSmokeTest do
     end
   end
 
-  # The first `**bold**` run in a markdown file — every entry in both of ours
-  # opens with one, and it survives rendering as plain text inside a <strong>.
+  # The first `**bold**` run in a markdown file that survives rendering
+  # verbatim — every entry in both of ours opens with one, and plain text
+  # inside a <strong> reaches the HTML unchanged. Runs carrying their own
+  # markup do not: a bold `code` span renders as <code> without the backticks,
+  # and anything with &, < or > comes back HTML-escaped, so those are skipped
+  # rather than compared against a string the page never contains.
   defp first_bold(file) do
-    [_, text] = Regex.run(~r/\*\*(.+?)\*\*/, File.read!(file))
-    text
+    ~r/\*\*(.+?)\*\*/
+    |> Regex.scan(File.read!(file))
+    |> Enum.map(fn [_, text] -> text end)
+    |> Enum.find(&(not Regex.match?(~r/[`<>&\[\]*_"']/, &1)))
   end
 
   test "each of the two links across to the other" do
