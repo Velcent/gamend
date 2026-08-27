@@ -1,4 +1,4 @@
-# gamend_core v1.0.1206 - API Reference
+# gamend_core v1.0.1207 - API Reference
 
 ## Modules
 
@@ -320,5 +320,6 @@ commented from each setting's declaration.
 - [mix gamend.theme.extract](Mix.Tasks.Gamend.Theme.Extract.md): Writes `theme.pot` from the strings in the theme config.
 - [mix gamend.theme.migrate_locales](Mix.Tasks.Gamend.Theme.MigrateLocales.md): One-shot migration off one-JSON-file-per-locale.
 - [mix gen.sdk](Mix.Tasks.Gen.Sdk.md): Generates SDK stub modules from the real Gamend modules.
+- [mix host.proto.check](Mix.Tasks.Host.Proto.Check.md): Check that registered protobuf schemas actually match the JSON they encode.
 - [mix host.proto.gen](Mix.Tasks.Host.Proto.Gen.md): Generates protobuf bindings for every target from a `.proto` file.
 

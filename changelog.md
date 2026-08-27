@@ -1,5 +1,8 @@
 # August 2026
 
+- [added] **`mix host.proto.check`** — checks every registered protobuf schema against the JSON actually stored under it, and reports which values fall back to JSON and why. A schema missing one field is not an error anywhere: it simply never encodes, so the optimisation looks shipped and is inert. Covers KV entry values and user/lobby/group/party metadata, takes a captured payload with `--json FILE --message Mod`, and exits 1 so it can gate CI. Also lists what is *not* typed — the KV keys, entities and hooks still going out as JSON.
+- [fixed] **Godot binding generation fails loudly.** Godot's headless script runner exits 0 whether or not the script succeeded, so `mix host.proto.gen` reported success while godobuf had written nothing — one `reserved` field it could not parse froze a game's Godot bindings for weeks while Elixir and JS kept regenerating fine. `reserved` is now stripped from godobuf's copy of the proto (it generates no code, and protoc keeps enforcing it), and a run that writes nothing is an error.
+
 - [fixed] **Server scripting works in a release.** Plugins were loaded at runtime but a release boots in embedded mode, which refuses to load them — every plugin failed with `{:error, :embedded}` while the startup banner still counted them as loaded.
 - [added] **Brotli for static assets**, alongside the gzip files the digest already wrote.
 

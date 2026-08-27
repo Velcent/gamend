@@ -8,7 +8,7 @@
     <meta name="project" content="gamend_core v1.0.1207">
 
 
-    <title>Gamend.Push.Supervisor — gamend_core v1.0.1207</title>
+    <title>mix host.proto.check — gamend_core v1.0.1207</title>
 
     <link rel="stylesheet" href="dist/html-elixir-NHQLCD6Y.css" />
 
@@ -47,7 +47,7 @@ gamend_core
 
 <output role="status" id="toast"></output>
 
-<main class="content page-module" id="main" data-type="modules">
+<main class="content page-task" id="main" data-type="tasks">
   <div id="content" class="content-inner">
     <div class="top-search">
       <div class="search-settings">
@@ -93,19 +93,19 @@ gamend_core
 <div id="top-content">
   <div class="heading-with-actions top-heading">
     <h1>
-      <span translate="no">Gamend.<wbr />Push.<wbr />Supervisor</span> 
+      <span translate="no">mix host.<wbr />proto.<wbr />check</span> 
       <small class="app-vsn" translate="no">(gamend_core v1.0.1207)</small>
 
     </h1>
 
-<a href="Gamend.Push.Supervisor.md" title="Copy Markdown (hold Ctrl/Cmd and click it to open as Markdown)" class="copy-markdown icon-action" rel="help">
+<a href="Mix.Tasks.Host.Proto.Check.md" title="Copy Markdown (hold Ctrl/Cmd and click it to open as Markdown)" class="copy-markdown icon-action" rel="help">
   <i class="ri-markdown-line" aria-hidden="true"></i>
   <span class="sr-only">Copy Markdown</span>
 </a>
 
 
 
-      <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/push/supervisor.ex#L1" title="View Source" class="icon-action" rel="help nofollow">
+      <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/mix/tasks/host.proto.check.ex#L1" title="View Source" class="icon-action" rel="help nofollow">
         <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         <span class="sr-only">View Source</span>
       </a>
@@ -114,108 +114,34 @@ gamend_core
 
 
     <section id="moduledoc">
-<p>Supervises the push delivery processes: the Goth worker (FCM OAuth) and the
-two Pigeon dispatchers.</p><p>Children are built from config, so with nothing configured (or with
-<code class="inline">PUSH_ADAPTER=log</code>) this supervises nothing and every delivery routes to
-the <code class="inline">Log</code> provider. Its own restart budget also isolates the app: a
-dispatcher that somehow crash-loops exhausts this supervisor, provider
-<code class="inline">configured?/0</code> checks start returning false, and push degrades to <code class="inline">Log</code>
-while the rest of the server runs on.</p>
+<p>Check that registered protobuf schemas actually match the JSON they encode.</p><p>A protobuf schema here is an opt-in wire optimisation over a value that is
+still stored and sent as JSON. The encoder is deliberately safe: a value the
+schema does not fully describe is sent as JSON instead, so a schema can never
+drop or corrupt data. The cost of that safety is silence — a schema missing
+one field is not an error anywhere, it simply never encodes, and the
+optimisation you think you shipped is inert.</p><p>That has happened twice in this codebase and neither was noticed by a test:</p><ul><li><code class="inline">Progress</code> listed neither <code class="inline">words_total</code> nor several other keys the
+canonical shape always carries, so <em>every</em> player's progress fell back to
+JSON — the protobuf path had never encoded a single row.</li><li>A hand-written Godot decoder omitted <code class="inline">awaiting_continue</code>, so a paid
+continue offer was decoded away and players sat in a paused game with no
+prompt and no way on.</li></ul><p>This task is the check that would have caught both, run against real data:
+for every registered schema it takes the values actually stored under those
+keys and reports which of them fail to encode, and why.</p><h2 id="module-usage" class="section-heading"><a href="#module-usage" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Usage</span></h2><pre><code class="makeup elixir" translate="no"><span class="n">mix</span><span class="w"> </span><span class="n">host</span><span class="o">.</span><span class="n">proto</span><span class="o">.</span><span class="n">check</span><span class="w">                     </span><span class="c1"># every registered schema</span><span class="w">
+</span><span class="n">mix</span><span class="w"> </span><span class="n">host</span><span class="o">.</span><span class="n">proto</span><span class="o">.</span><span class="n">check</span><span class="w"> </span><span class="o">--</span><span class="n">limit</span><span class="w"> </span><span class="mi">200</span><span class="w">         </span><span class="c1"># rows sampled per key (default 50)</span><span class="w">
+</span><span class="n">mix</span><span class="w"> </span><span class="n">host</span><span class="o">.</span><span class="n">proto</span><span class="o">.</span><span class="n">check</span><span class="w"> </span><span class="o">--</span><span class="n">key</span><span class="w"> </span><span class="n">progress</span><span class="w">      </span><span class="c1"># one key or entity only</span></code></pre><p>It covers both places a schema is applied to stored data: KV entry values
+(registered explicitly via <code class="inline">kv_schemas/0</code>) and user/lobby/group/party
+metadata (registered by naming a <code class="inline">UserMeta</code>/<code class="inline">LobbyMeta</code>/<code class="inline">GroupMeta</code>/
+<code class="inline">PartyMeta</code> message). It also prints, without failing, what is NOT typed —
+the KV keys, metadata entities and hooks still going out as JSON — because
+nothing else in the system reports that either.</p><p>What it cannot sample is anything that is never stored — a typed hook's
+request or reply, most of all. Capture one real payload and name its module;
+this is also the form to hand someone who reports &quot;protobuf is not working&quot;:</p><pre><code class="makeup elixir" translate="no"><span class="n">mix</span><span class="w"> </span><span class="n">host</span><span class="o">.</span><span class="n">proto</span><span class="o">.</span><span class="n">check</span><span class="w"> </span><span class="o">--</span><span class="n">json</span><span class="w"> </span><span class="n">captured</span><span class="o">.</span><span class="n">json</span><span class="w"> </span><span class="o">--</span><span class="n">message</span><span class="w"> </span><span class="nc">MyGame.V1.HelloReply</span></code></pre><p>Exit status is 1 when any sampled value fails to encode, so it can gate CI.</p><h2 id="module-what-a-failure-means" class="section-heading"><a href="#module-what-a-failure-means" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">What a failure means</span></h2><p><code class="inline">unknown keys</code> are keys present in the data that the schema has no field for.
+They are the usual cause: add the field to the <code class="inline">.proto</code>, regenerate with
+<a href="Mix.Tasks.Host.Proto.Gen.html"><code class="inline">mix host.proto.gen</code></a>, and re-run. <code class="inline">encode errors</code> are keys the schema knows
+but whose <em>type</em> disagrees, which is the same class of bug one level down.</p>
     </section>
 
 </div>
 
-  <section id="summary" class="details-list">
-    <h2 class="section-heading">
-      <a class="hover-link" href="#summary">
-        <i class="ri-link-m" aria-hidden="true"></i>
-      </a>
-      <span class="text">Summary</span>
-    </h2>
-<div class="summary-functions summary">
-  <h3>
-    <a href="#functions">Functions</a>
-  </h3>
-
-    <div class="summary-row">
-      <div class="summary-signature">
-        <a href="#child_spec/1" data-no-tooltip="" translate="no">child_spec(init_arg)</a>
-
-      </div>
-
-        <div class="summary-synopsis"><p>Returns a specification to start this module under a supervisor.</p></div>
-
-    </div>
-
-    <div class="summary-row">
-      <div class="summary-signature">
-        <a href="#start_link/1" data-no-tooltip="" translate="no">start_link(opts)</a>
-
-      </div>
-
-    </div>
-
-</div>
-
-  </section>
-
-
-  <section id="functions" class="details-list">
-    <h2 class="section-heading">
-      <a class="hover-link" href="#functions">
-        <i class="ri-link-m" aria-hidden="true"></i>
-      </a>
-      <span class="text">Functions</span>
-    </h2>
-
-    <div class="functions-list">
-<section class="detail" id="child_spec/1">
-
-  <div class="detail-header">
-    <a href="#child_spec/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
-      <i class="ri-link-m" aria-hidden="true"></i>
-    </a>
-    <div class="heading-with-actions">
-      <h1 class="signature" translate="no">child_spec(init_arg)</h1>
-
-
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/push/supervisor.ex#L14" class="icon-action" rel="help nofollow" aria-label="View Source">
-          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
-        </a>
-
-    </div>
-  </div>
-
-  <section class="docstring">
-
-<p>Returns a specification to start this module under a supervisor.</p><p>See <a href="https://hexdocs.pm/elixir/Supervisor.html"><code class="inline">Supervisor</code></a>.</p>
-  </section>
-</section>
-<section class="detail" id="start_link/1">
-
-  <div class="detail-header">
-    <a href="#start_link/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
-      <i class="ri-link-m" aria-hidden="true"></i>
-    </a>
-    <div class="heading-with-actions">
-      <h1 class="signature" translate="no">start_link(opts)</h1>
-
-
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/push/supervisor.ex#L16" class="icon-action" rel="help nofollow" aria-label="View Source">
-          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
-        </a>
-
-    </div>
-  </div>
-
-  <section class="docstring">
-
-
-  </section>
-</section>
-
-    </div>
-  </section>
 
     <footer class="footer">
 
