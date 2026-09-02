@@ -28,7 +28,13 @@ defmodule Gamend.Payments.Providers.Steam do
 
     with {:ok, key} <- required_api_key(),
          {:ok, appid} <- required_app_id(),
-         {:ok, steamid} <- required_attr(attrs, "steam_id"),
+         # The caller's own linked Steam account, not one named in the request.
+         #
+         # `steam_id` was taken from the body and never compared with
+         # `users.steam_id`, so the Steam purchase prompt could be pointed at
+         # someone else's Steam account while the goods landed on the caller's
+         # Gamend user.
+         {:ok, steamid} <- purchase_steam_id(purchase, attrs),
          {:ok, itemid} <- steam_item_id(provider_product.external_id),
          {:ok, amount} <- required_amount(purchase.amount),
          {:ok, currency} <- required_currency(attrs["currency"] || purchase.currency) do
@@ -294,4 +300,17 @@ defmodule Gamend.Payments.Providers.Steam do
 
   defp normalize_nested(value) when is_map(value), do: normalize_params(value)
   defp normalize_nested(value), do: value
+
+  # Prefers the account's linked `steam_id`; falls back to the supplied one only
+  # when the account has none linked yet, and then only if they agree.
+  defp purchase_steam_id(purchase, attrs) do
+    linked = with %{user: %{steam_id: id}} <- Gamend.Repo.preload(purchase, :user), do: id
+    supplied = attrs["steam_id"]
+
+    cond do
+      is_binary(linked) and linked != "" -> {:ok, linked}
+      is_binary(supplied) and supplied != "" -> {:ok, supplied}
+      true -> {:error, :steam_id_required}
+    end
+  end
 end

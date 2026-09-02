@@ -92,21 +92,28 @@ defmodule GamendWeb.AuthController do
         dispatch_browser_oauth_state(conn, browser_state)
 
       session_id ->
-        # Not a browser state — check if it's a valid API OAuthSession
-        case OAuthSessions.get_session(session_id) do
-          nil ->
-            # No matching session — invalid state
-            {:csrf_error, conn}
-
-          _session ->
-            {:api, session_id}
+        # Not a browser state — must be an API OAuthSession that is still
+        # pending, was started for this provider, and has not aged out.
+        #
+        # Accepting any row in any status let a started flow stay redeemable
+        # indefinitely: an attacker could begin the API flow, send the
+        # authorization URL to someone else, and collect that person's tokens
+        # from their own session id long afterwards.
+        case OAuthSessions.get_pending_session(session_id, provider_of(conn)) do
+          nil -> {:csrf_error, conn}
+          _session -> {:api, session_id}
         end
     end
   end
 
+  # The provider named in the callback path, used to reject a state issued for
+  # a different one.
+  defp provider_of(%{params: %{"provider" => provider}}) when is_binary(provider), do: provider
+  defp provider_of(_conn), do: nil
+
   defp dispatch_browser_oauth_state(conn, browser_state) do
-    case OAuthSessions.get_session(browser_state) do
-      %{status: "pending"} = session ->
+    case OAuthSessions.get_pending_session(browser_state, provider_of(conn)) do
+      %{} = session ->
         # Consume state once. Do not fall back to Plug session cookies for browser
         # OAuth: Apple form_post callbacks can legitimately arrive without them.
         _ = OAuthSessions.update_session(browser_state, %{status: "completed"})
@@ -115,16 +122,17 @@ defmodule GamendWeb.AuthController do
 
         {:browser, conn}
 
-      # The state exists but is no longer pending, so this callback has already
-      # been redeemed. Pressing back after signing in, refreshing the callback,
-      # or a link prefetcher touching the URL all land here. Single-use state
-      # working exactly as designed is not a CSRF failure, and reporting it as
-      # one buries the real thing.
-      %{} ->
-        {:state_replayed, conn}
-
-      _ ->
-        {:csrf_error, conn}
+      nil ->
+        # Not acceptable — but distinguish a state that was already redeemed
+        # from one that never existed. Pressing back after signing in,
+        # refreshing the callback, or a link prefetcher touching the URL all
+        # produce a redeemed state, and single-use state working exactly as
+        # designed is not a CSRF failure; reporting it as one buries the real
+        # thing. An expired or provider-mismatched state is a genuine reject.
+        case OAuthSessions.get_session(browser_state) do
+          %{status: status} when status != "pending" -> {:state_replayed, conn}
+          _ -> {:csrf_error, conn}
+        end
     end
   end
 
@@ -629,12 +637,23 @@ defmodule GamendWeb.AuthController do
             require Logger
             Logger.warning("#{config.label} already linked to another user id=#{other_user.id}")
 
+            # The conflict is recorded in the session, not in the URL.
+            #
+            # It used to travel as `?conflict_user_id=`, and the settings page
+            # rendered a delete button straight from that parameter — so any
+            # signed-in user could name any account and delete it, provided it
+            # had no password (which is every device and OAuth-only account).
+            # Only this branch has actually proven the caller controls the
+            # provider identity the other account claims, so only this branch
+            # may authorise anything.
             conn
             |> put_flash(:error, gettext("Failed"))
-            |> redirect(
-              to:
-                ~p"/users/settings?conflict_provider=#{provider}&conflict_user_id=#{other_user.id}"
-            )
+            |> put_session(:oauth_link_conflict, %{
+              "provider" => provider,
+              "user_id" => other_user.id,
+              "at" => System.system_time(:second)
+            })
+            |> redirect(to: ~p"/users/settings")
 
           {:error, changeset} ->
             require Logger
@@ -1428,6 +1447,13 @@ defmodule GamendWeb.AuthController do
       %Gamend.OAuthSession{status: status, data: data} ->
         {message, normalized_data} = pop_session_message(data)
 
+        # Hand the tokens over exactly once. They used to be re-served on every
+        # read until retention pruned the row a day later, so the session id —
+        # which travels in a redirect URL, and therefore through browser
+        # history, proxies and access logs — stayed a bearer credential for 24
+        # hours after the client had already collected it.
+        _ = consume_session_tokens(session_id, normalized_data)
+
         json(conn, %{
           status: status,
           message: message,
@@ -1438,6 +1464,19 @@ defmodule GamendWeb.AuthController do
         conn
         |> put_status(:not_found)
         |> json(%{error: "session_not_found", message: "OAuth session not found"})
+    end
+  end
+
+  # Blank the token fields on the stored row after they have been served once.
+  # Anything else in `data` stays, so the client can still poll for status.
+  @session_token_keys ~w(access_token refresh_token)
+
+  defp consume_session_tokens(session_id, data) do
+    if Enum.any?(@session_token_keys, &(Map.get(data, &1) not in [nil, ""])) do
+      Gamend.OAuthSessions.update_session(
+        session_id,
+        %{data: Map.drop(data, @session_token_keys)}
+      )
     end
   end
 

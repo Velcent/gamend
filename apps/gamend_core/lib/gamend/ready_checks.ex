@@ -485,13 +485,27 @@ defmodule Gamend.ReadyChecks do
   defp do_remove_member(check, user_id) do
     result =
       Gamend.Lock.serialize(:ready_check, check.id, fn ->
-        Participant
-        |> where([p], p.ready_check_id == ^check.id and p.user_id == ^user_id)
-        |> Repo.delete_all()
+        # Re-read inside the lock, as `cancel/2`, `expire/1` and
+        # `write_answer/2` all do.
+        #
+        # This path used the pre-lock struct and `resolve/3` writes
+        # unconditionally, so a removal racing the expiry worker could take an
+        # already-failed check, re-evaluate the remaining answers, and overwrite
+        # it as `passed` — firing the success hook for a check that had already
+        # fired the failure hook, and starting a match the game had torn down.
+        case reload_pending(check) do
+          {:ok, check} ->
+            Participant
+            |> where([p], p.ready_check_id == ^check.id and p.user_id == ^user_id)
+            |> Repo.delete_all()
 
-        case remaining_count(check) do
-          0 -> resolve(check, "cancelled", "cancelled")
-          _ -> evaluate(check)
+            case remaining_count(check) do
+              0 -> resolve(check, "cancelled", "cancelled")
+              _ -> evaluate(check)
+            end
+
+          {:error, reason} ->
+            Repo.rollback(reason)
         end
       end)
 

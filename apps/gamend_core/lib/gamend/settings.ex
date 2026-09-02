@@ -181,8 +181,15 @@ defmodule Gamend.Settings do
             {:ok, value}
 
           :error ->
+            # Never echo the value of a setting declared `secret: true`. Core
+            # secrets are all `:string`, which never fails to cast, but a plugin
+            # is free to declare a secret as `:integer` or `:boolean` — and one
+            # typo would then print it in cleartext into the rotating log and
+            # the admin log buffer.
+            shown = if definition.secret, do: "[redacted]", else: inspect(raw)
+
             Logger.warning(
-              "#{definition.env}=#{inspect(raw)} is not a valid #{definition.type}; " <>
+              "#{definition.env}=#{shown} is not a valid #{definition.type}; " <>
                 "using #{inspect(definition.default)}"
             )
 
@@ -199,7 +206,16 @@ defmodule Gamend.Settings do
   def cast(raw, :string), do: {:ok, raw}
   # Downcased: every atom-valued setting is a lowercase choice (`s3`, `redis`,
   # `log`), and `STORAGE_ADAPTER=S3` should not silently miss.
-  def cast(raw, :atom), do: {:ok, raw |> String.trim() |> String.downcase() |> String.to_atom()}
+  # `to_existing_atom`, not `to_atom`: the set of atom-valued choices is fixed and
+  # already compiled in (`:s3`, `:redis`, `:log`, …), while the input is an
+  # environment string that a plugin reload re-reads at runtime. An unknown value
+  # is a typo, and a typo should fall back to the default rather than mint an
+  # atom that nothing will ever match.
+  def cast(raw, :atom) do
+    {:ok, raw |> String.trim() |> String.downcase() |> String.to_existing_atom()}
+  rescue
+    ArgumentError -> :error
+  end
 
   def cast(raw, :integer) do
     case Integer.parse(String.trim(raw)) do

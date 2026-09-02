@@ -63,11 +63,28 @@ defmodule Gamend.Hooks.PluginBuilder do
   @spec build(String.t()) :: {:ok, build_result()} | {:error, term()}
   def build(plugin_name) when is_binary(plugin_name) do
     source_dir = sources_dir()
+
+    # The name has to be one of the plugins we actually offer, checked here
+    # rather than only at the caller.
+    #
+    # `mix compile` *evaluates* the `mix.exs` in its working directory, and
+    # `mix deps.get` fetches whatever refs that file names — so a directory is
+    # not an innocent parameter, it is code. The admin LiveView passed a
+    # client-controlled string straight through (the rendered `<select>` does
+    # not constrain the event payload), and this function joined it onto the
+    # sources directory with no basename and no allowlist, so
+    # `../../../../tmp/x` reached `System.cmd`. Arguments are passed as a list,
+    # so there was never a shell-injection hole; the working directory was the
+    # whole vulnerability.
+    plugin_name = Path.basename(plugin_name)
     plugin_dir = Path.join(source_dir, plugin_name)
 
     cond do
       not available?() ->
         return_error(:mix_unavailable)
+
+      plugin_name not in list_buildable_plugins() ->
+        return_error({:unknown_plugin, plugin_name})
 
       File.exists?(Path.join(plugin_dir, "mix.exs")) ->
         run_build_steps(plugin_name, source_dir, plugin_dir)

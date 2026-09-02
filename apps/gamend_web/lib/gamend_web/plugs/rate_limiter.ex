@@ -160,14 +160,30 @@ defmodule GamendWeb.Plugs.RateLimiter do
     auth_bucket(ip)
   end
 
+  # Polling for an OAuth session's result is not an auth attempt.
+  #
+  # It shared the 10/min auth bucket, while the shipped Godot client polls this
+  # every 2 seconds for up to a minute — so any OAuth login that took longer
+  # than about 18 seconds ran out of budget and the client reported a timeout,
+  # on production defaults, for a sign-in that had actually succeeded. Reads of
+  # a random 32-byte session id are cheap and idempotent; the general bucket is
+  # the right home for them.
+  defp bucket_for(%{path_info: ["api", "v1", "auth", "session" | _]} = _conn, ip) do
+    {"general:#{ip}", setting(:general_window_ms), setting(:general_limit)}
+  end
+
   # API OAuth endpoints — also auth bucket
   defp bucket_for(%{path_info: ["api", "v1", "auth" | _]} = _conn, ip) do
     auth_bucket(ip)
   end
 
-  # Browser login POST — same strict bucket as API login
+  # Browser login POST — same strict bucket as API login.
+  #
+  # Both spellings: the routes are `/users/log_in` and `/users/log_in/:token`,
+  # so matching only the hyphenated form left browser password login in the
+  # general bucket (240/min) instead of the auth one (10/min).
   defp bucket_for(%{path_info: ["users", action | _], method: method} = _conn, ip)
-       when action in ~w(log-in register) and method in ["POST", "GET"] do
+       when action in ~w(log_in log-in register) and method in ["POST", "GET"] do
     auth_bucket(ip)
   end
 

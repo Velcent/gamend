@@ -142,11 +142,18 @@ defmodule GamendWeb.UserChannel do
       user_id = parse_optional_id(Map.get(payload, "user_id"))
       lobby_id = parse_optional_id(Map.get(payload, "lobby_id"))
 
-      if kv_read_allowed?(socket, key, user_id, lobby_id) do
-        socket = subscribe_kv_once(socket, key, user_id, lobby_id)
-        {:reply, {:ok, kv_subscribe_reply(key, user_id, lobby_id, payload)}, socket}
-      else
-        {:reply, {:error, kv_reply_payload(%{error: "forbidden"}, payload)}, socket}
+      # The key goes into a PubSub topic string, so bound it the same way the
+      # stored key is bounded rather than letting a whole frame become a topic.
+      cond do
+        byte_size(key) > Gamend.Limits.get(:max_kv_key) ->
+          {:reply, {:error, kv_reply_payload(%{error: "invalid_key"}, payload)}, socket}
+
+        kv_read_allowed?(socket, key, user_id, lobby_id) ->
+          socket = subscribe_kv_once(socket, key, user_id, lobby_id)
+          {:reply, {:ok, kv_subscribe_reply(key, user_id, lobby_id, payload)}, socket}
+
+        true ->
+          {:reply, {:error, kv_reply_payload(%{error: "forbidden"}, payload)}, socket}
       end
     end
   end
@@ -188,7 +195,8 @@ defmodule GamendWeb.UserChannel do
   @impl true
   def handle_in("webrtc:offer", %{"sdp" => _} = offer_json, socket) do
     with :ok <- check_ws_rate_limit(socket),
-         :ok <- check_webrtc_enabled() do
+         :ok <- check_webrtc_enabled(),
+         :ok <- validate_offer(offer_json) do
       stop_existing_peer(socket)
 
       {:ok, peer} =
@@ -208,7 +216,8 @@ defmodule GamendWeb.UserChannel do
   @impl true
   def handle_in("webrtc:ice", %{"candidate" => _} = candidate_json, socket) do
     with :ok <- check_ws_rate_limit(socket),
-         :ok <- check_ice_rate_limit(socket) do
+         :ok <- check_ice_rate_limit(socket),
+         :ok <- validate_ice_candidate(candidate_json) do
       case Map.get(socket.assigns, :webrtc_peer) do
         nil ->
           {:reply, {:error, %{error: "no_webrtc_session"}}, socket}
@@ -571,10 +580,42 @@ defmodule GamendWeb.UserChannel do
           {:ok, _} -> broadcast_member_presence(user_id, false)
           _ -> :ok
         end
+
+        # Re-check shortly afterwards, and undo the projection if a socket is
+        # in fact present.
+        #
+        # `Phoenix.Tracker` replicates between nodes asynchronously, so when a
+        # socket closes on node 1 just after another opened on node 2, node 1
+        # has not seen the new one yet: the count reads 1, this branch runs, and
+        # the user is marked offline while they are connected. Nothing repaired
+        # it — `set_user_online/1` runs only in `after_join`, and the stale
+        # sweeper only marks people offline — so they showed offline to every
+        # friend, lobby and group for the rest of the session.
+        schedule_presence_recheck(user_id)
       end
     end
 
     :ok
+  end
+
+  # Long enough for a cross-node tracker diff to land, short enough that a
+  # genuinely-offline user is not shown online meanwhile. Runs in a detached
+  # task because the channel process is terminating.
+  @presence_recheck_ms 2_000
+
+  defp schedule_presence_recheck(user_id) do
+    Gamend.Async.run(fn ->
+      Process.sleep(@presence_recheck_ms)
+
+      if Gamend.Presence.last_socket?(user_id) do
+        :ok
+      else
+        case Accounts.set_user_online(user_id) do
+          {:ok, _} -> broadcast_member_presence(user_id, true)
+          _ -> :ok
+        end
+      end
+    end)
   end
 
   # ---------------------------------------------------------------------------
@@ -660,15 +701,29 @@ defmodule GamendWeb.UserChannel do
   # same key would be registered twice and get every `kv_updated` twice. The
   # reply is still `:ok` — asking again is not an error, it is the same
   # subscription — so a client repeating itself sees no difference.
+  # How many distinct KV scopes one socket may watch at once.
+  #
+  # Each subscription is a PubSub registration plus a `MapSet` member held for
+  # the life of the channel, and the key is interpolated into the topic string.
+  # The message rate limiter bounds how *fast* a client can subscribe, not how
+  # many it accumulates, so a socket could hold tens of thousands of
+  # registrations — each with a key as large as the 128 KB frame allows.
+  @max_kv_subscriptions 64
+
   defp subscribe_kv_once(socket, key, user_id, lobby_id) do
     scope = {key, user_id, lobby_id}
     subscribed = Map.get(socket.assigns, :kv_subscriptions, MapSet.new())
 
-    if MapSet.member?(subscribed, scope) do
-      socket
-    else
-      :ok = KV.subscribe(key, user_id: user_id, lobby_id: lobby_id)
-      assign(socket, :kv_subscriptions, MapSet.put(subscribed, scope))
+    cond do
+      MapSet.member?(subscribed, scope) ->
+        socket
+
+      MapSet.size(subscribed) >= @max_kv_subscriptions ->
+        socket
+
+      true ->
+        :ok = KV.subscribe(key, user_id: user_id, lobby_id: lobby_id)
+        assign(socket, :kv_subscriptions, MapSet.put(subscribed, scope))
     end
   end
 
@@ -810,4 +865,40 @@ defmodule GamendWeb.UserChannel do
       peer -> if Process.alive?(peer), do: GamendWeb.WebRTCPeer.close(peer)
     end
   end
+
+  # The channel guarded only on the *presence* of an "sdp" / "candidate" key,
+  # while the decoders below it demand more: `SessionDescription.from_json/1`
+  # requires a "type" from a fixed set, and `ICECandidate.from_json/1` does a
+  # `Map.fetch!` for "sdpMid" and "sdpMLineIndex". The peer process then matched
+  # `:ok =` on results that return error tuples for bad input.
+  #
+  # Because the peer is started with a link and channels do not trap exits, one
+  # malformed frame took the caller's whole `user:<id>` channel down *without*
+  # running `terminate/2` — skipping the matchmaking cancel, the unsubscribes
+  # and the offline projection, so the player was left marked online in the
+  # database with a leaked matchmaking ticket.
+  @sdp_types ~w(offer answer pranswer rollback)
+
+  defp validate_offer(%{"sdp" => sdp} = offer) when is_binary(sdp) do
+    if Map.get(offer, "type") in @sdp_types do
+      :ok
+    else
+      {:error, %{error: "invalid_sdp_type"}}
+    end
+  end
+
+  defp validate_offer(_offer), do: {:error, %{error: "invalid_offer"}}
+
+  defp validate_ice_candidate(%{"candidate" => candidate} = json) when is_binary(candidate) do
+    has_mid? = is_binary(Map.get(json, "sdpMid"))
+    has_index? = is_integer(Map.get(json, "sdpMLineIndex"))
+
+    if has_mid? or has_index? do
+      :ok
+    else
+      {:error, %{error: "invalid_ice_candidate"}}
+    end
+  end
+
+  defp validate_ice_candidate(_json), do: {:error, %{error: "invalid_ice_candidate"}}
 end

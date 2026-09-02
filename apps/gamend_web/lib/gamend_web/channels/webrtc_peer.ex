@@ -144,25 +144,56 @@ defmodule GamendWeb.WebRTCPeer do
     {:ok, state}
   end
 
+  # Decoding and negotiation are wrapped, and failures answered with a log line
+  # rather than a crash.
+  #
+  # These clauses used to decode straight from the client's JSON and assert
+  # `:ok =` on the results. This process is started with a link from the
+  # channel, and `Phoenix.Channel.Server` does not trap exits, so any of those
+  # raises took the caller's whole `user:<id>` channel down — bypassing its
+  # `terminate/2` and the cleanup that lives there. The channel now validates
+  # payload shape too; this is the second line of defence, for the errors that
+  # only the WebRTC stack can detect.
   @impl true
   def handle_cast({:offer, offer_json}, state) do
-    offer = SessionDescription.from_json(offer_json)
-    :ok = PeerConnection.set_remote_description(state.peer_connection, offer)
-
-    {:ok, answer} = PeerConnection.create_answer(state.peer_connection)
-    :ok = PeerConnection.set_local_description(state.peer_connection, answer)
-
-    answer_json = SessionDescription.to_json(answer)
-    send(state.channel_pid, {:webrtc_answer, answer_json})
+    with {:ok, offer} <- decode_offer(offer_json),
+         :ok <- PeerConnection.set_remote_description(state.peer_connection, offer),
+         {:ok, answer} <- PeerConnection.create_answer(state.peer_connection),
+         :ok <- PeerConnection.set_local_description(state.peer_connection, answer) do
+      send(state.channel_pid, {:webrtc_answer, SessionDescription.to_json(answer)})
+    else
+      other ->
+        Logger.info("webrtc: rejected offer (user_id=#{state.user_id}): #{inspect(other)}")
+    end
 
     {:noreply, state}
   end
 
   @impl true
   def handle_cast({:ice_candidate, candidate_json}, state) do
-    candidate = ICECandidate.from_json(candidate_json)
-    :ok = PeerConnection.add_ice_candidate(state.peer_connection, candidate)
+    with {:ok, candidate} <- decode_ice_candidate(candidate_json),
+         :ok <- PeerConnection.add_ice_candidate(state.peer_connection, candidate) do
+      :ok
+    else
+      other ->
+        Logger.info(
+          "webrtc: rejected ICE candidate (user_id=#{state.user_id}): #{inspect(other)}"
+        )
+    end
+
     {:noreply, state}
+  end
+
+  defp decode_offer(offer_json) do
+    {:ok, SessionDescription.from_json(offer_json)}
+  rescue
+    e -> {:error, Exception.message(e)}
+  end
+
+  defp decode_ice_candidate(candidate_json) do
+    {:ok, ICECandidate.from_json(candidate_json)}
+  rescue
+    e -> {:error, Exception.message(e)}
   end
 
   @impl true

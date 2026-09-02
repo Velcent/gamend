@@ -32,8 +32,16 @@ services:
     #env_file:
     #  - .env
     environment:
-      # Run mix phx.gen.secret
-      GAMEND_AUTH_SECRET_KEY_BASE: 1DdaMAX56nUh1tvXniEEuQNsGNvgADndawxrJ3YFZlLXc9EOahC/NFDgowCDUFwb
+      # REQUIRED. There is deliberately no default: this key signs session
+      # cookies AND, unless GAMEND_AUTH_GUARDIAN_SECRET_KEY is set separately,
+      # every API JWT. A value committed to a public repository is a value an
+      # attacker already has, and knowing it is enough to mint a token for any
+      # account — including an admin, whose id the public user listing hands out.
+      #
+      # Generate one, then put it in a .env file beside this one:
+      #   echo "GAMEND_AUTH_SECRET_KEY_BASE=$(mix phx.gen.secret)" >> .env
+      # (or `openssl rand -base64 48` if you have no Elixir toolchain locally).
+      GAMEND_AUTH_SECRET_KEY_BASE: ${GAMEND_AUTH_SECRET_KEY_BASE:?set it in .env - see the comment above}
       # Path to server module plugins
       GAMEND_CONTENT_PLUGINS_DIR: modules/plugins_examples
       GAMEND_AUTH_DEVICE_AUTH_ENABLED: true

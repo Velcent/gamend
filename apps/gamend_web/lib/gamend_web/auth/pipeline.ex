@@ -11,7 +11,11 @@ defmodule GamendWeb.Auth.Pipeline do
     module: GamendWeb.Auth.Guardian,
     error_handler: GamendWeb.Auth.ErrorHandler
 
-  plug Guardian.Plug.VerifyHeader, scheme: "Bearer"
+  # `claims:` pins the token type. Without it Guardian verifies only the
+  # signature, so a 30-day refresh token authenticated every API route as if it
+  # were a 15-minute access token — which defeats the point of the short access
+  # TTL. Every issuer sets the type explicitly (`token_type: "access"`).
+  plug Guardian.Plug.VerifyHeader, scheme: "Bearer", claims: %{"typ" => "access"}
   plug Guardian.Plug.EnsureAuthenticated
   plug Guardian.Plug.LoadResource
   plug GamendWeb.Auth.AssignCurrentScope

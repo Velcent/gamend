@@ -97,7 +97,12 @@ defmodule Gamend.Payments.Providers.Apple do
     data = notification["data"] || %{}
 
     with {:ok, transaction_info} <- maybe_decode_jws(data["signedTransactionInfo"]),
-         {:ok, renewal_info} <- maybe_decode_jws(data["signedRenewalInfo"]) do
+         {:ok, renewal_info} <- maybe_decode_jws(data["signedRenewalInfo"]),
+         # The notification envelope carries its own `bundleId`, and it was never
+         # checked — only `validate_purchase/2` checked one. A signed
+         # notification for a different app could therefore drive a refund or a
+         # revocation here.
+         :ok <- validate_bundle_id(data) do
       {:ok,
        notification
        |> Map.put("data", data)
@@ -137,6 +142,13 @@ defmodule Gamend.Payments.Providers.Apple do
   defp apple_transaction_environment("Xcode"), do: "test"
   defp apple_transaction_environment(_), do: default_environment()
 
+  # Fails closed when no bundle id is configured.
+  #
+  # Product ids are per-app, so without this an Apple-signed transaction from
+  # *any* app whose `productId` happens to match a catalog `external_id` was
+  # accepted — and registering that same product id in an app of your own is
+  # free. The JWS-only deployment shape needs no other Apple credential, so
+  # nothing else prompted the operator to set this.
   defp validate_bundle_id(transaction) do
     case bundle_id_value() do
       value when is_binary(value) and value != "" ->
@@ -147,7 +159,7 @@ defmodule Gamend.Payments.Providers.Apple do
         end
 
       _ ->
-        :ok
+        {:error, :apple_bundle_id_not_configured}
     end
   end
 
@@ -348,7 +360,8 @@ defmodule Gamend.Payments.Providers.Apple.JWS do
   # the pinned Apple root — never trust a key taken from an unverified header.
   defp verified_leaf_jwk(%{"x5c" => [leaf | _] = x5c}) when is_binary(leaf) do
     with {:ok, der_chain} <- decode_x5c(x5c),
-         :ok <- validate_chain(der_chain) do
+         :ok <- validate_chain(der_chain),
+         :ok <- validate_marker_oids(der_chain) do
       {:ok, JOSE.JWK.from_pem(leaf_pem(leaf))}
     end
   rescue
@@ -356,6 +369,51 @@ defmodule Gamend.Payments.Providers.Apple.JWS do
   end
 
   defp verified_leaf_jwk(_header), do: {:error, :missing_apple_jws_certificate}
+
+  # Apple's verification procedure has two halves, and chaining to the root is
+  # only the first.
+  #
+  # Apple issues plenty of other ECC certificates under Apple Root CA - G3 —
+  # Apple Pay payment-processing certificates among them — and any of those
+  # chains validates here just as well. What distinguishes a *transaction*
+  # signing certificate is the marker extension Apple puts on it. Without this
+  # check, a developer holding any other ES256 key under that root could sign a
+  # JWS carrying whatever `productId`, `bundleId`, `transactionId` and
+  # `environment` they liked, and it would be accepted as a genuine purchase or
+  # a genuine refund notification.
+  @leaf_marker_oid {1, 2, 840, 113_635, 100, 6, 11, 1}
+  @intermediate_marker_oid {1, 2, 840, 113_635, 100, 6, 2, 1}
+
+  defp validate_marker_oids([leaf_der, intermediate_der | _]) do
+    cond do
+      not has_extension?(leaf_der, @leaf_marker_oid) ->
+        {:error, {:apple_cert_chain_invalid, :missing_leaf_marker}}
+
+      not has_extension?(intermediate_der, @intermediate_marker_oid) ->
+        {:error, {:apple_cert_chain_invalid, :missing_intermediate_marker}}
+
+      true ->
+        :ok
+    end
+  end
+
+  defp validate_marker_oids(_short_chain),
+    do: {:error, {:apple_cert_chain_invalid, :chain_too_short}}
+
+  defp has_extension?(der, oid) do
+    {:OTPCertificate, tbs, _sig_alg, _sig} = :public_key.pkix_decode_cert(der, :otp)
+    {:OTPTBSCertificate, _v, _sn, _alg, _iss, _val, _subj, _spki, _iuid, _suid, extensions} = tbs
+
+    case extensions do
+      list when is_list(list) ->
+        Enum.any?(list, &match?({:Extension, ^oid, _critical, _value}, &1))
+
+      _ ->
+        false
+    end
+  rescue
+    _ -> false
+  end
 
   defp decode_x5c(x5c) do
     {:ok, Enum.map(x5c, &Base.decode64!/1)}

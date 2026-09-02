@@ -424,7 +424,10 @@ defmodule GamendWeb.Api.V1.LeaderboardController do
 
   def around(conn, %{"id" => id, "user_id" => user_id_str} = params) do
     user_id = Gamend.UUIDv7.cast_or_nil(user_id_str)
-    limit = parse_int(params["limit"], 11)
+    # Clamped like every other page size. This went straight into the query, so
+    # `?limit=1000000` dumped the whole leaderboard in one unauthenticated
+    # request and a negative value reached the database as a negative LIMIT.
+    limit = Gamend.Limits.clamp_page_size(params["limit"], 11)
 
     case Leaderboards.get_leaderboard(to_string(id)) do
       nil ->
@@ -537,17 +540,6 @@ defmodule GamendWeb.Api.V1.LeaderboardController do
       })
     end
   end
-
-  defp parse_int(nil, default), do: default
-
-  defp parse_int(val, default) when is_binary(val) do
-    case Integer.parse(val) do
-      {int, _} -> int
-      :error -> default
-    end
-  end
-
-  defp parse_int(val, _default) when is_integer(val), do: val
 
   defp maybe_add_slug_filter(opts, nil), do: opts
   defp maybe_add_slug_filter(opts, ""), do: opts

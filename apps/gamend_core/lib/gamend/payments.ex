@@ -20,6 +20,7 @@ defmodule Gamend.Payments do
   alias Gamend.Payments.Purchase
   alias Gamend.Payments.ReconciliationCursor
   alias Gamend.Repo
+  alias Gamend.Repo.AdvisoryLock
 
   @pubsub Gamend.PubSub
   @store_validation_providers ~w(apple google steam)
@@ -155,6 +156,24 @@ defmodule Gamend.Payments do
   # Purchases and fulfillment
   # ---------------------------------------------------------------------------
 
+  # Everything a checkout request may carry. Everything else — amount, currency,
+  # status, environment, expiry, order id, the provider transaction ids, the raw
+  # provider payload — is ours to decide, and is dropped here.
+  #
+  # Both checkout controllers pass the whole request body through. With no
+  # allowlist, `POST /api/v1/payments/checkout/steam` accepted `"amount": 1` and
+  # a cheap `"currency"`, and Steam was asked to charge that: any product, for
+  # effectively nothing, ending in a real entitlement and real hook-granted
+  # currency. `expires_at` was accepted the same way, turning a subscription
+  # into a permanent grant.
+  @client_checkout_fields ~w(
+    product_sku provider_product_id external_id quantity
+    success_url cancel_url steam_id language usersession ipaddress metadata
+  )
+
+  defp client_checkout_attrs(attrs) when is_map(attrs),
+    do: Map.take(attrs, @client_checkout_fields)
+
   @spec create_purchase(User.t(), ProviderProduct.t(), map()) ::
           {:ok, Purchase.t()} | {:error, Ecto.Changeset.t()}
   def create_purchase(user, %ProviderProduct{} = provider_product, attrs \\ %{}) do
@@ -164,6 +183,11 @@ defmodule Gamend.Payments do
     quantity = parse_positive_int(attrs["quantity"], 1)
     unit_amount = provider_product.unit_amount
 
+    # NOTE: `attrs` here is trusted. The receipt-validation path
+    # (`record_validated_purchase/3`) legitimately supplies amount, currency,
+    # status, environment and expiry read out of a provider-signed receipt.
+    # Attributes that arrive from a *client* are stripped at the checkout entry
+    # points instead — see `client_checkout_attrs/1`.
     purchase_attrs =
       attrs
       |> Map.merge(%{
@@ -241,6 +265,7 @@ defmodule Gamend.Payments do
       Repo.durable_transaction(fn ->
         purchase =
           Purchase
+          |> lock_for_update()
           |> Repo.get!(purchase.id)
           |> Repo.preload([:product, :provider_product])
 
@@ -335,7 +360,16 @@ defmodule Gamend.Payments do
           {:error, :receipt_already_used}
 
         nil ->
-          with :ok <- ensure_checkout_allowed(user, provider_product, validation) do
+          # Also check the *original* transaction id before creating anything.
+          #
+          # Deduping on `transaction_id` alone is enough for a one-time
+          # purchase, but a subscription mints a fresh transaction id at every
+          # renewal — so user B could take user A's receipt, wait for the next
+          # renewal, and validate it as a brand-new purchase. The original id is
+          # stable across the whole subscription and is already stored and
+          # indexed; it just was not consulted.
+          with :ok <- ensure_original_transaction_unclaimed(user, provider, validation),
+               :ok <- ensure_checkout_allowed(user, provider_product, validation) do
             create_validated_store_purchase(user, provider_product, validation)
           end
       end
@@ -354,7 +388,7 @@ defmodule Gamend.Payments do
            %{purchase: Purchase.t(), checkout_url: String.t(), provider_session_id: String.t()}}
           | {:error, term()}
   def create_stripe_checkout(%User{} = user, attrs) when is_map(attrs) do
-    attrs = normalize_params(attrs)
+    attrs = attrs |> normalize_params() |> client_checkout_attrs()
 
     with {:ok, provider_product} <- resolve_provider_product("stripe", attrs),
          :ok <- ensure_checkout_allowed(user, provider_product, attrs),
@@ -384,11 +418,11 @@ defmodule Gamend.Payments do
     with {:ok, event} <- stripe_adapter().verify_webhook(raw_body, signature),
          event <- normalize_params(event),
          {:ok, event_id} <- required_value(event, "id"),
-         event_type when is_binary(event_type) <- event["type"],
-         {:ok, _record, true} <- record_provider_event("stripe", event_id, event_type, event) do
-      process_stripe_event(event)
+         event_type when is_binary(event_type) <- event["type"] do
+      claim_provider_event("stripe", event_id, event_type, event, fn ->
+        process_stripe_event(event)
+      end)
     else
-      {:ok, _record, false} -> {:ok, :duplicate}
       nil -> {:error, :missing_event_type}
       {:error, reason} -> {:error, reason}
     end
@@ -475,7 +509,8 @@ defmodule Gamend.Payments do
     attrs =
       attrs
       |> normalize_params()
-      |> Map.put_new("order_id", generate_steam_order_id())
+      |> client_checkout_attrs()
+      |> Map.put("order_id", generate_steam_order_id())
 
     with {:ok, provider_product} <- resolve_provider_product("steam", attrs),
          :ok <- ensure_checkout_allowed(user, provider_product, attrs),
@@ -531,11 +566,11 @@ defmodule Gamend.Payments do
     with {:ok, event} <- provider_adapter("google").verify_webhook(raw_body, authorization_header),
          event <- normalize_params(event),
          event_id <- event["message_id"] || provider_event_hash("google", raw_body),
-         event_type <- google_event_type(event),
-         {:ok, _record, true} <- record_provider_event("google", event_id, event_type, event) do
-      process_google_event(event)
+         event_type <- google_event_type(event) do
+      claim_provider_event("google", event_id, event_type, event, fn ->
+        process_google_event(event)
+      end)
     else
-      {:ok, _record, false} -> {:ok, :duplicate}
       {:error, reason} -> {:error, reason}
     end
   end
@@ -545,11 +580,11 @@ defmodule Gamend.Payments do
     with {:ok, event} <- provider_adapter("apple").verify_notification(raw_body),
          event <- normalize_params(event),
          event_id <- event["notificationUUID"] || provider_event_hash("apple", raw_body),
-         event_type when is_binary(event_type) <- event["notificationType"],
-         {:ok, _record, true} <- record_provider_event("apple", event_id, event_type, event) do
-      process_apple_event(event)
+         event_type when is_binary(event_type) <- event["notificationType"] do
+      claim_provider_event("apple", event_id, event_type, event, fn ->
+        process_apple_event(event)
+      end)
     else
-      {:ok, _record, false} -> {:ok, :duplicate}
       nil -> {:error, :missing_event_type}
       {:error, reason} -> {:error, reason}
     end
@@ -814,13 +849,67 @@ defmodule Gamend.Payments do
           event_type: event_type,
           payload: payload,
           metadata: metadata,
-          processed_at: DateTime.utc_now(:second)
+          # Deliberately nil. This used to be stamped at insert, *before* the
+          # handler ran, so a handler that failed (a database blip, an upstream
+          # timeout while fetching the subscription) returned an error to the
+          # provider, and the provider's retry then matched this row and was
+          # dismissed as a duplicate. The event was lost for good: the customer
+          # had paid and was never fulfilled, or a refund never withdrew the
+          # entitlement, with no path to recovery.
+          processed_at: nil
         })
         |> Repo.insert()
         |> case do
           {:ok, event} -> {:ok, event, true}
           {:error, changeset} -> {:error, changeset}
         end
+    end
+  end
+
+  @doc """
+  Stamp a provider event as fully handled. Only then does a retry of the same
+  event id count as a duplicate.
+  """
+  @spec mark_event_processed(ProviderEvent.t()) ::
+          {:ok, ProviderEvent.t()} | {:error, Ecto.Changeset.t()}
+  def mark_event_processed(%ProviderEvent{} = event) do
+    event
+    |> ProviderEvent.changeset(%{processed_at: DateTime.utc_now(:second)})
+    |> Repo.update()
+  end
+
+  # Decide whether a webhook delivery should run, and stamp it when it does.
+  #
+  # `record_provider_event/5` answers "have I seen this event id before?".
+  # That is not the same question as "has it been handled?", and treating it as
+  # such lost events: the row used to be written with `processed_at` already
+  # set, *before* the handler ran, so a handler that failed returned an error to
+  # the provider and the provider's retry was then dismissed as a duplicate.
+  # A paid checkout could go permanently unfulfilled, a refund permanently
+  # un-revoked, with nothing to recover from.
+  #
+  # Now the row is written unprocessed, and only a *completed* delivery counts
+  # as a duplicate. A retry of an event we recorded but never finished runs
+  # again — webhook handlers are idempotent (`fulfill_purchase/2` locks the row
+  # and returns `:already_fulfilled`), so re-running one is safe and losing one
+  # is not.
+  defp claim_provider_event(provider, event_id, event_type, event, fun) do
+    case record_provider_event(provider, event_id, event_type, event) do
+      {:ok, %ProviderEvent{processed_at: %DateTime{}}, false} ->
+        {:ok, :duplicate}
+
+      {:ok, %ProviderEvent{} = record, _new_or_unprocessed} ->
+        case fun.() do
+          {:error, _reason} = error ->
+            error
+
+          result ->
+            _ = mark_event_processed(record)
+            result
+        end
+
+      {:error, reason} ->
+        {:error, reason}
     end
   end
 
@@ -1010,7 +1099,17 @@ defmodule Gamend.Payments do
     validated_status = validation["status"] || "completed"
 
     attrs = %{
-      status: status_before_fulfillment(validated_status),
+      # A completed purchase is never moved back to pending.
+      #
+      # `status_before_fulfillment/1` maps "completed" to "pending" so that a
+      # *new* purchase can go through `fulfill_purchase/2` once. Applied to an
+      # already-completed row it re-armed fulfilment, so an Apple activation
+      # notification arriving after the client had already validated the same
+      # transaction fulfilled it a second time — firing
+      # `after_purchase_fulfilled` twice, which for the bundled example hook
+      # means granting the currency twice. Renewals extend the entitlement via
+      # `expires_at` below; they do not need a second fulfilment.
+      status: next_validated_status(purchase, validated_status),
       provider_transaction_id: validation["transaction_id"] || purchase.provider_transaction_id,
       provider_original_transaction_id:
         validation["original_transaction_id"] || purchase.provider_original_transaction_id,
@@ -1094,7 +1193,20 @@ defmodule Gamend.Payments do
   end
 
   defp create_validated_store_purchase(%User{} = user, provider_product, validation) do
-    validated_status = validation["status"] || "completed"
+    validated_status =
+      if test_purchase?(validation) do
+        # Recorded, never fulfilled.
+        #
+        # A sandbox or TestFlight transaction is signed by Apple exactly like a
+        # real one, and a Google test purchase verifies exactly like a real one,
+        # so every other check passes. The environment was decoded and stored
+        # but never compared against the server's own — which meant anyone with
+        # a TestFlight build or a sandbox tester account got every in-app
+        # purchase for free on the production server.
+        "failed"
+      else
+        validation["status"] || "completed"
+      end
 
     attrs = %{
       "status" => status_before_fulfillment(validated_status),
@@ -1113,6 +1225,59 @@ defmodule Gamend.Payments do
       {:ok, %{purchase: fulfilled_purchase, seen_before: false}}
     end
   end
+
+  defp ensure_original_transaction_unclaimed(user, provider, validation) do
+    case validation["original_transaction_id"] do
+      original when is_binary(original) and original != "" ->
+        case get_purchase_by_provider_original_transaction(provider, original) do
+          %Purchase{user_id: owner_id} when owner_id != user.id -> {:error, :receipt_already_used}
+          _ -> :ok
+        end
+
+      _no_original ->
+        :ok
+    end
+  end
+
+  # A transaction from an environment this server does not serve.
+  #
+  # Apple reports `Sandbox` for both the sandbox and TestFlight; Google reports
+  # `purchaseType` 0 for a test purchase and 1 for a promo. None of them
+  # represent money, so on a production server they must not produce goods.
+  # A non-production deployment accepts them, which is the whole point of one.
+  # Both adapters already normalise their provider's own field into
+  # `"environment"` — Apple maps `Sandbox`/`Xcode`, Google maps `purchaseType`
+  # 0 — so one comparison covers all of them.
+  defp test_purchase?(validation) do
+    configured = to_string(default_environment())
+    reported = validation["environment"]
+
+    configured == "production" and is_binary(reported) and
+      String.downcase(reported) != "production"
+  end
+
+  # Row-level lock for the fulfilment read, so two confirmations of the same
+  # purchase cannot both see "pending" and both fulfil it. That race is
+  # reachable in normal operation: a client `POST /payments/validate/:provider`
+  # arriving alongside the provider's own webhook for the same transaction, or
+  # a webhook alongside an admin reconcile. Each winner fires
+  # `after_purchase_fulfilled`, which is where games grant currency.
+  #
+  # Postgres only. SQLite has no row locks — `FOR UPDATE` raises rather than
+  # being ignored — but its single writer plus `default_transaction_mode:
+  # :immediate` already serialises the whole transaction, so the guarantee holds
+  # there for a different reason.
+  defp lock_for_update(query) do
+    if AdvisoryLock.postgres?() do
+      lock(query, "FOR UPDATE")
+    else
+      query
+    end
+  end
+
+  # Terminal states a re-validation must not walk back out of.
+  defp next_validated_status(%Purchase{status: "completed"}, "completed"), do: "completed"
+  defp next_validated_status(_purchase, status), do: status_before_fulfillment(status)
 
   defp status_before_fulfillment("completed"), do: "pending"
   defp status_before_fulfillment(status), do: status
@@ -1206,17 +1371,28 @@ defmodule Gamend.Payments do
               "charge.dispute.created",
               "charge.dispute.funds_withdrawn"
             ] and is_map(object) do
-    with {:ok, purchase} <- purchase_from_provider_object(object),
-         {:ok, _purchase} <-
-           revoke_purchase(purchase, %{
-             "status" => stripe_reversal_status(type),
-             "reason" => type,
-             "payload" => %{"stripe_event_object" => object}
-           }) do
-      {:ok, :processed}
+    # Only a refund that actually succeeded revokes.
+    #
+    # `refund.created` and `refund.updated` fire for pending, failed and
+    # cancelled refunds too, and every one of them revoked the entitlement — so
+    # a refund that failed left the customer charged *and* without the goods,
+    # with nothing to put it back. A partial `charge.refunded` was treated as a
+    # full one for the same reason.
+    if reversal_effective?(type, object) do
+      with {:ok, purchase} <- purchase_from_provider_object(object),
+           {:ok, _purchase} <-
+             revoke_purchase(purchase, %{
+               "status" => stripe_reversal_status(type),
+               "reason" => type,
+               "payload" => %{"stripe_event_object" => object}
+             }) do
+        {:ok, :processed}
+      else
+        {:error, :purchase_not_found} -> {:ok, :ignored}
+        {:error, reason} -> {:error, reason}
+      end
     else
-      {:error, :purchase_not_found} -> {:ok, :ignored}
-      {:error, reason} -> {:error, reason}
+      {:ok, :ignored}
     end
   end
 
@@ -1708,6 +1884,25 @@ defmodule Gamend.Payments do
        do: "refunded"
 
   defp stripe_reversal_status(_type), do: "revoked"
+
+  # A dispute always takes effect. A refund object counts only when its status
+  # says the money actually moved; a `charge.refunded` counts only when the
+  # charge was refunded in full, since a partial refund is not a revocation.
+  defp reversal_effective?("charge.dispute" <> _rest, _object), do: true
+
+  defp reversal_effective?("charge.refunded", object) do
+    case {object["amount"], object["amount_refunded"]} do
+      {amount, refunded} when is_integer(amount) and is_integer(refunded) -> refunded >= amount
+      _unknown -> true
+    end
+  end
+
+  defp reversal_effective?(_refund_event, object) do
+    case object["status"] do
+      status when is_binary(status) -> status == "succeeded"
+      _unknown -> true
+    end
+  end
 
   defp purchase_from_original_transaction(nil), do: {:error, :purchase_not_found}
 

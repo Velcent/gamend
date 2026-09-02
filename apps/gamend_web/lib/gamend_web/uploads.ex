@@ -84,7 +84,7 @@ defmodule GamendWeb.Uploads do
   @spec confirm(Plug.Conn.t(), String.t(), String.t(), term(), (String.t() -> Plug.Conn.t())) ::
           Plug.Conn.t()
   def confirm(conn, prefix, owner_id, key, fun) when is_binary(key) do
-    if String.starts_with?(key, "#{prefix}/#{owner_id}/") do
+    if String.starts_with?(key, "#{prefix}/#{owner_id}/") and normalized_key?(key) do
       case verify_stored_object(key) do
         :ok -> fun.(Storage.url(key))
         {:error, :object_not_found} -> error(conn, :bad_request, "object_not_found")
@@ -98,6 +98,19 @@ defmodule GamendWeb.Uploads do
 
   def confirm(conn, _prefix, _owner_id, _key, _fun), do: error(conn, :bad_request, "missing_key")
 
+  # A key with no `.`, `..` or empty segment.
+  #
+  # The prefix test alone is satisfied by `avatars/<my-id>/../../../<name>.png`,
+  # which the local backend then strips back down to a real object — so the
+  # stored `profile_url` became a URL that normalises to somewhere else entirely
+  # once a browser or CDN resolves it. Keys we generate never contain these
+  # segments, so requiring the normalised form costs nothing.
+  defp normalized_key?(key) do
+    segments = String.split(key, "/")
+
+    segments != [] and Enum.all?(segments, &(&1 not in ["", ".", ".."]))
+  end
+
   # Checks size before fetching, so an oversized object is rejected without
   # pulling it into memory. A rejected object is deleted rather than left to sit
   # in the bucket unreferenced.
@@ -107,6 +120,17 @@ defmodule GamendWeb.Uploads do
     with {:ok, %{size: size}} when size <= max <- Storage.stat(key),
          {:ok, data} <- Storage.get(key),
          content_type when is_binary(content_type) <- Storage.sniff_content_type(data) do
+      # Rewrite the object with the type its *bytes* say it is.
+      #
+      # The presigned S3 upload signs the method, bucket, key and expiry — not
+      # the content type, which is returned to the client as advice only. The
+      # client is therefore free to PUT the bytes with any `Content-Type`, and
+      # the bucket stores and later serves that. This step already reads the
+      # object back to sniff it, so writing it back under the sniffed type is
+      # what makes the sniff binding rather than advisory. On the local backend
+      # the serving route derives the type from the key and this is a no-op in
+      # effect, but it costs one write and keeps the two backends equivalent.
+      _ = Storage.put(key, data, content_type: content_type)
       :ok
     else
       {:ok, %{size: _oversized}} -> reject(key, :too_large)

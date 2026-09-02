@@ -70,7 +70,6 @@ defmodule GamendWeb.UserLive.Settings do
               <div class="flex items-center gap-2">
                 <button
                   phx-click="delete_conflicting_account"
-                  phx-value-id={@conflict_user.id}
                   class="btn btn-error btn-sm"
                   data-confirm={gettext("Delete?")}
                 >
@@ -141,16 +140,17 @@ defmodule GamendWeb.UserLive.Settings do
     {:ok, push_navigate(socket, to: ~p"/users/settings")}
   end
 
-  def mount(_params, _session, socket) do
+  def mount(_params, session, socket) do
     user = Scope.user(socket.assigns.current_scope)
+    {conflict_user, conflict_provider} = AccountTab.resolve_link_conflict(session, user)
 
     socket =
       socket
       |> assign(:page_title, gettext("Account"))
       |> assign(:settings_tab, "account")
       |> assign(:user, user)
-      |> assign(:conflict_user, nil)
-      |> assign(:conflict_provider, nil)
+      |> assign(:conflict_user, conflict_user)
+      |> assign(:conflict_provider, conflict_provider)
       |> AccountTab.assign_defaults(user)
       |> FriendsTab.assign_defaults(user)
       |> DataTab.assign_defaults()
@@ -255,16 +255,10 @@ defmodule GamendWeb.UserLive.Settings do
 
   @impl true
   def handle_params(params, _url, socket) do
-    conflict_user =
-      case params do
-        %{"conflict_user_id" => id} when is_binary(id) ->
-          Accounts.get_user(id)
-
-        _ ->
-          nil
-      end
-
-    conflict_provider = Map.get(params, "conflict_provider")
+    # The link conflict comes from the session, resolved once in `mount/3` — never
+    # from the query string. See `AccountTab.resolve_link_conflict/2`.
+    conflict_user = socket.assigns[:conflict_user]
+    conflict_provider = socket.assigns[:conflict_provider]
 
     tab =
       if Map.get(params, "tab") in @valid_tabs,

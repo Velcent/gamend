@@ -2821,24 +2821,23 @@ defmodule GamendWeb.AdminLive.Config do
   end
 
   # Helpers for masking secrets shown in the admin UI.
-  # We show the first 2 and last 2 characters for secrets longer than 6
-  # (e.g. ab...yz). For very short values we show them with a small mask.
+  # A fixed-width mask, plus the last four characters once the value is long
+  # enough for four to be a small fraction of it.
+  #
+  # This used to show the first and last `ceil(len/4)` characters — about half
+  # of the value, contiguous at both ends. For a 64-character `secret_key_base`
+  # that is 32 characters; for a 16-character SMTP password it left 8 to guess;
+  # and it masked `RELEASE_COOKIE`, the BEAM distribution credential, the same
+  # way. Recognising a value needs a handful of characters, not half of it.
+  # Matches `GamendWeb.AdminLive.Settings`, which already did this.
   defp mask_secret(nil), do: "<unset>"
   defp mask_secret(""), do: "<unset>"
 
   defp mask_secret(s) when is_binary(s) do
-    len = byte_size(s)
-
-    if len <= 4 do
-      String.duplicate("*", len)
+    if byte_size(s) <= 12 do
+      "••••••••"
     else
-      # Reveal a roughly half-window by showing the first and last ceil(len/4)
-      # characters. This is a balance between usefulness and not leaking
-      # full secrets in the admin UI.
-      visible = max(1, div(len + 3, 4))
-      first = String.slice(s, 0, visible)
-      last = String.slice(s, -visible, visible)
-      "#{first}...#{last}"
+      "••••••••" <> String.slice(s, -4, 4)
     end
   end
 

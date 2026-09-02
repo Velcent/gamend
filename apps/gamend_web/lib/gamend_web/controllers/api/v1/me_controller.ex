@@ -346,17 +346,30 @@ defmodule GamendWeb.Api.V1.MeController do
     ]
   )
 
-  def delete(conn, _params) do
+  def delete(conn, params) do
     user = Scope.user(conn.assigns.current_scope)
 
-    case Gamend.Accounts.delete_user(user) do
-      {:ok, _} ->
-        json(conn, %{})
+    # Deleting the account requires the password, when there is one.
+    #
+    # Changing a password already demands `current_password` on the reasoning
+    # that a stolen access token must not become a permanent takeover — and
+    # permanently destroying the account, its stored objects, KV entries and
+    # wallet is the larger of the two actions. Accounts with no password (device
+    # and OAuth-only) have nothing to prove, exactly as for setting one.
+    if password_change_authorized?(user, params) do
+      case Gamend.Accounts.delete_user(user) do
+        {:ok, _} ->
+          json(conn, %{})
 
-      {:error, _} ->
-        conn
-        |> put_status(:bad_request)
-        |> json(%{error: "Failed to delete account"})
+        {:error, _} ->
+          conn
+          |> put_status(:bad_request)
+          |> json(%{error: "Failed to delete account"})
+      end
+    else
+      conn
+      |> put_status(:unauthorized)
+      |> json(%{error: "invalid_current_password"})
     end
   end
 end

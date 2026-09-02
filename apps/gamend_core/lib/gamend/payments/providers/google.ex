@@ -215,9 +215,14 @@ defmodule Gamend.Payments.Providers.Google do
     end
   end
 
-  defp access_token(%{"access_token" => token}) when is_binary(token) and token != "",
-    do: {:ok, token}
-
+  # Deliberately not read from `attrs`.
+  #
+  # A clause here used to accept `"access_token"` from the request body, so a
+  # caller of `POST /api/v1/payments/validate/google` chose which credential the
+  # server used for its own server-to-server call to Google. It gained nothing
+  # against Google, but the credential for a server-side call is not an input a
+  # client gets to supply. Operators still override it with the configured
+  # `GOOGLE_PLAY_ACCESS_TOKEN`.
   defp access_token(_attrs) do
     case config_value("GOOGLE_PLAY_ACCESS_TOKEN", :google_play_access_token) do
       token when is_binary(token) and token != "" -> {:ok, token}
@@ -329,7 +334,11 @@ defmodule Gamend.Payments.Providers.Google do
   # Fail closed in production when no shared token is configured — an unset token
   # would otherwise leave the RTDN webhook unauthenticated. Dev/test stay lenient.
   defp unconfigured_rtdn_result do
-    if Application.get_env(:gamend_web, :environment) == :prod do
+    # Defaults to `:prod`, like every other reader of this key. Without the
+    # default, a host that never sets it got `nil` — which is not `:prod`, so
+    # the lenient branch ran and the notification endpoint was unauthenticated
+    # on a production server.
+    if Application.get_env(:gamend_web, :environment, :prod) == :prod do
       {:error, :google_rtdn_not_configured}
     else
       :ok

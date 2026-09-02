@@ -436,47 +436,83 @@ defmodule GamendWeb.UserLive.SettingsTest do
       assert render(lv) =~ "btn-disabled"
     end
 
-    test "can delete conflicting account when other account has no password (provider-only)", %{
-      conn: conn
-    } do
-      # other account is provider-only (no password) and already has the discord_id
-      other_user = user_fixture(%{discord_id: "d_conflict"})
+    # The conflict is recorded in the session by `GamendWeb.AuthController`,
+    # which is the only place that has proven the caller controls the provider
+    # identity the other account claims.
+    defp with_link_conflict(conn, provider, user_id) do
+      Phoenix.ConnTest.init_test_session(conn, %{
+        "oauth_link_conflict" => %{
+          "provider" => provider,
+          "user_id" => user_id,
+          "at" => System.system_time(:second)
+        }
+      })
+    end
 
-      {:ok, lv, html} =
+    # `user_fixture/1` builds its user through `register_user/1`, whose changesets
+    # do not cast provider ids — so passing `discord_id:` to it silently did
+    # nothing. Set it directly, or the account is not actually in conflict.
+    defp provider_only_user_fixture(discord_id) do
+      user_fixture() |> Ecto.Changeset.change(discord_id: discord_id) |> Repo.update!()
+    end
+
+    test "a query parameter cannot name an account to delete", %{conn: conn} do
+      other_user = provider_only_user_fixture("d_conflict")
+
+      {:ok, lv, _html} =
         live(
           conn,
           ~p"/users/settings?conflict_provider=discord&conflict_user_id=#{other_user.id}"
         )
 
-      assert html =~ "Failed"
-      assert has_element?(lv, "button[phx-value-id=\"#{other_user.id}\"]")
+      # No conflict was proven, so no delete control is offered...
+      refute has_element?(lv, "button[phx-click=\"delete_conflicting_account\"]")
 
-      # click delete
-      lv |> element("button[phx-value-id=\"#{other_user.id}\"]") |> render_click()
+      # ...and pushing the event anyway does nothing. This is the whole finding:
+      # the id used to come straight from the URL, so any signed-in user could
+      # delete any account without a password.
+      render_click(lv, "delete_conflicting_account", %{"id" => other_user.id})
 
-      # other account should be removed
+      assert Repo.get(User, other_user.id)
+    end
+
+    test "deletes a conflicting account that is only the provider identity", %{conn: conn} do
+      # Provider-only: no password, no device credential, one linked provider.
+      other_user = provider_only_user_fixture("d_conflict")
+
+      {:ok, lv, _html} =
+        live(with_link_conflict(conn, "discord", other_user.id), ~p"/users/settings")
+
+      assert has_element?(lv, "button[phx-click=\"delete_conflicting_account\"]")
+
+      lv |> element("button[phx-click=\"delete_conflicting_account\"]") |> render_click()
+
       refute Repo.get(User, other_user.id)
       assert render(lv) =~ "Success."
     end
 
-    test "cannot delete conflicting account when other account has a password", %{conn: conn} do
-      other_user = user_fixture(%{discord_id: "d_conflict"})
-      # set a password for the other_user so it's a real claimed account
-      other_user = set_password(other_user)
+    test "refuses to delete a conflicting account that has its own password", %{conn: conn} do
+      other_user = provider_only_user_fixture("d_conflict") |> set_password()
 
-      {:ok, lv, html} =
-        live(
-          conn,
-          ~p"/users/settings?conflict_provider=discord&conflict_user_id=#{other_user.id}"
-        )
+      {:ok, lv, _html} =
+        live(with_link_conflict(conn, "discord", other_user.id), ~p"/users/settings")
 
-      assert html =~ "Failed"
+      lv |> element("button[phx-click=\"delete_conflicting_account\"]") |> render_click()
 
-      lv |> element("button[phx-value-id=\"#{other_user.id}\"]") |> render_click()
-
-      # other account should remain
       assert Repo.get(User, other_user.id)
-      assert render(lv) =~ "Failed"
+      assert render(lv) =~ "Sign in to it"
+    end
+
+    test "ignores a session conflict that no longer holds", %{conn: conn} do
+      # A session outlives the situation it describes, so the conflict is
+      # re-validated on every mount: here the other account is gone.
+      other_user = provider_only_user_fixture("d_conflict")
+      conn = with_link_conflict(conn, "discord", other_user.id)
+      {:ok, _} = Accounts.delete_user(other_user)
+
+      {:ok, lv, _html} = live(conn, ~p"/users/settings")
+
+      refute has_element?(lv, "button[phx-click=\"delete_conflicting_account\"]")
     end
   end
 

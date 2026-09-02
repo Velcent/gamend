@@ -115,8 +115,29 @@ defmodule Gamend.Matchmaking.Worker do
     # lock: expiring fires hooks and broadcasts. One indexed query per tick.
     _ = Gamend.ReadyChecks.expire_due()
 
+    _ = Matchmaking.prune_offline()
+
+    # Matching happens *outside* the lock; only the claim is inside it.
+    #
+    # `Lock.serialize/3` opens a transaction, which on SQLite (the production
+    # default) means holding the single pooled write connection. `form_bucket/1`
+    # calls the `matchmaking_form_matches` hook, which waits on a task for up to
+    # the hook timeout — a minute by default. A slow plugin therefore stalled
+    # every write in the application, not just matchmaking; worse, the hook's
+    # own task could not check out a connection, because this sweep held the
+    # only one, so a plugin that touched the database blocked until the busy
+    # timeout and then burned its whole budget.
+    #
+    # Reading queued tickets without the lock means the proposed groups may be
+    # stale by the time the claim runs. That is already handled:
+    # `Matchmaking.claim/1` is a conditional update and seats a group only if
+    # every ticket in it is still queued.
+    proposed =
+      Matchmaking.list_queued_by_params()
+      |> Enum.flat_map(&form_bucket/1)
+
     claimed =
-      case Gamend.Lock.serialize(:matchmaking_sweep, "global", &claim_phase/0) do
+      case Gamend.Lock.serialize(:matchmaking_sweep, "global", fn -> claim_phase(proposed) end) do
         {:ok, matches} -> matches
         {:error, _} -> []
       end
@@ -126,12 +147,28 @@ defmodule Gamend.Matchmaking.Worker do
     |> Enum.count(&match?({:ok, _}, &1))
   end
 
-  defp claim_phase do
-    _ = Matchmaking.prune_offline()
+  defp claim_phase(proposed) do
+    # A ticket must not be seated twice in one sweep: a custom matcher is free
+    # to return the same ticket in two groups, and `Matchmaking.requeue/1` would
+    # then flip a ticket that another group had already claimed back to queued.
+    {claimed, _seen} =
+      Enum.reduce(proposed, {[], MapSet.new()}, fn group, {acc, seen} ->
+        ids = Enum.map(group, & &1.id)
 
-    Matchmaking.list_queued_by_params()
-    |> Enum.flat_map(&form_bucket/1)
-    |> Enum.filter(&(Matchmaking.claim(&1) == :ok))
+        cond do
+          Enum.any?(ids, &MapSet.member?(seen, &1)) ->
+            Logger.warning("matchmaking: ticket proposed in two groups this sweep; dropped")
+            {acc, seen}
+
+          Matchmaking.claim(group) == :ok ->
+            {[group | acc], MapSet.union(seen, MapSet.new(ids))}
+
+          true ->
+            {acc, seen}
+        end
+      end)
+
+    Enum.reverse(claimed)
   end
 
   # One bucket = the tickets sharing identical match_params. A game may

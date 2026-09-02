@@ -16,7 +16,13 @@ defmodule GamendWeb.Auth.OptionalPipeline do
     module: GamendWeb.Auth.Guardian,
     error_handler: GamendWeb.Auth.ErrorHandler
 
-  plug Guardian.Plug.VerifyHeader, scheme: "Bearer", allow_blank: true
+  # Same token-type pin as `GamendWeb.Auth.Pipeline` — a refresh token must not
+  # authenticate a request just because this pipeline tolerates no token at all.
+  plug Guardian.Plug.VerifyHeader,
+    scheme: "Bearer",
+    allow_blank: true,
+    claims: %{"typ" => "access"}
+
   plug Guardian.Plug.LoadResource, allow_blank: true
   plug GamendWeb.Auth.AssignCurrentScope
 end

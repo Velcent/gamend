@@ -58,7 +58,9 @@ defmodule GamendWeb.UserSocket do
   # each user may hold at most :max_sockets_per_user concurrent sockets.
   def connect(params, socket, _connect_info) do
     with token when is_binary(token) <- extract_token(params),
-         {:ok, claims} <- Guardian.decode_and_verify(token),
+         # Access tokens only: a refresh token is a 30-day credential and must
+         # not open a socket. Matches the two HTTP pipelines.
+         {:ok, claims} <- Guardian.decode_and_verify(token, %{"typ" => "access"}),
          {:ok, user} <- Guardian.resource_from_claims(claims),
          false <- socket_limit_reached?(user.id) do
       format = extract_format(params, socket)

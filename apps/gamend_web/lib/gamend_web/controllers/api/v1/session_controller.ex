@@ -150,14 +150,33 @@ defmodule GamendWeb.Api.V1.SessionController do
   operation(:delete,
     operation_id: "logout",
     summary: "Logout",
-    description: "Invalidate user session token",
+    description:
+      "Revoke the caller's tokens. Send the access or refresh token in the " <>
+        "Authorization header. This signs the account out on every device, because " <>
+        "revocation works by bumping the account's token version. Always returns 200, " <>
+        "so a client with an already-expired token can still complete sign-out.",
     parameters: [],
     responses: [
       ok: {"Logout successful", "application/json", %Schema{type: :object}}
     ]
   )
 
+  # Previously this returned `%{}` and did nothing at all, while its own
+  # description claimed to invalidate the session — so a client that had
+  # "logged out" kept a working access token, and its refresh token stayed
+  # valid for 30 days.
+  #
+  # There is no per-token denylist to revoke against, so revocation is
+  # `token_version`, which is account-wide. Callers are told that plainly above.
+  # The route is unauthenticated, so the token is read here rather than by a
+  # pipeline: sign-out must not fail merely because the token already expired.
   def delete(conn, _params) do
+    with ["Bearer " <> token] <- get_req_header(conn, "authorization"),
+         {:ok, claims} <- Guardian.decode_and_verify(token),
+         {:ok, user} <- Guardian.resource_from_claims(claims) do
+      _ = Accounts.revoke_all_tokens(user)
+    end
+
     json(conn, %{})
   end
 

@@ -65,6 +65,29 @@ defmodule GamendWeb.Api.V1.StorageController do
   def show(conn, %{"key" => segments}) do
     key = Enum.join(segments, "/")
 
+    if publicly_servable?(key) do
+      serve_object(conn, key)
+    else
+      conn |> put_status(:not_found) |> json(%{error: "not_found"})
+    end
+  end
+
+  # Prefixes this unauthenticated route may serve.
+  #
+  # It used to serve *any* key in the store. Avatar and icon keys carry 16 bytes
+  # of entropy so they are effectively unguessable, but the admin uploader
+  # writes operator-chosen keys at any path (`PUT /api/v1/admin/storage/object`,
+  # and the admin page advertises "any file type, at any path") — and a
+  # hand-written key like `backups/db.sql` is guessable by construction.
+  # Everything outside these prefixes is reachable only through the
+  # authenticated admin download route.
+  @public_prefixes ~w(avatars/ icons/)
+
+  defp publicly_servable?(key) do
+    Enum.any?(@public_prefixes, &String.starts_with?(key, &1))
+  end
+
+  defp serve_object(conn, key) do
     case Storage.get(key) do
       {:ok, data} ->
         etag = etag_for(data)

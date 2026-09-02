@@ -180,8 +180,14 @@ defmodule GamendWeb.Api.V1.UserController do
     |> Map.drop([:profile_url])
     |> Map.put(:metadata, public_metadata(user.metadata))
     |> Map.merge(%{
-      lobby_id: user.lobby_id || "",
-      party_id: user.party_id || ""
+      # Deliberately blank on the public endpoints. These are unauthenticated
+      # (`list_users` gate only), and a lobby id is enough to join a lobby or
+      # walk into a WebRTC signaling room — so publishing "which room is this
+      # player in" alongside a name search was the discovery half of several
+      # other problems. Authenticated callers get membership from the lobby,
+      # party and channel APIs, which check the caller's relationship to it.
+      lobby_id: "",
+      party_id: ""
     })
   end
 

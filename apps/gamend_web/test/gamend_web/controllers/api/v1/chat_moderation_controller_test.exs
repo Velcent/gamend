@@ -81,11 +81,40 @@ defmodule GamendWeb.Api.V1.ChatModerationControllerTest do
 
   describe "POST /api/v1/chat/messages/:id/report" do
     setup do
+      # Both users are in the lobby the message belongs to. Reporting requires
+      # being able to read the message, so a message in a lobby nobody is in is
+      # not reportable by anyone — which is the point, but makes for a fixture
+      # that does not exercise the endpoint.
+      host = create_user()
+
+      {:ok, lobby} =
+        Lobbies.create_lobby(%{
+          title: "report-#{System.unique_integer([:positive])}",
+          host_id: host.id
+        })
+
       reporter = create_user()
       sender = create_user()
-      message = insert_message(sender, Ecto.UUID.generate(), "something rude")
+      {:ok, _} = Lobbies.join_lobby(reporter, lobby)
+      {:ok, _} = Lobbies.join_lobby(sender, lobby)
 
-      %{reporter: reporter, sender: sender, message: message}
+      message = insert_message(sender, lobby.id, "something rude")
+
+      %{reporter: reporter, sender: sender, message: message, lobby: lobby}
+    end
+
+    test "refuses to report a message the caller cannot read" do
+      outsider = create_user()
+      stranger = create_user()
+      unrelated = insert_message(stranger, Ecto.UUID.generate(), "not your conversation")
+
+      conn =
+        Phoenix.ConnTest.build_conn()
+        |> auth_conn(outsider)
+        |> post("/api/v1/chat/messages/#{unrelated.id}/report", %{reason: "abusive"})
+
+      assert json_response(conn, 404)["error"] == "not_found"
+      assert Chat.count_reports() == 0
     end
 
     test "files a report for another player's message", %{

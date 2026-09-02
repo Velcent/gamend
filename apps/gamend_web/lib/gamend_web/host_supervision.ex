@@ -48,7 +48,9 @@ defmodule GamendWeb.HostSupervision do
     # Before anything starts: a missing required setting should stop the boot
     # here, with a list of what is missing, rather than surface later as a
     # crash-loop in whichever child needed it.
-    Gamend.Settings.validate!(Application.get_env(:gamend_web, :environment, :prod))
+    env = Application.get_env(:gamend_web, :environment, :prod)
+    Gamend.Settings.validate!(env)
+    refuse_published_secret!(env)
 
     Application.start(:os_mon)
 
@@ -62,6 +64,47 @@ defmodule GamendWeb.HostSupervision do
 
     :ok
   end
+
+  # Secrets that have appeared in this repository, and are therefore known to
+  # everyone. `docker-compose.yml` shipped the first one as a literal for a long
+  # time, so a deployment that started from the stock file is running with a key
+  # an attacker can read on GitHub — and since the Guardian secret falls back to
+  # `secret_key_base`, that key mints API tokens for any account, admin included.
+  #
+  # Refusing to boot is the point: this cannot be a warning, because the failure
+  # it prevents is silent and total, and a warning in a container log is a
+  # warning nobody reads.
+  @published_secrets [
+    "1DdaMAX56nUh1tvXniEEuQNsGNvgADndawxrJ3YFZlLXc9EOahC/NFDgowCDUFwb"
+  ]
+
+  defp refuse_published_secret!(:prod) do
+    [
+      {"GAMEND_AUTH_SECRET_KEY_BASE", Gamend.Settings.get(Gamend.Accounts, :secret_key_base)},
+      {"GAMEND_AUTH_GUARDIAN_SECRET_KEY",
+       Gamend.Settings.get(Gamend.Accounts, :guardian_secret_key)}
+    ]
+    |> Enum.each(fn {name, value} ->
+      if value in @published_secrets do
+        raise """
+        #{name} is set to a value published in the Gamend repository.
+
+        It signs session cookies and API tokens, so anyone who has read the
+        repository can forge a token for any account on this server, including
+        an administrator.
+
+        Generate a new one and restart:
+
+            #{name}=$(mix phx.gen.secret)
+
+        Treat any data this server has handled as exposed, and revoke sessions
+        once the new key is in place.
+        """
+      end
+    end)
+  end
+
+  defp refuse_published_secret!(_env), do: :ok
 
   @doc """
   Core's children, in start order.

@@ -107,9 +107,9 @@ defmodule GamendWeb.LobbyChannel do
   # rest of the session going quiet. A client that pushes something we do not
   # know is a client to answer, not to hang up on.
   def handle_in(event, _payload, socket) do
-    Logger.warning(
-      "LobbyChannel: unknown event=#{event} lobby=#{socket.assigns[:lobby_id] || "nil"}"
-    )
+    Logger.debug(fn ->
+      "LobbyChannel: unknown event=#{truncate_event(event)} lobby=#{socket.assigns[:lobby_id] || "nil"}"
+    end)
 
     {:reply, {:error, %{error: "unknown_event"}}, socket}
   end
@@ -138,7 +138,7 @@ defmodule GamendWeb.LobbyChannel do
       display_name: Serializers.display_name(user_id)
     })
 
-    {:noreply, socket}
+    stop_if_own_departure(socket, user_id)
   end
 
   @impl true
@@ -148,7 +148,7 @@ defmodule GamendWeb.LobbyChannel do
       display_name: Serializers.display_name(user_id)
     })
 
-    {:noreply, socket}
+    stop_if_own_departure(socket, user_id)
   end
 
   @impl true
@@ -278,4 +278,34 @@ defmodule GamendWeb.LobbyChannel do
         :ok
     end
   end
+
+  # Membership is checked on join, so leaving has to end the channel too.
+  #
+  # These handlers pushed the event to every subscriber and returned. Nothing
+  # broadcasts a disconnect to the departing member's socket, so a kicked player
+  # stayed subscribed to this lobby's topic *and* its chat, and kept receiving
+  # full membership snapshots, state changes and every message — for a room they
+  # could no longer rejoin, hidden or password-protected or not.
+  #
+  # The event is pushed first, so the client learns why the channel closed.
+  defp stop_if_own_departure(socket, user_id) do
+    if user_id == socket.assigns.current_scope.user_id and not socket.assigns[:spectator] do
+      {:stop, :normal, socket}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  # Unknown events are logged at debug with the name truncated, and the name is
+  # never interpolated at warning level.
+  #
+  # Every other `handle_in/3` here rate-limits first; this catch-all did not,
+  # and it put a client-chosen string into a warning line. A frame allows a
+  # 128 KB event name, so one socket could drive unbounded warning-level volume
+  # made of attacker-controlled text into the rotating log and the admin buffer.
+  # Client-chosen, so never logged whole.
+  defp truncate_event(event) when is_binary(event),
+    do: binary_part(event, 0, min(byte_size(event), 64))
+
+  defp truncate_event(event), do: inspect(event)
 end

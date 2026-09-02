@@ -38,11 +38,17 @@ defmodule Gamend.Hooks.PluginBuilderTest do
       end)
     end
 
-    test "reports a missing project separately from an unavailable mix" do
-      assert {:error, {:missing_mix_project, path}} =
-               PluginBuilder.build("definitely-not-a-plugin")
+    test "refuses a name that is not one of the buildable plugins" do
+      assert PluginBuilder.build("definitely-not-a-plugin") ==
+               {:error, {:unknown_plugin, "definitely-not-a-plugin"}}
+    end
 
-      assert path =~ "definitely-not-a-plugin"
+    # `mix compile` evaluates the mix.exs in its working directory, so the
+    # directory is code, not a parameter. The name is reduced to a basename and
+    # must name a plugin we actually ship.
+    test "cannot be steered out of the sources directory" do
+      assert {:error, {:unknown_plugin, _}} = PluginBuilder.build("../../../../tmp/evil")
+      assert {:error, {:unknown_plugin, _}} = PluginBuilder.build("/etc")
     end
   end
 

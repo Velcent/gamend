@@ -81,6 +81,17 @@ defmodule GamendWeb.SignalingChannel do
              signaling_room: room_id,
              signaling_user_id: user_id,
              signaling_role: role,
+             # Read once, at join. `handle_out` for a presence diff runs in
+             # *every* subscribed channel process, and `schedule_leaves/2` read
+             # this from the lobby each time — so one peer leaving a 50-peer
+             # room cost 50 lobby reads, each of them two multilevel cache
+             # lookups (the cache key is itself a cached version counter), and
+             # 50 more when the confirm timers fired.
+             #
+             # A room's reconnect timeout changing mid-session is a config edit,
+             # and the stale value only widens or narrows a grace period, so
+             # picking it up on the next join is good enough.
+             signaling_reconnect_timeout: reconnect_timeout(room_id),
              pending_leaves: %{}
            )}
 
@@ -105,7 +116,8 @@ defmodule GamendWeb.SignalingChannel do
 
   @impl true
   def handle_in("offer", %{"target" => target, "sdp" => sdp}, socket) do
-    with :ok <- check_ws_rate_limit(socket) do
+    with :ok <- check_ws_rate_limit(socket),
+         :ok <- validate_signal_payload(sdp, socket) do
       room = socket.assigns.signaling_room
       from = socket.assigns.signaling_user_id
 
@@ -139,7 +151,8 @@ defmodule GamendWeb.SignalingChannel do
 
   @impl true
   def handle_in("answer", %{"target" => target, "sdp" => sdp}, socket) do
-    with :ok <- check_ws_rate_limit(socket) do
+    with :ok <- check_ws_rate_limit(socket),
+         :ok <- validate_signal_payload(sdp, socket) do
       room = socket.assigns.signaling_room
       from = socket.assigns.signaling_user_id
 
@@ -173,7 +186,8 @@ defmodule GamendWeb.SignalingChannel do
 
   @impl true
   def handle_in("ice", %{"target" => target, "candidate" => candidate}, socket) do
-    with :ok <- check_ice_rate_limit(socket) do
+    with :ok <- check_ice_rate_limit(socket),
+         :ok <- validate_signal_payload(candidate, socket) do
       room = socket.assigns.signaling_room
       from = socket.assigns.signaling_user_id
 
@@ -204,7 +218,8 @@ defmodule GamendWeb.SignalingChannel do
 
   @impl true
   def handle_in("broadcast_offer", %{"sdp" => sdp}, socket) do
-    with :ok <- check_ws_rate_limit(socket) do
+    with :ok <- check_ws_rate_limit(socket),
+         :ok <- validate_signal_payload(sdp, socket) do
       room = socket.assigns.signaling_room
       from = socket.assigns.signaling_user_id
 
@@ -245,9 +260,9 @@ defmodule GamendWeb.SignalingChannel do
 
   @impl true
   def handle_in(event, _payload, socket) do
-    Logger.warning(
-      "SignalingChannel: unknown event=#{event} room=#{socket.assigns[:signaling_room] || "nil"} user=#{socket.assigns[:signaling_user_id] || "nil"}"
-    )
+    Logger.debug(fn ->
+      "SignalingChannel: unknown event=#{truncate_event(event)} room=#{socket.assigns[:signaling_room] || "nil"} user=#{socket.assigns[:signaling_user_id] || "nil"}"
+    end)
 
     {:reply, {:error, %{error: "unknown_event"}}, socket}
   end
@@ -394,7 +409,7 @@ defmodule GamendWeb.SignalingChannel do
 
   defp schedule_leaves(socket, leaves) do
     me = socket.assigns.signaling_user_id
-    grace = reconnect_timeout(socket.assigns.signaling_room)
+    grace = socket.assigns[:signaling_reconnect_timeout] || 0
 
     Enum.reduce(leaves, socket, fn {user_id, _}, acc ->
       if user_id == me do
@@ -462,4 +477,38 @@ defmodule GamendWeb.SignalingChannel do
       :ok
     end
   end
+
+  # Unknown events are logged at debug with the name truncated, and the name is
+  # never interpolated at warning level.
+  #
+  # Every other `handle_in/3` here rate-limits first; this catch-all did not,
+  # and it put a client-chosen string into a warning line. A frame allows a
+  # 128 KB event name, so one socket could drive unbounded warning-level volume
+  # made of attacker-controlled text into the rotating log and the admin buffer.
+  # Client-chosen, so never logged whole.
+  defp truncate_event(event) when is_binary(event),
+    do: binary_part(event, 0, min(byte_size(event), 64))
+
+  defp truncate_event(event), do: inspect(event)
+
+  # SDP and ICE candidates are relayed verbatim to other peers, so bound them
+  # here rather than trusting whatever a frame can carry.
+  #
+  # These were passed through with no type or size check at all — they did not
+  # even have to be strings, since any JSON term was forwarded — while the
+  # socket allows a 128 KB frame. A real SDP offer is a few kilobytes and an ICE
+  # candidate is a single line.
+  @max_signal_bytes 16_384
+
+  # Returns `:ok`, or a complete channel reply — the `with`s above have no
+  # `else`, so a non-`:ok` value is returned to Phoenix as-is, the same way
+  # `check_ws_rate_limit/1` signals a rejection.
+  defp validate_signal_payload(value, socket) when is_binary(value) do
+    if byte_size(value) <= @max_signal_bytes,
+      do: :ok,
+      else: {:reply, {:error, %{error: "payload_too_large"}}, socket}
+  end
+
+  defp validate_signal_payload(_value, socket),
+    do: {:reply, {:error, %{error: "invalid_payload"}}, socket}
 end

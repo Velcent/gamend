@@ -590,34 +590,38 @@ defmodule GamendWeb.Api.V1.LobbyController do
 
   ### API actions (create/join/update/leave/kick) ###
 
+  # `hostless` and `host_id` are server-owned and are dropped, not rejected.
+  #
+  # The old guard compared against the boolean `true` only, so `"hostless":
+  # "true"` sailed past it and Ecto cast the string — producing a lobby with no
+  # host, which nobody can manage, and which game hooks reasonably read as
+  # "created by the server". Stripping is also the better shape than a 401: a
+  # client sending a field it does not own gets its lobby, minus that field.
+  @server_owned_lobby_fields ~w(hostless host_id)a ++ ~w(hostless host_id)
+
   def create(conn, params) do
-    # disallow hostless creation from public API
-    if Map.get(params, "hostless") == true or Map.get(params, :hostless) == true do
-      conn
-      |> put_status(:unauthorized)
-      |> json(%{error: "Not authenticated"})
-    else
-      case Scope.user(conn.assigns[:current_scope]) do
-        %User{} = user ->
-          user = Gamend.Accounts.get_user(user.id)
+    params = Map.drop(params, @server_owned_lobby_fields)
 
-          cond do
-            # Non-leader party members must leave the party first
-            user.party_id != nil and not Parties.can_manage_party?(user, user.party_id) ->
-              conn |> put_status(:forbidden) |> json(%{error: "in_party"})
+    case Scope.user(conn.assigns[:current_scope]) do
+      %User{} = user ->
+        user = Gamend.Accounts.get_user(user.id)
 
-            # Party leader: automatically bring the whole party
-            user.party_id != nil and Parties.can_manage_party?(user, user.party_id) ->
-              create_lobby_as_party_leader(conn, user, params)
+        cond do
+          # Non-leader party members must leave the party first
+          user.party_id != nil and not Parties.can_manage_party?(user, user.party_id) ->
+            conn |> put_status(:forbidden) |> json(%{error: "in_party"})
 
-            # Not in a party: normal create flow
-            true ->
-              create_lobby_solo(conn, user, params)
-          end
+          # Party leader: automatically bring the whole party
+          user.party_id != nil and Parties.can_manage_party?(user, user.party_id) ->
+            create_lobby_as_party_leader(conn, user, params)
 
-        _ ->
-          conn |> put_status(:unauthorized) |> json(%{error: "Not authenticated"})
-      end
+          # Not in a party: normal create flow
+          true ->
+            create_lobby_solo(conn, user, params)
+        end
+
+      _ ->
+        conn |> put_status(:unauthorized) |> json(%{error: "Not authenticated"})
     end
   end
 

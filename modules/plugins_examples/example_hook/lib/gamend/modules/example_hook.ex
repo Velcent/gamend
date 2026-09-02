@@ -318,33 +318,44 @@ defmodule Gamend.Modules.ExampleHook do
         config = product.grant_config
         qty = max(purchase.quantity || 1, 1)
 
-        grant_currency(purchase.user_id, config, qty, product.sku)
-        grant_items(purchase.user_id, config, qty)
+        grant_currency(purchase.user_id, config, qty, product.sku, purchase.id)
+        grant_items(purchase.user_id, config, qty, purchase.id)
     end
 
     :ok
   end
 
-  defp grant_currency(user_id, %{"currency" => code, "amount" => amount}, qty, sku)
+  defp grant_currency(user_id, %{"currency" => code, "amount" => amount}, qty, sku, purchase_id)
        when is_binary(code) and is_integer(amount) and amount > 0 do
-    # The purchase id would be the natural idempotency key; the sku keeps this
-    # example short and is enough for a sample store.
-    Economy.grant(user_id, code, amount * qty, reason: "store:" <> sku)
+    # `idempotency_key` is the point of this example, not a detail of it.
+    #
+    # This hook can legitimately run more than once for one purchase — a client
+    # validating a receipt while the provider's webhook for the same
+    # transaction arrives, a retry, an admin reconcile. Without a key the second
+    # run pays the player twice, and an example is the thing people copy.
+    Economy.grant(user_id, code, amount * qty,
+      reason: "store:" <> sku,
+      idempotency_key: "purchase:#{purchase_id}:currency"
+    )
   end
 
-  defp grant_currency(_user_id, _config, _qty, _sku), do: :ok
+  defp grant_currency(_user_id, _config, _qty, _sku, _purchase_id), do: :ok
 
-  defp grant_items(user_id, %{"items" => items}, qty) when is_list(items) do
+  defp grant_items(user_id, %{"items" => items}, qty, purchase_id) when is_list(items) do
+    # Keyed per item, for the same reason as the currency grant above.
     Enum.each(items, fn
       %{"item" => item, "qty" => item_qty} when is_binary(item) and is_integer(item_qty) ->
-        Inventory.grant_item(user_id, item, item_qty * qty, reason: "store_purchase")
+        Inventory.grant_item(user_id, item, item_qty * qty,
+          reason: "store_purchase",
+          idempotency_key: "purchase:#{purchase_id}:item:#{item}"
+        )
 
       _ ->
         :ok
     end)
   end
 
-  defp grant_items(_user_id, _config, _qty), do: :ok
+  defp grant_items(_user_id, _config, _qty, _purchase_id), do: :ok
 
   # ── Sample KV entry: a global value any client can read ───────────────────
 

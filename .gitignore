@@ -31,6 +31,10 @@ gamend-*.tar
 # Ignore digested assets cache.
 /priv/static/cache_manifest.json
 /priv/static/**/*.gz
+# Brotli copies, written by bin/compress-static in `mix assets.deploy`. Same
+# build output as the .gz above; only the .gz line existed, so the .br files
+# were committed and every build showed them as modified.
+/priv/static/**/*.br
 /priv/static/**/*-????????????????????????????????.*
 
 # Umbrella layout: ignore generated/digested static assets in the web app
@@ -106,3 +110,4 @@ apps/gamend_web/priv/db/
 
 # Staged single-plugin dir for measurement runs (see stress/README.md)
 stress/.plugins/
+apps/gamend_web/game_server_test.db

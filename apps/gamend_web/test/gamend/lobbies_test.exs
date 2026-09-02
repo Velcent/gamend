@@ -680,20 +680,43 @@ defmodule Gamend.LobbiesTest do
       assert Lobbies.get_lobby_members(a) |> Enum.map(& &1.id) == [player.id]
     end
 
-    # `host_id` is castable, and `update_lobby_by_host/3` passes attrs straight
-    # through — so handing the lobby over is a plain PATCH, and the old host
-    # loses its authority the moment it lands. Documented, not endorsed.
-    test "a host can hand host_id to anyone, including a non-member" do
+    # `update_lobby_by_host/3` takes only the fields a host owns. It used to pass
+    # attrs straight through to a changeset that casts `host_id`, `hostless` and
+    # `password_hash`, so a host could hand the lobby to a non-member, write the
+    # password hash unhashed, or set `hostless` — which makes `can_manage_lobby?/2`
+    # false for everyone and leaves the lobby permanently unmanageable.
+    test "a host cannot rewrite ownership, hostless or the password hash" do
       host = AccountsFixtures.user_fixture()
       server = AccountsFixtures.user_fixture()
       {:ok, lobby} = Lobbies.create_lobby(%{title: "transfer", host_id: host.id})
 
-      assert {:ok, moved} = Lobbies.update_lobby_by_host(host, lobby, %{"host_id" => server.id})
+      assert {:ok, moved} =
+               Lobbies.update_lobby_by_host(host, lobby, %{
+                 "host_id" => server.id,
+                 "hostless" => true,
+                 "password_hash" => "not-a-hash",
+                 "title" => "renamed"
+               })
 
-      assert moved.host_id == server.id
-      assert Accounts.get_user(server.id).lobby_id == nil
-      assert Lobbies.can_manage_lobby?(server, moved)
-      refute Lobbies.can_manage_lobby?(host, moved)
+      # The field it does own still applies.
+      assert moved.title == "renamed"
+
+      assert moved.host_id == host.id
+      refute moved.hostless
+      assert moved.password_hash == lobby.password_hash
+      assert Lobbies.can_manage_lobby?(host, moved)
+      refute Lobbies.can_manage_lobby?(server, moved)
+    end
+
+    test "a host setting a password gets it hashed, not stored verbatim" do
+      host = AccountsFixtures.user_fixture()
+      {:ok, lobby} = Lobbies.create_lobby(%{title: "secret", host_id: host.id})
+
+      assert {:ok, updated} =
+               Lobbies.update_lobby_by_host(host, lobby, %{"password" => "hunter22"})
+
+      assert is_binary(updated.password_hash)
+      refute updated.password_hash == "hunter22"
     end
 
     test "a member leaving does not take the host seat from it" do

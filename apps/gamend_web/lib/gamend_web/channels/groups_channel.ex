@@ -40,7 +40,7 @@ defmodule GamendWeb.GroupsChannel do
   # unrecognised event took every broadcast it carried with it, and a client
   # cannot tell a dead channel from a quiet one.
   def handle_in(event, _payload, socket) do
-    Logger.warning("GroupsChannel: unknown event=#{event}")
+    Logger.debug(fn -> "GroupsChannel: unknown event=#{truncate_event(event)}" end)
 
     {:reply, {:error, %{error: "unknown_event"}}, socket}
   end
@@ -79,4 +79,16 @@ defmodule GamendWeb.GroupsChannel do
 
   @impl true
   def handle_info(_msg, socket), do: {:noreply, socket}
+  # Unknown events are logged at debug with the name truncated, and the name is
+  # never interpolated at warning level.
+  #
+  # Every other `handle_in/3` here rate-limits first; this catch-all did not,
+  # and it put a client-chosen string into a warning line. A frame allows a
+  # 128 KB event name, so one socket could drive unbounded warning-level volume
+  # made of attacker-controlled text into the rotating log and the admin buffer.
+  # Client-chosen, so never logged whole.
+  defp truncate_event(event) when is_binary(event),
+    do: binary_part(event, 0, min(byte_size(event), 64))
+
+  defp truncate_event(event), do: inspect(event)
 end

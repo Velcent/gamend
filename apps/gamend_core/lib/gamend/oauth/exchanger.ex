@@ -429,8 +429,11 @@ defmodule Gamend.OAuth.Exchanger do
             %{status: 200, body: %{"response" => %{"params" => params_map, "result" => result}}}} <-
              http_client().post(url, form: params),
            true <- result in ["OK", "ok"],
-           steamid when is_binary(steamid) <-
-             params_map["ownersteamid"] || params_map["steamid"] do
+           # `steamid` is the account playing; `ownersteamid` is whoever owns the
+           # license, which differs under Family Sharing. Preferring the owner
+           # signed a borrower into the lender's account, and disagreed with the
+           # browser OpenID flow, which has always used the player.
+           steamid when is_binary(steamid) <- params_map["steamid"] do
         if Keyword.get(opts, :fetch_profile, true) do
           steam_profile_for(api_key, steamid)
         else

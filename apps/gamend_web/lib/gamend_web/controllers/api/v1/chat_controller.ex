@@ -179,6 +179,15 @@ defmodule GamendWeb.Api.V1.ChatController do
     end
   end
 
+  defp ensure_can_report(conn, message_id) do
+    user = Scope.user(conn.assigns.current_scope)
+
+    case Chat.get_message(message_id) do
+      nil -> {:error, :not_found}
+      message -> if can_access_message?(user, message), do: :ok, else: {:error, :not_found}
+    end
+  end
+
   defp can_access_message?(user, message) do
     case message.chat_type do
       "friend" ->
@@ -544,7 +553,13 @@ defmodule GamendWeb.Api.V1.ChatController do
         conn |> put_status(:bad_request) |> json(%{error: "invalid_id"})
 
       message_id ->
+        # Reporting requires being able to read the message.
+        #
+        # Without this, any user could report any message id in any conversation
+        # — including ones they cannot see — and each report alerts admins. The
+        # daily quota bounded the volume but not the reach.
         with :ok <- GamendWeb.RateLimit.check_report_daily(user_id),
+             :ok <- ensure_can_report(conn, message_id),
              {:ok, _report} <- Chat.report_message(user_id, message_id, reason) do
           json(conn, %{ok: true})
         else

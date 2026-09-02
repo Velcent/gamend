@@ -823,10 +823,30 @@ defmodule GamendWeb.Api.V1.GroupController do
         conn |> put_status(:not_found) |> json(%{error: "not_found"})
 
       group_id ->
-        case Groups.get_group(group_id) do
+        case visible_group(conn, group_id) do
           nil -> conn |> put_status(:not_found) |> json(%{error: "not_found"})
           group -> json(conn, serialize_group(group))
         end
+    end
+  end
+
+  # A group the caller is allowed to know exists.
+  #
+  # `list_groups/2` has always excluded hidden groups, but fetching one by id
+  # did not check the type at all — so anyone holding an id (they appear in
+  # invite notifications and as a chat's `chat_ref_id`) could read a hidden
+  # group and its full roster without a token. Hidden groups are invite-only by
+  # definition, so non-members get the same 404 as a group that does not exist.
+  defp visible_group(conn, group_id) do
+    case Groups.get_group(group_id) do
+      %{type: "hidden"} = group ->
+        case Scope.user(conn.assigns[:current_scope]) do
+          %User{id: user_id} -> if Groups.member?(user_id, group_id), do: group
+          _ -> nil
+        end
+
+      group ->
+        group
     end
   end
 
@@ -960,7 +980,7 @@ defmodule GamendWeb.Api.V1.GroupController do
   end
 
   defp save_icon(conn, user, group_id, url) do
-    case Groups.update_group(user.id, group_id, %{"icon_url" => url}) do
+    case Groups.set_icon_url(user.id, group_id, url) do
       {:ok, group} ->
         json(conn, serialize_group(group))
 
@@ -1095,17 +1115,18 @@ defmodule GamendWeb.Api.V1.GroupController do
         conn |> put_status(:not_found) |> json(%{error: "not_found"})
 
       group_id ->
-        case Groups.get_group(group_id) do
+        case visible_group(conn, group_id) do
           nil ->
             conn |> put_status(:not_found) |> json(%{error: "not_found"})
 
           _group ->
             {page, page_size} = GamendWeb.Pagination.params(params)
+            authenticated? = match?(%User{}, Scope.user(conn.assigns[:current_scope]))
 
             members =
               Groups.get_group_members_paginated(group_id, page: page, page_size: page_size)
 
-            serialized = Enum.map(members, &serialize_member/1)
+            serialized = Enum.map(members, &serialize_member(&1, authenticated?))
             count = length(serialized)
             total_count = Groups.count_group_members(group_id)
 
@@ -1468,16 +1489,24 @@ defmodule GamendWeb.Api.V1.GroupController do
     )
   end
 
-  defp serialize_member(member) do
+  # `authenticated?` controls the presence and avatar fields.
+  #
+  # `UserController.serialize_user/1` deliberately strips `profile_url` and
+  # `last_seen_at` from its unauthenticated responses; this listing returned
+  # both for every member of any group, which made it the easier way to collect
+  # exactly what that endpoint protects.
+  defp serialize_member(member, authenticated? \\ true) do
     user_loaded? = Ecto.assoc_loaded?(member.user) and member.user != nil
 
     username = if user_loaded?, do: member.user.username, else: nil
     display_name = if user_loaded?, do: member.user.display_name, else: nil
-    profile_url = if user_loaded?, do: member.user.profile_url, else: nil
-    is_online = if user_loaded?, do: member.user.is_online || false, else: false
+    profile_url = if user_loaded? and authenticated?, do: member.user.profile_url, else: nil
+
+    is_online =
+      if user_loaded? and authenticated?, do: member.user.is_online || false, else: false
 
     last_seen_at =
-      if user_loaded?,
+      if user_loaded? and authenticated?,
         do: User.last_seen_at_or_fallback(member.user),
         else: ~U[1970-01-01 00:00:00Z]
 

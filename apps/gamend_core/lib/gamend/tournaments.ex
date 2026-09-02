@@ -23,6 +23,7 @@ defmodule Gamend.Tournaments do
   use Nebulex.Caching, cache: Gamend.Cache
 
   alias Gamend.Accounts.User
+  alias Gamend.Lock
   alias Gamend.Repo
   alias Gamend.Tournaments.Bracket
   alias Gamend.Tournaments.Entry
@@ -274,9 +275,19 @@ defmodule Gamend.Tournaments do
         {:error, :tournament_full}
 
       true ->
+        # The hook runs first, then the seat is taken under a lock that
+        # re-counts.
+        #
+        # The count above is only a cheap early rejection. It used to be the
+        # *only* check, with the fee-charging `before_tournament_register` hook
+        # sitting between it and the insert — so two players joining a nearly
+        # full tournament both read a passing count, both were charged, and both
+        # were inserted. `unique_index(:tournament_entries, [:tournament_id,
+        # :leader_id])` stops the same user entering twice; nothing enforced the
+        # global cap.
         with {:ok, _} <-
                Gamend.Hooks.internal_call(:before_tournament_register, [user, tournament]),
-             {:ok, entry} <- insert_entry(tournament, user) do
+             {:ok, entry} <- claim_entry_seat(tournament, user) do
           Gamend.Async.run(fn ->
             Gamend.Hooks.internal_call(:after_tournament_register, [user, tournament])
           end)
@@ -285,6 +296,19 @@ defmodule Gamend.Tournaments do
           {:ok, entry}
         end
     end
+  end
+
+  defp claim_entry_seat(tournament, user) do
+    Lock.serialize(:tournament_join, tournament.id, fn ->
+      if tournament.max_entries != nil and count_entries(tournament.id) >= tournament.max_entries do
+        Repo.rollback(:tournament_full)
+      end
+
+      case insert_entry(tournament, user) do
+        {:ok, entry} -> entry
+        {:error, reason} -> Repo.rollback(reason)
+      end
+    end)
   end
 
   defp insert_entry(tournament, user) do
@@ -594,7 +618,15 @@ defmodule Gamend.Tournaments do
   end
 
   defp after_draw(%Tournament{state: "running"} = tournament, now) do
-    broadcast_tournament(tournament, "tournament_updated")
+    # Deferred, like every other effect in this module.
+    #
+    # `draw/2` calls this from inside `Lock.serialize(:tournament_draw, ...)`,
+    # and this was the one broadcast that skipped `defer/1` — whose whole
+    # purpose, per the note at the top of the module, is that observers never
+    # see uncommitted state. A subscriber that re-read on this event got the
+    # pre-commit snapshot on Postgres (still `registration`, no brackets), or
+    # contended for the writer this very transaction was holding on SQLite.
+    defer(fn -> broadcast_tournament(tournament, "tournament_updated") end)
 
     from(m in Match, where: m.tournament_id == ^tournament.id and m.round == 1)
     |> Repo.all()
@@ -954,14 +986,30 @@ defmodule Gamend.Tournaments do
     brackets > 0 and open == 0
   end
 
+  # A compare-and-set, so the finish effects run exactly once.
+  #
+  # `update_state/2` is an unconditional `UPDATE ... WHERE id = ?`, and the
+  # guard above matches the *in-memory* struct — while `advance_lifecycle/2`
+  # runs from the public `GET /tournaments/:id` as well as from the ticker. Two
+  # concurrent page loads of a just-decided tournament therefore both saw
+  # "running", both wrote "finished", and both ran the effects: the completion
+  # hook fired twice (games pay prizes there) and two next occurrences were
+  # spawned, because neither transaction could see the other's row yet.
   defp finish_tournament(%Tournament{state: "running"} = tournament) do
-    case update_state(tournament, "finished") do
-      {:ok, tournament} ->
-        do_finish_side_effects(tournament)
-        tournament
+    query =
+      from(t in Tournament, where: t.id == ^tournament.id and t.state == "running")
 
-      _ ->
-        tournament
+    now = DateTime.utc_now(:second)
+
+    case Repo.update_all(query, set: [state: "finished", updated_at: now]) do
+      {1, _} ->
+        tap_bump_tournament({:ok, tournament})
+        finished = %{tournament | state: "finished"}
+        do_finish_side_effects(finished)
+        finished
+
+      _already_finished_by_someone_else ->
+        %{tournament | state: "finished"}
     end
   end
 

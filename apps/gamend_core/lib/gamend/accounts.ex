@@ -321,6 +321,18 @@ defmodule Gamend.Accounts do
   @decorate cacheable(key: {:accounts, :users_count}, opts: [ttl: @users_count_cache_ttl_ms])
   def count_users, do: Repo.aggregate(User, :count, :id)
 
+  @doc """
+  How many accounts hold the admin flag.
+
+  Used to refuse the write that would take that number to zero: nothing else can
+  grant `is_admin`, so an installation that reaches zero admins cannot be
+  administered again.
+  """
+  @spec count_admins() :: non_neg_integer()
+  def count_admins do
+    Repo.one(from(u in User, where: u.is_admin == true, select: count(u.id))) || 0
+  end
+
   defp invalidate_users_count_cache do
     Gamend.Async.run(fn ->
       _ = Gamend.Cache.invalidate({:accounts, :users_count})
@@ -785,7 +797,6 @@ defmodule Gamend.Accounts do
       %User{}
       |> User.email_changeset(attrs)
       |> User.username_changeset(attrs)
-      |> maybe_attach_device(attrs)
       |> maybe_make_first_user_admin(is_first_user)
       |> maybe_deactivate_new_user(is_first_user)
     end
@@ -834,7 +845,6 @@ defmodule Gamend.Accounts do
       %User{}
       |> User.email_changeset(attrs)
       |> User.username_changeset(attrs)
-      |> maybe_attach_device(attrs)
       |> maybe_make_first_user_admin(is_first_user)
       |> maybe_deactivate_new_user(is_first_user)
     end
@@ -955,12 +965,20 @@ defmodule Gamend.Accounts do
     end
   end
 
-  defp maybe_attach_device(changeset, %{"device_id" => device_id}) when is_binary(device_id) do
-    changeset
-    |> Ecto.Changeset.put_change(:device_id, device_id)
-  end
-
-  defp maybe_attach_device(changeset, _), do: changeset
+  # Registration deliberately does NOT attach a device id.
+  #
+  # `device_id` is a bearer credential: `find_or_create_from_device/2` is a plain
+  # lookup on the column, so whoever knows the value holds the account. Accepting
+  # it from registration attrs meant a client — LiveView form payloads are
+  # client-controlled — could register the victim's email with a device id of
+  # their choosing. When the victim later claimed that row by magic link or by an
+  # OAuth provider asserting the same verified email, the planted device id still
+  # resolved to it, and survived `token_version` bumps because device login never
+  # consults them.
+  #
+  # A device is attached only while authenticated (`link_device_id/2`, reached
+  # through `POST /api/v1/me/device`) or when device login itself creates the
+  # account (`do_find_or_create_from_device/2`).
 
   @doc """
   Confirms a user's email by setting confirmed_at timestamp.
@@ -1409,7 +1427,7 @@ defmodule Gamend.Accounts do
     if Map.get(attrs, :email_verified) == true do
       attrs = scrub_attrs_for_update(user, attrs, provider_id_field)
 
-      case user |> changeset_fn.(attrs) |> Repo.update() do
+      case user |> changeset_fn.(attrs) |> drop_device_credential() |> Repo.update() do
         {:ok, %User{} = updated} = ok ->
           invalidate_user_cache(user)
           invalidate_user_cache(updated)
@@ -1430,6 +1448,22 @@ defmodule Gamend.Accounts do
       {:error, %{changeset | action: :update}}
     end
   end
+
+  # Linking a provider to an existing account retires that account's device
+  # credential. The provider is linked as usual — the account keeps working, and
+  # gains a sign-in method — but device auth is no longer one of its methods.
+  #
+  # The reason is that a device id is a bearer credential nobody has to prove
+  # they still hold: it is a plain column lookup, unaffected by `token_version`,
+  # and it may predate the link (an anonymous device account, or a value planted
+  # before this account was ever claimed). Once a real identity is attached, that
+  # standing key should not remain. Re-attach a device deliberately, while
+  # authenticated, via `link_device_id/2`.
+  defp drop_device_credential(%Ecto.Changeset{data: %User{device_id: nil}} = changeset),
+    do: changeset
+
+  defp drop_device_credential(%Ecto.Changeset{} = changeset),
+    do: Ecto.Changeset.put_change(changeset, :device_id, nil)
 
   # Mirror an external (OAuth provider) avatar into our object storage so avatars
   # render from our storage/CDN rather than hotlinking the provider. Enqueued
@@ -1585,7 +1619,9 @@ defmodule Gamend.Accounts do
   def link_account(%User{} = user, attrs, provider_id_field, changeset_fn) do
     attrs = scrub_attrs_for_update(user, attrs, provider_id_field)
 
-    changeset = changeset_fn.(user, attrs)
+    # Same rule as the find-or-create link path: gaining a provider identity
+    # retires the account's standing device credential.
+    changeset = user |> changeset_fn.(attrs) |> drop_device_credential()
 
     case Repo.update(changeset) do
       {:ok, %User{} = updated_user} ->
@@ -1809,7 +1845,14 @@ defmodule Gamend.Accounts do
     Repo.transact(fn ->
       with {:ok, query} <- UserToken.verify_change_email_token_query(token, context),
            %UserToken{sent_to: email} <- Repo.one(query),
-           {:ok, updated_user} <- Repo.update(User.email_changeset(user, %{email: email})),
+           # Bump `token_version` with the address change, so JWTs issued to the
+           # old identity stop verifying. `GamendWeb.Auth.Guardian` documents
+           # this as already happening on email change; it did not.
+           {:ok, updated_user} <-
+             user
+             |> User.email_changeset(%{email: email})
+             |> bump_token_version()
+             |> Repo.update(),
            {_count, _result} <-
              Repo.delete_all(
                from(UserToken, where: [user_id: ^updated_user.id, context: ^context])
@@ -2220,6 +2263,18 @@ defmodule Gamend.Accounts do
   # Invalidates all previously issued JWTs: `GamendWeb.Auth.Guardian`
   # embeds `token_version` as a claim and rejects tokens whose claim no longer
   # matches the user's current value.
+  # Turning `is_activated` off revokes the account's tokens in the same write.
+  # Verification checks activation as well (see `GamendWeb.Auth.Guardian`), but
+  # bumping the version here is what makes the revocation immediate and explicit
+  # rather than dependent on every future reader remembering to ask.
+  defp revoke_on_deactivation(%Ecto.Changeset{} = changeset) do
+    if Ecto.Changeset.get_change(changeset, :is_activated) == false do
+      bump_token_version(changeset)
+    else
+      changeset
+    end
+  end
+
   defp bump_token_version(changeset) do
     current = Ecto.Changeset.get_field(changeset, :token_version)
     Ecto.Changeset.force_change(changeset, :token_version, current + 1)
@@ -2713,7 +2768,7 @@ defmodule Gamend.Accounts do
   end
 
   defp do_update_user(%User{} = user, attrs) do
-    case User.admin_changeset(user, attrs) |> Repo.update() do
+    case user |> User.admin_changeset(attrs) |> revoke_on_deactivation() |> Repo.update() do
       {:ok, updated} = ok ->
         invalidate_user_cache(user)
         invalidate_user_cache(updated)
@@ -2734,8 +2789,9 @@ defmodule Gamend.Accounts do
 
   @spec change_user_registration(User.t()) :: Ecto.Changeset.t()
   @spec change_user_registration(User.t(), map()) :: Ecto.Changeset.t()
-  def change_user_registration(%User{} = user, attrs \\ %{}) do
-    User.registration_changeset(user, attrs, [])
+  @spec change_user_registration(User.t(), map(), keyword()) :: Ecto.Changeset.t()
+  def change_user_registration(%User{} = user, attrs \\ %{}, opts \\ []) do
+    User.registration_changeset(user, attrs, opts)
   end
 
   @spec deliver_user_confirmation_instructions(User.t(), (String.t() -> String.t())) ::

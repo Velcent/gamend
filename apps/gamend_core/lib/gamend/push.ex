@@ -125,7 +125,21 @@ defmodule Gamend.Push do
 
     cond do
       existing = token && Repo.one(from(t in PushToken, where: t.token == ^token)) ->
-        update_registration(existing, user_id, attrs)
+        # Taking a token off another account requires proving the device.
+        #
+        # Reassigning on the token string alone is what makes account switching
+        # on one device work — but it also means anyone who *obtains* a token
+        # string (a crash report, a shared or rooted device, a pasted log) could
+        # move it to their own account: the rightful owner silently stops
+        # receiving their own notifications, and pushes meant for the attacker
+        # are delivered to the victim's physical device. A matching `device_id`
+        # is evidence the caller is on that device; without one, the claim is
+        # refused rather than silently honoured.
+        if existing.user_id == user_id or device_claim_matches?(existing, device_id) do
+          update_registration(existing, user_id, attrs)
+        else
+          {:error, :token_owned_by_another_user}
+        end
 
       existing = device_id && find_by_device(user_id, device_id) ->
         update_registration(existing, user_id, attrs)
@@ -137,6 +151,12 @@ defmodule Gamend.Push do
           |> Repo.insert()
         end
     end
+  end
+
+  # Same physical device: the row already carries this `device_id`, and the
+  # caller sent it. A row with no `device_id` cannot be claimed this way.
+  defp device_claim_matches?(%PushToken{device_id: existing_device_id}, device_id) do
+    is_binary(device_id) and device_id != "" and existing_device_id == device_id
   end
 
   defp find_by_device(user_id, device_id) do

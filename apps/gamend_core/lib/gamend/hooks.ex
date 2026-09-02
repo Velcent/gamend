@@ -402,11 +402,7 @@ defmodule Gamend.Hooks do
 
       true ->
         timeout =
-          Keyword.get(
-            opts,
-            :timeout_ms,
-            Application.get_env(:gamend_core, :hooks_call_timeout, 60_000)
-          )
+          Keyword.get(opts, :timeout_ms, default_hook_timeout())
 
         task =
           Task.async(fn ->
@@ -456,11 +452,7 @@ defmodule Gamend.Hooks do
     mods = lifecycle_modules()
 
     timeout =
-      Keyword.get(
-        opts,
-        :timeout_ms,
-        Application.get_env(:gamend_core, :hooks_call_timeout, 60_000)
-      )
+      Keyword.get(opts, :timeout_ms, default_hook_timeout())
 
     arity = length(args)
 
@@ -1399,6 +1391,27 @@ defmodule Gamend.Hooks do
         nil
     end
   end
+
+  # How long a plugin hook may run before it is killed.
+  #
+  # Much shorter when the caller is inside a `Repo.transaction`. Ten call sites
+  # invoke hooks from inside one — group join, lobby join and create, party
+  # operations, tournament registration — and on SQLite (the production default)
+  # an open transaction holds the single pooled write connection. At the 60s
+  # default, one slow or looping plugin stalled *every* write in the
+  # application, not just the operation it was attached to; worse, the hook runs
+  # in its own task, so a plugin that touches the database ends up waiting on a
+  # connection the caller is holding, and burns the whole budget doing nothing.
+  #
+  # Outside a transaction the generous budget stays: a hook doing real work on
+  # its own time blocks nothing but its own request.
+  defp default_hook_timeout do
+    if Gamend.Repo.in_transaction?() do
+      Application.get_env(:gamend_core, :hooks_call_timeout_in_transaction, 5_000)
+    else
+      Application.get_env(:gamend_core, :hooks_call_timeout, 60_000)
+    end
+  end
 end
 
 defmodule Gamend.Hooks.Default do
@@ -1582,9 +1595,29 @@ defmodule Gamend.Hooks.Default do
 
   @impl true
   @doc """
-  Default implementation for `before_kv_get/2` — always allow public reads.
+  Default implementation for `before_kv_get/2`.
+
+  Scope-aware, not blanket-public. A global entry (no `user_id`, no `lobby_id`)
+  is `:public`, which is what makes a shared config or welcome value readable by
+  everyone. A read that *names* a user or lobby defaults to
+  `:owner_or_lobby_member`, so the caller has to be that user or in that lobby.
+
+  It used to return `:public` unconditionally, and `kv_access_allowed?/4` grants
+  a `:public` read without looking at who is asking — so with no plugin
+  overriding this hook, `GET /api/v1/kv/save_data?user_id=<someone else>` (and
+  the `kv:subscribe` channel event, which then streamed every later write)
+  returned another player's entries. Saves and progression live there.
+
+  A game that genuinely wants cross-player reads implements this hook and
+  returns `:public` for those keys.
   """
-  def before_kv_get(_key, _opts), do: :public
+  def before_kv_get(_key, opts) do
+    scoped? =
+      is_binary(opts[:user_id]) or is_binary(opts["user_id"]) or
+        is_binary(opts[:lobby_id]) or is_binary(opts["lobby_id"])
+
+    if scoped?, do: :owner_or_lobby_member, else: :public
+  end
 
   @impl true
   def before_quest_claim(_user_id, _quest, _progress), do: :ok

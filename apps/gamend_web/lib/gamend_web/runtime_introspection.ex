@@ -142,7 +142,8 @@ defmodule GamendWeb.RuntimeIntrospection do
     declared =
       for definition <- Gamend.Settings.all() do
         env_row(
-          {definition.env, definition.default, definition.doc, definition.label, definition.type}
+          {definition.env, definition.default, definition.doc, definition.label, definition.type},
+          definition.secret
         )
       end
 
@@ -150,13 +151,16 @@ defmodule GamendWeb.RuntimeIntrospection do
 
     plugin =
       for var <- Declarations.env_vars(), not MapSet.member?(known, var.name) do
-        env_row({var.name, var.default, var.description, "Plugin: #{var.plugin}", var.type})
+        env_row(
+          {var.name, var.default, var.description, "Plugin: #{var.plugin}", var.type},
+          Map.get(var, :secret, false)
+        )
       end
 
     Enum.sort_by(declared ++ plugin, & &1.name)
   end
 
-  defp env_row({name, default, desc, section, type}) do
+  defp env_row({name, default, desc, section, type}, declared_secret?) do
     value = System.get_env(name)
 
     %{
@@ -164,7 +168,7 @@ defmodule GamendWeb.RuntimeIntrospection do
       name: name,
       set: value != nil,
       state: if(value == nil, do: "unset", else: "set"),
-      value: mask(name, value),
+      value: mask(name, value, declared_secret?),
       default: to_string(default),
       type: to_string(type || guess_type(default)),
       description: desc,
@@ -185,10 +189,23 @@ defmodule GamendWeb.RuntimeIntrospection do
 
   defp guess_type(default), do: Gamend.Config.infer_type(default)
 
-  defp mask(_name, nil), do: nil
+  defp mask(_name, nil, _declared_secret?), do: nil
 
-  defp mask(name, value) do
-    if Regex.match?(@secret_pattern, name), do: String.duplicate("•", 8), else: value
+  # `declared_secret?` comes from the setting's own `secret: true` flag, which is
+  # authoritative; the name pattern stays only as a net for variables nothing
+  # declares.
+  #
+  # Masking on the name alone missed every secret whose name does not contain
+  # one of those words — `GAMEND_DB_URL`, which is the full
+  # `ecto://user:password@host/db`, and
+  # `GAMEND_PAYMENTS_GOOGLE_PLAY_SERVICE_ACCOUNT_JSON`, which carries a private
+  # key — and printed them in full on the admin runtime page.
+  defp mask(name, value, declared_secret?) do
+    if declared_secret? or Regex.match?(@secret_pattern, name) do
+      String.duplicate("•", 8)
+    else
+      value
+    end
   end
 
   # ── Protobuf ────────────────────────────────────────────────────────────

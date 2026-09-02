@@ -170,10 +170,24 @@ defmodule Gamend.Signaling do
   def authorize(room_id, user_id) when is_binary(room_id) and is_binary(user_id) do
     with {:ok, cfg} <- config(room_id) do
       cond do
-        cfg.topology == :star and cfg.host_user_id == user_id -> {:ok, :host}
-        member?(room_id, user_id) -> {:ok, :user}
-        cfg.late_join -> {:ok, :user}
-        true -> {:error, :not_allowed}
+        cfg.topology == :star and cfg.host_user_id == user_id ->
+          {:ok, :host}
+
+        member?(room_id, user_id) ->
+          {:ok, :user}
+
+        # Late join admits a non-member, so it has to respect the same
+        # visibility rules the lobby channel applies. It used to be the last
+        # word: hidden, locked and password state were never consulted, so any
+        # authenticated user could join any WebRTC room, be announced to the
+        # real members, enumerate them, and in mesh topology exchange offers
+        # with them — while `LobbyChannel` refused that same person the same
+        # room.
+        cfg.late_join and late_join_open?(room_id) ->
+          {:ok, :user}
+
+        true ->
+          {:error, :not_allowed}
       end
     end
   end
@@ -308,8 +322,25 @@ defmodule Gamend.Signaling do
 
   defp allow_pair(_topology, _from_role, _to_role), do: :ok
 
-  defp allow_broadcast(:star, role) when role != :host, do: {:error, :not_allowed}
-  defp allow_broadcast(_topology, _role), do: :ok
+  # Broadcasting is a host privilege in both topologies.
+  #
+  # Star already restricted it. Mesh let *any* peer fan one message out to every
+  # other peer in the room — an N-way amplifier reachable at the signaling rate
+  # limit, with a frame-sized payload each time. Mesh peers negotiate pairwise
+  # through `relay/5` (targeted, and the target is resolved against live
+  # presence), so nothing in the normal flow needs this; a room that genuinely
+  # wants a mesh-wide announcement has a host to send it.
+  defp allow_broadcast(_topology, :host), do: :ok
+  defp allow_broadcast(_topology, _role), do: {:error, :not_allowed}
+
+  # A room a non-member may walk into: the same test the lobby channel uses for
+  # spectators, so the two surfaces cannot disagree about who may observe a lobby.
+  defp late_join_open?(room_id) do
+    case Lobbies.get_lobby(room_id) do
+      nil -> false
+      lobby -> Lobbies.spectatable?(lobby)
+    end
+  end
 
   defp member?(room_id, user_id) do
     case Lobbies.get_lobby(room_id) do

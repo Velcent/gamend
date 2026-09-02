@@ -282,13 +282,36 @@ defmodule Gamend.ClientLogs do
 
   defp to_message(message) when is_binary(message) do
     message
-    |> String.slice(0, @max_message_bytes)
+    |> truncate_bytes(@max_message_bytes)
     |> single_line()
+    |> strip_control_chars()
     |> scrub()
     |> String.trim()
   end
 
   defp to_message(_), do: ""
+
+  # The cap is named in bytes, so measure bytes. `String.slice/3` counts
+  # graphemes, so a message of 4-byte codepoints was 8 KB against a 2 KB
+  # limit — four times the intended log volume per entry.
+  defp truncate_bytes(value, max) do
+    if byte_size(value) <= max do
+      value
+    else
+      # Cut on a codepoint boundary so the result stays valid UTF-8.
+      value |> binary_part(0, max) |> String.chunk(:valid) |> List.first() || ""
+    end
+  end
+
+  # ANSI escapes and other C0/C1 controls, out.
+  #
+  # `single_line/1` removed `\r` and `\n`, but `\e` is not whitespace and
+  # survived into the rotating file and `journalctl` — where an escape sequence
+  # can move the cursor, clear the screen, or overwrite the line above, letting
+  # a client forge what looks like a preceding server line for whoever reads it.
+  defp strip_control_chars(value) do
+    String.replace(value, ~r/[\x00-\x08\x0B-\x1F\x7F-\x9F]/u, "")
+  end
 
   # One entry, one line. Everything downstream — `grep session=`, the rotating
   # file, a line-oriented aggregator — reads a newline as the start of a new

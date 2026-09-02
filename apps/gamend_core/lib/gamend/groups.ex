@@ -57,8 +57,8 @@ defmodule Gamend.Groups do
   alias Gamend.Groups.Invites
   alias Gamend.Groups.JoinRequests
   alias Gamend.Groups.Shared
+  alias Gamend.Lock
   alias Gamend.Repo
-  alias Gamend.Repo.AdvisoryLock
 
   # ---------------------------------------------------------------------------
   # PubSub
@@ -247,6 +247,23 @@ defmodule Gamend.Groups do
   # ---------------------------------------------------------------------------
   # Members
   # ---------------------------------------------------------------------------
+
+  @doc """
+  Just the user ids of a group's members, oldest first.
+
+  For callers that only need to address members — chat notification fanout is
+  the hot one — where `get_group_members/1` would preload every member's full
+  user row only to read `user_id` from it.
+  """
+  @spec group_member_ids(Ecto.UUID.t()) :: [Ecto.UUID.t()]
+  def group_member_ids(group_id) when is_binary(group_id) do
+    from(m in GroupMember,
+      where: m.group_id == ^group_id,
+      order_by: [asc: m.inserted_at],
+      select: m.user_id
+    )
+    |> Repo.all()
+  end
 
   @doc "Get all members of a group."
   @spec get_group_members(Ecto.UUID.t()) :: [GroupMember.t()]
@@ -497,14 +514,20 @@ defmodule Gamend.Groups do
       when is_binary(user_id) and is_binary(group_id) and is_map(attrs) do
     if can_manage_group?(user_id, group_id) do
       group = get_group!(group_id)
-      attrs = normalize_params(attrs)
+
+      # `icon_url` is dropped: it is set only by `save_icon/3`, after an upload
+      # ticket has been confirmed. Leaving it castable here let a group admin
+      # point the icon at any external URL, and did so even when the
+      # `user_image_uploads` feature gate — whose whole purpose is to close that
+      # surface — was switched off.
+      attrs = attrs |> normalize_params() |> Map.drop(["icon_url"])
 
       new_max = Map.get(attrs, "max_members") || Map.get(attrs, :max_members)
 
       if is_nil(new_max) do
         do_update_group(group, attrs)
       else
-        new_max_int = if is_binary(new_max), do: String.to_integer(new_max), else: new_max
+        new_max_int = to_int_or_nil(new_max) || 0
         current_count = count_group_members(group_id)
 
         if new_max_int < current_count do
@@ -513,6 +536,26 @@ defmodule Gamend.Groups do
           do_update_group(group, attrs)
         end
       end
+    else
+      {:error, :not_admin}
+    end
+  end
+
+  @doc """
+  Set a group's icon to an object we have just accepted an upload for.
+
+  Separate from `update_group/3` because that one deliberately drops `icon_url`
+  from caller-supplied attributes. The URL here does not come from the caller:
+  it is produced by `GamendWeb.Uploads.confirm/5` after the stored object has
+  been re-read, size-checked and content-sniffed, so this path is the only way
+  an icon is ever set. Admin rights are still required.
+  """
+  @spec set_icon_url(String.t(), String.t(), String.t()) ::
+          {:ok, Group.t()} | {:error, :not_admin | Ecto.Changeset.t() | term()}
+  def set_icon_url(user_id, group_id, url)
+      when is_binary(user_id) and is_binary(group_id) and is_binary(url) do
+    if can_manage_group?(user_id, group_id) do
+      group_id |> get_group!() |> do_update_group(%{"icon_url" => url})
     else
       {:error, :not_admin}
     end
@@ -701,30 +744,92 @@ defmodule Gamend.Groups do
 
   @doc "Leave a group."
   @spec leave_group(Ecto.UUID.t(), Ecto.UUID.t()) :: {:ok, GroupMember.t()} | {:error, atom()}
+  @leave_effects_key {__MODULE__, :leave_effects}
+
   def leave_group(user_id, group_id)
       when is_binary(user_id) and is_binary(group_id) do
-    Repo.transaction(fn ->
-      AdvisoryLock.lock(:group, group_id)
+    # Effects are collected during the transaction and run after it commits.
+    #
+    # `do_leave/3` broadcast `member_left` and `maybe_delete_empty_group/1`
+    # broadcast `group_deleted` from *inside* the open transaction, and the
+    # cache-version bump went out through `Gamend.Async.run` — so a subscriber
+    # that re-read on the event could see the pre-commit state, or cache rows
+    # that were about to be rolled back under the new version.
+    result =
+      Lock.serialize(:group, group_id, fn ->
+        Process.put(@leave_effects_key, [])
 
-      case get_membership(group_id, user_id) do
-        nil ->
-          Repo.rollback(:not_member)
+        case get_membership(group_id, user_id) do
+          nil ->
+            Repo.rollback(:not_member)
 
-        member ->
-          # If leaving user is admin, check if they're the last admin
-          result =
-            if member.role == "admin" do
-              maybe_transfer_admin_before_leave(member, group_id, user_id)
-            else
-              do_leave(member, group_id, user_id)
+          member ->
+            # If leaving user is admin, check if they're the last admin
+            outcome =
+              if member.role == "admin" do
+                maybe_transfer_admin_before_leave(member, group_id, user_id)
+              else
+                do_leave(member, group_id, user_id)
+              end
+
+            case outcome do
+              {:ok, deleted} -> {deleted, Process.get(@leave_effects_key, [])}
+              {:error, reason} -> Repo.rollback(reason)
             end
+        end
+      end)
 
-          case result do
-            {:ok, deleted} -> deleted
-            {:error, reason} -> Repo.rollback(reason)
-          end
-      end
-    end)
+    Process.delete(@leave_effects_key)
+
+    case result do
+      {:ok, {deleted, effects}} ->
+        effects |> Enum.reverse() |> Enum.each(& &1.())
+        {:ok, deleted}
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
+  # Queue an effect to run once `leave_group/2`'s transaction has committed.
+  # Outside that transaction there is nothing to wait for, so it runs now.
+  defp after_leave_commit(fun) when is_function(fun, 0) do
+    case Process.get(@leave_effects_key) do
+      nil -> fun.()
+      queued -> Process.put(@leave_effects_key, [fun | queued])
+    end
+
+    :ok
+  end
+
+  # Whether removing `target_id`'s admin rights would leave the group with none.
+  #
+  # Only the *leave* path had an admin-count check (and promotes a successor).
+  # Demote and kick had none, so two admins demoting or kicking each other at
+  # the same time both read the other as an admin and both writes landed — after
+  # which nobody could update, invite, kick, promote or approve join requests,
+  # because `can_manage_group?/2` is admin-membership only. The group could not
+  # be recovered; it could only be emptied until it auto-deleted.
+  #
+  # A single query, evaluated inside neither a lock nor a transaction: this
+  # closes the ordinary case, while the genuinely concurrent one is closed by
+  # `Gamend.Lock.serialize/3` around the write (see AUDIT.md, advisory locks).
+  defp would_orphan_group?(group_id, target_id) do
+    case get_membership(group_id, target_id) do
+      %GroupMember{role: "admin"} -> last_admin?(group_id)
+      _not_an_admin -> false
+    end
+  end
+
+  defp last_admin?(group_id) do
+    admin_count =
+      from(m in GroupMember,
+        where: m.group_id == ^group_id and m.role == "admin",
+        select: count(m.id)
+      )
+      |> Repo.one()
+
+    admin_count <= 1
   end
 
   defp maybe_transfer_admin_before_leave(member, group_id, user_id) do
@@ -798,11 +903,13 @@ defmodule Gamend.Groups do
   defp do_leave(member, group_id, user_id) do
     case Repo.delete(member) do
       {:ok, deleted} ->
-        _ = invalidate_group_cache(group_id)
-        broadcast_group(group_id, {:member_left, group_id, user_id})
+        after_leave_commit(fn ->
+          _ = invalidate_group_cache(group_id)
+          broadcast_group(group_id, {:member_left, group_id, user_id})
 
-        Gamend.Async.run(fn ->
-          Gamend.Hooks.internal_call(:after_group_leave, [user_id, group_id])
+          Gamend.Async.run(fn ->
+            Gamend.Hooks.internal_call(:after_group_leave, [user_id, group_id])
+          end)
         end)
 
         maybe_delete_empty_group(group_id)
@@ -821,14 +928,18 @@ defmodule Gamend.Groups do
 
         group ->
           Repo.delete(group)
-          _ = invalidate_group_cache(group_id)
-          broadcast_groups({:group_deleted, group_id})
-
-          Gamend.Async.run(fn ->
-            Gamend.Hooks.internal_call(:after_group_deleted, [group])
-          end)
+          after_leave_commit(fn -> announce_group_deleted(group) end)
       end
     end
+  end
+
+  defp announce_group_deleted(%Group{id: group_id} = group) do
+    _ = invalidate_group_cache(group_id)
+    broadcast_groups({:group_deleted, group_id})
+
+    Gamend.Async.run(fn ->
+      Gamend.Hooks.internal_call(:after_group_deleted, [group])
+    end)
   end
 
   @doc "Kick a member from the group. Only admins can kick."
@@ -842,6 +953,9 @@ defmodule Gamend.Groups do
 
       admin_id == target_id ->
         {:error, :cannot_kick_self}
+
+      would_orphan_group?(group_id, target_id) ->
+        {:error, :last_admin}
 
       true ->
         case get_membership(group_id, target_id) do
@@ -967,6 +1081,9 @@ defmodule Gamend.Groups do
 
       admin_id == target_id ->
         {:error, :cannot_demote_self}
+
+      would_orphan_group?(group_id, target_id) ->
+        {:error, :last_admin}
 
       true ->
         case get_membership(group_id, target_id) do
@@ -1172,21 +1289,45 @@ defmodule Gamend.Groups do
 
   defp filter_by_min_members(q, filters) do
     case Map.get(filters, :min_members) || Map.get(filters, "min_members") do
-      nil -> q
-      "" -> q
-      v when is_binary(v) -> from g in q, where: g.max_members >= ^String.to_integer(v)
-      v when is_integer(v) -> from g in q, where: g.max_members >= ^v
-      _ -> q
+      nil ->
+        q
+
+      "" ->
+        q
+
+      v when is_binary(v) ->
+        case to_int_or_nil(v) do
+          nil -> q
+          int -> from g in q, where: g.max_members >= ^int
+        end
+
+      v when is_integer(v) ->
+        from g in q, where: g.max_members >= ^v
+
+      _ ->
+        q
     end
   end
 
   defp filter_by_max_members(q, filters) do
     case Map.get(filters, :max_members) || Map.get(filters, "max_members") do
-      nil -> q
-      "" -> q
-      v when is_binary(v) -> from g in q, where: g.max_members <= ^String.to_integer(v)
-      v when is_integer(v) -> from g in q, where: g.max_members <= ^v
-      _ -> q
+      nil ->
+        q
+
+      "" ->
+        q
+
+      v when is_binary(v) ->
+        case to_int_or_nil(v) do
+          nil -> q
+          int -> from g in q, where: g.max_members <= ^int
+        end
+
+      v when is_integer(v) ->
+        from g in q, where: g.max_members <= ^v
+
+      _ ->
+        q
     end
   end
 
@@ -1326,4 +1467,19 @@ defmodule Gamend.Groups do
   @doc "Count group invitations sent by a user."
   @spec count_sent_invitations(Ecto.UUID.t()) :: non_neg_integer()
   defdelegate count_sent_invitations(user_id), to: Invites
+
+  # `String.to_integer/1` raises on anything non-numeric, and these values come
+  # straight from query strings and request bodies — so `?min_users=abc` was a
+  # 500 rather than a validation error. Returns nil for unparseable input, which
+  # every caller reads as "no filter" / "not supplied".
+  defp to_int_or_nil(value) when is_integer(value), do: value
+
+  defp to_int_or_nil(value) when is_binary(value) do
+    case Integer.parse(value) do
+      {int, ""} -> int
+      _ -> nil
+    end
+  end
+
+  defp to_int_or_nil(_value), do: nil
 end

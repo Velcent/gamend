@@ -266,6 +266,22 @@ defmodule Gamend.Chat do
     end
   end
 
+  # Titles double as the consolidation key.
+  #
+  # `create_chat_notification/3` upserts on `(sender_id, recipient_id, title)`
+  # and these set sender == recipient, so the title alone decides which
+  # notifications merge. That made a *user-chosen name* the key: a group or
+  # lobby named "friends" produced "New messages from friends" — the same slot
+  # as the friend-DM notification — and the two merged, accumulating each
+  # other's `message_count` and overwriting each other's routing metadata, so
+  # tapping the notification opened the wrong conversation. Two lobbies sharing
+  # a title collided the same way.
+  #
+  # Each chat type now has its own phrasing, so no name can reach another type's
+  # slot. Group titles are unique, so a group name is safe to keep. Lobby and
+  # party titles are not unique — but a user is in at most one lobby and one
+  # party at a time (`users.lobby_id`, `users.party_id`), so those consolidate
+  # by type and carry the id in metadata.
   defp send_chat_notifications(message) do
     alias Gamend.Notifications
 
@@ -285,13 +301,17 @@ defmodule Gamend.Chat do
         group = Gamend.Groups.get_group(message.chat_ref_id)
         group_name = (group && group.title) || "Group #{message.chat_ref_id}"
 
-        members = Gamend.Groups.get_group_members(message.chat_ref_id)
+        # Ids only. This used `get_group_members/1`, which preloads every
+        # member's full user row — for a group at the default 10,000-member cap
+        # that is 10,000 rows loaded to read one column from each, before the
+        # per-recipient loop below even starts.
+        member_ids = Gamend.Groups.group_member_ids(message.chat_ref_id)
 
-        for member <- members, member.user_id != message.sender_id do
+        for member_id <- member_ids, member_id != message.sender_id do
           # Consolidated: one notification per recipient per group
           # Use recipient's own ID as sender_id so upsert groups all group messages together
-          Notifications.create_chat_notification(member.user_id, member.user_id, %{
-            "title" => "New messages from #{group_name}",
+          Notifications.create_chat_notification(member_id, member_id, %{
+            "title" => "New messages in group #{group_name}",
             "content" => "",
             "metadata" => %{
               "type" => "chat_group",
@@ -302,15 +322,12 @@ defmodule Gamend.Chat do
         end
 
       "lobby" ->
-        lobby = Gamend.Lobbies.get_lobby(message.chat_ref_id)
-        lobby_name = (lobby && lobby.title) || "Lobby #{message.chat_ref_id}"
-
         lobby_users = Gamend.Lobbies.get_lobby_members(message.chat_ref_id)
 
         for user <- lobby_users, user.id != message.sender_id do
           # Consolidated: one notification per recipient per lobby
           Notifications.create_chat_notification(user.id, user.id, %{
-            "title" => "New messages from #{lobby_name}",
+            "title" => "New messages in your lobby",
             "content" => "",
             "metadata" => %{
               "type" => "chat_lobby",
@@ -339,7 +356,7 @@ defmodule Gamend.Chat do
 
     for member <- members, member.id != message.sender_id do
       Notifications.create_chat_notification(member.id, member.id, %{
-        "title" => "New message in party",
+        "title" => "New messages in your party",
         "content" => "",
         "metadata" => %{
           "type" => "chat_party",
@@ -597,9 +614,20 @@ defmodule Gamend.Chat do
       %ReadCursor{user_id: user_id}
       |> ReadCursor.changeset(attrs)
       |> Repo.insert(
-        on_conflict: [
-          set: [last_read_message_id: message_id, updated_at: DateTime.utc_now(:second)]
-        ],
+        # Only ever forward. The cursor used to be set unconditionally, so two
+        # marks racing (or arriving out of order from different tabs) could
+        # leave it on an older message — and `count_unread/3` then counts
+        # everything after that one, so the badge climbs back up with no way for
+        # the reader to clear it. Ids are UUIDv7, so lexicographic order is
+        # chronological, which is what `count_unread/3`'s `m.id > ^last_id`
+        # already relies on.
+        on_conflict:
+          from(c in ReadCursor,
+            update: [
+              set: [last_read_message_id: ^message_id, updated_at: ^DateTime.utc_now(:second)]
+            ],
+            where: fragment("EXCLUDED.last_read_message_id > ?", c.last_read_message_id)
+          ),
         conflict_target: {:unsafe_fragment, "(user_id, chat_type, chat_ref_id)"}
       )
     end

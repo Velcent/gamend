@@ -44,11 +44,19 @@ defmodule Gamend.OAuth.ExchangerExchangeTest do
 
     def post("https://api.steampowered.com/ISteamUserAuth/AuthenticateUserTicket/v1/", opts) do
       case opts[:form] do
+        # A Family Sharing ticket: `steamid` is the account actually playing,
+        # `ownersteamid` is whoever owns the license. Steam sends both, and they
+        # differ exactly when the game is borrowed.
         %{ticket: "valid_ticket", appid: _, key: _} ->
           {:ok,
            %{
              status: 200,
-             body: %{"response" => %{"params" => %{"ownersteamid" => "99999"}, "result" => "OK"}}
+             body: %{
+               "response" => %{
+                 "params" => %{"steamid" => "12345", "ownersteamid" => "99999"},
+                 "result" => "OK"
+               }
+             }
            }}
 
         _ ->
@@ -247,18 +255,22 @@ defmodule Gamend.OAuth.ExchangerExchangeTest do
   end
 
   describe "exchange_steam_ticket/1" do
-    test "valid ticket returns owner steam id and profile" do
+    # The player, never the license owner. Preferring `ownersteamid` signed a
+    # Family Sharing borrower straight into the lending account, and disagreed
+    # with the browser OpenID flow, which has always used the player id — so one
+    # person got two identities depending on how they signed in.
+    test "valid ticket identifies the player, not the license owner" do
       assert {:ok,
               %{
-                "id" => "99999",
-                "display_name" => "steam_ticket_user",
-                "profile_url" => "https://steam/profile/99999"
+                "id" => "12345",
+                "display_name" => "steam_user",
+                "profile_url" => "https://steam/profile/12345"
               }} =
                Exchanger.exchange_steam_ticket("valid_ticket")
     end
 
     test "valid ticket can return only id when fetch_profile=false" do
-      assert {:ok, %{"id" => "99999"}} =
+      assert {:ok, %{"id" => "12345"}} =
                Exchanger.exchange_steam_ticket("valid_ticket", fetch_profile: false)
     end
 

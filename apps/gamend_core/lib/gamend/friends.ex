@@ -33,8 +33,8 @@ defmodule Gamend.Friends do
   use Nebulex.Caching, cache: Gamend.Cache
   alias Gamend.Accounts.User
   alias Gamend.Friends.Friendship
+  alias Gamend.Lock
   alias Gamend.Repo
-  alias Gamend.Repo.AdvisoryLock
   alias Gamend.Types
   @friends_topic "friends"
 
@@ -215,12 +215,10 @@ defmodule Gamend.Friends do
     if requester_id == target_id do
       {:error, :cannot_friend_self}
     else
-      Repo.transaction(fn ->
-        # Lock on the canonical (direction-independent) pair so concurrent
-        # A→B and B→A requests serialize — the unique index only covers one
-        # direction, so without this both could insert reciprocal pending rows.
-        AdvisoryLock.lock(:friendship, canonical_pair_id(requester_id, target_id))
-
+      # Lock on the canonical (direction-independent) pair so concurrent
+      # A→B and B→A requests serialize — the unique index only covers one
+      # direction, so without this both could insert reciprocal pending rows.
+      Lock.serialize(:friendship, canonical_pair_id(requester_id, target_id), fn ->
         # clean up any rejected same-direction rows to allow fresh request creation
         remove_rejected_same_direction(requester_id, target_id)
 

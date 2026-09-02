@@ -131,14 +131,26 @@ defmodule GamendWeb.Api.V1.Admin.SessionController do
   )
 
   def delete_user_sessions(conn, %{"id" => id}) do
-    user_id = id
+    # Revoke the JWTs as well as the browser sessions.
+    #
+    # Deleting `user_tokens` rows only ended browser sessions, so "revoke this
+    # user's sessions" left every issued access and refresh token working —
+    # up to the 30-day refresh TTL. `revoke_all_tokens/1` bumps `token_version`,
+    # which is the claim `GamendWeb.Auth.Guardian` verifies, and deletes the
+    # session rows in the same transaction.
+    case Gamend.Accounts.get_user(id) do
+      %Gamend.Accounts.User{} = user ->
+        _ = Gamend.Accounts.revoke_all_tokens(user)
+        json(conn, %{})
 
-    _ =
-      Repo.delete_all(
-        from(t in UserToken, where: t.user_id == ^user_id and t.context == "session")
-      )
+      _ ->
+        _ =
+          Repo.delete_all(
+            from(t in UserToken, where: t.user_id == ^id and t.context == "session")
+          )
 
-    json(conn, %{})
+        json(conn, %{})
+    end
   end
 
   defp serialize_session(token) do

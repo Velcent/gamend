@@ -409,8 +409,12 @@ defmodule GamendWeb.Router.Shared do
         delete "/groups/sent_invitations/:invite_id", GroupController, :cancel_invite
       end
 
+      # Optional auth, because these stay public for public and private groups —
+      # but a *hidden* group must not be readable by id. The controller needs a
+      # caller to check membership against, and `:api_optional_auth` supplies one
+      # when a token is present without demanding it.
       scope "/api/v1", GamendWeb.Api.V1, as: :api_v1 do
-        pipe_through [:api, :list_groups_gate]
+        pipe_through [:api, :api_optional_auth, :list_groups_gate]
 
         get "/groups/:id", GroupController, :show
         get "/groups/:id/members", GroupController, :members

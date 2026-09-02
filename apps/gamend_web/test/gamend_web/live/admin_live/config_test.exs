@@ -255,15 +255,14 @@ defmodule GamendWeb.AdminLive.ConfigTest do
       if is_nil(s) or s == "" do
         "<unset>"
       else
-        len = byte_size(s)
-
-        if len <= 4 do
-          String.duplicate("*", len)
+        # Fixed-width mask, plus the last four characters once the value is
+        # long enough for four to be a small fraction of it. The old mask
+        # revealed the first and last quarter — about half of every secret,
+        # including `secret_key_base` and the release cookie.
+        if byte_size(s) <= 12 do
+          "••••••••"
         else
-          n = max(1, div(len + 3, 4))
-          first = String.slice(s, 0, n)
-          last = String.slice(s, -n, n)
-          "#{first}...#{last}"
+          "••••••••" <> String.slice(s, -4, 4)
         end
       end
     end

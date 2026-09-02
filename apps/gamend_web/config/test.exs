@@ -113,3 +113,10 @@ config :gamend_core, Gamend.Accounts,
 # objects behind in the checkout.
 config :gamend_core, Gamend.Storage.Local,
   dir: Path.join(System.tmp_dir!(), "gamend_test_storage")
+
+# Payments run against fake provider adapters here, and their fixtures report
+# `environment: "test"`. `Gamend.Payments` refuses to fulfil a transaction whose
+# environment is not the configured one — that is what stops a TestFlight or
+# sandbox receipt buying real goods on a production server — so the test suite
+# has to declare that it is not a production payment environment.
+config :gamend_core, Gamend.Payments.Settings, environment: :sandbox

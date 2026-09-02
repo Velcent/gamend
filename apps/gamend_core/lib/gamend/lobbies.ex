@@ -56,8 +56,8 @@ defmodule Gamend.Lobbies do
   alias Gamend.Lobbies.Lobby
   alias Gamend.Lobbies.SpectatorTracker
   alias Gamend.Lobbies.States
+  alias Gamend.Lock
   alias Gamend.Repo
-  alias Gamend.Repo.AdvisoryLock
   alias Gamend.Types
 
   # A state is a game-chosen word (see Gamend.Lobbies.States); core only
@@ -213,19 +213,27 @@ defmodule Gamend.Lobbies do
 
   defp filter_by_min_users(q, filters) do
     case Map.get(filters, :min_users) || Map.get(filters, "min_users") do
-      nil -> q
-      v when is_binary(v) -> from l in q, where: l.max_users >= ^String.to_integer(v)
-      v when is_integer(v) -> from l in q, where: l.max_users >= ^v
-      _ -> q
+      nil ->
+        q
+
+      v ->
+        case to_int_or_nil(v) do
+          nil -> q
+          int -> from l in q, where: l.max_users >= ^int
+        end
     end
   end
 
   defp filter_by_max_users(q, filters) do
     case Map.get(filters, :max_users) || Map.get(filters, "max_users") do
-      nil -> q
-      v when is_binary(v) -> from l in q, where: l.max_users <= ^String.to_integer(v)
-      v when is_integer(v) -> from l in q, where: l.max_users <= ^v
-      _ -> q
+      nil ->
+        q
+
+      v ->
+        case to_int_or_nil(v) do
+          nil -> q
+          int -> from l in q, where: l.max_users <= ^int
+        end
     end
   end
 
@@ -480,7 +488,7 @@ defmodule Gamend.Lobbies do
         q
 
       val ->
-        val_int = if is_binary(val), do: String.to_integer(val), else: val
+        val_int = to_int_or_nil(val) || 0
         from l in q, where: l.max_users >= ^val_int
     end
   end
@@ -494,7 +502,7 @@ defmodule Gamend.Lobbies do
         q
 
       val ->
-        val_int = if is_binary(val), do: String.to_integer(val), else: val
+        val_int = to_int_or_nil(val) || 0
         from l in q, where: l.max_users <= ^val_int
     end
   end
@@ -548,6 +556,9 @@ defmodule Gamend.Lobbies do
 
     * `:password` - password for a password-protected lobby
     * `:bypass_lock` - when `true`, join succeeds even if the lobby is locked.
+    * `:bypass_hidden` - when `true`, join succeeds even if the lobby is hidden.
+      For server-side callers (matchmaking, hooks, admin) that already know the
+      lobby is the right one; a client-facing path must never set it.
       Only set this from trusted server-side code; the HTTP and channel
       surfaces never pass it, so players cannot unlock a lobby themselves.
 
@@ -601,6 +612,14 @@ defmodule Gamend.Lobbies do
       lobby.is_locked and not opt(opts, :bypass_lock, false) ->
         {:error, :locked}
 
+      # A hidden lobby is invite-only by construction: `list_lobbies/2` excludes
+      # it and `show/2` 404s it "so a 403 does not confirm it exists" — but join
+      # never checked, so an id (which the public user listing hands out via
+      # `lobby_id`) was enough to walk into one. Server-side callers pass
+      # `bypass_hidden` the way they already pass `bypass_lock`.
+      lobby.is_hidden and not opt(opts, :bypass_hidden, false) ->
+        {:error, :not_found}
+
       true ->
         case do_join_with_lock(user, lobby, opts, user_id) do
           {:ok, updated_user} ->
@@ -621,9 +640,7 @@ defmodule Gamend.Lobbies do
   # Wrap count + join in a transaction with advisory lock to prevent
   # TOCTOU race conditions on PostgreSQL.
   defp do_join_with_lock(user, lobby, opts, user_id) do
-    Repo.transaction(fn ->
-      AdvisoryLock.lock(:lobby, lobby.id)
-
+    Lock.serialize(:lobby, lobby.id, fn ->
       member_ids =
         Repo.all(
           from(u in User,
@@ -1152,9 +1169,7 @@ defmodule Gamend.Lobbies do
   end
 
   defp do_delete_lobby(%Lobby{id: lobby_id} = lobby) when is_binary(lobby_id) do
-    Repo.transaction(fn ->
-      AdvisoryLock.lock(:lobby, lobby_id)
-
+    Lock.serialize(:lobby, lobby_id, fn ->
       # Before anything is unwound: members are about to be detached and the
       # lobby's KV deleted, so this is the last moment the run's final state is
       # readable. Gathered synchronously for that reason; the write itself is
@@ -1590,11 +1605,19 @@ defmodule Gamend.Lobbies do
   @doc """
   Check if a lobby can be spectated (watched by non-members).
 
-  A lobby is spectatable if it is not hidden and not locked.
+  A lobby is spectatable if it is not hidden, not locked and not
+  password-protected.
+
+  The password clause matters because spectating is not a read-only peek: the
+  channel subscribes the spectator to lobby chat and hands them an after-join
+  payload built with the full member list. The password gated the HTTP join and
+  nothing on the channel, so it protected participation while leaving the
+  conversation and the roster open to anyone who knew the lobby id.
   """
   @spec spectatable?(Lobby.t()) :: boolean()
   def spectatable?(%Lobby{is_hidden: true}), do: false
   def spectatable?(%Lobby{is_locked: true}), do: false
+  def spectatable?(%Lobby{password_hash: hash}) when is_binary(hash), do: false
   def spectatable?(%Lobby{}), do: true
 
   @doc """
@@ -1610,7 +1633,7 @@ defmodule Gamend.Lobbies do
           {:ok, Lobby.t()} | {:error, :not_host | :too_small | Ecto.Changeset.t() | term()}
   def update_lobby_by_host(%User{} = user, %Lobby{} = lobby, attrs) do
     if can_manage_lobby?(user, lobby) do
-      attrs = maybe_hash_password(attrs)
+      attrs = attrs |> take_client_update_fields() |> maybe_hash_password()
       new_max = Map.get(attrs, "max_users") || Map.get(attrs, :max_users)
 
       if is_nil(new_max) do
@@ -1623,9 +1646,24 @@ defmodule Gamend.Lobbies do
     end
   end
 
+  # The fields a lobby's host may set, and only those.
+  #
+  # `Lobby.changeset/2` also casts `host_id`, `hostless` and `password_hash`,
+  # which are server-owned: the controller forwarded every parameter, so a host
+  # could hand ownership to someone else, write the password hash directly
+  # (skipping hashing), or set `hostless` — which makes `can_manage_lobby?/2`
+  # false for everyone and leaves the lobby permanently unmanageable. `slowdown`
+  # is included because hosts do set it; the password is hashed downstream.
+  @client_lobby_fields ~w(title max_users is_hidden is_locked password metadata slowdown)
+
+  defp take_client_update_fields(attrs) when is_map(attrs) do
+    allowed = @client_lobby_fields ++ Enum.map(@client_lobby_fields, &String.to_existing_atom/1)
+    Map.take(attrs, allowed)
+  end
+
   defp validate_and_update_max_users(lobby, attrs, new_max) do
     # ensure new_max is an integer
-    new_max = if is_binary(new_max), do: String.to_integer(new_max), else: new_max
+    new_max = to_int_or_nil(new_max)
 
     current_count =
       Repo.one(
@@ -1813,4 +1851,19 @@ defmodule Gamend.Lobbies do
       other -> {:halt, other}
     end
   end
+
+  # `String.to_integer/1` raises on anything non-numeric, and these values come
+  # straight from query strings and request bodies — so `?min_users=abc` was a
+  # 500 rather than a validation error. Returns nil for unparseable input, which
+  # every caller reads as "no filter" / "not supplied".
+  defp to_int_or_nil(value) when is_integer(value), do: value
+
+  defp to_int_or_nil(value) when is_binary(value) do
+    case Integer.parse(value) do
+      {int, ""} -> int
+      _ -> nil
+    end
+  end
+
+  defp to_int_or_nil(_value), do: nil
 end

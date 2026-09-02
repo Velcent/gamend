@@ -114,7 +114,25 @@ defmodule Gamend.Payments.ProviderAdaptersTest do
        %{
          "notificationUUID" => "apple_note_1",
          "notificationType" => "REFUND",
-         "data" => %{"signedTransactionInfo" => "signed_tx"}
+         # Real App Store Server Notifications carry the bundle id in `data`,
+         # and it is checked — a signed notification for another app must not
+         # drive a refund here.
+         "data" => %{
+           "bundleId" => "com.example.game",
+           "signedTransactionInfo" => "signed_tx"
+         }
+       }}
+    end
+
+    def verify_and_decode("signed_notification_other_app") do
+      {:ok,
+       %{
+         "notificationUUID" => "apple_note_2",
+         "notificationType" => "REFUND",
+         "data" => %{
+           "bundleId" => "com.someone-else.game",
+           "signedTransactionInfo" => "signed_tx"
+         }
        }}
     end
   end
@@ -432,6 +450,28 @@ defmodule Gamend.Payments.ProviderAdaptersTest do
     assert event["notificationUUID"] == "apple_note_1"
     assert event["notificationType"] == "REFUND"
     assert event["decoded_transaction_info"]["transactionId"] == "apple_tx_1"
+  end
+
+  test "Apple rejects a notification for another app's bundle id" do
+    Application.put_env(:gamend_core, :apple_jws_verifier, AppleJWS)
+    put_setting(:apple_bundle_id, "com.example.game")
+    put_setting(:environment, :test)
+
+    body = Jason.encode!(%{"signedPayload" => "signed_notification_other_app"})
+
+    assert {:error, :apple_bundle_id_mismatch} = Apple.verify_notification(body)
+  end
+
+  # Product ids are per-app and anyone can register the same one in an app of
+  # their own, so an unset bundle id has to fail closed rather than accept every
+  # Apple-signed transaction that happens to name a catalog product.
+  test "Apple refuses to validate when no bundle id is configured" do
+    Application.put_env(:gamend_core, :apple_jws_verifier, AppleJWS)
+    put_setting(:apple_bundle_id, nil)
+    put_setting(:environment, :test)
+
+    assert {:error, :apple_bundle_id_not_configured} =
+             Apple.validate_purchase(nil, %{"signed_transaction_info" => "signed_tx"})
   end
 
   test "Steam normalizes InitTxn, FinalizeTxn, and QueryTxn responses" do

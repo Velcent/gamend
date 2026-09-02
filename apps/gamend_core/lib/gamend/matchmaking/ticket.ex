@@ -78,6 +78,12 @@ defmodule Gamend.Matchmaking.Ticket do
     |> Gamend.Limits.validate_metadata_size(:match_params, :max_matchmaking_params_size)
     |> foreign_key_constraint(:user_id)
     |> foreign_key_constraint(:party_id)
+    # Backs `Matchmaking.ensure_none_queued/1`, whose check-then-insert has the
+    # `before_matchmaking_join` hook in the middle of it.
+    |> unique_constraint(:user_id,
+      name: :matchmaking_tickets_one_queued_per_user,
+      message: "already queued"
+    )
   end
 
   defp validate_max_gte_min(changeset) do

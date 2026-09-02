@@ -94,9 +94,12 @@ defmodule GamendWeb.Api.V1.SessionControllerTest do
       {:ok, user} =
         Gamend.Accounts.register_user(%{
           email: "devuser#{System.unique_integer([:positive])}@example.com",
-          password: "longenoughpass",
-          device_id: device_id
+          password: "longenoughpass"
         })
+
+      # Registration ignores a submitted `device_id` on purpose; attaching one is
+      # an authenticated action.
+      {:ok, user} = Gamend.Accounts.link_device_id(user, device_id)
 
       assert user.device_id == device_id
 

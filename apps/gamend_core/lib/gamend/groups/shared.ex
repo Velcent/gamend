@@ -9,8 +9,8 @@ defmodule Gamend.Groups.Shared do
   alias Gamend.Groups.Group
   alias Gamend.Groups.GroupInvite
   alias Gamend.Groups.GroupMember
+  alias Gamend.Lock
   alias Gamend.Repo
-  alias Gamend.Repo.AdvisoryLock
 
   @doc false
   def broadcast_group(group_id, event) do
@@ -178,9 +178,7 @@ defmodule Gamend.Groups.Shared do
   # Shared helper: acquire advisory lock, check capacity, run hook, insert member.
   @doc false
   def do_add_group_member(user_id, group_id, group, source) do
-    Repo.transaction(fn ->
-      AdvisoryLock.lock(:group, group_id)
-
+    Lock.serialize(:group, group_id, fn ->
       if Groups.count_group_members(group_id) >= group.max_members do
         Repo.rollback(:full)
       end

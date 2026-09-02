@@ -69,19 +69,37 @@ defmodule GamendWeb.Api.V1.Admin.UserController do
           |> Map.delete("id")
           |> ensure_is_admin_present(user)
 
-        case Accounts.update_user(user, attrs) do
-          {:ok, updated} ->
-            maybe_notify_activation(user, updated)
-            json(conn, %{data: serialize_user(updated)})
-
-          {:error, %Ecto.Changeset{} = cs} ->
-            conn
-            |> put_status(:unprocessable_entity)
-            |> json(%{
-              error: "validation_failed",
-              errors: Ecto.Changeset.traverse_errors(cs, & &1)
-            })
+        if demoting_last_admin?(user, attrs) do
+          conn |> put_status(:unprocessable_entity) |> json(%{error: "last_admin"})
+        else
+          do_update(conn, user, attrs)
         end
+    end
+  end
+
+  # An installation with no administrators cannot be administered: `/admin` is
+  # gated on `is_admin`, and nothing else can set the flag. There was no guard
+  # at all, so an admin could demote themselves — or the only other admin — and
+  # lock everyone out of the console permanently.
+  defp demoting_last_admin?(user, attrs) do
+    demoting? = Map.get(attrs, "is_admin") in [false, "false"]
+
+    demoting? and user.is_admin and Accounts.count_admins() <= 1
+  end
+
+  defp do_update(conn, user, attrs) do
+    case Accounts.update_user(user, attrs) do
+      {:ok, updated} ->
+        maybe_notify_activation(user, updated)
+        json(conn, %{data: serialize_user(updated)})
+
+      {:error, %Ecto.Changeset{} = cs} ->
+        conn
+        |> put_status(:unprocessable_entity)
+        |> json(%{
+          error: "validation_failed",
+          errors: Ecto.Changeset.traverse_errors(cs, & &1)
+        })
     end
   end
 

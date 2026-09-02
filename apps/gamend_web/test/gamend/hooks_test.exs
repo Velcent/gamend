@@ -60,9 +60,10 @@ defmodule Gamend.HooksTest do
     assert Map.get(reloaded.metadata || %{}, "registered_hook") == true
   end
 
-  test "linking a provider does NOT automatically remove device_id from user" do
+  test "linking a provider retires the account's device credential" do
     device_id = "dev-#{System.unique_integer([:positive])}"
-    user = unconfirmed_user_fixture(%{"device_id" => device_id})
+    user = unconfirmed_user_fixture()
+    {:ok, user} = Accounts.link_device_id(user, device_id)
 
     assert is_binary(user.device_id)
 
@@ -75,8 +76,12 @@ defmodule Gamend.HooksTest do
       )
 
     assert user.discord_id == "d999"
-    # Device ID should remain - it's NOT automatically cleared anymore
-    assert user.device_id == device_id
+
+    # The provider is linked, and device auth stops being one of this account's
+    # sign-in methods. A device id is a standing credential nobody has to prove
+    # they still hold: it is unaffected by `token_version` and may predate the
+    # link entirely. Re-attach deliberately via `link_device_id/2` if wanted.
+    assert is_nil(user.device_id)
   end
 
   test "after_user_logged_in hook runs on successful magic-link login" do

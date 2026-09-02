@@ -143,6 +143,8 @@ defmodule Gamend.Hooks.PluginManager do
   defp validate_rpc_request(fn_name, args) do
     cond do
       reserved_hook_name?(fn_name) -> {:error, :reserved_hook_name}
+      scheduled_callback?(fn_name) -> {:error, :reserved_hook_name}
+      introspection_name?(fn_name) -> {:error, :reserved_hook_name}
       length(args) > Gamend.Limits.get(:max_hook_args_count) -> {:error, :too_many_args}
       rpc_args_too_large?(args) -> {:error, :args_too_large}
       true -> :ok
@@ -152,6 +154,26 @@ defmodule Gamend.Hooks.PluginManager do
   defp reserved_hook_name?(fn_name) when is_binary(fn_name) do
     Enum.any?(Gamend.Hooks.internal_hooks(), &(Atom.to_string(&1) == fn_name))
   end
+
+  # `Gamend.Hooks.do_call/3` blocks these alongside the lifecycle hooks, and
+  # `Gamend.Jobs.ProtectedCallbacks` documents them as blocked from client RPC —
+  # but this function is the one every client transport actually goes through
+  # (HTTP, user channel, DataChannel), and it only checked the lifecycle list.
+  # A player could therefore invoke a plugin's scheduled callback directly, with
+  # arguments of their choosing: a daily payout, a periodic reset.
+  defp scheduled_callback?(fn_name) when is_binary(fn_name) do
+    Gamend.Schedule.registered_callbacks()
+    |> Enum.any?(&(Atom.to_string(&1) == fn_name))
+  end
+
+  # Dispatch and introspection helpers a plugin gets for free. `rpc/2` re-enters
+  # dispatch and would skip the `DynamicRpcs` allowlist; `__settings__/0` returns
+  # every declared setting for the plugin, including env var names and which are
+  # secret; `module_info`/`__info__` enumerate the module.
+  @introspection_names ~w(rpc __settings__ __info__ module_info)
+
+  defp introspection_name?(fn_name) when is_binary(fn_name),
+    do: fn_name in @introspection_names
 
   defp rpc_args_too_large?(args) do
     Enum.sum_by(args, &rpc_arg_size/1) > Gamend.Limits.get(:max_hook_args_size)
@@ -271,10 +293,17 @@ defmodule Gamend.Hooks.PluginManager do
         function_exported?(module, :__settings__, 0) do
       Gamend.Settings.add_provider(module)
 
+      # `{:ok, cast} = ...` was a strict match inside the comprehension, and
+      # `Gamend.Settings.cast/2` returns a bare `:error` for `:integer`,
+      # `:float`, `:boolean` and `:log_level`. So one malformed plugin
+      # environment variable — `MY_PLUGIN_PORT=abc` — raised a `MatchError`
+      # inside `init/1`, which meant the supervisor never finished starting and
+      # the node restarted in a loop. Core settings log and skip
+      # (`Gamend.Settings.read_env/1`); plugin settings now do the same.
       for definition <- module.__settings__(),
           value = System.get_env(definition.env),
           value not in [nil, ""],
-          {:ok, cast} = Gamend.Settings.cast(value, definition.type),
+          {:ok, cast} <- [cast_plugin_setting(definition, value)],
           existing = Application.get_env(definition.app, module, []),
           not Keyword.has_key?(existing, definition.key) do
         Application.put_env(definition.app, module, Keyword.put(existing, definition.key, cast))
@@ -282,6 +311,23 @@ defmodule Gamend.Hooks.PluginManager do
     end
 
     :ok
+  end
+
+  defp cast_plugin_setting(definition, value) do
+    case Gamend.Settings.cast(value, definition.type) do
+      {:ok, _cast} = ok ->
+        ok
+
+      :error ->
+        shown = if definition.secret, do: "[redacted]", else: inspect(value)
+
+        Logger.warning(
+          "#{definition.env}=#{shown} is not a valid #{definition.type}; " <>
+            "using #{inspect(definition.default)}"
+        )
+
+        :skip
+    end
   end
 
   defp format_rpc_context(plugin, fn_name, args, opts) do

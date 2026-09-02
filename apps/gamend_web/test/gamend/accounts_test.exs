@@ -104,7 +104,7 @@ defmodule Gamend.AccountsTest do
       assert is_nil(user.password)
     end
 
-    test "registers user with device_id set" do
+    test "ignores a device_id supplied at registration" do
       device_id = "test-device-#{System.unique_integer([:positive])}"
 
       attrs =
@@ -112,7 +112,15 @@ defmodule Gamend.AccountsTest do
 
       {:ok, user} = Accounts.register_user(attrs)
 
-      assert user.device_id == device_id
+      # A device id is a bearer credential — `find_or_create_from_device/2` is a
+      # plain lookup on the column. Honouring it here let anyone register the
+      # victim's email with a device id of their choosing and keep a working
+      # credential for the row the victim would later claim.
+      assert is_nil(user.device_id)
+
+      # Attaching one while authenticated is still the supported path.
+      assert {:ok, linked} = Accounts.link_device_id(user, device_id)
+      assert linked.device_id == device_id
     end
 
     test "register_user_and_deliver/3 succeeds when notifier delivers" do

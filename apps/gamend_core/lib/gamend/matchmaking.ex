@@ -70,10 +70,20 @@ defmodule Gamend.Matchmaking do
 
     # The client proposes; the game decides. A hook may rewrite the params
     # (stamping a server-computed skill band) or refuse the join outright.
+    # The hook runs *before* the guard, so the write is the last thing that
+    # happens rather than being separated from its check by up to a minute of
+    # plugin time. The partial unique index
+    # (`matchmaking_tickets_one_queued_per_user`) closes the remaining window.
     with {:ok, members} <- resolve_queue_group(user, proposed),
-         :ok <- ensure_none_queued(members),
-         {:ok, attrs} <- run_join_hook(user, proposed) do
-      insert_tickets(user, members, attrs)
+         {:ok, attrs} <- run_join_hook(user, proposed),
+         :ok <- ensure_none_queued(members) do
+      case insert_tickets(user, members, attrs) do
+        {:error, %Ecto.Changeset{errors: errors}} = error ->
+          if Keyword.has_key?(errors, :user_id), do: {:error, :already_queued}, else: error
+
+        result ->
+          result
+      end
     end
   end
 

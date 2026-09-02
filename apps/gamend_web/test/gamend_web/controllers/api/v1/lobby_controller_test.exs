@@ -93,7 +93,7 @@ defmodule GamendWeb.Api.V1.LobbyControllerTest do
       player = AccountsFixtures.user_fixture()
 
       {:ok, lobby} = Lobbies.create_lobby(%{title: "matchmade", hostless: true, is_hidden: true})
-      assert {:ok, _} = Lobbies.join_lobby(player, lobby)
+      assert {:ok, _} = Lobbies.join_lobby(player, lobby, %{bypass_hidden: true})
 
       {:ok, lobby} =
         Gamend.Signaling.configure(lobby, enabled: true, topology: :star, host_id: server.id)
@@ -249,7 +249,7 @@ defmodule GamendWeb.Api.V1.LobbyControllerTest do
       member = AccountsFixtures.user_fixture()
       outsider = AccountsFixtures.user_fixture()
       {:ok, lobby} = Lobbies.create_lobby(%{title: "hidden", host_id: host.id, is_hidden: true})
-      assert {:ok, _} = Lobbies.join_lobby(member, lobby)
+      assert {:ok, _} = Lobbies.join_lobby(member, lobby, %{bypass_hidden: true})
 
       %{lobby: lobby, host: host, member: member, outsider: outsider}
     end

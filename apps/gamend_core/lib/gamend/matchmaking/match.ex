@@ -47,7 +47,11 @@ defmodule Gamend.Matchmaking.Match do
   defp seat_players(tickets, lobby) do
     failed =
       Enum.reject(tickets, fn ticket ->
-        match?({:ok, _}, Lobbies.join_lobby(ticket.user, lobby.id))
+        # `bypass_hidden`: the match lobby is created hidden on purpose (players
+        # are seated into it, never browse to it), and `join_lobby/2` refuses a
+        # hidden lobby for everyone else — an id alone must not let an outsider
+        # walk into someone's match.
+        match?({:ok, _}, Lobbies.join_lobby(ticket.user, lobby.id, %{bypass_hidden: true}))
       end)
 
     if failed == [] do

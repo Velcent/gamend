@@ -13,7 +13,8 @@ defmodule GamendWeb.Plugs.MetricsAuth do
      private address.)
 
   3. **No token configured** — private/Docker-internal IPs are allowed without
-     auth (dev/compose convenience); all requests are allowed.
+     auth (dev/compose convenience); every other caller is denied. Set the token
+     to scrape from outside the private network.
 
   ## Configuration
 
@@ -53,8 +54,11 @@ defmodule GamendWeb.Plugs.MetricsAuth do
   defp check_token(conn) do
     case required_token() do
       nil ->
-        # No token configured — allow unrestricted access
-        conn
+        # No token configured: private and loopback callers were already allowed
+        # above, so anything reaching here is remote. Deny rather than serve the
+        # metrics openly — a public listener would otherwise export queue depths,
+        # error rates and BEAM internals to anyone who asks.
+        deny(conn)
 
       expected ->
         case get_req_header(conn, "authorization") do

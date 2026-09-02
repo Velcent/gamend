@@ -67,22 +67,54 @@ defmodule Gamend.PushTest do
       assert Push.count_tokens(user.id) == 1
     end
 
+    # Account switching on one device: the claimer sends the same `device_id`
+    # the row already carries, which is the evidence they are on that device.
     test "re-registering an existing token claims it for the new user" do
       old_owner = AccountsFixtures.user_fixture()
       new_owner = AccountsFixtures.user_fixture()
+      device_id = "device-#{System.unique_integer([:positive])}"
 
-      token = register!(old_owner, %{"platform" => "android"})
+      token = register!(old_owner, %{"platform" => "android", "device_id" => device_id})
 
       assert {:ok, claimed} =
                Push.register_token(new_owner.id, %{
                  "token" => token.token,
-                 "platform" => "android"
+                 "platform" => "android",
+                 "device_id" => device_id
                })
 
       assert claimed.id == token.id
       assert claimed.user_id == new_owner.id
       assert Push.list_tokens(old_owner.id) == []
       refute Push.user_has_live_tokens?(old_owner.id)
+    end
+
+    # A token string on its own is not proof of anything: it turns up in crash
+    # reports, shared devices and pasted logs. Honouring a bare claim let an
+    # attacker silently take over the victim's notifications — the victim stops
+    # receiving their own, and pushes meant for the attacker are delivered to
+    # the victim's physical device.
+    test "refuses to claim another user's token without device proof" do
+      old_owner = AccountsFixtures.user_fixture()
+      attacker = AccountsFixtures.user_fixture()
+
+      token = register!(old_owner, %{"platform" => "android", "device_id" => "the-real-device"})
+
+      assert {:error, :token_owned_by_another_user} =
+               Push.register_token(attacker.id, %{
+                 "token" => token.token,
+                 "platform" => "android"
+               })
+
+      assert {:error, :token_owned_by_another_user} =
+               Push.register_token(attacker.id, %{
+                 "token" => token.token,
+                 "platform" => "android",
+                 "device_id" => "a-different-device"
+               })
+
+      assert [kept] = Push.live_tokens(old_owner.id)
+      assert kept.id == token.id
     end
 
     test "re-registering re-enables a disabled token" do
@@ -102,13 +134,15 @@ defmodule Gamend.PushTest do
       claimer = AccountsFixtures.user_fixture()
       max = Gamend.Limits.get(:max_push_tokens_per_user)
 
-      stolen = register!(victim, %{"platform" => "android"})
+      device_id = "shared-device-#{System.unique_integer([:positive])}"
+      stolen = register!(victim, %{"platform" => "android", "device_id" => device_id})
       for _ <- 1..max, do: register!(claimer, %{"platform" => "android"})
 
       assert {:error, :too_many_tokens} =
                Push.register_token(claimer.id, %{
                  "token" => stolen.token,
-                 "platform" => "android"
+                 "platform" => "android",
+                 "device_id" => device_id
                })
 
       # The victim keeps the row when the claim is rejected.

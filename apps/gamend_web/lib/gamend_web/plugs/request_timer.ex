@@ -106,10 +106,19 @@ defmodule GamendWeb.Plugs.RequestTimer do
   defp sensitive_key?(key) when is_binary(key) do
     normalized = String.downcase(key)
 
-    Enum.any?(
-      ~w(password token secret authorization api_key cookie session),
-      &String.contains?(normalized, &1)
-    )
+    # `code` and `state` are exact matches, not substrings: an OAuth
+    # authorization code is a credential, and these lines are warning-level, so
+    # they reach the admin buffer and the rotating file. Slow OAuth callbacks
+    # cross the threshold routinely — they make an outbound token exchange — so
+    # in practice every one of them was logged with its code.
+    #
+    # Exact match because `code` appears inside innocent names (`country_code`,
+    # `postcode`), and over-redacting a slow-request log makes it useless.
+    normalized in ~w(code state id_token access_token refresh_token) or
+      Enum.any?(
+        ~w(password token secret authorization api_key cookie session),
+        &String.contains?(normalized, &1)
+      )
   end
 
   defp param_type(value) when is_binary(value), do: "string"

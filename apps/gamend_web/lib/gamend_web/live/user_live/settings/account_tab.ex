@@ -433,14 +433,13 @@ defmodule GamendWeb.UserLive.Settings.AccountTab do
     end
   end
 
-  def handle_event("delete_conflicting_account", %{"id" => id}, socket) do
-    current = Shared.current_user(socket)
-
-    other_user = Accounts.get_user(id)
-
-    case other_user do
-      %Gamend.Accounts.User{} = other_user ->
-        handle_delete_conflicting_account(socket, current, other_user)
+  def handle_event("delete_conflicting_account", _params, socket) do
+    # The target is the conflict resolved at mount, never an id from the event.
+    # A LiveView event payload is client-controlled, so trusting the id in it
+    # let any signed-in user delete any account without a password.
+    case socket.assigns[:conflict_user] do
+      %Accounts.User{} = other_user ->
+        handle_delete_conflicting_account(socket, Shared.current_user(socket), other_user)
 
       _ ->
         {:noreply, put_flash(socket, :error, gettext("Not found"))}
@@ -493,23 +492,75 @@ defmodule GamendWeb.UserLive.Settings.AccountTab do
     end
   end
 
-  defp handle_delete_conflicting_account(socket, current, other_user) do
-    current_email = (current.email || "") |> String.downcase()
-    other_email = (other_user.email || "") |> String.downcase()
+  @doc """
+  The pending OAuth link conflict for this session, as `{conflict_user, provider}`.
 
+  A conflict exists only when `GamendWeb.AuthController` proved one: the caller
+  completed a provider callback and that provider identity was already linked to
+  another account. It is recorded in the session there, so the id can never be
+  supplied by the reader.
+
+  Re-validated on every mount, because the session outlives the situation: the
+  other account may since have unlinked the provider, been deleted, or turned out
+  to be the caller's own. Anything that no longer holds resolves to no conflict.
+  """
+  @spec resolve_link_conflict(map(), Accounts.User.t() | nil) ::
+          {Accounts.User.t() | nil, String.t() | nil}
+  def resolve_link_conflict(session, current_user)
+
+  def resolve_link_conflict(
+        %{"oauth_link_conflict" => %{"provider" => provider, "user_id" => user_id}},
+        %Accounts.User{} = current_user
+      )
+      when is_binary(provider) and is_binary(user_id) do
+    with true <- provider in Enum.map(Providers.all(), &to_string/1),
+         %Accounts.User{} = other <- Accounts.get_user(user_id),
+         true <- other.id != current_user.id,
+         # Still claiming the identity we were blocked on.
+         linked_id when is_binary(linked_id) <- linked_provider_id(other, provider) do
+      {other, provider}
+    else
+      _ -> {nil, nil}
+    end
+  end
+
+  def resolve_link_conflict(_session, _current_user), do: {nil, nil}
+
+  # Deletion is allowed only for an account that is *nothing but* the provider
+  # identity the caller has just proven they control: no password, no device
+  # credential, and no second provider. Such a row is an orphan holding an
+  # identity that is demonstrably the caller's.
+  #
+  # Anything else is a real account that merely shares one identity, and the
+  # answer there is to sign in to it and unlink — never to let one party delete
+  # another's account, their stored objects, KV entries and wallet along with it.
+  defp handle_delete_conflicting_account(socket, current, other_user) do
     cond do
       other_user.id == current.id ->
         {:noreply, put_flash(socket, :error, gettext("Failed"))}
 
-      other_email == current_email and other_email != "" ->
-        perform_conflicting_account_deletion(socket, other_user)
-
-      other_user.hashed_password == nil ->
+      orphaned_provider_account?(other_user) ->
         perform_conflicting_account_deletion(socket, other_user)
 
       true ->
-        {:noreply, put_flash(socket, :error, gettext("Failed"))}
+        {:noreply,
+         put_flash(
+           socket,
+           :error,
+           gettext(
+             "That account has its own sign-in method. Sign in to it and unlink the provider there."
+           )
+         )}
     end
+  end
+
+  defp orphaned_provider_account?(%Accounts.User{} = user) do
+    linked_providers =
+      Providers.all()
+      |> Enum.map(&linked_provider_id(user, &1))
+      |> Enum.count(&is_binary/1)
+
+    is_nil(user.hashed_password) and user.device_id in [nil, ""] and linked_providers <= 1
   end
 
   defp perform_conflicting_account_deletion(socket, user) do

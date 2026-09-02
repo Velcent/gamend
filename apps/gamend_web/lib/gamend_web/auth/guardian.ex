@@ -43,10 +43,18 @@ defmodule GamendWeb.Auth.Guardian do
       {:ok, user_id} ->
         case Accounts.get_user(user_id) do
           %{} = user ->
-            if Map.get(claims, "tv") == user.token_version do
-              {:ok, user}
-            else
-              {:error, :token_revoked}
+            cond do
+              Map.get(claims, "tv") != user.token_version ->
+                {:error, :token_revoked}
+
+              # Deactivating an account has to end its API access too, not only
+              # block new logins — otherwise an admin who un-approves someone
+              # leaves them refreshing tokens for the full 30-day refresh TTL.
+              not Accounts.user_activated?(user) ->
+                {:error, :account_deactivated}
+
+              true ->
+                {:ok, user}
             end
 
           nil ->

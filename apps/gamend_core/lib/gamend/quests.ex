@@ -521,16 +521,36 @@ defmodule Gamend.Quests do
   # *lock holders*, not the lock-free writers, so the version check is still
   # what makes the merge safe — the lock only guarantees this caller stops
   # competing with an unbounded field and eventually wins.
-  defp advance_serialized(user_id, quest, event, amount, meta, now) do
+  # The retry loop is *around* the lock, not inside it.
+  #
+  # `Lock.serialize/3` opens a transaction, which on SQLite means holding the
+  # single pooled write connection. Running the 25-attempt loop inside it parked
+  # that connection through every `Process.sleep/1` — tens of milliseconds of
+  # pure sleeping plus fifty round trips — while every other write in the
+  # application queued behind it. One attempt per lock acquisition means the
+  # writer is released between tries, and a contended caller waits its turn
+  # rather than blocking the node.
+  defp advance_serialized(user_id, quest, event, amount, meta, now, attempts_left \\ nil) do
+    attempts_left = attempts_left || @contended_attempts
+
     result =
       Gamend.Lock.serialize(:quest, "#{user_id}:#{quest.key}", fn ->
-        do_advance(user_id, quest, event, amount, meta, now, @contended_attempts)
+        do_advance(user_id, quest, event, amount, meta, now, 1)
       end)
 
     case result do
-      {:ok, :contended} -> {:error, :contended}
-      {:ok, outcome} -> outcome
-      {:error, reason} -> {:error, reason}
+      {:ok, :contended} when attempts_left > 1 ->
+        Process.sleep(:rand.uniform(@advance_retry_backoff_ms))
+        advance_serialized(user_id, quest, event, amount, meta, now, attempts_left - 1)
+
+      {:ok, :contended} ->
+        {:error, :contended}
+
+      {:ok, outcome} ->
+        outcome
+
+      {:error, reason} ->
+        {:error, reason}
     end
   end
 
