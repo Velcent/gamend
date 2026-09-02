@@ -202,6 +202,20 @@ defmodule Gamend.Friends do
   end
 
   @doc ~S"""
+    Count every non-block friendship row, honouring the same filters as `list_all_friendships/1`.
+  """
+  @spec count_all_friendships(keyword()) :: non_neg_integer()
+  def count_all_friendships(_opts \\ []) do
+    case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        0
+
+      _ ->
+        raise "Gamend.Friends.count_all_friendships/1 is a stub - only available at runtime on Gamend"
+    end
+  end
+
+  @doc ~S"""
     Count blocked friendships for a user (number of blocked rows where user is target).
   """
   @spec count_blocked_for_user(user_id()) :: non_neg_integer()
@@ -306,6 +320,25 @@ defmodule Gamend.Friends do
 
       _ ->
         raise "Gamend.Friends.delete_block/1 is a stub - only available at runtime on Gamend"
+    end
+  end
+
+  @doc ~S"""
+    Remove a non-block friendship row by its id, regardless of who created it.
+    
+    For admin use — force-unfriend an accepted pair or cancel a request without
+    being either side of it. Blocked rows belong to the Blacklist; remove those
+    with `delete_block/1`.
+    
+  """
+  @spec delete_friendship(Ecto.UUID.t()) :: {:ok, :removed} | {:error, :not_found}
+  def delete_friendship(_friendship_id) do
+    case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        {:ok, nil}
+
+      _ ->
+        raise "Gamend.Friends.delete_friendship/1 is a stub - only available at runtime on Gamend"
     end
   end
 
@@ -432,6 +465,30 @@ defmodule Gamend.Friends do
 
       _ ->
         raise "Gamend.Friends.list_all_blocks/1 is a stub - only available at runtime on Gamend"
+    end
+  end
+
+  @doc ~S"""
+    List every friendship row that is not a block, newest first, for admin views.
+    
+    Covers pending, accepted and rejected rows; blocks belong to the Blacklist
+    and are listed with `list_all_blocks/1`.
+    
+    ## Options
+    
+      * `:user_id` - only rows where this user is the requester or the target
+      * `:status` - only rows with this status ("pending" | "accepted" | "rejected")
+      * `:page`, `:page_size` - see `t:Gamend.Types.pagination_opts/0`
+    
+  """
+  @spec list_all_friendships(keyword()) :: [Gamend.Friends.Friendship.t()]
+  def list_all_friendships(_opts \\ []) do
+    case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        []
+
+      _ ->
+        raise "Gamend.Friends.list_all_friendships/1 is a stub - only available at runtime on Gamend"
     end
   end
 

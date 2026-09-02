@@ -2789,9 +2789,27 @@ defmodule Gamend.Accounts do
 
   @spec change_user_registration(User.t()) :: Ecto.Changeset.t()
   @spec change_user_registration(User.t(), map()) :: Ecto.Changeset.t()
-  @spec change_user_registration(User.t(), map(), keyword()) :: Ecto.Changeset.t()
-  def change_user_registration(%User{} = user, attrs \\ %{}, opts \\ []) do
-    User.registration_changeset(user, attrs, opts)
+  def change_user_registration(%User{} = user, attrs \\ %{}) do
+    User.registration_changeset(user, attrs, [])
+  end
+
+  @doc """
+  A registration changeset for live form feedback, with the uniqueness query
+  skipped.
+
+  `change_user_registration/2` runs `unsafe_validate_unique`, which is right on
+  submit and wrong on every keystroke: the registration form's `validate` event
+  is neither rate-limited nor captcha'd, so running it there turned the form
+  into an unauthenticated oracle for "does this address have an account here?",
+  one query per character typed. Submitting still checks, and the unique index
+  is what actually enforces it.
+
+  Separate function rather than an option, because `mix gen.sdk` cannot generate
+  a stub for a function carrying two default arguments.
+  """
+  @spec change_user_registration_for_validation(User.t(), map()) :: Ecto.Changeset.t()
+  def change_user_registration_for_validation(%User{} = user, attrs) do
+    User.registration_changeset(user, attrs, validate_unique: false)
   end
 
   @spec deliver_user_confirmation_instructions(User.t(), (String.t() -> String.t())) ::

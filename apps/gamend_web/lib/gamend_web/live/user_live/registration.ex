@@ -81,17 +81,12 @@ defmodule GamendWeb.UserLive.Registration do
   end
 
   def handle_event("validate", %{"user" => user_params}, socket) do
-    # `validate_unique: false` on the keystroke path.
-    #
-    # The registration changeset defaults to `unsafe_validate_unique`, so every
-    # keystroke ran a query and rendered "has already been taken" — an
-    # unauthenticated, unthrottled oracle for "does this address have an account
-    # here?", one email per keystroke. Only `save` is rate-limited and captcha'd.
-    # Submitting still checks uniqueness, and the database's unique index is
-    # what actually enforces it.
+    # The keystroke path skips the uniqueness query — see
+    # `Accounts.change_user_registration_for_validation/2` for why. `save`
+    # below uses the checking form.
     changeset =
       %User{}
-      |> Accounts.change_user_registration(user_params, validate_unique: false)
+      |> Accounts.change_user_registration_for_validation(user_params)
       |> Map.put(:action, :validate)
 
     {:noreply, assign_form(socket, changeset)}

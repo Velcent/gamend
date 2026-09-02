@@ -513,6 +513,23 @@ defmodule Gamend.Payments do
     end
   end
 
+  @doc ~S"""
+    Stamp a provider event as fully handled. Only then does a retry of the same
+    event id count as a duplicate.
+    
+  """
+  @spec mark_event_processed(Gamend.Payments.ProviderEvent.t()) ::
+          {:ok, Gamend.Payments.ProviderEvent.t()} | {:error, Ecto.Changeset.t()}
+  def mark_event_processed(_event) do
+    case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        {:ok, nil}
+
+      _ ->
+        raise "Gamend.Payments.mark_event_processed/1 is a stub - only available at runtime on Gamend"
+    end
+  end
+
   @doc false
   @spec product_entitlement_key(Gamend.Payments.Product.t()) :: String.t()
   def product_entitlement_key(_product) do

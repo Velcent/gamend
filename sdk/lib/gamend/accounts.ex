@@ -329,6 +329,33 @@ defmodule Gamend.Accounts do
     end
   end
 
+  @doc ~S"""
+    A registration changeset for live form feedback, with the uniqueness query
+    skipped.
+    
+    `change_user_registration/2` runs `unsafe_validate_unique`, which is right on
+    submit and wrong on every keystroke: the registration form's `validate` event
+    is neither rate-limited nor captcha'd, so running it there turned the form
+    into an unauthenticated oracle for "does this address have an account here?",
+    one query per character typed. Submitting still checks, and the unique index
+    is what actually enforces it.
+    
+    Separate function rather than an option, because `mix gen.sdk` cannot generate
+    a stub for a function carrying two default arguments.
+    
+  """
+  @spec change_user_registration_for_validation(Gamend.Accounts.User.t(), map()) ::
+          Ecto.Changeset.t()
+  def change_user_registration_for_validation(_user, _attrs) do
+    case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        nil
+
+      _ ->
+        raise "Gamend.Accounts.change_user_registration_for_validation/2 is a stub - only available at runtime on Gamend"
+    end
+  end
+
   @doc false
   @spec change_username(Gamend.Accounts.User.t()) :: Ecto.Changeset.t()
   def change_username(_user) do
@@ -409,6 +436,25 @@ defmodule Gamend.Accounts do
 
       _ ->
         raise "Gamend.Accounts.confirm_user_by_token/1 is a stub - only available at runtime on Gamend"
+    end
+  end
+
+  @doc ~S"""
+    How many accounts hold the admin flag.
+    
+    Used to refuse the write that would take that number to zero: nothing else can
+    grant `is_admin`, so an installation that reaches zero admins cannot be
+    administered again.
+    
+  """
+  @spec count_admins() :: non_neg_integer()
+  def count_admins() do
+    case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        0
+
+      _ ->
+        raise "Gamend.Accounts.count_admins/0 is a stub - only available at runtime on Gamend"
     end
   end
 

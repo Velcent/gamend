@@ -554,6 +554,25 @@ defmodule Gamend.Groups do
   end
 
   @doc ~S"""
+    Just the user ids of a group's members, oldest first.
+    
+    For callers that only need to address members — chat notification fanout is
+    the hot one — where `get_group_members/1` would preload every member's full
+    user row only to read `user_id` from it.
+    
+  """
+  @spec group_member_ids(Ecto.UUID.t()) :: [Ecto.UUID.t()]
+  def group_member_ids(_group_id) do
+    case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        []
+
+      _ ->
+        raise "Gamend.Groups.group_member_ids/1 is a stub - only available at runtime on Gamend"
+    end
+  end
+
+  @doc ~S"""
     Clean up group memberships before a user is deleted.
     
     For each group the user belongs to:
@@ -893,6 +912,28 @@ defmodule Gamend.Groups do
 
       _ ->
         raise "Gamend.Groups.request_join/2 is a stub - only available at runtime on Gamend"
+    end
+  end
+
+  @doc ~S"""
+    Set a group's icon to an object we have just accepted an upload for.
+    
+    Separate from `update_group/3` because that one deliberately drops `icon_url`
+    from caller-supplied attributes. The URL here does not come from the caller:
+    it is produced by `GamendWeb.Uploads.confirm/5` after the stored object has
+    been re-read, size-checked and content-sniffed, so this path is the only way
+    an icon is ever set. Admin rights are still required.
+    
+  """
+  @spec set_icon_url(String.t(), String.t(), String.t()) ::
+          {:ok, Gamend.Groups.Group.t()} | {:error, :not_admin | Ecto.Changeset.t() | term()}
+  def set_icon_url(_user_id, _group_id, _url) do
+    case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        {:ok, nil}
+
+      _ ->
+        raise "Gamend.Groups.set_icon_url/3 is a stub - only available at runtime on Gamend"
     end
   end
 
