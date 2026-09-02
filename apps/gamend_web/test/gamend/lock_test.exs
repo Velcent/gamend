@@ -9,6 +9,7 @@ defmodule Gamend.LockTest do
   use Gamend.DataCase, async: false
 
   alias Gamend.Lock
+  alias Gamend.Repo.AdvisoryLock
 
   setup do
     table = :ets.new(:lock_test, [:public, :set])
@@ -104,6 +105,42 @@ defmodule Gamend.LockTest do
   end
 
   # `:global` releases on holder death, so a crash must not wedge the key.
+  # This is the bug this test exists for: `Lock.serialize/3` only reaches
+  # `AdvisoryLock.lock/2` on Postgres, so an unregistered atom namespace used to
+  # pass every test on the default SQLite setup and raise `KeyError` on the
+  # Postgres CI job. The namespace is now resolved on both adapters.
+  describe "namespace validation (adapter-independent)" do
+    test "an unregistered atom namespace raises here, not only on Postgres" do
+      assert_raise ArgumentError, ~r/unknown advisory-lock namespace :nope_not_registered/, fn ->
+        Lock.serialize(:nope_not_registered, "some-id", fn -> :ok end)
+      end
+    end
+
+    test "an arbitrary string namespace needs no registration" do
+      assert {:ok, :ran} = Lock.serialize("ad hoc namespace", "some-id", fn -> :ran end)
+    end
+
+    test "every namespace the codebase locks on is registered" do
+      registered = AdvisoryLock.namespaces() |> Map.keys() |> MapSet.new()
+
+      used =
+        Path.wildcard(Path.join([__DIR__, "..", "..", "..", "gamend_core", "lib", "**", "*.ex"]))
+        |> Enum.flat_map(fn file ->
+          Regex.scan(~r/Lock\.serialize\(:([a-z_]+)/, File.read!(file), capture: :all_but_first)
+        end)
+        |> List.flatten()
+        |> Enum.map(&String.to_atom/1)
+        |> MapSet.new()
+
+      # Guards against the scan silently matching nothing (a refactor, a moved
+      # directory) and passing vacuously.
+      assert MapSet.size(used) >= 5
+
+      assert MapSet.subset?(used, registered),
+             "unregistered advisory-lock namespaces: #{inspect(MapSet.to_list(MapSet.difference(used, registered)))}"
+    end
+  end
+
   test "a crash inside the section releases the key" do
     {pid, ref} =
       spawn_monitor(fn -> Lock.serialize(:lobby, "crashy", fn -> raise "boom" end) end)

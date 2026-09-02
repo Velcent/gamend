@@ -96,6 +96,12 @@ defmodule Gamend.Lock do
   def serialize(namespace, resource_id, fun)
       when (is_atom(namespace) or is_binary(namespace)) and is_binary(resource_id) and
              is_function(fun, 0) do
+    # Resolved on every adapter, so an unregistered atom namespace fails the
+    # same way on SQLite as on Postgres. Only the Postgres branch below actually
+    # uses the number; validating it here is what stops a lock that works
+    # locally from raising a `KeyError` on the Postgres CI job.
+    _ = AdvisoryLock.namespace_id(namespace)
+
     cond do
       AdvisoryLock.postgres?() ->
         Repo.transaction(fn ->

@@ -61,7 +61,8 @@ defmodule Gamend.Repo.AdvisoryLock do
     matchmaking_sweep: 8,
     quest: 9,
     push_tokens: 10,
-    ready_check: 11
+    ready_check: 11,
+    tournament_join: 12
   }
 
   # Reserve 0..99 for atom namespaces; string hashes start at 100.
@@ -82,16 +83,47 @@ defmodule Gamend.Repo.AdvisoryLock do
   the lock is available. On SQLite, returns immediately — see the moduledoc.
   """
   @spec lock(atom() | String.t(), String.t()) :: :ok
-  def lock(namespace, resource_id)
-      when is_atom(namespace) and is_binary(resource_id) do
-    ns = Map.fetch!(@namespaces, namespace)
-    maybe_advisory_lock(ns, hash_resource_id(resource_id))
+  def lock(namespace, resource_id) when is_binary(resource_id) do
+    maybe_advisory_lock(namespace_id(namespace), hash_resource_id(resource_id))
   end
 
-  def lock(namespace, resource_id)
-      when is_binary(namespace) and is_binary(resource_id) do
-    ns = :erlang.phash2(namespace, 2_147_483_547) + @string_ns_offset
-    maybe_advisory_lock(ns, hash_resource_id(resource_id))
+  @doc """
+  The integer namespace `pg_advisory_xact_lock` is called with.
+
+  Public so `Gamend.Lock.serialize/3` can resolve it on *every* adapter, not
+  only Postgres. An unregistered atom is a programming error, and it used to
+  surface as a `KeyError` from deep inside the Postgres branch — while the
+  SQLite branch never calls `lock/2` at all and so never noticed. Anyone
+  developing on the default SQLite setup could therefore add a lock with an
+  unregistered namespace, watch every local test pass, and only find out on the
+  Postgres CI job.
+  """
+  @spec namespace_id(atom() | String.t()) :: non_neg_integer()
+  def namespace_id(namespace) when is_atom(namespace) do
+    case Map.fetch(@namespaces, namespace) do
+      {:ok, ns} ->
+        ns
+
+      :error ->
+        raise ArgumentError, """
+        unknown advisory-lock namespace #{inspect(namespace)}.
+
+        Atom namespaces are pre-registered in Gamend.Repo.AdvisoryLock so their
+        integer ids stay stable across releases. Either add it to @namespaces
+        (next free id: #{next_namespace_id()}), or pass a string, which is
+        hashed and needs no registration:
+
+            Gamend.Lock.serialize("#{namespace}", resource_id, fun)
+        """
+    end
+  end
+
+  def namespace_id(namespace) when is_binary(namespace) do
+    :erlang.phash2(namespace, 2_147_483_547) + @string_ns_offset
+  end
+
+  defp next_namespace_id do
+    @namespaces |> Map.values() |> Enum.max() |> Kernel.+(1)
   end
 
   defp hash_resource_id(resource_id), do: :erlang.phash2(resource_id, 2_147_483_647)

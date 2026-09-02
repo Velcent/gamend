@@ -1,3 +1,5 @@
+<!-- api-lint: unimplemented -->
+
 # Replays — recorded sessions from a deterministic client
 
 Design spec. Builds on **Object storage** (Phase 0, shipped), `Gamend.ClientLogs`

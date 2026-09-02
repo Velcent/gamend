@@ -234,10 +234,25 @@ defmodule Gamend.ApiConventions do
     end
   end
 
+  # A design spec for a feature that has not been built yet is *supposed* to name
+  # routes that do not exist — that is what a spec is. This rule is about
+  # shipped documentation drifting out of step with a rename, so such a document
+  # opts out by declaring itself, on any line:
+  #
+  #     <!-- api-lint: unimplemented -->
+  #
+  # Deliberately a per-file marker rather than skipping `docs/specs/` wholesale:
+  # a spec that describes something already shipped (load-testing.md cites real
+  # endpoints) should still be checked, and the marker has to be deleted when
+  # the feature lands, which is the moment the routes become checkable.
+  @unimplemented_marker "api-lint: unimplemented"
+
   defp stale_documented_routes(declared) do
     for dir <- @doc_dirs,
         file <- Path.wildcard(Path.join(dir, "**/*.md")),
-        {text, line} <- file |> File.read!() |> String.split("\n") |> Enum.with_index(1),
+        contents = File.read!(file),
+        not String.contains?(contents, @unimplemented_marker),
+        {text, line} <- contents |> String.split("\n") |> Enum.with_index(1),
         path <- documented_api_paths(text),
         not known_or_prefix?(path, declared) do
       %{
