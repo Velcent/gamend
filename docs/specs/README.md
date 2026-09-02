@@ -47,6 +47,10 @@ Not a plan; a living reference.
 - [discord-notifications.md](discord-notifications.md) — **Discord
   notifications.** One env var, Oban-delivered, rate-limit aware and redacted by
   construction — the concrete slice of the parked webhooks spec.
+- [replays.md](replays.md) — **Replays.** Recorded sessions from a deterministic
+  client: a small per-tick digest trace in the database that catches two players
+  parting at tick N, and the full input recording on object storage only when
+  something asks for it.
 - [gdscript-plugins.md](gdscript-plugins.md) — **GDScript plugins.** GDScript
   transpiled to readable Elixir source and compiled into an ordinary OTP
   plugin — the same `ebin/*.beam` `plugin.bundle` produces, at native speed,
