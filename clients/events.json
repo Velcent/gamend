@@ -1,0 +1,407 @@
+[
+  {
+    "channel": "user",
+    "event": "updated",
+    "signal": "user_updated"
+  },
+  {
+    "channel": "user",
+    "event": "notification_created",
+    "signal": "notification_emitted"
+  },
+  {
+    "channel": "user",
+    "event": "wallet_updated",
+    "signal": "wallet_updated"
+  },
+  {
+    "channel": "user",
+    "event": "inventory_updated",
+    "signal": "inventory_updated"
+  },
+  {
+    "channel": "user",
+    "event": "kv_updated",
+    "signal": "kv_updated"
+  },
+  {
+    "channel": "user",
+    "event": "kv_deleted",
+    "signal": "kv_deleted"
+  },
+  {
+    "channel": "user",
+    "event": "friend_updated",
+    "signal": "friend_updated"
+  },
+  {
+    "channel": "user",
+    "event": "outgoing_request",
+    "signal": "friend_added"
+  },
+  {
+    "channel": "user",
+    "event": "incoming_request",
+    "signal": "friend_added"
+  },
+  {
+    "channel": "user",
+    "event": "request_accepted",
+    "signal": "friend_added"
+  },
+  {
+    "channel": "user",
+    "event": "friend_accepted",
+    "signal": "friend_added"
+  },
+  {
+    "channel": "user",
+    "event": "friend_added",
+    "signal": "friend_added"
+  },
+  {
+    "channel": "user",
+    "event": "request_cancelled",
+    "signal": "friend_request_cancelled"
+  },
+  {
+    "channel": "user",
+    "event": "friend_removed",
+    "signal": "friend_removed"
+  },
+  {
+    "channel": "user",
+    "event": "chat_message_created",
+    "signal": "friend_chat_message"
+  },
+  {
+    "channel": "user",
+    "event": "chat_message_updated",
+    "signal": "friend_chat_message_updated"
+  },
+  {
+    "channel": "user",
+    "event": "chat_message_deleted",
+    "signal": "friend_chat_message_deleted"
+  },
+  {
+    "channel": "user",
+    "event": "group_invite_accepted",
+    "signal": "group_invite_accepted"
+  },
+  {
+    "channel": "user",
+    "event": "group_invite_cancelled",
+    "signal": "group_invite_cancelled"
+  },
+  {
+    "channel": "user",
+    "event": "group_join_request_approved",
+    "signal": "group_join_request_approved"
+  },
+  {
+    "channel": "user",
+    "event": "group_join_request_rejected",
+    "signal": "group_join_request_rejected"
+  },
+  {
+    "channel": "user",
+    "event": "party_invite_accepted",
+    "signal": "party_invite_accepted"
+  },
+  {
+    "channel": "user",
+    "event": "party_invite_declined",
+    "signal": "party_invite_declined"
+  },
+  {
+    "channel": "user",
+    "event": "party_invite_cancelled",
+    "signal": "party_invite_cancelled"
+  },
+  {
+    "channel": "user",
+    "event": "friend_blocked",
+    "signal": "friend_blocked"
+  },
+  {
+    "channel": "user",
+    "event": "friend_unblocked",
+    "signal": "friend_unblocked"
+  },
+  {
+    "channel": "user",
+    "event": "friend_rejected",
+    "signal": "friend_rejected"
+  },
+  {
+    "channel": "user",
+    "event": "quest_progress",
+    "signal": "quest_progress"
+  },
+  {
+    "channel": "user",
+    "event": "quest_completed",
+    "signal": "quest_completed"
+  },
+  {
+    "channel": "user",
+    "event": "quest_claimed",
+    "signal": "quest_claimed"
+  },
+  {
+    "channel": "lobby",
+    "event": "updated",
+    "signal": "lobby_updated"
+  },
+  {
+    "channel": "lobby",
+    "event": "state_changed",
+    "signal": "lobby_state_changed"
+  },
+  {
+    "channel": "lobby",
+    "event": "user_joined",
+    "signal": "lobby_member_joined"
+  },
+  {
+    "channel": "lobby",
+    "event": "user_left",
+    "signal": "lobby_member_left"
+  },
+  {
+    "channel": "lobby",
+    "event": "user_kicked",
+    "signal": "lobby_member_kicked"
+  },
+  {
+    "channel": "lobby",
+    "event": "user_online",
+    "signal": "lobby_member_online"
+  },
+  {
+    "channel": "lobby",
+    "event": "user_offline",
+    "signal": "lobby_member_offline"
+  },
+  {
+    "channel": "lobby",
+    "event": "user_updated",
+    "signal": "lobby_member_updated"
+  },
+  {
+    "channel": "lobby",
+    "event": "host_changed",
+    "signal": "lobby_host_changed"
+  },
+  {
+    "channel": "lobby",
+    "event": "chat_message_created",
+    "signal": "lobby_chat_message"
+  },
+  {
+    "channel": "lobby",
+    "event": "chat_message_updated",
+    "signal": "lobby_chat_message_updated"
+  },
+  {
+    "channel": "lobby",
+    "event": "chat_message_deleted",
+    "signal": "lobby_chat_message_deleted"
+  },
+  {
+    "channel": "lobby",
+    "event": "ready_check_started",
+    "signal": "ready_check_started"
+  },
+  {
+    "channel": "lobby",
+    "event": "ready_check_updated",
+    "signal": "ready_check_updated"
+  },
+  {
+    "channel": "lobby",
+    "event": "ready_check_passed",
+    "signal": "ready_check_passed"
+  },
+  {
+    "channel": "lobby",
+    "event": "ready_check_failed",
+    "signal": "ready_check_failed"
+  },
+  {
+    "channel": "lobbies",
+    "event": "lobby_created",
+    "signal": "lobby_created"
+  },
+  {
+    "channel": "lobbies",
+    "event": "lobby_updated",
+    "signal": "lobby_list_updated"
+  },
+  {
+    "channel": "lobbies",
+    "event": "lobby_deleted",
+    "signal": "lobby_deleted"
+  },
+  {
+    "channel": "lobbies",
+    "event": "lobby_membership_changed",
+    "signal": "lobby_membership_changed"
+  },
+  {
+    "channel": "party",
+    "event": "updated",
+    "signal": "party_updated"
+  },
+  {
+    "channel": "party",
+    "event": "member_joined",
+    "signal": "party_member_joined"
+  },
+  {
+    "channel": "party",
+    "event": "member_left",
+    "signal": "party_member_left"
+  },
+  {
+    "channel": "party",
+    "event": "member_online",
+    "signal": "party_member_online"
+  },
+  {
+    "channel": "party",
+    "event": "member_offline",
+    "signal": "party_member_offline"
+  },
+  {
+    "channel": "party",
+    "event": "member_updated",
+    "signal": "party_member_updated"
+  },
+  {
+    "channel": "party",
+    "event": "disbanded",
+    "signal": "party_disbanded"
+  },
+  {
+    "channel": "party",
+    "event": "chat_message_created",
+    "signal": "party_chat_message"
+  },
+  {
+    "channel": "party",
+    "event": "chat_message_updated",
+    "signal": "party_chat_message_updated"
+  },
+  {
+    "channel": "party",
+    "event": "chat_message_deleted",
+    "signal": "party_chat_message_deleted"
+  },
+  {
+    "channel": "party",
+    "event": "ready_check_started",
+    "signal": "ready_check_started"
+  },
+  {
+    "channel": "party",
+    "event": "ready_check_updated",
+    "signal": "ready_check_updated"
+  },
+  {
+    "channel": "party",
+    "event": "ready_check_passed",
+    "signal": "ready_check_passed"
+  },
+  {
+    "channel": "party",
+    "event": "ready_check_failed",
+    "signal": "ready_check_failed"
+  },
+  {
+    "channel": "group",
+    "event": "updated",
+    "signal": "group_updated"
+  },
+  {
+    "channel": "group",
+    "event": "member_joined",
+    "signal": "group_member_joined"
+  },
+  {
+    "channel": "group",
+    "event": "member_left",
+    "signal": "group_member_left"
+  },
+  {
+    "channel": "group",
+    "event": "member_kicked",
+    "signal": "group_member_kicked"
+  },
+  {
+    "channel": "group",
+    "event": "member_promoted",
+    "signal": "group_member_promoted"
+  },
+  {
+    "channel": "group",
+    "event": "member_demoted",
+    "signal": "group_member_demoted"
+  },
+  {
+    "channel": "group",
+    "event": "member_online",
+    "signal": "group_member_online"
+  },
+  {
+    "channel": "group",
+    "event": "member_offline",
+    "signal": "group_member_offline"
+  },
+  {
+    "channel": "group",
+    "event": "member_updated",
+    "signal": "group_member_updated"
+  },
+  {
+    "channel": "group",
+    "event": "join_request_approved",
+    "signal": "group_join_request_approved"
+  },
+  {
+    "channel": "group",
+    "event": "join_request_rejected",
+    "signal": "group_join_request_rejected"
+  },
+  {
+    "channel": "group",
+    "event": "chat_message_created",
+    "signal": "group_chat_message"
+  },
+  {
+    "channel": "group",
+    "event": "chat_message_updated",
+    "signal": "group_chat_message_updated"
+  },
+  {
+    "channel": "group",
+    "event": "chat_message_deleted",
+    "signal": "group_chat_message_deleted"
+  },
+  {
+    "channel": "groups",
+    "event": "group_created",
+    "signal": "group_created"
+  },
+  {
+    "channel": "groups",
+    "event": "group_updated",
+    "signal": "group_list_updated"
+  },
+  {
+    "channel": "groups",
+    "event": "group_deleted",
+    "signal": "group_deleted"
+  }
+]
