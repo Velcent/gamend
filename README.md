@@ -100,4 +100,12 @@ This project has a [.github/copilot-instructions.md](.github/copilot-instruction
 
 ## Star History
 
-[![Star History Chart](https://star-history.dera.page/svg?repos=appsinacup/gamend&type=date&legend=top-left)](https://star-history.dera.page/#appsinacup/gamend&type=date&legend=top-left)
+## Star History
+
+<a href="https://www.star-history.com/?repos=appsinacup%2Fgamend&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=appsinacup/gamend&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=appsinacup/gamend&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=appsinacup/gamend&type=date&legend=top-left" />
+ </picture>
+</a>
