@@ -164,3 +164,96 @@ Example: grouped public links plus admin-only account entry:
   ]
 }
 ```
+
+## Site search
+
+Every page carries a magnifier in the header and answers Ctrl/Cmd+K with a search palette. Out of the box it searches your navigation: the links you configured above, flattened so a page two taps deep in a phone's hamburger menu is one query away.
+
+Search is on by default. Turn it off with:
+
+```elixir
+config :gamend_web, :search_provider, false
+```
+
+That removes the button, the dialog and the index endpoint together.
+
+### Putting your own content in it
+
+Point the setting at a module implementing `GamendWeb.SearchIndex.Provider`:
+
+```elixir
+config :gamend_web, :search_provider, MyApp.Search
+```
+
+```elixir
+defmodule MyApp.Search do
+  @behaviour GamendWeb.SearchIndex.Provider
+
+  @impl true
+  def entries(context) do
+    GamendWeb.SearchIndex.navigation_entries(context) ++
+      Enum.map(MyApp.guides(), fn guide ->
+        %{title: guide.title, href: "/guides/#{guide.slug}", group: "Guides"}
+      end)
+  end
+end
+```
+
+`entries/1` is called once per palette open, with `%{scope: current_scope, locale: locale}`. Use `scope` to leave out what the reader cannot open; `locale` is the language to translate titles into, and gettext is already set to it.
+
+| Key | Required | What it is |
+|---|---|---|
+| `title` | yes | What the row says |
+| `href` | yes | A clean path (`/guides/intro`) or a full URL. Core adds the locale prefix |
+| `group` | no | The heading the row sits under. Rows keep the order you return them in |
+| `subtitle` | no | Shown greyed at the end of the row |
+| `keywords` | no | Also matched, never shown — alternate names, codes, spellings |
+| `scope` | no | See below |
+
+Titles, subtitles and group labels are the reader's words: translate them in the provider.
+
+An entry whose `href` contains `{q}` is a search rather than a destination: the palette substitutes what was typed and offers it under the page hits. That is how a query the palette cannot answer itself reaches a page that can.
+
+```elixir
+%{title: "Spanish", subtitle: "Search: {q}", href: "/vocabulary/spanish?q={q}",
+  scope: "es_es", keywords: ["Spanish", "Español"]}
+```
+
+Which of these are offered is decided by scope, most relevant first:
+
+1. one whose `keywords` the reader typed — `casa spanish` searches Spanish for `casa`, with the language name taken out of the query;
+2. the ones matching a current scope, in scope order;
+3. entries with no `scope` at all, but only when neither of the above matched.
+
+Scopes come from two places, page first. A page says what it is about by setting `data-gamend-search-scopes` on `<html>` (a comma-separated list, most relevant first) — outside every LiveView, so a patch cannot clear it. The optional `scopes/1` callback adds the server's own suggestions after, which is where a signed-in reader's saved preference belongs.
+
+### Things too numerous to put in the index
+
+The index is everything worth offering before anyone types, and it is sent whole. Some content is too large for that — a dictionary, a product catalogue, a message archive. Add an optional `search/2` and the palette will ask per query instead:
+
+```elixir
+@impl true
+def search(query, context) do
+  Enum.map(MyApp.find(query, context[:scopes]), fn hit ->
+    %{title: hit.name, subtitle: hit.summary, href: "/things/#{hit.id}", group: "Things"}
+  end)
+end
+```
+
+Rows come back in the same shape as an index entry and are shown below the ones the browser matched locally, in their own groups. The call is debounced, so it arrives once a reader stops typing rather than once per key, and `context[:scopes]` carries what they most likely mean, most likely first.
+
+Order matters and is deliberate: local matches stay on top. They were instant and these were not, so anything that jumped the queue would move under the reader's cursor a moment after they could already act on it.
+
+Leave the callback out and the palette searches its index and nothing else, which is the whole feature for most hosts.
+
+### How it is served
+
+The palette fetches `/search/index.json?locale=<locale>` once per page load, on first open, and filters it in the browser. A host with `search/2` also gets `/search/query.json?q=…&scopes=…&locale=…`, cached for a minute rather than ten. The locale is a parameter rather than a path prefix on purpose: a prefixed URL would store that locale in the session, and a background fetch must not decide what language the reader's next page arrives in.
+
+### Spelling, and what the reader actually typed
+
+The palette does three things before deciding a query matches nothing:
+
+- **Names are matched on their first five letters.** A language, a country or a product is rarely typed in the form an index holds it in — "spaniolă" is written "în spaniolă", Polish "hiszpański" becomes "po hiszpańsku". Whole-word comparison caught nine of the fifteen locales tested; five letters caught all fifteen.
+- **The connector between a word and a name is dropped**, so "casa in spanish" searches for "casa" and not "casa in". A closed list, because there is no shape that tells "in" from "go".
+- **A typo is worth one edit on a short word and two on a long one**, tried only when nothing matched honestly, and never below four letters. Two letters swapped count as one edit, not two: that is the difference between reading "hosue" as "house" and offering "hose".

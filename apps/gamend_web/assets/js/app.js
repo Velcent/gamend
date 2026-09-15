@@ -31,6 +31,7 @@ import {LocalDatetimeInput, startLocalTime} from "./local_time"
 import {startAvatarFallback} from "./avatar_fallback"
 import {startVideoClickToPlay} from "./video_click_to_play"
 import {startConnectionState} from "./connection_state"
+import {startSearchPalette} from "./search_palette"
 import topbar from "../vendor/topbar"
 
 // Custom hooks
@@ -455,6 +456,11 @@ window.addEventListener("phx:page-loading-stop", _info => topbar.hide())
 // Timestamps render as UTC server-side and are rewritten in the viewer's zone.
 // Started before the socket so static (non-LiveView) pages are covered too.
 startLocalTime()
+
+// The search palette listens on `document`, not on the button: the navbar is
+// re-rendered by any `push_patch`, which would drop a listener bound to an
+// element. Started here so it works on pages with no LiveView at all.
+startSearchPalette()
 
 // Smooth scrolling for in-page anchors — armed on the reader's first input,
 // not in the markup. `scroll-behavior: smooth` on <html> also governs scrolls

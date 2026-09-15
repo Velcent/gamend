@@ -16,6 +16,7 @@ defmodule GamendWeb.HostLayoutShell do
   attr :locale, :string, required: true
   attr :known_locales, :list, default: []
   attr :breadcrumbs, :list, default: []
+  attr :search, :map, default: %{enabled: false, index_url: nil, query_url: nil}
 
   slot :inner_block, required: true
 
@@ -54,9 +55,11 @@ defmodule GamendWeb.HostLayoutShell do
           )
         ]}
       >
-        <% title = Map.get(@theme, "title") %>
-        <% tagline = Map.get(@theme, "tagline") %>
-        <% logo = Map.get(@theme, "logo") %>
+        <%!-- Read straight off `@theme` rather than through `<% var = ... %>`
+              bindings: a variable defined in a template is opaque to change
+              tracking, so the three of them re-rendered — and re-sent the
+              logo's URL — on every diff the page sent, long after the theme
+              stopped moving. --%>
         <div class="flex-1">
           <a
             href={GamendWeb.HostLayouts.localized_href(~p"/", @locale)}
@@ -73,7 +76,7 @@ defmodule GamendWeb.HostLayoutShell do
                   say it twice — `image-redundant-alt`. The link is named by
                   that text. --%>
             <img
-              src={GamendWeb.SRI.versioned_path(logo) || logo}
+              src={theme_logo(@theme)}
               width="36"
               height="36"
               alt=""
@@ -81,10 +84,13 @@ defmodule GamendWeb.HostLayoutShell do
               decoding="sync"
               fetchpriority="high"
             />
-            <span class="text-lg font-bold">{title}</span>
-            <%= if tagline && tagline != "" do %>
-              <span class="text-sm opacity-80 ms-1 hidden xl:inline">{tagline}</span>
-            <% end %>
+            <span class="text-lg font-bold">{Map.get(@theme, "title")}</span>
+            <span
+              :if={theme_tagline(@theme)}
+              class="text-sm opacity-80 ms-1 hidden xl:inline"
+            >
+              {theme_tagline(@theme)}
+            </span>
           </a>
         </div>
         <%!-- The language picker sits outside both navs: one button in the bar
@@ -100,6 +106,24 @@ defmodule GamendWeb.HostLayoutShell do
             locale={@locale}
             known_locales={@known_locales}
           />
+
+          <%!-- One button at every width, like the language picker beside it:
+                below `xl` the whole nav is a hamburger, so an input in the bar
+                would be a desktop-only feature. The label is on `aria-label`
+                and `title` rather than on screen — `title` and not a daisyUI
+                `tooltip`, which hosts exclude from their stylesheet. --%>
+          <button
+            :if={@search.enabled}
+            type="button"
+            data-gamend-search-open
+            aria-haspopup="dialog"
+            aria-controls="gamend-search"
+            aria-label={GamendWeb.HostLayouts.translate("Search")}
+            title={GamendWeb.HostLayouts.translate("Search")}
+            class="btn btn-ghost btn-circle"
+          >
+            <.icon name="hero-magnifying-glass-solid" class="w-5 h-5" />
+          </button>
 
           <GamendWeb.HostLayoutNavigation.language_dropdown
             :if={length(@known_locales) > 1}
@@ -131,6 +155,12 @@ defmodule GamendWeb.HostLayoutShell do
         current_path={@current_path}
         current_query={@current_query}
         known_locales={@known_locales}
+      />
+
+      <.search_dialog
+        :if={@search.enabled}
+        index_url={@search.index_url}
+        query_url={@search[:query_url]}
       />
 
       <%= if @flush do %>
@@ -193,6 +223,118 @@ defmodule GamendWeb.HostLayoutShell do
     """
   end
 
+  attr :index_url, :string, required: true
+
+  attr :query_url, :string,
+    default: nil,
+    doc: "where to ask for rows the index cannot hold; absent when the host answers none"
+
+  @doc """
+  The site search palette.
+
+  Server-rendered and empty: `search_palette.js` fills the list by cloning the
+  two `<template>`s below. That split is deliberate — every class name stays
+  in HEEx where Tailwind's scanner can see it (a class authored in a JS string
+  is purged from the stylesheet), and the JS only ever sets `textContent`, so
+  an entry's title cannot carry markup into the page.
+
+  `phx-update="ignore"` because this lives inside the LiveView DOM: morphdom
+  re-sends the layout on every diff and an open `<dialog>` has no `open`
+  attribute in that markup, so the palette would close itself a second after
+  opening on any page with a ticking clock. LiveView still syncs `data-*` on
+  an ignored element, which is why the index URL travels as one and no client
+  state does.
+  """
+  def search_dialog(assigns) do
+    ~H"""
+    <%!-- Outside `<header>` for the same reason the language sheet is, plus
+          one of its own: on flush pages `NavbarAutohide` sets the header's
+          `pointer-events: none`, and that inherits — a dialog inside it would
+          be visible and unclickable. --%>
+    <dialog
+      id="gamend-search"
+      phx-update="ignore"
+      data-gamend-search
+      data-index-url={@index_url}
+      data-query-url={@query_url}
+      aria-labelledby="gamend-search-label"
+      class="modal modal-top sm:modal-middle"
+    >
+      <div class="modal-box max-w-xl p-3">
+        <h2 id="gamend-search-label" class="sr-only">
+          {GamendWeb.HostLayouts.translate("Search")}
+        </h2>
+
+        <div class="relative">
+          <%!-- `start`/`ps`, not `left`/`pl`: in Arabic a magnifier pinned to
+                the physical left sits where the reader's text ends. --%>
+          <.icon
+            name="hero-magnifying-glass-solid"
+            class="pointer-events-none absolute start-3 top-1/2 w-4 h-4 -translate-y-1/2 opacity-50"
+          />
+          <input
+            id="gamend-search-input"
+            data-gamend-search-input
+            type="search"
+            role="combobox"
+            autocomplete="off"
+            aria-expanded="false"
+            aria-controls="gamend-search-results"
+            aria-autocomplete="list"
+            placeholder={GamendWeb.HostLayouts.translate("Search")}
+            class="input input-bordered w-full ps-9 pe-10"
+          />
+          <button
+            type="button"
+            data-gamend-search-close
+            aria-label={GamendWeb.HostLayouts.translate("Close")}
+            class="btn btn-ghost btn-square btn-sm absolute end-1 top-1/2 -translate-y-1/2"
+          >
+            <.icon name="hero-x-mark-solid" class="w-4 h-4" />
+          </button>
+        </div>
+
+        <%!-- `flex-nowrap`: daisyUI's `.menu` is `column wrap`, so a capped
+              height wraps into a second column off to the side instead of
+              scrolling. --%>
+        <ul
+          id="gamend-search-results"
+          data-gamend-search-results
+          role="listbox"
+          aria-label={GamendWeb.HostLayouts.translate("Search")}
+          hidden
+          class="menu menu-sm mt-2 max-h-[60vh] flex-nowrap overflow-y-auto overflow-x-hidden overscroll-contain p-0"
+        >
+        </ul>
+
+        <p data-gamend-search-empty hidden class="px-3 py-4 text-sm text-base-content/60">
+          {GamendWeb.HostLayouts.translate("No results.")}
+        </p>
+
+        <template data-gamend-search-group>
+          <li class="menu-title px-3 pt-3 pb-1 text-xs uppercase tracking-wide">
+            <span data-group-label></span>
+          </li>
+        </template>
+
+        <template data-gamend-search-row>
+          <li>
+            <a role="option" class="flex items-center justify-between gap-3 rounded-lg px-3 py-2">
+              <span data-row-title class="truncate font-semibold"></span>
+              <span data-row-subtitle class="truncate text-xs opacity-60"></span>
+            </a>
+          </li>
+        </template>
+      </div>
+
+      <%!-- A `<form method="dialog">` backdrop would be a second form inside
+            the LiveView DOM; the JS closes on a click that lands on the
+            dialog itself instead. --%>
+      <div class="modal-backdrop" data-gamend-search-backdrop></div>
+    </dialog>
+    """
+  end
+
   attr :trail, :list, default: []
 
   @doc """
@@ -216,6 +358,18 @@ defmodule GamendWeb.HostLayoutShell do
       </ol>
     </nav>
     """
+  end
+
+  defp theme_logo(theme) do
+    logo = Map.get(theme, "logo")
+    GamendWeb.SRI.versioned_path(logo) || logo
+  end
+
+  defp theme_tagline(theme) do
+    case Map.get(theme, "tagline") do
+      tagline when is_binary(tagline) and tagline != "" -> tagline
+      _ -> nil
+    end
   end
 
   defp footer_sections(%{"sections" => sections}) when is_list(sections), do: sections

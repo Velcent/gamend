@@ -388,7 +388,43 @@ defmodule GamendWeb.HostLayouts do
 
   defp translate_map_field(value, _key), do: value
 
-  defp prepare_app_assigns(assigns) do
+  # What the shell renders from, all of it derived. A function component is
+  # stateless, so the derivation runs again on every render and `assign/3`
+  # marks each key changed — assigns never already hold the value to compare
+  # against. Unchecked, that re-renders the navbar, the language picker, the
+  # breadcrumbs and the footer on *every* diff any LiveView on the site sends.
+  # The client then morphs that markup back over the DOM, and an open
+  # `<details>` dropdown has no `open` attribute in it, so the menu shuts
+  # itself. The Tests page refreshes its clock once a second, which turned that
+  # into a menu closing a second after it was opened.
+  @derived_shell_assigns [
+    :background_icons,
+    :breadcrumbs,
+    :current_path,
+    :current_query,
+    :footer,
+    :known_locales,
+    :locale,
+    :navigation,
+    :notif_unread_count,
+    :search,
+    :theme
+  ]
+
+  # The attrs the derivation reads. Nothing else it depends on can move inside
+  # the life of one render: the locale belongs to the process, the theme config
+  # is global and only re-read on deploy, and `:current_path` is kept in step
+  # by the `:set_current_path` hook in `GamendWeb.UserAuth`, so a `push_patch`
+  # to another URL does change the nav highlight.
+  @shell_assign_inputs [:background_icons, :conn, :current_path, :current_scope, :flush, :theme]
+
+  # The assigns `HostLayoutShell.app/1` renders from, derived from the handful
+  # of attrs `app/1` takes. Public so the change-tracking contract above can be
+  # asserted directly: what comes back out of `__changed__` is the whole of the
+  # fix, and it leaves no trace in rendered markup.
+  @doc false
+  def prepare_app_assigns(assigns) do
+    rerender? = shell_inputs_changed?(assigns)
     conn = Map.get(assigns, :conn)
 
     # `Layouts.app` is a function component, so it only sees the attrs a
@@ -411,26 +447,77 @@ defmodule GamendWeb.HostLayouts do
     navigation = navigation_config(theme, en_theme)
     background_icons = shell_background_icons(assigns, theme, en_theme)
 
-    notif_unread_count =
-      if assigns[:current_scope] do
-        Gamend.Notifications.count_unread_notifications(assigns.current_scope.user_id)
+    notif_unread_count = unread_notifications(assigns, rerender?)
+
+    assigns =
+      assign(assigns,
+        current_path: current_path,
+        current_query: current_query,
+        locale: locale,
+        known_locales: @known_locales,
+        theme: theme,
+        navigation: localize_hrefs(navigation, locale),
+        footer: localize_hrefs(Map.get(theme, "footer", %{}), locale),
+        background_icons: background_icons,
+        notif_unread_count: notif_unread_count,
+        search: search_assign(locale),
+        breadcrumbs: breadcrumbs_for(current_path, locale)
+      )
+
+    freeze_derived_shell_assigns(assigns, rerender?)
+  end
+
+  # The index URL carries the locale, so this moves when the locale does —
+  # which is why `:search` is one of the frozen shell assigns rather than a
+  # constant computed once.
+  defp search_assign(locale) do
+    if GamendWeb.SearchIndex.enabled?() do
+      %{
+        enabled: true,
+        index_url: GamendWeb.SearchIndex.index_path(locale),
+        # Absent unless the host answers live queries, which is what tells the
+        # palette whether there is anything to ask for per keystroke.
+        query_url: if(GamendWeb.SearchIndex.live?(), do: GamendWeb.SearchIndex.query_path(locale))
+      }
+    else
+      %{enabled: false, index_url: nil, query_url: nil}
+    end
+  end
+
+  # `nil` means the caller is not change-tracking at all — a dead render, or a
+  # first render, where every dynamic has to be produced.
+  defp shell_inputs_changed?(%{__changed__: changed}) when is_map(changed),
+    do: Enum.any?(@shell_assign_inputs, &Map.has_key?(changed, &1))
+
+  defp shell_inputs_changed?(_assigns), do: true
+
+  defp freeze_derived_shell_assigns(assigns, true), do: assigns
+
+  defp freeze_derived_shell_assigns(%{__changed__: changed} = assigns, false)
+       when is_map(changed),
+       do: %{assigns | __changed__: Map.drop(changed, @derived_shell_assigns)}
+
+  defp freeze_derived_shell_assigns(assigns, false), do: assigns
+
+  # The unread count is the one derived value that can move without an attr
+  # moving, and a function component has nowhere to keep the last one it
+  # rendered. The process does: a LiveView is one process for the life of the
+  # page, so a render that is not re-rendering the navbar reuses the number the
+  # navbar is already showing instead of asking the database for it again. A
+  # dead render is a fresh process, so it always counts.
+  defp unread_notifications(assigns, true) do
+    count =
+      if scope = assigns[:current_scope] do
+        Gamend.Notifications.count_unread_notifications(scope.user_id)
       else
         0
       end
 
-    assign(assigns,
-      current_path: current_path,
-      current_query: current_query,
-      locale: locale,
-      known_locales: @known_locales,
-      theme: theme,
-      navigation: localize_hrefs(navigation, locale),
-      footer: localize_hrefs(Map.get(theme, "footer", %{}), locale),
-      background_icons: background_icons,
-      notif_unread_count: notif_unread_count,
-      breadcrumbs: breadcrumbs_for(current_path, locale)
-    )
+    Process.put(:gamend_notif_unread_count, count)
+    count
   end
+
+  defp unread_notifications(_assigns, false), do: Process.get(:gamend_notif_unread_count, 0)
 
   # The shell's icon layer is the fallback for pages that do not paint one
   # themselves. A `PresentationPage` draws its own, band by band, and says so
@@ -553,6 +640,19 @@ defmodule GamendWeb.HostLayouts do
   end
 
   defp merge_assigned_theme(full_theme, _assigned_theme), do: full_theme
+
+  @doc """
+  The four navigation sections for a locale, as configured.
+
+  The same map the navbar renders from, for callers that are not the navbar —
+  the search palette flattens it into rows. Hrefs are left clean: this is the
+  configured shape, not a rendering of it, and a caller that needs locale
+  prefixes runs `localized_href/2` itself.
+  """
+  @spec navigation(String.t() | nil) :: map()
+  def navigation(locale \\ nil) do
+    navigation_config(resolve_theme(locale), resolve_theme("en"))
+  end
 
   defp navigation_config(provider_theme, en_theme) do
     provider_navigation = Map.get(provider_theme, "navigation") || %{}

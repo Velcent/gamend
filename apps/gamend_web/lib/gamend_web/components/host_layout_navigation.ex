@@ -949,6 +949,73 @@ defmodule GamendWeb.HostLayoutNavigation do
     link_visible?(entry, auth_level(Scope.user(current_scope)), "any")
   end
 
+  @doc """
+  Every navigation destination this viewer can reach, as a flat list.
+
+  What the nav renders as four sections of groups and leaves, the search
+  palette needs as rows: `%{title, href, group}`, where `group` is the
+  dropdown the link lives in, or nil for a top-level link.
+
+  It goes through `section_entries/5` rather than `entry_visible?/2` because
+  each section has its own default for an entry that does not declare `auth` —
+  an account link with no `auth` is for signed-in readers, and filtering it
+  with the public "any" default would offer admin pages to a stranger.
+
+  Dynamic `{Module.fn}` labels resolve the way the nav resolves them; one that
+  resolves to nothing is dropped, as is a `readonly` badge. Neither is a place
+  you can go.
+  """
+  @spec flat_links(map(), map() | nil) :: [
+          %{title: String.t(), href: String.t(), group: String.t() | nil}
+        ]
+  def flat_links(navigation, current_scope) when is_map(navigation) do
+    auth_level = auth_level(Scope.user(current_scope))
+
+    [
+      {"primary_links", "any"},
+      {"guest_links", "unauthenticated"},
+      {"authenticated_links", "authenticated"},
+      {"account_links", "authenticated"}
+    ]
+    |> Enum.flat_map(fn {key, default_auth} ->
+      navigation
+      |> section_entries(key, auth_level, default_auth, current_scope)
+      |> Enum.flat_map(&flatten_entry(&1, nil))
+    end)
+  end
+
+  def flat_links(_navigation, _current_scope), do: []
+
+  defp flatten_entry(%{"items" => items} = entry, _group) when is_list(items) do
+    group = label_presence(entry)
+
+    Enum.flat_map(items, &flatten_entry(&1, group))
+  end
+
+  defp flatten_entry(entry, group) do
+    href = Map.get(entry, "href")
+    title = label_presence(entry)
+
+    if readonly?(entry) or is_nil(title) or not (is_binary(href) and href != "") do
+      []
+    else
+      [%{title: title, href: href, group: group}]
+    end
+  end
+
+  defp label_presence(entry) do
+    case entry |> Map.get("label") |> translate_label() do
+      label when is_binary(label) ->
+        case String.trim(label) do
+          "" -> nil
+          trimmed -> trimmed
+        end
+
+      _ ->
+        nil
+    end
+  end
+
   defp link_visible?(link, auth_level, default_auth) do
     required = required_auth(link, default_auth)
 

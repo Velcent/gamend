@@ -301,3 +301,8 @@ config :gamend_web, GamendWeb.Sitemap,
 # Per-page titles, descriptions, breadcrumbs and schema.org markup. Without a
 # provider every page inherits the theme's site-wide description.
 config :gamend_web, page_meta_provider: GamendHost.PageMeta
+
+# What the site search palette holds. Without this the palette still works but
+# finds only navigation destinations; `GamendHost.Search` adds the guides and
+# the blog, which is most of what there is to look for here.
+config :gamend_web, :search_provider, GamendHost.Search

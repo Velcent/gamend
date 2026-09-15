@@ -34,6 +34,7 @@ defmodule GamendWeb.Router.Shared do
   | `gamend_admin_live_routes/1` | The `/admin` console. Takes the `on_mount` hook from `require_admin_on_mount/0`. |
   | `gamend_admin_api_routes/0` | Admin HTTP mirrors of every console action. |
   | `gamend_static_page_routes/0`, `gamend_support_routes/0` | Host pages and support endpoints. |
+  | `gamend_search_routes/0` | The site search palette's JSON index. Already mounted by `gamend_static_page_routes/0`. |
   | `gamend_configured_page_fallback_routes/0` | Catch-all for theme-configured pages. Mount **last**. |
 
   The narrower macros (`gamend_chat_api_routes/0`,
@@ -191,6 +192,37 @@ defmodule GamendWeb.Router.Shared do
       pipeline :metrics_auth do
         plug GamendWeb.Plugs.MetricsAuth
       end
+
+      # The search index is JSON on a browser path, so neither existing
+      # pipeline fits: `:browser` is `accepts ["html"]` and 406s the fetch,
+      # while anything under `/api` is skipped by both `LocalePath` and the
+      # session plug — and this needs both, the locale to translate into and
+      # the session to know who is asking.
+      pipeline :gamend_search_json do
+        plug :accepts, ["json"]
+        plug :fetch_session
+        plug :fetch_current_scope_for_user
+      end
+    end
+  end
+
+  @doc """
+  The site search palette's index.
+
+  Mounted by `gamend_static_page_routes/0`, so a host gets it with the rest of
+  the static pages; call it directly when mounting those is not wanted. The
+  `.json` suffix is load-bearing on hosts that assert every page has a locale
+  prefix — this one deliberately has none, and carries its locale in a query
+  parameter instead.
+  """
+  defmacro gamend_search_routes do
+    quote do
+      scope "/", GamendWeb do
+        pipe_through :gamend_search_json
+
+        get "/search/index.json", SearchIndexController, :show
+        get "/search/query.json", SearchIndexController, :query
+      end
     end
   end
 
@@ -221,6 +253,8 @@ defmodule GamendWeb.Router.Shared do
         # already ship. Public and unauthenticated: it is static artwork.
         get "/icons/:name", IconController, :show
       end
+
+      gamend_search_routes()
 
       # Serve stored objects (local backend). With S3 the object URL points at the
       # bucket and this route is unused.
@@ -887,13 +921,28 @@ defmodule GamendWeb.Router.Shared do
   Same reasoning as the admin and authenticated variants: `live_session
   :current_user` can only be declared once, so a host adding one public page
   extends this rather than restating core's list.
+
+  `:extra_pipelines` adds host pipelines on top of `:browser` for the whole
+  scope — for a plug a host's public pages need and core's crawlable ones should
+  not have, such as `GamendWeb.Plugs.VisitorId`.
   """
-  defmacro gamend_current_user_routes(on_mount, opts \\ []) do
+  # `opts` and `do_block` are separate because Elixir appends a `do` block as a
+  # final argument: `f(a) do .. end` arrives as arity 2, and `f(a, opt: x) do ..
+  # end` as arity 3. Merging them lets a host pass options without restating the
+  # block in keyword form.
+  defmacro gamend_current_user_routes(on_mount, opts \\ [], do_block \\ []) do
+    opts = Keyword.merge(opts, do_block)
     host_routes = Keyword.get(opts, :do)
     docs = Keyword.get(opts, :docs)
     changelog = Keyword.get(opts, :changelog)
     roadmap = Keyword.get(opts, :roadmap)
     blog = Keyword.get(opts, :blog)
+
+    # Pipelines the host wants on these routes on top of `:browser`. The scope
+    # is a host's main surface, so a host that needs a plug here — a visitor id
+    # to count a free tier against, say — had no way to add one short of
+    # forking this macro or widening `:browser` for every crawlable page too.
+    extra_pipelines = Keyword.get(opts, :extra_pipelines, [])
 
     docs_route =
       if docs do
@@ -928,7 +977,7 @@ defmodule GamendWeb.Router.Shared do
 
     quote do
       scope "/", GamendWeb do
-        pipe_through [:browser]
+        pipe_through [:browser | unquote(extra_pipelines)]
 
         live_session :current_user,
           on_mount: unquote(on_mount) do
