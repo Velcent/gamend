@@ -322,18 +322,28 @@ and raises on invalid queries
 when result: term()
 ```
 
-Runs `fun`, answering `{:error, reason}` when it violates a foreign key that
-Ecto could not attribute to a changeset constraint.
+Runs `fun`, answering `{:error, reason}` when it violates a foreign key --
+however the adapter reports it.
 
-SQLite — the default adapter — does not say *which* constraint an INSERT
-violated, so `Ecto.Changeset.foreign_key_constraint/2` cannot match and Ecto
-raises `Ecto.ConstraintError` instead of returning a changeset. The contexts
-check the referenced row exists first (`Gamend.Accounts.user_exists?/1`), but
-the row can still be deleted between that check and the write. This closes
-that window: the race answers like the check would have, instead of a 500.
+The contexts check the referenced row exists first
+(`Gamend.Accounts.user_exists?/1`), but the row can still be deleted between
+that check and the write. This closes that window: the race answers like the
+check would have, instead of a 500 or a changeset.
 
-Any other constraint error is re-raised. On Postgres the constraint is named,
-the changeset catches it, and this never fires.
+The adapters report the violation differently, which is why both forms are
+handled here:
+
+  * SQLite, the default, does not say *which* constraint an INSERT violated,
+    so `Ecto.Changeset.foreign_key_constraint/2` cannot match and Ecto raises
+    `Ecto.ConstraintError`.
+  * Postgres names the constraint, so the changeset declaration matches and
+    `fun` returns `{:error, changeset}` -- or `{:error, {tag, changeset}}`
+    from a context that tags its failures -- with a `constraint: :foreign`
+    error on the key.
+
+Handling only the first answered `:user_not_found` on SQLite and a
+validation changeset on Postgres for the same race. Any other constraint
+error is re-raised, and any other error result is returned as it was.
 
 # `rollback`
 
