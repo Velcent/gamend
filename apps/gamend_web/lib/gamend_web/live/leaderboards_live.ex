@@ -385,27 +385,14 @@ defmodule GamendWeb.LeaderboardsLive do
   # ---------------------------------------------------------------------------
 
   @impl true
-  def handle_event("prev_page", _, socket) do
-    {:noreply,
-     socket
-     |> assign(:page, max(1, socket.assigns.page - 1))
-     |> reload_groups()}
-  end
+  def handle_event("prev_page", _params, socket),
+    do: {:noreply, socket |> LiveHelpers.prev_page() |> reload_groups()}
 
-  def handle_event("next_page", _, socket) do
-    {:noreply,
-     socket
-     |> assign(:page, socket.assigns.page + 1)
-     |> reload_groups()}
-  end
+  def handle_event("next_page", _params, socket),
+    do: {:noreply, socket |> LiveHelpers.next_page() |> reload_groups()}
 
-  def handle_event("leaderboards_page_size", %{"size" => size}, socket) do
-    {:noreply,
-     socket
-     |> assign(:page_size, String.to_integer(size))
-     |> assign(:page, 1)
-     |> reload_groups()}
-  end
+  def handle_event("leaderboards_page_size", %{"size" => size}, socket),
+    do: {:noreply, socket |> LiveHelpers.put_page_size(size) |> reload_groups()}
 
   def handle_event("prev_season", _, socket) do
     # Go to older season (higher index)
@@ -425,19 +412,11 @@ defmodule GamendWeb.LeaderboardsLive do
     {:noreply, push_patch(socket, to: leaderboard_path(leaderboard))}
   end
 
-  def handle_event("records_prev", _, socket) do
-    {:noreply,
-     socket
-     |> assign(:records_page, max(1, socket.assigns.records_page - 1))
-     |> reload_records()}
-  end
+  def handle_event("records_prev", _, socket),
+    do: {:noreply, socket |> LiveHelpers.prev_page(:records_page) |> reload_records()}
 
-  def handle_event("records_next", _, socket) do
-    {:noreply,
-     socket
-     |> assign(:records_page, socket.assigns.records_page + 1)
-     |> reload_records()}
-  end
+  def handle_event("records_next", _, socket),
+    do: {:noreply, socket |> LiveHelpers.next_page(:records_page) |> reload_records()}
 
   def handle_event("search", %{"search" => term}, socket) do
     {:noreply,

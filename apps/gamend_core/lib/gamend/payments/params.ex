@@ -20,28 +20,11 @@ defmodule Gamend.Payments.Params do
   arrived as JSON can be read the same way.
   """
   @spec normalize(term()) :: term()
-  def normalize(attrs) when is_map(attrs) do
-    Map.new(attrs, fn
-      {k, v} when is_atom(k) -> {Atom.to_string(k), normalize(v)}
-      {k, v} -> {k, normalize(v)}
-    end)
-  end
+  defdelegate normalize(attrs), to: Gamend.Parse, as: :string_keys_deep
 
-  def normalize(value) when is_list(value), do: Enum.map(value, &normalize/1)
-  def normalize(value), do: value
-
-  @doc "An integer, or an integer written as a string. `nil` for anything else."
+  @doc "An integer, or an integer written as a string. See `Gamend.Parse.integer/1`."
   @spec parse_int(term()) :: integer() | nil
-  def parse_int(value) when is_integer(value), do: value
-
-  def parse_int(value) when is_binary(value) do
-    case Integer.parse(value) do
-      {int, ""} -> int
-      _ -> nil
-    end
-  end
-
-  def parse_int(_value), do: nil
+  defdelegate parse_int(value), to: Gamend.Parse, as: :integer
 
   @doc "A positive integer, or `default` when the value is missing or not one."
   @spec parse_positive_int(term(), integer()) :: integer()

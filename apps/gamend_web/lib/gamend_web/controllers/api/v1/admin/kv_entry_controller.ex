@@ -6,6 +6,7 @@ defmodule GamendWeb.Api.V1.Admin.KvEntryController do
 
   alias Gamend.KV
   alias GamendWeb.Pagination
+  alias GamendWeb.Serializers
   alias OpenApiSpex.Schema
 
   tags(["Admin – KV"])
@@ -99,7 +100,7 @@ defmodule GamendWeb.Api.V1.Admin.KvEntryController do
     total_count = KV.count_entries(Keyword.drop(opts, [:page, :page_size]))
 
     json(conn, %{
-      data: Enum.map(entries, &serialize_entry/1),
+      data: Enum.map(entries, &Serializers.serialize_kv_entry/1),
       meta: Pagination.meta(page, page_size, length(entries), total_count)
     })
   end
@@ -138,7 +139,7 @@ defmodule GamendWeb.Api.V1.Admin.KvEntryController do
 
     case KV.create_entry(attrs) do
       {:ok, entry} ->
-        json(conn, %{data: serialize_entry(entry)})
+        json(conn, %{data: Serializers.serialize_kv_entry(entry)})
 
       {:error, %Ecto.Changeset{} = cs} ->
         unprocessable(conn, cs)
@@ -182,7 +183,7 @@ defmodule GamendWeb.Api.V1.Admin.KvEntryController do
 
     case KV.update_entry(id, attrs) do
       {:ok, entry} ->
-        json(conn, %{data: serialize_entry(entry)})
+        json(conn, %{data: Serializers.serialize_kv_entry(entry)})
 
       {:error, :not_found} ->
         conn |> put_status(:not_found) |> json(%{error: "not_found"})
@@ -209,19 +210,6 @@ defmodule GamendWeb.Api.V1.Admin.KvEntryController do
   def delete(conn, %{"id" => id}) do
     :ok = KV.delete_entry(id)
     json(conn, %{})
-  end
-
-  defp serialize_entry(entry) do
-    %{
-      id: entry.id,
-      key: entry.key,
-      user_id: entry.user_id || "",
-      lobby_id: entry.lobby_id || "",
-      data: entry.value,
-      metadata: entry.metadata || %{},
-      inserted_at: entry.inserted_at,
-      updated_at: entry.updated_at
-    }
   end
 
   defp normalize_entry_attrs(params) when is_map(params) do

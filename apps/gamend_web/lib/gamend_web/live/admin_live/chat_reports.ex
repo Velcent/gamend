@@ -12,6 +12,7 @@ defmodule GamendWeb.AdminLive.ChatReports do
   alias Gamend.Chat.Moderation.Notices
   alias Gamend.Chat.Mute
   alias Gamend.Chat.Report
+  alias GamendWeb.LiveHelpers
 
   @form_keys ~w(duration scope scope_ref_id reason message notify_user notify_reporter
                 reporter_message)
@@ -59,19 +60,14 @@ defmodule GamendWeb.AdminLive.ChatReports do
     {:noreply, socket |> assign(:user_filter, id) |> assign(:page, 1) |> reload()}
   end
 
-  def handle_event("prev_page", _params, socket) do
-    {:noreply, socket |> assign(:page, max(socket.assigns.page - 1, 1)) |> reload()}
-  end
+  def handle_event("prev_page", _params, socket),
+    do: {:noreply, socket |> LiveHelpers.prev_page() |> reload()}
 
-  def handle_event("next_page", _params, socket) do
-    page = min(socket.assigns.page + 1, max(socket.assigns.total_pages, 1))
-    {:noreply, socket |> assign(:page, page) |> reload()}
-  end
+  def handle_event("next_page", _params, socket),
+    do: {:noreply, socket |> LiveHelpers.next_page() |> reload()}
 
-  def handle_event("page_size", %{"size" => size}, socket) do
-    {:noreply,
-     socket |> assign(:page_size, String.to_integer(size)) |> assign(:page, 1) |> reload()}
-  end
+  def handle_event("page_size", %{"size" => size}, socket),
+    do: {:noreply, socket |> LiveHelpers.put_page_size(size) |> reload()}
 
   def handle_event("refresh", _params, socket), do: {:noreply, reload(socket)}
 

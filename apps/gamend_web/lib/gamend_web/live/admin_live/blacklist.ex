@@ -6,6 +6,8 @@ defmodule GamendWeb.AdminLive.Blacklist do
   use GamendWeb, :live_view
 
   alias Gamend.Friends
+  alias GamendWeb.AdminLive.Shared
+  alias GamendWeb.LiveHelpers
 
   @impl true
   def mount(_params, _session, socket) do
@@ -24,27 +26,18 @@ defmodule GamendWeb.AdminLive.Blacklist do
   def handle_event("filter", params, socket) do
     {:noreply,
      socket
-     |> assign(:user_filter, String.trim(Map.get(params, "user_id", "")))
-     |> assign(:page, 1)
+     |> Shared.put_filters(params, user_filter: "user_id")
      |> reload()}
   end
 
-  def handle_event("prev_page", _params, socket) do
-    {:noreply, socket |> assign(:page, max(socket.assigns.page - 1, 1)) |> reload()}
-  end
+  def handle_event("prev_page", _params, socket),
+    do: {:noreply, socket |> LiveHelpers.prev_page() |> reload()}
 
-  def handle_event("next_page", _params, socket) do
-    page = min(socket.assigns.page + 1, max(socket.assigns.total_pages, 1))
-    {:noreply, socket |> assign(:page, page) |> reload()}
-  end
+  def handle_event("next_page", _params, socket),
+    do: {:noreply, socket |> LiveHelpers.next_page() |> reload()}
 
-  def handle_event("page_size", %{"size" => size}, socket) do
-    {:noreply,
-     socket
-     |> assign(:page_size, String.to_integer(size))
-     |> assign(:page, 1)
-     |> reload()}
-  end
+  def handle_event("page_size", %{"size" => size}, socket),
+    do: {:noreply, socket |> LiveHelpers.put_page_size(size) |> reload()}
 
   def handle_event("unblock", %{"id" => id}, socket) do
     socket =

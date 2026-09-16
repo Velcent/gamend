@@ -963,16 +963,12 @@ defmodule Gamend.Lobbies do
             {:error, :not_found}
 
           current ->
-            merged = Map.merge(current.metadata || %{}, stringify_keys(patch))
+            merged = Map.merge(current.metadata || %{}, Gamend.Parse.string_keys(patch))
             update_lobby(current, %{metadata: merged})
         end
       end)
 
     with {:ok, inner} <- result, do: inner
-  end
-
-  defp stringify_keys(map) do
-    Map.new(map, fn {k, v} -> {to_string(k), v} end)
   end
 
   @doc """

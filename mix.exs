@@ -119,7 +119,7 @@ defmodule GamendHost.MixProject do
           "ecto.create --quiet -r Gamend.Repo",
           "host.migrate --quiet -r Gamend.Repo",
           "test"
-        ] ++ local_web_commands([web_test_cmd("test")]),
+        ] ++ local_web_commands([core_test_cmd("test"), web_test_cmd("test")]),
       lint:
         ["format --check-formatted", "credo --strict"] ++
           local_web_commands([web_cmd("format --check-formatted"), web_cmd("credo --strict")]) ++
@@ -157,6 +157,9 @@ defmodule GamendHost.MixProject do
             # No `xref unreachable`: Elixir folded that check into the compiler,
             # so the task prints "has no effect now" and exits 0. A step that
             # cannot fail is noise, not a gate.
+            # A dependency's warnings never fail its dependent's build, so the
+            # core is only gated when it is the project being compiled.
+            core_test_cmd("compile --warnings-as-errors"),
             web_test_cmd("compile --warnings-as-errors"),
             web_cmd("format"),
             web_cmd("credo --strict")
@@ -210,6 +213,10 @@ defmodule GamendHost.MixProject do
 
   defp web_test_cmd(task),
     do: "cmd --cd #{web_app_path()} env MIX_ENV=test #{force_ansi()}mix #{task}"
+
+  # The core's own suite: the context tests that need no web app to run.
+  defp core_test_cmd(task),
+    do: "cmd --cd apps/gamend_core env MIX_ENV=test #{force_ansi()}mix #{task}"
 
   defp local_web_commands(commands) do
     if local_web_source?(), do: commands, else: []

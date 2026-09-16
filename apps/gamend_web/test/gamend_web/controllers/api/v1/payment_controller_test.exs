@@ -6,7 +6,7 @@ defmodule GamendWeb.Api.V1.PaymentControllerTest do
   alias GamendWeb.Auth.Guardian
 
   defmodule NoopPaymentHooks do
-    use GamendWeb.TestSupport.NoopHooks
+    use Gamend.TestSupport.NoopHooks
   end
 
   defmodule StripeAdapter do

@@ -186,16 +186,7 @@ defmodule GamendWeb.Plugs.IpBan do
       :ok
   end
 
-  defp broadcast(message) do
-    Phoenix.PubSub.broadcast(Gamend.PubSub, @topic, message)
-    :ok
-  rescue
-    e ->
-      Logger.warning("ip ban broadcast failed: " <> Exception.message(e))
-      :ok
-  catch
-    :exit, _reason -> :ok
-  end
+  defp broadcast(message), do: Gamend.Broadcast.best_effort(@topic, message, "ip ban")
 
   defp append_log(action, ip, ttl) do
     ts = System.monotonic_time(:nanosecond)

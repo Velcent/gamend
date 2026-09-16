@@ -12,6 +12,7 @@ defmodule GamendWeb.QuestsLive do
   alias Gamend.Quests
   alias Gamend.Quests.Quest
   alias GamendWeb.ContentText
+  alias GamendWeb.LiveHelpers
   alias GamendWeb.Plugs.FeatureGate
 
   @page_size 50
@@ -127,29 +128,14 @@ defmodule GamendWeb.QuestsLive do
 
   def handle_event("chain_noop", _params, socket), do: {:noreply, socket}
 
-  def handle_event("prev_page", _params, socket) do
-    {:noreply,
-     socket
-     |> assign(:page, max(1, socket.assigns.page - 1))
-     |> load_quests()}
-  end
+  def handle_event("prev_page", _params, socket),
+    do: {:noreply, socket |> LiveHelpers.prev_page() |> load_quests()}
 
-  def handle_event("next_page", _params, socket) do
-    {:noreply,
-     socket
-     |> assign(:page, socket.assigns.page + 1)
-     |> load_quests()}
-  end
+  def handle_event("next_page", _params, socket),
+    do: {:noreply, socket |> LiveHelpers.next_page() |> load_quests()}
 
-  def handle_event("page_size", %{"size" => size}, socket) do
-    size = size |> String.to_integer() |> min(200) |> max(24)
-
-    {:noreply,
-     socket
-     |> assign(:page_size, size)
-     |> assign(:page, 1)
-     |> load_quests()}
-  end
+  def handle_event("page_size", %{"size" => size}, socket),
+    do: {:noreply, socket |> LiveHelpers.put_page_size(size, min: 24) |> load_quests()}
 
   @impl true
   def handle_info({:quests_changed}, socket) do

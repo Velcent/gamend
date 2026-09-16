@@ -3,6 +3,7 @@ defmodule GamendWeb.Api.V1.Admin.KvController do
   use OpenApiSpex.ControllerSpecs
 
   alias Gamend.KV
+  alias GamendWeb.Serializers
   alias OpenApiSpex.Schema
 
   tags(["Admin – KV"])
@@ -114,7 +115,7 @@ defmodule GamendWeb.Api.V1.Admin.KvController do
 
       case KV.put(key, data, metadata, user_id: user_id, lobby_id: lobby_id) do
         {:ok, entry} ->
-          json(conn, %{data: serialize_entry(entry)})
+          json(conn, %{data: Serializers.serialize_kv_entry(entry)})
 
         {:error, %Ecto.Changeset{} = cs} ->
           unprocessable(conn, cs)
@@ -177,18 +178,5 @@ defmodule GamendWeb.Api.V1.Admin.KvController do
 
     :ok = KV.delete(key, user_id: user_id, lobby_id: lobby_id)
     json(conn, %{})
-  end
-
-  defp serialize_entry(entry) do
-    %{
-      id: entry.id,
-      key: entry.key,
-      user_id: entry.user_id || "",
-      lobby_id: entry.lobby_id || "",
-      data: entry.value,
-      metadata: entry.metadata || %{},
-      inserted_at: entry.inserted_at,
-      updated_at: entry.updated_at
-    }
   end
 end

@@ -4,6 +4,7 @@ defmodule GamendWeb.AdminLive.Sessions do
   alias Gamend.Accounts
   alias Gamend.Accounts.UserToken
   alias Gamend.Repo
+  alias GamendWeb.LiveHelpers
 
   import Ecto.Query
 
@@ -274,13 +275,12 @@ defmodule GamendWeb.AdminLive.Sessions do
      |> reload_sessions()}
   end
 
-  def handle_event("admin_sessions_page_size", %{"size" => size}, socket) do
-    {:noreply,
-     socket
-     |> assign(:sessions_page_size, String.to_integer(size))
-     |> assign(:sessions_page, 1)
-     |> reload_sessions()}
-  end
+  def handle_event("admin_sessions_page_size", %{"size" => size}, socket),
+    do:
+      {:noreply,
+       socket
+       |> LiveHelpers.put_page_size(size, size_key: :sessions_page_size, page_key: :sessions_page)
+       |> reload_sessions()}
 
   defp reload_sessions(socket) do
     page = socket.assigns[:sessions_page] || 1

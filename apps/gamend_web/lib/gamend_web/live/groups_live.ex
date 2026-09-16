@@ -152,30 +152,14 @@ defmodule GamendWeb.GroupsLive do
      |> load_groups()}
   end
 
-  def handle_event("prev_page", _params, socket) do
-    page = max(1, socket.assigns.page - 1)
+  def handle_event("prev_page", _params, socket),
+    do: {:noreply, socket |> LiveHelpers.prev_page() |> load_groups()}
 
-    {:noreply,
-     socket
-     |> assign(page: page)
-     |> load_groups()}
-  end
+  def handle_event("next_page", _params, socket),
+    do: {:noreply, socket |> LiveHelpers.next_page() |> load_groups()}
 
-  def handle_event("next_page", _params, socket) do
-    page = socket.assigns.page + 1
-
-    {:noreply,
-     socket
-     |> assign(page: page)
-     |> load_groups()}
-  end
-
-  def handle_event("groups_page_size", %{"size" => size}, socket) do
-    {:noreply,
-     socket
-     |> assign(page_size: String.to_integer(size), page: 1)
-     |> load_groups()}
-  end
+  def handle_event("groups_page_size", %{"size" => size}, socket),
+    do: {:noreply, socket |> LiveHelpers.put_page_size(size) |> load_groups()}
 
   def handle_event("view_group", %{"id" => id}, socket) do
     {:noreply, push_patch(socket, to: ~p"/groups/#{id}")}
@@ -270,15 +254,11 @@ defmodule GamendWeb.GroupsLive do
     end
   end
 
-  def handle_event("members_prev", _params, socket) do
-    page = max(1, socket.assigns.members_page - 1)
-    {:noreply, load_members(assign(socket, members_page: page))}
-  end
+  def handle_event("members_prev", _params, socket),
+    do: {:noreply, socket |> LiveHelpers.prev_page(:members_page) |> load_members()}
 
-  def handle_event("members_next", _params, socket) do
-    page = socket.assigns.members_page + 1
-    {:noreply, load_members(assign(socket, members_page: page))}
-  end
+  def handle_event("members_next", _params, socket),
+    do: {:noreply, socket |> LiveHelpers.next_page(:members_page) |> load_members()}
 
   def handle_event("search_members", %{"search" => term}, socket) do
     {:noreply, load_members(assign(socket, members_search: term, members_page: 1))}

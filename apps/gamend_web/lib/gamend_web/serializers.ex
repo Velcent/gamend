@@ -17,7 +17,15 @@ defmodule GamendWeb.Serializers do
   alias Gamend.Lobbies.SpectatorTracker
   alias Gamend.Parties
 
-  @spec display_name(integer() | nil) :: String.t()
+  @doc """
+  The raw `display_name` column for a user id, `""` when unset or unknown.
+
+  For a wire field literally named `display_name`, which the API conventions
+  define as the person's *chosen* name, shipped alongside `username`. A client
+  wanting a label reads both. Not a label: for one, `Gamend.Accounts.display_name/1`
+  falls back to the username.
+  """
+  @spec display_name(Ecto.UUID.t() | nil) :: String.t()
   def display_name(nil), do: ""
 
   def display_name(user_id) do
@@ -240,19 +248,45 @@ defmodule GamendWeb.Serializers do
     |> Enum.map(&User.serialize_brief/1)
   end
 
+  @doc """
+  A KV entry for the admin API. `data` is the stored value; an entry is scoped
+  to a user or a lobby (or neither), and the unused scope is `""` per the null
+  policy above. The two admin KV controllers each carried a private copy.
+  """
+  @spec serialize_kv_entry(Gamend.KV.Entry.t()) :: map()
+  def serialize_kv_entry(entry) do
+    %{
+      id: entry.id,
+      key: entry.key,
+      user_id: entry.user_id || "",
+      lobby_id: entry.lobby_id || "",
+      data: entry.value,
+      metadata: entry.metadata || %{},
+      inserted_at: entry.inserted_at,
+      updated_at: entry.updated_at
+    }
+  end
+
   defp loaded_assoc(struct, field) do
     value = Map.get(struct, field)
 
     if Ecto.assoc_loaded?(value), do: value, else: nil
   end
 
-  defp assoc_display_name(nil), do: ""
-  defp assoc_display_name(%{display_name: name}) when is_binary(name), do: name
+  # `sender_name`, `host_name`, `creator_name` and `leader_name` are labels for a
+  # person, so they follow `Gamend.Accounts.display_name/1`: the display name,
+  # else the username. They used to stop at the display name and send `""`,
+  # while a party or group invite's `sender_name` — built in core — already fell
+  # back to the username, so the same field named the same player two ways. A
+  # deleted user is still `""`.
+  #
+  # Not `display_name:` fields — those carry the raw column (see `display_name/1`).
+  defp assoc_display_name(%User{} = user), do: Accounts.display_name(user)
   defp assoc_display_name(_assoc), do: ""
 
   defp assoc_or_lookup_display_name(_assoc, nil), do: ""
-  defp assoc_or_lookup_display_name(%{} = assoc, _id), do: assoc_display_name(assoc)
-  defp assoc_or_lookup_display_name(_assoc, id), do: display_name(id)
+  defp assoc_or_lookup_display_name(%User{} = user, _id), do: Accounts.display_name(user)
+  defp assoc_or_lookup_display_name(_assoc, id), do: Accounts.display_name(id)
 
   # A group with no creator (a system group) has no creator id — emit the empty
   # string, not a -1 sentinel. The REST contract types creator_id as a string,

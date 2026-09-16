@@ -18,7 +18,7 @@ defmodule Gamend.HooksTest do
   end
 
   defmodule TestHooksRegister do
-    use GamendWeb.TestSupport.NoopHooks
+    use Gamend.TestSupport.NoopHooks
 
     # After-register hook - mutate the user record in DB so tests can observe it
     # Use metadata to avoid interfering with email-based token logic.
@@ -131,7 +131,7 @@ defmodule Gamend.HooksTest do
 
   describe "scheduled callbacks protection" do
     defmodule ScheduleTestHook do
-      use GamendWeb.TestSupport.NoopHooks
+      use Gamend.TestSupport.NoopHooks
 
       alias Gamend.Schedule
 

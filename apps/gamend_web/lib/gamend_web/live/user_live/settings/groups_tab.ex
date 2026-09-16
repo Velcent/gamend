@@ -1047,15 +1047,11 @@ defmodule GamendWeb.UserLive.Settings.GroupsTab do
      |> reload_browse_groups()}
   end
 
-  def handle_event("browse_groups_prev", _params, socket) do
-    page = max(1, socket.assigns.browse_groups_page - 1)
-    {:noreply, socket |> assign(:browse_groups_page, page) |> reload_browse_groups()}
-  end
+  def handle_event("browse_groups_prev", _params, socket),
+    do: {:noreply, socket |> LiveHelpers.prev_page(:browse_groups_page) |> reload_browse_groups()}
 
-  def handle_event("browse_groups_next", _params, socket) do
-    page = socket.assigns.browse_groups_page + 1
-    {:noreply, socket |> assign(:browse_groups_page, page) |> reload_browse_groups()}
-  end
+  def handle_event("browse_groups_next", _params, socket),
+    do: {:noreply, socket |> LiveHelpers.next_page(:browse_groups_page) |> reload_browse_groups()}
 
   def handle_event("group_view_detail", %{"group_id" => gid}, socket) do
     {:noreply, patch_groups(socket, group: to_string(gid), edit: false)}
@@ -1152,15 +1148,11 @@ defmodule GamendWeb.UserLive.Settings.GroupsTab do
     end
   end
 
-  def handle_event("group_members_prev", _params, socket) do
-    page = max(1, socket.assigns.group_members_page - 1)
-    {:noreply, socket |> assign(:group_members_page, page) |> reload_group_members()}
-  end
+  def handle_event("group_members_prev", _params, socket),
+    do: {:noreply, socket |> LiveHelpers.prev_page(:group_members_page) |> reload_group_members()}
 
-  def handle_event("group_members_next", _params, socket) do
-    page = socket.assigns.group_members_page + 1
-    {:noreply, socket |> assign(:group_members_page, page) |> reload_group_members()}
-  end
+  def handle_event("group_members_next", _params, socket),
+    do: {:noreply, socket |> LiveHelpers.next_page(:group_members_page) |> reload_group_members()}
 
   def handle_event("group_invite_search", %{"value" => query}, socket) do
     query = String.trim(query)

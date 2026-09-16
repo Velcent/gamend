@@ -701,15 +701,8 @@ defmodule Gamend.Hooks do
   defp normalize_hook_args(args) when is_list(args) do
     Enum.map(args, fn
       %_{} = struct -> struct
-      m when is_map(m) -> stringify_keys(m)
+      m when is_map(m) -> Gamend.Parse.string_keys(m)
       other -> other
-    end)
-  end
-
-  defp stringify_keys(map) when is_map(map) do
-    Map.new(map, fn
-      {k, v} when is_atom(k) -> {Atom.to_string(k), v}
-      {k, v} -> {k, v}
     end)
   end
 

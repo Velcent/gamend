@@ -8,7 +8,7 @@ defmodule Gamend.LobbiesTest do
 
   describe "lobbies and memberships" do
     defmodule CaptureHook do
-      use GamendWeb.TestSupport.NoopHooks
+      use Gamend.TestSupport.NoopHooks
 
       @impl true
       def after_lobby_join(_user, lobby) do
@@ -383,7 +383,7 @@ defmodule Gamend.LobbiesTest do
     # surfaced as "Could not start game" every time quick_join landed on a lobby
     # already mid-match, which a stale one did to every player who tried.
     defmodule RefuseJoinHook do
-      use GamendWeb.TestSupport.NoopHooks
+      use Gamend.TestSupport.NoopHooks
 
       @impl true
       def before_lobby_join(user, lobby, opts) do

@@ -4,6 +4,7 @@ defmodule GamendWeb.AdminLive.Leaderboards do
   alias Gamend.Leaderboards
   alias Gamend.Leaderboards.Leaderboard
   alias Gamend.Leaderboards.Record
+  alias GamendWeb.LiveHelpers
 
   @impl true
   def mount(_params, _session, socket) do
@@ -486,27 +487,14 @@ defmodule GamendWeb.AdminLive.Leaderboards do
     {:noreply, socket |> reload_leaderboards()}
   end
 
-  def handle_event("prev_page", _, socket) do
-    {:noreply,
-     socket
-     |> assign(:page, max(1, socket.assigns.page - 1))
-     |> reload_leaderboards()}
-  end
+  def handle_event("prev_page", _params, socket),
+    do: {:noreply, socket |> LiveHelpers.prev_page() |> reload_leaderboards()}
 
-  def handle_event("next_page", _, socket) do
-    {:noreply,
-     socket
-     |> assign(:page, socket.assigns.page + 1)
-     |> reload_leaderboards()}
-  end
+  def handle_event("next_page", _params, socket),
+    do: {:noreply, socket |> LiveHelpers.next_page() |> reload_leaderboards()}
 
-  def handle_event("leaderboards_page_size", %{"size" => size}, socket) do
-    {:noreply,
-     socket
-     |> assign(:page_size, String.to_integer(size))
-     |> assign(:page, 1)
-     |> reload_leaderboards()}
-  end
+  def handle_event("leaderboards_page_size", %{"size" => size}, socket),
+    do: {:noreply, socket |> LiveHelpers.put_page_size(size) |> reload_leaderboards()}
 
   def handle_event("new_leaderboard", _, socket) do
     changeset = Leaderboards.change_leaderboard(%Leaderboard{})
@@ -640,19 +628,11 @@ defmodule GamendWeb.AdminLive.Leaderboards do
      |> assign(:records, [])}
   end
 
-  def handle_event("records_prev_page", _, socket) do
-    {:noreply,
-     socket
-     |> assign(:records_page, max(1, socket.assigns.records_page - 1))
-     |> reload_records()}
-  end
+  def handle_event("records_prev_page", _, socket),
+    do: {:noreply, socket |> LiveHelpers.prev_page(:records_page) |> reload_records()}
 
-  def handle_event("records_next_page", _, socket) do
-    {:noreply,
-     socket
-     |> assign(:records_page, socket.assigns.records_page + 1)
-     |> reload_records()}
-  end
+  def handle_event("records_next_page", _, socket),
+    do: {:noreply, socket |> LiveHelpers.next_page(:records_page) |> reload_records()}
 
   def handle_event("add_record", _, socket) do
     changeset = Leaderboards.change_record(%Record{})
@@ -697,10 +677,20 @@ defmodule GamendWeb.AdminLive.Leaderboards do
     result =
       case socket.assigns.editing_record do
         nil ->
-          # Create new record via submit_score
-          user_id = params["user_id"]
-          score = String.to_integer(params["score"])
-          Leaderboards.submit_score(lb.id, user_id, score, params["metadata"] || %{})
+          # Create new record via submit_score. Parsed strictly: this used
+          # `String.to_integer/1`, which crashed the page on a non-numeric score.
+          case Gamend.Parse.integer(params["score"]) do
+            nil ->
+              {:error, :invalid_score}
+
+            score ->
+              Leaderboards.submit_score(
+                lb.id,
+                params["user_id"] || "",
+                score,
+                params["metadata"] || %{}
+              )
+          end
 
         record ->
           # Update existing record
@@ -716,8 +706,14 @@ defmodule GamendWeb.AdminLive.Leaderboards do
          |> assign(:record_form, nil)
          |> reload_records()}
 
-      {:error, changeset} ->
+      {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, :record_form, to_form(changeset, as: "record"))}
+
+      # `submit_score/4` also answers with atoms (`:leaderboard_ended`,
+      # `:user_not_found`), which this passed to `to_form/2` as if they were
+      # changesets — a crash, not a message.
+      {:error, reason} ->
+        {:noreply, put_flash(socket, :error, "Could not save record: #{reason}")}
     end
   end
 

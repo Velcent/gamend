@@ -5,7 +5,7 @@ defmodule Gamend.EconomyHooksTest do
   alias Gamend.Inventory
 
   defmodule Hook do
-    use GamendWeb.TestSupport.NoopHooks
+    use Gamend.TestSupport.NoopHooks
 
     @impl true
     def after_wallet_changed(change) do

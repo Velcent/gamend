@@ -957,14 +957,18 @@ defmodule GamendWeb.CoreComponents do
     ~H"{@empty}"
   end
 
-  # A bare date (blog posts, release dates) has no instant to localize, so it
-  # is rendered as-is with no `data-local-time` — shifting it into the
-  # reader's zone would move it across midnight boundaries it never crossed.
+  # A bare date (blog posts, release dates) has no instant to localize, and
+  # shifting it into the reader's zone would move it across midnight boundaries
+  # it never crossed. It used to skip the localizer for that reason, which left
+  # it in English for every reader. `calendar-date` translates it with the zone
+  # pinned to UTC, so it changes language without changing day.
   def timestamp(%{at: %Date{} = at} = assigns) do
     assigns = assign(assigns, :iso, Date.to_iso8601(at))
 
     ~H"""
-    <time datetime={@iso} class={@class}>{Calendar.strftime(@at, "%b %d, %Y")}</time>
+    <time datetime={@iso} data-local-time="calendar-date" class={@class}>
+      {Calendar.strftime(@at, "%b %d, %Y")}
+    </time>
     """
   end
 

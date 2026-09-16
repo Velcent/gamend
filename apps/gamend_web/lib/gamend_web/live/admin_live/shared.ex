@@ -28,6 +28,37 @@ defmodule GamendWeb.AdminLive.Shared do
   end
 
   @doc """
+  Applies an admin list's filter form and returns the list to its first page.
+
+  `fields` maps each assign to the form param it reads, as `assign: "param"`
+  (defaulting to `""`) or `assign: {"param", default}`. Values are trimmed, so a
+  pasted id with a trailing space still matches.
+
+      Shared.put_filters(socket, params, status_filter: {"status", "all"}, user_filter: "user_id")
+
+  Four console pages wrote this out by hand, field by field.
+  """
+  @spec put_filters(Phoenix.LiveView.Socket.t(), map(), keyword()) :: Phoenix.LiveView.Socket.t()
+  def put_filters(socket, params, fields) do
+    fields
+    |> Enum.reduce(socket, fn
+      {assign_key, {param, default}}, acc ->
+        Phoenix.Component.assign(acc, assign_key, read_filter(params, param, default))
+
+      {assign_key, param}, acc ->
+        Phoenix.Component.assign(acc, assign_key, read_filter(params, param, ""))
+    end)
+    |> Phoenix.Component.assign(:page, 1)
+  end
+
+  defp read_filter(params, param, default) do
+    case Map.get(params, param) do
+      value when is_binary(value) -> String.trim(value)
+      _ -> default
+    end
+  end
+
+  @doc """
   An ISO-3166 alpha-2 code as its flag emoji, or a globe when it is not one.
 
   The regional-indicator block sits at a fixed offset from `A`, so the two

@@ -12,11 +12,10 @@ defmodule GamendWeb.LobbiesChannel do
 
   import GamendWeb.ChannelPush
 
+  alias GamendWeb.ChannelEvents
   alias GamendWeb.ChannelUpdates
   alias GamendWeb.Plugs.FeatureGate
   alias GamendWeb.Serializers
-
-  require Logger
 
   @impl true
   def join("lobbies", _payload, socket) do
@@ -33,11 +32,7 @@ defmodule GamendWeb.LobbiesChannel do
   # Answer and stay up — see LobbyChannel: stopping the channel over one
   # unrecognised event took every broadcast it carried with it, and a client
   # cannot tell a dead channel from a quiet one.
-  def handle_in(event, _payload, socket) do
-    Logger.debug(fn -> "LobbiesChannel: unknown event=#{truncate_event(event)}" end)
-
-    {:reply, {:error, %{error: "unknown_event"}}, socket}
-  end
+  def handle_in(event, _payload, socket), do: ChannelEvents.unknown(event, socket)
 
   @impl true
   def handle_info({:lobby_created, lobby}, socket) do
@@ -82,8 +77,4 @@ defmodule GamendWeb.LobbiesChannel do
   # 128 KB event name, so one socket could drive unbounded warning-level volume
   # made of attacker-controlled text into the rotating log and the admin buffer.
   # Client-chosen, so never logged whole.
-  defp truncate_event(event) when is_binary(event),
-    do: binary_part(event, 0, min(byte_size(event), 64))
-
-  defp truncate_event(event), do: inspect(event)
 end

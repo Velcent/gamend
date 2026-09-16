@@ -49,6 +49,7 @@ defmodule GamendWeb.SignalingChannel do
 
   alias Gamend.Presence
   alias Gamend.Signaling
+  alias GamendWeb.ChannelEvents
 
   # WebSocket message rate limits (per user) — defaults, overridden by config
   @default_ws_rate_limit 300
@@ -259,13 +260,8 @@ defmodule GamendWeb.SignalingChannel do
   end
 
   @impl true
-  def handle_in(event, _payload, socket) do
-    Logger.debug(fn ->
-      "SignalingChannel: unknown event=#{truncate_event(event)} room=#{socket.assigns[:signaling_room] || "nil"} user=#{socket.assigns[:signaling_user_id] || "nil"}"
-    end)
-
-    {:reply, {:error, %{error: "unknown_event"}}, socket}
-  end
+  def handle_in(event, _payload, socket),
+    do: ChannelEvents.unknown(event, socket, room: :signaling_room, user: :signaling_user_id)
 
   # ── Presence ─────────────────────────────────────────────────────────────
 
@@ -486,10 +482,6 @@ defmodule GamendWeb.SignalingChannel do
   # 128 KB event name, so one socket could drive unbounded warning-level volume
   # made of attacker-controlled text into the rotating log and the admin buffer.
   # Client-chosen, so never logged whole.
-  defp truncate_event(event) when is_binary(event),
-    do: binary_part(event, 0, min(byte_size(event), 64))
-
-  defp truncate_event(event), do: inspect(event)
 
   # SDP and ICE candidates are relayed verbatim to other peers, so bound them
   # here rather than trusting whatever a frame can carry.

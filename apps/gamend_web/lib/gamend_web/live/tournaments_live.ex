@@ -73,32 +73,31 @@ defmodule GamendWeb.TournamentsLive do
   end
 
   @impl true
+  # The "next" handlers clamped to `total_pages` with no floor, so an empty list
+  # (0 pages) put the reader on page 0. `LiveHelpers.next_page/3` never goes
+  # below 1.
   def handle_event("prev_page", _params, socket) do
-    {:noreply, load_index(socket, max(socket.assigns.page - 1, 1))}
+    socket = LiveHelpers.prev_page(socket)
+    {:noreply, load_index(socket, socket.assigns.page)}
   end
 
   def handle_event("next_page", _params, socket) do
-    {:noreply, load_index(socket, min(socket.assigns.page + 1, socket.assigns.total_pages))}
+    socket = LiveHelpers.next_page(socket)
+    {:noreply, load_index(socket, socket.assigns.page)}
   end
 
-  def handle_event("brackets_prev", _params, socket) do
-    {:noreply, socket |> assign(:page, max(socket.assigns.page - 1, 1)) |> load_brackets()}
-  end
+  def handle_event("brackets_prev", _params, socket),
+    do: {:noreply, socket |> LiveHelpers.prev_page() |> load_brackets()}
 
-  def handle_event("brackets_next", _params, socket) do
-    page = min(socket.assigns.page + 1, socket.assigns.total_pages)
-    {:noreply, socket |> assign(:page, page) |> load_brackets()}
-  end
+  def handle_event("brackets_next", _params, socket),
+    do: {:noreply, socket |> LiveHelpers.next_page() |> load_brackets()}
 
-  def handle_event("players_prev", _params, socket) do
-    page = max(socket.assigns.players_page - 1, 1)
-    {:noreply, socket |> assign(:players_page, page) |> load_players()}
-  end
+  def handle_event("players_prev", _params, socket),
+    do: {:noreply, socket |> LiveHelpers.prev_page(:players_page) |> load_players()}
 
-  def handle_event("players_next", _params, socket) do
-    page = min(socket.assigns.players_page + 1, socket.assigns.players_pages)
-    {:noreply, socket |> assign(:players_page, page) |> load_players()}
-  end
+  def handle_event("players_next", _params, socket),
+    do:
+      {:noreply, socket |> LiveHelpers.next_page(:players_page, :players_pages) |> load_players()}
 
   def handle_event("search", %{"search" => term}, socket) do
     {:noreply, socket |> assign(:search, term) |> assign(:players_page, 1) |> load_players()}

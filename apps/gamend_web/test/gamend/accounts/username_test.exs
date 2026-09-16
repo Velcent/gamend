@@ -13,7 +13,7 @@ defmodule Gamend.Accounts.UsernameTest do
   end
 
   defmodule OverrideUsernameHooks do
-    use GamendWeb.TestSupport.NoopHooks
+    use Gamend.TestSupport.NoopHooks
 
     @impl true
     def before_user_register(_user, attrs),
@@ -21,7 +21,7 @@ defmodule Gamend.Accounts.UsernameTest do
   end
 
   defmodule InvalidUsernameHooks do
-    use GamendWeb.TestSupport.NoopHooks
+    use Gamend.TestSupport.NoopHooks
 
     @impl true
     def before_user_register(_user, attrs),
@@ -29,7 +29,7 @@ defmodule Gamend.Accounts.UsernameTest do
   end
 
   defmodule VetoRegisterHooks do
-    use GamendWeb.TestSupport.NoopHooks
+    use Gamend.TestSupport.NoopHooks
 
     @impl true
     def before_user_register(_user, _attrs), do: {:error, :registration_vetoed}

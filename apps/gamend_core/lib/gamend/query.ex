@@ -27,9 +27,11 @@ defmodule Gamend.Query do
   growing table.
   """
 
-  import Ecto.Query, only: [limit: 2, offset: 2]
+  import Ecto.Query, only: [limit: 2, offset: 2, where: 3, join: 5]
 
+  alias Gamend.Accounts.User
   alias Gamend.Limits
+  alias Gamend.Repo
 
   # The ceiling on a read that asked for no window. Deliberately well above
   # `max_page_size`: this is a backstop against an unbounded scan, not a page.
@@ -58,6 +60,35 @@ defmodule Gamend.Query do
     case Keyword.get(opts, :page) do
       nil -> limit(query, @unpaginated_limit)
       page -> window(query, page, Keyword.get(opts, :page_size))
+    end
+  end
+
+  @doc """
+  Narrows a query over a table with a `user_id` column to one user, found by
+  exact id or by a substring of their username or display name — so an admin
+  can filter a list without knowing the raw id.
+
+  `nil` leaves the query alone. Economy, inventory and quests each carried an
+  identical private copy of this.
+  """
+  @spec filter_user(Ecto.Queryable.t(), String.t() | nil) :: Ecto.Queryable.t()
+  def filter_user(query, nil), do: query
+
+  def filter_user(query, value) when is_binary(value) do
+    case Ecto.UUID.cast(value) do
+      {:ok, uuid} ->
+        where(query, [q], q.user_id == ^uuid)
+
+      :error ->
+        pattern = "%" <> Repo.escape_like(String.downcase(value)) <> "%"
+
+        query
+        |> join(:inner, [q], u in User, on: u.id == q.user_id)
+        |> where(
+          [q, u],
+          fragment("lower(coalesce(?, '')) LIKE ? ESCAPE '\\'", u.username, ^pattern) or
+            fragment("lower(coalesce(?, '')) LIKE ? ESCAPE '\\'", u.display_name, ^pattern)
+        )
     end
   end
 

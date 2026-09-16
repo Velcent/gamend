@@ -7,7 +7,7 @@ defmodule GamendWeb.UserLive.SettingsPaymentsTest do
   alias Gamend.Payments
 
   defmodule NoopPaymentHooks do
-    use GamendWeb.TestSupport.NoopHooks
+    use Gamend.TestSupport.NoopHooks
   end
 
   defmodule StripeAdapter do

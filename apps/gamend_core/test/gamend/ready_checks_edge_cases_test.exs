@@ -269,7 +269,7 @@ defmodule Gamend.ReadyChecksEdgeCasesTest do
 
     test "a vetoing hook blocks the check", ctx do
       defmodule VetoHook do
-        use GamendWeb.TestSupport.NoopHooks
+        use Gamend.TestSupport.NoopHooks
 
         @impl true
         def before_ready_check_open(_subject, _user_ids), do: {:error, :not_now}

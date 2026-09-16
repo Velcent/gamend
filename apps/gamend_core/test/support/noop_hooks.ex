@@ -1,4 +1,4 @@
-defmodule GamendWeb.TestSupport.NoopHooks do
+defmodule Gamend.TestSupport.NoopHooks do
   @moduledoc """
   Test helper for hook modules that override only callbacks under test.
 

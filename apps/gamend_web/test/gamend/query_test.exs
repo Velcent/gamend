@@ -82,4 +82,45 @@ defmodule Gamend.QueryTest do
       assert length(Gamend.Inventory.list_items(page: 1, page_size: 10_000_000)) <= max
     end
   end
+
+  describe "filter_user/2" do
+    setup do
+      alice = Gamend.AccountsFixtures.user_fixture()
+      {:ok, alice} = Gamend.Accounts.update_user(alice, %{display_name: "Alice Wonder"})
+      bob = Gamend.AccountsFixtures.user_fixture()
+
+      {:ok, _} = Gamend.Economy.grant(alice.id, "gold", 5)
+      {:ok, _} = Gamend.Economy.grant(bob.id, "gold", 7)
+
+      %{alice: alice, bob: bob}
+    end
+
+    defp owners(filter) do
+      Gamend.Economy.Wallet
+      |> Query.filter_user(filter)
+      |> Gamend.Repo.all()
+      |> Enum.map(& &1.user_id)
+      |> Enum.uniq()
+    end
+
+    test "an exact id narrows to that user", %{alice: alice} do
+      assert owners(alice.id) == [alice.id]
+    end
+
+    test "a case-insensitive name substring finds the user", %{alice: alice} do
+      assert owners("WONDER") == [alice.id]
+    end
+
+    test "matches the username too", %{bob: bob} do
+      assert bob.id in owners(String.slice(bob.username, 0, 5))
+    end
+
+    test "nil leaves the query alone", %{alice: alice, bob: bob} do
+      assert Enum.sort(owners(nil)) == Enum.sort([alice.id, bob.id])
+    end
+
+    test "LIKE metacharacters in the search are literal" do
+      assert owners("%") == []
+    end
+  end
 end

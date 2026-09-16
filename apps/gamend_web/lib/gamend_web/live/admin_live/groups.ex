@@ -2,6 +2,7 @@ defmodule GamendWeb.AdminLive.Groups do
   use GamendWeb, :live_view
 
   alias Gamend.Groups
+  alias GamendWeb.LiveHelpers
 
   @impl true
   def mount(_params, _session, socket) do
@@ -627,13 +628,14 @@ defmodule GamendWeb.AdminLive.Groups do
 
   @impl true
   def handle_event("admin_groups_page_size", %{"size" => size}, socket) do
-    size = size |> String.to_integer() |> min(200) |> max(25)
+    socket =
+      LiveHelpers.put_page_size(socket, size,
+        min: 25,
+        size_key: :groups_page_size,
+        page_key: :groups_page
+      )
 
-    {:noreply,
-     socket
-     |> assign(:groups_page_size, size)
-     |> assign(:groups_page, 1)
-     |> reload_groups()}
+    {:noreply, reload_groups(socket)}
   end
 
   # ---------------------------------------------------------------------------

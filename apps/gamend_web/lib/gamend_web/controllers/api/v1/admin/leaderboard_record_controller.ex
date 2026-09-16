@@ -66,63 +66,49 @@ defmodule GamendWeb.Api.V1.Admin.LeaderboardRecordController do
 
   def create(conn, %{"id" => leaderboard_id, "label" => label, "score" => score} = params)
       when is_binary(label) and label != "" do
-    leaderboard_id = to_string(leaderboard_id)
-
-    score =
-      case score do
-        s when is_integer(s) -> s
-        s when is_binary(s) -> String.to_integer(s)
-      end
-
-    metadata = Map.get(params, "metadata") || %{}
-
-    case Leaderboards.submit_label_score(leaderboard_id, label, score, metadata) do
-      {:ok, %Record{} = record} ->
-        json(conn, %{data: record})
-
-      {:error, :not_found} ->
-        conn |> put_status(:not_found) |> json(%{error: "not_found"})
-
-      {:error, :user_not_found} ->
-        conn |> put_status(:not_found) |> json(%{error: "user_not_found"})
-
-      {:error, %Ecto.Changeset{} = cs} ->
-        unprocessable(conn, cs)
-
-      {:error, reason} ->
-        conn |> put_status(:bad_request) |> json(%{error: to_string(reason)})
-    end
+    with_score(conn, score, fn score ->
+      leaderboard_id
+      |> to_string()
+      |> Leaderboards.submit_label_score(label, score, metadata(params))
+      |> respond(conn)
+    end)
   end
 
   def create(conn, %{"id" => leaderboard_id, "user_id" => user_id, "score" => score} = params) do
-    leaderboard_id = to_string(leaderboard_id)
-    user_id = to_string(user_id)
+    with_score(conn, score, fn score ->
+      leaderboard_id
+      |> to_string()
+      |> Leaderboards.submit_score(to_string(user_id), score, metadata(params))
+      |> respond(conn)
+    end)
+  end
 
-    score =
-      case score do
-        s when is_integer(s) -> s
-        s when is_binary(s) -> String.to_integer(s)
-      end
-
-    metadata = Map.get(params, "metadata") || %{}
-
-    case Leaderboards.submit_score(leaderboard_id, user_id, score, metadata) do
-      {:ok, %Record{} = record} ->
-        json(conn, %{data: record})
-
-      {:error, :not_found} ->
-        conn |> put_status(:not_found) |> json(%{error: "not_found"})
-
-      {:error, :user_not_found} ->
-        conn |> put_status(:not_found) |> json(%{error: "user_not_found"})
-
-      {:error, %Ecto.Changeset{} = cs} ->
-        unprocessable(conn, cs)
-
-      {:error, reason} ->
-        conn |> put_status(:bad_request) |> json(%{error: to_string(reason)})
+  # A score arrives as a JSON number or a form string. It was parsed with
+  # `String.to_integer/1`, which raises on anything non-numeric — `"abc"`,
+  # `"12abc"` — and a float matched no clause at all, so each answered 500.
+  # Strict, so a partial number is rejected rather than stored as its prefix.
+  defp with_score(conn, raw, fun) do
+    case Gamend.Parse.integer(raw) do
+      nil -> conn |> put_status(:bad_request) |> json(%{error: "invalid_score"})
+      score -> fun.(score)
     end
   end
+
+  defp metadata(params), do: Map.get(params, "metadata") || %{}
+
+  # `submit_score/4` reports a missing board as `:leaderboard_not_found`, which
+  # the old clauses did not match — so it fell through to the catch-all and
+  # answered 400 instead of 404.
+  defp respond({:ok, %Record{} = record}, conn), do: json(conn, %{data: record})
+
+  defp respond({:error, reason}, conn)
+       when reason in [:not_found, :leaderboard_not_found, :user_not_found],
+       do: conn |> put_status(:not_found) |> json(%{error: to_string(reason)})
+
+  defp respond({:error, %Ecto.Changeset{} = cs}, conn), do: unprocessable(conn, cs)
+
+  defp respond({:error, reason}, conn),
+    do: conn |> put_status(:bad_request) |> json(%{error: to_string(reason)})
 
   operation(:update,
     operation_id: "admin_update_leaderboard_record",

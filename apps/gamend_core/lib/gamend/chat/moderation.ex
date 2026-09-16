@@ -505,14 +505,7 @@ defmodule Gamend.Chat.Moderation do
 
   # The muted player's own socket, so the client can grey out its chat input.
   # Best-effort for the same reason the cache broadcast is.
-  defp notify_user(user_id, event) do
-    Phoenix.PubSub.broadcast(Gamend.PubSub, "user:#{user_id}", event)
-    :ok
-  rescue
-    _error -> :ok
-  catch
-    :exit, _reason -> :ok
-  end
+  defp notify_user(user_id, event), do: Gamend.Broadcast.best_effort("user:#{user_id}", event)
 
   # Hooks never run inside the write — they are queued and flushed after it.
   defp dispatch(hook, args) do

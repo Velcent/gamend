@@ -139,23 +139,20 @@ defmodule GamendWeb.NotificationsLive do
   end
 
   @impl true
-  def handle_event("prev_page", _params, socket) do
-    page = max(1, socket.assigns.notif_page - 1)
-    {:noreply, socket |> assign(:notif_page, page) |> reload_notifications()}
-  end
+  def handle_event("prev_page", _params, socket),
+    do: {:noreply, socket |> LiveHelpers.prev_page(:notif_page) |> reload_notifications()}
 
-  def handle_event("next_page", _params, socket) do
-    page = socket.assigns.notif_page + 1
-    {:noreply, socket |> assign(:notif_page, page) |> reload_notifications()}
-  end
+  def handle_event("next_page", _params, socket),
+    do:
+      {:noreply,
+       socket |> LiveHelpers.next_page(:notif_page, :notif_total_pages) |> reload_notifications()}
 
-  def handle_event("notif_page_size", %{"size" => size}, socket) do
-    {:noreply,
-     socket
-     |> assign(:notif_page_size, String.to_integer(size))
-     |> assign(:notif_page, 1)
-     |> reload_notifications()}
-  end
+  def handle_event("notif_page_size", %{"size" => size}, socket),
+    do:
+      {:noreply,
+       socket
+       |> LiveHelpers.put_page_size(size, size_key: :notif_page_size, page_key: :notif_page)
+       |> reload_notifications()}
 
   def handle_event("delete", %{"id" => id}, socket) do
     user = Scope.user(socket.assigns.current_scope)

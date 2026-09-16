@@ -202,13 +202,19 @@ defmodule Gamend.Theme.JSONConfig do
 
   defp normalize_path_env(_value), do: nil
 
+  # The web app ships the default theme files, but the core runs without it
+  # (its own suite, a host that only uses the contexts), where `priv_dir/1`
+  # answers `{:error, :bad_name}` rather than a path.
+  defp web_priv_candidate(path) do
+    case :code.priv_dir(:gamend_web) do
+      dir when is_list(dir) -> [Path.join(dir, path)]
+      {:error, _not_loaded} -> []
+    end
+  end
+
   defp read_json(path) when is_binary(path) do
     # If the path is relative to the project root, check it directly.
-    candidates = [
-      path,
-      Path.join(File.cwd!(), path),
-      Path.join(:code.priv_dir(:gamend_web), path)
-    ]
+    candidates = [path, Path.join(File.cwd!(), path)] ++ web_priv_candidate(path)
 
     Enum.find_value(candidates, :error, fn p ->
       try_decode_file(p)

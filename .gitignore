@@ -103,6 +103,7 @@ apps/gamend_core/deps/
 apps/gamend_web/_build/
 apps/gamend_web/deps/
 apps/gamend_web/priv/db/
+apps/gamend_core/priv/db/
 
 # Rotating log files (dev: log/dev.log, docker compose: logs/).
 /log/

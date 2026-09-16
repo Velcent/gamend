@@ -60,7 +60,6 @@ defmodule Gamend.Quests do
 
   require Logger
 
-  alias Gamend.Accounts.User
   alias Gamend.Quests.Quest
   alias Gamend.Quests.QuestProgress
   alias Gamend.Repo
@@ -326,7 +325,7 @@ defmodule Gamend.Quests do
       when is_binary(user_id) and is_binary(event) and is_integer(amount) and amount > 0 and
              is_map(meta) do
     now = DateTime.utc_now(:second)
-    meta = stringify_keys(meta)
+    meta = Gamend.Parse.string_keys(meta)
 
     advanced =
       active_quests()
@@ -1564,7 +1563,7 @@ defmodule Gamend.Quests do
 
   defp progress_query(opts) do
     QuestProgress
-    |> maybe_filter_user(Keyword.get(opts, :user_id))
+    |> Gamend.Query.filter_user(Keyword.get(opts, :user_id))
     |> maybe_filter_quest_key(Keyword.get(opts, :quest_key))
     |> maybe_filter_status(Keyword.get(opts, :status))
   end
@@ -1574,27 +1573,6 @@ defmodule Gamend.Quests do
 
   defp maybe_filter_status(query, nil), do: query
   defp maybe_filter_status(query, status), do: where(query, [p], p.status == ^status)
-
-  # Accept either an exact user id (UUID) or a username/display-name substring.
-  defp maybe_filter_user(query, nil), do: query
-
-  defp maybe_filter_user(query, value) do
-    case Ecto.UUID.cast(value) do
-      {:ok, uuid} ->
-        where(query, [p], p.user_id == ^uuid)
-
-      :error ->
-        pattern = "%" <> Repo.escape_like(String.downcase(value)) <> "%"
-
-        query
-        |> join(:inner, [p], u in User, on: u.id == p.user_id)
-        |> where(
-          [p, u],
-          fragment("lower(coalesce(?, '')) LIKE ? ESCAPE '\\'", u.username, ^pattern) or
-            fragment("lower(coalesce(?, '')) LIKE ? ESCAPE '\\'", u.display_name, ^pattern)
-        )
-    end
-  end
 
   @doc """
   Force-complete a quest for a user (admin grant): every objective jumps to
@@ -1835,14 +1813,5 @@ defmodule Gamend.Quests do
 
   defp paginate(query, opts), do: Gamend.Query.page(query, opts)
 
-  defp normalize_params(attrs) when is_map(attrs) do
-    stringify_keys(attrs)
-  end
-
-  defp stringify_keys(map) when is_map(map) do
-    Map.new(map, fn
-      {k, v} when is_atom(k) -> {Atom.to_string(k), v}
-      {k, v} -> {k, v}
-    end)
-  end
+  defp normalize_params(attrs) when is_map(attrs), do: Gamend.Parse.string_keys(attrs)
 end

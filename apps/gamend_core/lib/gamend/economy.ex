@@ -34,7 +34,6 @@ defmodule Gamend.Economy do
 
   import Ecto.Query
 
-  alias Gamend.Accounts.User
   alias Gamend.Economy.LedgerEntry
   alias Gamend.Economy.Wallet
   alias Gamend.Repo
@@ -248,13 +247,7 @@ defmodule Gamend.Economy do
 
   @doc false
   @spec list_ledger(keyword()) :: [LedgerEntry.t()]
-  def list_ledger(opts \\ []) do
-    ledger_query(opts)
-    |> order_by([l], desc: l.inserted_at, desc: l.id)
-    |> paginate(opts)
-    |> preload(:user)
-    |> Repo.all()
-  end
+  def list_ledger(opts \\ []), do: opts |> ledger_query() |> Gamend.Ledger.list_entries(opts)
 
   @doc false
   @spec count_ledger(keyword()) :: non_neg_integer()
@@ -291,28 +284,8 @@ defmodule Gamend.Economy do
   end
 
   defp maybe_filter(query, _field, nil), do: query
-  defp maybe_filter(query, :user_id, value), do: filter_user(query, value)
+  defp maybe_filter(query, :user_id, value), do: Gamend.Query.filter_user(query, value)
   defp maybe_filter(query, :currency, value), do: where(query, [q], q.currency == ^value)
-
-  # Accept either an exact user id (UUID) or a username/display-name substring,
-  # so an admin can find a wallet without knowing the raw id.
-  defp filter_user(query, value) do
-    case Ecto.UUID.cast(value) do
-      {:ok, uuid} ->
-        where(query, [q], q.user_id == ^uuid)
-
-      :error ->
-        pattern = "%" <> Repo.escape_like(String.downcase(value)) <> "%"
-
-        query
-        |> join(:inner, [q], u in User, on: u.id == q.user_id)
-        |> where(
-          [q, u],
-          fragment("lower(coalesce(?, '')) LIKE ? ESCAPE '\\'", u.username, ^pattern) or
-            fragment("lower(coalesce(?, '')) LIKE ? ESCAPE '\\'", u.display_name, ^pattern)
-        )
-    end
-  end
 
   defp paginate(query, opts), do: Gamend.Query.page(query, opts)
 end

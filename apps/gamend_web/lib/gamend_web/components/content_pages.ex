@@ -179,7 +179,7 @@ defmodule GamendWeb.ContentPages do
 
               <div :for={{month, posts} <- months} class="mb-8">
                 <h3 class="mb-4 text-sm font-semibold uppercase tracking-[0.22em] text-base-content/70">
-                  {month_name(month)}
+                  <.month_heading year={year} month={month} />
                 </h3>
 
                 <div class="space-y-4">
@@ -278,13 +278,23 @@ defmodule GamendWeb.ContentPages do
     """
   end
 
-  # Month names come from the reader's locale via gettext rather than
-  # `Calendar.strftime`, which only ever speaks English.
-  defp month_name(month) do
-    Gettext.dgettext(
-      GamendWeb.Gettext,
-      "default",
-      Calendar.strftime(Date.new!(2000, month, 1), "%B")
-    )
+  attr :year, :integer, required: true
+  attr :month, :integer, required: true
+
+  # The month in the reader's language. This used to pass `Calendar.strftime`'s
+  # English name through `dgettext` — but no catalog carries month names, so it
+  # always came back in English while its comment said otherwise. The browser's
+  # `Intl` already knows every locale's months: `local_time.js` translates this
+  # with the zone pinned to UTC. Without JS the English name stands.
+  defp month_heading(assigns) do
+    assigns =
+      assign(assigns,
+        iso: "#{assigns.year}-#{String.pad_leading(to_string(assigns.month), 2, "0")}",
+        english: Calendar.strftime(Date.new!(assigns.year, assigns.month, 1), "%B")
+      )
+
+    ~H"""
+    <time datetime={@iso} data-local-time="calendar-month">{@english}</time>
+    """
   end
 end

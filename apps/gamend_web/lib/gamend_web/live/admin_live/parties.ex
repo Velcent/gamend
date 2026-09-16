@@ -2,6 +2,7 @@ defmodule GamendWeb.AdminLive.Parties do
   use GamendWeb, :live_view
 
   alias Gamend.Parties
+  alias GamendWeb.LiveHelpers
 
   @impl true
   def mount(_params, _session, socket) do
@@ -692,13 +693,12 @@ defmodule GamendWeb.AdminLive.Parties do
   end
 
   @impl true
-  def handle_event("admin_parties_page_size", %{"size" => size}, socket) do
-    {:noreply,
-     socket
-     |> assign(:parties_page_size, String.to_integer(size))
-     |> assign(:parties_page, 1)
-     |> reload_parties()}
-  end
+  def handle_event("admin_parties_page_size", %{"size" => size}, socket),
+    do:
+      {:noreply,
+       socket
+       |> LiveHelpers.put_page_size(size, size_key: :parties_page_size, page_key: :parties_page)
+       |> reload_parties()}
 
   # ---------------------------------------------------------------------------
   # PubSub

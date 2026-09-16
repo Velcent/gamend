@@ -2,6 +2,7 @@ defmodule GamendWeb.AdminLive.KV do
   use GamendWeb, :live_view
 
   alias Gamend.KV
+  alias GamendWeb.LiveHelpers
 
   @impl true
   def render(assigns) do
@@ -289,23 +290,16 @@ defmodule GamendWeb.AdminLive.KV do
   def handle_params(_params, _uri, socket), do: {:noreply, socket}
 
   @impl true
-  def handle_event("kv_prev", _params, socket) do
-    {:noreply, socket |> assign(:page, max(1, socket.assigns.page - 1)) |> reload_entries()}
-  end
+  def handle_event("kv_prev", _params, socket),
+    do: {:noreply, socket |> LiveHelpers.prev_page() |> reload_entries()}
 
   @impl true
-  def handle_event("kv_next", _params, socket) do
-    {:noreply, socket |> assign(:page, socket.assigns.page + 1) |> reload_entries()}
-  end
+  def handle_event("kv_next", _params, socket),
+    do: {:noreply, socket |> LiveHelpers.next_page() |> reload_entries()}
 
   @impl true
-  def handle_event("kv_page_size", %{"size" => size}, socket) do
-    {:noreply,
-     socket
-     |> assign(:page_size, String.to_integer(size))
-     |> assign(:page, 1)
-     |> reload_entries()}
-  end
+  def handle_event("kv_page_size", %{"size" => size}, socket),
+    do: {:noreply, socket |> LiveHelpers.put_page_size(size) |> reload_entries()}
 
   @impl true
   def handle_event("toggle_select", %{"id" => id}, socket) do

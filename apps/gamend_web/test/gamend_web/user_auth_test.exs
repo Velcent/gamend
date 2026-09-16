@@ -28,7 +28,7 @@ defmodule GamendWeb.UserAuthTest do
     end
 
     defmodule TestHooksLogin do
-      use GamendWeb.TestSupport.NoopHooks
+      use Gamend.TestSupport.NoopHooks
 
       alias Gamend.Repo
 

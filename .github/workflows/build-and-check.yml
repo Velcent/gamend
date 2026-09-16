@@ -481,6 +481,11 @@ jobs:
         working-directory: apps/gamend_web
         run: MIX_ENV=test mix deps.get
 
+      # `mix test` at the root also runs the core's own suite.
+      - name: Install core test dependencies
+        working-directory: apps/gamend_core
+        run: MIX_ENV=test mix deps.get
+
       - name: Compile
         run: MIX_ENV=test mix compile --warnings-as-errors
 
@@ -550,6 +555,11 @@ jobs:
 
       - name: Install web test dependencies
         working-directory: apps/gamend_web
+        run: MIX_ENV=test mix deps.get
+
+      # `mix test` at the root also runs the core's own suite.
+      - name: Install core test dependencies
+        working-directory: apps/gamend_core
         run: MIX_ENV=test mix deps.get
 
       - name: Compile

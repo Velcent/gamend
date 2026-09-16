@@ -7,7 +7,7 @@ defmodule Gamend.PushHooksTest do
   alias Gamend.Push.DeliveryWorker
 
   defmodule VetoHooks do
-    use GamendWeb.TestSupport.NoopHooks
+    use Gamend.TestSupport.NoopHooks
 
     @impl true
     def before_push_send(user_id, message) do
@@ -22,7 +22,7 @@ defmodule Gamend.PushHooksTest do
   end
 
   defmodule RewriteHooks do
-    use GamendWeb.TestSupport.NoopHooks
+    use Gamend.TestSupport.NoopHooks
 
     @impl true
     def before_push_send(_user_id, message) do
@@ -31,7 +31,7 @@ defmodule Gamend.PushHooksTest do
   end
 
   defmodule OversizeRewriteHooks do
-    use GamendWeb.TestSupport.NoopHooks
+    use Gamend.TestSupport.NoopHooks
 
     @impl true
     def before_push_send(_user_id, message) do
@@ -40,7 +40,7 @@ defmodule Gamend.PushHooksTest do
   end
 
   defmodule ObserverHooks do
-    use GamendWeb.TestSupport.NoopHooks
+    use Gamend.TestSupport.NoopHooks
 
     @impl true
     def after_push_sent(user_id, message, result) do

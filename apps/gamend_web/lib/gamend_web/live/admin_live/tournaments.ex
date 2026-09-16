@@ -3,6 +3,7 @@ defmodule GamendWeb.AdminLive.Tournaments do
 
   alias Gamend.Tournaments
   alias Gamend.Tournaments.Tournament
+  alias GamendWeb.LiveHelpers
 
   @impl true
   def mount(_params, _session, socket) do
@@ -347,14 +348,11 @@ defmodule GamendWeb.AdminLive.Tournaments do
     {:noreply, socket |> assign(:state_filter, state) |> assign(:page, 1) |> reload()}
   end
 
-  def handle_event("prev_page", _params, socket) do
-    {:noreply, socket |> assign(:page, max(socket.assigns.page - 1, 1)) |> reload()}
-  end
+  def handle_event("prev_page", _params, socket),
+    do: {:noreply, socket |> LiveHelpers.prev_page() |> reload()}
 
-  def handle_event("next_page", _params, socket) do
-    page = min(socket.assigns.page + 1, socket.assigns.total_pages)
-    {:noreply, socket |> assign(:page, page) |> reload()}
-  end
+  def handle_event("next_page", _params, socket),
+    do: {:noreply, socket |> LiveHelpers.next_page() |> reload()}
 
   def handle_event("new_tournament", _params, socket) do
     changeset =
@@ -458,14 +456,21 @@ defmodule GamendWeb.AdminLive.Tournaments do
 
   def handle_event("detail_next", _params, socket) do
     d = socket.assigns.detail
-    {:noreply, load_detail(socket, d.tournament.id, min(d.entry_page + 1, d.entry_pages))}
+    # Floored at 1: a tournament with no entries has 0 pages.
+    {:noreply, load_detail(socket, d.tournament.id, min(d.entry_page + 1, max(d.entry_pages, 1)))}
   end
 
   def handle_event("select_bracket", %{"index" => index}, socket) do
     d = socket.assigns.detail
-    index = String.to_integer(index)
-    socket = assign(socket, :detail, Map.put(d, :selected_bracket, index))
-    {:noreply, load_detail(socket, d.tournament.id, d.entry_page)}
+
+    case Gamend.Parse.integer(index) do
+      nil ->
+        {:noreply, socket}
+
+      index ->
+        socket = assign(socket, :detail, Map.put(d, :selected_bracket, index))
+        {:noreply, load_detail(socket, d.tournament.id, d.entry_page)}
+    end
   end
 
   def handle_event("force_reopen", _params, socket) do

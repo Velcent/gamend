@@ -2,6 +2,7 @@ defmodule GamendWeb.AdminLive.Push do
   use GamendWeb, :live_view
 
   alias Gamend.Push
+  alias GamendWeb.LiveHelpers
 
   @impl true
   def mount(_params, _session, socket) do
@@ -265,25 +266,16 @@ defmodule GamendWeb.AdminLive.Push do
   end
 
   @impl true
-  def handle_event("admin_push_prev", _params, socket) do
-    page = max(1, socket.assigns.page - 1)
-    {:noreply, socket |> assign(:page, page) |> reload_tokens()}
-  end
+  def handle_event("admin_push_prev", _params, socket),
+    do: {:noreply, socket |> LiveHelpers.prev_page() |> reload_tokens()}
 
   @impl true
-  def handle_event("admin_push_next", _params, socket) do
-    page = socket.assigns.page + 1
-    {:noreply, socket |> assign(:page, page) |> reload_tokens()}
-  end
+  def handle_event("admin_push_next", _params, socket),
+    do: {:noreply, socket |> LiveHelpers.next_page() |> reload_tokens()}
 
   @impl true
-  def handle_event("admin_push_page_size", %{"size" => size}, socket) do
-    {:noreply,
-     socket
-     |> assign(:page_size, String.to_integer(size))
-     |> assign(:page, 1)
-     |> reload_tokens()}
-  end
+  def handle_event("admin_push_page_size", %{"size" => size}, socket),
+    do: {:noreply, socket |> LiveHelpers.put_page_size(size) |> reload_tokens()}
 
   defp reload_tokens(socket) do
     page = socket.assigns.page

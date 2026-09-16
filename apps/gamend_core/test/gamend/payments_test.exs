@@ -38,11 +38,11 @@ defmodule Gamend.PaymentsTest do
   end
 
   defmodule NoopPaymentHooks do
-    use GamendWeb.TestSupport.NoopHooks
+    use Gamend.TestSupport.NoopHooks
   end
 
   defmodule CapturePaymentHooks do
-    use GamendWeb.TestSupport.NoopHooks
+    use Gamend.TestSupport.NoopHooks
 
     @impl true
     def after_purchase_fulfilled(purchase) do

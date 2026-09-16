@@ -3,6 +3,7 @@ defmodule GamendWeb.AdminLive.Connections do
 
   alias Gamend.Accounts
   alias GamendWeb.ConnectionTracker
+  alias GamendWeb.LiveHelpers
 
   @refresh_interval 3_000
 
@@ -345,21 +346,13 @@ defmodule GamendWeb.AdminLive.Connections do
   end
 
   @impl true
-  def handle_event("conn_prev_page", _params, socket) do
-    {:noreply,
-     socket
-     |> assign(conn_page: max(socket.assigns.conn_page - 1, 1))
-     |> assign_all()}
-  end
+  def handle_event("conn_prev_page", _params, socket),
+    do: {:noreply, socket |> LiveHelpers.prev_page(:conn_page) |> assign_all()}
 
   @impl true
-  def handle_event("conn_next_page", _params, socket) do
-    # assign_all/1 clamps to the last page, so no ceiling is needed here.
-    {:noreply,
-     socket
-     |> assign(conn_page: socket.assigns.conn_page + 1)
-     |> assign_all()}
-  end
+  # assign_all/1 clamps to the last page as well.
+  def handle_event("conn_next_page", _params, socket),
+    do: {:noreply, socket |> LiveHelpers.next_page(:conn_page) |> assign_all()}
 
   defp schedule_refresh, do: Process.send_after(self(), :refresh, @refresh_interval)
 

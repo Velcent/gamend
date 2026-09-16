@@ -2,6 +2,7 @@ defmodule GamendWeb.AdminLive.Notifications do
   use GamendWeb, :live_view
 
   alias Gamend.Notifications
+  alias GamendWeb.LiveHelpers
 
   @impl true
   def mount(_params, _session, socket) do
@@ -381,25 +382,16 @@ defmodule GamendWeb.AdminLive.Notifications do
   end
 
   @impl true
-  def handle_event("admin_notifications_prev", _params, socket) do
-    page = max(1, socket.assigns.page - 1)
-    {:noreply, socket |> assign(:page, page) |> reload_notifications()}
-  end
+  def handle_event("admin_notifications_prev", _params, socket),
+    do: {:noreply, socket |> LiveHelpers.prev_page() |> reload_notifications()}
 
   @impl true
-  def handle_event("admin_notifications_next", _params, socket) do
-    page = socket.assigns.page + 1
-    {:noreply, socket |> assign(:page, page) |> reload_notifications()}
-  end
+  def handle_event("admin_notifications_next", _params, socket),
+    do: {:noreply, socket |> LiveHelpers.next_page() |> reload_notifications()}
 
   @impl true
-  def handle_event("admin_notifications_page_size", %{"size" => size}, socket) do
-    {:noreply,
-     socket
-     |> assign(:page_size, String.to_integer(size))
-     |> assign(:page, 1)
-     |> reload_notifications()}
-  end
+  def handle_event("admin_notifications_page_size", %{"size" => size}, socket),
+    do: {:noreply, socket |> LiveHelpers.put_page_size(size) |> reload_notifications()}
 
   defp reload_notifications(socket) do
     page = socket.assigns.page

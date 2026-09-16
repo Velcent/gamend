@@ -55,6 +55,7 @@ defmodule GamendWeb.UserChannel do
   alias Gamend.Lobbies
   alias Gamend.Notifications
   alias Gamend.Parties
+  alias GamendWeb.ChannelEvents
   alias GamendWeb.ChannelUpdates
   alias GamendWeb.Plugs.ClientSession
   alias GamendWeb.Serializers
@@ -244,9 +245,7 @@ defmodule GamendWeb.UserChannel do
   end
 
   @impl true
-  def handle_in(_event, _payload, socket) do
-    {:reply, {:error, %{error: "unknown_event"}}, socket}
-  end
+  def handle_in(event, _payload, socket), do: ChannelEvents.unknown(event, socket)
 
   # ── PubSub event forwarding ────────────────────────────────────────────────
 

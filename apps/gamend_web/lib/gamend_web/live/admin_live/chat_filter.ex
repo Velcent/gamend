@@ -10,6 +10,7 @@ defmodule GamendWeb.AdminLive.ChatFilter do
   alias Gamend.Chat.Moderation
   alias Gamend.Chat.Moderation.Cache
   alias Gamend.Chat.Moderation.Normalizer
+  alias GamendWeb.LiveHelpers
 
   @blank_word %{
     "id" => nil,
@@ -180,19 +181,14 @@ defmodule GamendWeb.AdminLive.ChatFilter do
      |> assign_test_result()}
   end
 
-  def handle_event("prev_page", _params, socket) do
-    {:noreply, socket |> assign(:page, max(socket.assigns.page - 1, 1)) |> reload()}
-  end
+  def handle_event("prev_page", _params, socket),
+    do: {:noreply, socket |> LiveHelpers.prev_page() |> reload()}
 
-  def handle_event("next_page", _params, socket) do
-    page = min(socket.assigns.page + 1, max(socket.assigns.total_pages, 1))
-    {:noreply, socket |> assign(:page, page) |> reload()}
-  end
+  def handle_event("next_page", _params, socket),
+    do: {:noreply, socket |> LiveHelpers.next_page() |> reload()}
 
-  def handle_event("page_size", %{"size" => size}, socket) do
-    {:noreply,
-     socket |> assign(:page_size, String.to_integer(size)) |> assign(:page, 1) |> reload()}
-  end
+  def handle_event("page_size", %{"size" => size}, socket),
+    do: {:noreply, socket |> LiveHelpers.put_page_size(size) |> reload()}
 
   def handle_event("refresh", _params, socket), do: {:noreply, reload(socket)}
 

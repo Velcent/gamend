@@ -858,7 +858,7 @@ defmodule GamendWeb.AdminLive.Users do
   end
 
   def handle_event("admin_users_page_size", %{"size" => size}, socket) do
-    page_size = String.to_integer(size)
+    page_size = Gamend.Limits.clamp_page_size(size, socket.assigns[:users_page_size] || 25)
 
     {users, total_count, total_pages} =
       load_users(

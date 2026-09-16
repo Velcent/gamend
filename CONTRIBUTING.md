@@ -69,7 +69,7 @@ Adding one callback touches six places — miss one and plugins break in confusi
 
 ## Tests
 
-- Context tests + controller tests + admin API tests + LiveView tests in `apps/gamend_web/test/`.
+- Context tests in `apps/gamend_core/test/` — they run without the web app, so a test that needs a conn, a channel or a `GamendWeb` module belongs in `apps/gamend_web/test/` instead. Controller, admin API, channel and LiveView tests in `apps/gamend_web/test/`. Both share `apps/gamend_core/test/support` (`Gamend.DataCase`, fixtures, `Gamend.TestSupport.NoopHooks`); root `mix test` runs both suites.
 - Run against both adapters: `mix test` and with `POSTGRES_HOST` set. SQLite and Postgres differ in ways tests hide: `config/test.exs` sets `busy_timeout`, so concurrent-write failures that bite in dev never surface in CI.
 - **Run the feature, don't only test it.** Boot the app (`mix run` a script, or the dev server) and exercise the real path — several classes of bug (hooks inside transactions, stale caches, missing supervision children) only appear at runtime.
 - Add a set to `mix demo.seed` so the feature can be viewed at volume (pagination, large brackets, long lists).

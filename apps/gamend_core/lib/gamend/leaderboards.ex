@@ -667,10 +667,17 @@ defmodule Gamend.Leaderboards do
         metadata: metadata
       })
 
-    case Repo.insert(changeset,
-           on_conflict: build_score_upsert(leaderboard, score, metadata, now),
-           conflict_target: [:leaderboard_id, :label]
-         ) do
+    # The board was checked before this, but it can still be deleted before
+    # the write lands — see `Gamend.Repo.rescue_foreign_key/2`. A label record
+    # references nothing else, so that is the only key that can fire.
+    insert = fn ->
+      Repo.insert(changeset,
+        on_conflict: build_score_upsert(leaderboard, score, metadata, now),
+        conflict_target: [:leaderboard_id, :label]
+      )
+    end
+
+    case Repo.rescue_foreign_key(:leaderboard_not_found, insert) do
       {:ok, _} ->
         _ = invalidate_records_cache(leaderboard.id)
         record = get_label_record(leaderboard.id, label)
@@ -711,10 +718,22 @@ defmodule Gamend.Leaderboards do
         metadata: metadata
       })
 
-    case Repo.insert(changeset,
-           on_conflict: build_score_upsert(leaderboard, score, metadata, now),
-           conflict_target: [:leaderboard_id, :user_id]
-         ) do
+    # Board and user were checked before this, but either can still be
+    # deleted before the write lands — see `Gamend.Repo.rescue_foreign_key/2`.
+    insert = fn ->
+      Repo.insert(changeset,
+        on_conflict: build_score_upsert(leaderboard, score, metadata, now),
+        conflict_target: [:leaderboard_id, :user_id]
+      )
+    end
+
+    case Repo.rescue_foreign_key(:foreign_key, insert) do
+      {:error, :foreign_key} ->
+        # SQLite does not say which key fired, so ask again.
+        if Accounts.user_exists?(user_id),
+          do: {:error, :leaderboard_not_found},
+          else: {:error, :user_not_found}
+
       {:ok, _} ->
         # Invalidate caches and re-fetch to get accurate data after upsert
         _ = invalidate_records_cache(leaderboard.id)

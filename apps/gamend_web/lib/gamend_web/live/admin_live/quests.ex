@@ -3,6 +3,7 @@ defmodule GamendWeb.AdminLive.Quests do
 
   alias Gamend.Quests
   alias Gamend.Quests.Quest
+  alias GamendWeb.LiveHelpers
 
   @resets Quest.resets()
   @statuses ~w(active completed claimed)
@@ -424,27 +425,14 @@ defmodule GamendWeb.AdminLive.Quests do
      |> reload_quests()}
   end
 
-  def handle_event("prev_page", _, socket) do
-    {:noreply,
-     socket
-     |> assign(:page, max(1, socket.assigns.page - 1))
-     |> reload_quests()}
-  end
+  def handle_event("prev_page", _params, socket),
+    do: {:noreply, socket |> LiveHelpers.prev_page() |> reload_quests()}
 
-  def handle_event("next_page", _, socket) do
-    {:noreply,
-     socket
-     |> assign(:page, socket.assigns.page + 1)
-     |> reload_quests()}
-  end
+  def handle_event("next_page", _params, socket),
+    do: {:noreply, socket |> LiveHelpers.next_page() |> reload_quests()}
 
-  def handle_event("page_size", %{"size" => size}, socket) do
-    {:noreply,
-     socket
-     |> assign(:page_size, String.to_integer(size))
-     |> assign(:page, 1)
-     |> reload_quests()}
-  end
+  def handle_event("page_size", %{"size" => size}, socket),
+    do: {:noreply, socket |> LiveHelpers.put_page_size(size) |> reload_quests()}
 
   def handle_event("new_quest", _, socket) do
     changeset = Quests.change_quest(%Quest{})
@@ -583,27 +571,18 @@ defmodule GamendWeb.AdminLive.Quests do
      |> reload_progress()}
   end
 
-  def handle_event("progress_prev_page", _, socket) do
-    {:noreply,
-     socket
-     |> assign(:progress_page, max(1, socket.assigns.progress_page - 1))
-     |> reload_progress()}
-  end
+  def handle_event("progress_prev_page", _, socket),
+    do: {:noreply, socket |> LiveHelpers.prev_page(:progress_page) |> reload_progress()}
 
-  def handle_event("progress_next_page", _, socket) do
-    {:noreply,
-     socket
-     |> assign(:progress_page, socket.assigns.progress_page + 1)
-     |> reload_progress()}
-  end
+  def handle_event("progress_next_page", _, socket),
+    do: {:noreply, socket |> LiveHelpers.next_page(:progress_page) |> reload_progress()}
 
-  def handle_event("progress_page_size", %{"size" => size}, socket) do
-    {:noreply,
-     socket
-     |> assign(:progress_page_size, String.to_integer(size))
-     |> assign(:progress_page, 1)
-     |> reload_progress()}
-  end
+  def handle_event("progress_page_size", %{"size" => size}, socket),
+    do:
+      {:noreply,
+       socket
+       |> LiveHelpers.put_page_size(size, size_key: :progress_page_size, page_key: :progress_page)
+       |> reload_progress()}
 
   def handle_event("force_complete", %{"user" => user_id, "key" => key}, socket) do
     case Quests.admin_complete(user_id, key) do

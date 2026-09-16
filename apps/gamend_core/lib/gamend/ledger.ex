@@ -22,6 +22,8 @@ defmodule Gamend.Ledger do
   having exactly one copy of it.
   """
 
+  import Ecto.Query, only: [order_by: 3, preload: 2]
+
   alias Gamend.Repo
 
   @doc """
@@ -41,15 +43,19 @@ defmodule Gamend.Ledger do
           (-> integer())
         ) :: {:ok, integer()} | {:error, term()}
   def change(apply_fun, record_fun, replay_fun) do
-    Repo.transaction(fn ->
-      case apply_fun.() do
-        {:ok, new_total} ->
-          record_fun.(new_total)
-          new_total
+    # A balance row and its ledger row reference only the user, so a foreign
+    # key that fires here means the user was deleted after the context checked.
+    Repo.rescue_foreign_key(:user_not_found, fn ->
+      Repo.transaction(fn ->
+        case apply_fun.() do
+          {:ok, new_total} ->
+            record_fun.(new_total)
+            new_total
 
-        {:error, reason} ->
-          Repo.rollback(reason)
-      end
+          {:error, reason} ->
+            Repo.rollback(reason)
+        end
+      end)
     end)
     |> case do
       {:ok, new_total} -> {:ok, new_total}
@@ -58,6 +64,19 @@ defmodule Gamend.Ledger do
       {:error, :idempotent_replay} -> {:ok, replay_fun.()}
       {:error, reason} -> {:error, reason}
     end
+  end
+
+  @doc """
+  A page of ledger entries from `query`, newest first, with the user loaded —
+  the admin listing both ledgers expose.
+  """
+  @spec list_entries(Ecto.Queryable.t(), keyword()) :: [struct()]
+  def list_entries(query, opts) do
+    query
+    |> order_by([l], desc: l.inserted_at, desc: l.id)
+    |> Gamend.Query.page(opts)
+    |> preload(:user)
+    |> Repo.all()
   end
 
   @doc """

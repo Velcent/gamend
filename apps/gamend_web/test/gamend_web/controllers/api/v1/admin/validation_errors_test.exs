@@ -90,4 +90,49 @@ defmodule GamendWeb.Api.V1.Admin.ValidationErrorsTest do
       assert body["error"] == "user_not_found"
     end
   end
+
+  describe "admin leaderboard record create, malformed input" do
+    setup do
+      {:ok, board} =
+        Gamend.Leaderboards.create_leaderboard(%{
+          "slug" => "rec_#{System.unique_integer([:positive])}",
+          "title" => "Records"
+        })
+
+      %{board: board}
+    end
+
+    # `String.to_integer/1` raised on these, so each answered 500.
+    test "a non-numeric, partial or float score is a 400", %{admin_conn: conn, board: board} do
+      user = Gamend.AccountsFixtures.user_fixture()
+
+      for bad <- ["abc", "12abc", 1.5] do
+        body =
+          conn
+          |> post(~p"/api/v1/admin/leaderboards/#{board.id}/records", %{
+            "user_id" => user.id,
+            "score" => bad
+          })
+          |> json_response(400)
+
+        assert body["error"] == "invalid_score", "#{inspect(bad)} was not rejected"
+      end
+    end
+
+    # submit_score reports this as :leaderboard_not_found, which no clause
+    # matched, so it fell through to the 400 catch-all.
+    test "an unknown leaderboard is a 404", %{admin_conn: conn} do
+      user = Gamend.AccountsFixtures.user_fixture()
+
+      body =
+        conn
+        |> post(~p"/api/v1/admin/leaderboards/#{Ecto.UUID.generate()}/records", %{
+          "user_id" => user.id,
+          "score" => 5
+        })
+        |> json_response(404)
+
+      assert body["error"] == "leaderboard_not_found"
+    end
+  end
 end

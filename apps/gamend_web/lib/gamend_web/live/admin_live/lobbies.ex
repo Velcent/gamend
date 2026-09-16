@@ -4,6 +4,7 @@ defmodule GamendWeb.AdminLive.Lobbies do
   alias Gamend.Lobbies
   alias Gamend.Lobbies.SpectatorTracker
   alias Gamend.ReadyChecks
+  alias GamendWeb.LiveHelpers
 
   @impl true
   def mount(_params, _session, socket) do
@@ -743,13 +744,12 @@ defmodule GamendWeb.AdminLive.Lobbies do
     {:noreply, socket |> assign(:lobbies_page, page) |> reload_lobbies()}
   end
 
-  def handle_event("admin_lobbies_page_size", %{"size" => size}, socket) do
-    {:noreply,
-     socket
-     |> assign(:lobbies_page_size, String.to_integer(size))
-     |> assign(:lobbies_page, 1)
-     |> reload_lobbies()}
-  end
+  def handle_event("admin_lobbies_page_size", %{"size" => size}, socket),
+    do:
+      {:noreply,
+       socket
+       |> LiveHelpers.put_page_size(size, size_key: :lobbies_page_size, page_key: :lobbies_page)
+       |> reload_lobbies()}
 
   def handle_event("save_lobby", %{"lobby" => params}, socket) do
     lobby = socket.assigns.selected_lobby

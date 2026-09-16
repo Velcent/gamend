@@ -231,11 +231,12 @@ defmodule GamendWeb.LobbyLive.Index do
         attrs = %{}
         attrs = if params["title"], do: Map.put(attrs, "title", params["title"]), else: attrs
 
+        # A player-facing form: `String.to_integer/1` here crashed the page on a
+        # non-numeric value. An unparseable one is simply not applied.
         attrs =
-          if params["max_users"] && params["max_users"] != "" do
-            Map.put(attrs, "max_users", String.to_integer(params["max_users"]))
-          else
-            attrs
+          case Gamend.Parse.integer(params["max_users"]) do
+            nil -> attrs
+            max_users -> Map.put(attrs, "max_users", max_users)
           end
 
         attrs =
