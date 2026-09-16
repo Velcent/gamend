@@ -31,6 +31,7 @@ defmodule Gamend.Leaderboards do
   alias Gamend.Repo
   alias Gamend.Types
 
+  alias Gamend.Accounts
   alias Gamend.Leaderboards.Leaderboard
   alias Gamend.Leaderboards.Record
 
@@ -427,8 +428,9 @@ defmodule Gamend.Leaderboards do
   @spec list_leaderboards() :: [Leaderboard.t()]
   @spec list_leaderboards(keyword()) :: [Leaderboard.t()]
   def list_leaderboards(opts \\ []) do
-    page = Keyword.get(opts, :page, 1)
-    page_size = Keyword.get(opts, :page_size, 25)
+    # Clamped before the cached call: both values are in its cache key.
+    page = Gamend.Limits.clamp_page(Keyword.get(opts, :page))
+    page_size = Gamend.Limits.clamp_page_size(Keyword.get(opts, :page_size))
     order_by = Keyword.get(opts, :order_by, :inserted_at)
 
     list_leaderboards_cached(opts, order_by, page, page_size)
@@ -441,13 +443,10 @@ defmodule Gamend.Leaderboards do
               opts: [ttl: @leaderboards_cache_ttl_ms]
             )
   defp list_leaderboards_cached(opts, order_by, page, page_size) do
-    offset = max((page - 1) * page_size, 0)
-
     opts
     |> build_leaderboard_query()
     |> apply_order_by(order_by)
-    |> offset(^offset)
-    |> limit(^page_size)
+    |> Gamend.Query.page(page: page, page_size: page_size)
     |> Repo.all()
   end
 
@@ -592,18 +591,21 @@ defmodule Gamend.Leaderboards do
           {:ok, Record.t()} | {:error, term()}
   def submit_score(leaderboard_id, user_id, score, metadata \\ %{})
       when is_binary(leaderboard_id) and is_binary(user_id) and is_integer(score) do
-    case get_leaderboard(leaderboard_id) do
-      nil ->
-        {:error, :leaderboard_not_found}
-
-      leaderboard ->
-        # Check if leaderboard is still active
-        if Leaderboard.ended?(leaderboard) do
-          {:error, :leaderboard_ended}
-        else
-          do_submit_score(leaderboard, user_id, score, metadata)
-          |> run_after_score_submitted()
-        end
+    with {:board, %Leaderboard{} = leaderboard} <- {:board, get_leaderboard(leaderboard_id)},
+         # Checked before the insert, because SQLite cannot tell Ecto which
+         # constraint an INSERT violated — see `Gamend.Accounts.user_exists?/1`.
+         # Without this, a score for an unknown user raised
+         # `Ecto.ConstraintError`, so an admin request naming a stale id got a
+         # 500 rather than an answer.
+         {:user, true} <- {:user, Accounts.user_exists?(user_id)},
+         {:ended, false} <- {:ended, Leaderboard.ended?(leaderboard)} do
+      leaderboard
+      |> do_submit_score(user_id, score, metadata)
+      |> run_after_score_submitted()
+    else
+      {:board, nil} -> {:error, :leaderboard_not_found}
+      {:user, false} -> {:error, :user_not_found}
+      {:ended, true} -> {:error, :leaderboard_ended}
     end
   end
 

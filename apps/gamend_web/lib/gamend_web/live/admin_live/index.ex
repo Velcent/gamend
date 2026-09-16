@@ -528,7 +528,7 @@ defmodule GamendWeb.AdminLive.Index do
                 <div :if={@geo_stats_1h != []} class="text-xs text-base-content/60 mt-1 space-y-1">
                   <%= for {country, count} <- Enum.take(@geo_stats_1h, 3) do %>
                     <div class="flex justify-between items-center">
-                      <span class="font-mono">{country_flag(country)} {country}</span>
+                      <span class="font-mono">{GamendWeb.AdminLive.Shared.country_flag(country)} {country}</span>
                       <span class="font-mono">{format_number(count)} (1h)</span>
                     </div>
                   <% end %>
@@ -942,18 +942,6 @@ defmodule GamendWeb.AdminLive.Index do
 
   # Convert ISO 3166-1 alpha-2 country code to its flag emoji.
   # Works by offseting each letter into the Regional Indicator Symbol range.
-  defp country_flag(code) when is_binary(code) and byte_size(code) == 2 do
-    code
-    |> String.upcase()
-    |> String.to_charlist()
-    |> Enum.map(fn c -> c - ?A + 0x1F1E6 end)
-    |> List.to_string()
-  rescue
-    _ -> "🌐"
-  end
-
-  defp country_flag(_), do: "🌐"
-
   defp safe_log_count_by_level do
     GamendWeb.AdminLogBuffer.count_by_level()
   rescue

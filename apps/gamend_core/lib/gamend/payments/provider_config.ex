@@ -40,9 +40,6 @@ defmodule Gamend.Payments.ProviderConfig do
   @spec production?() :: boolean()
   def production?, do: environment() == "production"
 
-  @spec sandbox_like?() :: boolean()
-  def sandbox_like?, do: environment() == "sandbox"
-
   @spec environments() :: [String.t()]
   def environments, do: @environments
 
@@ -59,9 +56,6 @@ defmodule Gamend.Payments.ProviderConfig do
       nil -> @stripe_sdk_api_version
     end
   end
-
-  @spec stripe_default_api_version() :: String.t()
-  def stripe_default_api_version, do: @stripe_sdk_api_version
 
   @spec stripe_secret_key_source() :: {String.t(), String.t()} | nil
   def stripe_secret_key_source, do: stripe_source(:secret_key)

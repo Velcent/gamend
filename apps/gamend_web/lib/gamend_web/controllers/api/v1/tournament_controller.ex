@@ -426,10 +426,7 @@ defmodule GamendWeb.Api.V1.TournamentController do
   defp error(conn, %Ecto.Changeset{} = changeset) do
     conn
     |> put_status(:bad_request)
-    |> json(%{
-      error: "invalid_data",
-      errors: Ecto.Changeset.traverse_errors(changeset, fn {msg, _opts} -> msg end)
-    })
+    |> json(%{error: "invalid_data", errors: GamendWeb.ChangesetErrors.errors(changeset)})
   end
 
   defp error(conn, _reason) do

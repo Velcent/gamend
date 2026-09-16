@@ -83,10 +83,11 @@ defmodule GamendWeb.Api.V1.Admin.LeaderboardRecordController do
       {:error, :not_found} ->
         conn |> put_status(:not_found) |> json(%{error: "not_found"})
 
+      {:error, :user_not_found} ->
+        conn |> put_status(:not_found) |> json(%{error: "user_not_found"})
+
       {:error, %Ecto.Changeset{} = cs} ->
-        conn
-        |> put_status(:unprocessable_entity)
-        |> json(%{error: "validation_failed", errors: Ecto.Changeset.traverse_errors(cs, & &1)})
+        unprocessable(conn, cs)
 
       {:error, reason} ->
         conn |> put_status(:bad_request) |> json(%{error: to_string(reason)})
@@ -112,10 +113,11 @@ defmodule GamendWeb.Api.V1.Admin.LeaderboardRecordController do
       {:error, :not_found} ->
         conn |> put_status(:not_found) |> json(%{error: "not_found"})
 
+      {:error, :user_not_found} ->
+        conn |> put_status(:not_found) |> json(%{error: "user_not_found"})
+
       {:error, %Ecto.Changeset{} = cs} ->
-        conn
-        |> put_status(:unprocessable_entity)
-        |> json(%{error: "validation_failed", errors: Ecto.Changeset.traverse_errors(cs, & &1)})
+        unprocessable(conn, cs)
 
       {:error, reason} ->
         conn |> put_status(:bad_request) |> json(%{error: to_string(reason)})
@@ -167,12 +169,7 @@ defmodule GamendWeb.Api.V1.Admin.LeaderboardRecordController do
             json(conn, %{data: updated})
 
           {:error, %Ecto.Changeset{} = cs} ->
-            conn
-            |> put_status(:unprocessable_entity)
-            |> json(%{
-              error: "validation_failed",
-              errors: Ecto.Changeset.traverse_errors(cs, & &1)
-            })
+            unprocessable(conn, cs)
         end
     end
   end
@@ -206,12 +203,7 @@ defmodule GamendWeb.Api.V1.Admin.LeaderboardRecordController do
             json(conn, %{})
 
           {:error, %Ecto.Changeset{} = cs} ->
-            conn
-            |> put_status(:unprocessable_entity)
-            |> json(%{
-              error: "validation_failed",
-              errors: Ecto.Changeset.traverse_errors(cs, & &1)
-            })
+            unprocessable(conn, cs)
         end
     end
   end

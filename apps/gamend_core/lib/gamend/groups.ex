@@ -1349,22 +1349,10 @@ defmodule Gamend.Groups do
     end
   end
 
-  @max_page_size 1000
-
-  defp paginate(q, opts) do
-    page = Keyword.get(opts, :page)
-    page_size = Keyword.get(opts, :page_size)
-
-    if page && page_size do
-      size = page_size |> min(@max_page_size) |> max(1)
-      offset = (max(page, 1) - 1) * size
-      Repo.all(from g in q, limit: ^size, offset: ^offset)
-    else
-      # No pagination requested: cap to a hard max so an unpaginated caller
-      # never triggers an unbounded Repo.all over the whole table.
-      Repo.all(from g in q, limit: @max_page_size)
-    end
-  end
+  # Unlike the other contexts this one runs the query. The window itself comes
+  # from `Gamend.Query`, which clamps to the *configured* `max_page_size` — the
+  # hard-coded 1000 here ignored it.
+  defp paginate(q, opts), do: q |> Gamend.Query.maybe_page(opts) |> Repo.all()
 
   defp apply_sort(q, opts) do
     case Keyword.get(opts, :sort_by) do

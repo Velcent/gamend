@@ -28,11 +28,11 @@ defmodule GamendWeb.Api.V1.StorageController do
 
   @doc "PUT /storage/upload?key=...&token=... — authenticated raw-body upload (local backend)."
   def upload(conn, %{"token" => token} = params) do
-    content_type = request_content_type(conn)
+    content_type = Uploads.request_content_type(conn)
     max = Gamend.Limits.get(:max_upload_bytes)
 
     with {:ok, key} <- verify_token(token, params["key"]),
-         {:ok, body, conn} <- read_full_body(conn, max),
+         {:ok, body, conn} <- Uploads.read_full_body(conn, max),
          :ok <- Storage.validate_upload(content_type, byte_size(body)),
          :ok <- verify_magic_bytes(body, content_type),
          :ok <- check_owner_quota(key, byte_size(body)),
@@ -166,23 +166,5 @@ defmodule GamendWeb.Api.V1.StorageController do
     if Storage.sniff_content_type(body) == content_type,
       do: :ok,
       else: {:error, :content_mismatch}
-  end
-
-  defp request_content_type(conn) do
-    case get_req_header(conn, "content-type") do
-      [ct | _] -> ct |> String.split(";") |> hd() |> String.trim()
-      [] -> ""
-    end
-  end
-
-  # Reads one byte past the cap so an oversized body is detected without buffering
-  # the whole thing. Image bodies pass the endpoint parser unparsed (`pass: */*`).
-  defp read_full_body(conn, max) do
-    case read_body(conn, length: max + 1) do
-      {:ok, body, conn} when byte_size(body) <= max -> {:ok, body, conn}
-      {:ok, _body, _conn} -> {:error, :too_large}
-      {:more, _partial, _conn} -> {:error, :too_large}
-      {:error, _} = err -> err
-    end
   end
 end

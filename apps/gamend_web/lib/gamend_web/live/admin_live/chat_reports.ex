@@ -304,16 +304,6 @@ defmodule GamendWeb.AdminLive.ChatReports do
 
   defp from_now(seconds), do: DateTime.add(DateTime.utc_now(:second), seconds, :second)
 
-  defp duration_options do
-    [
-      {"10m", gettext("10 minutes")},
-      {"1h", gettext("1 hour")},
-      {"24h", gettext("24 hours")},
-      {"7d", gettext("7 days")},
-      {"permanent", gettext("Permanent")}
-    ]
-  end
-
   # ── data ──────────────────────────────────────────────────────────────────
 
   defp reload(socket) do
@@ -558,7 +548,7 @@ defmodule GamendWeb.AdminLive.ChatReports do
                 <label class="label text-xs">{gettext("Duration")}</label>
                 <select name="duration" class="select select-bordered select-sm">
                   <option
-                    :for={{value, label} <- duration_options()}
+                    :for={{value, label} <- GamendWeb.AdminLive.Shared.duration_options()}
                     value={value}
                     selected={@form["duration"] == value}
                   >

@@ -205,14 +205,10 @@ defmodule Gamend.Accounts do
   """
   @spec list_all_users(map(), keyword()) :: [User.t()]
   def list_all_users(filters \\ %{}, opts \\ []) do
-    page = Keyword.get(opts, :page, 1)
-    page_size = Keyword.get(opts, :page_size, 25)
-
     filters
     |> all_users_query()
     |> order_by(^admin_user_sort(opts))
-    |> limit(^page_size)
-    |> offset(^((page - 1) * page_size))
+    |> Gamend.Query.page(opts)
     |> Repo.all()
   end
 
@@ -663,6 +659,68 @@ defmodule Gamend.Accounts do
   def display_label(user_id) do
     case get_user(user_id) do
       %User{} = user -> display_label(user)
+      _ -> ""
+    end
+  end
+
+  @doc """
+  Whether an account with this id exists.
+
+  For the contexts that write a row pointing at a user, before they write it.
+  SQLite — the default adapter — does not report *which* constraint an
+  `INSERT` violated, only that one was violated, so
+  `Ecto.Changeset.foreign_key_constraint/2` cannot match it and Ecto raises
+  `Ecto.ConstraintError` instead of returning a changeset. The declarations in
+  those schemas are therefore decorative on SQLite (the adapter's own docs say
+  so), and a bad `user_id` reaching the database surfaced as a 500.
+
+  Checking first costs one indexed read and gives the caller a real answer.
+  It is not a substitute for the foreign key: the row can still be deleted
+  between this and the write. That race ends where it did before, which is why
+  the constraint stays declared.
+
+  Returns `false` for a malformed id rather than raising, since these ids come
+  from request bodies and hook arguments.
+
+  Goes through `get_user/1` rather than a bare `Repo.exists?`, because this sits
+  on the hot write paths — a currency grant, a score submission — and
+  `get_user/1` is cached. A player earning currency during a session was
+  authenticated moments ago, so their row is already in the cache and this costs
+  nothing; `Repo.exists?` would take a connection from the pool every time.
+  Correctness is unchanged: `delete_user/1` invalidates that entry, and a
+  `nil` lookup is never cached (`cache_match/1`), so a missing user is re-checked
+  against the database each time rather than being remembered as absent.
+  """
+  @spec user_exists?(term()) :: boolean()
+  def user_exists?(id), do: get_user(id) != nil
+
+  @doc """
+  The short form of `display_label/1`: the display name, or the username when
+  there is none. No parenthesised handle.
+
+  Use this where the name sits inside a sentence the player reads — "Ana
+  invited you" — and `display_label/1` where it stands on its own and the
+  handle disambiguates, such as an admin table or a friends list.
+
+  This exists because the fallback was being written inline, differently, in
+  four places: parties sent `display_name || ""`, so an invite from a player
+  who had set no display name arrived from nobody; group invites wrote
+  `display_name || username`; three admin views fell through to the email and
+  then the raw id, which `display_label/1` documents as the thing not to do.
+  """
+  @spec display_name(User.t() | Ecto.UUID.t() | nil) :: String.t()
+  def display_name(nil), do: ""
+
+  def display_name(%User{} = user) do
+    case String.trim(user.display_name || "") do
+      "" -> String.trim(user.username || "")
+      name -> name
+    end
+  end
+
+  def display_name(user_id) do
+    case get_user(user_id) do
+      %User{} = user -> display_name(user)
       _ -> ""
     end
   end

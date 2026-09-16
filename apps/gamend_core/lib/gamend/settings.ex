@@ -176,7 +176,7 @@ defmodule Gamend.Settings do
         :unset
 
       raw ->
-        case cast(raw, definition.type) do
+        case cast(raw, definition.type, Map.get(definition, :values, [])) do
           {:ok, value} ->
             {:ok, value}
 
@@ -201,37 +201,60 @@ defmodule Gamend.Settings do
   @doc """
   Casts a raw string to a declared type. Returns `:error` when it does not
   parse, so the caller decides whether that is fatal.
+
+  `values` is the declared `:values` of an `:atom` setting. Pass it whenever
+  you have it — see `cast/3`.
   """
   @spec cast(String.t(), atom()) :: {:ok, term()} | :error
-  def cast(raw, :string), do: {:ok, raw}
+  def cast(raw, type), do: cast(raw, type, [])
+
+  @doc """
+  Casts a raw string against a declared type and, for `:atom`, its allowed
+  `values`.
+
+  With `values` the choice is matched against the declaration itself, so a
+  legal value is accepted whether or not any other compiled code happens to
+  name that atom. Without it there is nothing to match against and the cast
+  falls back to `String.to_existing_atom/1`, which rejects exactly those atoms
+  nothing else mentions — `GAMEND_PAYMENTS_ENVIRONMENT=sandbox` was rejected
+  that way and silently became `:production`. Declare `:values` on every
+  `:atom` setting; the fallback exists for plugins compiled before it did.
+  """
+  @spec cast(String.t(), atom(), [atom()]) :: {:ok, term()} | :error
+  def cast(raw, :string, _values), do: {:ok, raw}
+
   # Downcased: every atom-valued setting is a lowercase choice (`s3`, `redis`,
   # `log`), and `STORAGE_ADAPTER=S3` should not silently miss.
-  # `to_existing_atom`, not `to_atom`: the set of atom-valued choices is fixed and
-  # already compiled in (`:s3`, `:redis`, `:log`, …), while the input is an
-  # environment string that a plugin reload re-reads at runtime. An unknown value
-  # is a typo, and a typo should fall back to the default rather than mint an
-  # atom that nothing will ever match.
-  def cast(raw, :atom) do
+  def cast(raw, :atom, [_ | _] = values) do
+    normalized = raw |> String.trim() |> String.downcase()
+
+    case Enum.find(values, &(Atom.to_string(&1) == normalized)) do
+      nil -> :error
+      value -> {:ok, value}
+    end
+  end
+
+  def cast(raw, :atom, []) do
     {:ok, raw |> String.trim() |> String.downcase() |> String.to_existing_atom()}
   rescue
     ArgumentError -> :error
   end
 
-  def cast(raw, :integer) do
+  def cast(raw, :integer, _values) do
     case Integer.parse(String.trim(raw)) do
       {int, ""} -> {:ok, int}
       _ -> :error
     end
   end
 
-  def cast(raw, :float) do
+  def cast(raw, :float, _values) do
     case Float.parse(String.trim(raw)) do
       {float, ""} -> {:ok, float}
       _ -> :error
     end
   end
 
-  def cast(raw, :boolean) do
+  def cast(raw, :boolean, _values) do
     case raw |> String.trim() |> String.downcase() do
       truthy when truthy in ~w(true 1 yes y on) -> {:ok, true}
       falsy when falsy in ~w(false 0 no n off none) -> {:ok, false}
@@ -239,7 +262,7 @@ defmodule Gamend.Settings do
     end
   end
 
-  def cast(raw, :log_level) do
+  def cast(raw, :log_level, _values) do
     case raw |> String.trim() |> String.downcase() do
       level when level in ~w(debug info warning error) -> {:ok, String.to_existing_atom(level)}
       "warn" -> {:ok, :warning}
@@ -251,7 +274,7 @@ defmodule Gamend.Settings do
   # Values arrive from a shell or a .env file, where `KEY=a,b # note` keeps the
   # comment as part of the value. Trimming it here costs one ignored entry
   # instead of a list that silently matches nothing.
-  def cast(raw, :list) do
+  def cast(raw, :list, _values) do
     entries =
       raw
       |> String.split(",", trim: true)

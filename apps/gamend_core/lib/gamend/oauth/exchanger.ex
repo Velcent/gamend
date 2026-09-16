@@ -473,22 +473,6 @@ defmodule Gamend.OAuth.Exchanger do
     end
   end
 
-  @doc """
-  Fetch a public Steam profile for a given steamid using GetPlayerSummaries.
-  Returns {:ok, map} or {:error, reason}.
-  """
-  def get_player_profile(steamid) when is_binary(steamid) do
-    api_key =
-      Application.get_env(:ueberauth, Ueberauth.Strategy.Steam)[:api_key] ||
-        Gamend.Settings.get(Gamend.OAuth.Providers, :steam_api_key)
-
-    if is_nil(api_key) or api_key == "" do
-      {:error, :no_api_key}
-    else
-      steam_profile_for(api_key, steamid)
-    end
-  end
-
   # Apple already logged its failures; the other providers returned a bare
   # string, so an admin saw nothing about *why* the provider said no.
   defp log_oauth_failure(provider, stage, result) do

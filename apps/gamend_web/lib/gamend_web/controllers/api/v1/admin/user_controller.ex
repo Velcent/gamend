@@ -94,12 +94,7 @@ defmodule GamendWeb.Api.V1.Admin.UserController do
         json(conn, %{data: serialize_user(updated)})
 
       {:error, %Ecto.Changeset{} = cs} ->
-        conn
-        |> put_status(:unprocessable_entity)
-        |> json(%{
-          error: "validation_failed",
-          errors: Ecto.Changeset.traverse_errors(cs, & &1)
-        })
+        unprocessable(conn, cs)
     end
   end
 
@@ -138,12 +133,7 @@ defmodule GamendWeb.Api.V1.Admin.UserController do
             json(conn, %{})
 
           {:error, %Ecto.Changeset{} = cs} ->
-            conn
-            |> put_status(:unprocessable_entity)
-            |> json(%{
-              error: "validation_failed",
-              errors: Ecto.Changeset.traverse_errors(cs, & &1)
-            })
+            unprocessable(conn, cs)
         end
     end
   end

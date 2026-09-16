@@ -804,11 +804,5 @@ defmodule GamendWeb.Api.V1.Admin.ChatModerationController do
     conn |> put_status(:unprocessable_entity) |> json(%{error: to_string(reason)})
   end
 
-  defp changeset_errors(%Ecto.Changeset{} = changeset) do
-    Ecto.Changeset.traverse_errors(changeset, fn {msg, opts} ->
-      Regex.replace(~r"%{(\w+)}", msg, fn _, key ->
-        opts |> Keyword.get(String.to_existing_atom(key), key) |> to_string()
-      end)
-    end)
-  end
+  defp changeset_errors(changeset), do: GamendWeb.ChangesetErrors.errors(changeset)
 end

@@ -160,7 +160,7 @@ defmodule GamendWeb.AdminLive.Parties do
                         <span class="font-mono">{p.leader_id}</span>
                         <%= if p.leader do %>
                           <span class="text-base-content/60 ml-1">
-                            ({p.leader.display_name || p.leader.email || "-"})
+                            ({Gamend.Accounts.display_label(p.leader)})
                           </span>
                         <% end %>
                       </td>
@@ -308,7 +308,7 @@ defmodule GamendWeb.AdminLive.Parties do
               <tbody>
                 <tr :for={m <- @members} id={"party-member-" <> to_string(m.id)}>
                   <td class="font-mono text-sm">{m.id}</td>
-                  <td class="text-sm">{m.display_name || m.email || "-"}</td>
+                  <td class="text-sm">{Gamend.Accounts.display_label(m)}</td>
                   <td class="text-sm">
                     <%= if m.id == @selected_party.leader_id do %>
                       <span class="badge badge-primary badge-sm">Leader</span>

@@ -120,6 +120,20 @@ return `data` with the affected resource, or `{"ok": true}` when there is
 nothing to return. Errors return `{"error": "snake_case_reason"}` with a
 matching HTTP status.
 
+**[R12]** A failed changeset adds the per-field detail under `errors`, keyed by
+field, each value a list of already-interpolated, already-translated messages:
+
+```json
+{"error": "validation_failed",
+ "errors": {"max_players": ["must be greater than or equal to min_players"]}}
+```
+
+`unprocessable(conn, changeset)` — imported into every controller — is the only
+way to write it; `GamendWeb.ChangesetErrors.errors/1` gives the map alone for
+the few endpoints whose status is deliberately not 422 (a uniqueness clash on
+lobby create is a 409). `mix gamend.api.lint` rejects a hand-rolled
+`traverse_errors` in a controller.
+
 An endpoint returning two parallel collections (friend requests) nests one
 standard meta per collection under `meta.incoming` / `meta.outgoing` rather
 than inventing a parallel-map shape.

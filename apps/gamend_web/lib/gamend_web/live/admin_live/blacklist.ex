@@ -86,14 +86,10 @@ defmodule GamendWeb.AdminLive.Blacklist do
 
   defp user_name(nil), do: "—"
 
-  defp user_name(user) do
-    cond do
-      is_binary(user.display_name) and user.display_name != "" -> user.display_name
-      is_binary(user.username) and user.username != "" -> user.username
-      is_binary(user.email) and user.email != "" -> user.email
-      true -> user.id
-    end
-  end
+  # `display_label/1` rather than a local chain: it ends at the username, which
+  # every account has, instead of falling through to the email (leaking it into
+  # a list that does not otherwise show it) and then the raw id.
+  defp user_name(user), do: Gamend.Accounts.display_label(user)
 
   # ── render ────────────────────────────────────────────────────────────────
 

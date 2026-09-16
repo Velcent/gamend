@@ -251,6 +251,17 @@ defmodule GamendWeb.HostLayoutShell do
           one of its own: on flush pages `NavbarAutohide` sets the header's
           `pointer-events: none`, and that inherits — a dialog inside it would
           be visible and unclickable. --%>
+    <%!-- Not daisyUI's `.modal`: that centres its box in the viewport, and on a
+          desktop the palette belongs under the button that opened it, not
+          across the middle of the page. So the dialog positions itself —
+          `search_palette.js` measures the button and writes `left`/`top`/
+          `width` here — and these classes are the fallback it starts from and
+          returns to on a narrow screen: a sheet along the top edge.
+
+          `showModal()` still does the rest, which is why this stays a
+          `<dialog>`: the top layer (no z-index to lose), Esc, the focus trap,
+          and a real `::backdrop` whose clicks report the dialog itself as the
+          target — which is how clicking outside closes it. --%>
     <dialog
       id="gamend-search"
       phx-update="ignore"
@@ -258,9 +269,14 @@ defmodule GamendWeb.HostLayoutShell do
       data-index-url={@index_url}
       data-query-url={@query_url}
       aria-labelledby="gamend-search-label"
-      class="modal modal-top sm:modal-middle"
+      class="fixed inset-x-0 top-0 m-0 w-full max-w-none max-h-none border-0 bg-transparent p-2 backdrop:bg-base-300/50 sm:backdrop:bg-transparent"
     >
-      <div class="modal-box max-w-xl p-3">
+      <%!-- The panel, and the thing "outside" is measured against: a click
+            that does not land inside it closes the palette. --%>
+      <div
+        data-gamend-search-panel
+        class="mx-auto flex max-h-full w-full max-w-xl flex-col overflow-hidden rounded-box border border-base-300 bg-base-100 p-2 shadow-xl"
+      >
         <h2 id="gamend-search-label" class="sr-only">
           {GamendWeb.HostLayouts.translate("Search")}
         </h2>
@@ -296,14 +312,21 @@ defmodule GamendWeb.HostLayoutShell do
 
         <%!-- `flex-nowrap`: daisyUI's `.menu` is `column wrap`, so a capped
               height wraps into a second column off to the side instead of
-              scrolling. --%>
+              scrolling.
+
+              `w-full min-w-0`: `.menu` is also `width: fit-content`, which is
+              right for a dropdown that hugs its items and wrong for a list
+              inside a fixed-width panel — it grew to the widest row (1260px
+              in a 576px box) and every row hung out over the right edge.
+              `min-w-0` is what then lets a long title actually truncate
+              instead of pushing the row back out again. --%>
         <ul
           id="gamend-search-results"
           data-gamend-search-results
           role="listbox"
           aria-label={GamendWeb.HostLayouts.translate("Search")}
           hidden
-          class="menu menu-sm mt-2 max-h-[60vh] flex-nowrap overflow-y-auto overflow-x-hidden overscroll-contain p-0"
+          class="menu menu-sm mt-2 max-h-[60vh] min-h-0 w-full min-w-0 flex-1 flex-nowrap overflow-y-auto overflow-x-hidden overscroll-contain p-0"
         >
         </ul>
 
@@ -318,19 +341,17 @@ defmodule GamendWeb.HostLayoutShell do
         </template>
 
         <template data-gamend-search-row>
-          <li>
-            <a role="option" class="flex items-center justify-between gap-3 rounded-lg px-3 py-2">
-              <span data-row-title class="truncate font-semibold"></span>
-              <span data-row-subtitle class="truncate text-xs opacity-60"></span>
+          <li class="w-full min-w-0">
+            <a
+              role="option"
+              class="flex w-full min-w-0 items-center justify-between gap-3 rounded-lg px-3 py-2"
+            >
+              <span data-row-title class="min-w-0 truncate font-semibold"></span>
+              <span data-row-subtitle class="min-w-0 truncate text-xs opacity-60"></span>
             </a>
           </li>
         </template>
       </div>
-
-      <%!-- A `<form method="dialog">` backdrop would be a second form inside
-            the LiveView DOM; the JS closes on a click that lands on the
-            dialog itself instead. --%>
-      <div class="modal-backdrop" data-gamend-search-backdrop></div>
     </dialog>
     """
   end

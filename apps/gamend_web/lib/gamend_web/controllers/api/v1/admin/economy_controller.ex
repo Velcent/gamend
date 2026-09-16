@@ -161,6 +161,9 @@ defmodule GamendWeb.Api.V1.Admin.EconomyController do
          {:ok, balance} <- apply(Economy, op, [uid, currency, amount, opts]) do
       json(conn, %{ok: true, user_id: uid, currency: currency, balance: balance})
     else
+      {:error, :user_not_found} ->
+        conn |> put_status(:not_found) |> json(%{error: "user_not_found"})
+
       {:error, reason} ->
         conn |> put_status(:bad_request) |> json(%{error: to_string(reason)})
 
@@ -262,6 +265,9 @@ defmodule GamendWeb.Api.V1.Admin.EconomyController do
          {:ok, quantity} <- apply(Inventory, op, [uid, item, qty, []]) do
       json(conn, %{ok: true, user_id: uid, item: item, quantity: quantity})
     else
+      {:error, :user_not_found} ->
+        conn |> put_status(:not_found) |> json(%{error: "user_not_found"})
+
       {:error, reason} ->
         conn |> put_status(:bad_request) |> json(%{error: to_string(reason)})
 

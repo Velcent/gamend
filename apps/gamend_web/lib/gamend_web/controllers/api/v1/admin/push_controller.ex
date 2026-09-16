@@ -175,7 +175,7 @@ defmodule GamendWeb.Api.V1.Admin.PushController do
   end
 
   defp user_name(%{user: %Gamend.Accounts.User{} = user}),
-    do: user.display_name || user.username
+    do: Gamend.Accounts.display_name(user)
 
   defp user_name(_), do: nil
 end

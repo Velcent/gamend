@@ -222,17 +222,7 @@ defmodule GamendWeb.Api.V1.NotificationController do
             conn |> put_status(:bad_request) |> json(%{error: "not_friends"})
 
           {:error, %Ecto.Changeset{} = cs} ->
-            conn
-            |> put_status(:unprocessable_entity)
-            |> json(%{
-              error: "validation_failed",
-              errors:
-                Ecto.Changeset.traverse_errors(cs, fn {msg, opts} ->
-                  Regex.replace(~r"%{(\w+)}", msg, fn _, key ->
-                    opts |> Keyword.get(String.to_existing_atom(key), key) |> to_string()
-                  end)
-                end)
-            })
+            unprocessable(conn, cs)
 
           {:error, reason} ->
             conn |> put_status(:bad_request) |> json(%{error: to_string(reason)})

@@ -537,11 +537,7 @@ defmodule GamendWeb.Api.V1.PartyController do
             conn |> put_status(:conflict) |> json(%{error: "already_in_party"})
 
           {:error, %Ecto.Changeset{} = changeset} ->
-            conn
-            |> put_status(:unprocessable_entity)
-            |> json(%{
-              error: Ecto.Changeset.traverse_errors(changeset, fn {msg, _opts} -> msg end)
-            })
+            unprocessable(conn, changeset)
 
           _other ->
             conn |> put_status(:unprocessable_entity) |> json(%{error: "unexpected_error"})
@@ -790,11 +786,7 @@ defmodule GamendWeb.Api.V1.PartyController do
             conn |> put_status(:unprocessable_entity) |> json(%{error: "too_small"})
 
           {:error, %Ecto.Changeset{} = changeset} ->
-            conn
-            |> put_status(:unprocessable_entity)
-            |> json(%{
-              error: Ecto.Changeset.traverse_errors(changeset, fn {msg, _opts} -> msg end)
-            })
+            unprocessable(conn, changeset)
 
           _other ->
             conn |> put_status(:unprocessable_entity) |> json(%{error: "unexpected_error"})
@@ -830,11 +822,7 @@ defmodule GamendWeb.Api.V1.PartyController do
             conn |> put_status(:conflict) |> json(%{error: "members_offline"})
 
           {:error, %Ecto.Changeset{} = changeset} ->
-            conn
-            |> put_status(:unprocessable_entity)
-            |> json(%{
-              error: Ecto.Changeset.traverse_errors(changeset, fn {msg, _opts} -> msg end)
-            })
+            unprocessable(conn, changeset)
 
           _other ->
             conn |> put_status(:unprocessable_entity) |> json(%{error: "unexpected_error"})

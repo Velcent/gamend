@@ -13,10 +13,12 @@ defmodule Gamend.Payments do
 
   alias Gamend.Accounts.User
   alias Gamend.Payments.Entitlement
+  alias Gamend.Payments.Params
   alias Gamend.Payments.Product
   alias Gamend.Payments.ProviderConfig
   alias Gamend.Payments.ProviderEvent
   alias Gamend.Payments.ProviderProduct
+  alias Gamend.Payments.Providers
   alias Gamend.Payments.Purchase
   alias Gamend.Payments.ReconciliationCursor
   alias Gamend.Repo
@@ -60,7 +62,7 @@ defmodule Gamend.Payments do
   @spec create_product(map()) :: {:ok, Product.t()} | {:error, Ecto.Changeset.t()}
   def create_product(attrs) when is_map(attrs) do
     %Product{}
-    |> Product.changeset(normalize_params(attrs))
+    |> Product.changeset(Params.normalize(attrs))
     |> Repo.insert()
     |> tap_bump({:payments, :product_version})
   end
@@ -68,7 +70,7 @@ defmodule Gamend.Payments do
   @spec update_product(Product.t(), map()) :: {:ok, Product.t()} | {:error, Ecto.Changeset.t()}
   def update_product(%Product{} = product, attrs) when is_map(attrs) do
     product
-    |> Product.changeset(normalize_params(attrs))
+    |> Product.changeset(Params.normalize(attrs))
     |> Repo.update()
     |> tap_bump({:payments, :product_version})
   end
@@ -98,7 +100,7 @@ defmodule Gamend.Payments do
           {:ok, ProviderProduct.t()} | {:error, Ecto.Changeset.t()}
   def create_provider_product(attrs) when is_map(attrs) do
     %ProviderProduct{}
-    |> ProviderProduct.changeset(normalize_params(attrs))
+    |> ProviderProduct.changeset(Params.normalize(attrs))
     |> Repo.insert()
     |> tap_bump({:payments, :provider_product_version})
   end
@@ -108,7 +110,7 @@ defmodule Gamend.Payments do
   def update_provider_product(%ProviderProduct{} = provider_product, attrs)
       when is_map(attrs) do
     provider_product
-    |> ProviderProduct.changeset(normalize_params(attrs))
+    |> ProviderProduct.changeset(Params.normalize(attrs))
     |> Repo.update()
     |> tap_bump({:payments, :provider_product_version})
   end
@@ -179,8 +181,8 @@ defmodule Gamend.Payments do
   def create_purchase(user, %ProviderProduct{} = provider_product, attrs \\ %{}) do
     user_id = user.id
     provider_product = Repo.preload(provider_product, :product)
-    attrs = normalize_params(attrs)
-    quantity = parse_positive_int(attrs["quantity"], 1)
+    attrs = Params.normalize(attrs)
+    quantity = Params.parse_positive_int(attrs["quantity"], 1)
     unit_amount = provider_product.unit_amount
 
     # NOTE: `attrs` here is trusted. The receipt-validation path
@@ -200,7 +202,7 @@ defmodule Gamend.Payments do
         "quantity" => quantity,
         "currency" => attrs["currency"] || provider_product.currency,
         "amount" => attrs["amount"] || total_amount(unit_amount, quantity),
-        "environment" => attrs["environment"] || default_environment()
+        "environment" => attrs["environment"] || ProviderConfig.environment()
       })
 
     %Purchase{}
@@ -302,7 +304,7 @@ defmodule Gamend.Payments do
   @spec revoke_purchase(Purchase.t(), map()) :: {:ok, Purchase.t()} | {:error, term()}
   def revoke_purchase(%Purchase{} = purchase, attrs \\ %{}) when is_map(attrs) do
     now = DateTime.utc_now(:second)
-    attrs = normalize_params(attrs)
+    attrs = Params.normalize(attrs)
 
     # A revocation removes entitlements the player paid for; losing it to a
     # crash leaves them holding goods a refund already took back.
@@ -348,7 +350,7 @@ defmodule Gamend.Payments do
   def validate_store_purchase(%User{} = user, provider, attrs)
       when provider in @store_validation_providers and is_map(attrs) do
     with {:ok, validation} <- provider_adapter(provider).validate_purchase(user, attrs),
-         validation <- normalize_params(validation),
+         validation <- Params.normalize(validation),
          {:ok, external_id} <- required_value(validation, "product_id"),
          {:ok, transaction_id} <- required_value(validation, "transaction_id"),
          %ProviderProduct{} = provider_product <- get_provider_product(provider, external_id) do
@@ -388,7 +390,7 @@ defmodule Gamend.Payments do
            %{purchase: Purchase.t(), checkout_url: String.t(), provider_session_id: String.t()}}
           | {:error, term()}
   def create_stripe_checkout(%User{} = user, attrs) when is_map(attrs) do
-    attrs = attrs |> normalize_params() |> client_checkout_attrs()
+    attrs = attrs |> Params.normalize() |> client_checkout_attrs()
 
     with {:ok, provider_product} <- resolve_provider_product("stripe", attrs),
          :ok <- ensure_checkout_allowed(user, provider_product, attrs),
@@ -416,7 +418,7 @@ defmodule Gamend.Payments do
   @spec handle_stripe_webhook(binary(), binary() | nil) :: {:ok, atom()} | {:error, term()}
   def handle_stripe_webhook(raw_body, signature) when is_binary(raw_body) do
     with {:ok, event} <- stripe_adapter().verify_webhook(raw_body, signature),
-         event <- normalize_params(event),
+         event <- Params.normalize(event),
          {:ok, event_id} <- required_value(event, "id"),
          event_type when is_binary(event_type) <- event["type"] do
       claim_provider_event("stripe", event_id, event_type, event, fn ->
@@ -438,7 +440,7 @@ defmodule Gamend.Payments do
         } = purchase
       ) do
     with {:ok, session} <- stripe_adapter().retrieve_checkout_session(session_id),
-         session <- normalize_params(session),
+         session <- Params.normalize(session),
          :ok <- ensure_stripe_session_matches_purchase(purchase, session),
          {:ok, updated_purchase, result} <-
            reconcile_stripe_purchase_from_session(purchase, session) do
@@ -463,7 +465,7 @@ defmodule Gamend.Payments do
          {:ok, subscription_id} <- stripe_subscription_id(purchase),
          {:ok, subscription} <-
            stripe_adapter().cancel_subscription_at_period_end(subscription_id),
-         subscription <- normalize_params(subscription),
+         subscription <- Params.normalize(subscription),
          {:ok, updated_purchase} <-
            update_purchase_from_stripe_subscription(
              purchase,
@@ -508,7 +510,7 @@ defmodule Gamend.Payments do
   def create_steam_checkout(%User{} = user, attrs) when is_map(attrs) do
     attrs =
       attrs
-      |> normalize_params()
+      |> Params.normalize()
       |> client_checkout_attrs()
       |> Map.put("order_id", generate_steam_order_id())
 
@@ -540,13 +542,13 @@ defmodule Gamend.Payments do
   @spec finalize_steam_purchase(User.t(), map()) ::
           {:ok, %{purchase: Purchase.t()}} | {:error, term()}
   def finalize_steam_purchase(%User{} = user, attrs) when is_map(attrs) do
-    attrs = normalize_params(attrs)
+    attrs = Params.normalize(attrs)
 
     with {:ok, order_id} <- required_value(attrs, "order_id"),
          %Purchase{provider: "steam", user_id: user_id} = purchase when user_id == user.id <-
            get_purchase_by_order_id(order_id),
          {:ok, validation} <- provider_adapter("steam").finalize_transaction(purchase, attrs),
-         validation <- normalize_params(validation),
+         validation <- Params.normalize(validation),
          {:ok, updated} <- update_purchase_from_validation(purchase, validation),
          {:ok, final_purchase} <- apply_validated_status(updated, validation) do
       {:ok, %{purchase: final_purchase}}
@@ -564,7 +566,7 @@ defmodule Gamend.Payments do
   @spec handle_google_webhook(binary(), binary() | nil) :: {:ok, atom()} | {:error, term()}
   def handle_google_webhook(raw_body, authorization_header) when is_binary(raw_body) do
     with {:ok, event} <- provider_adapter("google").verify_webhook(raw_body, authorization_header),
-         event <- normalize_params(event),
+         event <- Params.normalize(event),
          event_id <- event["message_id"] || provider_event_hash("google", raw_body),
          event_type <- google_event_type(event) do
       claim_provider_event("google", event_id, event_type, event, fn ->
@@ -578,7 +580,7 @@ defmodule Gamend.Payments do
   @spec handle_apple_webhook(binary()) :: {:ok, atom()} | {:error, term()}
   def handle_apple_webhook(raw_body) when is_binary(raw_body) do
     with {:ok, event} <- provider_adapter("apple").verify_notification(raw_body),
-         event <- normalize_params(event),
+         event <- Params.normalize(event),
          event_id <- event["notificationUUID"] || provider_event_hash("apple", raw_body),
          event_type when is_binary(event_type) <- event["notificationType"] do
       claim_provider_event("apple", event_id, event_type, event, fn ->
@@ -672,7 +674,7 @@ defmodule Gamend.Payments do
       api_version_source: source_label(api_version_source) || "stripity_stripe default",
       masked_secret_key: mask_secret(secret_key),
       masked_webhook_secret: mask_secret(webhook_secret),
-      environment: default_environment()
+      environment: ProviderConfig.environment()
     }
   end
 
@@ -711,15 +713,10 @@ defmodule Gamend.Payments do
 
   @spec list_admin_products(keyword()) :: [Product.t()]
   def list_admin_products(opts \\ []) do
-    page = positive_page(opts)
-    page_size = page_size(opts)
-    offset = page_offset(page, page_size)
-
     from(p in Product,
-      order_by: [desc: p.inserted_at, desc: p.id],
-      limit: ^page_size,
-      offset: ^offset
+      order_by: [desc: p.inserted_at, desc: p.id]
     )
+    |> Gamend.Query.page(opts)
     |> Repo.all()
   end
 
@@ -730,16 +727,11 @@ defmodule Gamend.Payments do
 
   @spec list_admin_provider_products(keyword()) :: [ProviderProduct.t()]
   def list_admin_provider_products(opts \\ []) do
-    page = positive_page(opts)
-    page_size = page_size(opts)
-    offset = page_offset(page, page_size)
-
     from(pp in ProviderProduct,
       order_by: [desc: pp.inserted_at, desc: pp.id],
-      preload: [:product],
-      limit: ^page_size,
-      offset: ^offset
+      preload: [:product]
     )
+    |> Gamend.Query.page(opts)
     |> Repo.all()
   end
 
@@ -750,16 +742,11 @@ defmodule Gamend.Payments do
 
   @spec list_admin_purchases(keyword()) :: [Purchase.t()]
   def list_admin_purchases(opts \\ []) do
-    page = positive_page(opts)
-    page_size = page_size(opts)
-    offset = page_offset(page, page_size)
-
     Purchase
     |> admin_purchase_filters(opts)
     |> order_by([p], desc: p.inserted_at, desc: p.id)
     |> preload([:product, :provider_product, :user])
-    |> limit(^page_size)
-    |> offset(^offset)
+    |> Gamend.Query.page(opts)
     |> Repo.all()
   end
 
@@ -772,16 +759,11 @@ defmodule Gamend.Payments do
 
   @spec list_admin_entitlements(keyword()) :: [Entitlement.t()]
   def list_admin_entitlements(opts \\ []) do
-    page = positive_page(opts)
-    page_size = page_size(opts)
-    offset = page_offset(page, page_size)
-
     Entitlement
     |> admin_entitlement_filters(opts)
     |> order_by([e], desc: e.inserted_at, desc: e.id)
     |> preload([:product, :source_purchase, :user])
-    |> limit(^page_size)
-    |> offset(^offset)
+    |> Gamend.Query.page(opts)
     |> Repo.all()
   end
 
@@ -794,15 +776,10 @@ defmodule Gamend.Payments do
 
   @spec list_provider_events(keyword()) :: [ProviderEvent.t()]
   def list_provider_events(opts \\ []) do
-    page = positive_page(opts)
-    page_size = page_size(opts)
-    offset = page_offset(page, page_size)
-
     ProviderEvent
     |> provider_event_filters(opts)
     |> order_by([e], desc: e.inserted_at, desc: e.id)
-    |> limit(^page_size)
-    |> offset(^offset)
+    |> Gamend.Query.page(opts)
     |> Repo.all()
   end
 
@@ -815,15 +792,10 @@ defmodule Gamend.Payments do
 
   @spec list_reconciliation_cursors(keyword()) :: [ReconciliationCursor.t()]
   def list_reconciliation_cursors(opts \\ []) do
-    page = positive_page(opts)
-    page_size = page_size(opts)
-    offset = page_offset(page, page_size)
-
     from(c in ReconciliationCursor,
-      order_by: [asc: c.provider, asc: c.name],
-      limit: ^page_size,
-      offset: ^offset
+      order_by: [asc: c.provider, asc: c.name]
     )
+    |> Gamend.Query.page(opts)
     |> Repo.all()
   end
 
@@ -987,7 +959,7 @@ defmodule Gamend.Payments do
 
   defp ensure_single_ownership_quantity(%Product{kind: kind}, attrs)
        when kind in ["entitlement", "subscription"] do
-    if parse_positive_int(attrs["quantity"], 1) == 1 do
+    if Params.parse_positive_int(attrs["quantity"], 1) == 1 do
       :ok
     else
       {:error, :quantity_not_allowed}
@@ -1215,7 +1187,7 @@ defmodule Gamend.Payments do
       "quantity" => validation["quantity"] || 1,
       "currency" => validation["currency"],
       "amount" => validation["amount"],
-      "environment" => validation["environment"] || default_environment(),
+      "environment" => validation["environment"] || ProviderConfig.environment(),
       "expires_at" => parse_datetime(validation["expires_at"]),
       "raw_provider_payload" => validation["raw_payload"] || validation
     }
@@ -1249,10 +1221,9 @@ defmodule Gamend.Payments do
   # `"environment"` — Apple maps `Sandbox`/`Xcode`, Google maps `purchaseType`
   # 0 — so one comparison covers all of them.
   defp test_purchase?(validation) do
-    configured = to_string(default_environment())
     reported = validation["environment"]
 
-    configured == "production" and is_binary(reported) and
+    ProviderConfig.production?() and is_binary(reported) and
       String.downcase(reported) != "production"
   end
 
@@ -1557,7 +1528,7 @@ defmodule Gamend.Payments do
       "status" => "completed",
       "quantity" => transaction["quantity"] || 1,
       "environment" => apple_event_environment(transaction["environment"]),
-      "expires_at" => millis_to_iso8601(transaction["expiresDate"]),
+      "expires_at" => Params.millis_to_iso8601(transaction["expiresDate"]),
       "raw_payload" => %{"apple_transaction" => transaction}
     }
   end
@@ -1565,7 +1536,7 @@ defmodule Gamend.Payments do
   defp apple_event_environment("Sandbox"), do: "sandbox"
   defp apple_event_environment("Production"), do: "production"
   defp apple_event_environment("Xcode"), do: "test"
-  defp apple_event_environment(_environment), do: default_environment()
+  defp apple_event_environment(_environment), do: ProviderConfig.environment()
 
   defp purchase_from_provider_object(object) do
     metadata = object["metadata"] || %{}
@@ -1958,7 +1929,7 @@ defmodule Gamend.Payments do
       subscription_id when is_binary(subscription_id) and subscription_id != "" ->
         case stripe_adapter().retrieve_subscription(subscription_id) do
           {:ok, subscription} ->
-            normalize_params(subscription)
+            Params.normalize(subscription)
 
           {:error, reason} ->
             Logger.warning(
@@ -2041,7 +2012,7 @@ defmodule Gamend.Payments do
 
   defp unix_seconds_to_datetime(value) when is_binary(value) do
     value
-    |> parse_int()
+    |> Params.parse_int()
     |> unix_seconds_to_datetime()
   end
 
@@ -2154,14 +2125,14 @@ defmodule Gamend.Payments do
     adapters =
       Application.get_env(:gamend_core, :payment_provider_adapters, [])
 
-    key =
-      case provider do
-        "apple" -> :apple
-        "google" -> :google
-        "steam" -> :steam
-      end
-
-    Keyword.get(adapters, key, default_provider_adapter(provider))
+    # A `case` with no catch-all raised CaseClauseError on any other string,
+    # which is a 500 for what is really "no such provider".
+    case provider do
+      "apple" -> Keyword.get(adapters, :apple, Providers.Apple)
+      "google" -> Keyword.get(adapters, :google, Providers.Google)
+      "steam" -> Keyword.get(adapters, :steam, Providers.Steam)
+      _other -> nil
+    end
   end
 
   defp stripe_adapter do
@@ -2172,32 +2143,16 @@ defmodule Gamend.Payments do
     )
   end
 
-  defp default_provider_adapter("apple"), do: Gamend.Payments.Providers.Apple
-  defp default_provider_adapter("google"), do: Gamend.Payments.Providers.Google
-  defp default_provider_adapter("steam"), do: Gamend.Payments.Providers.Steam
+  defp provider_module_status(nil), do: %{configured: false}
 
   defp provider_module_status(module) do
+    # `config_status/0` is an optional callback of `Gamend.Payments.Provider`.
     if function_exported?(module, :config_status, 0) do
       module.config_status()
     else
       %{configured: true}
     end
   end
-
-  defp positive_page(opts) do
-    opts
-    |> Keyword.get(:page, 1)
-    |> parse_positive_int(1)
-  end
-
-  defp page_size(opts) do
-    opts
-    |> Keyword.get(:page_size, 50)
-    |> parse_positive_int(50)
-    |> min(250)
-  end
-
-  defp page_offset(page, page_size), do: (page - 1) * page_size
 
   defp admin_purchase_filters(query, opts) do
     query
@@ -2264,7 +2219,7 @@ defmodule Gamend.Payments do
   defp mask_secret(_value), do: "<unset>"
 
   defp entitlement_expiry(%Product{kind: "subscription", grant_config: config}) do
-    duration = parse_positive_int((config || %{})["duration_seconds"], 0)
+    duration = Params.parse_positive_int((config || %{})["duration_seconds"], 0)
 
     if duration > 0 do
       DateTime.utc_now(:second) |> DateTime.add(duration, :second)
@@ -2288,10 +2243,6 @@ defmodule Gamend.Payments do
     int |> rem(9_000_000_000_000_000_000) |> Kernel.+(1_000_000_000_000_000_000) |> to_string()
   end
 
-  defp default_environment do
-    ProviderConfig.environment()
-  end
-
   defp source_label({label, _value}), do: label
   defp source_label(nil), do: nil
 
@@ -2307,24 +2258,6 @@ defmodule Gamend.Payments do
     end
   end
 
-  defp parse_positive_int(value, default) do
-    case parse_int(value) do
-      int when is_integer(int) and int > 0 -> int
-      _ -> default
-    end
-  end
-
-  defp parse_int(value) when is_integer(value), do: value
-
-  defp parse_int(value) when is_binary(value) do
-    case Integer.parse(value) do
-      {int, ""} -> int
-      _ -> nil
-    end
-  end
-
-  defp parse_int(_value), do: nil
-
   defp parse_datetime(nil), do: nil
   defp parse_datetime(%DateTime{} = dt), do: DateTime.truncate(dt, :second)
 
@@ -2337,24 +2270,6 @@ defmodule Gamend.Payments do
 
   defp parse_datetime(_value), do: nil
 
-  defp millis_to_iso8601(nil), do: nil
-
-  defp millis_to_iso8601(value) do
-    with int when is_integer(int) <- parse_int(value),
-         {:ok, dt} <- DateTime.from_unix(int, :millisecond) do
-      DateTime.to_iso8601(dt)
-    else
-      _ -> nil
-    end
-  end
-
   defp normalize_currency(nil), do: nil
   defp normalize_currency(currency) when is_binary(currency), do: String.upcase(currency)
-
-  defp normalize_params(attrs) when is_map(attrs) do
-    Map.new(attrs, fn
-      {k, v} when is_atom(k) -> {Atom.to_string(k), v}
-      {k, v} -> {k, v}
-    end)
-  end
 end

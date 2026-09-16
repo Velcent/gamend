@@ -67,9 +67,7 @@ defmodule GamendWeb.Api.V1.Admin.LeaderboardController do
         json(conn, %{data: lb})
 
       {:error, %Ecto.Changeset{} = cs} ->
-        conn
-        |> put_status(:unprocessable_entity)
-        |> json(%{error: "validation_failed", errors: Ecto.Changeset.traverse_errors(cs, & &1)})
+        unprocessable(conn, cs)
     end
   end
 
@@ -144,9 +142,7 @@ defmodule GamendWeb.Api.V1.Admin.LeaderboardController do
         conn |> put_status(:not_found) |> json(%{error: "not_found"})
 
       {:error, %Ecto.Changeset{} = cs} ->
-        conn
-        |> put_status(:unprocessable_entity)
-        |> json(%{error: "validation_failed", errors: Ecto.Changeset.traverse_errors(cs, & &1)})
+        unprocessable(conn, cs)
     end
   end
 
@@ -242,12 +238,7 @@ defmodule GamendWeb.Api.V1.Admin.LeaderboardController do
             json(conn, %{})
 
           {:error, %Ecto.Changeset{} = cs} ->
-            conn
-            |> put_status(:unprocessable_entity)
-            |> json(%{
-              error: "validation_failed",
-              errors: Ecto.Changeset.traverse_errors(cs, & &1)
-            })
+            unprocessable(conn, cs)
         end
     end
   end
@@ -260,11 +251,6 @@ defmodule GamendWeb.Api.V1.Admin.LeaderboardController do
   end
 
   defp changeset_error(conn, changeset) do
-    conn
-    |> put_status(:unprocessable_entity)
-    |> json(%{
-      error: "validation_failed",
-      errors: Ecto.Changeset.traverse_errors(changeset, & &1)
-    })
+    unprocessable(conn, changeset)
   end
 end

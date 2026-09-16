@@ -859,7 +859,10 @@ defmodule GamendWeb.Api.V1.GroupController do
         {:error, %Ecto.Changeset{} = changeset} ->
           conn
           |> put_status(:conflict)
-          |> json(%{error: Ecto.Changeset.traverse_errors(changeset, fn {msg, _} -> msg end)})
+          |> json(%{
+            error: "validation_failed",
+            errors: GamendWeb.ChangesetErrors.errors(changeset)
+          })
 
         {:error, reason} when is_atom(reason) ->
           conn |> put_status(:conflict) |> json(%{error: to_string(reason)})
@@ -887,11 +890,7 @@ defmodule GamendWeb.Api.V1.GroupController do
               |> json(%{error: "max_members_too_low"})
 
             {:error, %Ecto.Changeset{} = changeset} ->
-              conn
-              |> put_status(:unprocessable_entity)
-              |> json(%{
-                error: Ecto.Changeset.traverse_errors(changeset, fn {msg, _} -> msg end)
-              })
+              unprocessable(conn, changeset)
 
             {:error, reason} when is_atom(reason) ->
               conn |> put_status(:unprocessable_entity) |> json(%{error: to_string(reason)})

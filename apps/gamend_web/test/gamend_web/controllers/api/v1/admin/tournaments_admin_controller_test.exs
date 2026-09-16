@@ -138,7 +138,7 @@ defmodule GamendWeb.Api.V1.Admin.TournamentsAdminControllerTest do
       |> post("/api/v1/admin/tournaments", %{"slug" => "bad"})
       |> json_response(422)
 
-    assert resp["error"] == "invalid_data"
+    assert resp["error"] == "validation_failed"
     assert resp["errors"]["title"]
   end
 

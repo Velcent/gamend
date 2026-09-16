@@ -53,6 +53,9 @@ defmodule Gamend.ApiConventions do
        nullable_string_schemas() ++
        hand_rolled_meta() ++
        hand_rolled_page_params() ++
+       hand_rolled_changeset_errors() ++
+       hand_rolled_context_paging() ++
+       inline_display_name_fallback() ++
        stale_documented_routes() ++
        role_named_predicates() ++
        inline_ownership_checks())
@@ -194,6 +197,78 @@ defmodule Gamend.ApiConventions do
         file: file,
         line: line,
         message: "build pagination meta with GamendWeb.Pagination.meta/4"
+      }
+    end
+  end
+
+  # ── R14: one way to name a user ───────────────────────────────────────────
+  #
+  # Four inline fallbacks were in use at once. Parties wrote
+  # `display_name || ""`, so an invite from a player who had set no display
+  # name arrived from nobody; group invites wrote `display_name || username`;
+  # three admin views fell through to the email and then the raw id.
+
+  defp inline_display_name_fallback do
+    for {file, line, text} <- source_lines(schema_dirs() ++ source_dirs()),
+        not String.ends_with?(file, "accounts.ex"),
+        # `display_name: user.display_name || ""` is R1's null coalescing on the
+        # field itself, not a name fallback. Only a fallback to *another* value
+        # is one.
+        Regex.match?(~r/\.display_name\s*\|\|\s*[^\s"]/, text) do
+      %{
+        rule: "R14-display-name",
+        file: file,
+        line: line,
+        message:
+          "name a user with Gamend.Accounts.display_name/1, " <>
+            "or display_label/1 where the handle disambiguates"
+      }
+    end
+  end
+
+  # ── R13: contexts window queries through Gamend.Query ─────────────────────
+  #
+  # Seven contexts each had a private `paginate/2`, in four behaviours. Three
+  # applied `:page_size` unclamped, so a plugin calling the context directly
+  # could ask for a million rows; two clamped to a hard-coded 1000 that ignored
+  # the configurable `max_page_size`. R8 covers the controller layer, which is
+  # not the layer a plugin calls.
+
+  defp hand_rolled_context_paging do
+    for {file, line, text} <- source_lines(schema_dirs()),
+        not String.ends_with?(file, "query.ex"),
+        # Mix tasks are not context listings; a sampling `limit` is theirs to set.
+        not String.contains?(file, "/mix/tasks/"),
+        Regex.match?(~r/^\s*\|>\s*(limit|offset)\(\^/, text) do
+      %{
+        rule: "R13-context-paging",
+        file: file,
+        line: line,
+        message:
+          "window a listing with Gamend.Query.page/2 or maybe_page/2, " <>
+            "or clamp with Gamend.Limits.clamp_page/1 and clamp_page_size/2"
+      }
+    end
+  end
+
+  # ── R12: changeset errors go through GamendWeb.ChangesetErrors ────────────
+  #
+  # Forty-six sites serialized them by hand in three payload shapes under three
+  # envelope keys. Seventeen left the raw `{msg, opts}` tuple in the map, which
+  # Jason cannot encode — those endpoints answered 500 where their own OpenAPI
+  # operation documented a 422.
+
+  defp hand_rolled_changeset_errors do
+    for {file, line, text} <- source_lines(source_dirs()),
+        controller?(file),
+        String.contains?(text, "Ecto.Changeset.traverse_errors") do
+      %{
+        rule: "R12-changeset-errors",
+        file: file,
+        line: line,
+        message:
+          "answer a failed changeset with unprocessable/2, or " <>
+            "GamendWeb.ChangesetErrors.errors/1 when the status must differ"
       }
     end
   end

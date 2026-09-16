@@ -466,9 +466,7 @@ defmodule GamendWeb.Api.V1.Admin.QuestController do
     json(conn, %{data: Quests.funnel(key)})
   end
 
-  defp changeset_errors(changeset) do
-    Ecto.Changeset.traverse_errors(changeset, fn {msg, _opts} -> msg end)
-  end
+  defp changeset_errors(changeset), do: GamendWeb.ChangesetErrors.errors(changeset)
 
   defp with_quest(conn, id, fun) do
     case Quests.get_quest(id) do

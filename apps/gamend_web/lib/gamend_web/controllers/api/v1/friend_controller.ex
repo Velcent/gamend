@@ -463,12 +463,7 @@ defmodule GamendWeb.Api.V1.FriendController do
             conn |> put_status(:bad_request) |> json(%{error: "cannot_friend_self"})
 
           {:error, %Ecto.Changeset{} = cs} ->
-            conn
-            |> put_status(:unprocessable_entity)
-            |> json(%{
-              error: "validation_failed",
-              errors: Ecto.Changeset.traverse_errors(cs, & &1)
-            })
+            unprocessable(conn, cs)
 
           {:error, reason} ->
             conn |> put_status(:bad_request) |> json(%{error: to_string(reason)})

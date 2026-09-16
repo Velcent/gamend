@@ -296,15 +296,10 @@ defmodule Gamend.Notifications do
   """
   @spec list_all_notifications(map(), keyword()) :: [Notification.t()]
   def list_all_notifications(filters \\ %{}, opts \\ []) do
-    page = Keyword.get(opts, :page, 1)
-    page_size = Keyword.get(opts, :page_size, 25)
-    offset = (page - 1) * page_size
-
     Notification
     |> apply_admin_filters(filters)
     |> order_by([n], desc: n.inserted_at, desc: n.id)
-    |> limit(^page_size)
-    |> offset(^offset)
+    |> Gamend.Query.page(opts)
     |> preload([:sender, :recipient])
     |> Repo.all()
   end

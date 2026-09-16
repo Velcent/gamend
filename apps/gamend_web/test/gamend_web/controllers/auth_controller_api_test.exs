@@ -185,15 +185,6 @@ defmodule GamendWeb.AuthControllerApiTest do
             exchange_steam_ticket("valid_ticket")
           end
         end
-
-        def get_player_profile("99999"),
-          do:
-            {:ok,
-             %{
-               "id" => "99999",
-               "display_name" => "SteamUser",
-               "profile_url" => "https://steam/profile/99999"
-             }}
       end
 
       Application.put_env(:gamend_web, :oauth_exchanger, MockExchangerSteamTicketOk)
@@ -542,15 +533,6 @@ defmodule GamendWeb.AuthControllerApiTest do
              "profile_url" => "https://steam/profile/99999"
            }}
         end
-
-        def get_player_profile(_steamid),
-          do:
-            {:ok,
-             %{
-               "id" => "99999",
-               "display_name" => "SteamUser",
-               "profile_url" => "https://steam/profile/99999"
-             }}
       end
 
       Application.put_env(:gamend_web, :oauth_exchanger, MockExchangerSteamIdOnlyNoProfile)
@@ -574,15 +556,6 @@ defmodule GamendWeb.AuthControllerApiTest do
 
       defmodule MockExchangerSteamIdOnlyWithProfile do
         def exchange_steam_ticket("valid_ticket", _opts) do
-          {:ok,
-           %{
-             "id" => "99999",
-             "display_name" => "FetchedName",
-             "profile_url" => "https://steam/profile/99999"
-           }}
-        end
-
-        def get_player_profile("99999") do
           {:ok,
            %{
              "id" => "99999",

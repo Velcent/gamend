@@ -408,6 +408,29 @@ defmodule Gamend.MatchmakingTest do
     end
   end
 
+  describe "get_ticket/1" do
+    test "returns the ticket with its user preloaded" do
+      alice = user()
+      {:ok, ticket} = Matchmaking.join(alice, %{"mode" => "ranked"})
+
+      found = Matchmaking.get_ticket(ticket.id)
+
+      assert found.id == ticket.id
+      # Preloaded, not a NotLoaded struct: admin views render the user straight
+      # off this call.
+      assert found.user.id == alice.id
+    end
+
+    test "returns nil for an unknown id" do
+      assert Matchmaking.get_ticket(Ecto.UUID.generate()) == nil
+    end
+
+    test "returns nil for a malformed id rather than raising" do
+      # Ids reach this from request paths, so a non-UUID must not 500.
+      assert Matchmaking.get_ticket("not-a-uuid") == nil
+    end
+  end
+
   describe "worker registration" do
     test "registers locally, not via :global" do
       # A :global name would make a second node's supervisor fail to boot on

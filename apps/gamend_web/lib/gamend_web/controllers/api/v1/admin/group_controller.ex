@@ -188,11 +188,7 @@ defmodule GamendWeb.Api.V1.Admin.GroupController do
               json(conn, serialize_group(updated))
 
             {:error, changeset} ->
-              conn
-              |> put_status(:unprocessable_entity)
-              |> json(%{
-                error: Ecto.Changeset.traverse_errors(changeset, fn {msg, _} -> msg end)
-              })
+              unprocessable(conn, changeset)
           end
         end
     end

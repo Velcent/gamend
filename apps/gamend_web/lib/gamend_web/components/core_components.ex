@@ -930,13 +930,6 @@ defmodule GamendWeb.CoreComponents do
   end
 
   @doc """
-  Translates the errors for a field from a keyword list of errors.
-  """
-  def translate_errors(errors, field) when is_list(errors) do
-    for {^field, {msg, opts}} <- errors, do: translate_error({msg, opts})
-  end
-
-  @doc """
   Renders a stored-UTC timestamp for a human reader.
 
   The server has no timezone database and no idea where the reader is, so it

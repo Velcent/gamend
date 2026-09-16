@@ -115,6 +115,13 @@ defmodule Gamend.Economy do
       not valid_currency?(currency) ->
         {:error, :invalid_currency}
 
+      # Checked before the write: SQLite cannot tell Ecto which constraint an
+      # INSERT violated, so the wallet's foreign key surfaced as a raised
+      # `Ecto.ConstraintError` rather than an error tuple — a 500 on an admin
+      # grant naming a stale user. See `Gamend.Accounts.user_exists?/1`.
+      not Gamend.Accounts.user_exists?(user_id) ->
+        {:error, :user_not_found}
+
       idem && idem_applied?(idem) ->
         {:ok, balance(user_id, currency)}
 
@@ -165,25 +172,13 @@ defmodule Gamend.Economy do
   end
 
   defp run_change(user_id, currency, delta, reason, idem, metadata) do
-    result =
-      Repo.transaction(fn ->
-        case apply_delta(user_id, currency, delta) do
-          {:ok, new_balance} ->
-            record_ledger(user_id, currency, delta, new_balance, reason, idem, metadata)
-            new_balance
-
-          {:error, err} ->
-            Repo.rollback(err)
-        end
-      end)
-
-    case result do
-      {:ok, new_balance} -> {:ok, new_balance}
-      # Lost the race to a concurrent request with the same idempotency key —
-      # the other one applied it; return the resulting balance.
-      {:error, :idempotent_replay} -> {:ok, balance(user_id, currency)}
-      {:error, err} -> {:error, err}
-    end
+    Gamend.Ledger.change(
+      fn -> apply_delta(user_id, currency, delta) end,
+      fn new_balance ->
+        record_ledger(user_id, currency, delta, new_balance, reason, idem, metadata)
+      end,
+      fn -> balance(user_id, currency) end
+    )
   end
 
   defp apply_delta(user_id, currency, delta) when delta > 0 do
@@ -236,13 +231,8 @@ defmodule Gamend.Economy do
     })
     |> Repo.insert()
     |> case do
-      {:ok, entry} ->
-        entry
-
-      {:error, changeset} ->
-        if Keyword.has_key?(changeset.errors, :idempotency_key),
-          do: Repo.rollback(:idempotent_replay),
-          else: Repo.rollback({:ledger_error, changeset})
+      {:ok, entry} -> entry
+      {:error, changeset} -> Gamend.Ledger.rollback_insert_error(changeset, :ledger_error)
     end
   end
 
@@ -324,11 +314,5 @@ defmodule Gamend.Economy do
     end
   end
 
-  defp paginate(query, opts) do
-    page = max(Keyword.get(opts, :page, 1), 1)
-    page_size = Keyword.get(opts, :page_size, 25)
-    offset = (page - 1) * page_size
-
-    query |> limit(^page_size) |> offset(^offset)
-  end
+  defp paginate(query, opts), do: Gamend.Query.page(query, opts)
 end

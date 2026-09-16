@@ -200,11 +200,6 @@ defmodule GamendWeb.Api.V1.MatchmakingController do
   defp parse_optional_int(_value), do: nil
 
   defp changeset_error(conn, changeset) do
-    conn
-    |> put_status(:unprocessable_entity)
-    |> json(%{
-      error: "invalid_data",
-      errors: Ecto.Changeset.traverse_errors(changeset, fn {msg, _opts} -> msg end)
-    })
+    unprocessable(conn, changeset)
   end
 end

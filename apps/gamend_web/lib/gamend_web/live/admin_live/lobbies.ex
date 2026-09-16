@@ -406,7 +406,7 @@ defmodule GamendWeb.AdminLive.Lobbies do
               <tbody>
                 <tr :for={m <- @members} id={"lobby-member-" <> to_string(m.id)}>
                   <td class="font-mono text-sm">{m.id}</td>
-                  <td class="text-sm">{m.display_name || m.email || "-"}</td>
+                  <td class="text-sm">{Gamend.Accounts.display_label(m)}</td>
                   <td class="text-sm">
                     <%= if m.id == @selected_lobby.host_id do %>
                       <span class="badge badge-primary badge-sm">Host</span>

@@ -596,9 +596,7 @@ jobs:
 
   publish-js-sdk:
     name: Publish JS SDK
-    # Disable it temporarily
-    if: false
-    #if: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
+    if: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -650,6 +648,22 @@ jobs:
           # so the cache key is computed correctly.
           cache-dependency-path: clients/package-lock.json
 
+      # Trusted publishing needs npm >= 11.5.1; Node 24 originally shipped
+      # 11.3.0. An older CLI does not fail loudly - it ignores the OIDC
+      # environment, falls back to looking for a token, and dies with
+      # ENEEDAUTH, which reads like a broken trusted publisher rather than a
+      # stale CLI. Pin the floor so that guess is never needed.
+      - name: Ensure npm supports trusted publishing (OIDC)
+        run: |
+          set -euo pipefail
+          need=11.5.1
+          have=$(npm --version)
+          if [ "$(printf '%s\n%s\n' "$need" "$have" | sort -V | head -1)" != "$need" ]; then
+            echo "npm ${have} is older than ${need}; upgrading."
+            npm install -g npm@latest
+          fi
+          echo "npm $(npm --version)"
+
       - name: Set up Elixir helpers
         working-directory: /tmp
         run: |
@@ -694,12 +708,25 @@ jobs:
       - name: Apply version and publish
         run: |
           cd clients/javascript
-          echo "Publishing package with version=${{ steps.version.outputs.version }}"
-          npm version ${{ steps.version.outputs.version }} --no-git-tag-version
-          # Trusted Publishing (OIDC) — npm 11+ auto-detects the OIDC
-          # environment and authenticates without tokens. Provenance
-          # attestations are generated automatically.
-          npm publish --access public
+          PKG=$(jq -r .name package.json)
+          echo "Publishing ${PKG} with version=${APP_VERSION}"
+          npm version "${APP_VERSION}" --no-git-tag-version
+          # Same re-publish guard as the Hex jobs: npm rejects a version that
+          # already exists, so a workflow re-run on the same commit would fail
+          # here for no reason. The registry answers 200 for a published
+          # version and 404 otherwise (the scope's "/" is URL-encoded).
+          if curl -sfo /dev/null "https://registry.npmjs.org/${PKG/\//%2f}/${APP_VERSION}"; then
+            echo "${PKG} ${APP_VERSION} is already on npm - skipping (workflow re-run on the same commit)."
+          else
+            # Trusted Publishing (OIDC): npm >= 11.5.1 detects the GitHub
+            # Actions OIDC environment and authenticates without a token.
+            # Provenance attestations are generated automatically. The
+            # trusted publisher on npmjs.com must name this repository
+            # (appsinacup/gamend) and this file (build-and-check.yml), and
+            # must have direct "npm publish" permission enabled - new
+            # configurations default to stage-only.
+            npm publish --access public
+          fi
 
   build-godot-sdk:
     runs-on: ubuntu-latest

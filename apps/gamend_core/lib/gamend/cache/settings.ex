@@ -15,11 +15,13 @@ defmodule Gamend.Cache.Settings do
   )
 
   setting(:mode, :atom,
+    values: [:single, :multi],
     default: :single,
     doc: "single (L1 local only) or multi (L1 + a shared L2)."
   )
 
   setting(:l2, :atom,
+    values: [:redis, :partitioned],
     default: :partitioned,
     doc: "redis or partitioned. Only used when mode is multi; partitioned needs clustering."
   )

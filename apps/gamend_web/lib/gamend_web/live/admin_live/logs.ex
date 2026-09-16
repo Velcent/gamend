@@ -718,7 +718,7 @@ defmodule GamendWeb.AdminLive.Logs do
 
     assign(socket,
       sessions: ClientLogs.list_sessions(opts),
-      session_total: ClientLogs.count_sessions(Keyword.drop(opts, [:limit, :offset]))
+      session_total: ClientLogs.count_sessions(Keyword.drop(opts, [:page, :page_size]))
     )
   end
 
@@ -737,8 +737,9 @@ defmodule GamendWeb.AdminLive.Logs do
     end
   end
 
+  # `page` is 0-based here; `Gamend.Query` pages from 1.
   defp session_opts(filters, page) do
-    [limit: @session_page_size, offset: page * @session_page_size]
+    [page: page + 1, page_size: @session_page_size]
     |> put_unless_blank(:query, filters.query)
     |> put_unless_blank(:user_id, filters.user_id)
     |> put_unless_blank(:lobby_id, filters.lobby_id)

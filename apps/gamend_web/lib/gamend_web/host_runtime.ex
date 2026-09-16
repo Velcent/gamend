@@ -250,7 +250,11 @@ defmodule GamendWeb.HostRuntime do
              key: apns_key,
              key_identifier: apns_key_id,
              team_id: apns_team_id,
-             mode: if(setting.(Gamend.Push, :apns_env) == "sandbox", do: :dev, else: :prod)
+             # `:apns_env` is an atom setting, so this compares atoms. It read
+             # `== "sandbox"` against an atom value and was therefore never
+             # true: every host talked to the production gateway, whatever it
+             # configured.
+             mode: if(setting.(Gamend.Push, :apns_env) == :sandbox, do: :dev, else: :prod)
            ]},
           {:gamend_core, Gamend.Push, [apns_topic: apns_topic]}
         ]

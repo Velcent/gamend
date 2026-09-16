@@ -466,20 +466,8 @@ defmodule Gamend.Matchmaking do
 
   defp filter_user(query, _user_id), do: query
 
-  # Pagination is opt-in: callers that pass no :page get the full list.
-  defp paginate(query, opts) do
-    case Keyword.get(opts, :page) do
-      nil ->
-        query
-
-      page ->
-        page_size = Limits.clamp_page_size(Keyword.get(opts, :page_size, 25))
-
-        query
-        |> limit(^page_size)
-        |> offset(^(max(page - 1, 0) * page_size))
-    end
-  end
+  # Pagination is opt-in; an unwindowed read is still bounded.
+  defp paginate(query, opts), do: Gamend.Query.maybe_page(query, opts)
 
   defp normalize_params(params) when is_map(params) do
     Map.new(params, fn {k, v} -> {to_string(k), to_string(v)} end)

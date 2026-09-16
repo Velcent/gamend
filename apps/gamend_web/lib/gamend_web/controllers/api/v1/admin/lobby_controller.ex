@@ -152,12 +152,7 @@ defmodule GamendWeb.Api.V1.Admin.LobbyController do
             json(conn, %{data: serialize_lobby(updated)})
 
           {:error, %Ecto.Changeset{} = cs} ->
-            conn
-            |> put_status(:unprocessable_entity)
-            |> json(%{
-              error: "validation_failed",
-              errors: Ecto.Changeset.traverse_errors(cs, & &1)
-            })
+            unprocessable(conn, cs)
 
           {:error, {:hook_rejected, _}} ->
             conn |> put_status(:forbidden) |> json(%{error: "forbidden"})
@@ -197,12 +192,7 @@ defmodule GamendWeb.Api.V1.Admin.LobbyController do
             conn |> put_status(:forbidden) |> json(%{error: "forbidden"})
 
           {:error, %Ecto.Changeset{} = cs} ->
-            conn
-            |> put_status(:unprocessable_entity)
-            |> json(%{
-              error: "validation_failed",
-              errors: Ecto.Changeset.traverse_errors(cs, & &1)
-            })
+            unprocessable(conn, cs)
 
           {:error, reason} ->
             conn |> put_status(:bad_request) |> json(%{error: to_string(reason)})

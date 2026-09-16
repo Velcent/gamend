@@ -314,7 +314,7 @@ defmodule Gamend.Hooks.PluginManager do
   end
 
   defp cast_plugin_setting(definition, value) do
-    case Gamend.Settings.cast(value, definition.type) do
+    case Gamend.Settings.cast(value, definition.type, Map.get(definition, :values, [])) do
       {:ok, _cast} = ok ->
         ok
 

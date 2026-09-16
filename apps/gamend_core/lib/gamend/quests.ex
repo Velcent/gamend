@@ -1833,11 +1833,7 @@ defmodule Gamend.Quests do
   # Private helpers
   # ---------------------------------------------------------------------------
 
-  defp paginate(query, opts) do
-    page = max(Keyword.get(opts, :page, 1), 1)
-    page_size = Keyword.get(opts, :page_size, 25)
-    query |> limit(^page_size) |> offset(^((page - 1) * page_size))
-  end
+  defp paginate(query, opts), do: Gamend.Query.page(query, opts)
 
   defp normalize_params(attrs) when is_map(attrs) do
     stringify_keys(attrs)

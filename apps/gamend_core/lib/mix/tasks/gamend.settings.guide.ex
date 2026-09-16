@@ -45,19 +45,11 @@ defmodule Mix.Tasks.Gamend.Settings.Guide do
         Mix.shell().info("no #{Path.dirname(path)} directory - skipping the settings guide")
 
       Keyword.get(opts, :check, false) ->
-        check(path, generated)
+        Gamend.Codegen.check!(path, generated, "gamend.settings.guide")
 
       true ->
         File.write!(path, generated)
         Mix.shell().info("wrote #{path} (#{length(Settings.all())} settings)")
-    end
-  end
-
-  defp check(path, generated) do
-    case File.read(path) do
-      {:ok, ^generated} -> Mix.shell().info("#{path} is up to date")
-      {:ok, _stale} -> Mix.raise("#{path} is out of date. Run: mix gamend.settings.guide")
-      {:error, _} -> Mix.raise("#{path} does not exist. Run: mix gamend.settings.guide")
     end
   end
 

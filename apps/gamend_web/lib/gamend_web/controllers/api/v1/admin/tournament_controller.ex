@@ -381,12 +381,7 @@ defmodule GamendWeb.Api.V1.Admin.TournamentController do
   end
 
   defp changeset_error(conn, changeset) do
-    conn
-    |> put_status(:unprocessable_entity)
-    |> json(%{
-      error: "invalid_data",
-      errors: Ecto.Changeset.traverse_errors(changeset, fn {msg, _opts} -> msg end)
-    })
+    unprocessable(conn, changeset)
   end
 
   defp to_string_reason(reason) when is_atom(reason) or is_binary(reason),

@@ -647,7 +647,10 @@ defmodule GamendWeb.Api.V1.LobbyController do
       {:error, %Ecto.Changeset{} = changeset} ->
         conn
         |> put_status(:conflict)
-        |> json(%{error: Ecto.Changeset.traverse_errors(changeset, fn {msg, _opts} -> msg end)})
+        |> json(%{
+          error: "validation_failed",
+          errors: GamendWeb.ChangesetErrors.errors(changeset)
+        })
 
       _other ->
         conn
@@ -669,7 +672,8 @@ defmodule GamendWeb.Api.V1.LobbyController do
         conn
         |> put_status(:conflict)
         |> json(%{
-          error: Ecto.Changeset.traverse_errors(changeset, fn {msg, _opts} -> msg end)
+          error: "validation_failed",
+          errors: GamendWeb.ChangesetErrors.errors(changeset)
         })
 
       _other ->
@@ -896,9 +900,7 @@ defmodule GamendWeb.Api.V1.LobbyController do
           conn |> put_status(:unprocessable_entity) |> json(%{error: "too_small"})
 
         {:error, %Ecto.Changeset{} = changeset} ->
-          conn
-          |> put_status(:unprocessable_entity)
-          |> json(%{error: Ecto.Changeset.traverse_errors(changeset, fn {msg, _} -> msg end)})
+          unprocessable(conn, changeset)
 
         _other ->
           conn |> put_status(:unprocessable_entity) |> json(%{error: "unexpected_error"})

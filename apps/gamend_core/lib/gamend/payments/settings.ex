@@ -17,6 +17,7 @@ defmodule Gamend.Payments.Settings do
     label: "Payments"
 
   setting(:environment, :atom,
+    values: [:production, :sandbox],
     default: :production,
     doc: "sandbox while validating, production for real transactions."
   )

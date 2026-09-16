@@ -80,7 +80,7 @@ defmodule Gamend.Groups.JoinRequests do
 
   defp notify_admins_of_join_request(user_id, group_id, group) do
     user = Gamend.Accounts.get_user(user_id)
-    user_name = (user && user.display_name) || ""
+    user_name = Gamend.Accounts.display_name(user)
 
     admins =
       from(m in GroupMember,
@@ -206,7 +206,7 @@ defmodule Gamend.Groups.JoinRequests do
 
             # Notify the user that their join request was approved
             admin = Gamend.Accounts.get_user(admin_id)
-            admin_name = (admin && admin.display_name) || ""
+            admin_name = Gamend.Accounts.display_name(admin)
 
             Gamend.Notifications.admin_create_notification(
               admin_id,

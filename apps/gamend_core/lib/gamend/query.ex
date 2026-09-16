@@ -1,0 +1,70 @@
+defmodule Gamend.Query do
+  @moduledoc """
+  Query-building pieces shared by the contexts. Right now: paging.
+
+  ## Why this exists
+
+  Seven contexts each carried a private `paginate/2`, in four different
+  behaviours. Three (`quests`, `economy`, `inventory`) read `:page_size`
+  straight out of the options and applied it, so `list_ledger(page_size:
+  1_000_000)` was a single unbounded read. Two (`groups`, `lobbies`) clamped —
+  to a hard-coded `@max_page_size 1000` that ignored the configurable
+  `max_page_size` limit entirely. Two (`matchmaking`, `ready_checks`) clamped
+  correctly through `Gamend.Limits`.
+
+  `GamendWeb.Pagination` already fixed the same drift one layer up, and
+  `mix gamend.api.lint` keeps controllers honest — but nothing was watching
+  the contexts, and a plugin calls them directly. Both functions here clamp
+  through `Gamend.Limits`, so the configured maximum is the maximum wherever
+  the call came from.
+
+  ## Which one
+
+  `page/2` always windows: the caller is paging, and no `:page` just means the
+  first one. `maybe_page/2` windows only when asked, and otherwise bounds the
+  read at `unpaginated_limit/0` — for a listing whose callers legitimately want
+  "all of them", where "all" must still not mean an unbounded `Repo.all` over a
+  growing table.
+  """
+
+  import Ecto.Query, only: [limit: 2, offset: 2]
+
+  alias Gamend.Limits
+
+  # The ceiling on a read that asked for no window. Deliberately well above
+  # `max_page_size`: this is a backstop against an unbounded scan, not a page.
+  @unpaginated_limit 1000
+
+  @doc "The ceiling applied to a read that requested no page."
+  @spec unpaginated_limit() :: pos_integer()
+  def unpaginated_limit, do: @unpaginated_limit
+
+  @doc """
+  Applies `:page` and `:page_size`, both clamped, defaulting to the first page.
+
+      Query.page(query, page: 2, page_size: 50)
+  """
+  @spec page(Ecto.Queryable.t(), keyword()) :: Ecto.Query.t()
+  def page(query, opts) do
+    window(query, Keyword.get(opts, :page), Keyword.get(opts, :page_size))
+  end
+
+  @doc """
+  Applies the window when `:page` is given, and otherwise caps the read at
+  `unpaginated_limit/0`.
+  """
+  @spec maybe_page(Ecto.Queryable.t(), keyword()) :: Ecto.Query.t()
+  def maybe_page(query, opts) do
+    case Keyword.get(opts, :page) do
+      nil -> limit(query, @unpaginated_limit)
+      page -> window(query, page, Keyword.get(opts, :page_size))
+    end
+  end
+
+  defp window(query, raw_page, raw_page_size) do
+    page = Limits.clamp_page(raw_page)
+    size = Limits.clamp_page_size(raw_page_size)
+
+    query |> limit(^size) |> offset(^((page - 1) * size))
+  end
+end

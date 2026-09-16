@@ -80,7 +80,7 @@ defmodule Gamend.Groups.Shared do
       invalidate_invite_cache_sync(user_id)
 
       user = Gamend.Accounts.get_user(user_id)
-      user_name = (user && user.display_name) || ""
+      user_name = Gamend.Accounts.display_name(user)
       group = Groups.get_group(group_id)
       group_title = (group && group.title) || ""
 

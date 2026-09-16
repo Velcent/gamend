@@ -8,6 +8,7 @@ defmodule GamendWeb.AdminLive.ChatFilter do
 
   alias Gamend.Chat.FilterWord
   alias Gamend.Chat.Moderation
+  alias Gamend.Chat.Moderation.Cache
   alias Gamend.Chat.Moderation.Normalizer
 
   @blank_word %{
@@ -215,6 +216,7 @@ defmodule GamendWeb.AdminLive.ChatFilter do
     socket
     |> assign(:words, words)
     |> assign(:count, total)
+    |> assign(:cached_words, Cache.word_count())
     |> assign(:total_pages, ceil_div(total, socket.assigns.page_size))
     |> assign_test_result()
   end
@@ -445,7 +447,22 @@ defmodule GamendWeb.AdminLive.ChatFilter do
       <div class="card bg-base-200">
         <div class="card-body">
           <div class="flex flex-wrap items-center justify-between gap-2">
-            <h2 class="card-title">{gettext("Blocklist")} ({@count})</h2>
+            <div class="flex flex-wrap items-baseline gap-2">
+              <h2 class="card-title">{gettext("Blocklist")} ({@count})</h2>
+              <span
+                class={[
+                  "badge badge-sm",
+                  if(@cached_words == @count, do: "badge-ghost", else: "badge-warning")
+                ]}
+                title={
+                  gettext(
+                    "Words loaded into this node's in-memory matcher. A number below the database count means this node missed a change broadcast."
+                  )
+                }
+              >
+                {gettext("%{n} on this node", n: @cached_words)}
+              </span>
+            </div>
             <button phx-click="refresh" class="btn btn-ghost btn-sm">{gettext("Refresh")}</button>
           </div>
 

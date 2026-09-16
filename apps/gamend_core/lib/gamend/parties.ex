@@ -399,13 +399,13 @@ defmodule Gamend.Parties do
         {:ok, invite} ->
           # Send an informational notification (independent of the invite record)
           Gamend.Notifications.admin_create_notification(leader.id, target_user_id, %{
-            "title" => "Party invite from #{leader.display_name || ""}",
+            "title" => "Party invite from #{Gamend.Accounts.display_name(leader)}",
             "content" => "",
             "metadata" => %{
               "type" => "party_invite",
               "party_id" => party.id,
-              "sender_name" => leader.display_name || "",
-              "recipient_name" => target.display_name || ""
+              "sender_name" => Gamend.Accounts.display_name(leader),
+              "recipient_name" => Gamend.Accounts.display_name(target)
             }
           })
 
@@ -473,7 +473,7 @@ defmodule Gamend.Parties do
       # a spurious party_invite_cancelled event to the recipient even when no
       # prior invite existed.
       if deleted_count > 0 do
-        leader_name = leader.display_name || ""
+        leader_name = Gamend.Accounts.display_name(leader)
 
         Gamend.Notifications.delete_notification_by(
           leader.id,
@@ -555,7 +555,7 @@ defmodule Gamend.Parties do
   end
 
   defp handle_accept_capacity_failure(user, invite, party_id, reason_str) do
-    user_name = user.display_name || ""
+    user_name = Gamend.Accounts.display_name(user)
 
     # Mark the invite as declined so the sender knows it didn't go through.
     #
@@ -575,7 +575,7 @@ defmodule Gamend.Parties do
 
     # Retract the original invite notification
     sender = Gamend.Accounts.get_user(invite.sender_id)
-    sender_name = (sender && sender.display_name) || ""
+    sender_name = Gamend.Accounts.display_name(sender)
 
     Gamend.Notifications.delete_notification_by(
       invite.sender_id,
@@ -649,7 +649,7 @@ defmodule Gamend.Parties do
 
     # Retract the invite notification for the accepting user
     sender = Gamend.Accounts.get_user(invite.sender_id)
-    sender_name = (sender && sender.display_name) || ""
+    sender_name = Gamend.Accounts.display_name(sender)
 
     Gamend.Notifications.delete_notification_by(
       invite.sender_id,
@@ -658,7 +658,7 @@ defmodule Gamend.Parties do
     )
 
     # Notify the leader that the invite was accepted
-    user_name = user.display_name || ""
+    user_name = Gamend.Accounts.display_name(user)
 
     Gamend.Notifications.admin_create_notification(
       user.id,
@@ -717,12 +717,12 @@ defmodule Gamend.Parties do
     Enum.each(sender_ids, &invalidate_party_invite_cache/1)
 
     # Notify each sender that the invite was declined
-    user_name = user.display_name || ""
+    user_name = Gamend.Accounts.display_name(user)
 
     Enum.each(sender_ids, fn sender_id ->
       # Retract the invite notification
       sender = Gamend.Accounts.get_user(sender_id)
-      sender_name = (sender && sender.display_name) || ""
+      sender_name = Gamend.Accounts.display_name(sender)
 
       Gamend.Notifications.delete_notification_by(
         sender_id,
@@ -811,9 +811,9 @@ defmodule Gamend.Parties do
       id: invite.id,
       party_id: invite.party_id,
       sender_id: invite.sender_id,
-      sender_name: invite.sender.display_name || "",
+      sender_name: Gamend.Accounts.display_name(invite.sender),
       recipient_id: invite.recipient_id,
-      recipient_name: invite.recipient.display_name || "",
+      recipient_name: Gamend.Accounts.display_name(invite.recipient),
       status: invite.status,
       inserted_at: invite.inserted_at
     }
@@ -1753,16 +1753,12 @@ defmodule Gamend.Parties do
   @doc "List all parties with optional filters and pagination."
   @spec list_all_parties(map(), keyword()) :: [Party.t()]
   def list_all_parties(filters \\ %{}, opts \\ []) do
-    page = Keyword.get(opts, :page, 1)
-    page_size = Keyword.get(opts, :page_size, 25)
     sort_by = Keyword.get(opts, :sort_by, "updated_at")
-    offset = (page - 1) * page_size
 
     from(p in Party)
     |> apply_party_filters(filters)
     |> apply_party_sort(sort_by)
-    |> limit(^page_size)
-    |> offset(^offset)
+    |> Gamend.Query.page(opts)
     |> Repo.all()
     |> Repo.preload(:leader)
   end

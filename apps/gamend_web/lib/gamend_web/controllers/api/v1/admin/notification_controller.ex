@@ -192,17 +192,7 @@ defmodule GamendWeb.Api.V1.Admin.NotificationController do
             |> json(Serializers.serialize_notification(notification))
 
           {:error, %Ecto.Changeset{} = cs} ->
-            conn
-            |> put_status(:unprocessable_entity)
-            |> json(%{
-              error: "validation_failed",
-              errors:
-                Ecto.Changeset.traverse_errors(cs, fn {msg, opts} ->
-                  Regex.replace(~r"%{(\w+)}", msg, fn _, key ->
-                    opts |> Keyword.get(String.to_existing_atom(key), key) |> to_string()
-                  end)
-                end)
-            })
+            unprocessable(conn, cs)
 
           {:error, reason} ->
             conn |> put_status(:bad_request) |> json(%{error: to_string(reason)})

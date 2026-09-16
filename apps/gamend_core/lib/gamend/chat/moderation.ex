@@ -147,14 +147,10 @@ defmodule Gamend.Chat.Moderation do
   @doc "List blocklist entries. Filters: `:word`, `:severity`, `:lang`."
   @spec list_filter_words(map(), keyword()) :: [FilterWord.t()]
   def list_filter_words(filters \\ %{}, opts \\ []) do
-    page = Keyword.get(opts, :page, 1)
-    page_size = Keyword.get(opts, :page_size, 25)
-
     filters
     |> filter_words_query()
     |> order_by([w], asc: w.word)
-    |> limit(^page_size)
-    |> offset(^((page - 1) * page_size))
+    |> Gamend.Query.page(opts)
     |> Repo.all()
   end
 
@@ -419,14 +415,10 @@ defmodule Gamend.Chat.Moderation do
   """
   @spec list_mutes(map(), keyword()) :: [Mute.t()]
   def list_mutes(filters \\ %{}, opts \\ []) do
-    page = Keyword.get(opts, :page, 1)
-    page_size = Keyword.get(opts, :page_size, 25)
-
     filters
     |> mutes_query()
     |> order_by([m], desc: m.inserted_at, desc: m.id)
-    |> limit(^page_size)
-    |> offset(^((page - 1) * page_size))
+    |> Gamend.Query.page(opts)
     |> preload([:user, :muted_by_user])
     |> Repo.all()
   end

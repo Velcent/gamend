@@ -37,6 +37,7 @@ defmodule Gamend.Mail do
   setting(:smtp_ssl, :boolean, default: true)
 
   setting(:smtp_tls, :atom,
+    values: [:never, :if_available, :always],
     default: :never,
     doc: "STARTTLS policy: never | if_available | always."
   )

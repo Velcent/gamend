@@ -141,9 +141,7 @@ defmodule GamendWeb.Api.V1.Admin.KvEntryController do
         json(conn, %{data: serialize_entry(entry)})
 
       {:error, %Ecto.Changeset{} = cs} ->
-        conn
-        |> put_status(:unprocessable_entity)
-        |> json(%{error: "validation_failed", errors: Ecto.Changeset.traverse_errors(cs, & &1)})
+        unprocessable(conn, cs)
     end
   end
 
@@ -190,9 +188,7 @@ defmodule GamendWeb.Api.V1.Admin.KvEntryController do
         conn |> put_status(:not_found) |> json(%{error: "not_found"})
 
       {:error, %Ecto.Changeset{} = cs} ->
-        conn
-        |> put_status(:unprocessable_entity)
-        |> json(%{error: "validation_failed", errors: Ecto.Changeset.traverse_errors(cs, & &1)})
+        unprocessable(conn, cs)
     end
   end
 

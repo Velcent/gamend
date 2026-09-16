@@ -105,6 +105,7 @@ defmodule GamendWeb.RateLimit do
     label: "Rate limiting"
 
   setting(:backend, :atom,
+    values: [:ets, :redis],
     default: :ets,
     doc: "ets (per-node counters) or redis (shared across instances)."
   )

@@ -35,7 +35,7 @@ defmodule GamendWeb.Api.V1.ProviderController do
         json(conn, %{})
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        errors = Ecto.Changeset.traverse_errors(changeset, fn {msg, _opts} -> msg end)
+        errors = GamendWeb.ChangesetErrors.errors(changeset)
 
         conn
         |> put_status(:bad_request)

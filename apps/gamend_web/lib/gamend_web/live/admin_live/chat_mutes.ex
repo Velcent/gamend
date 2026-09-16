@@ -7,8 +7,10 @@ defmodule GamendWeb.AdminLive.ChatMutes do
 
   alias Gamend.Accounts.Scope
   alias Gamend.Chat
+  alias Gamend.Chat.Moderation.Cache
   alias Gamend.Chat.Moderation.Notices
   alias Gamend.Chat.Mute
+  alias GamendWeb.AdminLive.Shared
 
   @empty_form %{
     "user_id" => "",
@@ -242,6 +244,7 @@ defmodule GamendWeb.AdminLive.ChatMutes do
     socket
     |> assign(:mutes, mutes)
     |> assign(:count, total)
+    |> assign(:cached_mutes, Cache.mute_count())
     |> assign(:total_pages, ceil_div(total, socket.assigns.page_size))
   end
 
@@ -261,18 +264,8 @@ defmodule GamendWeb.AdminLive.ChatMutes do
     DateTime.add(DateTime.utc_now(:second), seconds, :second)
   end
 
-  defp duration_options do
-    [
-      {"10m", gettext("10 minutes")},
-      {"1h", gettext("1 hour")},
-      {"24h", gettext("24 hours")},
-      {"7d", gettext("7 days")},
-      {"permanent", gettext("Permanent")}
-    ]
-  end
-
   defp edit_duration_options do
-    [{"keep", gettext("Keep current expiry")} | duration_options()]
+    [{"keep", gettext("Keep current expiry")} | Shared.duration_options()]
   end
 
   defp edit_expires_at("keep", mute), do: mute.expires_at
@@ -350,7 +343,19 @@ defmodule GamendWeb.AdminLive.ChatMutes do
       <div class="card bg-base-200">
         <div class="card-body">
           <div class="flex flex-wrap items-center justify-between gap-2">
-            <h2 class="card-title">{gettext("Chat mutes")} ({@count})</h2>
+            <div class="flex flex-wrap items-baseline gap-2">
+              <h2 class="card-title">{gettext("Chat mutes")} ({@count})</h2>
+              <span
+                class="badge badge-sm badge-ghost"
+                title={
+                  gettext(
+                    "Unexpired mutes loaded into this node's memory. Enforcement reads this, not the database."
+                  )
+                }
+              >
+                {gettext("%{n} on this node", n: @cached_mutes)}
+              </span>
+            </div>
             <button phx-click="refresh" class="btn btn-ghost btn-sm">{gettext("Refresh")}</button>
           </div>
 
@@ -407,7 +412,7 @@ defmodule GamendWeb.AdminLive.ChatMutes do
               <label class="label text-xs">{gettext("Duration")}</label>
               <select name="duration" class="select select-bordered select-sm">
                 <option
-                  :for={{value, label} <- duration_options()}
+                  :for={{value, label} <- Shared.duration_options()}
                   value={value}
                   selected={@form["duration"] == value}
                 >

@@ -348,14 +348,9 @@ defmodule Gamend.Push do
   """
   @spec list_all_tokens(map(), keyword()) :: [PushToken.t()]
   def list_all_tokens(filters \\ %{}, opts \\ []) do
-    page = Keyword.get(opts, :page, 1)
-    page_size = Keyword.get(opts, :page_size, 25)
-    offset = (page - 1) * page_size
-
     all_tokens_query(filters)
     |> order_by([t], desc: t.inserted_at, desc: t.id)
-    |> limit(^page_size)
-    |> offset(^offset)
+    |> Gamend.Query.page(opts)
     |> preload(:user)
     |> Repo.all()
   end
@@ -465,6 +460,7 @@ defmodule Gamend.Push do
     label: "Push notifications"
 
   setting(:adapter, :atom,
+    values: [:auto, :log],
     default: :auto,
     doc: "Set to `log` to route every delivery to the Log provider, credentials or not."
   )
@@ -509,6 +505,7 @@ defmodule Gamend.Push do
   )
 
   setting(:apns_env, :atom,
+    values: [:production, :sandbox],
     default: :production,
     doc: "`production`, or `sandbox` for dev builds."
   )

@@ -83,6 +83,7 @@ defmodule Gamend.Storage do
     label: "Storage"
 
   setting(:adapter, :atom,
+    values: [:local, :s3],
     default: :local,
     doc: "Backend for avatars and uploads: local | s3 (any S3-compatible service)."
   )

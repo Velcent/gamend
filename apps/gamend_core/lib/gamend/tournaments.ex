@@ -168,13 +168,9 @@ defmodule Gamend.Tournaments do
 
   @spec list_tournaments(keyword()) :: [Tournament.t()]
   def list_tournaments(opts \\ []) do
-    page = Keyword.get(opts, :page, 1)
-    page_size = min(Keyword.get(opts, :page_size, 25), 100)
-
     base_tournaments_query(opts)
     |> order_by([t], desc: t.starts_at, desc: t.id)
-    |> limit(^page_size)
-    |> offset(^(max(page - 1, 0) * page_size))
+    |> Gamend.Query.page(opts)
     |> Repo.all()
   end
 
@@ -420,15 +416,8 @@ defmodule Gamend.Tournaments do
   # Pagination is opt-in: callers that pass no :page get the full list.
   defp maybe_paginate(query, opts) do
     case Keyword.get(opts, :page) do
-      nil ->
-        query
-
-      page ->
-        page_size = min(Keyword.get(opts, :page_size, 25), 100)
-
-        query
-        |> limit(^page_size)
-        |> offset(^(max(page - 1, 0) * page_size))
+      nil -> query
+      _page -> Gamend.Query.page(query, opts)
     end
   end
 

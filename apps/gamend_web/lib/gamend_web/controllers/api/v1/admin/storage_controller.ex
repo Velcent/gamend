@@ -4,6 +4,7 @@ defmodule GamendWeb.Api.V1.Admin.StorageController do
 
   alias Gamend.Storage
   alias GamendWeb.Pagination
+  alias GamendWeb.Uploads
   alias OpenApiSpex.Schema
 
   tags(["Admin – Storage"])
@@ -103,9 +104,9 @@ defmodule GamendWeb.Api.V1.Admin.StorageController do
   )
 
   def upload(conn, %{"key" => key}) when is_binary(key) and key != "" do
-    content_type = request_content_type(conn)
+    content_type = Uploads.request_content_type(conn, "application/octet-stream")
 
-    with {:ok, body, conn} <- read_full_body(conn, Gamend.Limits.get(:max_upload_bytes)),
+    with {:ok, body, conn} <- Uploads.read_full_body(conn, Gamend.Limits.get(:max_upload_bytes)),
          {:ok, ^key} <- Storage.put(key, body, content_type: content_type) do
       json(conn, %{ok: true, key: key})
     else
@@ -146,22 +147,6 @@ defmodule GamendWeb.Api.V1.Admin.StorageController do
   end
 
   def download(conn, _), do: conn |> put_status(:bad_request) |> json(%{error: "missing_key"})
-
-  defp request_content_type(conn) do
-    case get_req_header(conn, "content-type") do
-      [ct | _] -> ct |> String.split(";") |> hd() |> String.trim()
-      [] -> "application/octet-stream"
-    end
-  end
-
-  defp read_full_body(conn, max) do
-    case read_body(conn, length: max + 1) do
-      {:ok, body, conn} when byte_size(body) <= max -> {:ok, body, conn}
-      {:ok, _body, _conn} -> {:error, :too_large}
-      {:more, _partial, _conn} -> {:error, :too_large}
-      {:error, _} = err -> err
-    end
-  end
 
   defp serialize(obj) do
     %{

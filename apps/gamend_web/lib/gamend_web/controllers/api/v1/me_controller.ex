@@ -140,7 +140,7 @@ defmodule GamendWeb.Api.V1.MeController do
           |> put_status(:bad_request)
           |> json(%{
             error: "invalid_data",
-            errors: Ecto.Changeset.traverse_errors(changeset, fn {msg, _opts} -> msg end)
+            errors: GamendWeb.ChangesetErrors.errors(changeset)
           })
       end
     else
@@ -198,7 +198,7 @@ defmodule GamendWeb.Api.V1.MeController do
         |> put_status(:bad_request)
         |> json(%{
           error: "invalid_data",
-          errors: Ecto.Changeset.traverse_errors(changeset, fn {msg, _opts} -> msg end)
+          errors: GamendWeb.ChangesetErrors.errors(changeset)
         })
     end
   end
@@ -241,7 +241,7 @@ defmodule GamendWeb.Api.V1.MeController do
         |> put_status(:bad_request)
         |> json(%{
           error: "invalid_data",
-          errors: Ecto.Changeset.traverse_errors(changeset, fn {msg, _opts} -> msg end)
+          errors: GamendWeb.ChangesetErrors.errors(changeset)
         })
 
       {:error, reason} when is_atom(reason) or is_binary(reason) ->

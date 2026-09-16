@@ -506,8 +506,11 @@ defmodule Gamend.Chat do
   """
   @spec list_messages(String.t(), Ecto.UUID.t(), keyword()) :: [Message.t()]
   def list_messages(chat_type, chat_ref_id, opts \\ []) do
-    page = Keyword.get(opts, :page, 1)
-    page_size = Keyword.get(opts, :page_size, 25)
+    # Clamped here rather than in the query: `page` and `page_size` are part of
+    # the cache key below, so an unclamped caller would mint an unbounded
+    # number of distinct entries as well as reading an unbounded number of rows.
+    page = Gamend.Limits.clamp_page(Keyword.get(opts, :page))
+    page_size = Gamend.Limits.clamp_page_size(Keyword.get(opts, :page_size))
     offset = (page - 1) * page_size
 
     do_list_messages(chat_type, chat_ref_id, page, page_size, offset)
@@ -519,13 +522,10 @@ defmodule Gamend.Chat do
                  page_size},
               opts: [ttl: @chat_cache_ttl_ms]
             )
-  defp do_list_messages(chat_type, chat_ref_id, page, page_size, offset) do
-    _ = page
-
+  defp do_list_messages(chat_type, chat_ref_id, page, page_size, _offset) do
     base_query(chat_type, chat_ref_id)
     |> order_by([m], desc: m.inserted_at, desc: m.id)
-    |> limit(^page_size)
-    |> offset(^offset)
+    |> Gamend.Query.page(page: page, page_size: page_size)
     |> preload(:sender)
     |> Repo.all()
   end
@@ -945,15 +945,11 @@ defmodule Gamend.Chat do
   @doc "List all messages (admin). Supports filters: sender_id, chat_type, chat_ref_id, content."
   @spec list_all_messages(map(), keyword()) :: [Message.t()]
   def list_all_messages(filters \\ %{}, opts \\ []) do
-    page = Keyword.get(opts, :page, 1)
-    page_size = Keyword.get(opts, :page_size, 25)
     sort_by = Keyword.get(opts, :sort_by, nil)
-    offset = (page - 1) * page_size
 
     base_admin_query(filters)
     |> admin_sort(sort_by)
-    |> limit(^page_size)
-    |> offset(^offset)
+    |> Gamend.Query.page(opts)
     |> preload(:sender)
     |> Repo.all()
   end

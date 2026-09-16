@@ -137,7 +137,7 @@ defmodule GamendWeb.Api.V1.SessionController do
           |> put_status(:bad_request)
           |> json(%{
             error: "unable to create device user",
-            details: Ecto.Changeset.traverse_errors(changeset, fn {msg, _} -> msg end)
+            errors: GamendWeb.ChangesetErrors.errors(changeset)
           })
       end
     else

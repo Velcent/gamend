@@ -33,7 +33,7 @@ defmodule GamendWeb.Api.V1.MatchmakingControllerTest do
       body = %{"min_players" => 5, "max_players" => 2}
       conn = post(conn, "/api/v1/matchmaking/tickets", body)
 
-      assert %{"error" => "invalid_data", "errors" => %{"max_players" => _}} =
+      assert %{"error" => "validation_failed", "errors" => %{"max_players" => _}} =
                json_response(conn, 422)
     end
 

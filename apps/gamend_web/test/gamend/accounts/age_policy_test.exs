@@ -209,4 +209,26 @@ defmodule Gamend.Accounts.AgePolicyTest do
       assert AgePolicy.stronger_signal?("self_declared", "made_up")
     end
   end
+
+  describe "known_countries/0" do
+    test "lists only countries the table actually answers for" do
+      countries = AgePolicy.known_countries()
+
+      assert is_list(countries)
+      assert countries != []
+
+      # Every listed code must be a two-letter uppercase code the lookup knows,
+      # otherwise an admin picker built from this list offers a country whose
+      # threshold silently falls back to the default.
+      for code <- countries do
+        assert code =~ ~r/^[A-Z]{2}$/, "#{inspect(code)} is not an upcased ISO-3166 alpha-2 code"
+        assert is_integer(AgePolicy.digital_consent_age(code))
+      end
+    end
+
+    test "an unlisted country falls back to the strictest default" do
+      refute "ZZ" in AgePolicy.known_countries()
+      assert AgePolicy.digital_consent_age("ZZ") == 16
+    end
+  end
 end

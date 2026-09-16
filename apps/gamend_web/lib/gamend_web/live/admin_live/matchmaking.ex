@@ -115,14 +115,10 @@ defmodule GamendWeb.AdminLive.Matchmaking do
   defp user_label(%{user: %{} = user}), do: user_name(user)
   defp user_label(%{user_id: user_id}), do: user_id
 
-  defp user_name(user) do
-    cond do
-      is_binary(user.display_name) and user.display_name != "" -> user.display_name
-      is_binary(user.username) and user.username != "" -> user.username
-      is_binary(user.email) and user.email != "" -> user.email
-      true -> user.id
-    end
-  end
+  # `display_label/1` rather than a local chain: it ends at the username, which
+  # every account has, instead of falling through to the email (leaking it into
+  # a list that does not otherwise show it) and then the raw id.
+  defp user_name(user), do: Gamend.Accounts.display_label(user)
 
   defp status_class("queued"), do: "badge-info"
   defp status_class("matched"), do: "badge-success"

@@ -26,7 +26,10 @@ defmodule Mix.Tasks.Gamend.Api.Lint do
     {"R8-page-params", "A controller reads page params without Pagination.params/1"},
     {"R9-doc-route", "A guide/spec documents an API route that does not exist"},
     {"R10-authority-predicate", "A permission predicate names a role instead of a capability"},
-    {"R11-inline-ownership", "A controller/channel re-derives who owns a resource"}
+    {"R11-inline-ownership", "A controller/channel re-derives who owns a resource"},
+    {"R12-changeset-errors", "A controller serializes changeset errors by hand"},
+    {"R13-context-paging", "A context builds limit/offset instead of using Gamend.Query"},
+    {"R14-display-name", "A user's name is built from an inline `display_name ||` fallback"}
   ]
 
   @impl true

@@ -786,19 +786,8 @@ defmodule Gamend.ReadyChecks do
 
   defp filter_equals(query, _field, _value), do: query
 
-  defp paginate(query, opts) do
-    case Keyword.get(opts, :page) do
-      nil ->
-        query
-
-      page ->
-        page_size = Limits.clamp_page_size(Keyword.get(opts, :page_size, 25))
-
-        query
-        |> limit(^page_size)
-        |> offset(^(max(page - 1, 0) * page_size))
-    end
-  end
+  # Pagination is opt-in; an unwindowed read is still bounded.
+  defp paginate(query, opts), do: Gamend.Query.maybe_page(query, opts)
 
   defp load_participants(%Check{participants: %Ecto.Association.NotLoaded{}} = check),
     do: check |> Repo.preload(:participants) |> Map.fetch!(:participants)

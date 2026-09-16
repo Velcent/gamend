@@ -98,6 +98,83 @@ defmodule Gamend.SettingsTest do
     end
   end
 
+  describe "cast/3 for :atom with declared values" do
+    # The regression this guards: with no declared values the cast falls back
+    # to `String.to_existing_atom/1`, so a legal choice is rejected unless some
+    # unrelated module happens to name that atom. `:sandbox` was named nowhere
+    # outside the test suite, so `GAMEND_PAYMENTS_ENVIRONMENT=sandbox` cast as
+    # :error and silently fell back to the default — `:production`.
+    test "accepts a declared value whose atom nothing else mentions" do
+      values = [:production, :zzz_never_mentioned_anywhere_else]
+
+      assert Settings.cast("zzz_never_mentioned_anywhere_else", :atom, values) ==
+               {:ok, :zzz_never_mentioned_anywhere_else}
+    end
+
+    test "matches case-insensitively and trims" do
+      assert Settings.cast("  SandBox ", :atom, [:production, :sandbox]) == {:ok, :sandbox}
+    end
+
+    test "rejects a value outside the declared set" do
+      assert Settings.cast("sandbocks", :atom, [:production, :sandbox]) == :error
+    end
+
+    test "without declared values, falls back to to_existing_atom" do
+      assert Settings.cast("production", :atom, []) == {:ok, :production}
+      assert Settings.cast("production", :atom) == {:ok, :production}
+    end
+  end
+
+  describe "the :values declaration" do
+    test "every documented choice of every :atom setting actually casts" do
+      # Each of these was documented in its own `doc:` string and in
+      # .env.example, and three of them could not be set at all.
+      for {module, key, choices} <- [
+            {Gamend.Payments.Settings, :environment, ~w(production sandbox)},
+            {Gamend.Push, :apns_env, ~w(production sandbox)},
+            {Gamend.Push, :adapter, ~w(auto log)},
+            {Gamend.Mail, :smtp_tls, ~w(never if_available always)},
+            {Gamend.Storage, :adapter, ~w(local s3)},
+            {Gamend.Database, :adapter, ~w(sqlite postgres)},
+            {Gamend.Database, :sqlite_synchronous, ~w(off normal full extra)},
+            {Gamend.Database, :postgres_synchronous_commit,
+             ~w(on off local remote_write remote_apply)},
+            {Gamend.Cache.Settings, :mode, ~w(single multi)},
+            {Gamend.Cache.Settings, :l2, ~w(redis partitioned)},
+            {GamendWeb.RateLimit, :backend, ~w(ets redis)}
+          ],
+          choice <- choices do
+        definition = Enum.find(module.__settings__(), &(&1.key == key))
+
+        assert definition, "#{inspect(module)} declares no setting #{inspect(key)}"
+
+        assert definition.values != [],
+               "#{inspect(module)}.#{key} is an :atom setting without :values"
+
+        assert {:ok, _} = Settings.cast(choice, :atom, definition.values),
+               "#{definition.env}=#{choice} is documented but does not cast"
+      end
+    end
+
+    test "rejects a default outside the declared values" do
+      assert_raise ArgumentError, ~r/not in :values/, fn ->
+        defmodule BadDefault do
+          use Gamend.Settings.Provider, app: :gamend_core, group: :baddefault
+          setting(:mode, :atom, values: [:a, :b], default: :c)
+        end
+      end
+    end
+
+    test "rejects :values on a non-atom setting" do
+      assert_raise ArgumentError, ~r/applies to :atom only/, fn ->
+        defmodule BadType do
+          use Gamend.Settings.Provider, app: :gamend_core, group: :badtype
+          setting(:mode, :string, values: [:a, :b])
+        end
+      end
+    end
+  end
+
   describe "from_env/0" do
     test "only set variables contribute, cast to their declared type" do
       System.put_env("GAMEND_SAMPLE_CHAT_DAYS", "30")

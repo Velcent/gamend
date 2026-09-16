@@ -69,13 +69,6 @@ defmodule Gamend.Chat.Moderation.Cache do
   @spec substring_pattern() :: :binary.cp() | nil
   def substring_pattern, do: :persistent_term.get(@pattern_key, nil)
 
-  @doc "Every blocklist entry as `[{word, severity, match_mode}]`."
-  @spec list_words() :: [{String.t(), String.t(), String.t()}]
-  def list_words do
-    init_table()
-    :ets.tab2list(@words_table)
-  end
-
   @doc "Number of words currently loaded on this node."
   @spec word_count() :: non_neg_integer()
   def word_count do

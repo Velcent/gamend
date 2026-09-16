@@ -81,7 +81,13 @@ defmodule Gamend.Theme.JSONConfig do
   # the caller's", which is a different answer per process, and keying on nil
   # would serve the first caller's language to everyone.
   defp translate(config, locale) do
-    backend = gettext_backend()
+    case gettext_backend() do
+      nil -> config
+      backend -> translate_with(config, backend, locale)
+    end
+  end
+
+  defp translate_with(config, backend, locale) do
     resolved = locale || Gettext.get_locale(backend)
 
     case :persistent_term.get({__MODULE__, :translated, backend, resolved}, :not_cached) do
@@ -107,10 +113,21 @@ defmodule Gamend.Theme.JSONConfig do
 
   # Resolved at runtime so a host can point the theme at its own backend, the
   # same one GettextSync drives for the rest of the UI.
+  #
+  # The last resort is `GamendWeb.Gettext`, which is the only place core reaches
+  # up into gamend_web — and gamend_core does not depend on gamend_web, so for a
+  # bare-core consumer that module does not exist. Resolved by name rather than
+  # referenced directly, so the theme is served untranslated there instead of
+  # raising UndefinedFunctionError.
   defp gettext_backend do
     Application.get_env(:gamend_core, :theme_gettext_backend) ||
       Application.get_env(:gamend_web, :host_gettext_backend) ||
-      GamendWeb.Gettext
+      default_backend()
+  end
+
+  defp default_backend do
+    backend = Module.concat([:GamendWeb, :Gettext])
+    if Code.ensure_loaded?(backend), do: backend
   end
 
   defp do_get_theme do

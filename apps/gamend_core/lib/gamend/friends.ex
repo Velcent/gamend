@@ -647,15 +647,10 @@ defmodule Gamend.Friends do
   """
   @spec list_all_blocks(keyword()) :: [Friendship.t()]
   def list_all_blocks(opts \\ []) do
-    page = Keyword.get(opts, :page, 1)
-    page_size = Keyword.get(opts, :page_size, 25)
-    offset = (page - 1) * page_size
-
     opts
     |> all_blocks_query()
     |> order_by([f], desc: f.inserted_at)
-    |> limit(^page_size)
-    |> offset(^offset)
+    |> Gamend.Query.page(opts)
     |> preload([:requester, :target])
     |> Repo.all()
   end
@@ -722,15 +717,10 @@ defmodule Gamend.Friends do
   """
   @spec list_all_friendships(keyword()) :: [Friendship.t()]
   def list_all_friendships(opts \\ []) do
-    page = Keyword.get(opts, :page, 1)
-    page_size = Keyword.get(opts, :page_size, 25)
-    offset = (page - 1) * page_size
-
     opts
     |> all_friendships_query()
     |> order_by([f], desc: f.inserted_at)
-    |> limit(^page_size)
-    |> offset(^offset)
+    |> Gamend.Query.page(opts)
     |> preload([:requester, :target])
     |> Repo.all()
   end

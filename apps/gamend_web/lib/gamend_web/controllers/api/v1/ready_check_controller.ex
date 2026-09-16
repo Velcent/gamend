@@ -15,8 +15,8 @@ defmodule GamendWeb.Api.V1.ReadyCheckController do
   use GamendWeb, :controller
   use OpenApiSpex.ControllerSpecs
 
-  alias Gamend.Accounts.Scope
-  alias Gamend.Accounts.User
+  import GamendWeb.ControllerScope
+
   alias Gamend.Lobbies
   alias Gamend.Parties
   alias Gamend.ReadyChecks
@@ -349,30 +349,4 @@ defmodule GamendWeb.Api.V1.ReadyCheckController do
   defp maybe_timeout(opts, _ms, :subject_default), do: opts
 
   defp maybe_timeout(opts, _ms, default), do: Keyword.put(opts, :timeout_ms, default)
-
-  defp with_user(conn, fun) do
-    case Scope.user(conn.assigns[:current_scope]) do
-      %User{} = user -> fun.(user)
-      _ -> conn |> put_status(:unauthorized) |> json(%{error: "Not authenticated"})
-    end
-  end
-
-  defp with_lobby(conn, fun) do
-    with_user(conn, fn user ->
-      if is_nil(user.lobby_id) do
-        conn |> put_status(:bad_request) |> json(%{error: "not_in_lobby"})
-      else
-        fun.(user, Lobbies.get_lobby!(user.lobby_id))
-      end
-    end)
-  end
-
-  defp with_party(conn, fun) do
-    with_user(conn, fn user ->
-      case user.party_id && Parties.get_party(user.party_id) do
-        %Parties.Party{} = party -> fun.(user, party)
-        _ -> conn |> put_status(:bad_request) |> json(%{error: "not_in_party"})
-      end
-    end)
-  end
 end

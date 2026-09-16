@@ -156,31 +156,6 @@ defmodule GamendWeb.Plugs.GeoCountry do
   end
 
   @doc """
-  Returns a time series of `{minute_ts, count}` for the given country and window.
-  Useful for sparklines in the UI. Each entry is a Unix minute timestamp.
-  """
-  def time_series(country, opts \\ []) do
-    if :ets.whereis(@table) == :undefined do
-      []
-    else
-      cutoff = minute_cutoff(opts[:window] || :hour)
-
-      :ets.foldl(
-        fn
-          {{^country, minute}, count}, acc when minute >= cutoff ->
-            [{minute, count} | acc]
-
-          _, acc ->
-            acc
-        end,
-        [],
-        @table
-      )
-      |> Enum.sort_by(fn {m, _} -> m end)
-    end
-  end
-
-  @doc """
   Reset all counters (useful from admin panel).
   """
   def reset_stats do
@@ -224,13 +199,6 @@ defmodule GamendWeb.Plugs.GeoCountry do
       databases when is_list(databases) and databases != [] -> true
       _ -> false
     end
-  end
-
-  @doc """
-  Returns the number of distinct countries seen in the given window.
-  """
-  def country_count(opts \\ []) do
-    length(country_stats(opts))
   end
 
   @doc """
