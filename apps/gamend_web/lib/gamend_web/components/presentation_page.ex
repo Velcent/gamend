@@ -116,6 +116,7 @@ defmodule GamendWeb.PresentationPage do
       assign(assigns,
         hero: Map.get(assigns.page, "hero", %{}),
         sections: sections,
+        sections_columns: sections_columns(assigns.page),
         background_icon_bands: background_icon_bands(sections)
       )
 
@@ -180,6 +181,7 @@ defmodule GamendWeb.PresentationPage do
           :if={@sections != []}
           class={[
             "relative z-10 mx-auto grid w-full gap-y-4 px-4 sm:px-6 lg:px-8",
+            sections_columns_class(@sections_columns),
             content_width_class()
           ]}
         >
@@ -824,6 +826,25 @@ defmodule GamendWeb.PresentationPage do
   end
 
   defp section_height(section), do: Map.get(section, "height", "compact")
+
+  # `"sections_columns": 2` lays the sections out two-up from `md` and stays
+  # one-up below it. A list page \u2014 a blog index, say \u2014 gets longer with every
+  # entry, and a column of full-width rows is a lot of scrolling to see what is
+  # there; a hero plus a two-column grid shows twice as much per screen.
+  #
+  # Opt-in, and only 1 or 2. Three across leaves each card too narrow for a
+  # title and a sentence at the widths this grid actually runs at, and a page
+  # that does not ask for columns renders exactly as it did before.
+  defp sections_columns(page) do
+    case Map.get(page, "sections_columns") do
+      2 -> 2
+      "2" -> 2
+      _ -> 1
+    end
+  end
+
+  defp sections_columns_class(2), do: "gap-x-4 md:grid-cols-2"
+  defp sections_columns_class(_), do: nil
 
   defp background_icon_bands(sections) when is_list(sections), do: max(3, length(sections) + 2)
 
