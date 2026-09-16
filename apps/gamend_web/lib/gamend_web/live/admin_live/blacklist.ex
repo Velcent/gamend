@@ -56,11 +56,7 @@ defmodule GamendWeb.AdminLive.Blacklist do
   # ── data ──────────────────────────────────────────────────────────────────
 
   defp reload(socket) do
-    filters = [
-      user_id: presence(socket.assigns.user_filter),
-      page: socket.assigns.page,
-      page_size: socket.assigns.page_size
-    ]
+    filters = Shared.list_opts(socket.assigns, user_id: :user_filter)
 
     blocks = Friends.list_all_blocks(filters)
     total = Friends.count_all_blocks(filters)
@@ -68,14 +64,8 @@ defmodule GamendWeb.AdminLive.Blacklist do
     socket
     |> assign(:blocks, blocks)
     |> assign(:count, total)
-    |> assign(:total_pages, ceil_div(total, socket.assigns.page_size))
+    |> assign(:total_pages, LiveHelpers.total_pages(total, socket.assigns.page_size))
   end
-
-  defp presence(""), do: nil
-  defp presence(value), do: value
-
-  defp ceil_div(_num, 0), do: 0
-  defp ceil_div(num, den), do: div(num + den - 1, den)
 
   defp user_name(nil), do: "—"
 

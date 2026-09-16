@@ -72,7 +72,7 @@ defmodule Gamend.Query do
   identical private copy of this.
   """
   @spec filter_user(Ecto.Queryable.t(), String.t() | nil) :: Ecto.Queryable.t()
-  def filter_user(query, nil), do: query
+  def filter_user(query, value) when value in [nil, ""], do: query
 
   def filter_user(query, value) when is_binary(value) do
     case Ecto.UUID.cast(value) do
@@ -89,6 +89,28 @@ defmodule Gamend.Query do
           fragment("lower(coalesce(?, '')) LIKE ? ESCAPE '\\'", u.username, ^pattern) or
             fragment("lower(coalesce(?, '')) LIKE ? ESCAPE '\\'", u.display_name, ^pattern)
         )
+    end
+  end
+
+  @doc """
+  The rows whose `field` is exactly the id `value`.
+
+  For a caller holding an id rather than a search term -- a plugin scoping a
+  read by user or lobby, a link from another page. `nil` and `""` leave the
+  query alone. A value that is not a UUID matches nothing: it arrives in
+  request params, where comparing it raised `Ecto.Query.CastError`, and
+  ignoring it instead would answer every row to a filter plainly meant to
+  narrow them. KV did the first and push the second.
+
+  See `filter_user/2` for the admin search that also matches names.
+  """
+  @spec filter_id(Ecto.Queryable.t(), atom(), String.t() | nil) :: Ecto.Queryable.t()
+  def filter_id(query, _field, value) when value in [nil, ""], do: query
+
+  def filter_id(query, field, value) when is_atom(field) and is_binary(value) do
+    case Ecto.UUID.cast(value) do
+      {:ok, uuid} -> where(query, [q], field(q, ^field) == ^uuid)
+      :error -> where(query, [_q], false)
     end
   end
 

@@ -611,14 +611,7 @@ defmodule GamendWeb.ChatLive do
     end
   end
 
-  defp parse_page(page) when is_binary(page) do
-    case Integer.parse(page) do
-      {n, ""} when n > 1 -> min(n, @max_pages)
-      _ -> 1
-    end
-  end
-
-  defp parse_page(_page), do: 1
+  defp parse_page(page), do: page |> Gamend.Parse.integer(1) |> max(1) |> min(@max_pages)
 
   # Only the sender's own, loaded messages can be edited. Re-opening the same
   # message keeps the text typed so far.

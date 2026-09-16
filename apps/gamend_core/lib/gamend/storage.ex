@@ -143,9 +143,25 @@ defmodule Gamend.Storage do
           {:ok, Adapter.presigned()} | {:error, term()}
   def presigned_upload(key, opts \\ []), do: adapter().presigned_upload(key, opts)
 
-  @doc "One page of stored objects. Opts: `:prefix`, `:offset`, `:limit` (admin use)."
+  @doc """
+  One page of stored objects (admin use). Opts: `:prefix`, and `:page` and
+  `:page_size` -- clamped through `Gamend.Limits` like every other listing --
+  or the adapter's own `:offset` and `:limit`.
+  """
   @spec list_objects(keyword()) :: [Adapter.object()]
-  def list_objects(opts \\ []), do: adapter().list(opts)
+  def list_objects(opts \\ []) do
+    if Keyword.has_key?(opts, :page) or Keyword.has_key?(opts, :page_size) do
+      page = Gamend.Limits.clamp_page(Keyword.get(opts, :page))
+      size = Gamend.Limits.clamp_page_size(Keyword.get(opts, :page_size))
+
+      opts
+      |> Keyword.drop([:page, :page_size])
+      |> Keyword.merge(offset: (page - 1) * size, limit: size)
+      |> adapter().list()
+    else
+      adapter().list(opts)
+    end
+  end
 
   @doc "Total object count and byte size. Opts: `:prefix`."
   @spec usage(keyword()) :: %{count: non_neg_integer(), bytes: non_neg_integer()}

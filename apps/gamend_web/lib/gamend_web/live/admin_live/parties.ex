@@ -733,9 +733,7 @@ defmodule GamendWeb.AdminLive.Parties do
     total_count = Parties.count_all_parties(filters)
 
     total_pages =
-      if page_size > 0,
-        do: div(total_count + page_size - 1, page_size),
-        else: 0
+      LiveHelpers.total_pages(total_count, page_size)
 
     socket
     |> assign(:parties, parties)

@@ -746,7 +746,7 @@ defmodule GamendWeb.AdminLive.Leaderboards do
 
     leaderboards = Leaderboards.list_leaderboards(opts)
     count = Leaderboards.count_leaderboards(Keyword.take(opts, [:active]))
-    total_pages = if page_size > 0, do: div(count + page_size - 1, page_size), else: 0
+    total_pages = LiveHelpers.total_pages(count, page_size)
 
     socket
     |> assign(:leaderboards, leaderboards)
@@ -775,7 +775,7 @@ defmodule GamendWeb.AdminLive.Leaderboards do
 
     records = Leaderboards.list_records(lb.id, page: page, page_size: page_size)
     count = Leaderboards.count_records(lb.id)
-    total_pages = if page_size > 0, do: div(count + page_size - 1, page_size), else: 0
+    total_pages = LiveHelpers.total_pages(count, page_size)
 
     socket
     |> assign(:records, records)

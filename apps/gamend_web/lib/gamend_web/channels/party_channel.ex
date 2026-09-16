@@ -192,14 +192,7 @@ defmodule GamendWeb.PartyChannel do
   end
 
   @impl true
-  def handle_info({:channel_updates_flush, _}, socket),
-    do: {:noreply, ChannelUpdates.flush(socket)}
-
-  # Ignore other messages
-  @impl true
-  def handle_info(_msg, socket) do
-    {:noreply, socket}
-  end
+  def handle_info(msg, socket), do: {:noreply, ChannelEvents.other_info(msg, socket)}
 
   defp serialize_ready_check(check, socket) do
     viewer_id = get_in(socket.assigns, [:current_scope, Access.key(:user_id)])

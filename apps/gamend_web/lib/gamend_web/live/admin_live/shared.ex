@@ -51,6 +51,28 @@ defmodule GamendWeb.AdminLive.Shared do
     |> Phoenix.Component.assign(:page, 1)
   end
 
+  @doc """
+  The options a filtered, paginated console list hands its context: each
+  `option: assign` pair read from `assigns`, where `"all"` and `""` mean no
+  filter, followed by the current page and page size -- the other half of
+  `put_filters/3`.
+
+      Shared.list_opts(socket.assigns, status: :status_filter, user_id: :user_filter)
+  """
+  @spec list_opts(map(), keyword(atom())) :: keyword()
+  def list_opts(assigns, fields) do
+    filters =
+      Enum.map(fields, fn {option, assign_key} ->
+        {option,
+         if(assigns[assign_key] == "all",
+           do: nil,
+           else: Gamend.Parse.blank_to_nil(assigns[assign_key])
+         )}
+      end)
+
+    filters ++ [page: assigns.page, page_size: assigns.page_size]
+  end
+
   defp read_filter(params, param, default) do
     case Map.get(params, param) do
       value when is_binary(value) -> String.trim(value)

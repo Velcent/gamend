@@ -1242,7 +1242,7 @@ defmodule GamendWeb.UserLive.Settings.GroupsTab do
 
     groups = Groups.list_groups(filters, page: page, page_size: page_size)
     total = Groups.count_list_groups(filters)
-    total_pages = if page_size > 0, do: div(total + page_size - 1, page_size), else: 0
+    total_pages = LiveHelpers.total_pages(total, page_size)
 
     socket
     |> stream(:browse_groups, groups, reset: true, dom_id: &"browse-group-#{&1.id}")
@@ -1387,7 +1387,7 @@ defmodule GamendWeb.UserLive.Settings.GroupsTab do
 
       members = Groups.get_group_members_paginated(group.id, page: page, page_size: page_size)
       total = Groups.count_group_members(group.id)
-      total_pages = if page_size > 0, do: div(total + page_size - 1, page_size), else: 0
+      total_pages = LiveHelpers.total_pages(total, page_size)
 
       socket
       |> assign(:group_members, members)

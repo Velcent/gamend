@@ -58,12 +58,7 @@ defmodule GamendWeb.AdminLive.Friends do
   # ── data ──────────────────────────────────────────────────────────────────
 
   defp reload(socket) do
-    filters = [
-      status: status_filter(socket.assigns.status_filter),
-      user_id: presence(socket.assigns.user_filter),
-      page: socket.assigns.page,
-      page_size: socket.assigns.page_size
-    ]
+    filters = Shared.list_opts(socket.assigns, status: :status_filter, user_id: :user_filter)
 
     friendships = Friends.list_all_friendships(filters)
     total = Friends.count_all_friendships(filters)
@@ -71,17 +66,8 @@ defmodule GamendWeb.AdminLive.Friends do
     socket
     |> assign(:friendships, friendships)
     |> assign(:count, total)
-    |> assign(:total_pages, ceil_div(total, socket.assigns.page_size))
+    |> assign(:total_pages, LiveHelpers.total_pages(total, socket.assigns.page_size))
   end
-
-  defp status_filter("all"), do: nil
-  defp status_filter(status), do: status
-
-  defp presence(""), do: nil
-  defp presence(value), do: value
-
-  defp ceil_div(_num, 0), do: 0
-  defp ceil_div(num, den), do: div(num + den - 1, den)
 
   defp user_name(nil), do: "—"
 

@@ -86,11 +86,11 @@ defmodule GamendWeb.AdminLive.ChatMutes do
 
     user_id = String.trim(form["user_id"] || "")
     scope = form["scope"] || "global"
-    scope_ref_id = presence(String.trim(form["scope_ref_id"] || ""))
+    scope_ref_id = Gamend.Parse.blank_to_nil(String.trim(form["scope_ref_id"] || ""))
 
     attrs = %{
       "expires_at" => expires_at(form["duration"]),
-      "reason" => presence(String.trim(form["reason"] || "")),
+      "reason" => Gamend.Parse.blank_to_nil(String.trim(form["reason"] || "")),
       "muted_by" => Scope.user_id(socket.assigns.current_scope)
     }
 
@@ -184,7 +184,7 @@ defmodule GamendWeb.AdminLive.ChatMutes do
 
     attrs = %{
       "expires_at" => edit_expires_at(form["duration"], mute),
-      "reason" => presence(String.trim(form["reason"] || "")),
+      "reason" => Gamend.Parse.blank_to_nil(String.trim(form["reason"] || "")),
       "muted_by" => Scope.user_id(socket.assigns.current_scope)
     }
 
@@ -225,7 +225,7 @@ defmodule GamendWeb.AdminLive.ChatMutes do
 
   defp reload(socket) do
     filters = %{
-      "scope" => presence(socket.assigns.scope_filter),
+      "scope" => Gamend.Parse.blank_to_nil(socket.assigns.scope_filter),
       "active" => socket.assigns.active_only
     }
 
@@ -238,14 +238,8 @@ defmodule GamendWeb.AdminLive.ChatMutes do
     |> assign(:mutes, mutes)
     |> assign(:count, total)
     |> assign(:cached_mutes, Cache.mute_count())
-    |> assign(:total_pages, ceil_div(total, socket.assigns.page_size))
+    |> assign(:total_pages, LiveHelpers.total_pages(total, socket.assigns.page_size))
   end
-
-  defp presence(""), do: nil
-  defp presence(value), do: value
-
-  defp ceil_div(_num, 0), do: 0
-  defp ceil_div(num, den), do: div(num + den - 1, den)
 
   defp expires_at("10m"), do: from_now(600)
   defp expires_at("1h"), do: from_now(3_600)
@@ -276,7 +270,7 @@ defmodule GamendWeb.AdminLive.ChatMutes do
     Notices.default_mute_message(%Mute{
       scope: form["scope"] || "global",
       expires_at: expires_at(form["duration"]),
-      reason: presence(String.trim(form["reason"] || ""))
+      reason: Gamend.Parse.blank_to_nil(String.trim(form["reason"] || ""))
     })
   end
 
@@ -284,7 +278,7 @@ defmodule GamendWeb.AdminLive.ChatMutes do
     Notices.default_mute_message(%{
       mute
       | expires_at: edit_expires_at(form["duration"], mute),
-        reason: presence(String.trim(form["reason"] || ""))
+        reason: Gamend.Parse.blank_to_nil(String.trim(form["reason"] || ""))
     })
   end
 

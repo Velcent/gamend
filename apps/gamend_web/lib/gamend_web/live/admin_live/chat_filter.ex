@@ -75,7 +75,7 @@ defmodule GamendWeb.AdminLive.ChatFilter do
       "word" => String.trim(form["word"] || ""),
       "severity" => form["severity"],
       "match_mode" => form["match_mode"],
-      "lang" => presence(String.trim(form["lang"] || ""))
+      "lang" => Gamend.Parse.blank_to_nil(String.trim(form["lang"] || ""))
     }
 
     socket =
@@ -196,9 +196,9 @@ defmodule GamendWeb.AdminLive.ChatFilter do
 
   defp reload(socket) do
     filters = %{
-      "word" => presence(socket.assigns.word_filter),
-      "severity" => presence(socket.assigns.severity_filter),
-      "lang" => presence(socket.assigns.lang_filter)
+      "word" => Gamend.Parse.blank_to_nil(socket.assigns.word_filter),
+      "severity" => Gamend.Parse.blank_to_nil(socket.assigns.severity_filter),
+      "lang" => Gamend.Parse.blank_to_nil(socket.assigns.lang_filter)
     }
 
     words =
@@ -213,7 +213,7 @@ defmodule GamendWeb.AdminLive.ChatFilter do
     |> assign(:words, words)
     |> assign(:count, total)
     |> assign(:cached_words, Cache.word_count())
-    |> assign(:total_pages, ceil_div(total, socket.assigns.page_size))
+    |> assign(:total_pages, LiveHelpers.total_pages(total, socket.assigns.page_size))
     |> assign_test_result()
   end
 
@@ -287,13 +287,6 @@ defmodule GamendWeb.AdminLive.ChatFilter do
     |> Ecto.Changeset.traverse_errors(fn {msg, _opts} -> msg end)
     |> Enum.map_join("; ", fn {field, messages} -> "#{field} #{Enum.join(messages, ", ")}" end)
   end
-
-  defp presence(nil), do: nil
-  defp presence(""), do: nil
-  defp presence(value), do: value
-
-  defp ceil_div(_num, 0), do: 0
-  defp ceil_div(num, den), do: div(num + den - 1, den)
 
   defp severity_badge("block"), do: "badge-error"
   defp severity_badge("mask"), do: "badge-warning"

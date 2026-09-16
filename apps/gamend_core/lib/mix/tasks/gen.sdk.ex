@@ -151,10 +151,10 @@ defmodule Mix.Tasks.Gen.Sdk do
   defp generate_stub(module, filename, sdk_dir) do
     {:docs_v1, _, :elixir, _, module_doc, _, function_docs} = Code.fetch_docs(module)
 
-    specs = get_specs(module)
+    {function_docs, specs} = resolve_delegates(function_docs, get_specs(module))
     types = get_types(module)
 
-    functions = list_public_functions(module)
+    functions = list_public_functions(module, specs)
 
     function_docs_by_name = build_function_docs_by_name(function_docs)
 
@@ -186,6 +186,41 @@ defmodule Mix.Tasks.Gen.Sdk do
     Mix.shell().info("Generated #{path}")
 
     {context_name(module), api_entries(module, function_docs)}
+  end
+
+  # A context split by concern keeps its API as `defdelegate`s marked
+  # `@doc delegate_to: {Module, :fun, arity}` (see `Gamend.Accounts`). The
+  # stub is still the context's, so its docs and specs come from where each
+  # function now lives -- otherwise every delegated function would reach the
+  # SDK undocumented, and without the spec this task insists on.
+  defp resolve_delegates(function_docs, specs) do
+    {docs, specs} =
+      Enum.reduce(function_docs, {[], specs}, fn
+        {{:function, name, _arity} = key, line, _sigs, _doc,
+         %{delegate_to: {mod, fun, arity}} = meta} =
+            entry,
+        {docs, specs} ->
+          {:docs_v1, _, :elixir, _, _, _, target_docs} = Code.fetch_docs(mod)
+
+          doc_entry =
+            case Enum.find(target_docs, &match?({{:function, ^fun, ^arity}, _, _, _, _}, &1)) do
+              {_, _, sigs, doc, target_meta} ->
+                {key, line, sigs, doc, Map.merge(target_meta, Map.delete(meta, :delegate_to))}
+
+              nil ->
+                entry
+            end
+
+          target_specs =
+            for {{^fun, a}, forms} <- get_specs(mod), a <= arity, do: {{name, a}, forms}
+
+          {[doc_entry | docs], target_specs ++ specs}
+
+        entry, {docs, specs} ->
+          {[entry | docs], specs}
+      end)
+
+    {Enum.reverse(docs), specs}
   end
 
   defp output_root do
@@ -719,7 +754,7 @@ defmodule Mix.Tasks.Gen.Sdk do
     end)
   end
 
-  defp list_public_functions(module) do
+  defp list_public_functions(module, specs) do
     all_funs =
       module.__info__(:functions)
       |> Enum.reject(fn {name, _arity} ->
@@ -731,12 +766,6 @@ defmodule Mix.Tasks.Gen.Sdk do
     # When a function has default args, Elixir generates multiple arities.
     # We only keep the highest arity (which has the @spec) and skip lower
     # arities that are just generated wrappers.
-    specs =
-      case Code.Typespec.fetch_specs(module) do
-        {:ok, s} -> s
-        :error -> []
-      end
-
     spec_set = MapSet.new(specs, fn {{name, arity}, _} -> {name, arity} end)
 
     by_name = Enum.group_by(all_funs, fn {name, _} -> name end)
@@ -955,6 +984,10 @@ defmodule Mix.Tasks.Gen.Sdk do
             {node, maybe_put_def_arg_names(head, acc)}
 
           {:defp, _meta, [head, _body]} = node, acc ->
+            {node, maybe_put_def_arg_names(head, acc)}
+
+          # A delegate names its arguments too -- see `resolve_delegates/2`.
+          {:defdelegate, _meta, [head, _opts]} = node, acc ->
             {node, maybe_put_def_arg_names(head, acc)}
 
           node, acc ->

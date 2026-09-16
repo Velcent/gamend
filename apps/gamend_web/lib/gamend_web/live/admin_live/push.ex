@@ -110,7 +110,7 @@ defmodule GamendWeb.AdminLive.Push do
                           name="user_id"
                           value={@filters["user_id"]}
                           class="input input-bordered input-xs w-full"
-                          placeholder="User ID"
+                          placeholder="User (id or name)"
                           phx-debounce="300"
                         />
                       </th>
@@ -286,9 +286,7 @@ defmodule GamendWeb.AdminLive.Push do
     total_count = Push.count_all_tokens(filters)
 
     total_pages =
-      if page_size > 0,
-        do: div(total_count + page_size - 1, page_size),
-        else: 0
+      LiveHelpers.total_pages(total_count, page_size)
 
     socket
     |> assign(:tokens, tokens)

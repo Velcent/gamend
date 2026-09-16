@@ -365,8 +365,8 @@ defmodule Gamend.KV do
           from(e in Entry,
             order_by: [desc: e.updated_at, desc: e.id]
           )
-          |> maybe_filter_user(user_id)
-          |> maybe_filter_lobby(lobby_id)
+          |> Gamend.Query.filter_id(:user_id, user_id)
+          |> Gamend.Query.filter_id(:lobby_id, lobby_id)
           |> maybe_filter_global_only(global_only)
           |> maybe_filter_key(key_filter)
 
@@ -411,8 +411,8 @@ defmodule Gamend.KV do
       _ ->
         count =
           Entry
-          |> maybe_filter_user(user_id)
-          |> maybe_filter_lobby(lobby_id)
+          |> Gamend.Query.filter_id(:user_id, user_id)
+          |> Gamend.Query.filter_id(:lobby_id, lobby_id)
           |> maybe_filter_global_only(global_only)
           |> maybe_filter_key(key_filter)
           |> Repo.aggregate(:count)
@@ -647,12 +647,6 @@ defmodule Gamend.KV do
   defp entry_query(key, user_id, lobby_id) do
     from(e in Entry, where: e.key == ^key and e.user_id == ^user_id and e.lobby_id == ^lobby_id)
   end
-
-  defp maybe_filter_user(query, nil), do: query
-  defp maybe_filter_user(query, user_id), do: from(e in query, where: e.user_id == ^user_id)
-
-  defp maybe_filter_lobby(query, nil), do: query
-  defp maybe_filter_lobby(query, lobby_id), do: from(e in query, where: e.lobby_id == ^lobby_id)
 
   defp maybe_filter_global_only(query, true) do
     from(e in query, where: is_nil(e.user_id) and is_nil(e.lobby_id))

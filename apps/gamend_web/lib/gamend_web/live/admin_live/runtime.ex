@@ -154,7 +154,7 @@ defmodule GamendWeb.AdminLive.Runtime do
       |> filter_by_search(search)
 
     total = length(filtered)
-    total_pages = max(div(total + page_size - 1, page_size), 1)
+    total_pages = max(LiveHelpers.total_pages(total, page_size), 1)
     page = min(page, total_pages)
 
     socket

@@ -187,10 +187,10 @@ defmodule GamendWeb.SearchIndex do
       %{
         "title" => title,
         "href" => localize(href, context),
-        "group" => presence(string_at(entry, :group)),
-        "subtitle" => presence(string_at(entry, :subtitle)),
+        "group" => Gamend.Parse.blank_to_nil(string_at(entry, :group)),
+        "subtitle" => Gamend.Parse.blank_to_nil(string_at(entry, :subtitle)),
         "keywords" => keywords_at(entry),
-        "scope" => presence(string_at(entry, :scope))
+        "scope" => Gamend.Parse.blank_to_nil(string_at(entry, :scope))
       }
     end
   end
@@ -233,9 +233,6 @@ defmodule GamendWeb.SearchIndex do
   defp to_string_safe(nil), do: ""
   defp to_string_safe(value) when is_atom(value) or is_number(value), do: to_string(value)
   defp to_string_safe(_value), do: ""
-
-  defp presence(""), do: nil
-  defp presence(value), do: value
 
   # First one wins: a host listing its own entries after the navigation ones
   # does not shadow a nav link, and nothing is offered twice.

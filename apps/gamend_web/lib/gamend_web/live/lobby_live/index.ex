@@ -32,9 +32,7 @@ defmodule GamendWeb.LobbyLive.Index do
     total_count = Lobbies.count_list_lobbies(%{})
 
     total_pages =
-      if lobbies_page_size > 0,
-        do: div(total_count + lobbies_page_size - 1, lobbies_page_size),
-        else: 0
+      LiveHelpers.total_pages(total_count, lobbies_page_size)
 
     memberships_map =
       Enum.into(lobbies, %{}, fn l -> {l.id, Lobbies.list_memberships_for_lobby(l.id)} end)

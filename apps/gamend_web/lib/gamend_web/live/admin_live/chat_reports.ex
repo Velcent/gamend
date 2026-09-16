@@ -175,7 +175,7 @@ defmodule GamendWeb.AdminLive.ChatReports do
 
   defp apply_action(socket, "mute", report, form) do
     scope = form["scope"] || "global"
-    scope_ref_id = presence(String.trim(form["scope_ref_id"] || ""))
+    scope_ref_id = Gamend.Parse.blank_to_nil(String.trim(form["scope_ref_id"] || ""))
 
     if scope != "global" and is_nil(scope_ref_id) do
       assign(socket, :form_error, gettext("A scoped mute needs the lobby, group or party id."))
@@ -187,7 +187,7 @@ defmodule GamendWeb.AdminLive.ChatReports do
   defp mute(socket, report, form, scope, scope_ref_id) do
     attrs = %{
       "expires_at" => expires_at(form["duration"]),
-      "reason" => presence(String.trim(form["reason"] || "")),
+      "reason" => Gamend.Parse.blank_to_nil(String.trim(form["reason"] || "")),
       "muted_by" => admin_id(socket)
     }
 
@@ -246,7 +246,7 @@ defmodule GamendWeb.AdminLive.ChatReports do
     :ok
   end
 
-  defp notice(value, default), do: presence(String.trim(value || "")) || default
+  defp notice(value, default), do: Gamend.Parse.blank_to_nil(String.trim(value || "")) || default
 
   # ── form ──────────────────────────────────────────────────────────────────
 
@@ -304,8 +304,8 @@ defmodule GamendWeb.AdminLive.ChatReports do
 
   defp reload(socket) do
     filters = %{
-      "status" => presence(socket.assigns.status_filter),
-      "reported_user_id" => presence(socket.assigns.user_filter)
+      "status" => Gamend.Parse.blank_to_nil(socket.assigns.status_filter),
+      "reported_user_id" => Gamend.Parse.blank_to_nil(socket.assigns.user_filter)
     }
 
     reports =
@@ -319,7 +319,7 @@ defmodule GamendWeb.AdminLive.ChatReports do
     socket
     |> assign(:reports, reports)
     |> assign(:count, total)
-    |> assign(:total_pages, ceil_div(total, socket.assigns.page_size))
+    |> assign(:total_pages, LiveHelpers.total_pages(total, socket.assigns.page_size))
   end
 
   # The message row is gone the moment it is deleted, and `message_id` is
@@ -337,12 +337,6 @@ defmodule GamendWeb.AdminLive.ChatReports do
       _other -> default
     end
   end
-
-  defp presence(""), do: nil
-  defp presence(value), do: value
-
-  defp ceil_div(_num, 0), do: 0
-  defp ceil_div(num, den), do: div(num + den - 1, den)
 
   defp reporter_name(%Report{reporter_id: nil}), do: gettext("Filter")
   defp reporter_name(%Report{reporter: reporter}), do: user_display(reporter)

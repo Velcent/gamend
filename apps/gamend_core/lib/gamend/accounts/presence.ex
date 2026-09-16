@@ -8,19 +8,10 @@ defmodule Gamend.Accounts.Presence do
   """
 
   import Ecto.Query, warn: false
-  alias Gamend.Repo
-
-  alias Gamend.Accounts.{
-    PresenceWriter,
-    User
-  }
-
   alias Gamend.Accounts
-
-  # Upper bound on cross-node staleness for cached user structs: explicit
-  # invalidations propagate immediately via `Gamend.Cache.invalidate/1`,
-  # and this TTL caps staleness if an invalidation broadcast is ever missed.
-  @user_cache_ttl_ms 60_000
+  alias Gamend.Accounts.PresenceWriter
+  alias Gamend.Accounts.User
+  alias Gamend.Repo
 
   @doc """
   Updates `last_seen_at` to now for the given user. Fire-and-forget — errors are ignored.
@@ -64,7 +55,7 @@ defmodule Gamend.Accounts.Presence do
           Gamend.Cache.put(
             {:accounts, :user, user_id},
             %{cached | last_seen_at: now, is_online: true},
-            ttl: @user_cache_ttl_ms
+            ttl: Accounts.user_cache_ttl_ms()
           )
 
       _ ->

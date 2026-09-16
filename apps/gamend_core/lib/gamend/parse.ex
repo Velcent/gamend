@@ -73,4 +73,15 @@ defmodule Gamend.Parse do
       int -> int
     end
   end
+
+  @doc """
+  `nil` for `nil` or `""`, the value otherwise -- what an optional filter from a
+  form means when it is left empty. Not trimmed: a caller that wants
+  `"  "` treated as blank trims first.
+
+  Eleven admin LiveViews and two chat contexts each defined this privately.
+  """
+  @spec blank_to_nil(term()) :: term()
+  def blank_to_nil(value) when value in [nil, ""], do: nil
+  def blank_to_nil(value), do: value
 end

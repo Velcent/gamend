@@ -136,15 +136,12 @@ defmodule GamendWeb.AdminLive.Economy do
       Inventory.list_items(user_id: blank(socket.assigns.user_filter), page: 1, page_size: 20)
     )
     |> assign(:count, total)
-    |> assign(:total_pages, ceil_div(total, socket.assigns.page_size))
+    |> assign(:total_pages, LiveHelpers.total_pages(total, socket.assigns.page_size))
   end
 
   defp blank(nil), do: nil
   defp blank(""), do: nil
   defp blank(v), do: v
-
-  defp ceil_div(_num, 0), do: 0
-  defp ceil_div(num, den), do: div(num + den - 1, den)
 
   # ── render ────────────────────────────────────────────────────────────────
 

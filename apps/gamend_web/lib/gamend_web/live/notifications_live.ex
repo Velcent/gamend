@@ -260,7 +260,7 @@ defmodule GamendWeb.NotificationsLive do
     notifications = Notifications.list_notifications(user.id, page: page, page_size: page_size)
     count = Notifications.count_notifications(user.id)
     unread_count = Notifications.count_unread_notifications(user.id)
-    total_pages = if page_size > 0, do: div(count + page_size - 1, page_size), else: 0
+    total_pages = LiveHelpers.total_pages(count, page_size)
 
     socket
     |> assign(:notifications, notifications)

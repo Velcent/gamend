@@ -453,18 +453,13 @@ defmodule Gamend.Matchmaking do
   defp tickets_query(opts) do
     Ticket
     |> filter_status(Keyword.get(opts, :status))
-    |> filter_user(Keyword.get(opts, :user_id))
+    |> Gamend.Query.filter_user(Keyword.get(opts, :user_id))
   end
 
   defp filter_status(query, status) when is_binary(status) and status != "",
     do: where(query, [t], t.status == ^status)
 
   defp filter_status(query, _status), do: query
-
-  defp filter_user(query, user_id) when is_binary(user_id) and user_id != "",
-    do: where(query, [t], t.user_id == ^user_id)
-
-  defp filter_user(query, _user_id), do: query
 
   # Pagination is opt-in; an unwindowed read is still bounded.
   defp paginate(query, opts), do: Gamend.Query.maybe_page(query, opts)

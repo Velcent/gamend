@@ -662,7 +662,7 @@ defmodule GamendWeb.AdminLive.Quests do
 
     quests = Quests.list_quests(page: page, page_size: page_size, category: category)
     count = Quests.count_quests(category: category)
-    total_pages = if page_size > 0, do: div(count + page_size - 1, page_size), else: 0
+    total_pages = LiveHelpers.total_pages(count, page_size)
     funnels = Map.new(quests, fn q -> {q.key, Quests.funnel(q.key)} end)
 
     socket
@@ -682,24 +682,20 @@ defmodule GamendWeb.AdminLive.Quests do
     opts = [
       page: page,
       page_size: page_size,
-      user_id: blank_to_nil(filters["user_id"]),
-      quest_key: blank_to_nil(filters["quest_key"]),
-      status: blank_to_nil(filters["status"])
+      user_id: Gamend.Parse.blank_to_nil(filters["user_id"]),
+      quest_key: Gamend.Parse.blank_to_nil(filters["quest_key"]),
+      status: Gamend.Parse.blank_to_nil(filters["status"])
     ]
 
     rows = Quests.list_progress(opts)
     count = Quests.count_progress(opts)
-    total_pages = if page_size > 0, do: div(count + page_size - 1, page_size), else: 0
+    total_pages = LiveHelpers.total_pages(count, page_size)
 
     socket
     |> assign(:progress_rows, rows)
     |> assign(:progress_count, count)
     |> assign(:progress_total_pages, max(total_pages, 1))
   end
-
-  defp blank_to_nil(nil), do: nil
-  defp blank_to_nil(""), do: nil
-  defp blank_to_nil(value), do: value
 
   defp progress_user_name(progress) do
     case progress.user do

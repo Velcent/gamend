@@ -4,6 +4,7 @@ defmodule GamendWeb.AdminLive.Payments do
   alias Gamend.Payments
   alias Gamend.Payments.Product
   alias Gamend.Payments.ProviderProduct
+  alias GamendWeb.LiveHelpers
 
   @sections ~w(products provider_products purchases entitlements provider_events reconciliation_cursors)a
   @default_page_size 25
@@ -769,7 +770,7 @@ defmodule GamendWeb.AdminLive.Payments do
           {Payments.list_reconciliation_cursors(opts), Payments.count_reconciliation_cursors()}
       end
 
-    total_pages = max(1, div(count + page_size - 1, page_size))
+    total_pages = max(1, LiveHelpers.total_pages(count, page_size))
 
     socket
     |> assign(section, items)

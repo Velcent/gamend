@@ -506,7 +506,7 @@ defmodule GamendWeb.AdminLive.Tournaments do
     socket
     |> assign(:tournaments, Tournaments.list_tournaments(opts))
     |> assign(:count, count)
-    |> assign(:total_pages, max(ceil_div(count, socket.assigns.page_size), 1))
+    |> assign(:total_pages, max(LiveHelpers.total_pages(count, socket.assigns.page_size), 1))
   end
 
   @detail_page_size 25
@@ -547,7 +547,7 @@ defmodule GamendWeb.AdminLive.Tournaments do
           entries: entries,
           entry_count: entry_count,
           entry_page: page,
-          entry_pages: ceil_div(entry_count, @detail_page_size),
+          entry_pages: LiveHelpers.total_pages(entry_count, @detail_page_size),
           brackets: brackets,
           selected_bracket: selected_bracket,
           matches: matches,
@@ -583,8 +583,6 @@ defmodule GamendWeb.AdminLive.Tournaments do
       _ -> user_id
     end
   end
-
-  defp ceil_div(num, den), do: div(num + den - 1, den)
 
   defp refresh_detail(socket) do
     case socket.assigns.detail do

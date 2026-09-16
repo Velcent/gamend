@@ -76,12 +76,7 @@ defmodule GamendWeb.AdminLive.Matchmaking do
   # ── data ──────────────────────────────────────────────────────────────────
 
   defp reload(socket) do
-    filters = [
-      status: status_filter(socket.assigns.status_filter),
-      user_id: presence(socket.assigns.user_filter),
-      page: socket.assigns.page,
-      page_size: socket.assigns.page_size
-    ]
+    filters = Shared.list_opts(socket.assigns, status: :status_filter, user_id: :user_filter)
 
     tickets = Matchmaking.list_tickets(filters)
     total = Matchmaking.count_tickets(filters)
@@ -89,20 +84,11 @@ defmodule GamendWeb.AdminLive.Matchmaking do
     socket
     |> assign(:tickets, tickets)
     |> assign(:count, total)
-    |> assign(:total_pages, ceil_div(total, socket.assigns.page_size))
+    |> assign(:total_pages, LiveHelpers.total_pages(total, socket.assigns.page_size))
     |> assign(:stats, Matchmaking.stats())
     |> assign(:ready_stats, ReadyChecks.stats())
     |> assign(:ready_checks, ReadyChecks.list_checks(page: 1, page_size: 10))
   end
-
-  defp status_filter("all"), do: nil
-  defp status_filter(status), do: status
-
-  defp presence(""), do: nil
-  defp presence(value), do: value
-
-  defp ceil_div(_num, 0), do: 0
-  defp ceil_div(num, den), do: div(num + den - 1, den)
 
   defp user_label(%{user: %{} = user}), do: user_name(user)
   defp user_label(%{user_id: user_id}), do: user_id
@@ -264,9 +250,9 @@ defmodule GamendWeb.AdminLive.Matchmaking do
               type="text"
               name="user_id"
               value={@user_filter}
-              placeholder="Filter by user id"
+              placeholder="User (id or name)"
               phx-debounce="300"
-              class="input input-sm w-72 font-mono"
+              class="input input-sm w-72"
             />
           </form>
 

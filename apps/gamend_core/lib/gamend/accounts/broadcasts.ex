@@ -8,8 +8,8 @@ defmodule Gamend.Accounts.Broadcasts do
   """
 
   import Ecto.Query, warn: false
-  alias Gamend.Accounts.User
   alias Gamend.Accounts
+  alias Gamend.Accounts.User
 
   @doc """
   Broadcast that the given user has been updated.

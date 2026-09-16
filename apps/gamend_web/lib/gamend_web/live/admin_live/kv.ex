@@ -532,7 +532,7 @@ defmodule GamendWeb.AdminLive.KV do
     count =
       KV.count_entries(key: key, user_id: user_id, lobby_id: lobby_id, global_only: global_only)
 
-    total_pages = if page_size > 0, do: div(count + page_size - 1, page_size), else: 0
+    total_pages = LiveHelpers.total_pages(count, page_size)
 
     socket
     |> assign(:entries, entries)

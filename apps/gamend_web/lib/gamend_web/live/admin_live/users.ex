@@ -4,6 +4,7 @@ defmodule GamendWeb.AdminLive.Users do
   alias Gamend.Accounts
   alias Gamend.Accounts.User
   alias Gamend.Async
+  alias GamendWeb.LiveHelpers
 
   @impl true
   def render(assigns) do
@@ -985,7 +986,7 @@ defmodule GamendWeb.AdminLive.Users do
 
     users = Accounts.list_all_users(query_filters, opts)
     total_count = Accounts.count_list_all_users(query_filters)
-    total_pages = if page_size > 0, do: div(total_count + page_size - 1, page_size), else: 0
+    total_pages = LiveHelpers.total_pages(total_count, page_size)
 
     {users, total_count, total_pages}
   end

@@ -278,7 +278,7 @@ defmodule GamendWeb.UserLive.Settings.FriendsTab do
     page_size = socket.assigns.search_page_size || @page_size
     results = Accounts.search_users(q, page: page, page_size: page_size)
     total = if q == "", do: 0, else: Accounts.count_search_users(q)
-    total_pages = if page_size > 0, do: div(total + page_size - 1, page_size), else: 0
+    total_pages = LiveHelpers.total_pages(total, page_size)
 
     {:noreply,
      socket
@@ -417,7 +417,7 @@ defmodule GamendWeb.UserLive.Settings.FriendsTab do
     page_size = socket.assigns.search_page_size || @page_size
     results = Accounts.search_users(q, page: page, page_size: page_size)
     total = if q == "", do: 0, else: Accounts.count_search_users(q)
-    total_pages = if page_size > 0, do: div(total + page_size - 1, page_size), else: 0
+    total_pages = LiveHelpers.total_pages(total, page_size)
 
     socket
     |> stream(:search_results, results, reset: true, dom_id: &"search-#{&1.id}")
@@ -470,14 +470,11 @@ defmodule GamendWeb.UserLive.Settings.FriendsTab do
       outgoing_total: outgoing_total,
       friends_total: friends_total,
       blocked_total: blocked_total,
-      incoming_total_pages: total_pages(incoming_total, incoming_page_size),
-      outgoing_total_pages: total_pages(outgoing_total, outgoing_page_size),
-      friends_total_pages: total_pages(friends_total, friends_page_size),
-      blocked_total_pages: total_pages(blocked_total, blocked_page_size),
+      incoming_total_pages: LiveHelpers.total_pages(incoming_total, incoming_page_size),
+      outgoing_total_pages: LiveHelpers.total_pages(outgoing_total, outgoing_page_size),
+      friends_total_pages: LiveHelpers.total_pages(friends_total, friends_page_size),
+      blocked_total_pages: LiveHelpers.total_pages(blocked_total, blocked_page_size),
       friend_unread_counts: %{}
     )
   end
-
-  defp total_pages(_total, page_size) when page_size <= 0, do: 0
-  defp total_pages(total, page_size), do: div(total + page_size - 1, page_size)
 end

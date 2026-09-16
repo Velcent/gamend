@@ -18,6 +18,9 @@ defmodule GamendWeb.LiveHelpers do
   # page still reloads its own way, so they return the socket rather than doing
   # the reload.
 
+  @doc "See `GamendWeb.Pagination.total_pages/2`."
+  defdelegate total_pages(total_count, page_size), to: GamendWeb.Pagination
+
   @doc """
   Steps back one page, never below the first.
 

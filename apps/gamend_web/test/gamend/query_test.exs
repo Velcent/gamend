@@ -115,12 +115,55 @@ defmodule Gamend.QueryTest do
       assert bob.id in owners(String.slice(bob.username, 0, 5))
     end
 
-    test "nil leaves the query alone", %{alice: alice, bob: bob} do
+    test "nil and a blank search leave the query alone", %{alice: alice, bob: bob} do
       assert Enum.sort(owners(nil)) == Enum.sort([alice.id, bob.id])
+      assert Enum.sort(owners("")) == Enum.sort([alice.id, bob.id])
     end
 
     test "LIKE metacharacters in the search are literal" do
       assert owners("%") == []
+    end
+  end
+
+  describe "filter_id/3" do
+    setup do
+      alice = Gamend.AccountsFixtures.user_fixture()
+      bob = Gamend.AccountsFixtures.user_fixture()
+
+      {:ok, _} = Gamend.Economy.grant(alice.id, "gold", 5)
+      {:ok, _} = Gamend.Economy.grant(bob.id, "gold", 7)
+
+      %{alice: alice, bob: bob}
+    end
+
+    defp owners_by_id(value) do
+      Gamend.Economy.Wallet
+      |> Query.filter_id(:user_id, value)
+      |> Gamend.Repo.all()
+      |> Enum.map(& &1.user_id)
+      |> Enum.uniq()
+    end
+
+    test "narrows to exactly that id", %{alice: alice} do
+      assert owners_by_id(alice.id) == [alice.id]
+    end
+
+    test "never searches names", %{alice: alice} do
+      assert owners_by_id(alice.username) == []
+    end
+
+    test "a malformed id matches nothing rather than raising or matching everything" do
+      assert owners_by_id("not-a-uuid") == []
+    end
+
+    test "nil and blank leave the query alone", %{alice: alice, bob: bob} do
+      assert Enum.sort(owners_by_id(nil)) == Enum.sort([alice.id, bob.id])
+      assert Enum.sort(owners_by_id("")) == Enum.sort([alice.id, bob.id])
+    end
+
+    test "KV listings take a malformed id from an admin filter without crashing" do
+      assert Gamend.KV.list_entries(user_id: "not-a-uuid") == []
+      assert Gamend.KV.count_entries(lobby_id: "not-a-uuid") == 0
     end
   end
 end

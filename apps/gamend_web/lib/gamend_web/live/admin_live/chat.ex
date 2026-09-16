@@ -301,9 +301,7 @@ defmodule GamendWeb.AdminLive.Chat do
     total_count = Chat.count_all_messages(filters)
 
     total_pages =
-      if page_size > 0,
-        do: div(total_count + page_size - 1, page_size),
-        else: 0
+      LiveHelpers.total_pages(total_count, page_size)
 
     socket
     |> assign(:messages, messages)

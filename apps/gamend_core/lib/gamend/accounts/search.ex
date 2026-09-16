@@ -7,12 +7,10 @@ defmodule Gamend.Accounts.Search do
   """
 
   import Ecto.Query, warn: false
+  alias Gamend.Accounts
+  alias Gamend.Accounts.User
   alias Gamend.Repo
   alias Gamend.Types
-
-  alias Gamend.Accounts.User
-
-  alias Gamend.Accounts
 
   # Fields the ADMIN search matches. Deliberately wider than search_users/2
   # (username + display_name only): email, device id and provider ids are

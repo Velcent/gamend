@@ -137,7 +137,7 @@ defmodule GamendWeb.AdminLive.Sessions do
           preload: [:user]
       )
 
-    total_pages = if page_size > 0, do: div(sessions_count + page_size - 1, page_size), else: 0
+    total_pages = LiveHelpers.total_pages(sessions_count, page_size)
 
     {:ok,
      socket
@@ -231,7 +231,7 @@ defmodule GamendWeb.AdminLive.Sessions do
           Repo.aggregate(from(t in UserToken, where: t.context == "session"), :count)
 
         total_pages =
-          if page_size > 0, do: div(sessions_count + page_size - 1, page_size), else: 0
+          LiveHelpers.total_pages(sessions_count, page_size)
 
         page = max(1, min(page, total_pages))
 
@@ -289,9 +289,7 @@ defmodule GamendWeb.AdminLive.Sessions do
     sessions_count = Repo.aggregate(from(t in UserToken, where: t.context == "session"), :count)
 
     total_pages =
-      if page_size > 0,
-        do: div(sessions_count + page_size - 1, page_size),
-        else: 0
+      LiveHelpers.total_pages(sessions_count, page_size)
 
     page = max(1, min(page, total_pages))
 

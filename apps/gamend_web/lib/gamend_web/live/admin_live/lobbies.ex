@@ -518,7 +518,7 @@ defmodule GamendWeb.AdminLive.Lobbies do
   @impl true
   def handle_event("create_lobby", %{"lobby" => params}, socket) do
     attrs = %{
-      title: blank_to_nil(params["title"]),
+      title: Gamend.Parse.blank_to_nil(params["title"]),
       max_users: parse_admin_int(params["max_users"]) || 10
     }
 
@@ -836,9 +836,7 @@ defmodule GamendWeb.AdminLive.Lobbies do
     total_count = Lobbies.count_list_all_lobbies(filters)
 
     total_pages =
-      if page_size > 0,
-        do: div(total_count + page_size - 1, page_size),
-        else: 0
+      LiveHelpers.total_pages(total_count, page_size)
 
     spectator_counts =
       lobbies
@@ -901,8 +899,4 @@ defmodule GamendWeb.AdminLive.Lobbies do
   end
 
   defp parse_admin_int(_), do: nil
-
-  defp blank_to_nil(nil), do: nil
-  defp blank_to_nil(""), do: nil
-  defp blank_to_nil(s) when is_binary(s), do: s
 end

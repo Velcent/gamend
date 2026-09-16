@@ -8,9 +8,9 @@ defmodule Gamend.Accounts.Stats do
 
   import Ecto.Query, warn: false
   use Nebulex.Caching, cache: Gamend.Cache
-  alias Gamend.Repo
-  alias Gamend.Accounts.User
   alias Gamend.Accounts
+  alias Gamend.Accounts.User
+  alias Gamend.Repo
 
   @stats_cache_ttl_ms 60_000
 

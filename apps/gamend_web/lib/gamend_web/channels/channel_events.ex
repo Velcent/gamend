@@ -12,7 +12,8 @@ defmodule GamendWeb.ChannelEvents do
 
   The channel callbacks still exist in each channel (a `handle_info/2` clause
   cannot be shared without a macro that would fight the catch-all clauses for
-  ordering); they delegate here.
+  ordering); they delegate here, the final `handle_info/2` through
+  `other_info/2`.
   """
 
   require Logger
@@ -28,6 +29,11 @@ defmodule GamendWeb.ChannelEvents do
   Replying rather than crashing matters: a crashed channel takes every broadcast
   it carried with it, and a client cannot tell a dead channel from a quiet one.
   `context` names assigns to include in the debug line, as `[label: assign_key]`.
+
+  Logged at debug, with the name bounded by `truncate/1`. A frame allows a
+  128 KB event name and the channels rate-limit their known events only, so a
+  warning-level line carrying the name let one socket write unbounded,
+  attacker-chosen text into the rotating log and the admin buffer.
   """
   @spec unknown(term(), Phoenix.Socket.t(), keyword(atom())) ::
           {:reply, {:error, map()}, Phoenix.Socket.t()}
@@ -43,6 +49,18 @@ defmodule GamendWeb.ChannelEvents do
 
     {:reply, {:error, %{error: "unknown_event"}}, socket}
   end
+
+  @doc """
+  The `handle_info/2` every channel ends with: flushes the coalesced updates
+  `GamendWeb.ChannelUpdates` scheduled, and ignores anything else -- a channel
+  subscribes to broad topics and is sent messages meant for other listeners.
+
+      @impl true
+      def handle_info(msg, socket), do: {:noreply, ChannelEvents.other_info(msg, socket)}
+  """
+  @spec other_info(term(), Phoenix.Socket.t()) :: Phoenix.Socket.t()
+  def other_info({:channel_updates_flush, _}, socket), do: ChannelUpdates.flush(socket)
+  def other_info(_msg, socket), do: socket
 
   @doc "An event name bounded for a log line: a client picks the name, and may pick a long one."
   @spec truncate(term()) :: String.t()

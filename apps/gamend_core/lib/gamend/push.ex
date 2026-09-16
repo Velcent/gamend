@@ -367,7 +367,7 @@ defmodule Gamend.Push do
     filters = Map.new(filters, fn {k, v} -> {to_string(k), v} end)
 
     PushToken
-    |> maybe_filter_user(filters["user_id"])
+    |> Gamend.Query.filter_user(filters["user_id"])
     |> maybe_filter(:platform, filters["platform"])
     |> maybe_filter(:provider, filters["provider"])
     |> maybe_filter_status(filters["status"])
@@ -376,13 +376,6 @@ defmodule Gamend.Push do
   # Cast before querying: a half-typed id in the admin filter box must be
   # ignored (the notifications-filter convention), not raise a CastError on
   # Postgres.
-  defp maybe_filter_user(query, value) do
-    case value != nil and Gamend.UUIDv7.cast_or_nil(value) do
-      id when is_binary(id) -> where(query, [t], t.user_id == ^id)
-      _ -> query
-    end
-  end
-
   defp maybe_filter(query, _field, value) when value in [nil, ""], do: query
   defp maybe_filter(query, field, value), do: where(query, [t], field(t, ^field) == ^value)
 

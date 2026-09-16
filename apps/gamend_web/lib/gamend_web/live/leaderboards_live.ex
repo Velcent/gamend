@@ -436,7 +436,7 @@ defmodule GamendWeb.LeaderboardsLive do
 
     groups = Leaderboards.list_leaderboard_groups(page: page, page_size: page_size)
     count = Leaderboards.count_leaderboard_groups()
-    total_pages = max(1, div(count + page_size - 1, page_size))
+    total_pages = max(1, LiveHelpers.total_pages(count, page_size))
 
     socket
     |> assign(:groups, ContentText.translate(groups))
@@ -452,7 +452,7 @@ defmodule GamendWeb.LeaderboardsLive do
 
     records = Leaderboards.list_records(lb.id, page: page, page_size: page_size, search: search)
     count = Leaderboards.count_records(lb.id, search: search)
-    total_pages = max(1, div(count + page_size - 1, page_size))
+    total_pages = max(1, LiveHelpers.total_pages(count, page_size))
 
     socket
     |> assign(:records, records)

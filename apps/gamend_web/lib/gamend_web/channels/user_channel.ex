@@ -541,14 +541,7 @@ defmodule GamendWeb.UserChannel do
   end
 
   @impl true
-  def handle_info({:channel_updates_flush, _}, socket),
-    do: {:noreply, ChannelUpdates.flush(socket)}
-
-  # Catch-all for unknown messages
-  @impl true
-  def handle_info(_msg, socket) do
-    {:noreply, socket}
-  end
+  def handle_info(msg, socket), do: {:noreply, ChannelEvents.other_info(msg, socket)}
 
   @impl true
   def terminate(_reason, socket) do

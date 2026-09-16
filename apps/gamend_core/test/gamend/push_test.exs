@@ -249,8 +249,11 @@ defmodule Gamend.PushTest do
       # Admin listing preloads user names.
       assert [%{user: %{id: _}} | _] = Push.list_all_tokens()
 
-      # A half-typed id in the filter box is ignored, never a query crash.
-      assert Push.count_all_tokens(%{user_id: "not-a-uuid"}) == Push.count_all_tokens(%{})
+      # The filter box is the same user search as the other admin pages: an id,
+      # or part of a name. Text that is neither finds nothing and never crashes.
+      assert Push.count_all_tokens(%{user_id: user.username}) == 2
+      assert Push.count_all_tokens(%{user_id: "not-a-uuid"}) == 0
+      assert Push.count_all_tokens(%{user_id: ""}) == Push.count_all_tokens(%{})
     end
 
     test "token_stats/0 aggregates totals and live splits" do

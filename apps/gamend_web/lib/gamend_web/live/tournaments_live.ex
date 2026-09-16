@@ -251,7 +251,7 @@ defmodule GamendWeb.TournamentsLive do
     |> assign(:page, page)
     |> assign(:groups, ContentText.translate(groups))
     |> assign(:count, total)
-    |> assign(:total_pages, ceil_div(total, @page_size))
+    |> assign(:total_pages, LiveHelpers.total_pages(total, @page_size))
   end
 
   defp load_detail(socket, tournament, page) do
@@ -300,7 +300,7 @@ defmodule GamendWeb.TournamentsLive do
     socket
     |> assign(:entries, entries)
     |> assign(:players_count, total)
-    |> assign(:players_pages, ceil_div(total, @page_size))
+    |> assign(:players_pages, LiveHelpers.total_pages(total, @page_size))
   end
 
   defp load_brackets(%{assigns: %{drawn?: false}} = socket) do
@@ -325,7 +325,10 @@ defmodule GamendWeb.TournamentsLive do
     socket
     |> assign(:brackets, brackets)
     |> assign(:bracket_progress, bracket_progress(brackets, matches))
-    |> assign(:total_pages, ceil_div(socket.assigns.bracket_count, @brackets_page_size))
+    |> assign(
+      :total_pages,
+      LiveHelpers.total_pages(socket.assigns.bracket_count, @brackets_page_size)
+    )
   end
 
   defp bracket_progress(brackets, matches) do
@@ -404,8 +407,6 @@ defmodule GamendWeb.TournamentsLive do
       :error -> default
     end
   end
-
-  defp ceil_div(num, den), do: div(num + den - 1, den)
 
   # ── Render ────────────────────────────────────────────────────────────────
 

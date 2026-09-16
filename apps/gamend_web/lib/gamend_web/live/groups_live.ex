@@ -340,9 +340,7 @@ defmodule GamendWeb.GroupsLive do
     total_count = Groups.count_list_groups(filters)
 
     total_pages =
-      if socket.assigns.page_size > 0,
-        do: div(total_count + socket.assigns.page_size - 1, socket.assigns.page_size),
-        else: 0
+      LiveHelpers.total_pages(total_count, socket.assigns.page_size)
 
     # Build a map of member counts per group
     member_counts = Enum.into(groups, %{}, fn g -> {g.id, Groups.count_group_members(g.id)} end)
@@ -378,12 +376,10 @@ defmodule GamendWeb.GroupsLive do
           selected_members: members,
           members_total: Groups.count_group_members(group.id),
           members_matched: matched,
-          members_total_pages: ceil_div(matched, @page_size)
+          members_total_pages: LiveHelpers.total_pages(matched, @page_size)
         )
     end
   end
-
-  defp ceil_div(num, den), do: div(num + den - 1, den)
 
   defp maybe_refresh_selected(socket, group_id) do
     case socket.assigns.selected_group do

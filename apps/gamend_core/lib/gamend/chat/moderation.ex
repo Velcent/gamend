@@ -214,7 +214,7 @@ defmodule Gamend.Chat.Moderation do
     query = from(w in FilterWord)
 
     query =
-      case blank_to_nil(Map.get(filters, :word) || Map.get(filters, "word")) do
+      case Gamend.Parse.blank_to_nil(Map.get(filters, :word) || Map.get(filters, "word")) do
         nil ->
           query
 
@@ -224,12 +224,12 @@ defmodule Gamend.Chat.Moderation do
       end
 
     query =
-      case blank_to_nil(Map.get(filters, :severity) || Map.get(filters, "severity")) do
+      case Gamend.Parse.blank_to_nil(Map.get(filters, :severity) || Map.get(filters, "severity")) do
         nil -> query
         value -> where(query, [w], w.severity == ^value)
       end
 
-    case blank_to_nil(Map.get(filters, :lang) || Map.get(filters, "lang")) do
+    case Gamend.Parse.blank_to_nil(Map.get(filters, :lang) || Map.get(filters, "lang")) do
       nil -> query
       value -> where(query, [w], w.lang == ^value)
     end
@@ -457,19 +457,21 @@ defmodule Gamend.Chat.Moderation do
     query = from(m in Mute)
 
     query =
-      case blank_to_nil(Map.get(filters, :user_id) || Map.get(filters, "user_id")) do
+      case Gamend.Parse.blank_to_nil(Map.get(filters, :user_id) || Map.get(filters, "user_id")) do
         nil -> query
         value -> where(query, [m], m.user_id == ^to_string(value))
       end
 
     query =
-      case blank_to_nil(Map.get(filters, :scope) || Map.get(filters, "scope")) do
+      case Gamend.Parse.blank_to_nil(Map.get(filters, :scope) || Map.get(filters, "scope")) do
         nil -> query
         value -> where(query, [m], m.scope == ^value)
       end
 
     query =
-      case blank_to_nil(Map.get(filters, :scope_ref_id) || Map.get(filters, "scope_ref_id")) do
+      case Gamend.Parse.blank_to_nil(
+             Map.get(filters, :scope_ref_id) || Map.get(filters, "scope_ref_id")
+           ) do
         nil -> query
         value -> where(query, [m], m.scope_ref_id == ^to_string(value))
       end
@@ -491,10 +493,6 @@ defmodule Gamend.Chat.Moderation do
       {key, value} -> {key, value}
     end)
   end
-
-  defp blank_to_nil(nil), do: nil
-  defp blank_to_nil(""), do: nil
-  defp blank_to_nil(value), do: value
 
   defp tap_ok({:ok, value} = result, fun) do
     fun.(value)

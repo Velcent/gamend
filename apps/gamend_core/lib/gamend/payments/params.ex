@@ -65,4 +65,73 @@ defmodule Gamend.Payments.Params do
   """
   @spec normalize_private_key(String.t()) :: String.t()
   def normalize_private_key(value), do: String.replace(value, "\\n", "\n")
+
+  @doc "A non-empty string, or an integer as its string, at `key`; `{:error, :missing_<key>}` otherwise."
+  @spec required_value(map(), term()) :: {:ok, String.t()} | {:error, atom()}
+  def required_value(map, key) do
+    case Map.get(map, key) do
+      value when is_binary(value) and value != "" -> {:ok, value}
+      value when is_integer(value) -> {:ok, to_string(value)}
+      _ -> {:error, String.to_atom("missing_#{key}")}
+    end
+  end
+
+  @doc "Whether `value` is a non-empty string."
+  @spec present?(term()) :: boolean()
+  def present?(value), do: is_binary(value) and value != ""
+
+  @doc "Puts `value` under `key` when `condition` is true and the value is a non-empty string."
+  @spec put_if_present(map(), term(), term(), boolean()) :: map()
+  def put_if_present(metadata, key, value, true) when is_binary(value) and value != "" do
+    Map.put(metadata, key, value)
+  end
+
+  def put_if_present(metadata, _key, _value, _condition), do: metadata
+
+  @doc "A stored provider payload with newer fields merged over it."
+  @spec merge_payload(map(), map()) :: map()
+  def merge_payload(existing, incoming) when is_map(existing) and is_map(incoming) do
+    Map.merge(existing, incoming)
+  end
+
+  @doc "Epoch seconds (integer or string) as a second-precision `DateTime`; `nil` when it is not one."
+  @spec unix_seconds_to_datetime(term()) :: DateTime.t() | nil
+  def unix_seconds_to_datetime(value) when is_integer(value) do
+    case DateTime.from_unix(value, :second) do
+      {:ok, datetime} -> DateTime.truncate(datetime, :second)
+      {:error, _reason} -> nil
+    end
+  end
+
+  def unix_seconds_to_datetime(value) when is_binary(value) do
+    value
+    |> parse_int()
+    |> unix_seconds_to_datetime()
+  end
+
+  def unix_seconds_to_datetime(_value), do: nil
+
+  @doc "An ISO-8601 string, or a `DateTime`, as a second-precision `DateTime`; `nil` otherwise."
+  @spec parse_datetime(term()) :: DateTime.t() | nil
+  def parse_datetime(nil), do: nil
+  def parse_datetime(%DateTime{} = dt), do: DateTime.truncate(dt, :second)
+
+  def parse_datetime(value) when is_binary(value) do
+    case DateTime.from_iso8601(value) do
+      {:ok, dt, _offset} -> DateTime.truncate(dt, :second)
+      _ -> nil
+    end
+  end
+
+  def parse_datetime(_value), do: nil
+
+  @doc "A `DateTime` as ISO-8601; `nil` for anything else."
+  @spec datetime_iso(term()) :: String.t() | nil
+  def datetime_iso(%DateTime{} = value), do: DateTime.to_iso8601(value)
+  def datetime_iso(_value), do: nil
+
+  @doc "An ISO 4217 code in upper case."
+  @spec normalize_currency(String.t() | nil) :: String.t() | nil
+  def normalize_currency(nil), do: nil
+  def normalize_currency(currency) when is_binary(currency), do: String.upcase(currency)
 end

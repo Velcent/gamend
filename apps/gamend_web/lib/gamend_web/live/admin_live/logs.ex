@@ -25,6 +25,7 @@ defmodule GamendWeb.AdminLive.Logs do
 
   alias Gamend.ClientLogs
   alias GamendWeb.AdminLogBuffer
+  alias GamendWeb.LiveHelpers
 
   @refresh_interval 3_000
   @page_size 200
@@ -395,7 +396,7 @@ defmodule GamendWeb.AdminLive.Logs do
           <button
             phx-click="page"
             phx-value-dir="prev"
-            disabled={@session_page == 0}
+            disabled={@session_page <= 1}
             class="btn btn-ghost btn-xs"
           >
             &larr; Prev
@@ -403,7 +404,7 @@ defmodule GamendWeb.AdminLive.Logs do
           <button
             phx-click="page"
             phx-value-dir="next"
-            disabled={(@session_page + 1) * @session_page_size >= @session_total}
+            disabled={@session_page >= @session_total_pages}
             class="btn btn-ghost btn-xs"
           >
             Next &rarr;
@@ -533,7 +534,8 @@ defmodule GamendWeb.AdminLive.Logs do
        selected: nil,
        selected_entries: [],
        selected_lobbies: [],
-       session_page: 0,
+       session_page: 1,
+       session_total_pages: 0,
        session_page_size: @session_page_size,
        session_filters: empty_session_filters()
      )
@@ -552,7 +554,7 @@ defmodule GamendWeb.AdminLive.Logs do
 
         {:noreply,
          socket
-         |> assign(tab: "client", session_filters: filters, session_page: 0)
+         |> assign(tab: "client", session_filters: filters, session_page: 1)
          |> load_sessions()}
 
       _ ->
@@ -644,25 +646,21 @@ defmodule GamendWeb.AdminLive.Logs do
       errors_only: Map.get(params, "errors_only") == "true"
     }
 
-    {:noreply, socket |> assign(session_filters: filters, session_page: 0) |> load_sessions()}
+    {:noreply, socket |> assign(session_filters: filters, session_page: 1) |> load_sessions()}
   end
 
   def handle_event("clear_session_filters", _params, socket) do
     {:noreply,
      socket
-     |> assign(session_filters: empty_session_filters(), session_page: 0)
+     |> assign(session_filters: empty_session_filters(), session_page: 1)
      |> load_sessions()}
   end
 
-  def handle_event("page", %{"dir" => dir}, socket) do
-    page =
-      case dir do
-        "next" -> socket.assigns.session_page + 1
-        _ -> max(socket.assigns.session_page - 1, 0)
-      end
+  def handle_event("page", %{"dir" => "next"}, socket),
+    do: {:noreply, socket |> LiveHelpers.next_page(:session_page) |> load_sessions()}
 
-    {:noreply, socket |> assign(session_page: page) |> load_sessions()}
-  end
+  def handle_event("page", _params, socket),
+    do: {:noreply, socket |> LiveHelpers.prev_page(:session_page) |> load_sessions()}
 
   def handle_event("select_session", %{"id" => id}, socket) do
     {:noreply, select_session(socket, id)}
@@ -715,10 +713,12 @@ defmodule GamendWeb.AdminLive.Logs do
 
   defp load_sessions(socket) do
     opts = session_opts(socket.assigns.session_filters, socket.assigns.session_page)
+    total = ClientLogs.count_sessions(Keyword.drop(opts, [:page, :page_size]))
 
     assign(socket,
       sessions: ClientLogs.list_sessions(opts),
-      session_total: ClientLogs.count_sessions(Keyword.drop(opts, [:page, :page_size]))
+      session_total: total,
+      session_total_pages: LiveHelpers.total_pages(total, @session_page_size)
     )
   end
 
@@ -737,9 +737,8 @@ defmodule GamendWeb.AdminLive.Logs do
     end
   end
 
-  # `page` is 0-based here; `Gamend.Query` pages from 1.
   defp session_opts(filters, page) do
-    [page: page + 1, page_size: @session_page_size]
+    [page: page, page_size: @session_page_size]
     |> put_unless_blank(:query, filters.query)
     |> put_unless_blank(:user_id, filters.user_id)
     |> put_unless_blank(:lobby_id, filters.lobby_id)

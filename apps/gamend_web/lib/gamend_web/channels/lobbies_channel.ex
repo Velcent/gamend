@@ -64,17 +64,5 @@ defmodule GamendWeb.LobbiesChannel do
   end
 
   @impl true
-  def handle_info({:channel_updates_flush, _}, socket),
-    do: {:noreply, ChannelUpdates.flush(socket)}
-
-  @impl true
-  def handle_info(_msg, socket), do: {:noreply, socket}
-  # Unknown events are logged at debug with the name truncated, and the name is
-  # never interpolated at warning level.
-  #
-  # Every other `handle_in/3` here rate-limits first; this catch-all did not,
-  # and it put a client-chosen string into a warning line. A frame allows a
-  # 128 KB event name, so one socket could drive unbounded warning-level volume
-  # made of attacker-controlled text into the rotating log and the admin buffer.
-  # Client-chosen, so never logged whole.
+  def handle_info(msg, socket), do: {:noreply, ChannelEvents.other_info(msg, socket)}
 end

@@ -18,32 +18,31 @@ defmodule Gamend.Accounts do
   """
 
   import Ecto.Query, warn: false
-  require Logger
   use Nebulex.Caching, cache: Gamend.Cache
   alias Gamend.Repo
   alias Gamend.Types
 
   alias Gamend.Accounts.{
-    AgePolicy,
-    AvatarMirror,
+    Broadcasts,
+    Identities,
     PasswordHash,
+    Presence,
+    Profile,
+    Registration,
+    Search,
+    Sessions,
+    Stats,
     User,
-    UsernameGenerator,
-    UserNotifier,
     UserToken
   }
-
-  alias Gamend.Accounts.Search
-  alias Gamend.Accounts.Stats
-  alias Gamend.Accounts.Sessions
-  alias Gamend.Accounts.Broadcasts
-  alias Gamend.Accounts.Presence
 
   # Upper bound on cross-node staleness for cached user structs: explicit
   # invalidations propagate immediately via `Gamend.Cache.invalidate/1`,
   # and this TTL caps staleness if an invalidation broadcast is ever missed.
-  alias Gamend.Accounts.Identities
   @user_cache_ttl_ms 60_000
+
+  @doc false
+  def user_cache_ttl_ms, do: @user_cache_ttl_ms
 
   @doc false
   def users_stats_cache_version do
@@ -60,31 +59,10 @@ defmodule Gamend.Accounts do
     :ok
   end
 
-  ## Database getters
+  # The context is split by concern; these keep every function reachable as
+  # `Gamend.Accounts.<name>`, which is the public API plugins and hosts call.
 
-  @doc """
-  Gets a user by email.
-
-  ## Examples
-
-      iex> get_user_by_email("foo@example.com")
-      %User{}
-
-      iex> get_user_by_email("unknown@example.com")
-      nil
-
-  """
-  @spec get_user_by_email(String.t()) :: User.t() | nil
-  def get_user_by_email(email) when is_binary(email) do
-    normalized = email |> String.trim() |> String.downcase()
-
-    if normalized == "" do
-      nil
-    else
-      get_user_by_field(:email, normalized)
-    end
-  end
-
+  # Finding users — `Gamend.Accounts.Search`.
   @doc delegate_to: {Search, :search_users, 2}
   defdelegate search_users(query, opts \\ []), to: Search
 
@@ -97,6 +75,7 @@ defmodule Gamend.Accounts do
   @doc delegate_to: {Search, :count_list_all_users, 1}
   defdelegate count_list_all_users(filters \\ %{}), to: Search
 
+  # Counts for the dashboards — `Gamend.Accounts.Stats`.
   @doc delegate_to: {Stats, :count_users, 0}
   defdelegate count_users(), to: Stats
 
@@ -127,45 +106,132 @@ defmodule Gamend.Accounts do
   @doc delegate_to: {Stats, :count_unactivated_users, 0}
   defdelegate count_unactivated_users(), to: Stats
 
+  # Creating and confirming an account — `Gamend.Accounts.Registration`.
+  @doc delegate_to: {Registration, :register_user, 1}
+  defdelegate register_user(attrs), to: Registration
+
+  @doc delegate_to: {Registration, :confirm_user, 1}
+  defdelegate confirm_user(user), to: Registration
+
+  @doc delegate_to: {Registration, :confirm_user_by_token, 1}
+  defdelegate confirm_user_by_token(token), to: Registration
+
+  @doc delegate_to: {Registration, :change_user_registration, 2}
+  defdelegate change_user_registration(user, attrs \\ %{}), to: Registration
+
+  @doc delegate_to: {Registration, :change_user_registration_for_validation, 2}
+  defdelegate change_user_registration_for_validation(user, attrs), to: Registration
+
+  @doc delegate_to: {Registration, :deliver_user_confirmation_instructions, 2}
+  defdelegate deliver_user_confirmation_instructions(user, confirmation_url_fun), to: Registration
+
+  # Signing in with a provider or a device, and linking identities — `Gamend.Accounts.Identities`.
+  @doc delegate_to: {Identities, :find_or_create_from_discord, 1}
+  defdelegate find_or_create_from_discord(attrs), to: Identities
+
+  @doc delegate_to: {Identities, :find_or_create_from_apple, 1}
+  defdelegate find_or_create_from_apple(attrs), to: Identities
+
+  @doc delegate_to: {Identities, :find_or_create_from_google, 1}
+  defdelegate find_or_create_from_google(attrs), to: Identities
+
+  @doc delegate_to: {Identities, :find_or_create_from_facebook, 1}
+  defdelegate find_or_create_from_facebook(attrs), to: Identities
+
+  @doc delegate_to: {Identities, :find_or_create_from_steam, 1}
+  defdelegate find_or_create_from_steam(attrs), to: Identities
+
+  @doc delegate_to: {Identities, :find_or_create_from_device, 2}
+  defdelegate find_or_create_from_device(device_id, attrs \\ %{}), to: Identities
+
+  @doc delegate_to: {Identities, :attach_device_to_user, 2}
+  defdelegate attach_device_to_user(user, device_id), to: Identities
+
+  @doc delegate_to: {Identities, :link_account, 4}
+  defdelegate link_account(user, attrs, provider_id_field, changeset_fn), to: Identities
+
+  @doc delegate_to: {Identities, :link_device_id, 2}
+  defdelegate link_device_id(user, device_id), to: Identities
+
+  @doc delegate_to: {Identities, :unlink_device_id, 1}
+  defdelegate unlink_device_id(user), to: Identities
+
+  @doc delegate_to: {Identities, :unlink_provider, 2}
+  defdelegate unlink_provider(user, provider), to: Identities
+
+  # Session and magic-link tokens — `Gamend.Accounts.Sessions`.
+  @doc delegate_to: {Sessions, :generate_user_session_token, 1}
+  defdelegate generate_user_session_token(user), to: Sessions
+
+  @doc delegate_to: {Sessions, :get_user_by_session_token, 1}
+  defdelegate get_user_by_session_token(token), to: Sessions
+
+  @doc delegate_to: {Sessions, :get_user_by_magic_link_token, 1}
+  defdelegate get_user_by_magic_link_token(token), to: Sessions
+
+  @doc delegate_to: {Sessions, :login_user_by_magic_link, 1}
+  defdelegate login_user_by_magic_link(token), to: Sessions
+
+  @doc delegate_to: {Sessions, :deliver_user_update_email_instructions, 3}
+  defdelegate deliver_user_update_email_instructions(user, current_email, update_email_url_fun),
+    to: Sessions
+
+  @doc delegate_to: {Sessions, :deliver_login_instructions, 2}
+  defdelegate deliver_login_instructions(user, magic_link_url_fun), to: Sessions
+
+  @doc delegate_to: {Sessions, :delete_user_session_token, 1}
+  defdelegate delete_user_session_token(token), to: Sessions
+
   @doc false
-  def invalidate_users_count_cache do
-    Gamend.Async.run(fn ->
-      _ = Gamend.Cache.invalidate({:accounts, :users_count})
-      :ok
-    end)
-
-    :ok
-  end
-
-  # Asked on every registration, and it only needs "is the table empty" — a
-  # count answers a much harder question at O(rows). Measured on SQLite it was
-  # 70us at 1k users, 480us at 10k and 2.5ms at 50k, by which point it was 82%
-  # of the whole registration; `exists?` stops at the first row and stays flat.
-  @doc false
-  def first_user? do
-    not Repo.exists?(User)
-  end
+  defdelegate get_user_token(id), to: Sessions
 
   @doc false
-  def maybe_make_first_user_admin(changeset, true) do
-    Ecto.Changeset.put_change(changeset, :is_admin, true)
-  end
+  defdelegate get_user_token!(id), to: Sessions
 
-  def maybe_make_first_user_admin(changeset, false), do: changeset
-
-  # When account activation is required, new non-admin users start deactivated.
-  # The first user (admin) is always activated.
   @doc false
-  def maybe_deactivate_new_user(changeset, true = _is_first_user), do: changeset
+  defdelegate delete_user_token(token), to: Sessions
 
-  def maybe_deactivate_new_user(changeset, _is_first_user) do
-    if require_account_activation?() do
-      Ecto.Changeset.put_change(changeset, :is_activated, false)
-    else
-      changeset
-    end
-  end
+  @doc delegate_to: {Sessions, :list_user_tokens, 2}
+  defdelegate list_user_tokens(user_id, opts \\ []), to: Sessions
 
+  @doc delegate_to: {Sessions, :count_user_tokens, 1}
+  defdelegate count_user_tokens(user_id), to: Sessions
+
+  @doc delegate_to: {Sessions, :revoke_all_user_sessions, 1}
+  defdelegate revoke_all_user_sessions(user_id), to: Sessions
+
+  # Display name, username, avatar, age and metadata — `Gamend.Accounts.Profile`.
+  @doc delegate_to: {Profile, :change_user_display_name, 2}
+  defdelegate change_user_display_name(user, attrs \\ %{}), to: Profile
+
+  @doc delegate_to: {Profile, :change_username, 2}
+  defdelegate change_username(user, attrs \\ %{}), to: Profile
+
+  @doc delegate_to: {Profile, :update_user_avatar, 2}
+  defdelegate update_user_avatar(user, url), to: Profile
+
+  @doc delegate_to: {Profile, :delete_user_storage, 1}
+  defdelegate delete_user_storage(user_id), to: Profile
+
+  @doc delegate_to: {Profile, :prune_user_avatars, 2}
+  defdelegate prune_user_avatars(user_id, keep_key), to: Profile
+
+  @doc delegate_to: {Profile, :merge_metadata, 2}
+  defdelegate merge_metadata(user, patch), to: Profile
+
+  @doc delegate_to: {Profile, :update_user_display_name, 2}
+  defdelegate update_user_display_name(user, attrs), to: Profile
+
+  @doc delegate_to: {Profile, :set_user_age, 2}
+  defdelegate set_user_age(user, attrs), to: Profile
+
+  @doc delegate_to: {Profile, :refresh_account_class, 1}
+  defdelegate refresh_account_class(user), to: Profile
+
+  @doc delegate_to: {Profile, :update_username, 2}
+  defdelegate update_username(user, attrs), to: Profile
+
+  # Online state and last seen — `Gamend.Accounts.Presence`.
   @doc delegate_to: {Presence, :touch_last_seen, 1}
   defdelegate touch_last_seen(user), to: Presence
 
@@ -180,6 +246,62 @@ defmodule Gamend.Accounts do
 
   @doc false
   defdelegate after_presence_write(user), to: Presence
+
+  # Telling clients a user changed — `Gamend.Accounts.Broadcasts`.
+  @doc delegate_to: {Broadcasts, :broadcast_user_update, 1}
+  defdelegate broadcast_user_update(user), to: Broadcasts
+
+  @doc delegate_to: {Broadcasts, :broadcast_member_update, 1}
+  defdelegate broadcast_member_update(user), to: Broadcasts
+
+  @doc delegate_to: {Broadcasts, :broadcast_friend_update, 1}
+  defdelegate broadcast_friend_update(user), to: Broadcasts
+
+  @doc delegate_to: {Broadcasts, :serialize_user_payload, 1}
+  defdelegate serialize_user_payload(user), to: Broadcasts
+
+  ## Database getters
+
+  @doc """
+  Gets a user by email.
+
+  ## Examples
+
+      iex> get_user_by_email("foo@example.com")
+      %User{}
+
+      iex> get_user_by_email("unknown@example.com")
+      nil
+
+  """
+  @spec get_user_by_email(String.t()) :: User.t() | nil
+  def get_user_by_email(email) when is_binary(email) do
+    normalized = email |> String.trim() |> String.downcase()
+
+    if normalized == "" do
+      nil
+    else
+      get_user_by_field(:email, normalized)
+    end
+  end
+
+  @doc false
+  def invalidate_users_count_cache do
+    Gamend.Async.run(fn ->
+      _ = Gamend.Cache.invalidate({:accounts, :users_count})
+      :ok
+    end)
+
+    :ok
+  end
+
+  @doc delegate_to: {Registration, :register_user_and_deliver, 3}
+  defdelegate register_user_and_deliver(
+                attrs,
+                confirmation_url_fun,
+                notifier \\ Gamend.Accounts.UserNotifier
+              ),
+              to: Registration
 
   @doc """
   Gets a user by email and password.
@@ -475,330 +597,6 @@ defmodule Gamend.Accounts do
     :ok
   end
 
-  ## User registration
-
-  @doc """
-  Registers a user.
-
-  ## Attributes
-
-  See `t:Gamend.Types.user_registration_attrs/0` for available fields.
-
-  ## Examples
-
-      iex> register_user(%{email: "user@example.com", password: "secret123"})
-      {:ok, %User{}}
-
-      iex> register_user(%{email: "invalid"})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  @spec register_user(Types.user_registration_attrs()) ::
-          {:ok, User.t()} | {:error, Ecto.Changeset.t()}
-  def register_user(attrs) do
-    # Normalize keys to strings to match form submissions
-    attrs = Map.new(attrs, fn {k, v} -> {to_string(k), v} end)
-
-    # Check if this is the first user and make them admin
-    is_first_user = first_user?()
-
-    changeset_fun = fn attrs ->
-      %User{}
-      |> User.email_changeset(attrs)
-      |> User.username_changeset(attrs)
-      |> maybe_make_first_user_admin(is_first_user)
-      |> maybe_deactivate_new_user(is_first_user)
-    end
-
-    with {:ok, attrs} <- run_before_user_register(changeset_fun, attrs),
-         {:ok, user} = ok <- insert_user_with_username_retry(changeset_fun, attrs) do
-      invalidate_users_count_cache()
-
-      Gamend.Async.run(fn ->
-        Gamend.Hooks.internal_call(:after_user_register, [user])
-      end)
-
-      ok
-    end
-  end
-
-  @doc """
-  Register a user and send the confirmation email inside a DB transaction.
-
-  The function accepts a `confirmation_url_fun` which must be a function of arity 1
-  that receives the encoded token and returns the confirmation URL string.
-
-  If sending the confirmation email fails the transaction is rolled back and
-  `{:error, reason}` is returned. On success it returns `{:ok, user}`.
-  """
-  @spec register_user_and_deliver(Types.user_registration_attrs(), (String.t() -> String.t())) ::
-          {:ok, User.t()} | {:error, Ecto.Changeset.t() | term()}
-  @spec register_user_and_deliver(
-          Types.user_registration_attrs(),
-          (String.t() -> String.t()),
-          module()
-        ) :: {:ok, User.t()} | {:error, Ecto.Changeset.t() | term()}
-  def register_user_and_deliver(
-        attrs,
-        confirmation_url_fun,
-        notifier \\ Gamend.Accounts.UserNotifier
-      )
-      when is_function(confirmation_url_fun, 1) do
-    # Normalize keys to strings to match form submissions
-    attrs = Map.new(attrs, fn {k, v} -> {to_string(k), v} end)
-
-    # Check if this is the first user and make them admin
-    is_first_user = first_user?()
-
-    changeset_fun = fn attrs ->
-      %User{}
-      |> User.email_changeset(attrs)
-      |> User.username_changeset(attrs)
-      |> maybe_make_first_user_admin(is_first_user)
-      |> maybe_deactivate_new_user(is_first_user)
-    end
-
-    transaction_fun = fn attrs ->
-      case Repo.insert(changeset_fun.(attrs)) do
-        {:ok, %User{} = user} ->
-          case maybe_send_confirmation(user, is_first_user, notifier, confirmation_url_fun) do
-            :ok -> user
-            {:error, reason} -> Repo.rollback(reason)
-          end
-
-        {:error, %Ecto.Changeset{} = changeset} ->
-          Repo.rollback(changeset)
-      end
-    end
-
-    with {:ok, attrs} <- run_before_user_register(changeset_fun, attrs),
-         {:ok, %User{} = user} <- transact_with_username_retry(transaction_fun, attrs) do
-      invalidate_users_count_cache()
-
-      Gamend.Async.run(fn ->
-        Gamend.Hooks.internal_call(:after_user_register, [user])
-      end)
-
-      {:ok, user}
-    end
-  end
-
-  defp maybe_send_confirmation(_user, true, _notifier, _fun), do: :ok
-
-  defp maybe_send_confirmation(user, false, notifier, confirmation_url_fun) do
-    {encoded_token, user_token} = UserToken.build_email_token(user, "confirm")
-    Repo.insert!(user_token)
-
-    case notifier.deliver_confirmation_instructions(
-           user,
-           confirmation_url_fun.(encoded_token)
-         ) do
-      {:ok, _} -> :ok
-      {:error, reason} -> {:error, reason}
-    end
-  end
-
-  @username_insert_attempts 4
-
-  defp put_generated_username(attrs) do
-    case attrs["username"] do
-      u when is_binary(u) and u != "" -> attrs
-      _ -> Map.put(attrs, "username", UsernameGenerator.generate(attrs))
-    end
-  end
-
-  # Runs the before_user_register pipeline with the tentative (not yet
-  # inserted) user built from attrs. Returns the possibly hook-modified,
-  # string-keyed attrs.
-  @doc false
-  def run_before_user_register(changeset_fun, attrs) do
-    attrs = put_generated_username(attrs)
-    tentative = attrs |> changeset_fun.() |> Ecto.Changeset.apply_changes()
-
-    case Gamend.Hooks.internal_call(:before_user_register, [tentative, attrs]) do
-      {:ok, returned} when is_map(returned) and not is_struct(returned) ->
-        {:ok, Map.new(returned, fn {k, v} -> {to_string(k), v} end)}
-
-      {:ok, _other} ->
-        {:ok, attrs}
-
-      {:error, reason} ->
-        {:error, reason}
-    end
-  end
-
-  # Registration must never fail on a bad username: a hook-supplied or
-  # generated name that is invalid or already taken is replaced with a
-  # freshly generated one (wider suffix on later attempts). Other changeset
-  # errors pass through untouched.
-  @doc false
-  def insert_user_with_username_retry(changeset_fun, attrs, attempt \\ 1) do
-    case Repo.insert(changeset_fun.(attrs)) do
-      {:ok, _user} = ok ->
-        ok
-
-      {:error, %Ecto.Changeset{} = changeset} = err ->
-        case regenerate_username_attrs(attrs, changeset, attempt) do
-          {:retry, attrs} -> insert_user_with_username_retry(changeset_fun, attrs, attempt + 1)
-          :no_retry -> err
-        end
-    end
-  end
-
-  # A unique violation aborts the surrounding Postgres transaction, so the
-  # retry must restart the whole transaction rather than re-insert inside
-  # the aborted one.
-  defp transact_with_username_retry(transaction_fun, attrs, attempt \\ 1) do
-    case Repo.transaction(fn -> transaction_fun.(attrs) end) do
-      {:error, %Ecto.Changeset{} = changeset} = err ->
-        case regenerate_username_attrs(attrs, changeset, attempt) do
-          {:retry, attrs} -> transact_with_username_retry(transaction_fun, attrs, attempt + 1)
-          :no_retry -> err
-        end
-
-      other ->
-        other
-    end
-  end
-
-  defp regenerate_username_attrs(attrs, %Ecto.Changeset{errors: errors}, attempt) do
-    if Keyword.has_key?(errors, :username) and attempt < @username_insert_attempts do
-      regenerated = UsernameGenerator.generate(attrs, attempt + 1)
-
-      Logger.warning(
-        "username #{inspect(attrs["username"])} rejected " <>
-          "(#{inspect(Keyword.get_values(errors, :username))}), retrying as #{regenerated}"
-      )
-
-      {:retry, Map.put(attrs, "username", regenerated)}
-    else
-      :no_retry
-    end
-  end
-
-  # Registration deliberately does NOT attach a device id.
-  #
-  # `device_id` is a bearer credential: `find_or_create_from_device/2` is a plain
-  # lookup on the column, so whoever knows the value holds the account. Accepting
-  # it from registration attrs meant a client — LiveView form payloads are
-  # client-controlled — could register the victim's email with a device id of
-  # their choosing. When the victim later claimed that row by magic link or by an
-  # OAuth provider asserting the same verified email, the planted device id still
-  # resolved to it, and survived `token_version` bumps because device login never
-  # consults them.
-  #
-  # A device is attached only while authenticated (`link_device_id/2`, reached
-  # through `POST /api/v1/me/device`) or when device login itself creates the
-  # account (`do_find_or_create_from_device/2`).
-
-  @doc """
-  Confirms a user's email by setting confirmed_at timestamp.
-
-  ## Examples
-
-      iex> confirm_user(user)
-      {:ok, %User{}}
-
-  """
-  @spec confirm_user(User.t()) :: {:ok, User.t()} | {:error, Ecto.Changeset.t()}
-  def confirm_user(user) do
-    case user
-         |> User.confirm_changeset()
-         |> Repo.update() do
-      {:ok, %User{} = updated} = ok ->
-        invalidate_user_cache(user)
-        invalidate_user_cache(updated)
-        ok
-
-      other ->
-        other
-    end
-  end
-
-  @doc """
-  Confirm a user by an email confirmation token (context: "confirm").
-
-  Returns {:ok, user} when the token is valid and user was confirmed.
-  Returns {:error, :not_found} or {:error, :expired} when token is invalid/expired.
-  """
-  @spec confirm_user_by_token(String.t()) :: {:ok, User.t()} | {:error, :invalid | :not_found}
-  def confirm_user_by_token(token) when is_binary(token) do
-    with {:ok, decoded} <- Base.url_decode64(token, padding: false),
-         hashed <- :crypto.hash(:sha256, decoded),
-         {:ok, %User{} = user} <- fetch_user_for_confirm_token(hashed),
-         {:ok, %User{} = confirmed_user} <- confirm_user_by_token_tx(user) do
-      {:ok, get_user(confirmed_user.id)}
-    else
-      :error ->
-        {:error, :invalid}
-
-      {:error, :not_found} ->
-        {:error, :not_found}
-
-      {:error, _} ->
-        {:error, :not_found}
-    end
-  end
-
-  defp fetch_user_for_confirm_token(hashed) do
-    query =
-      from t in UserToken,
-        where: t.token == ^hashed and t.context == "confirm",
-        where: t.inserted_at > ago(7, "day"),
-        join: u in assoc(t, :user),
-        select: {u, t}
-
-    case Repo.one(query) do
-      {%User{} = user, _token} -> {:ok, user}
-      nil -> {:error, :not_found}
-    end
-  end
-
-  defp confirm_user_by_token_tx(%User{} = user) do
-    Repo.transaction(fn ->
-      {:ok, confirmed_user} = confirm_user(user)
-
-      Repo.delete_all(
-        from(ut in UserToken, where: ut.user_id == ^confirmed_user.id and ut.context == "confirm")
-      )
-
-      confirmed_user
-    end)
-  end
-
-  @doc delegate_to: {Identities, :find_or_create_from_discord, 1}
-  defdelegate find_or_create_from_discord(attrs), to: Identities
-
-  @doc delegate_to: {Identities, :find_or_create_from_apple, 1}
-  defdelegate find_or_create_from_apple(attrs), to: Identities
-
-  @doc delegate_to: {Identities, :find_or_create_from_google, 1}
-  defdelegate find_or_create_from_google(attrs), to: Identities
-
-  @doc delegate_to: {Identities, :find_or_create_from_facebook, 1}
-  defdelegate find_or_create_from_facebook(attrs), to: Identities
-
-  @doc delegate_to: {Identities, :find_or_create_from_steam, 1}
-  defdelegate find_or_create_from_steam(attrs), to: Identities
-
-  @doc delegate_to: {Identities, :find_or_create_from_device, 2}
-  defdelegate find_or_create_from_device(device_id, attrs \\ %{}), to: Identities
-
-  @doc delegate_to: {Identities, :attach_device_to_user, 2}
-  defdelegate attach_device_to_user(user, device_id), to: Identities
-
-  @doc delegate_to: {Identities, :link_account, 4}
-  defdelegate link_account(user, attrs, provider_id_field, changeset_fn), to: Identities
-
-  @doc delegate_to: {Identities, :link_device_id, 2}
-  defdelegate link_device_id(user, device_id), to: Identities
-
-  @doc delegate_to: {Identities, :unlink_device_id, 1}
-  defdelegate unlink_device_id(user), to: Identities
-
-  @doc delegate_to: {Identities, :unlink_provider, 2}
-  defdelegate unlink_provider(user, provider), to: Identities
-
   @doc """
   Get a user by their Steam ID (steam_id).
 
@@ -931,25 +729,6 @@ defmodule Gamend.Accounts do
 
   def user_activated?(_), do: true
 
-  # Mirror an external (OAuth provider) avatar into our object storage so avatars
-  # render from our storage/CDN rather than hotlinking the provider. Enqueued
-  # whenever the user's avatar is not already one of our stored objects — once
-  # mirrored the URL points at our storage, so `our_stored_avatar?/1`
-  # short-circuits every later sign-in and we never re-fetch.
-  #
-  # Uniqueness deliberately omits `:discarded` and `:cancelled`. Counting those
-  # meant one failed download — a provider 429 is enough — blocked every future
-  # job for that user forever, leaving the avatar hotlinked to the provider for
-  # good. Excluding them lets the next sign-in try again, while a job still
-  # in flight or already completed keeps the dedupe.
-  #
-  # `source_url` is part of the key on purpose: enqueueing is already gated on
-  # "avatar is not one of our stored objects", so a completed job only blocks
-  # re-mirroring the *same* URL. Without it, an account healed after storage
-  # loss (see `dangling_stored_avatar?/1`) could never mirror its fresh
-  # provider URL — the years-old completed job would swallow it.
-  @mirror_dedupe_states [:available, :scheduled, :executing, :retryable, :completed]
-
   ## Settings
 
   @doc """
@@ -1059,48 +838,6 @@ defmodule Gamend.Accounts do
     |> User.password_changeset(attrs)
     |> update_user_and_delete_all_tokens()
   end
-
-  ## Session
-
-  @doc delegate_to: {Sessions, :generate_user_session_token, 1}
-  defdelegate generate_user_session_token(user), to: Sessions
-
-  @doc delegate_to: {Sessions, :get_user_by_session_token, 1}
-  defdelegate get_user_by_session_token(token), to: Sessions
-
-  @doc delegate_to: {Sessions, :get_user_by_magic_link_token, 1}
-  defdelegate get_user_by_magic_link_token(token), to: Sessions
-
-  @doc delegate_to: {Sessions, :login_user_by_magic_link, 1}
-  defdelegate login_user_by_magic_link(token), to: Sessions
-
-  @doc delegate_to: {Sessions, :deliver_user_update_email_instructions, 3}
-  defdelegate deliver_user_update_email_instructions(user, current_email, update_email_url_fun),
-    to: Sessions
-
-  @doc delegate_to: {Sessions, :deliver_login_instructions, 2}
-  defdelegate deliver_login_instructions(user, magic_link_url_fun), to: Sessions
-
-  @doc delegate_to: {Sessions, :delete_user_session_token, 1}
-  defdelegate delete_user_session_token(token), to: Sessions
-
-  @doc false
-  defdelegate get_user_token(id), to: Sessions
-
-  @doc false
-  defdelegate get_user_token!(id), to: Sessions
-
-  @doc false
-  defdelegate delete_user_token(token), to: Sessions
-
-  @doc delegate_to: {Sessions, :list_user_tokens, 2}
-  defdelegate list_user_tokens(user_id, opts \\ []), to: Sessions
-
-  @doc delegate_to: {Sessions, :count_user_tokens, 1}
-  defdelegate count_user_tokens(user_id), to: Sessions
-
-  @doc delegate_to: {Sessions, :revoke_all_user_sessions, 1}
-  defdelegate revoke_all_user_sessions(user_id), to: Sessions
 
   @doc """
   Deletes a user and associated resources.
@@ -1240,18 +977,6 @@ defmodule Gamend.Accounts do
     Ecto.Changeset.force_change(changeset, :token_version, current + 1)
   end
 
-  @doc delegate_to: {Broadcasts, :broadcast_user_update, 1}
-  defdelegate broadcast_user_update(user), to: Broadcasts
-
-  @doc delegate_to: {Broadcasts, :broadcast_member_update, 1}
-  defdelegate broadcast_member_update(user), to: Broadcasts
-
-  @doc delegate_to: {Broadcasts, :broadcast_friend_update, 1}
-  defdelegate broadcast_friend_update(user), to: Broadcasts
-
-  @doc delegate_to: {Broadcasts, :serialize_user_payload, 1}
-  defdelegate serialize_user_payload(user), to: Broadcasts
-
   @doc """
   Returns a map of linked OAuth providers for the user.
 
@@ -1282,322 +1007,6 @@ defmodule Gamend.Accounts do
   @spec has_password?(User.t()) :: boolean()
   def has_password?(%User{} = user) do
     user.hashed_password != nil
-  end
-
-  @doc """
-  Returns an `%Ecto.Changeset{}` for changing the user display_name.
-  """
-  @spec change_user_display_name(User.t()) :: Ecto.Changeset.t()
-  @spec change_user_display_name(User.t(), map()) :: Ecto.Changeset.t()
-  def change_user_display_name(user, attrs \\ %{}) do
-    User.display_name_changeset(user, attrs)
-  end
-
-  @spec change_username(User.t()) :: Ecto.Changeset.t()
-  @spec change_username(User.t(), map()) :: Ecto.Changeset.t()
-  def change_username(user, attrs \\ %{}) do
-    User.username_changeset(user, attrs)
-  end
-
-  @doc """
-  Set the user's avatar URL (`profile_url`), typically after an upload confirmed
-  by `Gamend.Storage`. Same cache/broadcast/hook path as other profile edits.
-  """
-  @spec update_user_avatar(User.t(), String.t()) ::
-          {:ok, User.t()} | {:error, Ecto.Changeset.t()}
-  def update_user_avatar(%User{} = user, url) when is_binary(url) do
-    case User.avatar_changeset(user, %{"profile_url" => url}) |> Repo.update() do
-      {:ok, updated} = ok ->
-        invalidate_user_cache(user)
-        invalidate_user_cache(updated)
-        broadcast_user_update(updated)
-        broadcast_member_update(updated)
-
-        Gamend.Async.run(fn ->
-          Gamend.Hooks.internal_call(:after_user_updated, [updated])
-        end)
-
-        ok
-
-      err ->
-        err
-    end
-  end
-
-  @doc """
-  Removes every stored object belonging to `user_id`.
-
-  Best-effort, like `prune_user_avatars/2`: a storage backend that is down must
-  not block an account deletion that has already happened at the database level.
-  """
-  @spec delete_user_storage(Ecto.UUID.t()) :: :ok
-  def delete_user_storage(user_id) when is_binary(user_id) do
-    case Gamend.Storage.delete_prefix("avatars/#{user_id}/") do
-      {:ok, _count} -> :ok
-      {:error, reason} -> log_storage_cleanup_failure(user_id, reason)
-    end
-  rescue
-    e -> log_storage_cleanup_failure(user_id, e)
-  end
-
-  defp log_storage_cleanup_failure(user_id, reason) do
-    Logger.warning("storage cleanup failed user=#{user_id}: #{inspect(reason)}")
-    :ok
-  end
-
-  @doc """
-  Delete a user's stored avatar objects except `keep_key`.
-
-  Each new avatar gets a fresh random key (`avatars/<user_id>/<rand><ext>`), so
-  without this the previous upload or mirror copy lingers in storage forever.
-  Best-effort: a failed cleanup leaves the old object rather than failing the
-  update that already succeeded.
-  """
-  @spec prune_user_avatars(Ecto.UUID.t(), String.t()) :: :ok
-  def prune_user_avatars(user_id, keep_key) when is_binary(user_id) and is_binary(keep_key) do
-    [prefix: "avatars/#{user_id}/", limit: 100]
-    |> Gamend.Storage.list_objects()
-    |> Enum.reject(&(&1.key == keep_key))
-    |> Enum.each(fn %{key: key} -> Gamend.Storage.delete(key) end)
-
-    :ok
-  rescue
-    e ->
-      Logger.warning("avatar prune failed user=#{user_id}: #{inspect(e)}")
-      :ok
-  end
-
-  @doc """
-  Merges `patch` into the user's metadata, leaving untouched every key it does
-  not mention.
-
-  The counterpart to `Gamend.Lobbies.merge_metadata/2`, and for the same
-  reason: `metadata` is one shared map, so a writer that replaces it wipes keys
-  belonging to code it has never heard of. Top-level merge, serialized so two
-  concurrent merges cannot lose each other.
-  """
-  @spec merge_metadata(User.t(), map()) :: {:ok, User.t()} | {:error, term()}
-  def merge_metadata(%User{} = user, patch) when is_map(patch) do
-    result =
-      Gamend.Lock.serialize("user_metadata", user.id, fn ->
-        case Repo.get(User, user.id) do
-          nil ->
-            {:error, :not_found}
-
-          current ->
-            merged =
-              Map.merge(
-                current.metadata || %{},
-                Map.new(patch, fn {k, v} -> {to_string(k), v} end)
-              )
-
-            current
-            |> Ecto.Changeset.change(metadata: merged)
-            |> Repo.update()
-        end
-      end)
-
-    case result do
-      {:ok, {:ok, updated}} ->
-        invalidate_user_cache(updated)
-        {:ok, updated}
-
-      {:ok, other} ->
-        other
-
-      {:error, reason} ->
-        {:error, reason}
-    end
-  end
-
-  @doc """
-  Updates the user's display name and broadcasts the change.
-  """
-  @spec update_user_display_name(User.t(), map()) ::
-          {:ok, User.t()} | {:error, Ecto.Changeset.t()}
-  def update_user_display_name(%User{} = user, attrs) do
-    case Gamend.Hooks.internal_call(:before_user_update, [user, attrs]) do
-      {:ok, returned} ->
-        attrs_to_use =
-          if is_map(returned) and not is_struct(returned) do
-            returned
-          else
-            attrs
-          end
-
-        case User.display_name_changeset(user, attrs_to_use) |> Repo.update() do
-          {:ok, updated} = ok ->
-            invalidate_user_cache(user)
-            invalidate_user_cache(updated)
-            broadcast_user_update(updated)
-            broadcast_member_update(updated)
-
-            Gamend.Async.run(fn ->
-              Gamend.Hooks.internal_call(:after_user_updated, [updated])
-            end)
-
-            ok
-
-          err ->
-            err
-        end
-
-      {:error, reason} ->
-        {:error, reason}
-    end
-  end
-
-  @doc """
-  Record a user's age answer and re-derive what it permits.
-
-  Three things happen together, and they have to: the answer is stored, the
-  denormalised `account_class` is recomputed from it, and `grandfathered_at` is
-  cleared. That last one is the point — an account that predated the age gate
-  stops being treated as an adult-by-default the moment it tells us what it
-  actually is, in whichever direction that goes.
-
-  Refuses with `{:error, :age_change_not_allowed}` when the answer would raise
-  the user's age without a stronger signal than the one already recorded. See
-  `AgePolicy.may_change_age?/4`: lowering is always allowed, because it only
-  ever increases protection.
-
-  `attrs` must carry `birth_year`, `birth_month` and `age_method`, and should
-  carry `age_country` — without it the highest digital-consent age in the table
-  applies, which is the safe reading but not always the right one.
-  """
-  @spec set_user_age(User.t(), map()) :: {:ok, User.t()} | {:error, term()}
-  def set_user_age(%User{} = user, attrs) when is_map(attrs) do
-    attrs = normalize_age_attrs(attrs)
-
-    with {:ok, year} <- fetch_age_field(attrs, "birth_year"),
-         {:ok, month} <- fetch_age_field(attrs, "birth_month"),
-         method when is_binary(method) <- attrs["age_method"],
-         true <- AgePolicy.may_change_age?(user, year, month, method) do
-      country = attrs["age_country"] || user.age_country
-
-      class =
-        year
-        |> AgePolicy.age_in_years(month, Date.utc_today())
-        |> AgePolicy.class_for_age(country)
-
-      changeset =
-        user
-        |> User.age_changeset(attrs)
-        |> Ecto.Changeset.put_change(:account_class, Atom.to_string(class))
-        |> Ecto.Changeset.put_change(
-          :age_locked_at,
-          DateTime.utc_now(:second)
-        )
-        |> Ecto.Changeset.put_change(:grandfathered_at, nil)
-
-      case Repo.update(changeset) do
-        {:ok, updated} = ok ->
-          invalidate_user_cache(user)
-          invalidate_user_cache(updated)
-          ok
-
-        err ->
-          err
-      end
-    else
-      false -> {:error, :age_change_not_allowed}
-      :error -> {:error, :invalid_age}
-      nil -> {:error, :invalid_age}
-      other -> other
-    end
-  end
-
-  # Accepts either string or atom keys, because this is reached from an RPC
-  # payload and from internal callers.
-  defp normalize_age_attrs(attrs) do
-    Map.new(attrs, fn {k, v} -> {to_string(k), v} end)
-  end
-
-  defp fetch_age_field(attrs, key) do
-    case attrs[key] do
-      value when is_integer(value) -> {:ok, value}
-      value when is_binary(value) -> parse_age_integer(value)
-      _ -> :error
-    end
-  end
-
-  defp parse_age_integer(value) do
-    case Integer.parse(value) do
-      {parsed, ""} -> {:ok, parsed}
-      _ -> :error
-    end
-  end
-
-  @doc """
-  Re-derive `account_class` for a user whose stored answer has not changed.
-
-  An account graduates on the first of its birth month, and nothing writes to it
-  on that day — the derivation is a function of the calendar, not of an event.
-  Call this to bring the denormalised column back in step, from a scheduled
-  sweep or on login.
-  """
-  @spec refresh_account_class(User.t()) :: {:ok, User.t()} | {:error, term()}
-  def refresh_account_class(%User{} = user) do
-    current = user.account_class
-    derived = user |> AgePolicy.classify() |> Atom.to_string()
-
-    if current == derived do
-      {:ok, user}
-    else
-      user
-      |> Ecto.Changeset.change(account_class: derived)
-      |> Repo.update()
-      |> case do
-        {:ok, updated} = ok ->
-          invalidate_user_cache(updated)
-          ok
-
-        err ->
-          err
-      end
-    end
-  end
-
-  @doc """
-  Updates the user's unique username handle and broadcasts the change.
-
-  Strict, unlike registration: an invalid or taken username returns
-  `{:error, changeset}` with no generated fallback, so the player can pick
-  again. Routed through the `before_user_update` hook pipeline, where games
-  can forbid changes entirely or reject names (profanity, reserved words).
-  """
-  @spec update_username(User.t(), map()) ::
-          {:ok, User.t()} | {:error, Ecto.Changeset.t() | term()}
-  def update_username(%User{} = user, attrs) do
-    case Gamend.Hooks.internal_call(:before_user_update, [user, attrs]) do
-      {:ok, returned} ->
-        attrs_to_use =
-          if is_map(returned) and not is_struct(returned) do
-            returned
-          else
-            attrs
-          end
-
-        case User.username_changeset(user, attrs_to_use) |> Repo.update() do
-          {:ok, updated} = ok ->
-            invalidate_user_cache(user)
-            invalidate_user_cache(updated)
-            broadcast_user_update(updated)
-            broadcast_member_update(updated)
-
-            Gamend.Async.run(fn ->
-              Gamend.Hooks.internal_call(:after_user_updated, [updated])
-            end)
-
-            ok
-
-          err ->
-            err
-        end
-
-      {:error, reason} ->
-        {:error, reason}
-    end
   end
 
   @doc """
@@ -1656,48 +1065,6 @@ defmodule Gamend.Accounts do
 
       other ->
         other
-    end
-  end
-
-  @spec change_user_registration(User.t()) :: Ecto.Changeset.t()
-  @spec change_user_registration(User.t(), map()) :: Ecto.Changeset.t()
-  def change_user_registration(%User{} = user, attrs \\ %{}) do
-    User.registration_changeset(user, attrs, [])
-  end
-
-  @doc """
-  A registration changeset for live form feedback, with the uniqueness query
-  skipped.
-
-  `change_user_registration/2` runs `unsafe_validate_unique`, which is right on
-  submit and wrong on every keystroke: the registration form's `validate` event
-  is neither rate-limited nor captcha'd, so running it there turned the form
-  into an unauthenticated oracle for "does this address have an account here?",
-  one query per character typed. Submitting still checks, and the unique index
-  is what actually enforces it.
-
-  Separate function rather than an option, because `mix gen.sdk` cannot generate
-  a stub for a function carrying two default arguments.
-  """
-  @spec change_user_registration_for_validation(User.t(), map()) :: Ecto.Changeset.t()
-  def change_user_registration_for_validation(%User{} = user, attrs) do
-    User.registration_changeset(user, attrs, validate_unique: false)
-  end
-
-  @spec deliver_user_confirmation_instructions(User.t(), (String.t() -> String.t())) ::
-          {:ok, Swoosh.Email.t()} | {:error, :already_confirmed | term()}
-  def deliver_user_confirmation_instructions(%User{} = user, confirmation_url_fun)
-      when is_function(confirmation_url_fun, 1) do
-    if user.confirmed_at do
-      {:error, :already_confirmed}
-    else
-      {encoded_token, user_token} = UserToken.build_email_token(user, "confirm")
-      Repo.insert!(user_token)
-
-      UserNotifier.deliver_confirmation_instructions(
-        user,
-        confirmation_url_fun.(encoded_token)
-      )
     end
   end
 end

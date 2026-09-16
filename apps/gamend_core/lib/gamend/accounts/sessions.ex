@@ -10,15 +10,11 @@ defmodule Gamend.Accounts.Sessions do
 
   import Ecto.Query, warn: false
   use Nebulex.Caching, cache: Gamend.Cache
-  alias Gamend.Repo
-
-  alias Gamend.Accounts.{
-    User,
-    UserNotifier,
-    UserToken
-  }
-
   alias Gamend.Accounts
+  alias Gamend.Accounts.User
+  alias Gamend.Accounts.UserNotifier
+  alias Gamend.Accounts.UserToken
+  alias Gamend.Repo
 
   @doc """
   Generates a session token.

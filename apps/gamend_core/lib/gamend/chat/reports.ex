@@ -214,28 +214,26 @@ defmodule Gamend.Chat.Reports do
     query = from(r in Report)
 
     query =
-      case blank_to_nil(Map.get(filters, :status) || Map.get(filters, "status")) do
+      case Gamend.Parse.blank_to_nil(Map.get(filters, :status) || Map.get(filters, "status")) do
         nil -> query
         value -> where(query, [r], r.status == ^value)
       end
 
     query =
-      case blank_to_nil(
+      case Gamend.Parse.blank_to_nil(
              Map.get(filters, :reported_user_id) || Map.get(filters, "reported_user_id")
            ) do
         nil -> query
         value -> where(query, [r], r.reported_user_id == ^to_string(value))
       end
 
-    case blank_to_nil(Map.get(filters, :reporter_id) || Map.get(filters, "reporter_id")) do
+    case Gamend.Parse.blank_to_nil(
+           Map.get(filters, :reporter_id) || Map.get(filters, "reporter_id")
+         ) do
       nil -> query
       value -> where(query, [r], r.reporter_id == ^to_string(value))
     end
   end
-
-  defp blank_to_nil(nil), do: nil
-  defp blank_to_nil(""), do: nil
-  defp blank_to_nil(value), do: value
 
   # Hooks never run inside the write — they are queued and flushed after it.
   defp dispatch(hook, args) do

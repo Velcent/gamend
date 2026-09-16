@@ -104,32 +104,24 @@ defmodule GamendWeb.AdminLive.Storage do
   defp reload(socket), do: socket |> reload_usage() |> reload_objects()
 
   defp reload_usage(socket) do
-    usage = Storage.usage(prefix: presence(socket.assigns.prefix))
+    usage = Storage.usage(prefix: Gamend.Parse.blank_to_nil(socket.assigns.prefix))
 
     socket
     |> assign(:count, usage.count)
     |> assign(:bytes, usage.bytes)
-    |> assign(:total_pages, ceil_div(usage.count, socket.assigns.page_size))
+    |> assign(:total_pages, LiveHelpers.total_pages(usage.count, socket.assigns.page_size))
   end
 
   defp reload_objects(socket) do
-    offset = (socket.assigns.page - 1) * socket.assigns.page_size
-
     objects =
       Storage.list_objects(
-        prefix: presence(socket.assigns.prefix),
-        offset: offset,
-        limit: socket.assigns.page_size
+        prefix: Gamend.Parse.blank_to_nil(socket.assigns.prefix),
+        page: socket.assigns.page,
+        page_size: socket.assigns.page_size
       )
 
     assign(socket, :objects, objects)
   end
-
-  defp presence(""), do: nil
-  defp presence(value), do: value
-
-  defp ceil_div(_num, 0), do: 0
-  defp ceil_div(num, den), do: div(num + den - 1, den)
 
   defp adapter_label do
     case Storage.adapter() do
