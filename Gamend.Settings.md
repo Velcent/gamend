@@ -91,6 +91,26 @@ Apps scanned for providers.
 Casts a raw string to a declared type. Returns `:error` when it does not
 parse, so the caller decides whether that is fatal.
 
+`values` is the declared `:values` of an `:atom` setting. Pass it whenever
+you have it — see `cast/3`.
+
+# `cast`
+
+```elixir
+@spec cast(String.t(), atom(), [atom()]) :: {:ok, term()} | :error
+```
+
+Casts a raw string against a declared type and, for `:atom`, its allowed
+`values`.
+
+With `values` the choice is matched against the declaration itself, so a
+legal value is accepted whether or not any other compiled code happens to
+name that atom. Without it there is nothing to match against and the cast
+falls back to `String.to_existing_atom/1`, which rejects exactly those atoms
+nothing else mentions — `GAMEND_PAYMENTS_ENVIRONMENT=sandbox` was rejected
+that way and silently became `:production`. Declare `:values` on every
+`:atom` setting; the fallback exists for plugins compiled before it did.
+
 # `describe`
 
 ```elixir

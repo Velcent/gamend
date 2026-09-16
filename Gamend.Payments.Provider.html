@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.40.4">
+    <meta name="project" content="gamend_core v1.0.1229">
+
+
+    <title>Gamend.Payments.Provider — gamend_core v1.0.1229</title>
+
+    <link rel="stylesheet" href="dist/html-elixir-RXHHCTJW.css" />
+
+    <script defer src="dist/sidebar_items-CB3FC2F4.js"></script>
+    <script defer src="docs_config.js"></script>
+    <script defer src="dist/html-MI33G4N7.js"></script>
+
+  </head>
+  <body>
+    <script>(()=>{var t="ex_doc:settings",e="dark";var o="dark",s="light";var E="sidebar_state",n="closed";var r="sidebar_width";var a="sidebar-open";var i=new URLSearchParams(window.location.search),S=i.get("theme")||JSON.parse(localStorage.getItem(t)||"{}").theme;(S===o||S!==s&&window.matchMedia("(prefers-color-scheme: dark)").matches)&&document.body.classList.add(e);var d=sessionStorage.getItem(E),A=d!==n&&!window.matchMedia(`screen and (max-width: ${768}px)`).matches;document.body.classList.toggle(a,A);var c=sessionStorage.getItem(r);c&&document.body.style.setProperty("--sidebarWidth",`${c}px`);var p=/(Macintosh|iPhone|iPad|iPod)/.test(window.navigator.userAgent);document.documentElement.classList.toggle("apple-os",p);})();
+</script>
+
+<div class="body-wrapper">
+
+<button id="sidebar-menu" class="sidebar-button sidebar-toggle" aria-label="toggle sidebar" aria-controls="sidebar">
+  <i class="ri-menu-line ri-lg" title="Collapse/expand sidebar"></i>
+</button>
+
+<nav id="sidebar" class="sidebar">
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectInfo">
+
+      <div>
+        <a href="readme.html" class="sidebar-projectName" translate="no">
+gamend_core
+        </a>
+        <div class="sidebar-projectVersion" translate="no">
+          v1.0.1229
+        </div>
+      </div>
+    </div>
+    <ul id="sidebar-list-nav" class="sidebar-list-nav" role="tablist" data-extras="Pages"></ul>
+  </div>
+</nav>
+
+<output role="status" id="toast"></output>
+
+<main class="content page-behaviour" id="main" data-type="modules">
+  <div id="content" class="content-inner">
+    <div class="top-search">
+      <div class="search-settings">
+        <form class="search-bar" action="search.html">
+          <label class="search-label">
+            <span class="sr-only">Search documentation of gamend_core</span>
+            <div class="search-input-wrapper">
+              <input name="q" type="text" class="search-input" placeholder="Press / to search" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+              <button type="button" tabindex="-1" class="search-close-button" aria-hidden="true">
+                <i class="ri-close-line ri-lg" title="Cancel search"></i>
+              </button>
+            </div>
+          </label>
+        </form>
+        <div class="autocomplete">
+        </div>
+        <div class="engine-selector" data-multiple="false">
+          <button type="button" class="engine-button" aria-label="Select search engine" aria-haspopup="true" aria-expanded="false">
+            <i class="ri-search-2-line" aria-hidden="true"></i>
+            <span class="engine-name">Default</span>
+            <i class="ri-arrow-down-s-line" aria-hidden="true"></i>
+          </button>
+          <div class="engine-dropdown" hidden role="menu">
+
+              <button type="button"
+                      class="engine-option"
+                      data-engine-url="search.html?q="
+                      role="menuitemradio"
+                      aria-checked="true">
+                <span class="name">Default</span>
+                <span class="help">In-browser search</span>
+              </button>
+
+          </div>
+        </div>
+        <button class="icon-settings display-settings">
+          <i class="ri-settings-3-line"></i>
+          <span class="sr-only">Settings</span>
+        </button>
+      </div>
+    </div>
+
+<div id="top-content">
+  <div class="heading-with-actions top-heading">
+    <h1>
+      <span translate="no">Gamend.<wbr />Payments.<wbr />Provider</span> <small>behaviour</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1229)</small>
+
+    </h1>
+
+<a href="Gamend.Payments.Provider.md" title="Copy Markdown (hold Ctrl/Cmd and click it to open as Markdown)" class="copy-markdown icon-action" rel="help">
+  <i class="ri-markdown-line" aria-hidden="true"></i>
+  <span class="sr-only">Copy Markdown</span>
+</a>
+
+
+
+      <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/provider.ex#L1" title="View Source" class="icon-action" rel="help nofollow">
+        <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        <span class="sr-only">View Source</span>
+      </a>
+
+  </div>
+
+
+    <section id="moduledoc">
+<p>Behaviour for a store adapter — Apple, Google, Steam, or a host's own.</p><p>A host swaps one out through config:</p><pre><code class="makeup elixir" translate="no"><span class="n">config</span><span class="w"> </span><span class="ss">:gamend_core</span><span class="p">,</span><span class="w"> </span><span class="ss">:payment_provider_adapters</span><span class="p">,</span><span class="w"> </span><span class="ss">apple</span><span class="p">:</span><span class="w"> </span><span class="nc">MyGame.AppleStub</span></code></pre><p>That seam existed before this behaviour did, which meant the contract was
+whatever <a href="Gamend.Payments.html"><code class="inline">Gamend.Payments</code></a> happened to call, discoverable only by reading it.
+The symptom was <code class="inline">function_exported?(module, :config_status, 0)</code> guarding
+every call to an optional callback: a runtime probe standing in for a
+declaration.</p><h2 id="module-required" class="section-heading"><a href="#module-required" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Required</span></h2><p><code class="inline">validate_purchase/2</code> is the one every adapter implements: given the
+attributes a client submitted, confirm with the store that the purchase is
+real, and answer with the normalised fields (<code class="inline">&quot;environment&quot;</code>,
+<code class="inline">&quot;provider_transaction_id&quot;</code>, and whatever else the provider knows).</p><h2 id="module-optional" class="section-heading"><a href="#module-optional" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Optional</span></h2><p>The rest are per-provider. Steam has a two-step init/finalize flow that the
+others do not; Apple verifies signed notifications where Google verifies a
+bearer token on the webhook. Declare only what your store actually does —
+<a href="Gamend.Payments.html"><code class="inline">Gamend.Payments</code></a> checks before calling, and now checks against this list.</p>
+    </section>
+
+</div>
+
+  <section id="summary" class="details-list">
+    <h2 class="section-heading">
+      <a class="hover-link" href="#summary">
+        <i class="ri-link-m" aria-hidden="true"></i>
+      </a>
+      <span class="text">Summary</span>
+    </h2>
+<div class="summary-payments-hooks summary">
+  <h3>
+    <a href="#payments-hooks">Payments hooks</a>
+  </h3>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#c:validate_purchase/2" data-no-tooltip="" translate="no">validate_purchase(user, attrs)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Verifies a purchase with the store and returns its normalised fields.</p></div>
+
+    </div>
+
+</div>
+<div class="summary-types summary">
+  <h3>
+    <a href="#types">Types</a>
+  </h3>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#t:attrs/0" data-no-tooltip="" translate="no">attrs()</a>
+
+      </div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#t:result/0" data-no-tooltip="" translate="no">result()</a>
+
+      </div>
+
+    </div>
+
+</div>
+<div class="summary-callbacks summary">
+  <h3>
+    <a href="#callbacks">Callbacks</a>
+  </h3>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#c:config_status/0" data-no-tooltip="" translate="no">config_status()</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Whether this adapter has the credentials it needs, for the admin console.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#c:finalize_transaction/2" data-no-tooltip="" translate="no">finalize_transaction(purchase, attrs)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Completes a checkout started by <code class="inline">init_transaction/3</code>.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#c:init_transaction/3" data-no-tooltip="" translate="no">init_transaction(purchase, provider_product, attrs)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Starts a provider-hosted checkout (Steam's init/finalize flow).</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#c:query_transaction/1" data-no-tooltip="" translate="no">query_transaction(attrs)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Reads back one transaction's current state from the store.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#c:verify_notification/1" data-no-tooltip="" translate="no">verify_notification(raw_body)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Verifies a signed store notification (Apple's App Store Server V2).</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#c:verify_webhook/2" data-no-tooltip="" translate="no">verify_webhook(raw_body, authorization)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Verifies a webhook's authenticity from its authorization header.</p></div>
+
+    </div>
+
+</div>
+
+  </section>
+
+
+  <section id="payments-hooks" class="details-list">
+    <h2 class="section-heading">
+      <a class="hover-link" href="#payments-hooks">
+        <i class="ri-link-m" aria-hidden="true"></i>
+      </a>
+      <span class="text">Payments hooks</span>
+    </h2>
+
+    <div class="payments-hooks-list">
+<section class="detail" id="c:validate_purchase/2">
+
+  <div class="detail-header">
+    <a href="#c:validate_purchase/2" class="detail-link" data-no-tooltip="" aria-label="Link to this callback">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">validate_purchase(user, attrs)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/provider.ex#L36" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@callback</span> validate_purchase(user :: <a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">struct</a>() | nil, <a href="#t:attrs/0">attrs</a>()) :: <a href="#t:result/0">result</a>()</pre>
+
+      </div>
+
+<p>Verifies a purchase with the store and returns its normalised fields.</p>
+  </section>
+</section>
+
+    </div>
+  </section>
+
+  <section id="types" class="details-list">
+    <h2 class="section-heading">
+      <a class="hover-link" href="#types">
+        <i class="ri-link-m" aria-hidden="true"></i>
+      </a>
+      <span class="text">Types</span>
+    </h2>
+
+    <div class="types-list">
+<section class="detail" id="t:attrs/0">
+
+  <div class="detail-header">
+    <a href="#t:attrs/0" class="detail-link" data-no-tooltip="" aria-label="Link to this type">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">attrs()</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/provider.ex#L30" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@type</span> attrs() :: <a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">map</a>()</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:result/0">
+
+  <div class="detail-header">
+    <a href="#t:result/0" class="detail-link" data-no-tooltip="" aria-label="Link to this type">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">result()</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/provider.ex#L31" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@type</span> result() :: {:ok, <a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">map</a>()} | {:error, <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">term</a>()}</pre>
+
+      </div>
+
+
+  </section>
+</section>
+
+    </div>
+  </section>
+
+  <section id="callbacks" class="details-list">
+    <h2 class="section-heading">
+      <a class="hover-link" href="#callbacks">
+        <i class="ri-link-m" aria-hidden="true"></i>
+      </a>
+      <span class="text">Callbacks</span>
+    </h2>
+
+    <div class="callbacks-list">
+<section class="detail" id="c:config_status/0">
+
+  <div class="detail-header">
+    <a href="#c:config_status/0" class="detail-link" data-no-tooltip="" aria-label="Link to this callback">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">config_status()</h1>
+
+        <span class="note">(optional)</span>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/provider.ex#L43" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@callback</span> config_status() :: %{:configured =&gt; <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">boolean</a>(), optional(<a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">atom</a>()) =&gt; <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">term</a>()}</pre>
+
+      </div>
+
+<p>Whether this adapter has the credentials it needs, for the admin console.</p><p>Assumed configured when not implemented.</p>
+  </section>
+</section>
+<section class="detail" id="c:finalize_transaction/2">
+
+  <div class="detail-header">
+    <a href="#c:finalize_transaction/2" class="detail-link" data-no-tooltip="" aria-label="Link to this callback">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">finalize_transaction(purchase, attrs)</h1>
+
+        <span class="note">(optional)</span>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/provider.ex#L50" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@callback</span> finalize_transaction(purchase :: <a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">struct</a>(), <a href="#t:attrs/0">attrs</a>()) :: <a href="#t:result/0">result</a>()</pre>
+
+      </div>
+
+<p>Completes a checkout started by <code class="inline">init_transaction/3</code>.</p>
+  </section>
+</section>
+<section class="detail" id="c:init_transaction/3">
+
+  <div class="detail-header">
+    <a href="#c:init_transaction/3" class="detail-link" data-no-tooltip="" aria-label="Link to this callback">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">init_transaction(purchase, provider_product, attrs)</h1>
+
+        <span class="note">(optional)</span>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/provider.ex#L46" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@callback</span> init_transaction(purchase :: <a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">struct</a>(), provider_product :: <a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">struct</a>(), <a href="#t:attrs/0">attrs</a>()) ::
+  <a href="#t:result/0">result</a>()</pre>
+
+      </div>
+
+<p>Starts a provider-hosted checkout (Steam's init/finalize flow).</p>
+  </section>
+</section>
+<section class="detail" id="c:query_transaction/1">
+
+  <div class="detail-header">
+    <a href="#c:query_transaction/1" class="detail-link" data-no-tooltip="" aria-label="Link to this callback">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">query_transaction(attrs)</h1>
+
+        <span class="note">(optional)</span>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/provider.ex#L53" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@callback</span> query_transaction(<a href="#t:attrs/0">attrs</a>()) :: <a href="#t:result/0">result</a>()</pre>
+
+      </div>
+
+<p>Reads back one transaction's current state from the store.</p>
+  </section>
+</section>
+<section class="detail" id="c:verify_notification/1">
+
+  <div class="detail-header">
+    <a href="#c:verify_notification/1" class="detail-link" data-no-tooltip="" aria-label="Link to this callback">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">verify_notification(raw_body)</h1>
+
+        <span class="note">(optional)</span>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/provider.ex#L56" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@callback</span> verify_notification(raw_body :: <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">binary</a>()) :: <a href="#t:result/0">result</a>()</pre>
+
+      </div>
+
+<p>Verifies a signed store notification (Apple's App Store Server V2).</p>
+  </section>
+</section>
+<section class="detail" id="c:verify_webhook/2">
+
+  <div class="detail-header">
+    <a href="#c:verify_webhook/2" class="detail-link" data-no-tooltip="" aria-label="Link to this callback">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">verify_webhook(raw_body, authorization)</h1>
+
+        <span class="note">(optional)</span>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/provider.ex#L59" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@callback</span> verify_webhook(raw_body :: <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">binary</a>(), authorization :: <a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>() | nil) ::
+  <a href="#t:result/0">result</a>()</pre>
+
+      </div>
+
+<p>Verifies a webhook's authenticity from its authorization header.</p>
+  </section>
+</section>
+
+    </div>
+  </section>
+
+    <footer class="footer">
+
+        <p>
+
+            <span class="line">
+              <a href="https://hex.pm/packages/gamend_core/1.0.1229">Hex Package</a>
+
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1229">Hex Preview</a>
+
+            </span>
+
+          <span class="line">
+            <button class="a-main footer-button display-quick-switch" title="Go to package docs">
+              Go to package docs
+            </button>
+
+              <a href="llms.txt" target="_blank">
+                View llms.txt
+              </a>
+
+
+              <a href="gamend_core.epub">
+                Download ePub version
+              </a>
+
+          </span>
+        </p>
+
+        <p class="built-using">
+          Built using
+          <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener" translate="no">ExDoc</a> (v0.40.4) for the
+
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank" translate="no">Elixir programming language</a>
+
+        </p>
+
+
+    </footer>
+  </div>
+</main>
+</div>
+
+  </body>
+</html>

@@ -32,12 +32,6 @@ production provider credentials for this host.
 @spec production?() :: boolean()
 ```
 
-# `sandbox_like?`
-
-```elixir
-@spec sandbox_like?() :: boolean()
-```
-
 # `stripe_api_version`
 
 ```elixir
@@ -54,12 +48,6 @@ production provider credentials for this host.
 
 ```elixir
 @spec stripe_candidate_labels(:secret_key | :webhook_secret) :: [String.t()]
-```
-
-# `stripe_default_api_version`
-
-```elixir
-@spec stripe_default_api_version() :: String.t()
 ```
 
 # `stripe_secret_key`

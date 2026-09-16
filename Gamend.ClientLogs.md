@@ -128,7 +128,7 @@ Sessions, newest activity first.
 
 Options: `:user_id`, `:platform`, `:build`, `:app_version`, `:lobby_id`,
 `:errors_only`, `:query` (matches session id or device id), `:since`,
-`:until`, `:limit`, `:offset`.
+`:until`, `:page`, `:page_size`.
 
 # `logger_level_blocks_collection?`
 

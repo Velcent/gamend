@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.4">
-    <meta name="project" content="gamend_core v1.0.1228">
+    <meta name="project" content="gamend_core v1.0.1229">
 
 
-    <title>Gamend.Chat.Moderation.Cache — gamend_core v1.0.1228</title>
+    <title>Gamend.Chat.Moderation.Cache — gamend_core v1.0.1229</title>
 
     <link rel="stylesheet" href="dist/html-elixir-RXHHCTJW.css" />
 
-    <script defer src="dist/sidebar_items-0381F603.js"></script>
+    <script defer src="dist/sidebar_items-CB3FC2F4.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-MI33G4N7.js"></script>
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1228
+          v1.0.1229
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr />Chat.<wbr />Moderation.<wbr />Cache</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1228)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1229)</small>
 
     </h1>
 
@@ -177,16 +177,6 @@ going through <a href="#put_word/1"><code class="inline">put_word/1</code></a> p
       </div>
 
         <div class="summary-synopsis"><p>Ensure the ETS tables exist (called once at app startup).</p></div>
-
-    </div>
-
-    <div class="summary-row">
-      <div class="summary-signature">
-        <a href="#list_words/0" data-no-tooltip="" translate="no">list_words()</a>
-
-      </div>
-
-        <div class="summary-synopsis"><p>Every blocklist entry as <code class="inline">[{word, severity, match_mode}]</code>.</p></div>
 
     </div>
 
@@ -324,7 +314,7 @@ going through <a href="#put_word/1"><code class="inline">put_word/1</code></a> p
       <h1 class="signature" translate="no">apply_remote(arg1, word)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat/moderation/cache.ex#L176" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat/moderation/cache.ex#L169" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -352,7 +342,7 @@ going through <a href="#put_word/1"><code class="inline">put_word/1</code></a> p
       <h1 class="signature" translate="no">delete_mute(user_id, scope, scope_ref_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat/moderation/cache.ex#L143" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat/moderation/cache.ex#L136" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -380,7 +370,7 @@ going through <a href="#put_word/1"><code class="inline">put_word/1</code></a> p
       <h1 class="signature" translate="no">delete_word(word)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat/moderation/cache.ex#L98" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat/moderation/cache.ex#L91" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -426,34 +416,6 @@ going through <a href="#put_word/1"><code class="inline">put_word/1</code></a> p
 <p>Ensure the ETS tables exist (called once at app startup).</p>
   </section>
 </section>
-<section class="detail" id="list_words/0">
-
-  <div class="detail-header">
-    <a href="#list_words/0" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
-      <i class="ri-link-m" aria-hidden="true"></i>
-    </a>
-    <div class="heading-with-actions">
-      <h1 class="signature" translate="no">list_words()</h1>
-
-
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat/moderation/cache.ex#L74" class="icon-action" rel="help nofollow" aria-label="View Source">
-          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
-        </a>
-
-    </div>
-  </div>
-
-  <section class="docstring">
-
-      <div class="specs">
-
-          <pre translate="no"><span class="attribute">@spec</span> list_words() :: [{<a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>(), <a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>(), <a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>()}]</pre>
-
-      </div>
-
-<p>Every blocklist entry as <code class="inline">[{word, severity, match_mode}]</code>.</p>
-  </section>
-</section>
 <section class="detail" id="load_persisted/0">
 
   <div class="detail-header">
@@ -464,7 +426,7 @@ going through <a href="#put_word/1"><code class="inline">put_word/1</code></a> p
       <h1 class="signature" translate="no">load_persisted()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat/moderation/cache.ex#L164" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat/moderation/cache.ex#L157" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -520,7 +482,7 @@ going through <a href="#put_word/1"><code class="inline">put_word/1</code></a> p
       <h1 class="signature" translate="no">mute_count()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat/moderation/cache.ex#L151" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat/moderation/cache.ex#L144" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -548,7 +510,7 @@ going through <a href="#put_word/1"><code class="inline">put_word/1</code></a> p
       <h1 class="signature" translate="no">muted?(user_id, chat_type, chat_ref_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat/moderation/cache.ex#L125" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat/moderation/cache.ex#L118" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -578,7 +540,7 @@ never depends on the sweep having run.</p>
       <h1 class="signature" translate="no">normalize(text)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat/moderation/cache.ex#L290" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat/moderation/cache.ex#L283" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -606,7 +568,7 @@ never depends on the sweep having run.</p>
       <h1 class="signature" translate="no">put_mute(mute)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat/moderation/cache.ex#L135" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat/moderation/cache.ex#L128" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -634,7 +596,7 @@ never depends on the sweep having run.</p>
       <h1 class="signature" translate="no">put_word(word)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat/moderation/cache.ex#L88" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat/moderation/cache.ex#L81" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -662,7 +624,7 @@ never depends on the sweep having run.</p>
       <h1 class="signature" translate="no">reload_words()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat/moderation/cache.ex#L110" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat/moderation/cache.ex#L103" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -747,7 +709,7 @@ other instances reload too — the alternative is one message per word.</p>
       <h1 class="signature" translate="no">word_count()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat/moderation/cache.ex#L81" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat/moderation/cache.ex#L74" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -774,9 +736,9 @@ other instances reload too — the alternative is one message per word.</p>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1228">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1229">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1228">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1229">Hex Preview</a>
 
             </span>
 

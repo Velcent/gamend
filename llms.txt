@@ -1,4 +1,4 @@
-# gamend_core v1.0.1228 - Table of Contents
+# gamend_core v1.0.1229 - Table of Contents
 
 > Core functionality for Gamend, including user management, authentication, friends, matchmaking, and more.
 
@@ -27,11 +27,15 @@ stores and sums them. Written by `Gamend.Analytics.count/3`.
 - [Gamend.ClientLogs.SessionLobby](Gamend.ClientLogs.SessionLobby.md): A lobby a client session was in.
 - [Gamend.Cluster](Gamend.Cluster.md): Erlang distribution, needed for multi-node deployments and the partitioned
 L2 cache.
+- [Gamend.Codegen](Gamend.Codegen.md): Support for the `mix` tasks that write generated files into the repo.
 - [Gamend.Database](Gamend.Database.md): Connection and tuning settings for `Gamend.Repo`.
+- [Gamend.Ledger](Gamend.Ledger.md): The mechanics both ledgered balances share: `Gamend.Economy` (currency in a
+wallet) and `Gamend.Inventory` (quantity of an item).
 - [Gamend.Mail](Gamend.Mail.md): Outbound email transport.
 - [Gamend.Policy](Gamend.Policy.md): One question — "may this user do this to this thing?" — asked the same way
 everywhere.
 - [Gamend.Presence](Gamend.Presence.md): Cluster-wide tracking of who is connected where.
+- [Gamend.Query](Gamend.Query.md): Query-building pieces shared by the contexts. Right now: paging.
 - [Gamend.Release](Gamend.Release.md): Release-time equivalents of the `host.*` mix tasks.
 - [Gamend.Signaling](Gamend.Signaling.md): WebRTC signaling: who is in a room, and relaying offers between them.
 - [Gamend.Signals](Gamend.Signals.md): Server-side signals: a plugin emits a named event, another part of the plugin
@@ -171,8 +175,10 @@ Carries the `idempotency_key` that makes item grants safe to retry.
   - [Gamend.Payments](Gamend.Payments.md): Payment catalog, purchase ledger, and entitlements.
   - [Gamend.Payments.Entitlement](Gamend.Payments.Entitlement.md): User access grant derived from a purchase or admin/server action.
 
+  - [Gamend.Payments.Params](Gamend.Payments.Params.md): Shape-wrangling shared by `Gamend.Payments` and its provider adapters.
   - [Gamend.Payments.Product](Gamend.Payments.Product.md): Internal product sold by one or more payment providers.
 
+  - [Gamend.Payments.Provider](Gamend.Payments.Provider.md): Behaviour for a store adapter — Apple, Google, Steam, or a host's own.
   - [Gamend.Payments.ProviderConfig](Gamend.Payments.ProviderConfig.md): Runtime payment-provider configuration helpers.
   - [Gamend.Payments.ProviderEvent](Gamend.Payments.ProviderEvent.md): Dedupe record for webhook and store notification events.
 

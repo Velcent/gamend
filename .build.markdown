@@ -42,6 +42,7 @@ Gamend.ClientLogs.Session.md
 Gamend.ClientLogs.SessionLobby.md
 Gamend.ClientLogs.md
 Gamend.Cluster.md
+Gamend.Codegen.md
 Gamend.Config.md
 Gamend.Content.md
 Gamend.ContentSettings.md
@@ -78,6 +79,7 @@ Gamend.KV.md
 Gamend.Leaderboards.Leaderboard.md
 Gamend.Leaderboards.Record.md
 Gamend.Leaderboards.md
+Gamend.Ledger.md
 Gamend.Limits.md
 Gamend.Lobbies.Lobby.md
 Gamend.Lobbies.SpectatorTracker.md
@@ -111,7 +113,9 @@ Gamend.Parties.Party.md
 Gamend.Parties.PartyInvite.md
 Gamend.Parties.md
 Gamend.Payments.Entitlement.md
+Gamend.Payments.Params.md
 Gamend.Payments.Product.md
+Gamend.Payments.Provider.md
 Gamend.Payments.ProviderConfig.md
 Gamend.Payments.ProviderEvent.md
 Gamend.Payments.ProviderProduct.md
@@ -139,6 +143,7 @@ Gamend.Push.Providers.Log.md
 Gamend.Push.PushToken.md
 Gamend.Push.Supervisor.md
 Gamend.Push.md
+Gamend.Query.md
 Gamend.Quests.Objective.md
 Gamend.Quests.Quest.md
 Gamend.Quests.QuestProgress.md

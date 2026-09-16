@@ -52,14 +52,6 @@ Remove a blocklist entry locally and on the other instances.
 
 Ensure the ETS tables exist (called once at app startup).
 
-# `list_words`
-
-```elixir
-@spec list_words() :: [{String.t(), String.t(), String.t()}]
-```
-
-Every blocklist entry as `[{word, severity, match_mode}]`.
-
 # `load_persisted`
 
 ```elixir

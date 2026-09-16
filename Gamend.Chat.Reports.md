@@ -94,8 +94,14 @@ yet.
 File a report about `message_id` on behalf of `reporter_id`.
 
 Returns `{:error, :not_found}` for an unknown message, `{:error, :own_message}`
-when a player reports themselves, and `{:error, :already_reported}` when they
-have already reported that message.
+when a player reports themselves, `{:error, :already_reported}` when they have
+already reported that message, and `{:error, :report_daily_limit}` once they
+are over `max_chat_reports_per_user_per_day`.
+
+The daily cap is enforced here rather than only at the HTTP edge so that a
+plugin calling this directly is bounded too. The edge keeps its own rate-limit
+check: that one is a cheap in-memory gate, while this counts committed rows,
+so it survives a restart and is shared by every instance. Either can reject.
 
 # `resolve_report`
 

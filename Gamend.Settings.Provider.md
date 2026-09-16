@@ -53,6 +53,13 @@ host configures them the ordinary Elixir way and never needs an env var:
   them to hold.
 - `:with` — sibling keys forming a complete-or-empty group. All unset is
   silent; a partial set trips `:required`.
+- `:values` — for `:atom`, the complete set of accepted choices. Always give
+  it. Without it the cast falls back to `String.to_existing_atom/1`, which
+  only succeeds when some *other* compiled code happens to mention the atom
+  already — so a perfectly valid choice that nothing else names is rejected
+  and silently replaced by the default. `GAMEND_PAYMENTS_ENVIRONMENT=sandbox`
+  selected production that way. Listing the values here casts against them
+  directly, so the declaration is the only thing that decides what is legal.
 
 # `derive_env`
 

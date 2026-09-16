@@ -43,6 +43,7 @@ Gamend.ClientLogs.Session.html
 Gamend.ClientLogs.SessionLobby.html
 Gamend.ClientLogs.html
 Gamend.Cluster.html
+Gamend.Codegen.html
 Gamend.Config.html
 Gamend.Content.html
 Gamend.ContentSettings.html
@@ -79,6 +80,7 @@ Gamend.KV.html
 Gamend.Leaderboards.Leaderboard.html
 Gamend.Leaderboards.Record.html
 Gamend.Leaderboards.html
+Gamend.Ledger.html
 Gamend.Limits.html
 Gamend.Lobbies.Lobby.html
 Gamend.Lobbies.SpectatorTracker.html
@@ -112,7 +114,9 @@ Gamend.Parties.Party.html
 Gamend.Parties.PartyInvite.html
 Gamend.Parties.html
 Gamend.Payments.Entitlement.html
+Gamend.Payments.Params.html
 Gamend.Payments.Product.html
+Gamend.Payments.Provider.html
 Gamend.Payments.ProviderConfig.html
 Gamend.Payments.ProviderEvent.html
 Gamend.Payments.ProviderProduct.html
@@ -140,6 +144,7 @@ Gamend.Push.Providers.Log.html
 Gamend.Push.PushToken.html
 Gamend.Push.Supervisor.html
 Gamend.Push.html
+Gamend.Query.html
 Gamend.Quests.Objective.html
 Gamend.Quests.Quest.html
 Gamend.Quests.QuestProgress.html
@@ -197,8 +202,8 @@ dist/lato-latin-700-normal-2XVSBPG4.woff2
 dist/lato-latin-ext-400-normal-N27NCBWW.woff2
 dist/lato-latin-ext-700-normal-Q2L5DVMW.woff2
 dist/remixicon-ZWU5GQ4X.woff2
-dist/search_data-3DD814E7.js
-dist/sidebar_items-0381F603.js
+dist/search_data-D9F001F8.js
+dist/sidebar_items-CB3FC2F4.js
 index.html
 readme.html
 search.html

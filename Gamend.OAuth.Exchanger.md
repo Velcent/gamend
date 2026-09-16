@@ -57,11 +57,6 @@ Verify a Steam auth ticket using ISteamUserAuth/AuthenticateUserTicket/v1
 Expects a ticket (binary blob) returned by the Steamworks client SDK. Returns
 {:ok, user_info} on successful verification or {:error, reason} on failure.
 
-# `get_player_profile`
-
-Fetch a public Steam profile for a given steamid using GetPlayerSummaries.
-Returns {:ok, map} or {:error, reason}.
-
 ---
 
 *Consult [api-reference.md](api-reference.md) for complete listing*
