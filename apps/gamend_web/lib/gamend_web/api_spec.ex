@@ -205,7 +205,7 @@ defmodule GamendWeb.ApiSpec do
         const userChannel = realtime.joinUserChannel(userId)
         userChannel.on('notification', payload => console.log(payload))
         ```
-        Requires the `phoenix` npm package as a peer dependency: `npm install phoenix`
+        `phoenix` ships as a dependency of the package, so no extra install is needed.
 
         ## **16. Real-time: WebRTC DataChannels**
         For low-latency game data, the server supports WebRTC DataChannels alongside WebSocket. The server acts as a WebRTC peer (not P2P between clients).

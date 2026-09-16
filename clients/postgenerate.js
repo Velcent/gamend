@@ -29,7 +29,7 @@ const additions = `
 
 /**
  * GameRealtime — Phoenix WebSocket channel manager.
- * Wraps Phoenix.Socket; requires the \`phoenix\` npm peer dependency.
+ * Wraps Phoenix.Socket. \`phoenix\` ships as a dependency of this package.
  */
 export { GameRealtime, GameRealtime as default_GameRealtime } from './realtime';
 

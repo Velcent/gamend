@@ -689,21 +689,62 @@ jobs:
           npm ci
           npm run generate
       
-      - name: Ensure license is included for JS SDK
+      - name: Stamp package metadata and runtime dependencies
+        working-directory: clients/javascript
         run: |
-          cp LICENSE clients/javascript/LICENSE
-          jq '.license = "MIT"' clients/javascript/package.json > clients/javascript/package.json.tmp && mv clients/javascript/package.json.tmp clients/javascript/package.json
+          set -euo pipefail
+          cp ../../LICENSE LICENSE
 
-      - name: Update package.json with repository field (https://github.com/appsinacup/gamend.git)
-        run: |
-          REPO_FIELD='"repository": { "type": "git", "url": "git+https://github.com/appsinacup/gamend.git" },'
-          jq ". + { $REPO_FIELD }" clients/javascript/package.json > clients/javascript/package.json.tmp && mv clients/javascript/package.json.tmp clients/javascript/package.json
+          # The generator emits neither field, and trusted publishing requires
+          # repository.url to match the GitHub repository exactly.
+          jq '.license = "MIT"
+              | .repository = {"type":"git","url":"git+https://github.com/appsinacup/gamend.git"}' \
+            package.json > tmp && mv tmp package.json
 
-      - name: Add phoenix as a dependency
+          # The handcrafted realtime code ships in the bundle but is invisible
+          # to the generator, so its dependencies have to be added here:
+          # realtime.js imports phoenix, and gamend_realtime.pb.js imports
+          # protobufjs. Omitting protobufjs is what made 1.0.0 throw
+          # "Cannot find module 'protobufjs/minimal.js'" on a clean install.
+          #
+          # Resolved at publish time instead of pinned, so a release never
+          # ships dependencies that are already months stale. The smoke test
+          # below is what makes that safe.
+          for dep in superagent phoenix protobufjs; do
+            latest=$(npm view "$dep" version)
+            echo "  ${dep} -> ^${latest}"
+            jq --arg d "$dep" --arg v "^${latest}" '.dependencies[$d] = $v' \
+              package.json > tmp && mv tmp package.json
+          done
+
+          # The generator lists @babel/cli as a runtime dependency. It is only
+          # needed to build, and `prepare` does not run for consumers
+          # installing from the registry, so it is weight in every install.
+          jq '.devDependencies["@babel/cli"] = (.dependencies["@babel/cli"] // "^7.0.0")
+              | del(.dependencies["@babel/cli"])' \
+            package.json > tmp && mv tmp package.json
+
+          jq '{name, license, repository, dependencies}' package.json
+
+      # The deps just changed under it, so the tree built during generation is
+      # stale. Reinstall and rebuild before anything inspects the bundle.
+      - name: Install stamped dependencies and rebuild
+        working-directory: clients/javascript
         run: |
-          jq '.dependencies.phoenix = ">=1.7.0"' \
-            clients/javascript/package.json > clients/javascript/package.json.tmp \
-            && mv clients/javascript/package.json.tmp clients/javascript/package.json
+          npm install --no-audit --no-fund
+          npm run build
+
+      # Catches the 1.0.0 failure mode directly: a module the bundle requires
+      # that nothing declares. Green builds and green tests both missed it,
+      # because the break only appears in a clean consumer install.
+      - name: Verify the bundle declares every module it requires
+        run: node clients/check_shipped_deps.js
+
+      # A real HTTP round trip through the generated client plus a load of the
+      # realtime code. This is the gate that lets the dependency versions above
+      # float to latest without risking a silent break.
+      - name: Smoke-test the built package
+        run: node clients/smoke_package.js
 
       - name: Apply version and publish
         run: |
