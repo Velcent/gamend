@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.4">
-    <meta name="project" content="gamend_core v1.0.1230">
+    <meta name="project" content="gamend_core v1.0.1233">
 
 
-    <title>Gamend.Repo — gamend_core v1.0.1230</title>
+    <title>Gamend.Repo — gamend_core v1.0.1233</title>
 
     <link rel="stylesheet" href="dist/html-elixir-RXHHCTJW.css" />
 
-    <script defer src="dist/sidebar_items-CB3FC2F4.js"></script>
+    <script defer src="dist/sidebar_items-4494F1AF.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-MI33G4N7.js"></script>
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1230
+          v1.0.1233
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr />Repo</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1230)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1233)</small>
 
     </h1>
 
@@ -560,6 +560,17 @@ and raises on invalid queries</p></div>
       </div>
 
         <div class="summary-synopsis"><p>Callback implementation for <a href="https://ecto.hexdocs.pm/3.14.2/Ecto.Repo.html#c:reload!/2"><code class="inline">Ecto.Repo.reload!/2</code></a>.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#rescue_foreign_key/2" data-no-tooltip="" translate="no">rescue_foreign_key(reason, fun)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Runs <code class="inline">fun</code>, answering <code class="inline">{:error, reason}</code> when it violates a foreign key that
+Ecto could not attribute to a changeset constraint.</p></div>
 
     </div>
 
@@ -1055,7 +1066,7 @@ connection-wide pragma with no per-transaction override.</p>
       <h1 class="signature" translate="no">escape_like(str)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/repo.ex#L82" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/repo.ex#L106" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1293,7 +1304,7 @@ consult their documentation for more details.</p><p>For version compatibility, p
       <h1 class="signature" translate="no">get_uuid(queryable, id, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/repo.ex#L113" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/repo.ex#L137" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1325,7 +1336,7 @@ input (URL params, channel payloads, hook args).</p>
       <h1 class="signature" translate="no">get_uuid!(queryable, id, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/repo.ex#L126" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/repo.ex#L150" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1846,6 +1857,42 @@ and raises on invalid queries</p>
 <p>Callback implementation for <a href="https://ecto.hexdocs.pm/3.14.2/Ecto.Repo.html#c:reload!/2"><code class="inline">Ecto.Repo.reload!/2</code></a>.</p>
   </section>
 </section>
+<section class="detail" id="rescue_foreign_key/2">
+
+  <div class="detail-header">
+    <a href="#rescue_foreign_key/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">rescue_foreign_key(reason, fun)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/repo.ex#L87" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> rescue_foreign_key(<a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">term</a>(), (-&gt; result)) :: result | {:error, <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">term</a>()}
+when result: <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">term</a>()</pre>
+
+      </div>
+
+<p>Runs <code class="inline">fun</code>, answering <code class="inline">{:error, reason}</code> when it violates a foreign key that
+Ecto could not attribute to a changeset constraint.</p><p>SQLite — the default adapter — does not say <em>which</em> constraint an INSERT
+violated, so <a href="https://ecto.hexdocs.pm/3.14.2/Ecto.Changeset.html#foreign_key_constraint/2"><code class="inline">Ecto.Changeset.foreign_key_constraint/2</code></a> cannot match and Ecto
+raises <a href="https://ecto.hexdocs.pm/3.14.2/Ecto.ConstraintError.html"><code class="inline">Ecto.ConstraintError</code></a> instead of returning a changeset. The contexts
+check the referenced row exists first (<a href="Gamend.Accounts.html#user_exists?/1"><code class="inline">Gamend.Accounts.user_exists?/1</code></a>), but
+the row can still be deleted between that check and the write. This closes
+that window: the race answers like the check would have, instead of a 500.</p><p>Any other constraint error is re-raised. On Postgres the constraint is named,
+the changeset catches it, and this never fires.</p>
+  </section>
+</section>
 <section class="detail" id="rollback/1">
 
   <div class="detail-header">
@@ -1884,7 +1931,7 @@ and raises on invalid queries</p>
       <h1 class="signature" translate="no">search_pattern(term)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/repo.ex#L98" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/repo.ex#L122" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -2144,9 +2191,9 @@ return a different result:</p><pre><code class="makeup elixir" translate="no"><s
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1230">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1233">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1230">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1233">Hex Preview</a>
 
             </span>
 

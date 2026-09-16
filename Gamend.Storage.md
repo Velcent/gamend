@@ -129,7 +129,9 @@ File extension for a declared image content type ("" when unknown).
 @spec list_objects(keyword()) :: [Gamend.Storage.Adapter.object()]
 ```
 
-One page of stored objects. Opts: `:prefix`, `:offset`, `:limit` (admin use).
+One page of stored objects (admin use). Opts: `:prefix`, and `:page` and
+`:page_size` -- clamped through `Gamend.Limits` like every other listing --
+or the adapter's own `:offset` and `:limit`.
 
 # `presigned_upload`
 

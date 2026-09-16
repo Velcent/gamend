@@ -1,4 +1,4 @@
-# gamend_core v1.0.1230 - Table of Contents
+# gamend_core v1.0.1233 - Table of Contents
 
 > Core functionality for Gamend, including user management, authentication, friends, matchmaking, and more.
 
@@ -20,6 +20,7 @@ the game (`"level.finished"`, `"level.started.lang:ja"`); the engine only
 stores and sums them. Written by `Gamend.Analytics.count/3`.
 
 - [Gamend.ApiConventions](Gamend.ApiConventions.md): Mechanical checks for the conventions in `docs/specs/api-conventions.md`.
+- [Gamend.Broadcast](Gamend.Broadcast.md): PubSub broadcasts that must never take the caller down with them.
 - [Gamend.Captcha](Gamend.Captcha.md): Human verification for the unauthenticated browser forms, via
 [Cloudflare Turnstile](https://developers.cloudflare.com/turnstile/).
 - [Gamend.ClientLogs](Gamend.ClientLogs.md): Logs from the game client, put where the server's own logs already are.
@@ -32,6 +33,8 @@ L2 cache.
 - [Gamend.Ledger](Gamend.Ledger.md): The mechanics both ledgered balances share: `Gamend.Economy` (currency in a
 wallet) and `Gamend.Inventory` (quantity of an item).
 - [Gamend.Mail](Gamend.Mail.md): Outbound email transport.
+- [Gamend.Parse](Gamend.Parse.md): Parsing and normalizing values that arrive from outside: request bodies, form
+params, hook arguments, JSON.
 - [Gamend.Policy](Gamend.Policy.md): One question — "may this user do this to this thing?" — asked the same way
 everywhere.
 - [Gamend.Presence](Gamend.Presence.md): Cluster-wide tracking of who is connected where.
@@ -49,13 +52,27 @@ clients.
   - [Gamend.Accounts.AvatarMirror](Gamend.Accounts.AvatarMirror.md): Oban worker that mirrors a user's external (OAuth provider) avatar into our
 own object storage, so avatars render from our storage/CDN instead of
 hotlinking the provider.
+  - [Gamend.Accounts.Broadcasts](Gamend.Accounts.Broadcasts.md): Telling connected clients a user changed: the `user:<id>` topic, and the
+member and friend topics that show that user to others.
+  - [Gamend.Accounts.Identities](Gamend.Accounts.Identities.md): How a person signs in without a password — Discord, Apple, Google, Facebook,
+Steam or a device id — and linking those identities to an existing account or
+removing them from one.
   - [Gamend.Accounts.InactivityNotifier](Gamend.Accounts.InactivityNotifier.md): Warns a user their account is about to be deleted for inactivity.
   - [Gamend.Accounts.PasswordHash](Gamend.Accounts.PasswordHash.md): Password hashing: Argon2id for new hashes, bcrypt still accepted for old ones.
+  - [Gamend.Accounts.Presence](Gamend.Accounts.Presence.md): Whether a user is online, and when they were last seen.
   - [Gamend.Accounts.PresenceStatus](Gamend.Accounts.PresenceStatus.md): How recently a user was seen, as the three states the UI actually draws.
   - [Gamend.Accounts.PresenceWriter](Gamend.Accounts.PresenceWriter.md): Coalesces `users.is_online` transitions into one write per flush window.
+  - [Gamend.Accounts.Profile](Gamend.Accounts.Profile.md): Changing what a user shows the world: display name, username, avatar, age and
+metadata, and the storage that goes with them.
+  - [Gamend.Accounts.Registration](Gamend.Accounts.Registration.md): Creating an account and confirming it: registration, the generated username,
+the first-user-is-admin rule and account activation, and email confirmation.
   - [Gamend.Accounts.Scope](Gamend.Accounts.Scope.md): Defines the scope of the caller to be used throughout the app.
+  - [Gamend.Accounts.Search](Gamend.Accounts.Search.md): Finding users: the player-facing search and the admin user listing.
+  - [Gamend.Accounts.Sessions](Gamend.Accounts.Sessions.md): Signing in and staying signed in: session and magic-link tokens, the emails
+that carry them, and listing or revoking a user's sessions.
   - [Gamend.Accounts.StalePresenceSweeper](Gamend.Accounts.StalePresenceSweeper.md): Periodically sweeps users whose `is_online` flag is `true` but whose
 `last_seen_at` timestamp is older than a configurable threshold.
+  - [Gamend.Accounts.Stats](Gamend.Accounts.Stats.md): Counts over the user table for the admin dashboard and the public stats page.
   - [Gamend.Accounts.User](Gamend.Accounts.User.md): The User schema and associated changeset functions used across the
 application (registration, OAuth, and admin changes).
   - [Gamend.Accounts.UserNotifier](Gamend.Accounts.UserNotifier.md): Small helpers used to deliver transactional emails for the Accounts flow
@@ -173,6 +190,9 @@ adjustment) — the inventory counterpart of `Gamend.Economy.LedgerEntry`.
 Carries the `idempotency_key` that makes item grants safe to retry.
 
   - [Gamend.Payments](Gamend.Payments.md): Payment catalog, purchase ledger, and entitlements.
+  - [Gamend.Payments.Admin](Gamend.Payments.Admin.md): What the admin payments pages and API read: the stats, provider configuration
+status, and filtered listings of products, purchases, entitlements, provider
+events and reconciliation cursors.
   - [Gamend.Payments.Entitlement](Gamend.Payments.Entitlement.md): User access grant derived from a purchase or admin/server action.
 
   - [Gamend.Payments.Params](Gamend.Payments.Params.md): Shape-wrangling shared by `Gamend.Payments` and its provider adapters.
@@ -196,6 +216,11 @@ Server Notifications V2).
   - [Gamend.Payments.ReconciliationCursor](Gamend.Payments.ReconciliationCursor.md): Provider reconciliation checkpoint.
 
   - [Gamend.Payments.Settings](Gamend.Payments.Settings.md): Store credentials, per provider.
+  - [Gamend.Payments.StoreEvents](Gamend.Payments.StoreEvents.md): Apple App Store and Google Play server notifications: verifying them, recording
+them once, and applying what they say to purchases and entitlements.
+  - [Gamend.Payments.StripeEvents](Gamend.Payments.StripeEvents.md): Stripe: starting a checkout, and keeping purchases and entitlements in step
+with what Stripe says — webhooks as they arrive, reconciliation when one was
+missed, and cancelling a subscription at the end of its period.
 
 - Storage &amp; content
   - [Gamend.Content](Gamend.Content.md): Reads and renders Markdown content from project files and directories.

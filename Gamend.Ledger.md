@@ -43,6 +43,15 @@ receives the new total and writes the ledger row; it is expected to
 `replay_fun` is called only on that replay, to read back the total the
 winning request produced.
 
+# `list_entries`
+
+```elixir
+@spec list_entries(Ecto.Queryable.t(), keyword()) :: [struct()]
+```
+
+A page of ledger entries from `query`, newest first, with the user loaded —
+the admin listing both ledgers expose.
+
 # `rollback_insert_error`
 
 ```elixir

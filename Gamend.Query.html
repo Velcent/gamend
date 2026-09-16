@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.4">
-    <meta name="project" content="gamend_core v1.0.1230">
+    <meta name="project" content="gamend_core v1.0.1233">
 
 
-    <title>Gamend.Query — gamend_core v1.0.1230</title>
+    <title>Gamend.Query — gamend_core v1.0.1233</title>
 
     <link rel="stylesheet" href="dist/html-elixir-RXHHCTJW.css" />
 
-    <script defer src="dist/sidebar_items-CB3FC2F4.js"></script>
+    <script defer src="dist/sidebar_items-4494F1AF.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-MI33G4N7.js"></script>
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1230
+          v1.0.1233
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr />Query</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1230)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1233)</small>
 
     </h1>
 
@@ -146,6 +146,28 @@ growing table.</p>
 
     <div class="summary-row">
       <div class="summary-signature">
+        <a href="#filter_id/3" data-no-tooltip="" translate="no">filter_id(query, field, value)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>The rows whose <code class="inline">field</code> is exactly the id <code class="inline">value</code>.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#filter_user/2" data-no-tooltip="" translate="no">filter_user(query, value)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Narrows a query over a table with a <code class="inline">user_id</code> column to one user, found by
+exact id or by a substring of their username or display name — so an admin
+can filter a list without knowing the raw id.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
         <a href="#maybe_page/2" data-no-tooltip="" translate="no">maybe_page(query, opts)</a>
 
       </div>
@@ -189,6 +211,70 @@ growing table.</p>
     </h2>
 
     <div class="functions-list">
+<section class="detail" id="filter_id/3">
+
+  <div class="detail-header">
+    <a href="#filter_id/3" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">filter_id(query, field, value)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/query.ex#L108" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> filter_id(<a href="https://ecto.hexdocs.pm/3.14.2/Ecto.Queryable.html#t:t/0">Ecto.Queryable.t</a>(), <a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">atom</a>(), <a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>() | nil) :: <a href="https://ecto.hexdocs.pm/3.14.2/Ecto.Queryable.html#t:t/0">Ecto.Queryable.t</a>()</pre>
+
+      </div>
+
+<p>The rows whose <code class="inline">field</code> is exactly the id <code class="inline">value</code>.</p><p>For a caller holding an id rather than a search term -- a plugin scoping a
+read by user or lobby, a link from another page. <code class="inline">nil</code> and <code class="inline">&quot;&quot;</code> leave the
+query alone. A value that is not a UUID matches nothing: it arrives in
+request params, where comparing it raised <a href="https://ecto.hexdocs.pm/3.14.2/Ecto.Query.CastError.html"><code class="inline">Ecto.Query.CastError</code></a>, and
+ignoring it instead would answer every row to a filter plainly meant to
+narrow them. KV did the first and push the second.</p><p>See <a href="#filter_user/2"><code class="inline">filter_user/2</code></a> for the admin search that also matches names.</p>
+  </section>
+</section>
+<section class="detail" id="filter_user/2">
+
+  <div class="detail-header">
+    <a href="#filter_user/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">filter_user(query, value)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/query.ex#L75" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> filter_user(<a href="https://ecto.hexdocs.pm/3.14.2/Ecto.Queryable.html#t:t/0">Ecto.Queryable.t</a>(), <a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>() | nil) :: <a href="https://ecto.hexdocs.pm/3.14.2/Ecto.Queryable.html#t:t/0">Ecto.Queryable.t</a>()</pre>
+
+      </div>
+
+<p>Narrows a query over a table with a <code class="inline">user_id</code> column to one user, found by
+exact id or by a substring of their username or display name — so an admin
+can filter a list without knowing the raw id.</p><p><code class="inline">nil</code> leaves the query alone. Economy, inventory and quests each carried an
+identical private copy of this.</p>
+  </section>
+</section>
 <section class="detail" id="maybe_page/2">
 
   <div class="detail-header">
@@ -199,7 +285,7 @@ growing table.</p>
       <h1 class="signature" translate="no">maybe_page(query, opts)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/query.ex#L57" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/query.ex#L59" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -228,7 +314,7 @@ growing table.</p>
       <h1 class="signature" translate="no">page(query, opts)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/query.ex#L48" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/query.ex#L50" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -256,7 +342,7 @@ growing table.</p>
       <h1 class="signature" translate="no">unpaginated_limit()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/query.ex#L40" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/query.ex#L42" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -283,9 +369,9 @@ growing table.</p>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1230">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1233">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1230">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1233">Hex Preview</a>
 
             </span>
 

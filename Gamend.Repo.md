@@ -315,6 +315,26 @@ and raises on invalid queries
 
 # `reload!`
 
+# `rescue_foreign_key`
+
+```elixir
+@spec rescue_foreign_key(term(), (-&gt; result)) :: result | {:error, term()}
+when result: term()
+```
+
+Runs `fun`, answering `{:error, reason}` when it violates a foreign key that
+Ecto could not attribute to a changeset constraint.
+
+SQLite — the default adapter — does not say *which* constraint an INSERT
+violated, so `Ecto.Changeset.foreign_key_constraint/2` cannot match and Ecto
+raises `Ecto.ConstraintError` instead of returning a changeset. The contexts
+check the referenced row exists first (`Gamend.Accounts.user_exists?/1`), but
+the row can still be deleted between that check and the write. This closes
+that window: the race answers like the check would have, instead of a 500.
+
+Any other constraint error is re-raised. On Postgres the constraint is named,
+the changeset catches it, and this never fires.
+
 # `rollback`
 
 ```elixir

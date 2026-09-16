@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.4">
-    <meta name="project" content="gamend_core v1.0.1230">
+    <meta name="project" content="gamend_core v1.0.1233">
 
 
-    <title>Gamend.Payments.Params — gamend_core v1.0.1230</title>
+    <title>Gamend.Payments.Params — gamend_core v1.0.1233</title>
 
     <link rel="stylesheet" href="dist/html-elixir-RXHHCTJW.css" />
 
-    <script defer src="dist/sidebar_items-CB3FC2F4.js"></script>
+    <script defer src="dist/sidebar_items-4494F1AF.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-MI33G4N7.js"></script>
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1230
+          v1.0.1233
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr />Payments.<wbr />Params</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1230)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1233)</small>
 
     </h1>
 
@@ -141,6 +141,26 @@ a tidy-up rather than a bug hunt.</p>
 
     <div class="summary-row">
       <div class="summary-signature">
+        <a href="#datetime_iso/1" data-no-tooltip="" translate="no">datetime_iso(value)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>A <a href="https://elixir.hexdocs.pm/DateTime.html"><code class="inline">DateTime</code></a> as ISO-8601; <code class="inline">nil</code> for anything else.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#merge_payload/2" data-no-tooltip="" translate="no">merge_payload(existing, incoming)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>A stored provider payload with newer fields merged over it.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
         <a href="#millis_to_iso8601/1" data-no-tooltip="" translate="no">millis_to_iso8601(value)</a>
 
       </div>
@@ -162,6 +182,16 @@ arrived as JSON can be read the same way.</p></div>
 
     <div class="summary-row">
       <div class="summary-signature">
+        <a href="#normalize_currency/1" data-no-tooltip="" translate="no">normalize_currency(currency)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>An ISO 4217 code in upper case.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
         <a href="#normalize_private_key/1" data-no-tooltip="" translate="no">normalize_private_key(value)</a>
 
       </div>
@@ -173,11 +203,21 @@ environment variable back into real newlines.</p></div>
 
     <div class="summary-row">
       <div class="summary-signature">
+        <a href="#parse_datetime/1" data-no-tooltip="" translate="no">parse_datetime(dt)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>An ISO-8601 string, or a <a href="https://elixir.hexdocs.pm/DateTime.html"><code class="inline">DateTime</code></a>, as a second-precision <a href="https://elixir.hexdocs.pm/DateTime.html"><code class="inline">DateTime</code></a>; <code class="inline">nil</code> otherwise.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
         <a href="#parse_int/1" data-no-tooltip="" translate="no">parse_int(value)</a>
 
       </div>
 
-        <div class="summary-synopsis"><p>An integer, or an integer written as a string. <code class="inline">nil</code> for anything else.</p></div>
+        <div class="summary-synopsis"><p>An integer, or an integer written as a string. See <a href="Gamend.Parse.html#integer/1"><code class="inline">Gamend.Parse.integer/1</code></a>.</p></div>
 
     </div>
 
@@ -193,11 +233,51 @@ environment variable back into real newlines.</p></div>
 
     <div class="summary-row">
       <div class="summary-signature">
+        <a href="#present?/1" data-no-tooltip="" translate="no">present?(value)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Whether <code class="inline">value</code> is a non-empty string.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#put_if_present/4" data-no-tooltip="" translate="no">put_if_present(metadata, key, value, arg4)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Puts <code class="inline">value</code> under <code class="inline">key</code> when <code class="inline">condition</code> is true and the value is a non-empty string.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
         <a href="#required_binary/2" data-no-tooltip="" translate="no">required_binary(map, key)</a>
 
       </div>
 
         <div class="summary-synopsis"><p>Fetches <code class="inline">key</code> as a non-empty string, or <code class="inline">{:error, :missing_&lt;key&gt;}</code>.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#required_value/2" data-no-tooltip="" translate="no">required_value(map, key)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>A non-empty string, or an integer as its string, at <code class="inline">key</code>; <code class="inline">{:error, :missing_&lt;key&gt;}</code> otherwise.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#unix_seconds_to_datetime/1" data-no-tooltip="" translate="no">unix_seconds_to_datetime(value)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Epoch seconds (integer or string) as a second-precision <a href="https://elixir.hexdocs.pm/DateTime.html"><code class="inline">DateTime</code></a>; <code class="inline">nil</code> when it is not one.</p></div>
 
     </div>
 
@@ -215,6 +295,62 @@ environment variable back into real newlines.</p></div>
     </h2>
 
     <div class="functions-list">
+<section class="detail" id="datetime_iso/1">
+
+  <div class="detail-header">
+    <a href="#datetime_iso/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">datetime_iso(value)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/params.ex#L130" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> datetime_iso(<a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">term</a>()) :: <a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>() | nil</pre>
+
+      </div>
+
+<p>A <a href="https://elixir.hexdocs.pm/DateTime.html"><code class="inline">DateTime</code></a> as ISO-8601; <code class="inline">nil</code> for anything else.</p>
+  </section>
+</section>
+<section class="detail" id="merge_payload/2">
+
+  <div class="detail-header">
+    <a href="#merge_payload/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">merge_payload(existing, incoming)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/params.ex#L93" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> merge_payload(<a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">map</a>(), <a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">map</a>()) :: <a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">map</a>()</pre>
+
+      </div>
+
+<p>A stored provider payload with newer fields merged over it.</p>
+  </section>
+</section>
 <section class="detail" id="millis_to_iso8601/1">
 
   <div class="detail-header">
@@ -225,7 +361,7 @@ environment variable back into real newlines.</p></div>
       <h1 class="signature" translate="no">millis_to_iso8601(value)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/params.ex#L57" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/params.ex#L40" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -272,6 +408,34 @@ environment variable back into real newlines.</p></div>
 arrived as JSON can be read the same way.</p>
   </section>
 </section>
+<section class="detail" id="normalize_currency/1">
+
+  <div class="detail-header">
+    <a href="#normalize_currency/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">normalize_currency(currency)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/params.ex#L135" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> normalize_currency(<a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>() | nil) :: <a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>() | nil</pre>
+
+      </div>
+
+<p>An ISO 4217 code in upper case.</p>
+  </section>
+</section>
 <section class="detail" id="normalize_private_key/1">
 
   <div class="detail-header">
@@ -282,7 +446,7 @@ arrived as JSON can be read the same way.</p>
       <h1 class="signature" translate="no">normalize_private_key(value)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/params.ex#L84" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/params.ex#L67" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -301,6 +465,34 @@ arrived as JSON can be read the same way.</p>
 environment variable back into real newlines.</p>
   </section>
 </section>
+<section class="detail" id="parse_datetime/1">
+
+  <div class="detail-header">
+    <a href="#parse_datetime/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">parse_datetime(dt)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/params.ex#L116" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> parse_datetime(<a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">term</a>()) :: <a href="https://elixir.hexdocs.pm/DateTime.html#t:t/0">DateTime.t</a>() | nil</pre>
+
+      </div>
+
+<p>An ISO-8601 string, or a <a href="https://elixir.hexdocs.pm/DateTime.html"><code class="inline">DateTime</code></a>, as a second-precision <a href="https://elixir.hexdocs.pm/DateTime.html"><code class="inline">DateTime</code></a>; <code class="inline">nil</code> otherwise.</p>
+  </section>
+</section>
 <section class="detail" id="parse_int/1">
 
   <div class="detail-header">
@@ -311,7 +503,7 @@ environment variable back into real newlines.</p>
       <h1 class="signature" translate="no">parse_int(value)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/params.ex#L35" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/params.ex#L27" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -326,7 +518,7 @@ environment variable back into real newlines.</p>
 
       </div>
 
-<p>An integer, or an integer written as a string. <code class="inline">nil</code> for anything else.</p>
+<p>An integer, or an integer written as a string. See <a href="Gamend.Parse.html#integer/1"><code class="inline">Gamend.Parse.integer/1</code></a>.</p>
   </section>
 </section>
 <section class="detail" id="parse_positive_int/2">
@@ -339,7 +531,7 @@ environment variable back into real newlines.</p>
       <h1 class="signature" translate="no">parse_positive_int(value, default)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/params.ex#L48" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/params.ex#L31" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -357,6 +549,62 @@ environment variable back into real newlines.</p>
 <p>A positive integer, or <code class="inline">default</code> when the value is missing or not one.</p>
   </section>
 </section>
+<section class="detail" id="present?/1">
+
+  <div class="detail-header">
+    <a href="#present?/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">present?(value)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/params.ex#L81" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> present?(<a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">term</a>()) :: <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">boolean</a>()</pre>
+
+      </div>
+
+<p>Whether <code class="inline">value</code> is a non-empty string.</p>
+  </section>
+</section>
+<section class="detail" id="put_if_present/4">
+
+  <div class="detail-header">
+    <a href="#put_if_present/4" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">put_if_present(metadata, key, value, arg4)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/params.ex#L85" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> put_if_present(<a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">map</a>(), <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">term</a>(), <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">term</a>(), <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">boolean</a>()) :: <a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">map</a>()</pre>
+
+      </div>
+
+<p>Puts <code class="inline">value</code> under <code class="inline">key</code> when <code class="inline">condition</code> is true and the value is a non-empty string.</p>
+  </section>
+</section>
 <section class="detail" id="required_binary/2">
 
   <div class="detail-header">
@@ -367,7 +615,7 @@ environment variable back into real newlines.</p>
       <h1 class="signature" translate="no">required_binary(map, key)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/params.ex#L72" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/params.ex#L55" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -385,6 +633,62 @@ environment variable back into real newlines.</p>
 <p>Fetches <code class="inline">key</code> as a non-empty string, or <code class="inline">{:error, :missing_&lt;key&gt;}</code>.</p>
   </section>
 </section>
+<section class="detail" id="required_value/2">
+
+  <div class="detail-header">
+    <a href="#required_value/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">required_value(map, key)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/params.ex#L71" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> required_value(<a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">map</a>(), <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">term</a>()) :: {:ok, <a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>()} | {:error, <a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">atom</a>()}</pre>
+
+      </div>
+
+<p>A non-empty string, or an integer as its string, at <code class="inline">key</code>; <code class="inline">{:error, :missing_&lt;key&gt;}</code> otherwise.</p>
+  </section>
+</section>
+<section class="detail" id="unix_seconds_to_datetime/1">
+
+  <div class="detail-header">
+    <a href="#unix_seconds_to_datetime/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">unix_seconds_to_datetime(value)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/params.ex#L99" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> unix_seconds_to_datetime(<a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">term</a>()) :: <a href="https://elixir.hexdocs.pm/DateTime.html#t:t/0">DateTime.t</a>() | nil</pre>
+
+      </div>
+
+<p>Epoch seconds (integer or string) as a second-precision <a href="https://elixir.hexdocs.pm/DateTime.html"><code class="inline">DateTime</code></a>; <code class="inline">nil</code> when it is not one.</p>
+  </section>
+</section>
 
     </div>
   </section>
@@ -394,9 +698,9 @@ environment variable back into real newlines.</p>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1230">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1233">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1230">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1233">Hex Preview</a>
 
             </span>
 

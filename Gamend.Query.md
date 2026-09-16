@@ -27,6 +27,36 @@ read at `unpaginated_limit/0` — for a listing whose callers legitimately want
 "all of them", where "all" must still not mean an unbounded `Repo.all` over a
 growing table.
 
+# `filter_id`
+
+```elixir
+@spec filter_id(Ecto.Queryable.t(), atom(), String.t() | nil) :: Ecto.Queryable.t()
+```
+
+The rows whose `field` is exactly the id `value`.
+
+For a caller holding an id rather than a search term -- a plugin scoping a
+read by user or lobby, a link from another page. `nil` and `""` leave the
+query alone. A value that is not a UUID matches nothing: it arrives in
+request params, where comparing it raised `Ecto.Query.CastError`, and
+ignoring it instead would answer every row to a filter plainly meant to
+narrow them. KV did the first and push the second.
+
+See `filter_user/2` for the admin search that also matches names.
+
+# `filter_user`
+
+```elixir
+@spec filter_user(Ecto.Queryable.t(), String.t() | nil) :: Ecto.Queryable.t()
+```
+
+Narrows a query over a table with a `user_id` column to one user, found by
+exact id or by a substring of their username or display name — so an admin
+can filter a list without knowing the raw id.
+
+`nil` leaves the query alone. Economy, inventory and quests each carried an
+identical private copy of this.
+
 # `maybe_page`
 
 ```elixir
