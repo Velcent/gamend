@@ -33,3 +33,8 @@ defmodule GamendWeb.Schemas.UserBrief do
     ]
   })
 end
+
+defmodule GamendWeb.Schemas.UserBriefPage do
+  @moduledoc "A page of users as member-list rows."
+  use GamendWeb.Schemas.Envelope, page: GamendWeb.Schemas.UserBrief
+end

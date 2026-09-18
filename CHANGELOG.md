@@ -1,5 +1,6 @@
 # September 2026
 
+- [added] **Theme `contact_email`.** The privacy, data deletion and terms pages give it as a mailto link for access, correction and deletion requests. Without it they still say "support channels", which app-store review and a data-protection request cannot act on.
 - [changed] **Lobby responses have names in the OpenAPI document.** `Lobby`, `LobbyPage`, `LobbyResponse`, `LobbyStatsResponse`, `PageMeta` and `UserBrief` replace the inline schemas, and every lobby error is `ErrorResponse`, so generated clients get `LobbyPage` instead of `ListLobbies200Response`. The inline schema had drifted from the serializer: it lacked `state`, `state_changed_at` and the members' `is_activated`, which a typed client drops, and typed `host_id` as a UUID though a hostless lobby sends `""`. `GamendWeb.ResponseContract` now checks every lobby response in the test suite against its schema, undeclared keys included. Nothing changes on the wire; the generated class names change at the next SDK release. First slice of `docs/specs/named-api-schemas.md`.
 - [added] **Plans for more client SDKs**: `docs/specs/client-sdks.md` (C++, C#/Unity, TypeScript, Rust, Lua, GML, and one conformance scenario for all of them) and `docs/specs/cpp-sdk.md`.
 

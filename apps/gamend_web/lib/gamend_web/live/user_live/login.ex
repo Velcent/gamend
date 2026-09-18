@@ -102,7 +102,7 @@ defmodule GamendWeb.UserLive.Login do
                 checked
               />
               <%!-- There is no reset flow: a magic link logs the player in, and
-                    Settings takes a new password without asking for the old one. --%>
+                    the Account page takes a new password without asking for the old one. --%>
               <button
                 type="button"
                 id="forgot_password_link"
@@ -116,7 +116,9 @@ defmodule GamendWeb.UserLive.Login do
               </button>
             </div>
             <p id="forgot_password_hint" class="hidden text-sm text-base-content/70 mb-2">
-              {gettext("Send yourself a magic link to log in, then set a new password in Settings.")}
+              {gettext(
+                "Send yourself a magic link to log in, then set a new password on your Account page."
+              )}
             </p>
             <.button class="btn btn-primary w-full">
               {gettext("Log in")} <span aria-hidden="true">→</span>

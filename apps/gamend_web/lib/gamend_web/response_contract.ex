@@ -12,10 +12,13 @@ defmodule GamendWeb.ResponseContract do
        SDK would silently drop;
     3. a 2xx status is documented. An undocumented error status must still be
        an `ErrorResponse`: every error is that one type, so an unlisted status
-       costs a client nothing.
+       costs a client nothing;
+    4. a response documented as a bare `type: object` really is `{}`.
 
   A violation raises inside the request, so every controller test is also a
-  contract test without being edited.
+  contract test without being edited. Raising stops a test at its first
+  violation; to see all of a domain's drift in one run, set
+  `RESPONSE_CONTRACT_REPORT=<file>` and violations are appended there instead.
 
   Only operations under `@enforced_tags` are checked. The list grows one domain
   per slice of `docs/specs/named-api-schemas.md` and is deleted, with the tag
@@ -26,7 +29,7 @@ defmodule GamendWeb.ResponseContract do
   alias OpenApiSpex.{Cast, Operation, PathItem, Reference, Response, Schema}
   alias OpenApiSpex.Plug.PutApiSpec
 
-  @enforced_tags MapSet.new(["Lobbies"])
+  @enforced_tags MapSet.new(["Lobbies", "Users", "Authentication", "Friends"])
 
   defmodule Violation do
     @moduledoc "A response that contradicts its documented schema."
@@ -53,10 +56,19 @@ defmodule GamendWeb.ResponseContract do
 
   # A 5xx is already a failure, and it is also the page Phoenix renders after a
   # violation raised — checking it would replace the real message with its own.
+  #
+  # An exception rendered by `GamendWeb.ErrorJSON` (`{"errors": {"detail": …}}`)
+  # is skipped too: it is the endpoint's shape, not the operation's, and is
+  # listed under *Wire inconsistencies* in the spec.
   defp json?(conn) do
     conn.status != 204 and conn.status < 500 and
+      not rendered_error?(conn) and
       Enum.any?(Plug.Conn.get_resp_header(conn, "content-type"), &(&1 =~ "json"))
   end
+
+  # RenderErrors puts the error view over whatever the controller chose.
+  defp rendered_error?(conn),
+    do: GamendWeb.ErrorJSON in Map.values(conn.private[:phoenix_view] || %{})
 
   defp enforced?(%Operation{tags: tags}),
     do: Enum.any?(tags || [], &MapSet.member?(@enforced_tags, &1))
@@ -83,20 +95,21 @@ defmodule GamendWeb.ResponseContract do
   defp method_key(method), do: method |> String.downcase() |> String.to_existing_atom()
 
   defp verify(conn, spec, operation) do
-    schemas = spec.components.schemas
+    case documented_schema(operation, conn.status) do
+      %{} = schema ->
+        verify_body(conn, spec.components.schemas, operation, schema)
+
+      nil when conn.status >= 400 ->
+        error = %Reference{"$ref": "#/components/schemas/ErrorResponse"}
+        verify_body(conn, spec.components.schemas, operation, error)
+
+      nil ->
+        violation!(conn, operation, "status #{conn.status} is not documented")
+    end
+  end
+
+  defp verify_body(conn, schemas, operation, schema) do
     body = Jason.decode!(conn.resp_body)
-
-    schema =
-      case documented_schema(operation, conn.status) do
-        %{} = schema ->
-          schema
-
-        nil when conn.status >= 400 ->
-          %Reference{"$ref": "#/components/schemas/ErrorResponse"}
-
-        nil ->
-          violation!(conn, operation, "status #{conn.status} is not documented")
-      end
 
     case Cast.cast(schema, body, schemas) do
       {:ok, _} ->
@@ -106,11 +119,25 @@ defmodule GamendWeb.ResponseContract do
         violation!(conn, operation, Enum.map_join(errors, "; ", &Cast.Error.message_with_path/1))
     end
 
-    case undeclared(schema, body, schemas, "") do
+    case undeclared(schema, body, schemas, "") ++ unlisted(schema, body, schemas) do
       [] -> :ok
       paths -> violation!(conn, operation, "undeclared keys: " <> Enum.join(paths, ", "))
     end
   end
+
+  # A response documented as a bare `type: object` accepts anything, so a body
+  # with keys in it is a body nobody wrote down — and a generator emits no type
+  # for it. A response that really is a free-form map says so with
+  # `additionalProperties`. Nested bare objects (metadata, KV values) are
+  # free-form by design and are not checked.
+  defp unlisted(%Reference{} = ref, body, schemas),
+    do: unlisted(resolve(ref, schemas), body, schemas)
+
+  defp unlisted(%Schema{type: :object, properties: nil, additionalProperties: nil}, body, _)
+       when is_map(body),
+       do: Enum.map(Map.keys(body), &".#{&1}")
+
+  defp unlisted(_schema, _body, _schemas), do: []
 
   defp documented_schema(%Operation{responses: responses}, status) do
     case Map.get(responses || %{}, status) || Map.get(responses || %{}, to_string(status)) do
@@ -160,9 +187,13 @@ defmodule GamendWeb.ResponseContract do
     do: Map.fetch!(schemas, name)
 
   defp violation!(conn, %Operation{operationId: id}, message) do
-    raise Violation,
-      message:
-        "#{conn.method} #{conn.request_path} (#{id}) -> #{conn.status}: #{message}\n" <>
-          "body: #{conn.resp_body}"
+    message =
+      "#{conn.method} #{conn.request_path} (#{id}) -> #{conn.status}: #{message}\n" <>
+        "body: #{conn.resp_body}"
+
+    case System.get_env("RESPONSE_CONTRACT_REPORT") do
+      nil -> raise Violation, message: message
+      path -> File.write!(path, message <> "\n", [:append])
+    end
   end
 end

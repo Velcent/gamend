@@ -4,6 +4,7 @@ defmodule GamendWeb.Api.V1.ProviderController do
 
   alias Gamend.Accounts
   alias Gamend.Accounts.Scope
+  alias GamendWeb.Schemas
 
   operation(:link_device,
     operation_id: "link_device",
@@ -22,8 +23,8 @@ defmodule GamendWeb.Api.V1.ProviderController do
        }},
     responses: [
       ok: {"Success", "application/json", %OpenApiSpex.Schema{type: :object}},
-      bad_request: {"Bad Request", "application/json", %OpenApiSpex.Schema{type: :object}},
-      unauthorized: {"Unauthorized", "application/json", %OpenApiSpex.Schema{type: :object}}
+      bad_request: Schemas.error("Bad request"),
+      unauthorized: Schemas.error("Unauthorized")
     ]
   )
 
@@ -58,8 +59,8 @@ defmodule GamendWeb.Api.V1.ProviderController do
     security: [%{"authorization" => []}],
     responses: [
       ok: {"Success", "application/json", %OpenApiSpex.Schema{type: :object}},
-      bad_request: {"Bad Request", "application/json", %OpenApiSpex.Schema{type: :object}},
-      unauthorized: {"Unauthorized", "application/json", %OpenApiSpex.Schema{type: :object}}
+      bad_request: Schemas.error("Bad request"),
+      unauthorized: Schemas.error("Unauthorized")
     ]
   )
 
@@ -101,8 +102,8 @@ defmodule GamendWeb.Api.V1.ProviderController do
     ],
     responses: [
       ok: {"Success", "application/json", %OpenApiSpex.Schema{type: :object}},
-      bad_request: {"Bad Request", "application/json", %OpenApiSpex.Schema{type: :object}},
-      unauthorized: {"Unauthorized", "application/json", %OpenApiSpex.Schema{type: :object}}
+      bad_request: Schemas.error("Bad request"),
+      unauthorized: Schemas.error("Unauthorized")
     ]
   )
 

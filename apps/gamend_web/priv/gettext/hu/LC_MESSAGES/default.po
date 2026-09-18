@@ -11,7 +11,7 @@ msgstr ""
 "Language: hu\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: lib/gamend_web/components/core_components.ex:649
+#: lib/gamend_web/components/core_components.ex:651
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:244
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:759
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:803
@@ -44,8 +44,8 @@ msgstr "Ranglisták"
 #: lib/gamend_web/live/user_live/confirmation.ex:56
 #: lib/gamend_web/live/user_live/confirmation.ex:71
 #: lib/gamend_web/live/user_live/login.ex:14
-#: lib/gamend_web/live/user_live/login.ex:99
-#: lib/gamend_web/live/user_live/login.ex:130
+#: lib/gamend_web/live/user_live/login.ex:122
+#: lib/gamend_web/live/user_live/login.ex:153
 #: lib/gamend_web/live/user_live/registration.ex:17
 #: lib/gamend_web/live/user_live/settings/account_tab.ex:210
 #, elixir-autogen, elixir-format
@@ -104,7 +104,7 @@ msgstr "Alkalmaz"
 msgid "Approve"
 msgstr "Jóváhagyás"
 
-#: lib/gamend_web/components/core_components.ex:593
+#: lib/gamend_web/components/core_components.ex:595
 #: lib/gamend_web/live/groups_live.ex:565
 #: lib/gamend_web/live/leaderboards_live.ex:192
 #: lib/gamend_web/live/tournaments_live.ex:507
@@ -185,7 +185,7 @@ msgstr "Létrehozás"
 msgid "Date"
 msgstr "Dátum"
 
-#: lib/gamend_web/controllers/page_controller.ex:22
+#: lib/gamend_web/controllers/page_controller.ex:23
 #: lib/gamend_web/live/admin_live/chat_filter.ex:582
 #: lib/gamend_web/live/chat_live.ex:280
 #: lib/gamend_web/live/chat_live.ex:282
@@ -343,12 +343,12 @@ msgstr "Név"
 msgid "Newest"
 msgstr "Legújabb"
 
-#: lib/gamend_web/components/core_components.ex:1095
+#: lib/gamend_web/components/core_components.ex:1097
 #, elixir-autogen, elixir-format
 msgid "Next"
 msgstr "Következő"
 
-#: lib/gamend_web/components/core_components.ex:1079
+#: lib/gamend_web/components/core_components.ex:1081
 #, elixir-autogen, elixir-format
 msgid "Prev"
 msgstr "Előző"
@@ -635,7 +635,7 @@ msgstr "Nem található"
 #: lib/gamend_web/live/lobby_live/index.ex:270
 #: lib/gamend_web/live/notifications_live.ex:163
 #: lib/gamend_web/live/notifications_live.ex:178
-#: lib/gamend_web/live/user_live/login.ex:153
+#: lib/gamend_web/live/user_live/login.ex:176
 #: lib/gamend_web/live/user_live/registration.ex:121
 #: lib/gamend_web/live/user_live/registration.ex:131
 #: lib/gamend_web/live/user_live/settings.ex:134
@@ -868,7 +868,7 @@ msgstr "Eltávolítva"
 msgid "Score"
 msgstr "Pontszám"
 
-#: lib/gamend_web/controllers/page_controller.ex:28
+#: lib/gamend_web/controllers/page_controller.ex:30
 #, elixir-autogen, elixir-format
 msgid "Terms"
 msgstr "Feltételek"
@@ -879,7 +879,7 @@ msgstr "Feltételek"
 msgid "Data"
 msgstr "Adatok"
 
-#: lib/gamend_web/live/user_live/login.ex:165
+#: lib/gamend_web/live/user_live/login.ex:188
 #: lib/gamend_web/live/user_live/registration.ex:79
 #, elixir-autogen, elixir-format
 msgid "Too many attempts. Please try again later."
@@ -1029,7 +1029,6 @@ msgid "Link"
 msgstr "Összekapcsolás"
 
 #: lib/gamend_web/live/user_live/confirmation.ex:65
-#: lib/gamend_web/live/user_live/login.ex:96
 #, elixir-autogen, elixir-format
 msgid "Log in and remember me"
 msgstr "Bejelentkezés és emlékezz rám"
@@ -2539,12 +2538,27 @@ msgstr "elmúlt 30 nap"
 msgid "last 7 days"
 msgstr "elmúlt 7 nap"
 
-#: lib/gamend_web/components/core_components.ex:492
+#: lib/gamend_web/components/core_components.ex:494
 #, elixir-autogen, elixir-format
 msgid "Log in with %{provider}"
 msgstr "Bejelentkezés ezzel: %{provider}"
 
-#: lib/gamend_web/components/core_components.ex:493
+#: lib/gamend_web/components/core_components.ex:495
 #, elixir-autogen, elixir-format
 msgid "Register with %{provider}"
 msgstr "Regisztráció ezzel: %{provider}"
+
+#: lib/gamend_web/live/user_live/login.ex:115
+#, elixir-autogen, elixir-format
+msgid "Forgot password?"
+msgstr "Elfelejtetted a jelszavad?"
+
+#: lib/gamend_web/live/user_live/login.ex:101
+#, elixir-autogen, elixir-format
+msgid "Remember me"
+msgstr "Emlékezz rám"
+
+#: lib/gamend_web/live/user_live/login.ex:119
+#, elixir-autogen, elixir-format
+msgid "Send yourself a magic link to log in, then set a new password on your Account page."
+msgstr "Küldj magadnak egy varázslinket a bejelentkezéshez, majd állíts be új jelszót a Fiók oldalon."

@@ -367,7 +367,13 @@ defmodule GamendWeb.PageControllerTest do
   end
 
   test "legal pages fall back to support channels without a contact email", %{conn: conn} do
-    Gamend.SettingsHelpers.delete(:gamend_core, Gamend.ContentSettings, :theme_config)
+    path =
+      Path.join(System.tmp_dir!(), "theme_no_email_#{System.unique_integer([:positive])}.json")
+
+    File.write!(path, Jason.encode!(%{"title" => "Gamend"}))
+    on_exit(fn -> File.rm(path) end)
+
+    Gamend.SettingsHelpers.put(:gamend_core, Gamend.ContentSettings, :theme_config, path)
     JSONConfig.reload()
     Content.reload()
 

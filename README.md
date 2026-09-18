@@ -96,9 +96,7 @@ See the [Deployment Tutorial](https://appsinacup.com/gamend-deploy/) and [Starte
 
 ## AI instructions file
 
-This project has a [.github/copilot-instructions.md](.github/copilot-instructions.md) file you can use.
-
-## Star History
+This project has an [AGENTS.md](AGENTS.md) file you can use.
 
 ## Star History
 

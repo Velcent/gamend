@@ -15,7 +15,6 @@ defmodule GamendWeb.AuthController do
   alias Gamend.OAuth.Providers
   alias Gamend.OAuthSessions
   alias GamendWeb.Auth.Guardian
-  alias GamendWeb.Schemas.OAuthSessionData
   alias GamendWeb.UserAuth
 
   @browser_state_prefix "browser:"
@@ -362,7 +361,7 @@ defmodule GamendWeb.AuthController do
       {:error, changeset} ->
         conn
         |> put_status(:bad_request)
-        |> json(%{error: "create_failed", details: changeset.errors})
+        |> json(%{error: "create_failed", errors: GamendWeb.ChangesetErrors.errors(changeset)})
     end
   end
 
@@ -996,27 +995,8 @@ defmodule GamendWeb.AuthController do
       ]
     ],
     responses: [
-      ok: {
-        "OAuth URL",
-        "application/json",
-        %OpenApiSpex.Schema{
-          type: :object,
-          properties: %{
-            authorization_url: %OpenApiSpex.Schema{
-              type: :string,
-              description: "URL to redirect user to for OAuth"
-            },
-            session_id: %OpenApiSpex.Schema{
-              type: :string,
-              description: "Unique session ID to track this OAuth request"
-            }
-          },
-          example: %{
-            authorization_url: "https://discord.com/oauth2/authorize?...",
-            session_id: "abc123..."
-          }
-        }
-      }
+      ok: {"OAuth URL", "application/json", GamendWeb.Schemas.OAuthAuthorization},
+      bad_request: GamendWeb.Schemas.error("Unsupported provider")
     ]
   )
 
@@ -1052,12 +1032,10 @@ defmodule GamendWeb.AuthController do
     },
     responses: [
       ok:
-        {"OAuth tokens", "application/json",
-         %OpenApiSpex.Schema{
-           type: :object,
-           properties: %{data: OAuthSessionData}
-         }},
-      bad_request: {"Bad request", "application/json", %OpenApiSpex.Schema{type: :object}}
+        {"OAuth tokens, or the link", "application/json", GamendWeb.Schemas.OAuthResultResponse},
+      bad_request: GamendWeb.Schemas.error("Bad request"),
+      forbidden: GamendWeb.Schemas.error("Account awaiting activation"),
+      conflict: GamendWeb.Schemas.error("Provider linked to another account")
     ]
   )
 
@@ -1176,14 +1154,11 @@ defmodule GamendWeb.AuthController do
     },
     responses: [
       ok:
-        {"OAuth tokens", "application/json",
-         %OpenApiSpex.Schema{
-           type: :object,
-           properties: %{data: GamendWeb.Schemas.OAuthSessionData}
-         }},
-      bad_request: {"Bad request", "application/json", %OpenApiSpex.Schema{type: :object}},
-      internal_server_error:
-        {"Server misconfigured", "application/json", %OpenApiSpex.Schema{type: :object}}
+        {"OAuth tokens, or the link", "application/json", GamendWeb.Schemas.OAuthResultResponse},
+      bad_request: GamendWeb.Schemas.error("Bad request"),
+      forbidden: GamendWeb.Schemas.error("Account awaiting activation"),
+      conflict: GamendWeb.Schemas.error("Provider linked to another account"),
+      internal_server_error: GamendWeb.Schemas.error("Server misconfigured")
     ]
   )
 
@@ -1343,13 +1318,11 @@ defmodule GamendWeb.AuthController do
     },
     responses: [
       ok:
-        {"OAuth tokens", "application/json",
-         %OpenApiSpex.Schema{
-           type: :object,
-           properties: %{data: OAuthSessionData}
-         }},
-      bad_request: {"Bad request", "application/json", GamendWeb.Schemas.ErrorResponse},
-      unauthorized: {"Unauthorized", "application/json", GamendWeb.Schemas.ErrorResponse}
+        {"OAuth tokens, or the link", "application/json", GamendWeb.Schemas.OAuthResultResponse},
+      bad_request: GamendWeb.Schemas.error("Bad request"),
+      unauthorized: GamendWeb.Schemas.error("Unauthorized"),
+      forbidden: GamendWeb.Schemas.error("Account awaiting activation"),
+      conflict: GamendWeb.Schemas.error("Provider linked to another account")
     ]
   )
 
@@ -1387,23 +1360,7 @@ defmodule GamendWeb.AuthController do
     description: "The OAuth providers a player may currently sign in with.",
     tags: ["Authentication"],
     responses: [
-      ok: {
-        "Enabled providers",
-        "application/json",
-        %OpenApiSpex.Schema{
-          type: :object,
-          properties: %{
-            data: %OpenApiSpex.Schema{
-              type: :array,
-              items: %OpenApiSpex.Schema{
-                type: :string,
-                enum: ["discord", "google", "apple", "facebook", "steam"]
-              }
-            }
-          },
-          example: %{data: ["discord", "steam"]}
-        }
-      }
+      ok: {"Enabled providers", "application/json", GamendWeb.Schemas.AuthProvidersResponse}
     ]
   )
 
@@ -1427,18 +1384,7 @@ defmodule GamendWeb.AuthController do
     ],
     responses: [
       ok: {"Session status", "application/json", GamendWeb.Schemas.OAuthSessionStatus},
-      not_found: {
-        "Session not found",
-        "application/json",
-        %OpenApiSpex.Schema{
-          type: :object,
-          properties: %{
-            error: %OpenApiSpex.Schema{type: :string},
-            message: %OpenApiSpex.Schema{type: :string}
-          },
-          required: [:error, :message]
-        }
-      }
+      not_found: GamendWeb.Schemas.error("Session not found")
     ]
   )
 

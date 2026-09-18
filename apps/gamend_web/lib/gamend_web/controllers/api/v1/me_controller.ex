@@ -5,15 +5,10 @@ defmodule GamendWeb.Api.V1.MeController do
   alias Gamend.Accounts
   alias Gamend.Accounts.Scope
   alias Gamend.Accounts.User
+  alias GamendWeb.Schemas
+  alias GamendWeb.Schemas.{AvatarUpdate, CurrentUser, ProfileUpdate, UploadTicket}
   alias GamendWeb.Uploads
   alias OpenApiSpex.Schema
-
-  @error_schema %Schema{type: :object, properties: %{error: %Schema{type: :string}}}
-
-  @validation_error_schema %Schema{
-    type: :object,
-    properties: %{error: %Schema{type: :string}, errors: %Schema{type: :object}}
-  }
 
   tags(["Users"])
 
@@ -23,54 +18,8 @@ defmodule GamendWeb.Api.V1.MeController do
     description: "Returns the current authenticated user's basic information.",
     security: [%{"authorization" => []}],
     responses: [
-      ok: {
-        "User info",
-        "application/json",
-        %Schema{
-          type: :object,
-          properties: %{
-            id: %Schema{type: :string, format: :uuid},
-            email: %Schema{type: :string},
-            profile_url: %Schema{type: :string},
-            username: %Schema{type: :string},
-            display_name: %Schema{type: :string},
-            metadata: %Schema{type: :object},
-            lobby_id: %Schema{
-              type: :string,
-              format: :uuid,
-              nullable: false,
-              description:
-                "Lobby ID when user is currently in a lobby. -1 means not currently in a lobby."
-            },
-            party_id: %Schema{
-              type: :string,
-              format: :uuid,
-              nullable: false,
-              description:
-                "Party ID when user is currently in a party. -1 means not currently in a party."
-            },
-            is_online: %Schema{type: :boolean},
-            last_seen_at: %Schema{type: :string, format: :date_time, nullable: false},
-            linked_providers: %Schema{
-              type: :object,
-              description: "Shows which OAuth providers are linked to this account",
-              properties: %{
-                google: %Schema{type: :boolean},
-                facebook: %Schema{type: :boolean},
-                discord: %Schema{type: :boolean},
-                apple: %Schema{type: :boolean},
-                steam: %Schema{type: :boolean},
-                device: %Schema{type: :boolean}
-              }
-            },
-            has_password: %Schema{
-              type: :boolean,
-              description: "Whether the user has a password set"
-            }
-          }
-        }
-      },
-      unauthorized: {"Not authenticated", "application/json", @error_schema}
+      ok: {"User info", "application/json", CurrentUser},
+      unauthorized: Schemas.error("Not authenticated")
     ]
   )
 
@@ -121,9 +70,9 @@ defmodule GamendWeb.Api.V1.MeController do
     },
     security: [%{"authorization" => []}],
     responses: [
-      ok: {"Password updated", "application/json", %Schema{type: :object}},
-      bad_request: {"Invalid data", "application/json", @validation_error_schema},
-      unauthorized: {"Not authenticated", "application/json", @error_schema}
+      ok: {"Password updated", "application/json", ProfileUpdate},
+      bad_request: Schemas.error("Invalid data"),
+      unauthorized: Schemas.error("Not authenticated, or wrong current password")
     ]
   )
 
@@ -180,9 +129,9 @@ defmodule GamendWeb.Api.V1.MeController do
     },
     security: [%{"authorization" => []}],
     responses: [
-      ok: {"Display name updated", "application/json", %Schema{type: :object}},
-      bad_request: {"Invalid data", "application/json", @validation_error_schema},
-      unauthorized: {"Not authenticated", "application/json", @error_schema}
+      ok: {"Display name updated", "application/json", ProfileUpdate},
+      bad_request: Schemas.error("Invalid data"),
+      unauthorized: Schemas.error("Not authenticated")
     ]
   )
 
@@ -223,9 +172,9 @@ defmodule GamendWeb.Api.V1.MeController do
     },
     security: [%{"authorization" => []}],
     responses: [
-      ok: {"Username updated", "application/json", %Schema{type: :object}},
-      bad_request: {"Invalid data", "application/json", @validation_error_schema},
-      unauthorized: {"Not authenticated", "application/json", @error_schema}
+      ok: {"Username updated", "application/json", ProfileUpdate},
+      bad_request: Schemas.error("Invalid data"),
+      unauthorized: Schemas.error("Not authenticated")
     ]
   )
 
@@ -276,9 +225,10 @@ defmodule GamendWeb.Api.V1.MeController do
     },
     security: [%{"authorization" => []}],
     responses: [
-      ok: {"Upload ticket", "application/json", %Schema{type: :object}},
-      bad_request: {"Invalid content type or size", "application/json", @error_schema},
-      unauthorized: {"Not authenticated", "application/json", @error_schema}
+      ok: {"Upload ticket", "application/json", UploadTicket},
+      bad_request: Schemas.error("Invalid content type or size"),
+      forbidden: Schemas.error("Avatars are disabled for anonymous accounts"),
+      unauthorized: Schemas.error("Not authenticated")
     ]
   )
 
@@ -310,10 +260,10 @@ defmodule GamendWeb.Api.V1.MeController do
     },
     security: [%{"authorization" => []}],
     responses: [
-      ok: {"Avatar updated", "application/json", %Schema{type: :object}},
-      bad_request: {"Object not found", "application/json", @error_schema},
-      forbidden: {"Key not owned by user", "application/json", @error_schema},
-      unauthorized: {"Not authenticated", "application/json", @error_schema}
+      ok: {"Avatar updated", "application/json", AvatarUpdate},
+      bad_request: Schemas.error("Object not found, or missing key"),
+      forbidden: Schemas.error("Key not owned by user, or avatars disabled"),
+      unauthorized: Schemas.error("Not authenticated")
     ]
   )
 
@@ -341,8 +291,8 @@ defmodule GamendWeb.Api.V1.MeController do
     security: [%{"authorization" => []}],
     responses: [
       ok: {"Account deleted", "application/json", %Schema{type: :object}},
-      bad_request: {"Failed to delete account", "application/json", @error_schema},
-      unauthorized: {"Not authenticated", "application/json", @error_schema}
+      bad_request: Schemas.error("Failed to delete account"),
+      unauthorized: Schemas.error("Not authenticated, or wrong current password")
     ]
   )
 

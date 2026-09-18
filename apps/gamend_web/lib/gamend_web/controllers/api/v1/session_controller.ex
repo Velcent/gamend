@@ -4,9 +4,9 @@ defmodule GamendWeb.Api.V1.SessionController do
 
   alias Gamend.Accounts
   alias GamendWeb.Auth.Guardian
+  alias GamendWeb.Schemas
+  alias GamendWeb.Schemas.SessionResponse
   alias OpenApiSpex.Schema
-
-  @error_schema %Schema{type: :object, properties: %{error: %Schema{type: :string}}}
 
   tags(["Authentication"])
 
@@ -31,40 +31,9 @@ defmodule GamendWeb.Api.V1.SessionController do
       }
     },
     responses: [
-      ok: {
-        "Login successful",
-        "application/json",
-        %Schema{
-          type: :object,
-          properties: %{
-            data: %Schema{
-              type: :object,
-              properties: %{
-                access_token: %Schema{type: :string, description: "JWT access token (15 min)"},
-                refresh_token: %Schema{type: :string, description: "JWT refresh token (30 days)"},
-                expires_in: %Schema{
-                  type: :integer,
-                  description: "Seconds until access token expires"
-                },
-                user_id: %Schema{type: :string, format: :uuid},
-                username: %Schema{type: :string, description: "Unique username handle"},
-                display_name: %Schema{type: :string, description: "User display name"}
-              }
-            }
-          },
-          example: %{
-            data: %{
-              access_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-              refresh_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-              expires_in: 900,
-              user_id: "0198c0de-0002-7000-8000-000000000002",
-              username: "coolplayer-1234",
-              display_name: "CoolPlayer"
-            }
-          }
-        }
-      },
-      unauthorized: {"Invalid credentials", "application/json", @error_schema}
+      ok: {"Login successful", "application/json", SessionResponse},
+      unauthorized: Schemas.error("Invalid credentials"),
+      forbidden: Schemas.error("Account awaiting activation")
     ]
   )
 
@@ -105,11 +74,9 @@ defmodule GamendWeb.Api.V1.SessionController do
       }
     },
     responses: [
-      ok:
-        {"Login successful", "application/json",
-         %Schema{type: :object, properties: %{data: GamendWeb.Schemas.OAuthSessionData}}},
-      bad_request: {"Unable to create device user", "application/json", @error_schema},
-      forbidden: {"Device auth disabled", "application/json", @error_schema}
+      ok: {"Login successful", "application/json", SessionResponse},
+      bad_request: Schemas.error("Unable to create device user"),
+      forbidden: Schemas.error("Device auth disabled, or account awaiting activation")
     ]
   )
 
@@ -200,41 +167,9 @@ defmodule GamendWeb.Api.V1.SessionController do
       }
     },
     responses: [
-      ok: {
-        "Token refreshed successfully",
-        "application/json",
-        %Schema{
-          type: :object,
-          properties: %{
-            data: %Schema{
-              type: :object,
-              properties: %{
-                access_token: %Schema{type: :string, description: "New access token"},
-                refresh_token: %Schema{
-                  type: :string,
-                  description: "Refresh token (same as input)"
-                },
-                user_id: %Schema{type: :string, format: :uuid, description: "User ID"},
-                expires_in: %Schema{type: :integer, description: "Seconds until expiry"},
-                username: %Schema{type: :string, description: "Unique username handle"},
-                display_name: %Schema{type: :string, description: "User display name"}
-              }
-            }
-          },
-          example: %{
-            data: %{
-              access_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-              refresh_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-              user_id: "0198c0de-0002-7000-8000-000000000002",
-              expires_in: 900,
-              username: "coolplayer-1234",
-              display_name: "CoolPlayer"
-            }
-          }
-        }
-      },
-      unauthorized: {"Invalid or expired refresh token", "application/json", @error_schema},
-      bad_request: {"Bad request", "application/json", @error_schema}
+      ok: {"Token refreshed successfully", "application/json", SessionResponse},
+      unauthorized: Schemas.error("Invalid or expired refresh token"),
+      bad_request: Schemas.error("Bad request")
     ]
   )
 

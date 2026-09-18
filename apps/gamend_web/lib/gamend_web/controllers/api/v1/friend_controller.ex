@@ -8,63 +8,18 @@ defmodule GamendWeb.Api.V1.FriendController do
   alias Gamend.Accounts.User
   alias Gamend.Friends
   alias GamendWeb.Pagination
+  alias GamendWeb.Schemas
+
+  alias GamendWeb.Schemas.{
+    BlockedFriendshipPage,
+    FriendPage,
+    FriendRequestsResponse,
+    UserBriefPage
+  }
+
   alias OpenApiSpex.Schema
 
-  @ok_schema %Schema{type: :object}
-  @error_schema %Schema{type: :object, properties: %{error: %Schema{type: :string}}}
-
-  @validation_error_schema %Schema{
-    type: :object,
-    properties: %{error: %Schema{type: :string}, errors: %Schema{type: :object}}
-  }
-
   tags(["Friends"])
-
-  @request_list_schema %Schema{
-    type: :array,
-    items: %Schema{
-      type: :object,
-      properties: %{
-        id: %Schema{type: :string, format: :uuid},
-        requester: %Schema{
-          type: :object,
-          properties: %{
-            id: %Schema{type: :string, format: :uuid},
-            username: %Schema{type: :string},
-            display_name: %Schema{type: :string},
-            metadata: %Schema{type: :object, description: "User metadata"},
-            is_online: %Schema{type: :boolean},
-            last_seen_at: %Schema{type: :string, format: :date_time, nullable: false}
-          }
-        },
-        target: %Schema{
-          type: :object,
-          properties: %{
-            id: %Schema{type: :string, format: :uuid},
-            username: %Schema{type: :string},
-            display_name: %Schema{type: :string},
-            metadata: %Schema{type: :object, description: "User metadata"},
-            is_online: %Schema{type: :boolean},
-            last_seen_at: %Schema{type: :string, format: :date_time, nullable: false}
-          }
-        },
-        status: %Schema{type: :string},
-        inserted_at: %Schema{type: :string, format: :date_time}
-      }
-    }
-  }
-
-  @request_meta_schema %Schema{
-    type: :object,
-    properties: %{
-      page: %Schema{type: :integer},
-      page_size: %Schema{type: :integer},
-      count: %Schema{type: :integer},
-      total_count: %Schema{type: :integer},
-      total_pages: %Schema{type: :integer},
-      has_more: %Schema{type: :boolean}
-    }
-  }
 
   operation(:create,
     operation_id: "create_friend_request",
@@ -86,11 +41,11 @@ defmodule GamendWeb.Api.V1.FriendController do
       }
     },
     responses: [
-      created: {"Request created", "application/json", @ok_schema},
-      bad_request: {"Bad request", "application/json", @error_schema},
-      conflict: {"Already friends or requested", "application/json", @error_schema},
-      unprocessable_entity: {"Validation failed", "application/json", @validation_error_schema},
-      unauthorized: {"Not authenticated", "application/json", @error_schema}
+      created: {"Request created", "application/json", %Schema{type: :object}},
+      bad_request: Schemas.error("Bad request"),
+      conflict: Schemas.error("Already friends or requested"),
+      unprocessable_entity: Schemas.error("Validation failed"),
+      unauthorized: Schemas.error("Not authenticated")
     ]
   )
 
@@ -113,51 +68,7 @@ defmodule GamendWeb.Api.V1.FriendController do
       ]
     ],
     responses: [
-      ok:
-        {"List of friends (paginated)", "application/json",
-         %Schema{
-           type: :object,
-           properties: %{
-             data: %Schema{
-               type: :array,
-               items: %Schema{
-                 type: :object,
-                 properties: %{
-                   id: %Schema{type: :string, format: :uuid},
-                   friendship_id: %Schema{type: :string, format: :uuid},
-                   username: %Schema{type: :string},
-                   display_name: %Schema{type: :string},
-                   profile_url: %Schema{type: :string},
-                   metadata: %Schema{
-                     type: :object,
-                     description: "User metadata (accessories, hat, color, etc.)"
-                   },
-                   is_online: %Schema{
-                     type: :boolean,
-                     description: "Whether the friend is currently connected"
-                   },
-                   last_seen_at: %Schema{
-                     type: :string,
-                     format: "date-time",
-                     nullable: false,
-                     description: "Last time the friend connected or disconnected"
-                   }
-                 }
-               }
-             },
-             meta: %Schema{
-               type: :object,
-               properties: %{
-                 page: %Schema{type: :integer},
-                 page_size: %Schema{type: :integer},
-                 count: %Schema{type: :integer},
-                 total_count: %Schema{type: :integer},
-                 total_pages: %Schema{type: :integer},
-                 has_more: %Schema{type: :boolean}
-               }
-             }
-           }
-         }}
+      ok: {"List of friends (paginated)", "application/json", FriendPage}
     ]
   )
 
@@ -180,29 +91,7 @@ defmodule GamendWeb.Api.V1.FriendController do
       ]
     ],
     responses: [
-      ok: {
-        "Requests",
-        "application/json",
-        %Schema{
-          type: :object,
-          properties: %{
-            data: %Schema{
-              type: :object,
-              properties: %{
-                incoming: @request_list_schema,
-                outgoing: @request_list_schema
-              }
-            },
-            meta: %Schema{
-              type: :object,
-              properties: %{
-                incoming: @request_meta_schema,
-                outgoing: @request_meta_schema
-              }
-            }
-          }
-        }
-      }
+      ok: {"Requests", "application/json", FriendRequestsResponse}
     ]
   )
 
@@ -221,8 +110,8 @@ defmodule GamendWeb.Api.V1.FriendController do
     ],
     responses: [
       ok: {"Accepted", "application/json", %Schema{type: :object}},
-      unauthorized: {"Not authenticated", "application/json", @error_schema},
-      forbidden: {"Not authorized", "application/json", @error_schema}
+      unauthorized: Schemas.error("Not authenticated"),
+      forbidden: Schemas.error("Not authorized")
     ]
   )
 
@@ -241,8 +130,8 @@ defmodule GamendWeb.Api.V1.FriendController do
     ],
     responses: [
       ok: {"Rejected", "application/json", %Schema{type: :object}},
-      unauthorized: {"Not authenticated", "application/json", @error_schema},
-      forbidden: {"Not authorized", "application/json", @error_schema}
+      unauthorized: Schemas.error("Not authenticated"),
+      forbidden: Schemas.error("Not authorized")
     ]
   )
 
@@ -261,8 +150,8 @@ defmodule GamendWeb.Api.V1.FriendController do
     ],
     responses: [
       ok: {"Blocked", "application/json", %Schema{type: :object}},
-      unauthorized: {"Not authenticated", "application/json", @error_schema},
-      forbidden: {"Not authorized", "application/json", @error_schema}
+      unauthorized: Schemas.error("Not authenticated"),
+      forbidden: Schemas.error("Not authorized")
     ]
   )
 
@@ -285,43 +174,7 @@ defmodule GamendWeb.Api.V1.FriendController do
       ]
     ],
     responses: [
-      ok: {
-        "Blocked list",
-        "application/json",
-        %Schema{
-          type: :object,
-          properties: %{
-            data: %Schema{
-              type: :array,
-              items: %Schema{
-                type: :object,
-                properties: %{
-                  id: %Schema{type: :string, format: :uuid},
-                  requester: %Schema{
-                    type: :object,
-                    properties: %{
-                      id: %Schema{type: :string, format: :uuid},
-                      username: %Schema{type: :string},
-                      display_name: %Schema{type: :string}
-                    }
-                  }
-                }
-              }
-            },
-            meta: %Schema{
-              type: :object,
-              properties: %{
-                page: %Schema{type: :integer},
-                page_size: %Schema{type: :integer},
-                count: %Schema{type: :integer},
-                total_count: %Schema{type: :integer},
-                total_pages: %Schema{type: :integer},
-                has_more: %Schema{type: :boolean}
-              }
-            }
-          }
-        }
-      }
+      ok: {"Blocked list", "application/json", BlockedFriendshipPage}
     ]
   )
 
@@ -340,9 +193,9 @@ defmodule GamendWeb.Api.V1.FriendController do
     ],
     responses: [
       ok: {"Unblocked", "application/json", %Schema{type: :object}},
-      unauthorized: {"Not authenticated", "application/json", @error_schema},
-      forbidden: {"Not authorized", "application/json", @error_schema},
-      not_found: {"Not found", "application/json", @error_schema}
+      unauthorized: Schemas.error("Not authenticated"),
+      forbidden: Schemas.error("Not authorized"),
+      not_found: Schemas.error("Not found")
     ]
   )
 
@@ -368,28 +221,8 @@ defmodule GamendWeb.Api.V1.FriendController do
       ]
     ],
     responses: [
-      ok: {
-        "Blacklisted users",
-        "application/json",
-        %Schema{
-          type: :object,
-          properties: %{
-            data: %Schema{
-              type: :array,
-              items: %Schema{
-                type: :object,
-                properties: %{
-                  id: %Schema{type: :string, format: :uuid},
-                  username: %Schema{type: :string},
-                  display_name: %Schema{type: :string}
-                }
-              }
-            },
-            meta: %Schema{type: :object}
-          }
-        }
-      },
-      unauthorized: {"Not authenticated", "application/json", @error_schema}
+      ok: {"Blacklisted users", "application/json", UserBriefPage},
+      unauthorized: Schemas.error("Not authenticated")
     ]
   )
 
@@ -410,8 +243,8 @@ defmodule GamendWeb.Api.V1.FriendController do
     ],
     responses: [
       ok: {"Blocked", "application/json", %Schema{type: :object}},
-      bad_request: {"Invalid id or cannot block self", "application/json", @error_schema},
-      unauthorized: {"Not authenticated", "application/json", @error_schema}
+      bad_request: Schemas.error("Invalid id or cannot block self"),
+      unauthorized: Schemas.error("Not authenticated")
     ]
   )
 
@@ -429,9 +262,9 @@ defmodule GamendWeb.Api.V1.FriendController do
     ],
     responses: [
       ok: {"Unblocked", "application/json", %Schema{type: :object}},
-      bad_request: {"Invalid id", "application/json", @error_schema},
-      unauthorized: {"Not authenticated", "application/json", @error_schema},
-      not_found: {"Not found", "application/json", @error_schema}
+      bad_request: Schemas.error("Invalid id"),
+      unauthorized: Schemas.error("Not authenticated"),
+      not_found: Schemas.error("Not found")
     ]
   )
 
@@ -442,8 +275,8 @@ defmodule GamendWeb.Api.V1.FriendController do
     parameters: [id: [in: :path, schema: %Schema{type: :string, format: :uuid}, required: true]],
     responses: [
       ok: {"Success", "application/json", %Schema{type: :object}},
-      unauthorized: {"Not authenticated", "application/json", @error_schema},
-      forbidden: {"Not authorized", "application/json", @error_schema}
+      unauthorized: Schemas.error("Not authenticated"),
+      forbidden: Schemas.error("Not authorized")
     ]
   )
 
@@ -778,37 +611,8 @@ defmodule GamendWeb.Api.V1.FriendController do
   end
 
   defp serialize_request(%Friends.Friendship{} = f) do
-    requester =
-      case f.requester do
-        %Ecto.Association.NotLoaded{} ->
-          %{
-            id: f.requester_id,
-            username: "",
-            display_name: "",
-            metadata: %{},
-            is_online: false,
-            last_seen_at: User.last_seen_at_or_fallback(%User{})
-          }
-
-        %User{} = r ->
-          User.serialize_brief(r)
-      end
-
-    target =
-      case f.target do
-        %Ecto.Association.NotLoaded{} ->
-          %{
-            id: f.target_id,
-            username: "",
-            display_name: "",
-            metadata: %{},
-            is_online: false,
-            last_seen_at: User.last_seen_at_or_fallback(%User{})
-          }
-
-        %User{} = t ->
-          User.serialize_brief(t)
-      end
+    requester = brief(f.requester, f.requester_id)
+    target = brief(f.target, f.target_id)
 
     %{
       id: f.id,
@@ -818,4 +622,9 @@ defmodule GamendWeb.Api.V1.FriendController do
       inserted_at: f.inserted_at
     }
   end
+
+  # A side that was not preloaded is sent as a blank member row with its id,
+  # built by the same serializer, so it has every field a loaded one has.
+  defp brief(%User{} = user, _id), do: User.serialize_brief(user)
+  defp brief(_not_loaded, id), do: User.serialize_brief(%User{id: id})
 end

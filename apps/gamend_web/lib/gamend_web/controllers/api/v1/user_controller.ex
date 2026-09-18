@@ -8,9 +8,9 @@ defmodule GamendWeb.Api.V1.UserController do
   alias Gamend.Accounts.User
   alias GamendWeb.Features
   alias GamendWeb.Pagination
+  alias GamendWeb.Schemas
+  alias GamendWeb.Schemas.{PlayerStatsResponse, PublicUser, PublicUserPage}
   alias OpenApiSpex.Schema
-
-  @error_schema %Schema{type: :object, properties: %{error: %Schema{type: :string}}}
 
   tags(["Users"])
 
@@ -23,56 +23,7 @@ defmodule GamendWeb.Api.V1.UserController do
       page_size: [in: :query, schema: %Schema{type: :integer}]
     ],
     responses: [
-      ok:
-        {"Users (paginated)", "application/json",
-         %Schema{
-           type: :object,
-           properties: %{
-             data: %Schema{
-               type: :array,
-               items: %Schema{
-                 type: :object,
-                 properties: %{
-                   id: %Schema{type: :string, format: :uuid},
-                   username: %Schema{type: :string},
-                   display_name: %Schema{type: :string},
-                   metadata: %Schema{
-                     type: :object,
-                     description:
-                       "User metadata, restricted to the keys named by the :public_user_metadata_keys setting. Empty by default."
-                   },
-                   lobby_id: %Schema{
-                     type: :string,
-                     format: :uuid,
-                     nullable: false,
-                     description:
-                       "Lobby ID when user is currently in a lobby. -1 means not currently in a lobby."
-                   },
-                   party_id: %Schema{
-                     type: :string,
-                     format: :uuid,
-                     nullable: false,
-                     description:
-                       "Party ID when user is currently in a party. -1 means not currently in a party."
-                   },
-                   is_online: %Schema{type: :boolean},
-                   last_seen_at: %Schema{type: :string, format: :date_time, nullable: false}
-                 }
-               }
-             },
-             meta: %Schema{
-               type: :object,
-               properties: %{
-                 page: %Schema{type: :integer},
-                 page_size: %Schema{type: :integer},
-                 count: %Schema{type: :integer},
-                 total_count: %Schema{type: :integer},
-                 total_pages: %Schema{type: :integer},
-                 has_more: %Schema{type: :boolean}
-               }
-             }
-           }
-         }}
+      ok: {"Users (paginated)", "application/json", PublicUserPage}
     ]
   )
 
@@ -81,38 +32,9 @@ defmodule GamendWeb.Api.V1.UserController do
     summary: "Get a user by id",
     parameters: [id: [in: :path, schema: %Schema{type: :string, format: :uuid}, required: true]],
     responses: [
-      ok:
-        {"User", "application/json",
-         %Schema{
-           type: :object,
-           properties: %{
-             id: %Schema{type: :string, format: :uuid},
-             username: %Schema{type: :string},
-             display_name: %Schema{type: :string},
-             metadata: %Schema{
-               type: :object,
-               description:
-                 "User metadata, restricted to the keys named by the :public_user_metadata_keys setting. Empty by default."
-             },
-             lobby_id: %Schema{
-               type: :string,
-               format: :uuid,
-               nullable: false,
-               description:
-                 "Lobby ID when user is currently in a lobby. -1 means not currently in a lobby."
-             },
-             party_id: %Schema{
-               type: :string,
-               format: :uuid,
-               nullable: false,
-               description:
-                 "Party ID when user is currently in a party. -1 means not currently in a party."
-             },
-             is_online: %Schema{type: :boolean},
-             last_seen_at: %Schema{type: :string, format: :date_time, nullable: false}
-           }
-         }},
-      not_found: {"Not found", "application/json", @error_schema}
+      ok: {"User", "application/json", PublicUser},
+      bad_request: Schemas.error("Malformed id"),
+      not_found: Schemas.error("Not found")
     ]
   )
 
@@ -122,14 +44,7 @@ defmodule GamendWeb.Api.V1.UserController do
     description:
       "Aggregate player counts. Public, and cached — treat the numbers as up to a minute old.",
     responses: [
-      ok:
-        GamendWeb.ApiStatsSchema.response("Player stats", [
-          :players_online,
-          :players_total,
-          :players_offline,
-          :players_in_lobbies,
-          :players_in_parties
-        ])
+      ok: {"Player stats", "application/json", PlayerStatsResponse}
     ]
   )
 
