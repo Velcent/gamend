@@ -9,7 +9,7 @@ Three optional callbacks, registered the same convention-based way as
 they are picked up at load:
 
     def notification_types do
-      %{"quest_completed" => "Player finished a quest"}
+      %{"rival_online" => "A rival the player follows came online"}
     end
 
     def realtime_events do

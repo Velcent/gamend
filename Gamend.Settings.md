@@ -12,11 +12,10 @@ the compiled default. That means a host configures the ordinary Elixir way:
     config :gamend_core, Gamend.Retention, chat_messages_days: 90
 
 Environment variables are one *input method* into that, not a second source.
-A host that wants them writes one line in `config/runtime.exs`:
-
-    for {app, module, opts} <- Gamend.Settings.from_env() do
-      config app, module, opts
-    end
+`GamendWeb.HostRuntime.config/2` folds `from_env/0` in with the Repo,
+Endpoint and mailer derivations, so a host's runtime config loops over that
+and nothing else. Looping over `from_env/0` alone leaves prod with no Repo or
+Endpoint configuration — see the `GamendWeb.HostRuntime` moduledoc.
 
 A host that prefers a JSON file, or plain Elixir, writes its own equivalent.
 Every route ends at `Application` config, so no two sources compete.

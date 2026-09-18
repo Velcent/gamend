@@ -9,13 +9,14 @@ via `Application.put_env(:gamend_core, Gamend.Limits, [...])`.
 
 ## Environment variables
 
-Each limit can be set via an environment variable. The env var name maps to
-the limit key with an uppercase `LIMIT_` prefix, e.g.:
+Each limit is a `Gamend.Settings.Provider` setting, so its env var name is
+derived from the key with the `GAMEND_LIMITS_` prefix, e.g.:
 
-    LIMIT_MAX_METADATA_SIZE=32768   -> :max_metadata_size
-    LIMIT_MAX_PAGE_SIZE=100         -> :max_page_size
+    GAMEND_LIMITS_MAX_METADATA_SIZE=32768   -> :max_metadata_size
+    GAMEND_LIMITS_MAX_PAGE_SIZE=100         -> :max_page_size
 
-Env vars are read once at boot in `config/runtime.exs`.
+Env vars are read once at boot by `Gamend.Settings.from_env/0`, which the
+host's `config/runtime.exs` runs through `GamendWeb.HostRuntime.config/2`.
 
 ## Usage in schemas
 

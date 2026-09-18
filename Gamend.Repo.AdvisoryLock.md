@@ -31,12 +31,24 @@ Always call within a `Repo.transaction`:
 
 ## Namespaces
 
-Each resource type uses a distinct integer namespace to avoid collisions:
+Each resource type uses a distinct integer namespace to avoid collisions.
+The registered atoms (`namespaces/0` returns the same map):
 
 - `:lobby` → 1
 - `:group` → 2
 - `:party` → 3
 - `:friendship` → 4
+- `:tournament_draw` → 5
+- `:tournament_match` → 6
+- `:tournaments_tick` → 7
+- `:matchmaking_sweep` → 8
+- `:quest` → 9
+- `:push_tokens` → 10
+- `:ready_check` → 11
+- `:tournament_join` → 12
+
+A new atom namespace is added to `@namespaces` (ids 0..99 are reserved for
+atoms).
 
 You can also pass an arbitrary string as the namespace. The string is
 hashed to a stable 32-bit integer via `:erlang.phash2/2`, so any
@@ -58,8 +70,8 @@ string (e.g. `"word_guessed"`, `"my_rpc"`) works without pre-registration.
 
 Acquire a transaction-scoped advisory lock for the given resource.
 
-`namespace` can be a predefined atom (`:lobby`, `:group`, `:party`) or any
-arbitrary string. `resource_id` is a UUID string; it is hashed to a stable
+`namespace` can be a registered atom (see `namespaces/0`) or any arbitrary
+string. `resource_id` is a UUID string; it is hashed to a stable
 32-bit integer for `pg_advisory_xact_lock` (a hash collision only causes
 extra serialization, never lost mutual exclusion).
 

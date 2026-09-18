@@ -5,10 +5,10 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.4">
-    <meta name="project" content="gamend_core v1.0.1238">
+    <meta name="project" content="gamend_core v1.0.1239">
 
 
-    <title>Gamend.Lock — gamend_core v1.0.1238</title>
+    <title>Gamend.Lock — gamend_core v1.0.1239</title>
 
     <link rel="stylesheet" href="dist/html-elixir-RXHHCTJW.css" />
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1238
+          v1.0.1239
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr />Lock</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1238)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1239)</small>
 
     </h1>
 
@@ -125,11 +125,12 @@ section that never touches the database.</li></ul><p><code class="inline">defaul
 this function, not the mechanism — it does nothing for ETS or process state.</p><h2 id="module-nesting" class="section-heading"><a href="#module-nesting" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Nesting</span></h2><p>Take the lock at the outermost point. A <a href="#serialize/3"><code class="inline">serialize/3</code></a> reached inside an open
 transaction cannot take the mutex — the caller holds the write lock, so
 waiting on a mutex whose holder wants that lock deadlocks — so it runs under
-the outer transaction and relies on the outer lock.</p><h2 id="module-prefer-an-atomic-write" class="section-heading"><a href="#module-prefer-an-atomic-write" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Prefer an atomic write</span></h2><p>Prefer an atomic write where one exists: <code class="inline">Economy.debit/3</code> does
+the outer transaction and relies on the outer lock.</p><h2 id="module-prefer-an-atomic-write" class="section-heading"><a href="#module-prefer-an-atomic-write" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Prefer an atomic write</span></h2><p>Prefer an atomic write where one exists: <code class="inline">Economy.spend/4</code> does
 <code class="inline">balance = balance - x where balance &gt;= x</code> in one statement, which needs no
 lock at all.</p><h2 id="module-multi-node-safety" class="section-heading"><a href="#module-multi-node-safety" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Multi-node safety</span></h2><p>Both paths are cluster-wide: the Postgres lock lives in the shared database,
 and <code class="inline">:global.trans</code> coordinates across connected nodes. A netsplit can produce
-two holders on either path, which is why value operations must also be atomic.</p><h2 id="module-namespace-conventions" class="section-heading"><a href="#module-namespace-conventions" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Namespace conventions</span></h2><p>The <code class="inline">namespace</code> argument can be:</p><ul><li>A <strong>predefined atom</strong>: <code class="inline">:lobby</code> (1), <code class="inline">:group</code> (2), <code class="inline">:party</code> (3)</li><li>An <strong>arbitrary string</strong>: hashed to a stable integer, e.g. <code class="inline">&quot;word_guessed&quot;</code></li></ul><p>The <code class="inline">resource_id</code> is typically the lobby, group, or user id that scopes
+two holders on either path, which is why value operations must also be atomic.</p><h2 id="module-namespace-conventions" class="section-heading"><a href="#module-namespace-conventions" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Namespace conventions</span></h2><p>The <code class="inline">namespace</code> argument can be:</p><ul><li>A <strong>registered atom</strong>: <code class="inline">:lobby</code> (1), <code class="inline">:group</code> (2), <code class="inline">:party</code> (3), … — the
+full list is <code class="inline">@namespaces</code> in <a href="Gamend.Repo.AdvisoryLock.html"><code class="inline">Gamend.Repo.AdvisoryLock</code></a></li><li>An <strong>arbitrary string</strong>: hashed to a stable integer, e.g. <code class="inline">&quot;word_guessed&quot;</code></li></ul><p>The <code class="inline">resource_id</code> is typically the lobby, group, or user id that scopes
 the lock.</p><h2 id="module-examples" class="section-heading"><a href="#module-examples" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Examples</span></h2><pre><code class="makeup elixir" translate="no"><span class="c1"># Serialize all &quot;word_guessed&quot; RPCs per lobby</span><span class="w">
 </span><span class="nc">Gamend.Lock</span><span class="o">.</span><span class="n">serialize</span><span class="p" data-group-id="group-1">(</span><span class="s">&quot;word_guessed&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">lobby_id</span><span class="p">,</span><span class="w"> </span><span class="k" data-group-id="group-2">fn</span><span class="w"> </span><span class="o">-&gt;</span><span class="w">
   </span><span class="p" data-group-id="group-3">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="n">entry</span><span class="p" data-group-id="group-3">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Gamend.KV</span><span class="o">.</span><span class="n">get</span><span class="p" data-group-id="group-4">(</span><span class="s">&quot;game_state&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">lobby_id</span><span class="p">:</span><span class="w"> </span><span class="n">lobby_id</span><span class="p" data-group-id="group-4">)</span><span class="w">
@@ -192,7 +193,7 @@ or <code class="inline">{:error, reason}</code> if the transaction rolls back.</
       <h1 class="signature" translate="no">serialize(namespace, resource_id, fun)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/lock.ex#L96" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/lock.ex#L97" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -222,9 +223,9 @@ callers block until the lock is released (on transaction commit/rollback).</p><p
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1238">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1239">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1238">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1239">Hex Preview</a>
 
             </span>
 
