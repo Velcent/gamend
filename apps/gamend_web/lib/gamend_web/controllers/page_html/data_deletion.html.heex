@@ -20,7 +20,14 @@
           </li>
           <li>
             <strong>Contact Support:</strong>
-            Send an email to our support team requesting data deletion
+            <span :if={@contact_email}>
+              Send an email to
+              <a href={"mailto:" <> @contact_email} class="link link-primary">{@contact_email}</a>
+              from the address on your account, requesting data deletion
+            </span>
+            <span :if={!@contact_email}>
+              Send an email to our support team requesting data deletion
+            </span>
           </li>
           <li>
             <strong>API Request:</strong>
@@ -61,7 +68,11 @@
 
     <section>
       <h2 class="text-xl font-semibold mb-4">Contact Information</h2>
-      <p class="text-base-content/80">
+      <p :if={@contact_email} class="text-base-content/80">
+        If you have questions about the data deletion process or need assistance, email us at
+        <a href={"mailto:" <> @contact_email} class="link link-primary">{@contact_email}</a>.
+      </p>
+      <p :if={!@contact_email} class="text-base-content/80">
         If you have questions about the data deletion process or need assistance, please contact
         us through the project's support channels.
       </p>

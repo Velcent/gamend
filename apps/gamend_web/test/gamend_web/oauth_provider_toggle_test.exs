@@ -62,6 +62,17 @@ defmodule GamendWeb.OAuthProviderToggleTest do
       refute html =~ "/auth/steam"
     end
 
+    test "name the provider, so the row is not one word repeated", %{conn: conn} do
+      configure(discord_client_id: "id", google_client_id: "id")
+
+      {:ok, _lv, html} = live(conn, ~p"/users/log_in")
+      assert html =~ "Log in with Discord"
+      assert html =~ "Log in with Google"
+
+      {:ok, _lv, html} = live(conn, ~p"/users/register")
+      assert html =~ "Register with Discord"
+    end
+
     test "no providers, no divider", %{conn: conn} do
       configure([])
 

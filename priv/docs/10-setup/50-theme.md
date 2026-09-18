@@ -91,6 +91,14 @@ The theme_color field tints the browser chrome (address bar, tab bar) in Safari 
 "theme_color": light": "#ffffff", "dark": "#1a1a2e
 ```
 
+## Contact email
+
+The contact_email field is the address the Privacy Policy, Data Deletion and Terms pages give for privacy and deletion requests, as a mailto link. App stores and data-protection rules expect a real address there. Without it, those pages only say to use "support channels".
+
+```text
+"contact_email": "support@example.com"
+```
+
 ## Configure the app to use it
 
 Optional: point the runtime override at a different JSON file:

@@ -77,6 +77,11 @@ defmodule GamendWeb.Endpoint do
     event_prefix: [:phoenix, :endpoint],
     log: {__MODULE__, :access_log_level, []}
 
+  # Test-only: every documented API response is checked against its schema.
+  if Application.compile_env(:gamend_web, :response_contract, false) do
+    plug GamendWeb.ResponseContract
+  end
+
   plug Plug.Parsers,
     parsers: [:urlencoded, :multipart, :json],
     pass: ["*/*"],

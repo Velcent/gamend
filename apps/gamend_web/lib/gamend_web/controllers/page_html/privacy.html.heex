@@ -77,7 +77,11 @@
 
     <section>
       <h2 class="text-xl font-semibold mb-4">Your Rights</h2>
-      <p class="text-base-content/80">
+      <p :if={@contact_email} class="text-base-content/80">
+        You may request access, correction, or deletion of your personal data by emailing
+        <a href={"mailto:" <> @contact_email} class="link link-primary">{@contact_email}</a>.
+      </p>
+      <p :if={!@contact_email} class="text-base-content/80">
         You may request access, correction, or deletion of your personal data by contacting us
         through the app or support channels.
       </p>
@@ -85,7 +89,11 @@
 
     <section>
       <h2 class="text-xl font-semibold mb-4">Contact</h2>
-      <p class="text-base-content/80">
+      <p :if={@contact_email} class="text-base-content/80">
+        If you have any questions about this Privacy Policy, email us at
+        <a href={"mailto:" <> @contact_email} class="link link-primary">{@contact_email}</a>.
+      </p>
+      <p :if={!@contact_email} class="text-base-content/80">
         If you have any questions about this Privacy Policy, please contact us via the project's
         contact channels.
       </p>

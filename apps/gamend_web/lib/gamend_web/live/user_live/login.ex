@@ -92,16 +92,39 @@ defmodule GamendWeb.UserLive.Login do
               label={gettext("Password")}
               autocomplete="current-password"
             />
-            <.button class="btn btn-primary w-full" name={@form[:remember_me].name} value="true">
-              {gettext("Log in and remember me")} <span aria-hidden="true">→</span>
-            </.button>
-            <.button class="btn btn-primary btn-soft w-full mt-2">
-              {gettext("Log in")}
+            <%!-- `@form`, not `f`: a `:let` variable re-renders with the slot, and
+                  a re-render would put the box back to checked under the player. --%>
+            <div class="flex items-start justify-between gap-2">
+              <.input
+                field={@form[:remember_me]}
+                type="checkbox"
+                label={gettext("Remember me")}
+                checked
+              />
+              <%!-- There is no reset flow: a magic link logs the player in, and
+                    Settings takes a new password without asking for the old one. --%>
+              <button
+                type="button"
+                id="forgot_password_link"
+                class="text-sm font-semibold text-brand hover:underline"
+                phx-click={
+                  JS.show(to: "#forgot_password_hint")
+                  |> JS.focus(to: "#login_form_magic input[type=email]")
+                }
+              >
+                {gettext("Forgot password?")}
+              </button>
+            </div>
+            <p id="forgot_password_hint" class="hidden text-sm text-base-content/70 mb-2">
+              {gettext("Send yourself a magic link to log in, then set a new password in Settings.")}
+            </p>
+            <.button class="btn btn-primary w-full">
+              {gettext("Log in")} <span aria-hidden="true">→</span>
             </.button>
           </.form>
         </div>
 
-        <.oauth_buttons label={gettext("Log in")} />
+        <.oauth_buttons action={:login} />
       </div>
     </Layouts.app>
     """

@@ -39,7 +39,7 @@ defmodule GamendWeb.UserLive.Registration do
           </.button>
         </.form>
 
-        <.oauth_buttons label={gettext("Register")} />
+        <.oauth_buttons action={:register} />
       </div>
     </Layouts.app>
     """

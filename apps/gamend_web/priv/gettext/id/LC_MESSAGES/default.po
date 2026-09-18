@@ -11,7 +11,7 @@ msgstr ""
 "Language: id\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: lib/gamend_web/components/core_components.ex:636
+#: lib/gamend_web/components/core_components.ex:649
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:244
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:759
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:803
@@ -38,14 +38,13 @@ msgstr "Papan peringkat"
 #: lib/gamend_web/live/auth_success_live.ex:30
 #: lib/gamend_web/live/auth_success_live.ex:42
 #: lib/gamend_web/live/auth_success_live.ex:52
-#: lib/gamend_web/live/groups_live.ex:558
-#: lib/gamend_web/live/groups_live.ex:734
-#: lib/gamend_web/live/tournaments_live.ex:736
+#: lib/gamend_web/live/groups_live.ex:554
+#: lib/gamend_web/live/groups_live.ex:730
+#: lib/gamend_web/live/tournaments_live.ex:737
 #: lib/gamend_web/live/user_live/confirmation.ex:56
 #: lib/gamend_web/live/user_live/confirmation.ex:71
 #: lib/gamend_web/live/user_live/login.ex:14
 #: lib/gamend_web/live/user_live/login.ex:99
-#: lib/gamend_web/live/user_live/login.ex:104
 #: lib/gamend_web/live/user_live/login.ex:130
 #: lib/gamend_web/live/user_live/registration.ex:17
 #: lib/gamend_web/live/user_live/settings/account_tab.ex:210
@@ -53,7 +52,7 @@ msgstr "Papan peringkat"
 msgid "Log in"
 msgstr "Masuk"
 
-#: lib/gamend_web/live/lobby_live/index.ex:817
+#: lib/gamend_web/live/lobby_live/index.ex:815
 #: lib/gamend_web/live/user_live/login.ex:92
 #: lib/gamend_web/live/user_live/settings/account_tab.ex:148
 #: lib/gamend_web/live/user_live/settings/account_tab.ex:169
@@ -61,13 +60,13 @@ msgstr "Masuk"
 msgid "Password"
 msgstr "Kata sandi"
 
-#: lib/gamend_web/components/core_components.ex:473
+#: lib/gamend_web/components/core_components.ex:476
 #: lib/gamend_web/live/user_live/login.ex:63
 #, elixir-autogen, elixir-format
 msgid "or"
 msgstr "atau"
 
-#: lib/gamend_web/live/groups_live.ex:660
+#: lib/gamend_web/live/groups_live.ex:656
 #, elixir-autogen, elixir-format
 msgid "Admin"
 msgstr "Admin"
@@ -75,7 +74,6 @@ msgstr "Admin"
 #: lib/gamend_web/live/user_live/login.ex:23
 #: lib/gamend_web/live/user_live/registration.ex:14
 #: lib/gamend_web/live/user_live/registration.ex:38
-#: lib/gamend_web/live/user_live/registration.ex:42
 #: lib/gamend_web/live/user_live/registration.ex:63
 #, elixir-autogen, elixir-format
 msgid "Register"
@@ -87,8 +85,8 @@ msgstr "Daftar"
 msgid "Accept"
 msgstr "Terima"
 
-#: lib/gamend_web/live/admin_live/chat_reports.ex:394
-#: lib/gamend_web/live/groups_live.ex:439
+#: lib/gamend_web/live/admin_live/chat_reports.ex:388
+#: lib/gamend_web/live/groups_live.ex:435
 #: lib/gamend_web/live/quests_live.ex:330
 #: lib/gamend_web/live/quests_live.ex:376
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:597
@@ -96,7 +94,7 @@ msgstr "Terima"
 msgid "All"
 msgstr "Semua"
 
-#: lib/gamend_web/live/user_live/settings/data_tab.ex:51
+#: lib/gamend_web/live/user_live/settings/data_tab.ex:52
 #, elixir-autogen, elixir-format
 msgid "Apply"
 msgstr "Terapkan"
@@ -106,11 +104,11 @@ msgstr "Terapkan"
 msgid "Approve"
 msgstr "Setujui"
 
-#: lib/gamend_web/components/core_components.ex:580
-#: lib/gamend_web/live/groups_live.ex:569
+#: lib/gamend_web/components/core_components.ex:593
+#: lib/gamend_web/live/groups_live.ex:565
 #: lib/gamend_web/live/leaderboards_live.ex:192
-#: lib/gamend_web/live/tournaments_live.ex:506
-#: lib/gamend_web/live/tournaments_live.ex:783
+#: lib/gamend_web/live/tournaments_live.ex:507
+#: lib/gamend_web/live/tournaments_live.ex:784
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:63
 #, elixir-autogen, elixir-format
 msgid "Back"
@@ -121,13 +119,13 @@ msgstr "Kembali"
 msgid "Block"
 msgstr "Blokir"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:512
-#: lib/gamend_web/live/admin_live/chat_mutes.ex:599
-#: lib/gamend_web/live/admin_live/chat_reports.ex:636
+#: lib/gamend_web/live/admin_live/chat_filter.ex:505
+#: lib/gamend_web/live/admin_live/chat_mutes.ex:593
+#: lib/gamend_web/live/admin_live/chat_reports.ex:630
 #: lib/gamend_web/live/admin_live/lobbies.ex:373
-#: lib/gamend_web/live/admin_live/matchmaking.ex:229
+#: lib/gamend_web/live/admin_live/matchmaking.ex:215
 #: lib/gamend_web/live/chat_live.ex:255
-#: lib/gamend_web/live/lobby_live/index.ex:824
+#: lib/gamend_web/live/lobby_live/index.ex:822
 #: lib/gamend_web/live/user_live/settings/friends_tab.ex:113
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:74
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:169
@@ -137,21 +135,21 @@ msgstr "Blokir"
 msgid "Cancel"
 msgstr "Batal"
 
-#: lib/gamend_web/live/lobby_live/index.ex:875
-#: lib/gamend_web/live/user_live/settings/data_tab.ex:53
+#: lib/gamend_web/live/lobby_live/index.ex:873
+#: lib/gamend_web/live/user_live/settings/data_tab.ex:54
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:608
 #, elixir-autogen, elixir-format
 msgid "Clear"
 msgstr "Bersihkan"
 
 #: lib/gamend_web/components/core_components.ex:181
-#: lib/gamend_web/live/lobby_live/index.ex:886
-#: lib/gamend_web/live/lobby_live/index.ex:956
+#: lib/gamend_web/live/lobby_live/index.ex:884
+#: lib/gamend_web/live/lobby_live/index.ex:954
 #, elixir-autogen, elixir-format
 msgid "Close"
 msgstr "Tutup"
 
-#: lib/gamend_web/live/lobby_live/index.ex:821
+#: lib/gamend_web/live/lobby_live/index.ex:819
 #: lib/gamend_web/live/user_live/confirmation.ex:37
 #: lib/gamend_web/live/user_live/confirmation.ex:90
 #: lib/gamend_web/live/user_live/login.ex:17
@@ -161,13 +159,13 @@ msgid "Confirm"
 msgstr "Konfirmasi"
 
 #: lib/gamend_web/live/auth_success_live.ex:116
-#: lib/gamend_web/live/user_live/settings/data_tab.ex:73
+#: lib/gamend_web/live/user_live/settings/data_tab.ex:74
 #, elixir-autogen, elixir-format
 msgid "Content"
 msgstr "Konten"
 
-#: lib/gamend_web/live/lobby_live/index.ex:701
-#: lib/gamend_web/live/lobby_live/index.ex:720
+#: lib/gamend_web/live/lobby_live/index.ex:699
+#: lib/gamend_web/live/lobby_live/index.ex:718
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:76
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:85
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:122
@@ -175,20 +173,20 @@ msgstr "Konten"
 msgid "Create"
 msgstr "Buat"
 
-#: lib/gamend_web/live/groups_live.ex:461
+#: lib/gamend_web/live/groups_live.ex:457
 #: lib/gamend_web/live/notifications_live.ex:44
-#: lib/gamend_web/live/user_live/settings/data_tab.ex:72
+#: lib/gamend_web/live/user_live/settings/data_tab.ex:73
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:198
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:704
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:802
 #: lib/gamend_web/live/user_live/settings/payments_tab.ex:61
-#: lib/gamend_web/live/user_live/settings/wallet_tab.ex:61
+#: lib/gamend_web/live/user_live/settings/wallet_tab.ex:62
 #, elixir-autogen, elixir-format
 msgid "Date"
 msgstr "Tanggal"
 
 #: lib/gamend_web/controllers/page_controller.ex:22
-#: lib/gamend_web/live/admin_live/chat_filter.ex:589
+#: lib/gamend_web/live/admin_live/chat_filter.ex:582
 #: lib/gamend_web/live/chat_live.ex:280
 #: lib/gamend_web/live/chat_live.ex:282
 #: lib/gamend_web/live/notifications_live.ex:30
@@ -227,7 +225,7 @@ msgstr "Grup"
 #: lib/gamend_web/live/chat_live.ex:146
 #: lib/gamend_web/live/groups_live.ex:48
 #: lib/gamend_web/live/groups_live.ex:101
-#: lib/gamend_web/live/groups_live.ex:403
+#: lib/gamend_web/live/groups_live.ex:399
 #: lib/gamend_web/live/user_live/settings.ex:91
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:58
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:478
@@ -235,7 +233,7 @@ msgstr "Grup"
 msgid "Groups"
 msgstr "Grup"
 
-#: lib/gamend_web/live/lobby_live/index.ex:869
+#: lib/gamend_web/live/lobby_live/index.ex:867
 #: lib/gamend_web/live/quests_live.ex:749
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:111
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:154
@@ -244,7 +242,7 @@ msgid "Hidden"
 msgstr "Tersembunyi"
 
 #: lib/gamend_web/live/user_live/settings/account_tab.ex:90
-#: lib/gamend_web/live/user_live/settings/data_tab.ex:70
+#: lib/gamend_web/live/user_live/settings/data_tab.ex:71
 #, elixir-autogen, elixir-format
 msgid "ID"
 msgstr "ID"
@@ -258,11 +256,11 @@ msgstr "ID"
 msgid "Invite"
 msgstr "Undang"
 
-#: lib/gamend_web/live/groups_live.ex:544
-#: lib/gamend_web/live/groups_live.ex:719
-#: lib/gamend_web/live/lobby_live/index.ex:785
-#: lib/gamend_web/live/lobby_live/index.ex:797
-#: lib/gamend_web/live/tournaments_live.ex:748
+#: lib/gamend_web/live/groups_live.ex:540
+#: lib/gamend_web/live/groups_live.ex:715
+#: lib/gamend_web/live/lobby_live/index.ex:783
+#: lib/gamend_web/live/lobby_live/index.ex:795
+#: lib/gamend_web/live/tournaments_live.ex:749
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:661
 #, elixir-autogen, elixir-format
 msgid "Join"
@@ -270,8 +268,8 @@ msgstr "Gabung"
 
 #: lib/gamend_web/live/groups_live.ex:186
 #: lib/gamend_web/live/groups_live.ex:213
-#: lib/gamend_web/live/lobby_live/index.ex:432
-#: lib/gamend_web/live/lobby_live/index.ex:723
+#: lib/gamend_web/live/lobby_live/index.ex:430
+#: lib/gamend_web/live/lobby_live/index.ex:721
 #: lib/gamend_web/live/tournaments_live.ex:116
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:242
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:649
@@ -279,42 +277,42 @@ msgstr "Gabung"
 msgid "Joined"
 msgstr "Bergabung"
 
-#: lib/gamend_web/live/lobby_live/index.ex:922
+#: lib/gamend_web/live/lobby_live/index.ex:920
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:303
 #, elixir-autogen, elixir-format
 msgid "Kick"
 msgstr "Keluarkan"
 
-#: lib/gamend_web/live/groups_live.ex:708
-#: lib/gamend_web/live/lobby_live/index.ex:911
-#: lib/gamend_web/live/lobby_live/index.ex:947
-#: lib/gamend_web/live/tournaments_live.ex:742
+#: lib/gamend_web/live/groups_live.ex:704
+#: lib/gamend_web/live/lobby_live/index.ex:909
+#: lib/gamend_web/live/lobby_live/index.ex:945
+#: lib/gamend_web/live/tournaments_live.ex:743
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:225
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:566
 #, elixir-autogen, elixir-format
 msgid "Leave"
 msgstr "Keluar"
 
-#: lib/gamend_web/live/lobby_live/index.ex:778
-#: lib/gamend_web/live/lobby_live/index.ex:790
-#: lib/gamend_web/live/lobby_live/index.ex:860
+#: lib/gamend_web/live/lobby_live/index.ex:776
+#: lib/gamend_web/live/lobby_live/index.ex:788
+#: lib/gamend_web/live/lobby_live/index.ex:858
 #: lib/gamend_web/live/quests_live.ex:697
 #, elixir-autogen, elixir-format
 msgid "Locked"
 msgstr "Terkunci"
 
-#: lib/gamend_web/live/groups_live.ex:535
-#: lib/gamend_web/live/groups_live.ex:662
+#: lib/gamend_web/live/groups_live.ex:531
+#: lib/gamend_web/live/groups_live.ex:658
 #, elixir-autogen, elixir-format
 msgid "Member"
 msgstr "Anggota"
 
-#: lib/gamend_web/live/groups_live.ex:464
-#: lib/gamend_web/live/groups_live.ex:504
-#: lib/gamend_web/live/groups_live.ex:603
-#: lib/gamend_web/live/groups_live.ex:617
-#: lib/gamend_web/live/lobby_live/index.ex:893
-#: lib/gamend_web/live/lobby_live/index.ex:931
+#: lib/gamend_web/live/groups_live.ex:460
+#: lib/gamend_web/live/groups_live.ex:500
+#: lib/gamend_web/live/groups_live.ex:599
+#: lib/gamend_web/live/groups_live.ex:613
+#: lib/gamend_web/live/lobby_live/index.ex:891
+#: lib/gamend_web/live/lobby_live/index.ex:929
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:117
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:159
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:195
@@ -325,12 +323,12 @@ msgstr "Anggota"
 msgid "Members"
 msgstr "Anggota"
 
-#: lib/gamend_web/live/groups_live.ex:463
-#: lib/gamend_web/live/groups_live.ex:640
+#: lib/gamend_web/live/groups_live.ex:459
+#: lib/gamend_web/live/groups_live.ex:636
 #: lib/gamend_web/live/leaderboards_live.ex:314
-#: lib/gamend_web/live/tournaments_live.ex:659
+#: lib/gamend_web/live/tournaments_live.ex:660
 #: lib/gamend_web/live/user_live/settings/account_tab.ex:119
-#: lib/gamend_web/live/user_live/settings/data_tab.ex:71
+#: lib/gamend_web/live/user_live/settings/data_tab.ex:72
 #: lib/gamend_web/live/user_live/settings/friends_tab.ex:232
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:141
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:176
@@ -340,24 +338,24 @@ msgstr "Anggota"
 msgid "Name"
 msgstr "Nama"
 
-#: lib/gamend_web/live/groups_live.ex:462
+#: lib/gamend_web/live/groups_live.ex:458
 #, elixir-autogen, elixir-format
 msgid "Newest"
 msgstr "Terbaru"
 
-#: lib/gamend_web/components/core_components.ex:1082
+#: lib/gamend_web/components/core_components.ex:1095
 #, elixir-autogen, elixir-format
 msgid "Next"
 msgstr "Berikutnya"
 
-#: lib/gamend_web/components/core_components.ex:1066
+#: lib/gamend_web/components/core_components.ex:1079
 #, elixir-autogen, elixir-format
 msgid "Prev"
 msgstr "Sebelumnya"
 
-#: lib/gamend_web/live/groups_live.ex:441
-#: lib/gamend_web/live/groups_live.ex:494
-#: lib/gamend_web/live/groups_live.ex:584
+#: lib/gamend_web/live/groups_live.ex:437
+#: lib/gamend_web/live/groups_live.ex:490
+#: lib/gamend_web/live/groups_live.ex:580
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:110
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:153
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:599
@@ -370,9 +368,9 @@ msgstr "Privat"
 msgid "Promote"
 msgstr "Promosikan"
 
-#: lib/gamend_web/live/groups_live.ex:440
-#: lib/gamend_web/live/groups_live.ex:492
-#: lib/gamend_web/live/groups_live.ex:582
+#: lib/gamend_web/live/groups_live.ex:436
+#: lib/gamend_web/live/groups_live.ex:488
+#: lib/gamend_web/live/groups_live.ex:578
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:109
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:152
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:598
@@ -388,14 +386,14 @@ msgstr "Tolak"
 
 #: lib/gamend_web/live/user_live/settings/account_tab.ex:221
 #: lib/gamend_web/live/user_live/settings/account_tab.ex:225
-#: lib/gamend_web/live/user_live/settings/devices_tab.ex:78
+#: lib/gamend_web/live/user_live/settings/devices_tab.ex:79
 #: lib/gamend_web/live/user_live/settings/friends_tab.ex:157
 #, elixir-autogen, elixir-format
 msgid "Remove"
 msgstr "Hapus"
 
-#: lib/gamend_web/live/groups_live.ex:552
-#: lib/gamend_web/live/groups_live.ex:728
+#: lib/gamend_web/live/groups_live.ex:548
+#: lib/gamend_web/live/groups_live.ex:724
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:329
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:481
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:669
@@ -404,7 +402,7 @@ msgstr "Hapus"
 msgid "Request"
 msgstr "Permintaan"
 
-#: lib/gamend_web/live/groups_live.ex:641
+#: lib/gamend_web/live/groups_live.ex:637
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:203
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:241
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:513
@@ -412,9 +410,9 @@ msgstr "Permintaan"
 msgid "Role"
 msgstr "Peran"
 
-#: lib/gamend_web/live/admin_live/chat_mutes.ex:601
+#: lib/gamend_web/live/admin_live/chat_mutes.ex:595
 #: lib/gamend_web/live/chat_live.ex:252
-#: lib/gamend_web/live/lobby_live/index.ex:879
+#: lib/gamend_web/live/lobby_live/index.ex:877
 #: lib/gamend_web/live/user_live/settings/account_tab.ex:106
 #: lib/gamend_web/live/user_live/settings/account_tab.ex:123
 #: lib/gamend_web/live/user_live/settings/account_tab.ex:141
@@ -439,19 +437,19 @@ msgstr "Menyimpan..."
 msgid "Send"
 msgstr "Kirim"
 
-#: lib/gamend_web/live/admin_live/chat_reports.ex:421
-#: lib/gamend_web/live/admin_live/matchmaking.ex:208
-#: lib/gamend_web/live/groups_live.ex:457
+#: lib/gamend_web/live/admin_live/chat_reports.ex:415
+#: lib/gamend_web/live/admin_live/matchmaking.ex:194
+#: lib/gamend_web/live/groups_live.ex:453
 #: lib/gamend_web/live/quests_live.ex:880
 #: lib/gamend_web/live/store_live/index.ex:146
-#: lib/gamend_web/live/user_live/settings/devices_tab.ex:48
+#: lib/gamend_web/live/user_live/settings/devices_tab.ex:49
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:757
 #: lib/gamend_web/live/user_live/settings/payments_tab.ex:58
 #, elixir-autogen, elixir-format
 msgid "Status"
 msgstr "Status"
 
-#: lib/gamend_web/live/lobby_live/index.ex:718
+#: lib/gamend_web/live/lobby_live/index.ex:716
 #: lib/gamend_web/live/notifications_live.ex:42
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:96
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:510
@@ -476,8 +474,8 @@ msgstr "Tipe"
 msgid "Unblock"
 msgstr "Buka blokir"
 
-#: lib/gamend_web/live/lobby_live/index.ex:766
-#: lib/gamend_web/live/lobby_live/index.ex:775
+#: lib/gamend_web/live/lobby_live/index.ex:764
+#: lib/gamend_web/live/lobby_live/index.ex:773
 #: lib/gamend_web/live/notifications_live.ex:201
 #: lib/gamend_web/live/notifications_live.ex:202
 #: lib/gamend_web/live/notifications_live.ex:205
@@ -495,17 +493,17 @@ msgstr "Lihat"
 
 #: lib/gamend_web/live/chat_live.ex:224
 #: lib/gamend_web/live/leaderboards_live.ex:349
-#: lib/gamend_web/live/tournaments_live.ex:681
-#: lib/gamend_web/live/tournaments_live.ex:745
-#: lib/gamend_web/live/tournaments_live.ex:813
+#: lib/gamend_web/live/tournaments_live.ex:682
+#: lib/gamend_web/live/tournaments_live.ex:746
+#: lib/gamend_web/live/tournaments_live.ex:814
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:306
 #, elixir-autogen, elixir-format
 msgid "You"
 msgstr "Kamu"
 
-#: lib/gamend_web/live/groups_live.ex:429
+#: lib/gamend_web/live/groups_live.ex:425
 #: lib/gamend_web/live/leaderboards_live.ex:302
-#: lib/gamend_web/live/user_live/settings/data_tab.ex:46
+#: lib/gamend_web/live/user_live/settings/data_tab.ex:47
 #: lib/gamend_web/live/user_live/settings/friends_tab.ex:225
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:372
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:380
@@ -539,11 +537,11 @@ msgstr "Obrolan"
 msgid "Decline"
 msgstr "Tolak"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:581
-#: lib/gamend_web/live/admin_live/chat_mutes.ex:503
+#: lib/gamend_web/live/admin_live/chat_filter.ex:574
+#: lib/gamend_web/live/admin_live/chat_mutes.ex:497
 #: lib/gamend_web/live/chat_live.ex:271
 #: lib/gamend_web/live/chat_live.ex:273
-#: lib/gamend_web/live/lobby_live/index.ex:757
+#: lib/gamend_web/live/lobby_live/index.ex:755
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:217
 #, elixir-autogen, elixir-format
 msgid "Edit"
@@ -578,7 +576,7 @@ msgstr "Pilih percakapan"
 
 #: lib/gamend_web/components/content_pages.ex:253
 #: lib/gamend_web/live/leaderboards_live.ex:250
-#: lib/gamend_web/live/tournaments_live.ex:558
+#: lib/gamend_web/live/tournaments_live.ex:559
 #, elixir-autogen, elixir-format
 msgid "Newer"
 msgstr "Lebih baru"
@@ -586,7 +584,7 @@ msgstr "Lebih baru"
 #: lib/gamend_web/components/content_pages.ex:267
 #: lib/gamend_web/live/chat_live.ex:203
 #: lib/gamend_web/live/leaderboards_live.ex:235
-#: lib/gamend_web/live/tournaments_live.ex:547
+#: lib/gamend_web/live/tournaments_live.ex:548
 #, elixir-autogen, elixir-format
 msgid "Older"
 msgstr "Lebih lama"
@@ -611,10 +609,10 @@ msgstr "Memuat..."
 #: lib/gamend_web/live/groups_live.ex:80
 #: lib/gamend_web/live/leaderboards_live.ex:47
 #: lib/gamend_web/live/leaderboards_live.ex:79
-#: lib/gamend_web/live/lobby_live/index.ex:154
-#: lib/gamend_web/live/lobby_live/index.ex:178
-#: lib/gamend_web/live/lobby_live/index.ex:193
-#: lib/gamend_web/live/tournaments_live.ex:393
+#: lib/gamend_web/live/lobby_live/index.ex:152
+#: lib/gamend_web/live/lobby_live/index.ex:176
+#: lib/gamend_web/live/lobby_live/index.ex:191
+#: lib/gamend_web/live/tournaments_live.ex:396
 #: lib/gamend_web/live/user_live/settings/account_tab.ex:446
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:1368
 #, elixir-autogen, elixir-format
@@ -634,7 +632,7 @@ msgstr "Tidak ditemukan"
 #: lib/gamend_web/live/auth_success_live.ex:98
 #: lib/gamend_web/live/auth_success_live.ex:102
 #: lib/gamend_web/live/groups_live.ex:307
-#: lib/gamend_web/live/lobby_live/index.ex:272
+#: lib/gamend_web/live/lobby_live/index.ex:270
 #: lib/gamend_web/live/notifications_live.ex:163
 #: lib/gamend_web/live/notifications_live.ex:178
 #: lib/gamend_web/live/user_live/login.ex:153
@@ -647,7 +645,7 @@ msgstr "Tidak ditemukan"
 #: lib/gamend_web/live/user_live/settings/account_tab.ex:411
 #: lib/gamend_web/live/user_live/settings/account_tab.ex:429
 #: lib/gamend_web/live/user_live/settings/account_tab.ex:572
-#: lib/gamend_web/live/user_live/settings/devices_tab.ex:117
+#: lib/gamend_web/live/user_live/settings/devices_tab.ex:118
 #: lib/gamend_web/live/user_live/settings/friends_tab.ex:303
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:1084
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:1108
@@ -674,7 +672,7 @@ msgstr "Tidak boleh kosong."
 #: lib/gamend_web/live/notifications_live.ex:27
 #: lib/gamend_web/live/user_live/settings.ex:74
 #: lib/gamend_web/live/user_live/settings/account_tab.ex:258
-#: lib/gamend_web/live/user_live/settings/devices_tab.ex:75
+#: lib/gamend_web/live/user_live/settings/devices_tab.ex:76
 #, elixir-autogen, elixir-format
 msgid "Delete?"
 msgstr "Hapus?"
@@ -686,13 +684,13 @@ msgstr "Hapus?"
 #: lib/gamend_web/live/chat_live.ex:118
 #: lib/gamend_web/live/chat_live.ex:149
 #: lib/gamend_web/live/chat_live.ex:209
-#: lib/gamend_web/live/groups_live.ex:512
-#: lib/gamend_web/live/groups_live.ex:672
+#: lib/gamend_web/live/groups_live.ex:508
+#: lib/gamend_web/live/groups_live.ex:668
 #: lib/gamend_web/live/leaderboards_live.ex:169
 #: lib/gamend_web/live/leaderboards_live.ex:363
 #: lib/gamend_web/live/quests_live.ex:502
-#: lib/gamend_web/live/tournaments_live.ex:483
-#: lib/gamend_web/live/tournaments_live.ex:709
+#: lib/gamend_web/live/tournaments_live.ex:484
+#: lib/gamend_web/live/tournaments_live.ex:710
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:208
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:428
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:464
@@ -701,11 +699,11 @@ msgstr "Hapus?"
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:695
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:749
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:794
-#: lib/gamend_web/live/user_live/settings/items_tab.ex:58
+#: lib/gamend_web/live/user_live/settings/items_tab.ex:59
 #: lib/gamend_web/live/user_live/settings/payments_tab.ex:48
 #: lib/gamend_web/live/user_live/settings/payments_tab.ex:101
-#: lib/gamend_web/live/user_live/settings/wallet_tab.ex:33
-#: lib/gamend_web/live/user_live/settings/wallet_tab.ex:91
+#: lib/gamend_web/live/user_live/settings/wallet_tab.ex:34
+#: lib/gamend_web/live/user_live/settings/wallet_tab.ex:92
 #, elixir-autogen, elixir-format
 msgid "No results."
 msgstr "Tidak ada hasil."
@@ -730,7 +728,7 @@ msgstr "Terbuka"
 #: lib/gamend_web/controllers/user_session_controller.ex:56
 #: lib/gamend_web/controllers/user_session_controller.ex:76
 #: lib/gamend_web/controllers/user_session_controller.ex:104
-#: lib/gamend_web/live/admin_live/matchmaking.ex:198
+#: lib/gamend_web/live/admin_live/matchmaking.ex:184
 #: lib/gamend_web/live/auth_success_live.ex:72
 #: lib/gamend_web/live/auth_success_live.ex:74
 #: lib/gamend_web/live/auth_success_live.ex:137
@@ -744,14 +742,14 @@ msgstr "Terbuka"
 #: lib/gamend_web/live/groups_live.ex:189
 #: lib/gamend_web/live/groups_live.ex:223
 #: lib/gamend_web/live/groups_live.ex:310
-#: lib/gamend_web/live/lobby_live/index.ex:91
-#: lib/gamend_web/live/lobby_live/index.ex:134
-#: lib/gamend_web/live/lobby_live/index.ex:181
-#: lib/gamend_web/live/lobby_live/index.ex:286
-#: lib/gamend_web/live/lobby_live/index.ex:321
-#: lib/gamend_web/live/lobby_live/index.ex:372
-#: lib/gamend_web/live/lobby_live/index.ex:416
-#: lib/gamend_web/live/lobby_live/index.ex:464
+#: lib/gamend_web/live/lobby_live/index.ex:89
+#: lib/gamend_web/live/lobby_live/index.ex:132
+#: lib/gamend_web/live/lobby_live/index.ex:179
+#: lib/gamend_web/live/lobby_live/index.ex:284
+#: lib/gamend_web/live/lobby_live/index.ex:319
+#: lib/gamend_web/live/lobby_live/index.ex:370
+#: lib/gamend_web/live/lobby_live/index.ex:414
+#: lib/gamend_web/live/lobby_live/index.ex:462
 #: lib/gamend_web/live/tournaments_live.ex:174
 #: lib/gamend_web/live/user_live/confirmation.ex:95
 #: lib/gamend_web/live/user_live/registration.ex:151
@@ -762,7 +760,7 @@ msgstr "Terbuka"
 #: lib/gamend_web/live/user_live/settings/account_tab.ex:433
 #: lib/gamend_web/live/user_live/settings/account_tab.ex:541
 #: lib/gamend_web/live/user_live/settings/account_tab.ex:576
-#: lib/gamend_web/live/user_live/settings/devices_tab.ex:121
+#: lib/gamend_web/live/user_live/settings/devices_tab.ex:122
 #: lib/gamend_web/live/user_live/settings/friends_tab.ex:307
 #: lib/gamend_web/live/user_live/settings/friends_tab.ex:310
 #: lib/gamend_web/live/user_live/settings/friends_tab.ex:323
@@ -802,10 +800,10 @@ msgstr "Akunmu menunggu aktivasi."
 msgid "In Progress"
 msgstr "Berlangsung"
 
-#: lib/gamend_web/live/admin_live/matchmaking.ex:200
+#: lib/gamend_web/live/admin_live/matchmaking.ex:186
 #: lib/gamend_web/live/groups_live.ex:216
-#: lib/gamend_web/live/groups_live.ex:537
-#: lib/gamend_web/live/groups_live.ex:711
+#: lib/gamend_web/live/groups_live.ex:533
+#: lib/gamend_web/live/groups_live.ex:707
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:653
 #, elixir-autogen, elixir-format
 msgid "Pending"
@@ -814,7 +812,7 @@ msgstr "Menunggu"
 #: lib/gamend_web/live/leaderboards_live.ex:156
 #: lib/gamend_web/live/leaderboards_live.ex:205
 #: lib/gamend_web/live/store_live/index.ex:148
-#: lib/gamend_web/live/user_live/settings/devices_tab.ex:64
+#: lib/gamend_web/live/user_live/settings/devices_tab.ex:65
 #, elixir-autogen, elixir-format
 msgid "Active"
 msgstr "Aktif"
@@ -825,8 +823,8 @@ msgstr "Aktif"
 msgid "Ended"
 msgstr "Berakhir"
 
-#: lib/gamend_web/live/lobby_live/index.ex:904
-#: lib/gamend_web/live/lobby_live/index.ex:942
+#: lib/gamend_web/live/lobby_live/index.ex:902
+#: lib/gamend_web/live/lobby_live/index.ex:940
 #, elixir-autogen, elixir-format
 msgid "Host"
 msgstr "Host"
@@ -842,8 +840,8 @@ msgstr "Keluarkan?"
 msgid "Leave?"
 msgstr "Keluar?"
 
-#: lib/gamend_web/live/lobby_live/index.ex:44
-#: lib/gamend_web/live/lobby_live/index.ex:731
+#: lib/gamend_web/live/lobby_live/index.ex:42
+#: lib/gamend_web/live/lobby_live/index.ex:729
 #: lib/gamend_web/live/stats_live.ex:108
 #, elixir-autogen, elixir-format
 msgid "Lobbies"
@@ -860,7 +858,7 @@ msgstr "Privasi"
 msgid "Rank"
 msgstr "Peringkat"
 
-#: lib/gamend_web/live/lobby_live/index.ex:576
+#: lib/gamend_web/live/lobby_live/index.ex:574
 #, elixir-autogen, elixir-format
 msgid "Removed"
 msgstr "Dihapus"
@@ -876,7 +874,7 @@ msgid "Terms"
 msgstr "Ketentuan"
 
 #: lib/gamend_web/live/user_live/settings.ex:95
-#: lib/gamend_web/live/user_live/settings/data_tab.ex:31
+#: lib/gamend_web/live/user_live/settings/data_tab.ex:32
 #, elixir-autogen, elixir-format
 msgid "Data"
 msgstr "Data"
@@ -991,7 +989,7 @@ msgstr "Dapat diunduh"
 msgid "Environment"
 msgstr "Lingkungan"
 
-#: lib/gamend_web/live/admin_live/chat_mutes.ex:471
+#: lib/gamend_web/live/admin_live/chat_mutes.ex:465
 #: lib/gamend_web/live/user_live/settings/payments_tab.ex:231
 #, elixir-autogen, elixir-format
 msgid "Expires"
@@ -1003,7 +1001,7 @@ msgid "Grant"
 msgstr "Berikan"
 
 #: lib/gamend_web/live/store_live/index.ex:148
-#: lib/gamend_web/live/user_live/settings/devices_tab.ex:67
+#: lib/gamend_web/live/user_live/settings/devices_tab.ex:68
 #, elixir-autogen, elixir-format
 msgid "Inactive"
 msgstr "Tidak aktif"
@@ -1018,7 +1016,7 @@ msgstr "Permintaan masuk"
 msgid "Invalid payment state"
 msgstr "Status pembayaran tidak valid"
 
-#: lib/gamend_web/live/admin_live/matchmaking.ex:207
+#: lib/gamend_web/live/admin_live/matchmaking.ex:193
 #: lib/gamend_web/live/user_live/settings/payments_tab.ex:122
 #, elixir-autogen, elixir-format
 msgid "Kind"
@@ -1036,8 +1034,8 @@ msgid "Log in and remember me"
 msgstr "Masuk dan ingat saya"
 
 #: lib/gamend_web/live/user_live/settings/account_tab.ex:238
-#: lib/gamend_web/live/user_live/settings/data_tab.ex:74
-#: lib/gamend_web/live/user_live/settings/items_tab.ex:41
+#: lib/gamend_web/live/user_live/settings/data_tab.ex:75
+#: lib/gamend_web/live/user_live/settings/items_tab.ex:42
 #, elixir-autogen, elixir-format
 msgid "Metadata"
 msgstr "Metadata"
@@ -1122,7 +1120,7 @@ msgstr "Produk"
 
 #: lib/gamend_web/live/store_live/index.ex:134
 #: lib/gamend_web/live/store_live/index.ex:275
-#: lib/gamend_web/live/user_live/settings/devices_tab.ex:45
+#: lib/gamend_web/live/user_live/settings/devices_tab.ex:46
 #: lib/gamend_web/live/user_live/settings/payments_tab.ex:57
 #, elixir-autogen, elixir-format
 msgid "Provider"
@@ -1199,159 +1197,159 @@ msgstr "Kamu sudah memiliki item ini."
 msgid "Send magic link"
 msgstr "Kirim tautan ajaib"
 
-#: lib/gamend_web/live/tournaments_live.ex:357
-#: lib/gamend_web/live/tournaments_live.ex:584
-#: lib/gamend_web/live/tournaments_live.ex:660
-#: lib/gamend_web/live/tournaments_live.ex:691
-#: lib/gamend_web/live/tournaments_live.ex:787
+#: lib/gamend_web/live/tournaments_live.ex:360
+#: lib/gamend_web/live/tournaments_live.ex:585
+#: lib/gamend_web/live/tournaments_live.ex:661
+#: lib/gamend_web/live/tournaments_live.ex:692
+#: lib/gamend_web/live/tournaments_live.ex:788
 #, elixir-autogen, elixir-format
 msgid "Bracket"
 msgstr "Bagan"
 
-#: lib/gamend_web/live/tournaments_live.ex:569
+#: lib/gamend_web/live/tournaments_live.ex:570
 #, elixir-autogen, elixir-format
 msgid "Bracket size"
 msgstr "Ukuran bagan"
 
-#: lib/gamend_web/live/tournaments_live.ex:570
-#: lib/gamend_web/live/tournaments_live.ex:575
+#: lib/gamend_web/live/tournaments_live.ex:571
+#: lib/gamend_web/live/tournaments_live.ex:576
 #, elixir-autogen, elixir-format
 msgid "Brackets"
 msgstr "Bagan"
 
-#: lib/gamend_web/live/admin_live/matchmaking.ex:199
-#: lib/gamend_web/live/tournaments_live.ex:971
+#: lib/gamend_web/live/admin_live/matchmaking.ex:185
+#: lib/gamend_web/live/tournaments_live.ex:972
 #, elixir-autogen, elixir-format
 msgid "Cancelled"
 msgstr "Dibatalkan"
 
-#: lib/gamend_web/live/tournaments_live.ex:930
+#: lib/gamend_web/live/tournaments_live.ex:931
 #, elixir-autogen, elixir-format
 msgid "Final"
 msgstr "Final"
 
-#: lib/gamend_web/live/tournaments_live.ex:970
+#: lib/gamend_web/live/tournaments_live.ex:971
 #, elixir-autogen, elixir-format
 msgid "Finished"
 msgstr "Selesai"
 
-#: lib/gamend_web/live/admin_live/chat_mutes.ex:467
-#: lib/gamend_web/live/tournaments_live.ex:389
-#: lib/gamend_web/live/tournaments_live.ex:916
+#: lib/gamend_web/live/admin_live/chat_mutes.ex:461
+#: lib/gamend_web/live/tournaments_live.ex:392
+#: lib/gamend_web/live/tournaments_live.ex:917
 #, elixir-autogen, elixir-format
 msgid "Player"
 msgstr "Pemain"
 
-#: lib/gamend_web/live/tournaments_live.ex:932
+#: lib/gamend_web/live/tournaments_live.ex:933
 #, elixir-autogen, elixir-format
 msgid "Quarterfinal"
 msgstr "Perempat final"
 
-#: lib/gamend_web/live/tournaments_live.ex:968
+#: lib/gamend_web/live/tournaments_live.ex:969
 #, elixir-autogen, elixir-format
 msgid "Registration open"
 msgstr "Pendaftaran dibuka"
 
-#: lib/gamend_web/live/tournaments_live.ex:933
+#: lib/gamend_web/live/tournaments_live.ex:934
 #, elixir-autogen, elixir-format
 msgid "Round %{n}"
 msgstr "Ronde %{n}"
 
-#: lib/gamend_web/live/tournaments_live.ex:969
+#: lib/gamend_web/live/tournaments_live.ex:970
 #, elixir-autogen, elixir-format
 msgid "Running"
 msgstr "Berlangsung"
 
-#: lib/gamend_web/live/tournaments_live.ex:967
+#: lib/gamend_web/live/tournaments_live.ex:968
 #, elixir-autogen, elixir-format
 msgid "Scheduled"
 msgstr "Terjadwal"
 
-#: lib/gamend_web/live/tournaments_live.ex:931
+#: lib/gamend_web/live/tournaments_live.ex:932
 #, elixir-autogen, elixir-format
 msgid "Semifinal"
 msgstr "Semifinal"
 
-#: lib/gamend_web/live/tournaments_live.ex:523
-#: lib/gamend_web/live/tournaments_live.ex:798
+#: lib/gamend_web/live/tournaments_live.ex:524
+#: lib/gamend_web/live/tournaments_live.ex:799
 #, elixir-autogen, elixir-format
 msgid "Starts manually"
 msgstr "Mulai manual"
 
 #: lib/gamend_web/live/tournaments_live.ex:32
 #: lib/gamend_web/live/tournaments_live.ex:248
-#: lib/gamend_web/live/tournaments_live.ex:419
+#: lib/gamend_web/live/tournaments_live.ex:420
 #, elixir-autogen, elixir-format
 msgid "Tournaments"
 msgstr "Turnamen"
 
-#: lib/gamend_web/live/tournaments_live.ex:904
+#: lib/gamend_web/live/tournaments_live.ex:905
 #, elixir-autogen, elixir-format
 msgid "bye"
 msgstr "bye"
 
-#: lib/gamend_web/live/tournaments_live.ex:589
+#: lib/gamend_web/live/tournaments_live.ex:590
 #, elixir-autogen, elixir-format
 msgid "matches decided"
 msgstr "pertandingan diputuskan"
 
 #: lib/gamend_web/live/stats_live.ex:79
-#: lib/gamend_web/live/tournaments_live.ex:477
-#: lib/gamend_web/live/tournaments_live.ex:568
-#: lib/gamend_web/live/tournaments_live.ex:612
+#: lib/gamend_web/live/tournaments_live.ex:478
+#: lib/gamend_web/live/tournaments_live.ex:569
+#: lib/gamend_web/live/tournaments_live.ex:613
 #, elixir-autogen, elixir-format
 msgid "Players"
 msgstr "Pemain"
 
-#: lib/gamend_web/live/tournaments_live.ex:586
-#: lib/gamend_web/live/tournaments_live.ex:792
+#: lib/gamend_web/live/tournaments_live.ex:587
+#: lib/gamend_web/live/tournaments_live.ex:793
 #, elixir-autogen, elixir-format
 msgid "Slots"
 msgstr "Slot"
 
-#: lib/gamend_web/live/tournaments_live.ex:623
-#: lib/gamend_web/live/tournaments_live.ex:961
+#: lib/gamend_web/live/tournaments_live.ex:624
+#: lib/gamend_web/live/tournaments_live.ex:962
 #, elixir-autogen, elixir-format
 msgid "Champion"
 msgstr "Juara"
 
-#: lib/gamend_web/live/tournaments_live.ex:629
-#: lib/gamend_web/live/tournaments_live.ex:963
+#: lib/gamend_web/live/tournaments_live.ex:630
+#: lib/gamend_web/live/tournaments_live.ex:964
 #, elixir-autogen, elixir-format
 msgid "Eliminated"
 msgstr "Tersingkir"
 
-#: lib/gamend_web/live/tournaments_live.ex:626
-#: lib/gamend_web/live/tournaments_live.ex:962
+#: lib/gamend_web/live/tournaments_live.ex:627
+#: lib/gamend_web/live/tournaments_live.ex:963
 #, elixir-autogen, elixir-format
 msgid "Playing"
 msgstr "Bermain"
 
-#: lib/gamend_web/live/tournaments_live.ex:632
-#: lib/gamend_web/live/tournaments_live.ex:964
-#: lib/gamend_web/live/user_live/settings/devices_tab.ex:46
+#: lib/gamend_web/live/tournaments_live.ex:633
+#: lib/gamend_web/live/tournaments_live.ex:965
+#: lib/gamend_web/live/user_live/settings/devices_tab.ex:47
 #, elixir-autogen, elixir-format
 msgid "Registered"
 msgstr "Terdaftar"
 
-#: lib/gamend_web/live/tournaments_live.ex:662
+#: lib/gamend_web/live/tournaments_live.ex:663
 #, elixir-autogen, elixir-format
 msgid "Result"
 msgstr "Hasil"
 
-#: lib/gamend_web/live/groups_live.ex:629
-#: lib/gamend_web/live/tournaments_live.ex:647
+#: lib/gamend_web/live/groups_live.ex:625
+#: lib/gamend_web/live/tournaments_live.ex:648
 #, elixir-autogen, elixir-format
 msgid "Search players..."
 msgstr "Cari pemain..."
 
-#: lib/gamend_web/live/tournaments_live.ex:810
+#: lib/gamend_web/live/tournaments_live.ex:811
 #, elixir-autogen, elixir-format
 msgid "Showing"
 msgstr "Menampilkan"
 
-#: lib/gamend_web/live/tournaments_live.ex:661
-#: lib/gamend_web/live/tournaments_live.ex:819
+#: lib/gamend_web/live/tournaments_live.ex:662
+#: lib/gamend_web/live/tournaments_live.ex:820
 #, elixir-autogen, elixir-format
 msgid "Wins"
 msgstr "Kemenangan"
@@ -1386,7 +1384,7 @@ msgstr "Anda sudah terdaftar."
 msgid "You are not registered."
 msgstr "Anda belum terdaftar."
 
-#: lib/gamend_web/live/tournaments_live.ex:620
+#: lib/gamend_web/live/tournaments_live.ex:621
 #, elixir-autogen, elixir-format
 msgid "All results"
 msgstr "Semua hasil"
@@ -1396,12 +1394,12 @@ msgstr "Semua hasil"
 msgid "Avatar updated."
 msgstr "Avatar diperbarui."
 
-#: lib/gamend_web/live/user_live/settings/wallet_tab.ex:64
+#: lib/gamend_web/live/user_live/settings/wallet_tab.ex:65
 #, elixir-autogen, elixir-format
 msgid "Balance"
 msgstr "Saldo"
 
-#: lib/gamend_web/live/user_live/settings/wallet_tab.ex:63
+#: lib/gamend_web/live/user_live/settings/wallet_tab.ex:64
 #, elixir-autogen, elixir-format
 msgid "Change"
 msgstr "Perubahan"
@@ -1416,7 +1414,7 @@ msgstr "Ganti avatar"
 msgid "Could not update avatar."
 msgstr "Tidak dapat memperbarui avatar."
 
-#: lib/gamend_web/live/user_live/settings/wallet_tab.ex:62
+#: lib/gamend_web/live/user_live/settings/wallet_tab.ex:63
 #, elixir-autogen, elixir-format
 msgid "Currency"
 msgstr "Mata uang"
@@ -1426,18 +1424,18 @@ msgstr "Mata uang"
 msgid "File is too large or not a supported image."
 msgstr "Berkas terlalu besar atau bukan gambar yang didukung."
 
-#: lib/gamend_web/live/user_live/settings/items_tab.ex:39
+#: lib/gamend_web/live/user_live/settings/items_tab.ex:40
 #, elixir-autogen, elixir-format
 msgid "Item"
 msgstr "Item"
 
 #: lib/gamend_web/live/user_live/settings.ex:93
-#: lib/gamend_web/live/user_live/settings/items_tab.ex:28
+#: lib/gamend_web/live/user_live/settings/items_tab.ex:29
 #, elixir-autogen, elixir-format
 msgid "Items"
 msgstr "Item"
 
-#: lib/gamend_web/live/groups_live.ex:700
+#: lib/gamend_web/live/groups_live.ex:696
 #, elixir-autogen, elixir-format
 msgid "Open chat"
 msgstr "Buka obrolan"
@@ -1447,18 +1445,18 @@ msgstr "Buka obrolan"
 msgid "Please choose an image first."
 msgstr "Silakan pilih gambar terlebih dahulu."
 
-#: lib/gamend_web/live/user_live/settings/items_tab.ex:40
+#: lib/gamend_web/live/user_live/settings/items_tab.ex:41
 #, elixir-autogen, elixir-format
 msgid "Quantity"
 msgstr "Jumlah"
 
-#: lib/gamend_web/live/admin_live/chat_mutes.ex:396
-#: lib/gamend_web/live/admin_live/chat_mutes.ex:470
-#: lib/gamend_web/live/admin_live/chat_mutes.ex:567
-#: lib/gamend_web/live/admin_live/chat_reports.ex:420
-#: lib/gamend_web/live/admin_live/chat_reports.ex:581
-#: lib/gamend_web/live/admin_live/matchmaking.ex:209
-#: lib/gamend_web/live/user_live/settings/wallet_tab.ex:65
+#: lib/gamend_web/live/admin_live/chat_mutes.ex:390
+#: lib/gamend_web/live/admin_live/chat_mutes.ex:464
+#: lib/gamend_web/live/admin_live/chat_mutes.ex:561
+#: lib/gamend_web/live/admin_live/chat_reports.ex:414
+#: lib/gamend_web/live/admin_live/chat_reports.ex:575
+#: lib/gamend_web/live/admin_live/matchmaking.ex:195
+#: lib/gamend_web/live/user_live/settings/wallet_tab.ex:66
 #, elixir-autogen, elixir-format
 msgid "Reason"
 msgstr "Alasan"
@@ -1468,13 +1466,13 @@ msgstr "Alasan"
 msgid "Remove selected file"
 msgstr "Hapus berkas yang dipilih"
 
-#: lib/gamend_web/live/user_live/settings/wallet_tab.ex:48
+#: lib/gamend_web/live/user_live/settings/wallet_tab.ex:49
 #, elixir-autogen, elixir-format
 msgid "Transactions"
 msgstr "Transaksi"
 
 #: lib/gamend_web/live/user_live/settings.ex:92
-#: lib/gamend_web/live/user_live/settings/wallet_tab.ex:29
+#: lib/gamend_web/live/user_live/settings/wallet_tab.ex:30
 #, elixir-autogen, elixir-format
 msgid "Wallet"
 msgstr "Dompet"
@@ -1566,53 +1564,53 @@ msgid "Monthly"
 msgstr "Bulanan"
 
 #: lib/gamend_web/live/user_live/settings.ex:96
-#: lib/gamend_web/live/user_live/settings/devices_tab.ex:29
+#: lib/gamend_web/live/user_live/settings/devices_tab.ex:30
 #, elixir-autogen, elixir-format
 msgid "Devices"
 msgstr "Perangkat"
 
-#: lib/gamend_web/live/user_live/settings/devices_tab.ex:31
+#: lib/gamend_web/live/user_live/settings/devices_tab.ex:32
 #, elixir-autogen, elixir-format
 msgid "Devices registered for push notifications."
 msgstr "Perangkat yang terdaftar untuk notifikasi push."
 
-#: lib/gamend_web/live/user_live/settings/devices_tab.ex:47
+#: lib/gamend_web/live/user_live/settings/devices_tab.ex:48
 #, elixir-autogen, elixir-format
 msgid "Last used"
 msgstr "Terakhir digunakan"
 
-#: lib/gamend_web/live/user_live/settings/devices_tab.ex:37
+#: lib/gamend_web/live/user_live/settings/devices_tab.ex:38
 #, elixir-autogen, elixir-format
 msgid "No devices registered."
 msgstr "Tidak ada perangkat terdaftar."
 
-#: lib/gamend_web/live/user_live/settings/devices_tab.ex:44
+#: lib/gamend_web/live/user_live/settings/devices_tab.ex:45
 #, elixir-autogen, elixir-format
 msgid "Platform"
 msgstr "Platform"
 
-#: lib/gamend_web/live/admin_live/matchmaking.ex:197
+#: lib/gamend_web/live/admin_live/matchmaking.ex:183
 #, elixir-autogen, elixir-format
 msgid "Passed"
 msgstr "Lulus"
 
 #: lib/gamend_web/live/admin_live/lobbies.ex:403
-#: lib/gamend_web/live/admin_live/matchmaking.ex:210
+#: lib/gamend_web/live/admin_live/matchmaking.ex:196
 #, elixir-autogen, elixir-format
 msgid "Ready"
 msgstr "Siap"
 
-#: lib/gamend_web/live/admin_live/matchmaking.ex:193
+#: lib/gamend_web/live/admin_live/matchmaking.ex:179
 #, elixir-autogen, elixir-format
 msgid "Ready checks"
 msgstr "Pemeriksaan kesiapan"
 
-#: lib/gamend_web/live/admin_live/matchmaking.ex:194
+#: lib/gamend_web/live/admin_live/matchmaking.ex:180
 #, elixir-autogen, elixir-format
 msgid "last 24h"
 msgstr "24 jam terakhir"
 
-#: lib/gamend_web/live/admin_live/matchmaking.ex:211
+#: lib/gamend_web/live/admin_live/matchmaking.ex:197
 #, elixir-autogen, elixir-format
 msgid "Created"
 msgstr "Dibuat"
@@ -1650,32 +1648,32 @@ msgstr "Siap diklaim"
 msgid "View quest chain"
 msgstr "Lihat rantai misi"
 
-#: lib/gamend_web/live_helpers.ex:181
+#: lib/gamend_web/live_helpers.ex:184
 #, elixir-autogen, elixir-format
 msgid "Captcha check failed. Please try again."
 msgstr "Pemeriksaan captcha gagal. Coba lagi."
 
-#: lib/gamend_web/live_helpers.ex:184
+#: lib/gamend_web/live_helpers.ex:187
 #, elixir-autogen, elixir-format
 msgid "Could not reach the captcha service. Please try again."
 msgstr "Tidak dapat menghubungi layanan captcha. Coba lagi."
 
-#: lib/gamend_web/live_helpers.ex:177
+#: lib/gamend_web/live_helpers.ex:180
 #, elixir-autogen, elixir-format
 msgid "Please complete the captcha."
 msgstr "Harap selesaikan captcha."
 
-#: lib/gamend_web/live/admin_live/chat_reports.ex:360
+#: lib/gamend_web/live/admin_live/chat_reports.ex:354
 #, elixir-autogen, elixir-format
 msgid "%{count}d ago"
 msgstr "%{count} hari lalu"
 
-#: lib/gamend_web/live/admin_live/chat_reports.ex:359
+#: lib/gamend_web/live/admin_live/chat_reports.ex:353
 #, elixir-autogen, elixir-format
 msgid "%{count}h ago"
 msgstr "%{count} jam lalu"
 
-#: lib/gamend_web/live/admin_live/chat_reports.ex:358
+#: lib/gamend_web/live/admin_live/chat_reports.ex:352
 #, elixir-autogen, elixir-format
 msgid "%{count}m ago"
 msgstr "%{count} menit lalu"
@@ -1700,7 +1698,7 @@ msgstr "24 jam"
 msgid "7 days"
 msgstr "7 hari"
 
-#: lib/gamend_web/live/admin_live/chat_mutes.ex:356
+#: lib/gamend_web/live/admin_live/chat_mutes.ex:350
 #, elixir-autogen, elixir-format
 msgid "A muted player's messages are rejected before they are stored. A global mute covers every chat including friend DMs; a scoped mute silences one lobby, group or party."
 msgstr "Pesan pemain yang dibisukan ditolak sebelum disimpan. Pembisuan global mencakup semua obrolan termasuk DM antarteman; pembisuan bercakupan hanya membungkam satu lobi, grup, atau party."
@@ -1711,27 +1709,27 @@ msgstr "Pesan pemain yang dibisukan ditolak sebelum disimpan. Pembisuan global m
 msgid "A scoped mute needs the lobby, group or party id."
 msgstr "Pembisuan bercakupan memerlukan id lobi, grup, atau party."
 
-#: lib/gamend_web/live/admin_live/chat_mutes.ex:459
+#: lib/gamend_web/live/admin_live/chat_mutes.ex:453
 #, elixir-autogen, elixir-format
 msgid "Active only"
 msgstr "Hanya yang aktif"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:504
+#: lib/gamend_web/live/admin_live/chat_filter.ex:497
 #, elixir-autogen, elixir-format
 msgid "Add word"
 msgstr "Tambah kata"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:558
+#: lib/gamend_web/live/admin_live/chat_filter.ex:551
 #, elixir-autogen, elixir-format
 msgid "Added"
 msgstr "Ditambahkan"
 
-#: lib/gamend_web/live/admin_live/chat_reports.ex:422
+#: lib/gamend_web/live/admin_live/chat_reports.ex:416
 #, elixir-autogen, elixir-format
 msgid "Age"
 msgstr "Usia"
 
-#: lib/gamend_web/live/admin_live/chat_mutes.ex:446
+#: lib/gamend_web/live/admin_live/chat_mutes.ex:440
 #, elixir-autogen, elixir-format
 msgid "All scopes"
 msgstr "Semua cakupan"
@@ -1741,28 +1739,28 @@ msgstr "Semua cakupan"
 msgid "Avatar uploads are not available."
 msgstr "Unggah avatar tidak tersedia."
 
-#: lib/gamend_web/live/admin_live/chat_mutes.ex:334
-#: lib/gamend_web/live/admin_live/chat_reports.ex:371
+#: lib/gamend_web/live/admin_live/chat_mutes.ex:328
+#: lib/gamend_web/live/admin_live/chat_reports.ex:365
 #, elixir-autogen, elixir-format
 msgid "Back to Admin"
 msgstr "Kembali ke Admin"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:308
+#: lib/gamend_web/live/admin_live/chat_filter.ex:301
 #, elixir-autogen, elixir-format
 msgid "Blocked"
 msgstr "Diblokir"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:447
+#: lib/gamend_web/live/admin_live/chat_filter.ex:440
 #, elixir-autogen, elixir-format
 msgid "Blocklist"
 msgstr "Daftar blokir"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:328
+#: lib/gamend_web/live/admin_live/chat_filter.ex:321
 #, elixir-autogen, elixir-format
 msgid "Bundled lists"
 msgstr "Daftar bawaan"
 
-#: lib/gamend_web/live/admin_live/chat_mutes.ex:340
+#: lib/gamend_web/live/admin_live/chat_mutes.ex:334
 #, elixir-autogen, elixir-format
 msgid "Chat mutes"
 msgstr "Pembisuan obrolan"
@@ -1772,7 +1770,7 @@ msgstr "Pembisuan obrolan"
 msgid "Chat report %{id}"
 msgstr "Laporan obrolan %{id}"
 
-#: lib/gamend_web/live/admin_live/chat_reports.ex:377
+#: lib/gamend_web/live/admin_live/chat_reports.ex:371
 #, elixir-autogen, elixir-format
 msgid "Chat reports"
 msgstr "Laporan obrolan"
@@ -1803,17 +1801,17 @@ msgid "Could not resolve the report"
 msgstr "Tidak dapat menyelesaikan laporan"
 
 #: lib/gamend_web/live/admin_live/chat_reports.ex:293
-#: lib/gamend_web/live/admin_live/chat_reports.ex:493
+#: lib/gamend_web/live/admin_live/chat_reports.ex:487
 #, elixir-autogen, elixir-format
 msgid "Delete message"
 msgstr "Hapus pesan"
 
-#: lib/gamend_web/live/admin_live/chat_reports.ex:490
+#: lib/gamend_web/live/admin_live/chat_reports.ex:484
 #, elixir-autogen, elixir-format
 msgid "Delete this message?"
 msgstr "Hapus pesan ini?"
 
-#: lib/gamend_web/live/admin_live/chat_reports.ex:475
+#: lib/gamend_web/live/admin_live/chat_reports.ex:469
 #, elixir-autogen, elixir-format
 msgid "Dismiss"
 msgstr "Abaikan"
@@ -1823,14 +1821,14 @@ msgstr "Abaikan"
 msgid "Dismissed from the report queue"
 msgstr "Diabaikan dari antrean laporan"
 
-#: lib/gamend_web/live/admin_live/chat_mutes.ex:405
-#: lib/gamend_web/live/admin_live/chat_mutes.ex:554
-#: lib/gamend_web/live/admin_live/chat_reports.ex:544
+#: lib/gamend_web/live/admin_live/chat_mutes.ex:399
+#: lib/gamend_web/live/admin_live/chat_mutes.ex:548
+#: lib/gamend_web/live/admin_live/chat_reports.ex:538
 #, elixir-autogen, elixir-format
 msgid "Duration"
 msgstr "Durasi"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:314
+#: lib/gamend_web/live/admin_live/chat_filter.ex:307
 #, elixir-autogen, elixir-format
 msgid "Each hit becomes *** and the message is sent."
 msgstr "Setiap kecocokan diganti menjadi *** dan pesan tetap dikirim."
@@ -1840,12 +1838,12 @@ msgstr "Setiap kecocokan diganti menjadi *** dan pesan tetap dikirim."
 msgid "Enter the player id to mute."
 msgstr "Masukkan id pemain yang akan dibisukan."
 
-#: lib/gamend_web/live/admin_live/chat_reports.ex:347
+#: lib/gamend_web/live/admin_live/chat_reports.ex:341
 #, elixir-autogen, elixir-format
 msgid "Filter"
 msgstr "Filter"
 
-#: lib/gamend_web/live/admin_live/chat_reports.ex:407
+#: lib/gamend_web/live/admin_live/chat_reports.ex:401
 #, elixir-autogen, elixir-format
 msgid "Filter by reported user id"
 msgstr "Filter berdasarkan id pengguna yang dilaporkan"
@@ -1856,22 +1854,22 @@ msgstr "Filter berdasarkan id pengguna yang dilaporkan"
 msgid "Filter word limit reached"
 msgstr "Batas kata filter tercapai"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:310
+#: lib/gamend_web/live/admin_live/chat_filter.ex:303
 #, elixir-autogen, elixir-format
 msgid "Flagged"
 msgstr "Ditandai"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:414
+#: lib/gamend_web/live/admin_live/chat_filter.ex:407
 #, elixir-autogen, elixir-format
 msgid "Flagged by"
 msgstr "Ditandai oleh"
 
-#: lib/gamend_web/live/admin_live/chat_mutes.ex:391
+#: lib/gamend_web/live/admin_live/chat_mutes.ex:385
 #, elixir-autogen, elixir-format
 msgid "Global mutes leave this empty"
 msgstr "Kosongkan untuk pembisuan global"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:356
+#: lib/gamend_web/live/admin_live/chat_filter.ex:349
 #, elixir-autogen, elixir-format
 msgid "Import bundled list"
 msgstr "Impor daftar bawaan"
@@ -1896,7 +1894,7 @@ msgstr "Di party"
 msgid "In queue"
 msgstr "Dalam antrean"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:557
+#: lib/gamend_web/live/admin_live/chat_filter.ex:550
 #, elixir-autogen, elixir-format
 msgid "Lang"
 msgstr "Bahasa"
@@ -1911,33 +1909,33 @@ msgstr "Tautkan email atau penyedia masuk untuk mengatur avatar khusus."
 msgid "Lobbies and parties"
 msgstr "Lobi dan party"
 
-#: lib/gamend_web/live/admin_live/chat_mutes.ex:386
-#: lib/gamend_web/live/admin_live/chat_reports.ex:570
+#: lib/gamend_web/live/admin_live/chat_mutes.ex:380
+#: lib/gamend_web/live/admin_live/chat_reports.ex:564
 #, elixir-autogen, elixir-format
 msgid "Lobby / group / party id"
 msgstr "Id lobi / grup / party"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:309
+#: lib/gamend_web/live/admin_live/chat_filter.ex:302
 #, elixir-autogen, elixir-format
 msgid "Masked"
 msgstr "Disamarkan"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:422
+#: lib/gamend_web/live/admin_live/chat_filter.ex:415
 #, elixir-autogen, elixir-format
 msgid "Masking left a match behind, so the message is rejected rather than sent half-masked."
 msgstr "Penyamaran masih menyisakan kecocokan, jadi pesan ditolak alih-alih dikirim setengah disamarkan."
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:556
+#: lib/gamend_web/live/admin_live/chat_filter.ex:549
 #, elixir-autogen, elixir-format
 msgid "Match"
 msgstr "Kecocokan"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:330
+#: lib/gamend_web/live/admin_live/chat_filter.ex:323
 #, elixir-autogen, elixir-format
 msgid "Matching is language-agnostic: importing a language's list adds its words to one shared set, and lang only records where a row came from."
 msgstr "Pencocokan tidak bergantung pada bahasa: mengimpor daftar suatu bahasa akan menambahkan katanya ke satu himpunan bersama, dan bahasa hanya mencatat asal baris tersebut."
 
-#: lib/gamend_web/live/admin_live/chat_reports.ex:419
+#: lib/gamend_web/live/admin_live/chat_reports.ex:413
 #, elixir-autogen, elixir-format
 msgid "Message"
 msgstr "Pesan"
@@ -1959,18 +1957,18 @@ msgstr "Pesan dihapus dari antrean laporan"
 msgid "Mute not found"
 msgstr "Pembisuan tidak ditemukan"
 
-#: lib/gamend_web/live/admin_live/chat_mutes.ex:434
+#: lib/gamend_web/live/admin_live/chat_mutes.ex:428
 #: lib/gamend_web/live/admin_live/chat_reports.ex:290
 #, elixir-autogen, elixir-format
 msgid "Mute player"
 msgstr "Bisukan pemain"
 
-#: lib/gamend_web/live/admin_live/chat_reports.ex:501
+#: lib/gamend_web/live/admin_live/chat_reports.ex:495
 #, elixir-autogen, elixir-format
 msgid "Mute user"
 msgstr "Bisukan pengguna"
 
-#: lib/gamend_web/live/admin_live/chat_mutes.ex:468
+#: lib/gamend_web/live/admin_live/chat_mutes.ex:462
 #, elixir-autogen, elixir-format
 msgid "Muted by"
 msgstr "Dibisukan oleh"
@@ -1980,32 +1978,32 @@ msgstr "Dibisukan oleh"
 msgid "No bundled list for %{lang}"
 msgstr "Tidak ada daftar bawaan untuk %{lang}"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:369
+#: lib/gamend_web/live/admin_live/chat_filter.ex:362
 #, elixir-autogen, elixir-format
 msgid "No bundled lists are available. Drop one at priv/chat_filter/<lang>.txt."
 msgstr "Tidak ada daftar bawaan yang tersedia. Letakkan satu di priv/chat_filter/<lang>.txt."
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:598
+#: lib/gamend_web/live/admin_live/chat_filter.ex:591
 #, elixir-autogen, elixir-format
 msgid "No filter words."
 msgstr "Tidak ada kata filter."
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:311
+#: lib/gamend_web/live/admin_live/chat_filter.ex:304
 #, elixir-autogen, elixir-format
 msgid "No match"
 msgstr "Tidak ada kecocokan"
 
-#: lib/gamend_web/live/admin_live/chat_mutes.ex:521
+#: lib/gamend_web/live/admin_live/chat_mutes.ex:515
 #, elixir-autogen, elixir-format
 msgid "No mutes."
 msgstr "Tidak ada pembisuan."
 
-#: lib/gamend_web/live/admin_live/chat_reports.ex:511
+#: lib/gamend_web/live/admin_live/chat_reports.ex:505
 #, elixir-autogen, elixir-format
 msgid "No reports."
 msgstr "Tidak ada laporan."
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:437
+#: lib/gamend_web/live/admin_live/chat_filter.ex:430
 #, elixir-autogen, elixir-format
 msgid "Normalized"
 msgstr "Dinormalisasi"
@@ -2025,13 +2023,13 @@ msgstr "Party"
 msgid "Peers connected"
 msgstr "Peer terhubung"
 
-#: lib/gamend_web/live/admin_live/chat_mutes.ex:493
+#: lib/gamend_web/live/admin_live/chat_mutes.ex:487
 #: lib/gamend_web/live/admin_live/shared.ex:26
 #, elixir-autogen, elixir-format
 msgid "Permanent"
 msgstr "Permanen"
 
-#: lib/gamend_web/live/admin_live/chat_mutes.ex:369
+#: lib/gamend_web/live/admin_live/chat_mutes.ex:363
 #, elixir-autogen, elixir-format
 msgid "Player id"
 msgstr "Id pemain"
@@ -2047,29 +2045,29 @@ msgstr "Pemain dibisukan"
 msgid "Player unmuted"
 msgstr "Pembisuan pemain dibatalkan"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:462
-#: lib/gamend_web/live/admin_live/chat_mutes.ex:352
-#: lib/gamend_web/live/admin_live/chat_reports.ex:378
+#: lib/gamend_web/live/admin_live/chat_filter.ex:455
+#: lib/gamend_web/live/admin_live/chat_mutes.ex:346
+#: lib/gamend_web/live/admin_live/chat_reports.ex:372
 #, elixir-autogen, elixir-format
 msgid "Refresh"
 msgstr "Segarkan"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:313
+#: lib/gamend_web/live/admin_live/chat_filter.ex:306
 #, elixir-autogen, elixir-format
 msgid "Rejected before it is stored or broadcast."
 msgstr "Ditolak sebelum disimpan atau disiarkan."
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:361
+#: lib/gamend_web/live/admin_live/chat_filter.ex:354
 #, elixir-autogen, elixir-format
 msgid "Remove every word tagged with this language?"
 msgstr "Hapus semua kata yang ditandai dengan bahasa ini?"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:364
+#: lib/gamend_web/live/admin_live/chat_filter.ex:357
 #, elixir-autogen, elixir-format
 msgid "Remove this list"
 msgstr "Hapus daftar ini"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:586
+#: lib/gamend_web/live/admin_live/chat_filter.ex:579
 #, elixir-autogen, elixir-format
 msgid "Remove this word?"
 msgstr "Hapus kata ini?"
@@ -2090,17 +2088,17 @@ msgstr "Laporan diabaikan"
 msgid "Report not found"
 msgstr "Laporan tidak ditemukan"
 
-#: lib/gamend_web/live/admin_live/chat_reports.ex:417
+#: lib/gamend_web/live/admin_live/chat_reports.ex:411
 #, elixir-autogen, elixir-format
 msgid "Reported"
 msgstr "Dilaporkan"
 
-#: lib/gamend_web/live/admin_live/chat_reports.ex:418
+#: lib/gamend_web/live/admin_live/chat_reports.ex:412
 #, elixir-autogen, elixir-format
 msgid "Reporter"
 msgstr "Pelapor"
 
-#: lib/gamend_web/live/admin_live/chat_reports.ex:382
+#: lib/gamend_web/live/admin_live/chat_reports.ex:376
 #, elixir-autogen, elixir-format
 msgid "Reports players filed about a chat message, plus the ones the word filter files itself. Acting on a report resolves it."
 msgstr "Laporan yang diajukan pemain tentang sebuah pesan obrolan, ditambah laporan yang dibuat sendiri oleh filter kata. Menindaklanjuti sebuah laporan akan menyelesaikannya."
@@ -2115,34 +2113,34 @@ msgstr "Ruang diaktifkan"
 msgid "Rooms in use"
 msgstr "Ruang terpakai"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:385
+#: lib/gamend_web/live/admin_live/chat_filter.ex:378
 #, elixir-autogen, elixir-format
 msgid "Runs the phrase through the live blocklist, exactly as chat does."
 msgstr "Menjalankan frasa melalui daftar blokir aktif, persis seperti pada obrolan."
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:504
+#: lib/gamend_web/live/admin_live/chat_filter.ex:497
 #, elixir-autogen, elixir-format
 msgid "Save word"
 msgstr "Simpan kata"
 
-#: lib/gamend_web/live/admin_live/chat_mutes.ex:378
-#: lib/gamend_web/live/admin_live/chat_mutes.ex:469
-#: lib/gamend_web/live/admin_live/chat_reports.ex:556
+#: lib/gamend_web/live/admin_live/chat_mutes.ex:372
+#: lib/gamend_web/live/admin_live/chat_mutes.ex:463
+#: lib/gamend_web/live/admin_live/chat_reports.ex:550
 #, elixir-autogen, elixir-format
 msgid "Scope"
 msgstr "Cakupan"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:410
+#: lib/gamend_web/live/admin_live/chat_filter.ex:403
 #, elixir-autogen, elixir-format
 msgid "Sent as"
 msgstr "Dikirim sebagai"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:316
+#: lib/gamend_web/live/admin_live/chat_filter.ex:309
 #, elixir-autogen, elixir-format
 msgid "Sent unchanged."
 msgstr "Dikirim tanpa perubahan."
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:315
+#: lib/gamend_web/live/admin_live/chat_filter.ex:308
 #, elixir-autogen, elixir-format
 msgid "Sent verbatim, and a report is filed for the queue."
 msgstr "Dikirim apa adanya, dan sebuah laporan masuk ke antrean."
@@ -2153,7 +2151,7 @@ msgstr "Dikirim apa adanya, dan sebuah laporan masuk ke antrean."
 msgid "Server stats"
 msgstr "Statistik server"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:555
+#: lib/gamend_web/live/admin_live/chat_filter.ex:548
 #, elixir-autogen, elixir-format
 msgid "Severity"
 msgstr "Tingkat"
@@ -2163,12 +2161,12 @@ msgstr "Tingkat"
 msgid "Spectators"
 msgstr "Penonton"
 
-#: lib/gamend_web/live/admin_live/chat_mutes.ex:319
+#: lib/gamend_web/live/admin_live/chat_mutes.ex:313
 #, elixir-autogen, elixir-format
 msgid "System"
 msgstr "Sistem"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:383
+#: lib/gamend_web/live/admin_live/chat_filter.ex:376
 #, elixir-autogen, elixir-format
 msgid "Test a phrase"
 msgstr "Uji sebuah frasa"
@@ -2183,17 +2181,17 @@ msgstr "Berkas itu bukan gambar yang valid."
 msgid "Total"
 msgstr "Total"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:393
+#: lib/gamend_web/live/admin_live/chat_filter.ex:386
 #, elixir-autogen, elixir-format
 msgid "Type a message to test…"
 msgstr "Ketik pesan untuk diuji…"
 
-#: lib/gamend_web/live/admin_live/chat_mutes.ex:511
+#: lib/gamend_web/live/admin_live/chat_mutes.ex:505
 #, elixir-autogen, elixir-format
 msgid "Unmute"
 msgstr "Batalkan bisu"
 
-#: lib/gamend_web/live/admin_live/chat_mutes.ex:508
+#: lib/gamend_web/live/admin_live/chat_mutes.ex:502
 #, elixir-autogen, elixir-format
 msgid "Unmute this player?"
 msgstr "Batalkan pembisuan pemain ini?"
@@ -2203,7 +2201,7 @@ msgstr "Batalkan pembisuan pemain ini?"
 msgid "WebRTC"
 msgstr "WebRTC"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:554
+#: lib/gamend_web/live/admin_live/chat_filter.ex:547
 #, elixir-autogen, elixir-format
 msgid "Word"
 msgstr "Kata"
@@ -2225,12 +2223,12 @@ msgstr "Kata dihapus"
 msgid "Word saved"
 msgstr "Kata disimpan"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:531
+#: lib/gamend_web/live/admin_live/chat_filter.ex:524
 #, elixir-autogen, elixir-format
 msgid "all severities"
 msgstr "semua tingkat"
 
-#: lib/gamend_web/live/admin_live/chat_reports.ex:450
+#: lib/gamend_web/live/admin_live/chat_reports.ex:444
 #, elixir-autogen, elixir-format
 msgid "by"
 msgstr "oleh"
@@ -2240,43 +2238,43 @@ msgstr "oleh"
 msgid "deadline_at"
 msgstr "deadline_at"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:544
+#: lib/gamend_web/live/admin_live/chat_filter.ex:537
 #, elixir-autogen, elixir-format
 msgid "filter by lang"
 msgstr "filter menurut bahasa"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:526
+#: lib/gamend_web/live/admin_live/chat_filter.ex:519
 #, elixir-autogen, elixir-format
 msgid "filter by word"
 msgstr "filter menurut kata"
 
-#: lib/gamend_web/live/admin_live/chat_reports.ex:357
+#: lib/gamend_web/live/admin_live/chat_reports.ex:351
 #, elixir-autogen, elixir-format
 msgid "just now"
 msgstr "baru saja"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:500
+#: lib/gamend_web/live/admin_live/chat_filter.ex:493
 #, elixir-autogen, elixir-format
 msgid "lang (optional)"
 msgstr "bahasa (opsional)"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:475
+#: lib/gamend_web/live/admin_live/chat_filter.ex:468
 #, elixir-autogen, elixir-format
 msgid "word"
 msgstr "kata"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:373
+#: lib/gamend_web/live/admin_live/chat_filter.ex:366
 #, elixir-autogen, elixir-format
 msgid "Gamend ships no word list of its own; en.txt holds two placeholders."
 msgstr "Gamend tidak menyertakan daftar kata sendiri; en.txt berisi dua contoh."
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:375
+#: lib/gamend_web/live/admin_live/chat_filter.ex:368
 #, elixir-autogen, elixir-format
 msgid "The Chat guide lists public sources and how to install one."
 msgstr "Panduan Obrolan mencantumkan sumber publik dan cara memasangnya."
 
-#: lib/gamend_web/live/admin_live/chat_reports.ex:608
-#: lib/gamend_web/live/admin_live/chat_reports.ex:627
+#: lib/gamend_web/live/admin_live/chat_reports.ex:602
+#: lib/gamend_web/live/admin_live/chat_reports.ex:621
 #, elixir-autogen, elixir-format
 msgid "Blank sends the default notice"
 msgstr "Kosongkan untuk mengirim pemberitahuan bawaan"
@@ -2291,17 +2289,17 @@ msgstr "Tidak dapat mengambil laporan"
 msgid "Dismiss report"
 msgstr "Abaikan laporan"
 
-#: lib/gamend_web/live/admin_live/chat_mutes.ex:540
+#: lib/gamend_web/live/admin_live/chat_mutes.ex:534
 #, elixir-autogen, elixir-format
 msgid "Edit mute"
 msgstr "Edit pembisuan"
 
-#: lib/gamend_web/live/admin_live/chat_mutes.ex:261
+#: lib/gamend_web/live/admin_live/chat_mutes.ex:255
 #, elixir-autogen, elixir-format
 msgid "Keep current expiry"
 msgstr "Pertahankan kedaluwarsa saat ini"
 
-#: lib/gamend_web/live/admin_live/chat_reports.ex:604
+#: lib/gamend_web/live/admin_live/chat_reports.ex:598
 #, elixir-autogen, elixir-format
 msgid "Message to the player"
 msgstr "Pesan untuk pemain"
@@ -2316,14 +2314,14 @@ msgstr "Pembisuan diperbarui"
 msgid "Muted from the report queue"
 msgstr "Dibisukan dari antrean laporan"
 
-#: lib/gamend_web/live/admin_live/chat_mutes.ex:426
-#: lib/gamend_web/live/admin_live/chat_mutes.ex:586
-#: lib/gamend_web/live/admin_live/chat_reports.ex:599
+#: lib/gamend_web/live/admin_live/chat_mutes.ex:420
+#: lib/gamend_web/live/admin_live/chat_mutes.ex:580
+#: lib/gamend_web/live/admin_live/chat_reports.ex:593
 #, elixir-autogen, elixir-format
 msgid "Notify the player"
 msgstr "Beri tahu pemain"
 
-#: lib/gamend_web/live/admin_live/chat_reports.ex:622
+#: lib/gamend_web/live/admin_live/chat_reports.ex:616
 #, elixir-autogen, elixir-format
 msgid "Notify the reporter"
 msgstr "Beri tahu pelapor"
@@ -2338,12 +2336,12 @@ msgstr "Pemain diperingatkan"
 msgid "Report under review"
 msgstr "Laporan sedang ditinjau"
 
-#: lib/gamend_web/live/admin_live/chat_reports.ex:467
+#: lib/gamend_web/live/admin_live/chat_reports.ex:461
 #, elixir-autogen, elixir-format
 msgid "Review"
 msgstr "Tinjau"
 
-#: lib/gamend_web/live/admin_live/chat_reports.ex:483
+#: lib/gamend_web/live/admin_live/chat_reports.ex:477
 #, elixir-autogen, elixir-format
 msgid "Warn"
 msgstr "Peringatkan"
@@ -2363,8 +2361,8 @@ msgstr "Diperingatkan dari antrean laporan"
 msgid "View every quest in this group"
 msgstr "Lihat semua misi dalam grup ini"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:459
-#: lib/gamend_web/live/admin_live/chat_mutes.ex:349
+#: lib/gamend_web/live/admin_live/chat_filter.ex:452
+#: lib/gamend_web/live/admin_live/chat_mutes.ex:343
 #, elixir-autogen, elixir-format
 msgid "%{n} on this node"
 msgstr "%{n} di node ini"
@@ -2456,7 +2454,7 @@ msgstr "Tidak diizinkan"
 msgid "Page not found"
 msgstr "Halaman tidak ditemukan"
 
-#: lib/gamend_web/components/presentation_page.ex:551
+#: lib/gamend_web/components/presentation_page.ex:553
 #, elixir-autogen, elixir-format
 msgid "Play video"
 msgstr "Putar video"
@@ -2504,7 +2502,7 @@ msgstr "Terlalu banyak permintaan"
 msgid "UTC"
 msgstr "UTC"
 
-#: lib/gamend_web/live/admin_live/chat_mutes.ex:344
+#: lib/gamend_web/live/admin_live/chat_mutes.ex:338
 #, elixir-autogen, elixir-format
 msgid "Unexpired mutes loaded into this node's memory. Enforcement reads this, not the database."
 msgstr "Pembisuan aktif yang dimuat di memori node ini. Penegakan membaca ini, bukan basis data."
@@ -2514,7 +2512,7 @@ msgstr "Pembisuan aktif yang dimuat di memori node ini. Penegakan membaca ini, b
 msgid "Where to go next"
 msgstr "Ke mana selanjutnya"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:454
+#: lib/gamend_web/live/admin_live/chat_filter.ex:447
 #, elixir-autogen, elixir-format
 msgid "Words loaded into this node's in-memory matcher. A number below the database count means this node missed a change broadcast."
 msgstr "Kata-kata yang dimuat ke filter dalam memori node ini. Angka di bawah jumlah di basis data berarti node ini melewatkan siaran perubahan."
@@ -2539,3 +2537,13 @@ msgstr "30 hari terakhir"
 #, elixir-autogen, elixir-format
 msgid "last 7 days"
 msgstr "7 hari terakhir"
+
+#: lib/gamend_web/components/core_components.ex:492
+#, elixir-autogen, elixir-format
+msgid "Log in with %{provider}"
+msgstr "Masuk dengan %{provider}"
+
+#: lib/gamend_web/components/core_components.ex:493
+#, elixir-autogen, elixir-format
+msgid "Register with %{provider}"
+msgstr "Daftar dengan %{provider}"

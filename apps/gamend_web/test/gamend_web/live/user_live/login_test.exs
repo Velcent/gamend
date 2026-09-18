@@ -11,7 +11,33 @@ defmodule GamendWeb.UserLive.LoginTest do
       assert html =~ "Log in"
       assert html =~ "Register"
       assert html =~ "Email"
-      assert html =~ "Log in and remember me"
+      assert html =~ "Remember me"
+      assert html =~ "Forgot password?"
+    end
+
+    test "remember me is one checkbox, on by default, beside a single submit", %{conn: conn} do
+      {:ok, lv, _html} = live(conn, ~p"/users/log_in")
+
+      assert has_element?(
+               lv,
+               "#login_form_password input[type=checkbox][name='user[remember_me]'][checked]"
+             )
+
+      # The unchecked box must still post a value, or "false" never arrives.
+      assert has_element?(
+               lv,
+               "#login_form_password input[type=hidden][name='user[remember_me]'][value=false]"
+             )
+
+      assert lv |> element("#login_form_password button:not([type=button])") |> render() =~
+               "Log in"
+    end
+
+    test "forgot password points at the magic link", %{conn: conn} do
+      {:ok, lv, _html} = live(conn, ~p"/users/log_in")
+
+      assert has_element?(lv, "#forgot_password_link[phx-click]")
+      assert has_element?(lv, "#forgot_password_hint.hidden", "magic link")
     end
   end
 

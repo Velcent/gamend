@@ -9,50 +9,12 @@ defmodule GamendWeb.Api.V1.LobbyController do
   alias Gamend.Lobbies
   alias Gamend.Lobbies.SpectatorTracker
   alias Gamend.Parties
+  alias GamendWeb.Schemas
+  alias GamendWeb.Schemas.{Lobby, LobbyPage, LobbyResponse, LobbyStatsResponse}
   alias GamendWeb.Serializers
   alias OpenApiSpex.Schema
 
   tags(["Lobbies"])
-
-  # Shared schema for lobby response
-  @lobby_schema %Schema{
-    type: :object,
-    properties: %{
-      id: %Schema{type: :string, format: :uuid, description: "Lobby ID"},
-      title: %Schema{type: :string, description: "Display title"},
-      host_id: %Schema{
-        type: :string,
-        format: :uuid,
-        description: "User ID of the host",
-        nullable: true
-      },
-      host_name: %Schema{type: :string, description: "Display name of the host"},
-      hostless: %Schema{type: :boolean, description: "Whether this is a server-managed lobby"},
-      max_users: %Schema{type: :integer, description: "Maximum number of users allowed"},
-      is_hidden: %Schema{type: :boolean, description: "Hidden from public listings"},
-      is_locked: %Schema{type: :boolean, description: "Locked - no new joins allowed"},
-      is_passworded: %Schema{
-        type: :boolean,
-        description: "Whether this lobby requires a password to join"
-      },
-      metadata: %Schema{type: :object, description: "Arbitrary metadata"},
-      slowdown: %Schema{type: :integer, description: "Chat slowdown in seconds (0 = disabled)"}
-    },
-    example: %{
-      id: "0198c0de-0001-7000-8000-000000000001",
-      # 'name' (slug) intentionally omitted from API responses - use 'id' and 'title'
-      title: "My Game Lobby",
-      host_id: "0198c0de-0002-7000-8000-000000000002",
-      host_name: "PlayerOne",
-      hostless: false,
-      max_users: 8,
-      is_hidden: false,
-      is_locked: false,
-      is_passworded: false,
-      metadata: %{},
-      slowdown: 0
-    }
-  }
 
   operation(:index,
     operation_id: "list_lobbies",
@@ -109,25 +71,7 @@ defmodule GamendWeb.Api.V1.LobbyController do
       ]
     ],
     responses: [
-      ok:
-        {"List of lobbies (paginated)", "application/json",
-         %Schema{
-           type: :object,
-           properties: %{
-             data: %Schema{type: :array, items: @lobby_schema},
-             meta: %Schema{
-               type: :object,
-               properties: %{
-                 page: %Schema{type: :integer},
-                 page_size: %Schema{type: :integer},
-                 count: %Schema{type: :integer},
-                 total_count: %Schema{type: :integer},
-                 total_pages: %Schema{type: :integer},
-                 has_more: %Schema{type: :boolean}
-               }
-             }
-           }
-         }}
+      ok: {"List of lobbies (paginated)", "application/json", LobbyPage}
     ]
   )
 
@@ -173,13 +117,11 @@ defmodule GamendWeb.Api.V1.LobbyController do
       }
     },
     responses: [
-      created: {"Lobby created", "application/json", @lobby_schema},
-      conflict:
-        {"User already in a lobby", "application/json",
-         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}},
-      unauthorized:
-        {"Not authenticated", "application/json",
-         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}}
+      created: {"Lobby created", "application/json", Lobby},
+      conflict: Schemas.error("User already in a lobby, or validation failed"),
+      forbidden: Schemas.error("In a party without leading it, or the party cannot follow"),
+      unauthorized: Schemas.error("Not authenticated"),
+      unprocessable_entity: Schemas.error("Unexpected error")
     ]
   )
 
@@ -212,13 +154,12 @@ defmodule GamendWeb.Api.V1.LobbyController do
       }
     },
     responses: %{
-      200 => {"Updated lobby", "application/json", %Schema{type: :object}},
-      400 =>
-        {"Not in a lobby / missing state / malformed id", "application/json",
-         %Schema{type: :object}},
-      403 => {"No authority over the lobby", "application/json", %Schema{type: :object}},
-      404 => {"Not found", "application/json", %Schema{type: :object}},
-      422 => {"Unknown state or hook rejection", "application/json", %Schema{type: :object}}
+      200 => {"Updated lobby", "application/json", Lobby},
+      400 => Schemas.error("Not in a lobby / missing state / malformed id"),
+      401 => Schemas.error("Not authenticated"),
+      403 => Schemas.error("No authority over the lobby"),
+      404 => Schemas.error("Not found"),
+      422 => Schemas.error("Unknown state or hook rejection")
     }
   )
 
@@ -290,19 +231,12 @@ defmodule GamendWeb.Api.V1.LobbyController do
       }
     },
     responses: [
-      ok: {"Lobby updated", "application/json", @lobby_schema},
-      bad_request:
-        {"Not in a lobby, or malformed id", "application/json",
-         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}},
-      forbidden:
-        {"No authority over the lobby", "application/json",
-         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}},
-      not_found:
-        {"Not found", "application/json",
-         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}},
-      unauthorized:
-        {"Not authenticated", "application/json",
-         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}}
+      ok: {"Lobby updated", "application/json", Lobby},
+      bad_request: Schemas.error("Not in a lobby, or malformed id"),
+      forbidden: Schemas.error("No authority over the lobby"),
+      not_found: Schemas.error("Not found"),
+      unauthorized: Schemas.error("Not authenticated"),
+      unprocessable_entity: Schemas.error("Smaller than its members, or validation failed")
     ]
   )
 
@@ -332,13 +266,11 @@ defmodule GamendWeb.Api.V1.LobbyController do
       }
     },
     responses: [
-      ok: {"Successfully joined", "application/json", %Schema{type: :object}},
-      forbidden:
-        {"Cannot join (locked, full, wrong password, etc)", "application/json",
-         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}},
-      unauthorized:
-        {"Not authenticated", "application/json",
-         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}}
+      ok: {"Successfully joined", "application/json", Lobby},
+      forbidden: Schemas.error("Cannot join (locked, full, wrong password, etc)"),
+      not_found: Schemas.error("Lobby not found"),
+      conflict: Schemas.error("A party member is already in a lobby"),
+      unauthorized: Schemas.error("Not authenticated")
     ]
   )
 
@@ -349,12 +281,10 @@ defmodule GamendWeb.Api.V1.LobbyController do
     security: [%{"authorization" => []}],
     responses: [
       ok: {"Success", "application/json", %Schema{type: :object}},
-      bad_request:
-        {"Not in a lobby", "application/json",
-         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}},
-      unauthorized:
-        {"Not authenticated", "application/json",
-         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}}
+      bad_request: Schemas.error("Not in a lobby"),
+      forbidden: Schemas.error("Rejected by a hook"),
+      unauthorized: Schemas.error("Not authenticated"),
+      unprocessable_entity: Schemas.error("Unexpected error")
     ]
   )
 
@@ -368,15 +298,10 @@ defmodule GamendWeb.Api.V1.LobbyController do
     security: [%{"authorization" => []}],
     responses: [
       ok: {"Success", "application/json", %Schema{type: :object}},
-      bad_request:
-        {"Not in a lobby", "application/json",
-         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}},
-      forbidden:
-        {"Not the lobby host", "application/json",
-         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}},
-      unauthorized:
-        {"Not authenticated", "application/json",
-         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}}
+      bad_request: Schemas.error("Not in a lobby"),
+      forbidden: Schemas.error("Not the lobby host"),
+      unauthorized: Schemas.error("Not authenticated"),
+      unprocessable_entity: Schemas.error("Unexpected error")
     ]
   )
 
@@ -404,12 +329,11 @@ defmodule GamendWeb.Api.V1.LobbyController do
     },
     responses: [
       ok: {"User kicked", "application/json", %Schema{type: :object}},
-      forbidden:
-        {"Not the host or cannot kick this user", "application/json",
-         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}},
-      unauthorized:
-        {"Not authenticated", "application/json",
-         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}}
+      bad_request: Schemas.error("Not in a lobby"),
+      forbidden: Schemas.error("Not the host or cannot kick this user"),
+      not_found: Schemas.error("Target not in the lobby"),
+      unauthorized: Schemas.error("Not authenticated"),
+      unprocessable_entity: Schemas.error("Unexpected error")
     ]
   )
 
@@ -438,13 +362,11 @@ defmodule GamendWeb.Api.V1.LobbyController do
       }
     },
     responses: [
-      ok: {"Lobby joined or created", "application/json", @lobby_schema},
-      conflict:
-        {"User already in a lobby", "application/json",
-         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}},
-      unauthorized:
-        {"Not authenticated", "application/json",
-         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}}
+      ok: {"Lobby joined or created", "application/json", Lobby},
+      conflict: Schemas.error("User already in a lobby"),
+      forbidden: Schemas.error("Not the party leader, members offline, or rejected"),
+      unauthorized: Schemas.error("Not authenticated"),
+      unprocessable_entity: Schemas.error("Unexpected error")
     ]
   )
 
@@ -454,17 +376,7 @@ defmodule GamendWeb.Api.V1.LobbyController do
     description:
       "Aggregate lobby counts, including spectators. Public, and cached — treat the numbers as up to a minute old.",
     responses: [
-      ok:
-        GamendWeb.ApiStatsSchema.response("Lobby stats", [
-          :lobbies_total,
-          :spectators,
-          {:by_state,
-           %OpenApiSpex.Schema{
-             type: :object,
-             description: "Lobby count per game-defined lifecycle state.",
-             additionalProperties: %OpenApiSpex.Schema{type: :integer}
-           }}
-        ])
+      ok: {"Lobby stats", "application/json", LobbyStatsResponse}
     ]
   )
 
@@ -524,39 +436,9 @@ defmodule GamendWeb.Api.V1.LobbyController do
       ]
     ],
     responses: [
-      ok:
-        {"Lobby details", "application/json",
-         %Schema{
-           type: :object,
-           properties: %{
-             data: @lobby_schema,
-             spectator_count: %Schema{type: :integer, description: "Number of current spectators"},
-             members: %Schema{
-               type: :array,
-               items: %Schema{
-                 type: :object,
-                 properties: %{
-                   id: %Schema{type: :string, format: :uuid},
-                   username: %Schema{type: :string},
-                   display_name: %Schema{type: :string},
-                   profile_url: %Schema{type: :string},
-                   metadata: %Schema{
-                     type: :object,
-                     description: "User metadata (accessories, hat, color, etc.)"
-                   },
-                   is_online: %Schema{type: :boolean},
-                   last_seen_at: %Schema{type: :string, format: "date-time"}
-                 }
-               }
-             }
-           }
-         }},
-      bad_request:
-        {"Malformed id", "application/json",
-         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}},
-      not_found:
-        {"Not found", "application/json",
-         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}}
+      ok: {"Lobby details", "application/json", LobbyResponse},
+      bad_request: Schemas.error("Malformed id"),
+      not_found: Schemas.error("Not found")
     ]
   )
 

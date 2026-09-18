@@ -461,9 +461,12 @@ defmodule GamendWeb.CoreComponents do
   "or" divider. Renders nothing when no provider is enabled, so the auth
   forms need no branching of their own.
 
-      <.oauth_buttons label={gettext("Log in")} />
+      <.oauth_buttons action={:login} />
+
+  The label names the provider ("Log in with Discord"), so a row of buttons
+  does not read as the same word five times.
   """
-  attr :label, :string, required: true
+  attr :action, :atom, values: [:login, :register], required: true
 
   def oauth_buttons(assigns) do
     assigns = assign(assigns, :providers, Providers.enabled())
@@ -472,19 +475,31 @@ defmodule GamendWeb.CoreComponents do
     <div :if={@providers != []}>
       <div class="divider">{gettext("or")}</div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
+      <%!-- One column until lg: the form is max-w-sm below that, and a named
+           label ("Log in with Facebook") does not fit half of it. --%>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <.link
           :for={provider <- @providers}
           href={"/auth/#{provider}"}
-          class="btn btn-neutral w-full flex items-center justify-center gap-2"
+          class="btn btn-neutral w-full h-auto min-h-10 py-2 whitespace-normal flex items-center justify-center gap-2"
         >
           <.oauth_icon provider={provider} />
-          {@label}
+          {oauth_label(@action, oauth_name(provider))}
         </.link>
       </div>
     </div>
     """
   end
+
+  defp oauth_label(:login, name), do: gettext("Log in with %{provider}", provider: name)
+  defp oauth_label(:register, name), do: gettext("Register with %{provider}", provider: name)
+
+  # Brand names: never translated.
+  defp oauth_name(:discord), do: "Discord"
+  defp oauth_name(:google), do: "Google"
+  defp oauth_name(:apple), do: "Apple"
+  defp oauth_name(:facebook), do: "Facebook"
+  defp oauth_name(:steam), do: "Steam"
 
   attr :provider, :atom, required: true
 

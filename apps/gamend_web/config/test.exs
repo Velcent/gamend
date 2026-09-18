@@ -9,6 +9,10 @@ config :gamend_web, GamendWeb.Endpoint,
   secret_key_base: "dJoNJZBOt08JlBREyPV5xvuOdwgHPORxK9WHp/k3Cs+g0R9ctyheJ8/CMeg/AdI1",
   server: false
 
+# Check every documented API response against its OpenAPI schema
+# (GamendWeb.ResponseContract; docs/specs/named-api-schemas.md).
+config :gamend_web, :response_contract, true
+
 config :phoenix, :plug_init_mode, :runtime
 
 config :phoenix_live_view,

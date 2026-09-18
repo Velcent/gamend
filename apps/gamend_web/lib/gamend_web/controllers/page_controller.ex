@@ -14,19 +14,41 @@ defmodule GamendWeb.PageController do
   def privacy(conn, _params) do
     conn
     |> assign(:page_title, gettext("Privacy"))
+    |> assign_contact_email()
     |> render(:privacy)
   end
 
   def data_deletion(conn, _params) do
     conn
     |> assign(:page_title, gettext("Delete"))
+    |> assign_contact_email()
     |> render(:data_deletion)
   end
 
   def terms(conn, _params) do
     conn
     |> assign(:page_title, gettext("Terms"))
+    |> assign_contact_email()
     |> render(:terms)
+  end
+
+  # The legal pages name an address when the theme gives one (`contact_email`).
+  # Without it they fall back to "our support channels", which a store review or
+  # a GDPR request cannot act on — so a host shipping these pages should set it.
+  defp assign_contact_email(conn) do
+    locale = Gettext.get_locale(GamendWeb.Gettext)
+    theme = GamendWeb.Layouts.resolve_theme(locale, conn.assigns[:theme] || %{})
+    assign(conn, :contact_email, contact_email(theme))
+  end
+
+  defp contact_email(theme) do
+    with email when is_binary(email) <- Map.get(theme, "contact_email"),
+         email = String.trim(email),
+         true <- Regex.match?(~r/\A[^\s@]+@[^\s@]+\.[^\s@]+\z/, email) do
+      email
+    else
+      _ -> nil
+    end
   end
 
   defp render_presentation_page(conn, path, fallback_title) do

@@ -1,0 +1,168 @@
+defmodule GamendWeb.ResponseContract do
+  @moduledoc """
+  Test-only: fails any API response that does not match the OpenAPI schema
+  documented for it.
+
+  The endpoint plugs this in when `config :gamend_web, :response_contract,
+  true` is set at compile time (only `config/test.exs` does). Before each JSON
+  response from a documented operation, it checks that:
+
+    1. the body casts against the schema documented for the status;
+    2. no object carries a key its schema does not declare — the drift a typed
+       SDK would silently drop;
+    3. a 2xx status is documented. An undocumented error status must still be
+       an `ErrorResponse`: every error is that one type, so an unlisted status
+       costs a client nothing.
+
+  A violation raises inside the request, so every controller test is also a
+  contract test without being edited.
+
+  Only operations under `@enforced_tags` are checked. The list grows one domain
+  per slice of `docs/specs/named-api-schemas.md` and is deleted, with the tag
+  filter, once every domain is in.
+  """
+  @behaviour Plug
+
+  alias OpenApiSpex.{Cast, Operation, PathItem, Reference, Response, Schema}
+  alias OpenApiSpex.Plug.PutApiSpec
+
+  @enforced_tags MapSet.new(["Lobbies"])
+
+  defmodule Violation do
+    @moduledoc "A response that contradicts its documented schema."
+    defexception [:message]
+  end
+
+  @impl true
+  def init(opts), do: opts
+
+  @impl true
+  def call(conn, _opts), do: Plug.Conn.register_before_send(conn, &check/1)
+
+  @doc false
+  @spec check(Plug.Conn.t()) :: Plug.Conn.t()
+  def check(conn) do
+    with true <- json?(conn),
+         {:ok, spec, operation} <- operation(conn),
+         true <- enforced?(operation) do
+      verify(conn, spec, operation)
+    end
+
+    conn
+  end
+
+  # A 5xx is already a failure, and it is also the page Phoenix renders after a
+  # violation raised — checking it would replace the real message with its own.
+  defp json?(conn) do
+    conn.status != 204 and conn.status < 500 and
+      Enum.any?(Plug.Conn.get_resp_header(conn, "content-type"), &(&1 =~ "json"))
+  end
+
+  defp enforced?(%Operation{tags: tags}),
+    do: Enum.any?(tags || [], &MapSet.member?(@enforced_tags, &1))
+
+  # The spec is only on conns that went through the `:api` pipeline, which is
+  # also exactly the set of responses the document describes.
+  defp operation(%Plug.Conn{private: %{open_api_spex: _, phoenix_router: router}} = conn) do
+    {spec, _lookup} = PutApiSpec.get_spec_and_operation_lookup(conn)
+
+    with %{route: route} <-
+           Phoenix.Router.route_info(router, conn.method, conn.request_path, conn.host),
+         %PathItem{} = item <- Map.get(spec.paths, openapi_path(route)),
+         %Operation{} = operation <- Map.get(item, method_key(conn.method)) do
+      {:ok, spec, operation}
+    else
+      _ -> :skip
+    end
+  end
+
+  defp operation(_conn), do: :skip
+
+  defp openapi_path(route), do: Regex.replace(~r/:(\w+)/, route, "{\\1}")
+
+  defp method_key(method), do: method |> String.downcase() |> String.to_existing_atom()
+
+  defp verify(conn, spec, operation) do
+    schemas = spec.components.schemas
+    body = Jason.decode!(conn.resp_body)
+
+    schema =
+      case documented_schema(operation, conn.status) do
+        %{} = schema ->
+          schema
+
+        nil when conn.status >= 400 ->
+          %Reference{"$ref": "#/components/schemas/ErrorResponse"}
+
+        nil ->
+          violation!(conn, operation, "status #{conn.status} is not documented")
+      end
+
+    case Cast.cast(schema, body, schemas) do
+      {:ok, _} ->
+        :ok
+
+      {:error, errors} ->
+        violation!(conn, operation, Enum.map_join(errors, "; ", &Cast.Error.message_with_path/1))
+    end
+
+    case undeclared(schema, body, schemas, "") do
+      [] -> :ok
+      paths -> violation!(conn, operation, "undeclared keys: " <> Enum.join(paths, ", "))
+    end
+  end
+
+  defp documented_schema(%Operation{responses: responses}, status) do
+    case Map.get(responses || %{}, status) || Map.get(responses || %{}, to_string(status)) do
+      %Response{content: %{"application/json" => %{schema: schema}}} -> schema
+      _ -> nil
+    end
+  end
+
+  # Keys present in the body that no schema on their path declares. Objects
+  # with `additionalProperties` are maps by design; composed schemas
+  # (allOf/oneOf/anyOf) are left to the cast.
+  defp undeclared(%Reference{} = ref, value, schemas, path),
+    do: undeclared(resolve(ref, schemas), value, schemas, path)
+
+  defp undeclared(%Schema{additionalProperties: %Schema{} = inner}, value, schemas, path)
+       when is_map(value) do
+    Enum.flat_map(value, fn {key, v} -> undeclared(inner, v, schemas, "#{path}.#{key}") end)
+  end
+
+  defp undeclared(
+         %Schema{properties: %{} = properties, additionalProperties: nil},
+         value,
+         schemas,
+         path
+       )
+       when is_map(value) do
+    declared = Map.new(properties, fn {key, schema} -> {to_string(key), schema} end)
+
+    Enum.flat_map(value, fn {key, v} ->
+      case Map.fetch(declared, key) do
+        {:ok, schema} -> undeclared(schema, v, schemas, "#{path}.#{key}")
+        :error -> ["#{path}.#{key}"]
+      end
+    end)
+  end
+
+  defp undeclared(%Schema{type: :array, items: items}, value, schemas, path)
+       when is_list(value) and not is_nil(items) do
+    value
+    |> Enum.with_index()
+    |> Enum.flat_map(fn {v, i} -> undeclared(items, v, schemas, "#{path}[#{i}]") end)
+  end
+
+  defp undeclared(_schema, _value, _schemas, _path), do: []
+
+  defp resolve(%Reference{"$ref": "#/components/schemas/" <> name}, schemas),
+    do: Map.fetch!(schemas, name)
+
+  defp violation!(conn, %Operation{operationId: id}, message) do
+    raise Violation,
+      message:
+        "#{conn.method} #{conn.request_path} (#{id}) -> #{conn.status}: #{message}\n" <>
+          "body: #{conn.resp_body}"
+  end
+end
