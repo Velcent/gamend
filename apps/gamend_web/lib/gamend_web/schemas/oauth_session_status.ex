@@ -16,12 +16,12 @@ defmodule GamendWeb.Schemas.OAuthSessionStatus do
         description: "Current session status",
         enum: ["pending", "completed", "error", "conflict"]
       },
-      data: GamendWeb.Schemas.OAuthSessionData,
+      result: GamendWeb.Schemas.OAuthSessionData,
       message: %Schema{
         type: :string,
         description: "Optional human-readable message describing the current status"
       }
     },
-    required: [:status, :message, :data]
+    required: [:status, :message, :result]
   })
 end

@@ -13,7 +13,9 @@ defmodule GamendWeb.ResponseContract do
     3. a 2xx status is documented. An undocumented error status must still be
        an `ErrorResponse`: every error is that one type, so an unlisted status
        costs a client nothing;
-    4. a response documented as a bare `type: object` really is `{}`.
+    4. a response documented as a bare `type: object` really is `{}`;
+    5. an error's `error` is a snake_case code, and `errors` appears only
+       with `validation_failed` (422, or 409 for a uniqueness clash).
 
   A violation raises inside the request, so every controller test is also a
   contract test without being edited. Raising stops a test at its first
@@ -42,7 +44,9 @@ defmodule GamendWeb.ResponseContract do
                    "Parties",
                    "Chat",
                    "Notifications",
-                   "Push"
+                   "Push",
+                   "Leaderboards",
+                   "Tournaments"
                  ])
 
   defmodule Violation do
@@ -70,21 +74,17 @@ defmodule GamendWeb.ResponseContract do
 
   # A 5xx is already a failure, and it is also the page Phoenix renders after a
   # violation raised — checking it would replace the real message with its own.
-  #
-  # An exception rendered by `GamendWeb.ErrorJSON` (`{"errors": {"detail": …}}`)
-  # is skipped too: it is the endpoint's shape, not the operation's, and is
-  # listed under *Wire inconsistencies* in the spec.
   defp json?(conn) do
     conn.status != 204 and conn.status < 500 and
-      not rendered_error?(conn) and
       Enum.any?(Plug.Conn.get_resp_header(conn, "content-type"), &(&1 =~ "json"))
   end
 
-  # RenderErrors puts the error view over whatever the controller chose.
-  defp rendered_error?(conn),
-    do: GamendWeb.ErrorJSON in Map.values(conn.private[:phoenix_view] || %{})
-
-  defp enforced?(%Operation{tags: tags}),
+  @doc """
+  Whether an operation's tags are in the migration ratchet. Shared with
+  `GamendWeb.ApiShapeTest`, so the document and the responses convert together.
+  """
+  @spec enforced?(Operation.t()) :: boolean()
+  def enforced?(%Operation{tags: tags}),
     do: Enum.any?(tags || [], &MapSet.member?(@enforced_tags, &1))
 
   # The spec is only on conns that went through the `:api` pipeline, which is
@@ -141,7 +141,25 @@ defmodule GamendWeb.ResponseContract do
       [] -> :ok
       paths -> violation!(conn, operation, "undeclared keys: " <> Enum.join(paths, ", "))
     end
+
+    if conn.status >= 400, do: error_rules(conn, operation, body)
   end
+
+  # R12 and R15: an error is a snake_case code a client can switch on, and
+  # field detail rides only on `validation_failed`, which is 422 — or 409 for
+  # a uniqueness clash.
+  defp error_rules(conn, operation, %{"error" => code} = body) do
+    unless is_binary(code) and code =~ ~r/^[a-z][a-z0-9_]*$/ do
+      violation!(conn, operation, "error #{inspect(code)} is not a snake_case code")
+    end
+
+    if Map.has_key?(body, "errors") and
+         (code != "validation_failed" or conn.status not in [409, 422]) do
+      violation!(conn, operation, "errors belongs to validation_failed, answered 422 or 409")
+    end
+  end
+
+  defp error_rules(_conn, _operation, _body), do: :ok
 
   # A response documented as a bare `type: object` accepts anything, so a body
   # with keys in it is a body nobody wrote down — and a generator emits no type

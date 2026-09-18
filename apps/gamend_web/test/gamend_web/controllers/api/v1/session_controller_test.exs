@@ -171,7 +171,7 @@ defmodule GamendWeb.Api.V1.SessionControllerTest do
     test "returns 400 when refresh_token is missing", %{conn: conn} do
       conn = post(conn, "/api/v1/refresh", %{})
 
-      assert %{"error" => "refresh_token is required"} = json_response(conn, 400)
+      assert %{"error" => "missing_param"} = json_response(conn, 400)
     end
 
     test "returns 401 after a password change revokes the refresh token", %{
@@ -222,7 +222,7 @@ defmodule GamendWeb.Api.V1.SessionControllerTest do
     test "returns 200 with empty object", %{conn: conn} do
       conn = delete(conn, "/api/v1/logout")
 
-      assert json_response(conn, 200) == %{}
+      assert json_response(conn, 200) == %{"ok" => true}
     end
   end
 end

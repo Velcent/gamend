@@ -994,7 +994,7 @@ defmodule Gamend.Groups do
             "metadata" => %{
               "type" => "group_kicked",
               "group_id" => group_id,
-              "group_name" => group_title
+              "group_title" => group_title
             }
           }
         )
@@ -1056,7 +1056,7 @@ defmodule Gamend.Groups do
                     "metadata" => %{
                       "type" => "group_promoted",
                       "group_id" => group_id,
-                      "group_name" => group_title
+                      "group_title" => group_title
                     }
                   }
                 )
@@ -1115,7 +1115,7 @@ defmodule Gamend.Groups do
                     "metadata" => %{
                       "type" => "group_demoted",
                       "group_id" => group_id,
-                      "group_name" => group_title
+                      "group_title" => group_title
                     }
                   }
                 )
@@ -1145,7 +1145,7 @@ defmodule Gamend.Groups do
   trusted, so it skips both the friends-only check and the per-recipient
   notification cap that `Notifications.send_notification/2` enforces.
 
-  The `group_id` / `group_name` are stored in metadata so the client can
+  The `group_id` / `group_title` are stored in metadata so the client can
   recognise and route it.
 
   ## Options
@@ -1192,7 +1192,7 @@ defmodule Gamend.Groups do
           "metadata" =>
             Map.merge(clean_metadata, %{
               "group_id" => group_id,
-              "group_name" => group.title
+              "group_title" => group.title
             })
         }
 

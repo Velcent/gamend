@@ -529,7 +529,12 @@ func sync_lobby_channel(lobby_id: String) -> void:
 ## Model/response → plain Dictionary (generated models expose bzz_normalize).
 static func user_to_dict(response) -> Dictionary:
 	var payload = response.data if response is ApiApiResponseClient else response
-	var user_data = payload.get("data", payload) if payload is Dictionary else payload
+	# Every answer is {data: ...}: a generated response model, or the raw dict.
+	var user_data = payload
+	if payload is Dictionary:
+		user_data = payload.get("data", payload)
+	elif payload != null and "data" in payload:
+		user_data = payload.data
 	if user_data is Dictionary:
 		return (user_data as Dictionary).duplicate(true)
 	if user_data != null and user_data.has_method("bzz_normalize"):
@@ -543,12 +548,14 @@ static func lobby_to_dict(response) -> Dictionary:
 	var payload = response.data if response is ApiApiResponseClient else response
 	var lobby_data = payload
 	var raw_members: Array = []
+	# {data: lobby}; get_lobby puts the members inside the lobby itself.
 	if payload is GamendLobbyResponse:
 		lobby_data = payload.data
-		raw_members = payload.members
+		if lobby_data != null:
+			raw_members = lobby_data.members
 	elif payload is Dictionary:
 		lobby_data = payload.get("data", payload)
-		raw_members = payload.get("members", [])
+		raw_members = (lobby_data as Dictionary).get("members", []) if lobby_data is Dictionary else []
 	var lobby: Dictionary = {}
 	if lobby_data is Dictionary:
 		lobby = lobby_data.duplicate(true)

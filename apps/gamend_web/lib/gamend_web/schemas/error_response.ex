@@ -1,9 +1,8 @@
 defmodule GamendWeb.Schemas.ErrorResponse do
   @moduledoc """
-  Error response schema: every non-2xx JSON body. `errors` is the per-field
-  changeset detail `GamendWeb.ChangesetErrors` writes (R12); `reason` is the
-  extra word a hook rejection carries; `message` is prose for a person;
-  `details` is what older auth endpoints send instead of `errors`.
+  Every non-2xx JSON body (docs/specs/api-conventions.md, R12 and R15): a
+  snake_case `error` code, optional `message` prose for a person, and the
+  per-field `errors` only with `validation_failed`.
   """
   require OpenApiSpex
   alias OpenApiSpex.Schema
@@ -15,18 +14,14 @@ defmodule GamendWeb.Schemas.ErrorResponse do
     properties: %{
       error: %Schema{
         type: :string,
-        description: "snake_case reason, or a message",
+        pattern: "^[a-z][a-z0-9_]*$",
+        description: "snake_case reason a client can switch on",
         example: "not_found"
       },
-      reason: %Schema{type: :string, description: "Detail from a rejecting hook"},
       message: %Schema{type: :string, description: "A human-readable explanation"},
-      details: %Schema{
-        description:
-          "Older endpoints' extra detail: a string or a field map. New code uses `errors`."
-      },
       errors: %Schema{
         type: :object,
-        description: "Per-field validation messages, already translated",
+        description: "With validation_failed only: per-field messages, already translated",
         additionalProperties: %Schema{type: :array, items: %Schema{type: :string}}
       }
     },

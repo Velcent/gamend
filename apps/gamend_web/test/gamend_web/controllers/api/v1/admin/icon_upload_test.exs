@@ -75,6 +75,7 @@ defmodule GamendWeb.Api.V1.Admin.IconUploadTest do
           "content_type" => "image/png"
         })
         |> json_response(200)
+        |> Map.fetch!("data")
 
       assert String.starts_with?(resp["key"], "#{prefix}/#{id}/"),
              "#{segment}: key #{resp["key"]} not under #{prefix}/#{id}/"
@@ -93,6 +94,7 @@ defmodule GamendWeb.Api.V1.Admin.IconUploadTest do
           "content_type" => "image/png"
         })
         |> json_response(200)
+        |> Map.fetch!("data")
 
       up =
         conn

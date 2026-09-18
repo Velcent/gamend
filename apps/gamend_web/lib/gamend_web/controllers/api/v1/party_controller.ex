@@ -8,7 +8,15 @@ defmodule GamendWeb.Api.V1.PartyController do
   alias Gamend.Accounts.User
   alias Gamend.Parties
   alias GamendWeb.Schemas
-  alias GamendWeb.Schemas.{Lobby, Party, PartyInvite, PartyStatsResponse}
+
+  alias GamendWeb.Schemas.{
+    LobbyResponse,
+    OkResponse,
+    PartyInvitePage,
+    PartyResponse,
+    PartyStatsResponse
+  }
+
   alias GamendWeb.Serializers
   alias OpenApiSpex.Schema
 
@@ -20,7 +28,7 @@ defmodule GamendWeb.Api.V1.PartyController do
     description: "Get the party the authenticated user is currently in, including members.",
     security: [%{"authorization" => []}],
     responses: [
-      ok: {"Party details", "application/json", Party},
+      ok: {"Party details", "application/json", PartyResponse},
       not_found: Schemas.error("Not in a party"),
       unauthorized: Schemas.error("Not authenticated")
     ]
@@ -49,7 +57,7 @@ defmodule GamendWeb.Api.V1.PartyController do
       }
     },
     responses: [
-      created: {"Party created", "application/json", Party},
+      created: {"Party created", "application/json", PartyResponse},
       conflict: Schemas.error("Already in a party"),
       unauthorized: Schemas.error("Not authenticated")
     ]
@@ -62,7 +70,7 @@ defmodule GamendWeb.Api.V1.PartyController do
       "Leave the party you are currently in. A leader hands it to the next member; the last member out disbands it.",
     security: [%{"authorization" => []}],
     responses: [
-      ok: {"Success", "application/json", %Schema{type: :object}},
+      ok: {"Success", "application/json", OkResponse},
       bad_request: Schemas.error("Not in a party"),
       unauthorized: Schemas.error("Not authenticated")
     ]
@@ -76,7 +84,7 @@ defmodule GamendWeb.Api.V1.PartyController do
         "to the next member, so ending it outright is its own act and only the leader may do it.",
     security: [%{"authorization" => []}],
     responses: [
-      ok: {"Success", "application/json", %Schema{type: :object}},
+      ok: {"Success", "application/json", OkResponse},
       bad_request: Schemas.error("Not in a party"),
       forbidden: Schemas.error("Not the party leader"),
       unauthorized: Schemas.error("Not authenticated")
@@ -108,7 +116,7 @@ defmodule GamendWeb.Api.V1.PartyController do
       }
     },
     responses: [
-      ok: {"Invite sent", "application/json", %Schema{type: :object}},
+      ok: {"Invite sent", "application/json", OkResponse},
       forbidden: Schemas.error("Not the leader or target not connected"),
       conflict: Schemas.error("Target already in a party or already invited"),
       unauthorized: Schemas.error("Not authenticated")
@@ -137,7 +145,7 @@ defmodule GamendWeb.Api.V1.PartyController do
       }
     },
     responses: [
-      ok: {"Invite cancelled", "application/json", %Schema{type: :object}},
+      ok: {"Invite cancelled", "application/json", OkResponse},
       forbidden: Schemas.error("Not the leader"),
       unauthorized: Schemas.error("Not authenticated")
     ]
@@ -163,7 +171,7 @@ defmodule GamendWeb.Api.V1.PartyController do
       }
     },
     responses: [
-      ok: {"Joined party", "application/json", Party},
+      ok: {"Joined party", "application/json", PartyResponse},
       not_found: Schemas.error("No invite found or party not found"),
       conflict: Schemas.error("Already in a party"),
       forbidden: Schemas.error("Party full"),
@@ -193,7 +201,7 @@ defmodule GamendWeb.Api.V1.PartyController do
       }
     },
     responses: [
-      ok: {"Invite declined", "application/json", %Schema{type: :object}},
+      ok: {"Invite declined", "application/json", OkResponse},
       unauthorized: Schemas.error("Not authenticated")
     ]
   )
@@ -203,8 +211,12 @@ defmodule GamendWeb.Api.V1.PartyController do
     summary: "List pending party invites for the current user",
     description: "Returns all pending PartyInvite records addressed to the authenticated user.",
     security: [%{"authorization" => []}],
+    parameters: [
+      page: [in: :query, schema: %Schema{type: :integer}, description: "Page number (1-based)"],
+      page_size: [in: :query, schema: %Schema{type: :integer}, description: "Rows per page"]
+    ],
     responses: [
-      ok: {"List of invitations", "application/json", %Schema{type: :array, items: PartyInvite}},
+      ok: {"List of invitations", "application/json", PartyInvitePage},
       unauthorized: Schemas.error("Not authenticated")
     ]
   )
@@ -215,10 +227,12 @@ defmodule GamendWeb.Api.V1.PartyController do
     description:
       "Returns all pending PartyInvite records the authenticated leader has sent that have not yet been accepted or declined.",
     security: [%{"authorization" => []}],
+    parameters: [
+      page: [in: :query, schema: %Schema{type: :integer}, description: "Page number (1-based)"],
+      page_size: [in: :query, schema: %Schema{type: :integer}, description: "Rows per page"]
+    ],
     responses: [
-      ok:
-        {"List of sent invitations", "application/json",
-         %Schema{type: :array, items: PartyInvite}},
+      ok: {"List of sent invitations", "application/json", PartyInvitePage},
       unauthorized: Schemas.error("Not authenticated")
     ]
   )
@@ -245,7 +259,7 @@ defmodule GamendWeb.Api.V1.PartyController do
       }
     },
     responses: [
-      ok: {"User kicked", "application/json", %Schema{type: :object}},
+      ok: {"User kicked", "application/json", OkResponse},
       forbidden: Schemas.error("Not the leader"),
       unauthorized: Schemas.error("Not authenticated")
     ]
@@ -270,7 +284,7 @@ defmodule GamendWeb.Api.V1.PartyController do
       }
     },
     responses: [
-      ok: {"Party updated", "application/json", Party},
+      ok: {"Party updated", "application/json", PartyResponse},
       forbidden: Schemas.error("Not the leader"),
       unauthorized: Schemas.error("Not authenticated")
     ]
@@ -299,7 +313,7 @@ defmodule GamendWeb.Api.V1.PartyController do
       }
     },
     responses: [
-      created: {"Lobby created with all party members", "application/json", Lobby},
+      created: {"Lobby created with all party members", "application/json", LobbyResponse},
       forbidden: Schemas.error("Not the leader or lobby too small"),
       unauthorized: Schemas.error("Not authenticated")
     ]
@@ -331,7 +345,7 @@ defmodule GamendWeb.Api.V1.PartyController do
       }
     },
     responses: [
-      ok: {"Lobby joined with all party members", "application/json", Lobby},
+      ok: {"Lobby joined with all party members", "application/json", LobbyResponse},
       forbidden: Schemas.error("Cannot join (not enough space, locked, wrong password, etc)"),
       unauthorized: Schemas.error("Not authenticated")
     ]
@@ -351,25 +365,25 @@ defmodule GamendWeb.Api.V1.PartyController do
     ]
   )
 
-  def stats(conn, _params), do: json(conn, %{data: Parties.stats()})
+  def stats(conn, _params), do: reply_data(conn, Parties.stats())
 
   def show(conn, _params) do
     case Scope.user(conn.assigns[:current_scope]) do
       %User{} = user ->
         if is_nil(user.party_id) do
-          conn |> put_status(:not_found) |> json(%{error: "not_in_party"})
+          reply_error(conn, :not_found, "not_in_party")
         else
           party = Parties.get_party(user.party_id)
 
           if is_nil(party) do
-            conn |> put_status(:not_found) |> json(%{error: "party_not_found"})
+            reply_error(conn, :not_found, "party_not_found")
           else
-            json(conn, serialize_party(party))
+            reply_data(conn, serialize_party(party))
           end
         end
 
       _ ->
-        conn |> put_status(:unauthorized) |> json(%{error: "Not authenticated"})
+        reply_error(conn, :unauthorized, "not_authenticated")
     end
   end
 
@@ -378,22 +392,20 @@ defmodule GamendWeb.Api.V1.PartyController do
       %User{} = user ->
         case Parties.create_party(user, params) do
           {:ok, party} ->
-            conn
-            |> put_status(:created)
-            |> json(serialize_party(party))
+            reply_data(conn, :created, serialize_party(party))
 
           {:error, :already_in_party} ->
-            conn |> put_status(:conflict) |> json(%{error: "already_in_party"})
+            reply_error(conn, :conflict, "already_in_party")
 
           {:error, %Ecto.Changeset{} = changeset} ->
             unprocessable(conn, changeset)
 
           _other ->
-            conn |> put_status(:unprocessable_entity) |> json(%{error: "unexpected_error"})
+            reply_error(conn, :unprocessable_entity, "unexpected_error")
         end
 
       _ ->
-        conn |> put_status(:unauthorized) |> json(%{error: "Not authenticated"})
+        reply_error(conn, :unauthorized, "not_authenticated")
     end
   end
 
@@ -402,17 +414,17 @@ defmodule GamendWeb.Api.V1.PartyController do
       %User{} = user ->
         case Parties.leave_party(user) do
           {:ok, _} ->
-            json(conn, %{})
+            reply_ok(conn)
 
           {:error, :not_in_party} ->
-            json(conn, %{})
+            reply_ok(conn)
 
           _other ->
-            conn |> put_status(:unprocessable_entity) |> json(%{error: "unexpected_error"})
+            reply_error(conn, :unprocessable_entity, "unexpected_error")
         end
 
       _ ->
-        conn |> put_status(:unauthorized) |> json(%{error: "Not authenticated"})
+        reply_error(conn, :unauthorized, "not_authenticated")
     end
   end
 
@@ -422,10 +434,10 @@ defmodule GamendWeb.Api.V1.PartyController do
         do_disband(conn, user, Parties.get_party(party_id))
 
       %User{} ->
-        conn |> put_status(:bad_request) |> json(%{error: "not_in_party"})
+        reply_error(conn, :bad_request, "not_in_party")
 
       _ ->
-        conn |> put_status(:unauthorized) |> json(%{error: "Not authenticated"})
+        reply_error(conn, :unauthorized, "not_authenticated")
     end
   end
 
@@ -435,51 +447,51 @@ defmodule GamendWeb.Api.V1.PartyController do
   defp do_disband(conn, user, %{} = party) do
     if Parties.can_manage_party?(user, party) do
       case Parties.disband(party) do
-        {:ok, _} -> json(conn, %{})
-        _ -> conn |> put_status(:unprocessable_entity) |> json(%{error: "unexpected_error"})
+        {:ok, _} -> reply_ok(conn)
+        _ -> reply_error(conn, :unprocessable_entity, "unexpected_error")
       end
     else
-      conn |> put_status(:forbidden) |> json(%{error: "not_party_leader"})
+      reply_error(conn, :forbidden, "not_party_leader")
     end
   end
 
   defp do_disband(conn, _user, _party),
-    do: conn |> put_status(:bad_request) |> json(%{error: "not_in_party"})
+    do: reply_error(conn, :bad_request, "not_in_party")
 
   def invite(conn, %{"target_user_id" => target_user_id}) do
     case Scope.user(conn.assigns[:current_scope]) do
       %User{} = user ->
         case parse_id(target_user_id) do
           nil ->
-            conn |> put_status(:bad_request) |> json(%{error: "invalid_id"})
+            reply_error(conn, :bad_request, "invalid_id")
 
           target_id ->
             case Parties.invite_to_party(user, target_id) do
               {:ok, _invite} ->
-                json(conn, %{})
+                reply_ok(conn)
 
               {:error, :not_in_party} ->
-                conn |> put_status(:bad_request) |> json(%{error: "not_in_party"})
+                reply_error(conn, :bad_request, "not_in_party")
 
               {:error, :not_leader} ->
-                conn |> put_status(:forbidden) |> json(%{error: "not_leader"})
+                reply_error(conn, :forbidden, "not_leader")
 
               {:error, :user_not_found} ->
-                conn |> put_status(:not_found) |> json(%{error: "user_not_found"})
+                reply_error(conn, :not_found, "user_not_found")
 
               {:error, :already_in_party} ->
-                conn |> put_status(:conflict) |> json(%{error: "already_in_party"})
+                reply_error(conn, :conflict, "already_in_party")
 
               {:error, :not_connected} ->
-                conn |> put_status(:forbidden) |> json(%{error: "not_connected"})
+                reply_error(conn, :forbidden, "not_connected")
 
               _other ->
-                conn |> put_status(:unprocessable_entity) |> json(%{error: "unexpected_error"})
+                reply_error(conn, :unprocessable_entity, "unexpected_error")
             end
         end
 
       _ ->
-        conn |> put_status(:unauthorized) |> json(%{error: "Not authenticated"})
+        reply_error(conn, :unauthorized, "not_authenticated")
     end
   end
 
@@ -488,26 +500,26 @@ defmodule GamendWeb.Api.V1.PartyController do
       %User{} = user ->
         case parse_id(target_user_id) do
           nil ->
-            conn |> put_status(:bad_request) |> json(%{error: "invalid_id"})
+            reply_error(conn, :bad_request, "invalid_id")
 
           target_id ->
             case Parties.cancel_party_invite(user, target_id) do
               :ok ->
-                json(conn, %{})
+                reply_ok(conn)
 
               {:error, :not_in_party} ->
-                conn |> put_status(:bad_request) |> json(%{error: "not_in_party"})
+                reply_error(conn, :bad_request, "not_in_party")
 
               {:error, :not_leader} ->
-                conn |> put_status(:forbidden) |> json(%{error: "not_leader"})
+                reply_error(conn, :forbidden, "not_leader")
 
               _other ->
-                conn |> put_status(:unprocessable_entity) |> json(%{error: "unexpected_error"})
+                reply_error(conn, :unprocessable_entity, "unexpected_error")
             end
         end
 
       _ ->
-        conn |> put_status(:unauthorized) |> json(%{error: "Not authenticated"})
+        reply_error(conn, :unauthorized, "not_authenticated")
     end
   end
 
@@ -516,32 +528,32 @@ defmodule GamendWeb.Api.V1.PartyController do
       %User{} = user ->
         case parse_id(party_id) do
           nil ->
-            conn |> put_status(:bad_request) |> json(%{error: "invalid_id"})
+            reply_error(conn, :bad_request, "invalid_id")
 
           pid ->
             case Parties.accept_party_invite(user, pid) do
               {:ok, party} ->
-                json(conn, serialize_party(party))
+                reply_data(conn, serialize_party(party))
 
               {:error, :no_invite} ->
-                conn |> put_status(:not_found) |> json(%{error: "no_invite"})
+                reply_error(conn, :not_found, "no_invite")
 
               {:error, :party_not_found} ->
-                conn |> put_status(:not_found) |> json(%{error: "party_not_found"})
+                reply_error(conn, :not_found, "party_not_found")
 
               {:error, :already_in_party} ->
-                conn |> put_status(:conflict) |> json(%{error: "already_in_party"})
+                reply_error(conn, :conflict, "already_in_party")
 
               {:error, :party_full} ->
-                conn |> put_status(:forbidden) |> json(%{error: "party_full"})
+                reply_error(conn, :forbidden, "party_full")
 
               _other ->
-                conn |> put_status(:unprocessable_entity) |> json(%{error: "unexpected_error"})
+                reply_error(conn, :unprocessable_entity, "unexpected_error")
             end
         end
 
       _ ->
-        conn |> put_status(:unauthorized) |> json(%{error: "Not authenticated"})
+        reply_error(conn, :unauthorized, "not_authenticated")
     end
   end
 
@@ -550,37 +562,39 @@ defmodule GamendWeb.Api.V1.PartyController do
       %User{} = user ->
         case parse_id(party_id) do
           nil ->
-            conn |> put_status(:bad_request) |> json(%{error: "invalid_id"})
+            reply_error(conn, :bad_request, "invalid_id")
 
           pid ->
             Parties.decline_party_invite(user, pid)
-            json(conn, %{})
+            reply_ok(conn)
         end
 
       _ ->
-        conn |> put_status(:unauthorized) |> json(%{error: "Not authenticated"})
+        reply_error(conn, :unauthorized, "not_authenticated")
     end
   end
 
-  def list_invitations(conn, _params) do
+  def list_invitations(conn, params) do
     case Scope.user(conn.assigns[:current_scope]) do
       %User{} = user ->
-        invitations = Parties.list_party_invitations(user)
-        json(conn, invitations)
+        {page, page_size} = GamendWeb.Pagination.params(params)
+        rows = Parties.list_party_invitations(user, page: page, page_size: page_size)
+        reply_page(conn, rows, page, page_size, Parties.count_party_invitations(user))
 
       _ ->
-        conn |> put_status(:unauthorized) |> json(%{error: "Not authenticated"})
+        reply_error(conn, :unauthorized, "not_authenticated")
     end
   end
 
-  def list_sent_invitations(conn, _params) do
+  def list_sent_invitations(conn, params) do
     case Scope.user(conn.assigns[:current_scope]) do
       %User{} = user ->
-        invitations = Parties.list_sent_party_invitations(user)
-        json(conn, invitations)
+        {page, page_size} = GamendWeb.Pagination.params(params)
+        rows = Parties.list_sent_party_invitations(user, page: page, page_size: page_size)
+        reply_page(conn, rows, page, page_size, Parties.count_sent_party_invitations(user))
 
       _ ->
-        conn |> put_status(:unauthorized) |> json(%{error: "Not authenticated"})
+        reply_error(conn, :unauthorized, "not_authenticated")
     end
   end
 
@@ -589,32 +603,32 @@ defmodule GamendWeb.Api.V1.PartyController do
       %User{} = user ->
         case parse_id(target_user_id) do
           nil ->
-            conn |> put_status(:bad_request) |> json(%{error: "invalid_id"})
+            reply_error(conn, :bad_request, "invalid_id")
 
           target_id ->
             case Parties.kick_member(user, target_id) do
               {:ok, _} ->
-                json(conn, %{})
+                reply_ok(conn)
 
               {:error, :not_in_party} ->
-                conn |> put_status(:bad_request) |> json(%{error: "not_in_party"})
+                reply_error(conn, :bad_request, "not_in_party")
 
               {:error, :not_leader} ->
-                conn |> put_status(:forbidden) |> json(%{error: "not_leader"})
+                reply_error(conn, :forbidden, "not_leader")
 
               {:error, :cannot_kick_self} ->
-                conn |> put_status(:forbidden) |> json(%{error: "cannot_kick_self"})
+                reply_error(conn, :forbidden, "cannot_kick_self")
 
               {:error, :user_not_found} ->
-                conn |> put_status(:not_found) |> json(%{error: "user_not_found"})
+                reply_error(conn, :not_found, "user_not_found")
 
               _other ->
-                conn |> put_status(:unprocessable_entity) |> json(%{error: "unexpected_error"})
+                reply_error(conn, :unprocessable_entity, "unexpected_error")
             end
         end
 
       _ ->
-        conn |> put_status(:unauthorized) |> json(%{error: "Not authenticated"})
+        reply_error(conn, :unauthorized, "not_authenticated")
     end
   end
 
@@ -623,26 +637,26 @@ defmodule GamendWeb.Api.V1.PartyController do
       %User{} = user ->
         case Parties.update_party(user, params) do
           {:ok, party} ->
-            json(conn, serialize_party(party))
+            reply_data(conn, serialize_party(party))
 
           {:error, :not_in_party} ->
-            conn |> put_status(:bad_request) |> json(%{error: "not_in_party"})
+            reply_error(conn, :bad_request, "not_in_party")
 
           {:error, :not_leader} ->
-            conn |> put_status(:forbidden) |> json(%{error: "not_leader"})
+            reply_error(conn, :forbidden, "not_leader")
 
           {:error, :too_small} ->
-            conn |> put_status(:unprocessable_entity) |> json(%{error: "too_small"})
+            reply_error(conn, :unprocessable_entity, "too_small")
 
           {:error, %Ecto.Changeset{} = changeset} ->
             unprocessable(conn, changeset)
 
           _other ->
-            conn |> put_status(:unprocessable_entity) |> json(%{error: "unexpected_error"})
+            reply_error(conn, :unprocessable_entity, "unexpected_error")
         end
 
       _ ->
-        conn |> put_status(:unauthorized) |> json(%{error: "Not authenticated"})
+        reply_error(conn, :unauthorized, "not_authenticated")
     end
   end
 
@@ -651,34 +665,32 @@ defmodule GamendWeb.Api.V1.PartyController do
       %User{} = user ->
         case Parties.create_lobby_with_party(user, params) do
           {:ok, lobby} ->
-            conn
-            |> put_status(:created)
-            |> json(serialize_lobby(lobby))
+            reply_data(conn, :created, serialize_lobby(lobby))
 
           {:error, :not_in_party} ->
-            conn |> put_status(:bad_request) |> json(%{error: "not_in_party"})
+            reply_error(conn, :bad_request, "not_in_party")
 
           {:error, :not_leader} ->
-            conn |> put_status(:forbidden) |> json(%{error: "not_leader"})
+            reply_error(conn, :forbidden, "not_leader")
 
           {:error, :lobby_too_small_for_party} ->
-            conn |> put_status(:forbidden) |> json(%{error: "lobby_too_small_for_party"})
+            reply_error(conn, :forbidden, "lobby_too_small_for_party")
 
           {:error, :member_in_lobby} ->
-            conn |> put_status(:conflict) |> json(%{error: "member_in_lobby"})
+            reply_error(conn, :conflict, "member_in_lobby")
 
           {:error, :members_offline} ->
-            conn |> put_status(:conflict) |> json(%{error: "members_offline"})
+            reply_error(conn, :conflict, "members_offline")
 
           {:error, %Ecto.Changeset{} = changeset} ->
             unprocessable(conn, changeset)
 
           _other ->
-            conn |> put_status(:unprocessable_entity) |> json(%{error: "unexpected_error"})
+            reply_error(conn, :unprocessable_entity, "unexpected_error")
         end
 
       _ ->
-        conn |> put_status(:unauthorized) |> json(%{error: "Not authenticated"})
+        reply_error(conn, :unauthorized, "not_authenticated")
     end
   end
 
@@ -691,45 +703,45 @@ defmodule GamendWeb.Api.V1.PartyController do
 
             case Parties.join_lobby_with_party(user, lobby_id, opts) do
               {:ok, lobby} ->
-                json(conn, serialize_lobby(lobby))
+                reply_data(conn, serialize_lobby(lobby))
 
               {:error, :not_in_party} ->
-                conn |> put_status(:bad_request) |> json(%{error: "not_in_party"})
+                reply_error(conn, :bad_request, "not_in_party")
 
               {:error, :not_leader} ->
-                conn |> put_status(:forbidden) |> json(%{error: "not_leader"})
+                reply_error(conn, :forbidden, "not_leader")
 
               {:error, :member_in_lobby} ->
-                conn |> put_status(:conflict) |> json(%{error: "member_in_lobby"})
+                reply_error(conn, :conflict, "member_in_lobby")
 
               {:error, :members_offline} ->
-                conn |> put_status(:conflict) |> json(%{error: "members_offline"})
+                reply_error(conn, :conflict, "members_offline")
 
               {:error, :invalid_lobby} ->
-                conn |> put_status(:not_found) |> json(%{error: "not_found"})
+                reply_error(conn, :not_found, "not_found")
 
               {:error, :locked} ->
-                conn |> put_status(:forbidden) |> json(%{error: "locked"})
+                reply_error(conn, :forbidden, "locked")
 
               {:error, :not_enough_space} ->
-                conn |> put_status(:forbidden) |> json(%{error: "not_enough_space"})
+                reply_error(conn, :forbidden, "not_enough_space")
 
               {:error, :password_required} ->
-                conn |> put_status(:forbidden) |> json(%{error: "password_required"})
+                reply_error(conn, :forbidden, "password_required")
 
               {:error, :invalid_password} ->
-                conn |> put_status(:forbidden) |> json(%{error: "invalid_password"})
+                reply_error(conn, :forbidden, "invalid_password")
 
               _other ->
-                conn |> put_status(:unprocessable_entity) |> json(%{error: "unexpected_error"})
+                reply_error(conn, :unprocessable_entity, "unexpected_error")
             end
 
           _ ->
-            conn |> put_status(:not_found) |> json(%{error: "not_found"})
+            reply_error(conn, :not_found, "not_found")
         end
 
       _ ->
-        conn |> put_status(:unauthorized) |> json(%{error: "Not authenticated"})
+        reply_error(conn, :unauthorized, "not_authenticated")
     end
   end
 

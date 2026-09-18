@@ -101,3 +101,13 @@ defmodule GamendWeb.Schemas.AuthProvidersResponse do
     },
     description: "Enabled sign-in providers under `data`"
 end
+
+defmodule GamendWeb.Schemas.OAuthAuthorizationResponse do
+  @moduledoc "A started OAuth sign-in under `data`."
+  use GamendWeb.Schemas.Envelope, data: GamendWeb.Schemas.OAuthAuthorization
+end
+
+defmodule GamendWeb.Schemas.OAuthSessionStatusResponse do
+  @moduledoc "An OAuth session's state under `data`."
+  use GamendWeb.Schemas.Envelope, data: GamendWeb.Schemas.OAuthSessionStatus
+end

@@ -251,7 +251,7 @@ Web-side features with no context: the site search palette (`GamendWeb.SearchInd
 
 ### API shape & pagination
 
-List endpoints take `page` / `page_size` (default 25, clamped to `max_page_size`) and return `data` plus a six-key `meta` built by `GamendWeb.Pagination`. Contexts page through `Gamend.Query` and pair each list with a `count_*`. Everything else — ids, names, time fields, null policy, errors, paths, uploads — is in [docs/specs/api-conventions.md](docs/specs/api-conventions.md).
+List endpoints take `page` / `page_size` (default 25, clamped to `max_page_size`) and return `data` plus a six-key `meta` built by `GamendWeb.Pagination`. Contexts page through `Gamend.Query` and pair each list with a `count_*`. Every response is one of four shapes — `{data}`, `{data, meta}`, `{ok: true}`, `{error, message?, errors?}` — answered through `GamendWeb.Reply` (`reply_data`, `reply_page`, `reply_ok`, `reply_error`) and `unprocessable/2`; every documented response is a named `GamendWeb.Schemas.*` module. `GamendWeb.ApiShapeTest` and `GamendWeb.ResponseContract` fail the suite otherwise (R15/R16). Everything else — ids, names, time fields, null policy, errors, paths, uploads — is in [docs/specs/api-conventions.md](docs/specs/api-conventions.md).
 
 ## Adding a feature
 

@@ -57,6 +57,18 @@ defmodule GamendWeb.ChangesetErrors do
   end
 
   @doc """
+  Replies 409 with the standard validation payload: a changeset that failed on
+  a uniqueness constraint (a lobby title already taken), where the conflict is
+  the point rather than the input.
+  """
+  @spec uniqueness_conflict(Plug.Conn.t(), Changeset.t()) :: Plug.Conn.t()
+  def uniqueness_conflict(conn, %Changeset{} = changeset) do
+    conn
+    |> put_status(:conflict)
+    |> Phoenix.Controller.json(%{error: "validation_failed", errors: errors(changeset)})
+  end
+
+  @doc """
   The `%{field => [message]}` map on its own, for a caller that needs to put it
   somewhere other than the standard envelope.
   """

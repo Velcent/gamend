@@ -6,7 +6,9 @@ server actually sends, so any generator in any language produces types a
 person would have written by hand.
 
 This is the prerequisite for every SDK in [client-sdks.md](client-sdks.md).
-It changes no wire format.
+Slices 1–4 named what was sent; after them the API was also reshaped to one
+envelope (R15 in [api-conventions.md](api-conventions.md)), so from slice 5
+each domain is named and reshaped in the same change.
 
 ## Why
 
@@ -45,11 +47,10 @@ the check is half of this spec.
 
 **Out, deliberately:**
 
-- **Wire changes.** Mutations that return a bare lobby rather than `{data: …}`,
-  and `{}` rather than `{"ok": true}`, contradict
-  [api-conventions.md](api-conventions.md) but are what clients parse today.
-  They are listed as found (see *Wire inconsistencies*) for a later, separately
-  versioned change. This spec names what is sent; it does not change it.
+- **Wire changes, at first.** Slices 1–4 documented the wire as it was and
+  listed what contradicted the conventions (see *Wire inconsistencies*). That
+  list was then fixed in one breaking change — see *Reshaping* — and every
+  later slice fixes its own as it goes.
 - **Request bodies.** Generators already name an inline body
   `<OperationId>Request` (`CreateLobbyRequest`), which is the name anyone would
   choose. A body shared by several operations gets a module; the rest stay put.
@@ -203,9 +204,9 @@ the tag added to the check, tests green, spec regenerated.
    `DeletedCount(Response)`, `PushToken(Page)`, `OkResponse`. Eight success
    responses had no test reaching them — the three mute lists and get, edit,
    delete, mark-read and unread-count of a chat message — and now do.
-5. Leaderboards, Tournaments.
-6. Quests, Economy, Payments.
-7. KV, Hooks, Matchmaking, Ready checks, Time, Signaling, Storage.
+5. Leaderboards, Tournaments Named and reshaped together.
+6. Quests, Economy, Payments Named and reshaped together.
+7. KV, Hooks, Matchmaking, Ready checks, Time, Signaling, Storage Named and reshaped together.
 8. Admin – * (mostly `Admin<T>` variants and pages of existing entities).
 9. **Close-out.** Drop the tag list (enforce everywhere); add R15 to
    `mix gamend.api.lint` — no inline object schema with `properties` in any
@@ -270,9 +271,28 @@ the wire moves, so an existing build keeps working until it regenerates.
   named classes. The JS `generate` script clears its previous output first,
   so a renamed model does not linger in the package.
 
-## Wire inconsistencies (found, not fixed here)
+## Reshaping (R15)
 
-Recorded as each slice finds them, for a later versioned change:
+Slices 1–4 then moved to the four response shapes, as one breaking change:
+74 of their 108 success responses changed. Bare entities went under `data`
+(a create answers 201 with the new row), `{}` became `{"ok": true}`, every
+profile change answers the whole `CurrentUser`, the OAuth session poll answers
+`{data: {status, message, result}}`, unmute answers `{data: {deleted}}`,
+party invitation lists became pages (the context gained paging and counts),
+and `group_name` became `group_title`. Errors became `snake_case` codes with
+optional `message` prose; `details` and `reason` folded into `message` or into
+`validation_failed`, which is now always 422 (409 for a uniqueness clash).
+Phoenix's own error pages and the auth pipeline's 401 took the same shape.
+Controllers answer through `GamendWeb.Reply` (`reply_data`, `reply_page`,
+`reply_pages`, `reply_ok`, `reply_error`), and two tests hold it:
+`GamendWeb.ApiShapeTest` on the document, `GamendWeb.ResponseContract` on
+every response the suite provokes. From slice 5 on, a domain is named and
+reshaped in one change.
+
+## Wire inconsistencies
+
+Recorded as each slice finds them. Everything below from slices 1–4 was fixed
+by the reshaping above, except where noted:
 
 - Lobby mutations (`create`, `update`, `join`, `quick_join`, `set_state`)
   return a bare lobby, not `{data: lobby}`.
@@ -290,11 +310,11 @@ Recorded as each slice finds them, for a later versioned change:
 - `/me` profile changes answer validation failures with
   `error: "invalid_data"` (R12 says `validation_failed`), status 400 not 422.
 - `PublicUser.lobby_id` and `party_id` are always `""`: kept so the shape
-  matches the member row, but they carry nothing.
+  matches the member row, but they carry nothing. *(Still open.)*
 - Password, display-name and username changes answer `{ok, id, …}`; avatar
   confirmation `{ok, profile_url}` — neither is `{data: …}`.
 - The OAuth exchange answers two unrelated shapes under `data` depending on
-  whether a bearer token was sent.
+  whether a bearer token was sent. *(Still open: one flat `OAuthResult`.)*
 - `GroupInvite.group_name` is the group's title; convention says a thing has
   a `title` and nothing is called `name`.
 - Party invitation lists are bare arrays: no `{data, meta}`, no paging.

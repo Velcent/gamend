@@ -6,7 +6,7 @@ defmodule GamendWeb.Api.V1.MeController do
   alias Gamend.Accounts.Scope
   alias Gamend.Accounts.User
   alias GamendWeb.Schemas
-  alias GamendWeb.Schemas.{AvatarUpdate, CurrentUser, ProfileUpdate, UploadTicket}
+  alias GamendWeb.Schemas.{CurrentUserResponse, OkResponse, UploadTicketResponse}
   alias GamendWeb.Uploads
   alias OpenApiSpex.Schema
 
@@ -18,7 +18,7 @@ defmodule GamendWeb.Api.V1.MeController do
     description: "Returns the current authenticated user's basic information.",
     security: [%{"authorization" => []}],
     responses: [
-      ok: {"User info", "application/json", CurrentUser},
+      ok: {"User info", "application/json", CurrentUserResponse},
       unauthorized: Schemas.error("Not authenticated")
     ]
   )
@@ -28,25 +28,10 @@ defmodule GamendWeb.Api.V1.MeController do
     # into current_scope via AssignCurrentScope plug
     case Scope.user(conn.assigns.current_scope) do
       %User{} = user ->
-        json(conn, %{
-          id: user.id,
-          email: user.email || "",
-          profile_url: user.profile_url || "",
-          metadata: user.metadata || %{},
-          username: user.username || "",
-          display_name: user.display_name || "",
-          lobby_id: user.lobby_id || "",
-          party_id: user.party_id || "",
-          is_online: user.is_online || false,
-          last_seen_at: User.last_seen_at_or_fallback(user),
-          linked_providers: Gamend.Accounts.get_linked_providers(user),
-          has_password: Gamend.Accounts.has_password?(user)
-        })
+        reply_data(conn, current_user(user))
 
       _ ->
-        conn
-        |> put_status(:unauthorized)
-        |> json(%{error: "Not authenticated"})
+        reply_error(conn, :unauthorized, "not_authenticated")
     end
   end
 
@@ -70,8 +55,8 @@ defmodule GamendWeb.Api.V1.MeController do
     },
     security: [%{"authorization" => []}],
     responses: [
-      ok: {"Password updated", "application/json", ProfileUpdate},
-      bad_request: Schemas.error("Invalid data"),
+      ok: {"Password updated", "application/json", CurrentUserResponse},
+      unprocessable_entity: Schemas.error("Validation failed"),
       unauthorized: Schemas.error("Not authenticated, or wrong current password")
     ]
   )
@@ -82,23 +67,18 @@ defmodule GamendWeb.Api.V1.MeController do
     if password_change_authorized?(user, params) do
       case Gamend.Accounts.update_user_password(user, params) do
         {:ok, {user, _tokens}} ->
-          json(conn, %{ok: true, id: user.id})
+          reply_data(conn, current_user(user))
 
         {:error, changeset} ->
-          conn
-          |> put_status(:bad_request)
-          |> json(%{
-            error: "invalid_data",
-            errors: GamendWeb.ChangesetErrors.errors(changeset)
-          })
+          unprocessable(conn, changeset)
       end
     else
-      conn
-      |> put_status(:unauthorized)
-      |> json(%{
-        error: "invalid_current_password",
-        message: "current_password is required and must match your existing password"
-      })
+      reply_error(
+        conn,
+        :unauthorized,
+        "invalid_current_password",
+        "current_password is required and must match your existing password"
+      )
     end
   end
 
@@ -129,8 +109,8 @@ defmodule GamendWeb.Api.V1.MeController do
     },
     security: [%{"authorization" => []}],
     responses: [
-      ok: {"Display name updated", "application/json", ProfileUpdate},
-      bad_request: Schemas.error("Invalid data"),
+      ok: {"Display name updated", "application/json", CurrentUserResponse},
+      unprocessable_entity: Schemas.error("Validation failed"),
       unauthorized: Schemas.error("Not authenticated")
     ]
   )
@@ -140,15 +120,10 @@ defmodule GamendWeb.Api.V1.MeController do
 
     case Gamend.Accounts.update_user_display_name(user, params) do
       {:ok, user} ->
-        json(conn, %{ok: true, id: user.id, display_name: user.display_name || ""})
+        reply_data(conn, current_user(user))
 
       {:error, changeset} ->
-        conn
-        |> put_status(:bad_request)
-        |> json(%{
-          error: "invalid_data",
-          errors: GamendWeb.ChangesetErrors.errors(changeset)
-        })
+        unprocessable(conn, changeset)
     end
   end
 
@@ -158,7 +133,7 @@ defmodule GamendWeb.Api.V1.MeController do
     description:
       "Sets the unique username handle. Lowercased on save; 3-32 chars of a-z, 0-9 and " <>
         "non-consecutive . _ - separators, starting and ending alphanumeric. " <>
-        "Returns invalid_data when the username is malformed or already taken.",
+        "Answers 422 validation_failed when the username is malformed or already taken.",
     request_body: {
       "Username payload",
       "application/json",
@@ -172,8 +147,8 @@ defmodule GamendWeb.Api.V1.MeController do
     },
     security: [%{"authorization" => []}],
     responses: [
-      ok: {"Username updated", "application/json", ProfileUpdate},
-      bad_request: Schemas.error("Invalid data"),
+      ok: {"Username updated", "application/json", CurrentUserResponse},
+      unprocessable_entity: Schemas.error("Validation failed"),
       unauthorized: Schemas.error("Not authenticated")
     ]
   )
@@ -183,25 +158,19 @@ defmodule GamendWeb.Api.V1.MeController do
 
     case Gamend.Accounts.update_username(user, params) do
       {:ok, user} ->
-        json(conn, %{ok: true, id: user.id, username: user.username || ""})
+        reply_data(conn, current_user(user))
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        conn
-        |> put_status(:bad_request)
-        |> json(%{
-          error: "invalid_data",
-          errors: GamendWeb.ChangesetErrors.errors(changeset)
-        })
+        unprocessable(conn, changeset)
 
       {:error, reason} when is_atom(reason) or is_binary(reason) ->
-        conn
-        |> put_status(:bad_request)
-        |> json(%{error: "invalid_data", errors: %{username: [to_string(reason)]}})
+        user
+        |> Ecto.Changeset.change()
+        |> Ecto.Changeset.add_error(:username, to_string(reason))
+        |> then(&unprocessable(conn, &1))
 
       {:error, _reason} ->
-        conn
-        |> put_status(:bad_request)
-        |> json(%{error: "invalid_data"})
+        reply_error(conn, :unprocessable_entity, "invalid_username")
     end
   end
 
@@ -225,7 +194,7 @@ defmodule GamendWeb.Api.V1.MeController do
     },
     security: [%{"authorization" => []}],
     responses: [
-      ok: {"Upload ticket", "application/json", UploadTicket},
+      ok: {"Upload ticket", "application/json", UploadTicketResponse},
       bad_request: Schemas.error("Invalid content type or size"),
       forbidden: Schemas.error("Avatars are disabled for anonymous accounts"),
       unauthorized: Schemas.error("Not authenticated")
@@ -246,7 +215,7 @@ defmodule GamendWeb.Api.V1.MeController do
   # confirm is where an old ticket or a direct-to-S3 upload would otherwise slip
   # a stored object onto the account.
   defp avatar_forbidden(conn) do
-    conn |> put_status(:forbidden) |> json(%{error: "anonymous_avatar_disabled"})
+    reply_error(conn, :forbidden, "anonymous_avatar_disabled")
   end
 
   operation(:set_avatar,
@@ -260,7 +229,7 @@ defmodule GamendWeb.Api.V1.MeController do
     },
     security: [%{"authorization" => []}],
     responses: [
-      ok: {"Avatar updated", "application/json", AvatarUpdate},
+      ok: {"Avatar updated", "application/json", CurrentUserResponse},
       bad_request: Schemas.error("Object not found, or missing key"),
       forbidden: Schemas.error("Key not owned by user, or avatars disabled"),
       unauthorized: Schemas.error("Not authenticated")
@@ -278,8 +247,8 @@ defmodule GamendWeb.Api.V1.MeController do
   defp do_set_avatar(conn, user, params) do
     Uploads.confirm(conn, "avatars", user.id, params["key"], fn url ->
       case Gamend.Accounts.update_user_avatar(user, url) do
-        {:ok, updated} -> json(conn, %{ok: true, profile_url: updated.profile_url})
-        {:error, _} -> conn |> put_status(:bad_request) |> json(%{error: "invalid_data"})
+        {:ok, updated} -> reply_data(conn, current_user(updated))
+        {:error, changeset} -> unprocessable(conn, changeset)
       end
     end)
   end
@@ -290,7 +259,7 @@ defmodule GamendWeb.Api.V1.MeController do
     description: "Deletes the authenticated user's account",
     security: [%{"authorization" => []}],
     responses: [
-      ok: {"Account deleted", "application/json", %Schema{type: :object}},
+      ok: {"Account deleted", "application/json", OkResponse},
       bad_request: Schemas.error("Failed to delete account"),
       unauthorized: Schemas.error("Not authenticated, or wrong current password")
     ]
@@ -309,17 +278,32 @@ defmodule GamendWeb.Api.V1.MeController do
     if password_change_authorized?(user, params) do
       case Gamend.Accounts.delete_user(user) do
         {:ok, _} ->
-          json(conn, %{})
+          reply_ok(conn)
 
         {:error, _} ->
-          conn
-          |> put_status(:bad_request)
-          |> json(%{error: "Failed to delete account"})
+          reply_error(conn, :bad_request, "delete_failed")
       end
     else
-      conn
-      |> put_status(:unauthorized)
-      |> json(%{error: "invalid_current_password"})
+      reply_error(conn, :unauthorized, "invalid_current_password")
     end
+  end
+
+  # The signed-in user as `GET /me` sends it; every profile change answers the
+  # same, so a client never merges a partial echo into its copy.
+  defp current_user(%User{} = user) do
+    %{
+      id: user.id,
+      email: user.email || "",
+      profile_url: user.profile_url || "",
+      metadata: user.metadata || %{},
+      username: user.username || "",
+      display_name: user.display_name || "",
+      lobby_id: user.lobby_id || "",
+      party_id: user.party_id || "",
+      is_online: user.is_online || false,
+      last_seen_at: User.last_seen_at_or_fallback(user),
+      linked_providers: Accounts.get_linked_providers(user),
+      has_password: Accounts.has_password?(user)
+    }
   end
 end

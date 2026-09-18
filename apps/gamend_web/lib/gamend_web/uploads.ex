@@ -41,7 +41,7 @@ defmodule GamendWeb.Uploads do
         key = Storage.build_key(prefix, owner_id, stem <> Storage.extension_for(content_type))
         {:ok, ticket} = Storage.presigned_upload(key, content_type: content_type)
 
-        json(conn, sign_local_ticket(ticket, key))
+        GamendWeb.Reply.reply_data(conn, sign_local_ticket(ticket, key))
 
       {:error, reason} ->
         error(conn, :bad_request, to_string(reason))

@@ -150,7 +150,7 @@ defmodule GamendWeb.Schemas.GroupInvite do
     properties: %{
       id: %Schema{type: :string, format: :uuid},
       group_id: %Schema{type: :string, format: :uuid},
-      group_name: %Schema{type: :string, description: "The group's title"},
+      group_title: %Schema{type: :string},
       sender_id: %Schema{type: :string, format: :uuid},
       sender_name: %Schema{type: :string},
       recipient_id: %Schema{type: :string, format: :uuid},
@@ -161,7 +161,7 @@ defmodule GamendWeb.Schemas.GroupInvite do
     required: [
       :id,
       :group_id,
-      :group_name,
+      :group_title,
       :sender_id,
       :sender_name,
       :recipient_id,
@@ -177,16 +177,43 @@ defmodule GamendWeb.Schemas.GroupInvitePage do
   use GamendWeb.Schemas.Envelope, page: GamendWeb.Schemas.GroupInvite
 end
 
-defmodule GamendWeb.Schemas.StatusResponse do
-  @moduledoc "An action whose only answer is the state it left something in."
+defmodule GamendWeb.Schemas.GroupResponse do
+  @moduledoc "One group under `data`."
+  use GamendWeb.Schemas.Envelope, data: GamendWeb.Schemas.Group
+end
+
+defmodule GamendWeb.Schemas.GroupMemberResponse do
+  @moduledoc "One membership under `data`."
+  use GamendWeb.Schemas.Envelope, data: GamendWeb.Schemas.GroupMember
+end
+
+defmodule GamendWeb.Schemas.GroupJoinRequestResponse do
+  @moduledoc "One join request under `data`."
+  use GamendWeb.Schemas.Envelope, data: GamendWeb.Schemas.GroupJoinRequest
+end
+
+defmodule GamendWeb.Schemas.GroupInviteOutcome do
+  @moduledoc "What inviting a user to a group did."
   require OpenApiSpex
   alias OpenApiSpex.Schema
 
   OpenApiSpex.schema(%{
-    title: "StatusResponse",
-    description: "The resulting status",
+    title: "GroupInviteOutcome",
+    description: "The result of an invitation",
     type: :object,
-    properties: %{status: %Schema{type: :string, example: "cancelled"}},
+    properties: %{
+      status: %Schema{
+        type: :string,
+        enum: ["invited", "request_approved"],
+        description:
+          "`invited` when an invite was created, `request_approved` when the user had asked to join and was let in instead"
+      }
+    },
     required: [:status]
   })
+end
+
+defmodule GamendWeb.Schemas.GroupInviteOutcomeResponse do
+  @moduledoc "The invitation's outcome under `data`."
+  use GamendWeb.Schemas.Envelope, data: GamendWeb.Schemas.GroupInviteOutcome
 end

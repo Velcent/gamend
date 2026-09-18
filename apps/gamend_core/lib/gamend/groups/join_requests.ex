@@ -99,7 +99,7 @@ defmodule Gamend.Groups.JoinRequests do
           "metadata" => %{
             "type" => "group_join_request",
             "group_id" => group_id,
-            "group_name" => group.title,
+            "group_title" => group.title,
             "user_id" => user_id,
             "user_name" => user_name
           }
@@ -217,7 +217,7 @@ defmodule Gamend.Groups.JoinRequests do
                 "metadata" => %{
                   "type" => "group_join_request_approved",
                   "group_id" => group_id,
-                  "group_name" => group.title,
+                  "group_title" => group.title,
                   "admin_id" => admin_id,
                   "admin_name" => admin_name
                 }
@@ -282,7 +282,7 @@ defmodule Gamend.Groups.JoinRequests do
                   "metadata" => %{
                     "type" => "group_join_request_rejected",
                     "group_id" => group_id,
-                    "group_name" => group_title
+                    "group_title" => group_title
                   }
                 }
               )

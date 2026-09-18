@@ -484,7 +484,14 @@ func _schedule_token_refresh() -> void:
 
 func _verify_login_result(method_name: String, data):
 	if data && method_name in ["oauth_session_status", "oauth_api_callback", "login", "device_login", "refresh_token", "oauth_callback_api_apple_ios", "oauth_google_id_token"]:
-		data = data.bzz_normalize().get("data").bzz_normalize()
+		# Every answer is {data: ...}; a polled OAuth session carries its tokens
+		# one level further in, under data.result.
+		var inner = data.bzz_normalize().get("data")
+		if method_name == "oauth_session_status" and inner != null:
+			inner = inner.bzz_normalize().get("result")
+		if inner == null:
+			return
+		data = inner.bzz_normalize() if inner is Object else inner
 		if data.get("access_token"):
 			_access_token = data["access_token"]
 		if data.get("refresh_token"):

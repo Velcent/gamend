@@ -28,3 +28,8 @@ defmodule GamendWeb.Schemas.UploadTicket do
     required: [:method, :url, :headers, :key, :expires_in]
   })
 end
+
+defmodule GamendWeb.Schemas.UploadTicketResponse do
+  @moduledoc "An upload ticket under `data`."
+  use GamendWeb.Schemas.Envelope, data: GamendWeb.Schemas.UploadTicket
+end

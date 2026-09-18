@@ -76,7 +76,10 @@ defmodule GamendWeb do
       # The one way to answer a failed changeset. Imported rather than aliased
       # so there is nothing to look up — the forty-six hand-rolled copies this
       # replaced were written because the helper was not in reach.
-      import GamendWeb.ChangesetErrors, only: [unprocessable: 2]
+      import GamendWeb.ChangesetErrors, only: [unprocessable: 2, uniqueness_conflict: 2]
+
+      # The other four response shapes (api-conventions.md, R15).
+      import GamendWeb.Reply
 
       unquote(verified_routes())
     end

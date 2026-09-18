@@ -531,7 +531,7 @@ defmodule Gamend.GroupsTest do
       assert notification.metadata["sender_name"] == "OwnerName"
       assert notification.metadata["recipient_name"] == "OtherName"
       assert notification.metadata["group_id"] == group.id
-      assert notification.metadata["group_name"] == group.title
+      assert notification.metadata["group_title"] == group.title
 
       # Also verify the invite record itself
       assert invite.sender_id == owner.id
@@ -793,7 +793,7 @@ defmodule Gamend.GroupsTest do
       invite = hd(invites)
 
       assert invite.group_id == group.id
-      assert invite.group_name == "ListInvGrp"
+      assert invite.group_title == "ListInvGrp"
       assert invite.sender_id == owner.id
       assert invite.sender_name == "SenderDisplay"
       assert invite.recipient_id == other.id
@@ -976,7 +976,7 @@ defmodule Gamend.GroupsTest do
 
       invites = Groups.list_sent_invitations(owner.id)
       assert length(invites) == 1
-      assert hd(invites).group_name == "SentInv"
+      assert hd(invites).group_title == "SentInv"
       assert hd(invites).recipient_id == other.id
     end
 
@@ -1081,7 +1081,7 @@ defmodule Gamend.GroupsTest do
       assert hd(group_notifs).content == "Updated message"
     end
 
-    test "includes group_id and group_name in metadata", %{owner: owner, other: other} do
+    test "includes group_id and group_title in metadata", %{owner: owner, other: other} do
       {:ok, group} = Groups.create_group(owner.id, %{"title" => "MetaGrp", "type" => "public"})
       {:ok, _} = Groups.join_group(other.id, group.id)
 
@@ -1093,7 +1093,7 @@ defmodule Gamend.GroupsTest do
         Enum.find(notifs, fn n -> n.title == "Group Notification" end)
 
       assert group_notif.metadata["group_id"] == group.id
-      assert group_notif.metadata["group_name"] == "MetaGrp"
+      assert group_notif.metadata["group_title"] == "MetaGrp"
     end
 
     test "passes custom metadata through", %{owner: owner, other: other} do

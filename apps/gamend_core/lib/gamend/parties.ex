@@ -759,16 +759,27 @@ defmodule Gamend.Parties do
   @doc """
   List pending party invites for the given user.
   """
-  @spec list_party_invitations(User.t()) :: [map()]
-  def list_party_invitations(%User{} = user) do
-    do_list_party_invitations(user.id)
+  @spec list_party_invitations(User.t(), keyword()) :: [map()]
+  def list_party_invitations(%User{} = user, opts \\ []) do
+    do_list_party_invitations(user.id, Keyword.get(opts, :page), Keyword.get(opts, :page_size))
+  end
+
+  @doc "How many pending party invites the user has, for paging."
+  @spec count_party_invitations(User.t()) :: non_neg_integer()
+  def count_party_invitations(%User{id: user_id}) do
+    Repo.aggregate(
+      from(i in PartyInvite, where: i.recipient_id == ^user_id and i.status == "pending"),
+      :count
+    )
   end
 
   @decorate cacheable(
-              key: {:party_invites, :list, party_invite_cache_version(user_id), user_id},
+              key:
+                {:party_invites, :list, party_invite_cache_version(user_id), user_id, page,
+                 page_size},
               opts: [ttl: @party_invite_cache_ttl_ms]
             )
-  defp do_list_party_invitations(user_id) do
+  defp do_list_party_invitations(user_id, page, page_size) do
     from(i in PartyInvite,
       where: i.recipient_id == ^user_id and i.status == "pending",
       join: s in assoc(i, :sender),
@@ -776,6 +787,7 @@ defmodule Gamend.Parties do
       order_by: [desc: i.inserted_at],
       preload: [sender: s, recipient: r]
     )
+    |> Gamend.Query.page(page: page, page_size: page_size)
     |> Repo.all()
     |> Enum.map(&serialize_party_invite/1)
   end
@@ -785,16 +797,31 @@ defmodule Gamend.Parties do
 
   Returns invitations the leader has sent that have not yet been accepted or declined.
   """
-  @spec list_sent_party_invitations(User.t()) :: [map()]
-  def list_sent_party_invitations(%User{} = leader) do
-    do_list_sent_party_invitations(leader.id)
+  @spec list_sent_party_invitations(User.t(), keyword()) :: [map()]
+  def list_sent_party_invitations(%User{} = leader, opts \\ []) do
+    do_list_sent_party_invitations(
+      leader.id,
+      Keyword.get(opts, :page),
+      Keyword.get(opts, :page_size)
+    )
+  end
+
+  @doc "How many pending party invites the leader has sent, for paging."
+  @spec count_sent_party_invitations(User.t()) :: non_neg_integer()
+  def count_sent_party_invitations(%User{id: leader_id}) do
+    Repo.aggregate(
+      from(i in PartyInvite, where: i.sender_id == ^leader_id and i.status == "pending"),
+      :count
+    )
   end
 
   @decorate cacheable(
-              key: {:party_invites, :list_sent, party_invite_cache_version(leader_id), leader_id},
+              key:
+                {:party_invites, :list_sent, party_invite_cache_version(leader_id), leader_id,
+                 page, page_size},
               opts: [ttl: @party_invite_cache_ttl_ms]
             )
-  defp do_list_sent_party_invitations(leader_id) do
+  defp do_list_sent_party_invitations(leader_id, page, page_size) do
     from(i in PartyInvite,
       where: i.sender_id == ^leader_id and i.status == "pending",
       join: s in assoc(i, :sender),
@@ -802,6 +829,7 @@ defmodule Gamend.Parties do
       order_by: [desc: i.inserted_at],
       preload: [sender: s, recipient: r]
     )
+    |> Gamend.Query.page(page: page, page_size: page_size)
     |> Repo.all()
     |> Enum.map(&serialize_party_invite/1)
   end

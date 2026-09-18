@@ -16,7 +16,7 @@ defmodule GamendWeb.Api.V1.MeControllerTest do
 
       conn = conn |> put_req_header("authorization", "Bearer " <> token) |> get("/api/v1/me")
 
-      body = json_response(conn, 200)
+      body = json_response(conn, 200)["data"]
       assert body["id"] == user.id
       assert body["email"] == user.email
       assert Map.has_key?(body, "display_name")
@@ -49,7 +49,7 @@ defmodule GamendWeb.Api.V1.MeControllerTest do
         |> put_req_header("authorization", "Bearer " <> token)
         |> patch("/api/v1/me/display_name", %{display_name: "API Name"})
 
-      assert json_response(conn, 200)["display_name"] == "API Name"
+      assert json_response(conn, 200)["data"]["display_name"] == "API Name"
 
       reloaded = Gamend.Repo.get(Gamend.Accounts.User, user.id)
       assert reloaded.display_name == "API Name"
@@ -79,7 +79,7 @@ defmodule GamendWeb.Api.V1.MeControllerTest do
         |> put_req_header("authorization", "Bearer " <> token)
         |> patch("/api/v1/me/username", %{username: "New.Handle"})
 
-      assert %{"ok" => true, "id" => id, "username" => "new.handle"} = json_response(conn, 200)
+      assert %{"id" => id, "username" => "new.handle"} = json_response(conn, 200)["data"]
       assert id == user.id
     end
   end
@@ -112,8 +112,8 @@ defmodule GamendWeb.Api.V1.MeControllerTest do
         |> put_req_header("authorization", "Bearer " <> token)
         |> patch("/api/v1/me/password", %{password: ""})
 
-      assert conn.status == 400
-      body = json_response(conn, 400)
+      assert conn.status == 422
+      body = json_response(conn, 422)
       assert Map.has_key?(body, "errors")
       assert Map.has_key?(body["errors"], "password")
     end

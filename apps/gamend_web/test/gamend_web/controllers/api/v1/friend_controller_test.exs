@@ -71,7 +71,9 @@ defmodule GamendWeb.Api.V1.FriendControllerTest do
     {:ok, token_b, _} = Guardian.encode_and_sign(b)
     conn_b = conn |> put_req_header("authorization", "Bearer " <> token_b)
 
-    assert conn_b |> post("/api/v1/friends/#{f.id}/reject") |> json_response(200) == %{}
+    assert conn_b |> post("/api/v1/friends/#{f.id}/reject") |> json_response(200) == %{
+             "ok" => true
+           }
 
     incoming =
       conn_b

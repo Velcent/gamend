@@ -5,6 +5,7 @@ defmodule GamendWeb.Api.V1.ProviderController do
   alias Gamend.Accounts
   alias Gamend.Accounts.Scope
   alias GamendWeb.Schemas
+  alias GamendWeb.Schemas.OkResponse
 
   operation(:link_device,
     operation_id: "link_device",
@@ -22,7 +23,7 @@ defmodule GamendWeb.Api.V1.ProviderController do
          required: [:device_id]
        }},
     responses: [
-      ok: {"Success", "application/json", %OpenApiSpex.Schema{type: :object}},
+      ok: {"Success", "application/json", OkResponse},
       bad_request: Schemas.error("Bad request"),
       unauthorized: Schemas.error("Unauthorized")
     ]
@@ -33,21 +34,15 @@ defmodule GamendWeb.Api.V1.ProviderController do
 
     case Accounts.link_device_id(user, device_id) do
       {:ok, _user} ->
-        json(conn, %{})
+        reply_ok(conn)
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        errors = GamendWeb.ChangesetErrors.errors(changeset)
-
-        conn
-        |> put_status(:bad_request)
-        |> json(%{error: "Failed to link device_id", details: errors})
+        unprocessable(conn, changeset)
     end
   end
 
   def link_device(conn, _params) do
-    conn
-    |> put_status(:bad_request)
-    |> json(%{error: "device_id is required"})
+    reply_error(conn, :bad_request, "missing_param", "device_id is required")
   end
 
   operation(:unlink_device,
@@ -58,7 +53,7 @@ defmodule GamendWeb.Api.V1.ProviderController do
     tags: ["Authentication"],
     security: [%{"authorization" => []}],
     responses: [
-      ok: {"Success", "application/json", %OpenApiSpex.Schema{type: :object}},
+      ok: {"Success", "application/json", OkResponse},
       bad_request: Schemas.error("Bad request"),
       unauthorized: Schemas.error("Unauthorized")
     ]
@@ -69,17 +64,18 @@ defmodule GamendWeb.Api.V1.ProviderController do
 
     case Accounts.unlink_device_id(user) do
       {:ok, _user} ->
-        json(conn, %{})
+        reply_ok(conn)
 
       {:error, :last_auth_method} ->
-        conn
-        |> put_status(:bad_request)
-        |> json(%{error: "Cannot unlink device_id when it's your last authentication method"})
+        reply_error(
+          conn,
+          :bad_request,
+          "last_auth_method",
+          "Cannot unlink the last way to sign in"
+        )
 
       {:error, _} ->
-        conn
-        |> put_status(:bad_request)
-        |> json(%{error: "Failed to unlink device_id"})
+        reply_error(conn, :bad_request, "unlink_failed")
     end
   end
 
@@ -101,7 +97,7 @@ defmodule GamendWeb.Api.V1.ProviderController do
       ]
     ],
     responses: [
-      ok: {"Success", "application/json", %OpenApiSpex.Schema{type: :object}},
+      ok: {"Success", "application/json", OkResponse},
       bad_request: Schemas.error("Bad request"),
       unauthorized: Schemas.error("Unauthorized")
     ]
@@ -121,23 +117,22 @@ defmodule GamendWeb.Api.V1.ProviderController do
       end
 
     if provider_atom == :unknown_provider do
-      conn
-      |> put_status(:bad_request)
-      |> json(%{error: "Unknown provider"})
+      reply_error(conn, :bad_request, "unknown_provider")
     else
       case Accounts.unlink_provider(user, provider_atom) do
         {:ok, _user} ->
-          json(conn, %{})
+          reply_ok(conn)
 
         {:error, :last_provider} ->
-          conn
-          |> put_status(:bad_request)
-          |> json(%{error: "Cannot unlink the last linked provider"})
+          reply_error(
+            conn,
+            :bad_request,
+            "last_auth_method",
+            "Cannot unlink the last way to sign in"
+          )
 
         {:error, _} ->
-          conn
-          |> put_status(:bad_request)
-          |> json(%{error: "Failed to unlink provider"})
+          reply_error(conn, :bad_request, "unlink_failed")
       end
     end
   end

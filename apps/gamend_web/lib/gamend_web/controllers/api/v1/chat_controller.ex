@@ -10,9 +10,9 @@ defmodule GamendWeb.Api.V1.ChatController do
   alias GamendWeb.Schemas
 
   alias GamendWeb.Schemas.{
-    ChatMessage,
     ChatMessagePage,
-    ChatReadCursor,
+    ChatMessageResponse,
+    ChatReadCursorResponse,
     ChatUnreadResponse,
     OkResponse
   }
@@ -53,7 +53,7 @@ defmodule GamendWeb.Api.V1.ChatController do
          }
        }},
     responses: [
-      created: {"Message sent", "application/json", ChatMessage},
+      created: {"Message sent", "application/json", ChatMessageResponse},
       bad_request: Schemas.error("Invalid input"),
       forbidden: Schemas.error("Not allowed"),
       unprocessable_entity: Schemas.error("Validation or hook error")
@@ -72,46 +72,40 @@ defmodule GamendWeb.Api.V1.ChatController do
 
     with :ok <- GamendWeb.RateLimit.check_chat_daily(scope.user_id),
          {:ok, message} <- Chat.send_message(%{user: Scope.user(scope)}, attrs) do
-      conn |> put_status(:created) |> json(serialize_message(message))
+      reply_data(conn, :created, serialize_message(message))
     else
       {:error, :chat_daily_limit} ->
-        conn |> put_status(:too_many_requests) |> json(%{error: "chat_daily_limit"})
+        reply_error(conn, :too_many_requests, "chat_daily_limit")
 
       {:error, :not_in_lobby} ->
-        conn |> put_status(:forbidden) |> json(%{error: "not_in_lobby"})
+        reply_error(conn, :forbidden, "not_in_lobby")
 
       {:error, :not_in_group} ->
-        conn |> put_status(:forbidden) |> json(%{error: "not_in_group"})
+        reply_error(conn, :forbidden, "not_in_group")
 
       {:error, :not_friends} ->
-        conn |> put_status(:forbidden) |> json(%{error: "not_friends"})
+        reply_error(conn, :forbidden, "not_friends")
 
       {:error, :not_in_party} ->
-        conn |> put_status(:forbidden) |> json(%{error: "not_in_party"})
+        reply_error(conn, :forbidden, "not_in_party")
 
       {:error, :blocked} ->
-        conn |> put_status(:forbidden) |> json(%{error: "blocked"})
+        reply_error(conn, :forbidden, "blocked")
 
       {:error, :slowdown} ->
-        conn
-        |> put_status(:too_many_requests)
-        |> json(%{error: "slowdown", message: "You are sending messages too quickly"})
+        reply_error(conn, :too_many_requests, "slowdown", "You are sending messages too quickly")
 
       {:error, :invalid_chat_type} ->
-        conn |> put_status(:bad_request) |> json(%{error: "invalid_chat_type"})
+        reply_error(conn, :bad_request, "invalid_chat_type")
 
       {:error, {:hook_rejected, reason}} ->
-        conn
-        |> put_status(:unprocessable_entity)
-        |> json(%{error: "hook_rejected", reason: to_string(reason)})
+        reply_error(conn, :unprocessable_entity, "hook_rejected", to_string(reason))
 
       {:error, %Ecto.Changeset{} = cs} ->
-        conn
-        |> put_status(:unprocessable_entity)
-        |> json(%{error: "validation_error", details: changeset_errors(cs)})
+        unprocessable(conn, cs)
 
       {:error, reason} ->
-        conn |> put_status(:unprocessable_entity) |> json(%{error: to_string(reason)})
+        reply_error(conn, :unprocessable_entity, reason)
     end
   end
 
@@ -134,7 +128,7 @@ defmodule GamendWeb.Api.V1.ChatController do
       ]
     ],
     responses: [
-      ok: {"Chat message", "application/json", ChatMessage},
+      ok: {"Chat message", "application/json", ChatMessageResponse},
       not_found: Schemas.error("Message not found")
     ]
   )
@@ -145,13 +139,13 @@ defmodule GamendWeb.Api.V1.ChatController do
 
     case Chat.get_message(message_id) do
       nil ->
-        conn |> put_status(:not_found) |> json(%{error: "not_found"})
+        reply_error(conn, :not_found, "not_found")
 
       message ->
         if can_access_message?(user, message) do
-          json(conn, serialize_message(message))
+          reply_data(conn, serialize_message(message))
         else
-          conn |> put_status(:not_found) |> json(%{error: "not_found"})
+          reply_error(conn, :not_found, "not_found")
         end
     end
   end
@@ -245,12 +239,7 @@ defmodule GamendWeb.Api.V1.ChatController do
             {msgs, total}
           end
 
-        count = length(messages)
-
-        json(conn, %{
-          data: Enum.map(messages, &serialize_message/1),
-          meta: GamendWeb.Pagination.meta(page, page_size, count, total_count)
-        })
+        reply_page(conn, Enum.map(messages, &serialize_message/1), page, page_size, total_count)
 
       {:error, conn} ->
         conn
@@ -278,7 +267,7 @@ defmodule GamendWeb.Api.V1.ChatController do
          }
        }},
     responses: [
-      ok: {"Read cursor updated", "application/json", ChatReadCursor},
+      ok: {"Read cursor updated", "application/json", ChatReadCursorResponse},
       unprocessable_entity: Schemas.error("Error")
     ]
   )
@@ -291,7 +280,7 @@ defmodule GamendWeb.Api.V1.ChatController do
 
     case Chat.mark_read(user_id, chat_type, chat_ref_id, message_id) do
       {:ok, cursor} ->
-        json(conn, %{
+        reply_data(conn, %{
           chat_type: cursor.chat_type,
           chat_ref_id: cursor.chat_ref_id,
           last_read_message_id: cursor.last_read_message_id,
@@ -299,20 +288,20 @@ defmodule GamendWeb.Api.V1.ChatController do
         })
 
       {:error, reason} when reason in [:invalid_chat_ref, :invalid_chat_type, :invalid_message] ->
-        conn |> put_status(:bad_request) |> json(%{error: to_string(reason)})
+        reply_error(conn, :bad_request, reason)
 
       {:error, reason}
       when reason in [:not_in_lobby, :not_in_group, :not_friends, :not_in_party, :blocked] ->
-        conn |> put_status(:forbidden) |> json(%{error: to_string(reason)})
+        reply_error(conn, :forbidden, reason)
 
       {:error, :message_not_found} ->
-        conn |> put_status(:not_found) |> json(%{error: "message_not_found"})
+        reply_error(conn, :not_found, "message_not_found")
 
       {:error, :message_not_in_chat} ->
-        conn |> put_status(:unprocessable_entity) |> json(%{error: "message_not_in_chat"})
+        reply_error(conn, :unprocessable_entity, "message_not_in_chat")
 
       {:error, reason} ->
-        conn |> put_status(:unprocessable_entity) |> json(%{error: to_string(reason)})
+        reply_error(conn, :unprocessable_entity, reason)
     end
   end
 
@@ -356,7 +345,7 @@ defmodule GamendWeb.Api.V1.ChatController do
             Chat.count_unread(user_id, chat_type, chat_ref_id)
           end
 
-        json(conn, %{data: %{unread_count: count}})
+        reply_data(conn, %{unread_count: count})
 
       {:error, conn} ->
         conn
@@ -391,7 +380,7 @@ defmodule GamendWeb.Api.V1.ChatController do
          }
        }},
     responses: [
-      ok: {"Updated message", "application/json", ChatMessage},
+      ok: {"Updated message", "application/json", ChatMessageResponse},
       not_found: Schemas.error("Message not found"),
       forbidden: Schemas.error("Not message sender"),
       unprocessable_entity: Schemas.error("Validation error")
@@ -409,21 +398,19 @@ defmodule GamendWeb.Api.V1.ChatController do
 
     case Chat.update_message(user_id, message_id, attrs) do
       {:ok, message} ->
-        json(conn, serialize_message(message))
+        reply_data(conn, serialize_message(message))
 
       {:error, :not_found} ->
-        conn |> put_status(:not_found) |> json(%{error: "not_found"})
+        reply_error(conn, :not_found, "not_found")
 
       {:error, :forbidden} ->
-        conn |> put_status(:forbidden) |> json(%{error: "forbidden"})
+        reply_error(conn, :forbidden, "forbidden")
 
       {:error, %Ecto.Changeset{} = cs} ->
-        conn
-        |> put_status(:unprocessable_entity)
-        |> json(%{error: "validation_error", details: changeset_errors(cs)})
+        unprocessable(conn, cs)
 
       {:error, reason} ->
-        conn |> put_status(:unprocessable_entity) |> json(%{error: to_string(reason)})
+        reply_error(conn, :unprocessable_entity, reason)
     end
   end
 
@@ -458,16 +445,16 @@ defmodule GamendWeb.Api.V1.ChatController do
 
     case Chat.delete_own_message(user_id, message_id) do
       {:ok, _message} ->
-        json(conn, %{ok: true})
+        reply_ok(conn)
 
       {:error, :not_found} ->
-        conn |> put_status(:not_found) |> json(%{error: "not_found"})
+        reply_error(conn, :not_found, "not_found")
 
       {:error, :forbidden} ->
-        conn |> put_status(:forbidden) |> json(%{error: "forbidden"})
+        reply_error(conn, :forbidden, "forbidden")
 
       {:error, reason} ->
-        conn |> put_status(:unprocessable_entity) |> json(%{error: to_string(reason)})
+        reply_error(conn, :unprocessable_entity, reason)
     end
   end
 
@@ -513,7 +500,7 @@ defmodule GamendWeb.Api.V1.ChatController do
 
     case parse_id(id) do
       nil ->
-        conn |> put_status(:bad_request) |> json(%{error: "invalid_id"})
+        reply_error(conn, :bad_request, "invalid_id")
 
       message_id ->
         # Reporting requires being able to read the message.
@@ -524,27 +511,25 @@ defmodule GamendWeb.Api.V1.ChatController do
         with :ok <- GamendWeb.RateLimit.check_report_daily(user_id),
              :ok <- ensure_can_report(conn, message_id),
              {:ok, _report} <- Chat.report_message(user_id, message_id, reason) do
-          json(conn, %{ok: true})
+          reply_ok(conn)
         else
           {:error, :report_daily_limit} ->
-            conn |> put_status(:too_many_requests) |> json(%{error: "report_daily_limit"})
+            reply_error(conn, :too_many_requests, "report_daily_limit")
 
           {:error, :not_found} ->
-            conn |> put_status(:not_found) |> json(%{error: "not_found"})
+            reply_error(conn, :not_found, "not_found")
 
           {:error, :own_message} ->
-            conn |> put_status(:bad_request) |> json(%{error: "own_message"})
+            reply_error(conn, :bad_request, "own_message")
 
           {:error, :already_reported} ->
-            conn |> put_status(:conflict) |> json(%{error: "already_reported"})
+            reply_error(conn, :conflict, "already_reported")
 
           # No catch-all: the clauses above cover everything
           # `check_report_daily/1` and `report_message/3` can return, and
           # dialyzer fails the build on the unreachable branch.
           {:error, %Ecto.Changeset{} = changeset} ->
-            conn
-            |> put_status(:unprocessable_entity)
-            |> json(%{error: "invalid", details: changeset_errors(changeset)})
+            unprocessable(conn, changeset)
         end
     end
   end
@@ -562,12 +547,10 @@ defmodule GamendWeb.Api.V1.ChatController do
         :ok
 
       {:error, reason} when reason in [:invalid_chat_ref, :invalid_chat_type] ->
-        {:error, conn |> put_status(:bad_request) |> json(%{error: to_string(reason)})}
+        {:error, reply_error(conn, :bad_request, reason)}
 
       {:error, reason} ->
-        {:error, conn |> put_status(:forbidden) |> json(%{error: to_string(reason)})}
+        {:error, reply_error(conn, :forbidden, reason)}
     end
   end
-
-  defp changeset_errors(changeset), do: GamendWeb.ChangesetErrors.errors(changeset)
 end

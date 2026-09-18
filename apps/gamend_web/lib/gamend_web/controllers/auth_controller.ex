@@ -312,20 +312,18 @@ defmodule GamendWeb.AuthController do
   defp handle_api_link(conn, user, user_params, provider_id_field, changeset_fn) do
     case Accounts.link_account(user, user_params, provider_id_field, changeset_fn) do
       {:ok, _updated_user} ->
-        json(conn, %{data: %{linked: true, provider: Atom.to_string(provider_id_field)}})
+        reply_data(conn, %{linked: true, provider: Atom.to_string(provider_id_field)})
 
       {:error, {:conflict, _other_user}} ->
-        conn
-        |> put_status(:conflict)
-        |> json(%{
-          error: "provider_already_linked",
-          message: "This provider is already linked to another account"
-        })
+        reply_error(
+          conn,
+          :conflict,
+          "provider_already_linked",
+          "This provider is already linked to another account"
+        )
 
       {:error, _changeset} ->
-        conn
-        |> put_status(:bad_request)
-        |> json(%{error: "link_failed", details: "internal_error"})
+        reply_error(conn, :bad_request, "link_failed", "internal_error")
     end
   end
 
@@ -341,27 +339,23 @@ defmodule GamendWeb.AuthController do
 
           Accounts.touch_last_seen(user)
 
-          json(conn, %{
-            data: %{
-              access_token: access_token,
-              refresh_token: refresh_token,
-              expires_in: 900,
-              user_id: user.id
-            }
+          reply_data(conn, %{
+            access_token: access_token,
+            refresh_token: refresh_token,
+            expires_in: 900,
+            user_id: user.id
           })
         else
-          conn
-          |> put_status(:forbidden)
-          |> json(%{
-            error: "account_not_activated",
-            message: "Your account is pending activation by an administrator."
-          })
+          reply_error(
+            conn,
+            :forbidden,
+            "account_not_activated",
+            "Your account is pending activation by an administrator."
+          )
         end
 
       {:error, changeset} ->
-        conn
-        |> put_status(:bad_request)
-        |> json(%{error: "create_failed", errors: GamendWeb.ChangesetErrors.errors(changeset)})
+        unprocessable(conn, changeset)
     end
   end
 
@@ -995,7 +989,7 @@ defmodule GamendWeb.AuthController do
       ]
     ],
     responses: [
-      ok: {"OAuth URL", "application/json", GamendWeb.Schemas.OAuthAuthorization},
+      ok: {"OAuth URL", "application/json", GamendWeb.Schemas.OAuthAuthorizationResponse},
       bad_request: GamendWeb.Schemas.error("Unsupported provider")
     ]
   )
@@ -1052,7 +1046,7 @@ defmodule GamendWeb.AuthController do
     url =
       "https://discord.com/oauth2/authorize?client_id=#{client_id}&redirect_uri=#{URI.encode_www_form(redirect_uri)}&response_type=code&scope=#{URI.encode_www_form(scope)}&state=#{URI.encode_www_form(session_id)}"
 
-    json(conn, %{authorization_url: url, session_id: session_id})
+    reply_data(conn, %{authorization_url: url, session_id: session_id})
   end
 
   def api_request(conn, %{"provider" => "apple"}) do
@@ -1068,7 +1062,7 @@ defmodule GamendWeb.AuthController do
     url =
       "https://appleid.apple.com/auth/authorize?client_id=#{client_id}&redirect_uri=#{URI.encode_www_form(redirect_uri)}&response_type=code&response_mode=form_post&scope=#{URI.encode_www_form(scope)}&state=#{URI.encode_www_form(session_id)}"
 
-    json(conn, %{authorization_url: url, session_id: session_id})
+    reply_data(conn, %{authorization_url: url, session_id: session_id})
   end
 
   def api_request(conn, %{"provider" => "google"}) do
@@ -1084,7 +1078,7 @@ defmodule GamendWeb.AuthController do
     url =
       "https://accounts.google.com/o/oauth2/v2/auth?client_id=#{client_id}&redirect_uri=#{URI.encode_www_form(redirect_uri)}&response_type=code&scope=#{URI.encode_www_form(scope)}&access_type=offline&state=#{URI.encode_www_form(session_id)}"
 
-    json(conn, %{authorization_url: url, session_id: session_id})
+    reply_data(conn, %{authorization_url: url, session_id: session_id})
   end
 
   def api_request(conn, %{"provider" => "facebook"}) do
@@ -1100,7 +1094,7 @@ defmodule GamendWeb.AuthController do
     url =
       "https://www.facebook.com/v18.0/dialog/oauth?client_id=#{client_id}&redirect_uri=#{URI.encode_www_form(redirect_uri)}&response_type=code&scope=#{URI.encode_www_form(scope)}&state=#{URI.encode_www_form(session_id)}"
 
-    json(conn, %{authorization_url: url, session_id: session_id})
+    reply_data(conn, %{authorization_url: url, session_id: session_id})
   end
 
   def api_request(conn, %{"provider" => "steam"}) do
@@ -1118,14 +1112,12 @@ defmodule GamendWeb.AuthController do
     url =
       "https://steamcommunity.com/openid/login?openid.ns=http://specs.openid.net/auth/2.0&openid.mode=checkid_setup&openid.return_to=#{URI.encode_www_form(return_to)}&openid.realm=#{URI.encode_www_form(realm)}&openid.identity=http://specs.openid.net/auth/2.0/identifier_select&openid.claimed_id=http://specs.openid.net/auth/2.0/identifier_select"
 
-    json(conn, %{authorization_url: url, session_id: session_id})
+    reply_data(conn, %{authorization_url: url, session_id: session_id})
   end
 
   # Unknown provider
   def api_request(conn, %{"provider" => _provider}) do
-    conn
-    |> put_status(:bad_request)
-    |> json(%{error: "invalid_provider", message: "Unsupported OAuth provider"})
+    reply_error(conn, :bad_request, "invalid_provider", "Unsupported OAuth provider")
   end
 
   # API clients can POST a code (or steam_id) to the callback endpoint and receive
@@ -1189,39 +1181,29 @@ defmodule GamendWeb.AuthController do
         end
 
       {:error, :missing_google_client_id} ->
-        conn
-        |> put_status(:internal_server_error)
-        |> json(%{
-          error: "server_misconfigured",
-          message: "Missing GOOGLE_WEB_CLIENT_ID/GOOGLE_CLIENT_ID"
-        })
+        reply_error(
+          conn,
+          :internal_server_error,
+          "server_misconfigured",
+          "Missing GOOGLE_WEB_CLIENT_ID/GOOGLE_CLIENT_ID"
+        )
 
       {:error, :invalid_audience} ->
-        conn
-        |> put_status(:bad_request)
-        |> json(%{error: "invalid_token", message: "Invalid audience"})
+        reply_error(conn, :bad_request, "invalid_token", "Invalid audience")
 
       {:error, :invalid_issuer} ->
-        conn
-        |> put_status(:bad_request)
-        |> json(%{error: "invalid_token", message: "Invalid issuer"})
+        reply_error(conn, :bad_request, "invalid_token", "Invalid issuer")
 
       {:error, :expired} ->
-        conn
-        |> put_status(:bad_request)
-        |> json(%{error: "invalid_token", message: "Token expired"})
+        reply_error(conn, :bad_request, "invalid_token", "Token expired")
 
       {:error, _err} ->
-        conn
-        |> put_status(:bad_request)
-        |> json(%{error: "invalid_token", details: "authentication_failed"})
+        reply_error(conn, :bad_request, "invalid_token", "authentication_failed")
     end
   end
 
   def api_google_id_token(conn, _params) do
-    conn
-    |> put_status(:bad_request)
-    |> json(%{error: "missing_param", message: "id_token is required"})
+    reply_error(conn, :bad_request, "missing_param", "id_token is required")
   end
 
   def api_callback(conn, %{"provider" => provider, "code" => code})
@@ -1231,14 +1213,10 @@ defmodule GamendWeb.AuthController do
         handle_api_oauth_result(conn, provider, user_params)
 
       {:error, :missing_user_info} ->
-        conn
-        |> put_status(:bad_request)
-        |> json(%{error: "exchange_failed", details: "missing id/email"})
+        reply_error(conn, :bad_request, "exchange_failed", "missing id/email")
 
       {:error, _err} ->
-        conn
-        |> put_status(:bad_request)
-        |> json(%{error: "exchange_failed", details: "authentication_failed"})
+        reply_error(conn, :bad_request, "exchange_failed", "authentication_failed")
     end
   end
 
@@ -1267,33 +1245,29 @@ defmodule GamendWeb.AuthController do
             handle_api_oauth_result(conn, "steam", user_params)
 
           {:error, _} ->
-            conn
-            |> put_status(:bad_request)
-            |> json(%{error: "exchange_failed", details: "authentication_failed"})
+            reply_error(conn, :bad_request, "exchange_failed", "authentication_failed")
         end
 
       {:error, :missing_param} ->
-        conn
-        |> put_status(:bad_request)
-        |> json(%{
-          error: "missing_param",
-          message: "code (Steam auth ticket) is required for steam provider"
-        })
+        reply_error(
+          conn,
+          :bad_request,
+          "missing_param",
+          "code (Steam auth ticket) is required for steam provider"
+        )
 
       {:error, _err} ->
-        conn
-        |> put_status(:bad_request)
-        |> json(%{error: "exchange_failed", details: "authentication_failed"})
+        reply_error(conn, :bad_request, "exchange_failed", "authentication_failed")
     end
   end
 
   def api_callback(conn, %{"provider" => _provider}) do
-    conn
-    |> put_status(:bad_request)
-    |> json(%{
-      error: "missing_or_unsupported",
-      message: "provider or required params are missing/unsupported"
-    })
+    reply_error(
+      conn,
+      :bad_request,
+      "missing_or_unsupported",
+      "provider or required params are missing/unsupported"
+    )
   end
 
   operation(:api_apple_ios_callback,
@@ -1332,16 +1306,12 @@ defmodule GamendWeb.AuthController do
         handle_api_oauth_result(conn, "apple", user_params)
 
       {:error, _err} ->
-        conn
-        |> put_status(:bad_request)
-        |> json(%{error: "exchange_failed", details: "authentication_failed"})
+        reply_error(conn, :bad_request, "exchange_failed", "authentication_failed")
     end
   end
 
   def api_apple_ios_callback(conn, _params) do
-    conn
-    |> put_status(:bad_request)
-    |> json(%{error: "missing_code"})
+    reply_error(conn, :bad_request, "missing_code")
   end
 
   defp apple_web_client_id do
@@ -1365,7 +1335,7 @@ defmodule GamendWeb.AuthController do
   )
 
   def api_providers(conn, _params) do
-    json(conn, %{data: Enum.map(Providers.enabled(), &Atom.to_string/1)})
+    reply_data(conn, Enum.map(Providers.enabled(), &Atom.to_string/1))
   end
 
   operation(:api_session_status,
@@ -1383,7 +1353,7 @@ defmodule GamendWeb.AuthController do
       ]
     ],
     responses: [
-      ok: {"Session status", "application/json", GamendWeb.Schemas.OAuthSessionStatus},
+      ok: {"Session status", "application/json", GamendWeb.Schemas.OAuthSessionStatusResponse},
       not_found: GamendWeb.Schemas.error("Session not found")
     ]
   )
@@ -1400,16 +1370,10 @@ defmodule GamendWeb.AuthController do
         # hours after the client had already collected it.
         _ = consume_session_tokens(session_id, normalized_data)
 
-        json(conn, %{
-          status: status,
-          message: message,
-          data: normalized_data
-        })
+        reply_data(conn, %{status: status, message: message, result: normalized_data})
 
       nil ->
-        conn
-        |> put_status(:not_found)
-        |> json(%{error: "session_not_found", message: "OAuth session not found"})
+        reply_error(conn, :not_found, "session_not_found", "OAuth session not found")
     end
   end
 

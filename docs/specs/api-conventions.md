@@ -108,35 +108,69 @@ generate code from it.
 
 ## Response shapes
 
-Reads return `data`, plus `meta` when paginated:
+**[R15]** Every JSON response takes one of four shapes, and nothing else:
+
+| Shape | Answers | Body | Helper |
+|---|---|---|---|
+| Resource | a read, or a write with something to return | `{"data": {...}}` | `reply_data/2,3` |
+| Page | any list of records | `{"data": [...], "meta": PageMeta}` | `reply_page/5` |
+| Done | a write with nothing to return | `{"ok": true}` | `reply_ok/1` |
+| Error | every 4xx and 5xx | `{"error": "snake_case", "message": "...", "errors": {...}}` | `reply_error/3,4`, `unprocessable/2` |
+
+The helpers live in `GamendWeb.Reply`, imported into every controller with
+`unprocessable/2`; answering through them is how a controller stays inside
+the table.
+
+- **Top level is fixed.** `data` alone, `data` with `meta`, `ok` alone, or
+  `error` with optional `message` and `errors`. Everything else — a member
+  list, a spectator count, a cursor — goes inside `data`.
+- **A write returns what it wrote.** Create answers 201 with the new resource,
+  update the updated one (a profile change answers the whole current user).
+  A write with nothing to show answers `{"ok": true}`, never `{}`.
+- **A list is a page.** An array under `data` carries the six-key `meta` from
+  `GamendWeb.Pagination`, even when the list is short today. The one
+  exemption is a fixed vocabulary — an array of enum strings, such as the
+  enabled sign-in providers. Two lists in one answer (friend requests) put an
+  object of lists under `data` and one `PageMeta` per list under `meta`:
 
 ```json
 {"data": [...], "meta": {"page": 1, "page_size": 25, "count": 25,
                          "total_count": 130, "total_pages": 6, "has_more": true}}
 ```
 
-All six meta keys, always, via `GamendWeb.Pagination.meta/4`. Mutations
-return `data` with the affected resource, or `{"ok": true}` when there is
-nothing to return. Errors return `{"error": "snake_case_reason"}` with a
-matching HTTP status.
+- **An error is a code.** `error` is a `snake_case` reason a client can switch
+  on; `message` is optional prose for a person; nothing else rides along.
+  Exceptions the endpoint renders (an unknown route, a crash) take the same
+  shape: `{"error": "not_found", "message": "Not Found"}`.
 
 **[R12]** A failed changeset adds the per-field detail under `errors`, keyed by
-field, each value a list of already-interpolated, already-translated messages:
+field, each value a list of already-interpolated, already-translated messages.
+`errors` appears with `"error": "validation_failed"` and nowhere else, and
+that answer is 422 — or 409 when what failed is a uniqueness constraint (a
+lobby title already taken):
 
 ```json
 {"error": "validation_failed",
  "errors": {"max_players": ["must be greater than or equal to min_players"]}}
 ```
 
-`unprocessable(conn, changeset)` — imported into every controller — is the only
-way to write it; `GamendWeb.ChangesetErrors.errors/1` gives the map alone for
-the few endpoints whose status is deliberately not 422 (a uniqueness clash on
-lobby create is a 409). `mix gamend.api.lint` rejects a hand-rolled
-`traverse_errors` in a controller.
+`unprocessable(conn, changeset)` is the only way to write it;
+`GamendWeb.ChangesetErrors.errors/1` gives the map alone for the 409 case.
+`mix gamend.api.lint` rejects a hand-rolled `traverse_errors` in a controller.
 
-An endpoint returning two parallel collections (friend requests) nests one
-standard meta per collection under `meta.incoming` / `meta.outgoing` rather
-than inventing a parallel-map shape.
+**[R16]** A person is named `<role>_name` (`host_name`, `sender_name`,
+`leader_name`); a thing carries its `title` (`group_title`, never
+`group_name`); no property is called `name`.
+
+**Enforcement.** `GamendWeb.ApiShapeTest` checks the OpenAPI document: every
+success response is a named component in one of the first three shapes, every
+error response is `ErrorResponse`, and R16 holds for every property. At run
+time `GamendWeb.ResponseContract` checks every response the test suite
+provokes against its documented schema, rejects undeclared keys, and holds
+error bodies to the rules above. Together they mean a new endpoint cannot
+answer in a fifth shape without failing CI. See
+[named-api-schemas.md](named-api-schemas.md) for how the documented schemas
+are named.
 
 ## Authentication in the document
 

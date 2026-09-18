@@ -21,7 +21,7 @@ defmodule GamendWeb.Api.V1.ChatMuteController do
   alias Gamend.Lobbies
   alias Gamend.Parties
   alias GamendWeb.Schemas
-  alias GamendWeb.Schemas.{ChatMuteRecordPage, ChatMuteRecordResponse, UnmuteResult}
+  alias GamendWeb.Schemas.{ChatMuteRecordPage, ChatMuteRecordResponse, DeletedCountResponse}
   alias OpenApiSpex.Schema
 
   tags(["Chat"])
@@ -82,7 +82,7 @@ defmodule GamendWeb.Api.V1.ChatMuteController do
     security: [%{"authorization" => []}],
     request_body: {"Unmute", "application/json", @unmute_request},
     responses: [
-      ok: {"Unmuted", "application/json", UnmuteResult},
+      ok: {"Unmuted", "application/json", DeletedCountResponse},
       bad_request: Schemas.error("Not in a lobby or invalid id"),
       forbidden: Schemas.error("Not the lobby host")
     ]
@@ -169,7 +169,7 @@ defmodule GamendWeb.Api.V1.ChatMuteController do
     ],
     request_body: {"Unmute", "application/json", @unmute_request},
     responses: [
-      ok: {"Unmuted", "application/json", UnmuteResult},
+      ok: {"Unmuted", "application/json", DeletedCountResponse},
       bad_request: Schemas.error("Invalid id"),
       forbidden: Schemas.error("Not a group admin")
     ]
@@ -242,7 +242,7 @@ defmodule GamendWeb.Api.V1.ChatMuteController do
     security: [%{"authorization" => []}],
     request_body: {"Unmute", "application/json", @unmute_request},
     responses: [
-      ok: {"Unmuted", "application/json", UnmuteResult},
+      ok: {"Unmuted", "application/json", DeletedCountResponse},
       bad_request: Schemas.error("Not in a party or invalid id"),
       forbidden: Schemas.error("Not the party leader")
     ]
@@ -291,7 +291,7 @@ defmodule GamendWeb.Api.V1.ChatMuteController do
   defp do_mute(conn, params, scope, scope_ref_id, actor) do
     case target_id(params) do
       nil ->
-        conn |> put_status(:bad_request) |> json(%{error: "invalid_target_user_id"})
+        reply_error(conn, :bad_request, "invalid_target_user_id")
 
       target_user_id ->
         attrs = %{
@@ -302,15 +302,13 @@ defmodule GamendWeb.Api.V1.ChatMuteController do
 
         case Chat.mute_user(target_user_id, scope, scope_ref_id, attrs) do
           {:ok, mute} ->
-            json(conn, %{data: serialize(mute)})
+            reply_data(conn, serialize(mute))
 
           {:error, %Ecto.Changeset{} = changeset} ->
-            conn
-            |> put_status(:unprocessable_entity)
-            |> json(%{error: "invalid", details: changeset_errors(changeset)})
+            unprocessable(conn, changeset)
 
           {:error, reason} ->
-            conn |> put_status(:unprocessable_entity) |> json(%{error: to_string(reason)})
+            reply_error(conn, :unprocessable_entity, reason)
         end
     end
   end
@@ -318,11 +316,11 @@ defmodule GamendWeb.Api.V1.ChatMuteController do
   defp do_unmute(conn, params, scope, scope_ref_id) do
     case target_id(params) do
       nil ->
-        conn |> put_status(:bad_request) |> json(%{error: "invalid_target_user_id"})
+        reply_error(conn, :bad_request, "invalid_target_user_id")
 
       target_user_id ->
         {:ok, count} = Chat.unmute_user(target_user_id, scope, scope_ref_id)
-        json(conn, %{ok: true, removed: count})
+        reply_data(conn, %{deleted: count})
     end
   end
 
@@ -333,10 +331,7 @@ defmodule GamendWeb.Api.V1.ChatMuteController do
     mutes = Chat.list_mutes(filters, page: page, page_size: page_size)
     total_count = Chat.count_mutes(filters)
 
-    json(conn, %{
-      data: Enum.map(mutes, &serialize/1),
-      meta: GamendWeb.Pagination.meta(page, page_size, length(mutes), total_count)
-    })
+    reply_page(conn, Enum.map(mutes, &serialize/1), page, page_size, total_count)
   end
 
   defp serialize(mute) do
@@ -366,7 +361,7 @@ defmodule GamendWeb.Api.V1.ChatMuteController do
     with_user(conn, fn user ->
       case Gamend.UUIDv7.cast_or_nil(group_id) do
         nil ->
-          conn |> put_status(:bad_request) |> json(%{error: "invalid_id"})
+          reply_error(conn, :bad_request, "invalid_id")
 
         group_id ->
           if Groups.can_manage_group?(user.id, group_id) do
@@ -378,7 +373,5 @@ defmodule GamendWeb.Api.V1.ChatMuteController do
     end)
   end
 
-  defp forbidden(conn, reason), do: conn |> put_status(:forbidden) |> json(%{error: reason})
-
-  defp changeset_errors(changeset), do: GamendWeb.ChangesetErrors.errors(changeset)
+  defp forbidden(conn, reason), do: reply_error(conn, :forbidden, reason)
 end

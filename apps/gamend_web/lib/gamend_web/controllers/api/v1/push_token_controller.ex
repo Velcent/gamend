@@ -10,7 +10,7 @@ defmodule GamendWeb.Api.V1.PushTokenController do
   alias Gamend.Push
   alias GamendWeb.Pagination
   alias GamendWeb.Schemas
-  alias GamendWeb.Schemas.{PushToken, PushTokenPage}
+  alias GamendWeb.Schemas.{PushTokenPage, PushTokenResponse}
   alias OpenApiSpex.Schema
 
   tags(["Push"])
@@ -37,7 +37,7 @@ defmodule GamendWeb.Api.V1.PushTokenController do
          }
        }},
     responses: [
-      created: {"Registered token", "application/json", PushToken},
+      created: {"Registered token", "application/json", PushTokenResponse},
       bad_request: Schemas.error("Too many devices"),
       unprocessable_entity: Schemas.error("Validation failed"),
       unauthorized: Schemas.error("Not authenticated")
@@ -49,17 +49,13 @@ defmodule GamendWeb.Api.V1.PushTokenController do
 
     case Push.register_token(user.id, params) do
       {:ok, token} ->
-        conn
-        |> put_status(:created)
-        |> json(serialize(token))
+        reply_data(conn, :created, serialize(token))
 
       {:error, :too_many_tokens} ->
-        conn |> put_status(:bad_request) |> json(%{error: "too_many_tokens"})
+        reply_error(conn, :bad_request, "too_many_tokens")
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        conn
-        |> put_status(:unprocessable_entity)
-        |> json(%{error: "validation_failed", errors: changeset_errors(changeset)})
+        unprocessable(conn, changeset)
     end
   end
 
@@ -79,15 +75,12 @@ defmodule GamendWeb.Api.V1.PushTokenController do
 
   def index(conn, params) do
     user = Scope.user(conn.assigns.current_scope)
-    {page, page_size} = GamendWeb.Pagination.params(params)
+    {page, page_size} = Pagination.params(params)
 
     tokens = Push.list_tokens(user.id, page: page, page_size: page_size)
     total = Push.count_tokens(user.id)
 
-    json(conn, %{
-      data: Enum.map(tokens, &serialize/1),
-      meta: Pagination.meta(page, page_size, length(tokens), total)
-    })
+    reply_page(conn, Enum.map(tokens, &serialize/1), page, page_size, total)
   end
 
   operation(:delete,
@@ -98,7 +91,7 @@ defmodule GamendWeb.Api.V1.PushTokenController do
       id: [in: :path, schema: %Schema{type: :string, format: :uuid}, required: true]
     ],
     responses: [
-      ok: {"Deleted token", "application/json", PushToken},
+      ok: {"Deleted token", "application/json", PushTokenResponse},
       not_found: Schemas.error("Unknown token"),
       unauthorized: Schemas.error("Not authenticated")
     ]
@@ -108,8 +101,8 @@ defmodule GamendWeb.Api.V1.PushTokenController do
     user = Scope.user(conn.assigns.current_scope)
 
     case Gamend.UUIDv7.cast_or_nil(id) && Push.delete_token(user.id, id) do
-      {:ok, token} -> json(conn, serialize(token))
-      _ -> conn |> put_status(:not_found) |> json(%{error: "not_found"})
+      {:ok, token} -> reply_data(conn, serialize(token))
+      _ -> reply_error(conn, :not_found, "not_found")
     end
   end
 
@@ -126,6 +119,4 @@ defmodule GamendWeb.Api.V1.PushTokenController do
       inserted_at: token.inserted_at
     }
   end
-
-  defp changeset_errors(changeset), do: GamendWeb.ChangesetErrors.errors(changeset)
 end

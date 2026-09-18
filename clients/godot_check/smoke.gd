@@ -45,13 +45,14 @@ func _run() -> void:
 		failures += 1
 		print("FAIL device_login: no token captured")
 
-	_expect(await api.users_get_current_user(), "get_current_user", GamendCurrentUser)
+	_expect(await api.users_get_current_user(), "get_current_user", GamendCurrentUserResponse)
 
 	var join := GamendQuickJoinRequest.new()
 	join.title = "godot-check"
 	join.max_users = 2
-	var lobby = _expect(await api.lobbies_quick_join(join), "quick_join", GamendLobby)
-	if lobby:
+	var joined = _expect(await api.lobbies_quick_join(join), "quick_join", GamendLobbyResponse)
+	if joined:
+		var lobby: GamendLobby = joined.data
 		var detail := await api.lobbies_get_lobby(lobby.id)
 		if _expect(detail, "get_lobby", GamendLobbyResponse):
 			var as_dict := GamendClient.lobby_to_dict(detail.response)
@@ -80,20 +81,21 @@ func _run() -> void:
 
 	var new_group := GamendCreateGroupRequest.new()
 	new_group.title = "godot-check-%d" % randi()
-	var group = _expect(await api.groups_create_group(new_group), "create_group", GamendGroup)
-	if group:
-		_expect(await api.groups_get_group(group.id), "get_group", GamendGroup)
+	var created = _expect(await api.groups_create_group(new_group), "create_group", GamendGroupResponse)
+	if created:
+		var group: GamendGroup = created.data
+		_expect(await api.groups_get_group(group.id), "get_group", GamendGroupResponse)
 		_expect(await api.groups_list_group_members(group.id), "list_group_members", GamendGroupMemberPage)
 	_expect(await api.groups_list_groups(), "list_groups", GamendGroupPage)
 	_expect(await api.groups_list_my_groups(), "list_my_groups", GamendGroupPage)
 
 	var new_party := GamendCreatePartyRequest.new()
 	new_party.max_size = 4
-	var party = _expect(await api.parties_create_party(new_party), "create_party", GamendParty)
-	if party and (party.members as Array).is_empty():
+	var party = _expect(await api.parties_create_party(new_party), "create_party", GamendPartyResponse)
+	if party and (party.data.members as Array).is_empty():
 		failures += 1
 		print("FAIL create_party: no members")
-	_expect(await api.parties_show_party(), "show_party", GamendParty)
+	_expect(await api.parties_show_party(), "show_party", GamendPartyResponse)
 	_expect(await api.parties_party_stats(), "party_stats", GamendPartyStatsResponse)
 	var left_party := await api.parties_leave_party()
 	if left_party.error:

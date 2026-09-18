@@ -112,42 +112,6 @@ defmodule GamendWeb.Schemas.PublicUserPage do
   use GamendWeb.Schemas.Envelope, page: GamendWeb.Schemas.PublicUser
 end
 
-defmodule GamendWeb.Schemas.ProfileUpdate do
-  @moduledoc "What a password, display-name or username change answers."
-  require OpenApiSpex
-  alias OpenApiSpex.Schema
-
-  OpenApiSpex.schema(%{
-    title: "ProfileUpdate",
-    description: "A profile change that went through; the changed field is echoed back",
-    type: :object,
-    properties: %{
-      ok: %Schema{type: :boolean},
-      id: %Schema{type: :string, format: :uuid, description: "The user's id"},
-      display_name: %Schema{type: :string, description: "Set by a display-name change"},
-      username: %Schema{type: :string, description: "Set by a username change"}
-    },
-    required: [:ok, :id]
-  })
-end
-
-defmodule GamendWeb.Schemas.AvatarUpdate do
-  @moduledoc "What confirming an uploaded avatar answers."
-  require OpenApiSpex
-  alias OpenApiSpex.Schema
-
-  OpenApiSpex.schema(%{
-    title: "AvatarUpdate",
-    description: "The avatar was recorded",
-    type: :object,
-    properties: %{
-      ok: %Schema{type: :boolean},
-      profile_url: %Schema{type: :string, description: "The new avatar URL"}
-    },
-    required: [:ok, :profile_url]
-  })
-end
-
 defmodule GamendWeb.Schemas.PlayerStats do
   @moduledoc "The counters `Gamend.Accounts.player_stats/0` returns."
   require OpenApiSpex
@@ -177,4 +141,14 @@ end
 defmodule GamendWeb.Schemas.PlayerStatsResponse do
   @moduledoc "Player counts under `data`."
   use GamendWeb.Schemas.Envelope, data: GamendWeb.Schemas.PlayerStats
+end
+
+defmodule GamendWeb.Schemas.CurrentUserResponse do
+  @moduledoc "The signed-in user under `data`; every profile change answers it."
+  use GamendWeb.Schemas.Envelope, data: GamendWeb.Schemas.CurrentUser
+end
+
+defmodule GamendWeb.Schemas.PublicUserResponse do
+  @moduledoc "One user under `data`."
+  use GamendWeb.Schemas.Envelope, data: GamendWeb.Schemas.PublicUser
 end

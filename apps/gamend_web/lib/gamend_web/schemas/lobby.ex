@@ -78,20 +78,6 @@ defmodule GamendWeb.Schemas.LobbyPage do
   use GamendWeb.Schemas.Envelope, page: GamendWeb.Schemas.Lobby
 end
 
-defmodule GamendWeb.Schemas.LobbyResponse do
-  @moduledoc "One lobby with its current members and spectator count."
-  alias OpenApiSpex.Schema
-
-  use GamendWeb.Schemas.Envelope,
-    data: GamendWeb.Schemas.Lobby,
-    description: "A lobby under `data`, with its members and spectator count",
-    extra: %{
-      members: %Schema{type: :array, items: GamendWeb.Schemas.UserBrief},
-      spectator_count: %Schema{type: :integer, description: "Current spectators"}
-    },
-    required: [:members, :spectator_count]
-end
-
 defmodule GamendWeb.Schemas.LobbyStats do
   @moduledoc "The counters `Gamend.Lobbies.stats/0` returns."
   require OpenApiSpex
@@ -117,4 +103,9 @@ end
 defmodule GamendWeb.Schemas.LobbyStatsResponse do
   @moduledoc "Lobby counts under `data`."
   use GamendWeb.Schemas.Envelope, data: GamendWeb.Schemas.LobbyStats
+end
+
+defmodule GamendWeb.Schemas.LobbyResponse do
+  @moduledoc "One lobby under `data`; `get_lobby` includes its members and spectator count."
+  use GamendWeb.Schemas.Envelope, data: GamendWeb.Schemas.Lobby
 end

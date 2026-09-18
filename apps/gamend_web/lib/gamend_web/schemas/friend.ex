@@ -124,3 +124,8 @@ defmodule GamendWeb.Schemas.BlockedFriendshipPage do
   @moduledoc "A page of blocked friendships."
   use GamendWeb.Schemas.Envelope, page: GamendWeb.Schemas.BlockedFriendship
 end
+
+defmodule GamendWeb.Schemas.FriendRequestResponse do
+  @moduledoc "One friend request under `data`."
+  use GamendWeb.Schemas.Envelope, data: GamendWeb.Schemas.FriendRequest
+end

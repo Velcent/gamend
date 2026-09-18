@@ -36,10 +36,15 @@ may have its own `Lobby`:
 
 | Call | `data` is |
 |---|---|
-| `lobbies_get_lobby(id)` | `GamendLobbyResponse`: `data` (a `GamendLobby`), `members`, `spectator_count` |
+| `lobbies_get_lobby(id)` | `GamendLobbyResponse`: `data`, a `GamendLobby` with its `members` and `spectator_count` |
 | `lobbies_list_lobbies()` | `GamendLobbyPage`: `data` (`GamendLobby` rows), `meta` (a `GamendPageMeta`) |
-| `users_get_current_user()` | `GamendCurrentUser` |
-| `authenticate_device_login(id)` | `GamendSessionResponse`: `data` (a `GamendSession`) |
+| `users_get_current_user()` | `GamendCurrentUserResponse`: `data`, a `GamendCurrentUser` |
+| `authenticate_device_login(id)` | `GamendSessionResponse`: `data`, a `GamendSession` |
+| `lobbies_leave_lobby()` | `GamendOkResponse`: `ok` |
+
+Every answer has the same four shapes (see API conventions): the resource
+under `data`, a page under `data` with `meta`, `ok` for a write with nothing
+to return, or an error.
 
 Request bodies follow the operation: `GamendCreateLobbyRequest`,
 `GamendCallHookRequest`. A failed call sets `response.error` instead.
@@ -60,15 +65,15 @@ func do_discord_auth() -> void:
 	).finished
 	print_error_or_result(response)
 
-	var authorization_url: String = response.response.data.authorization_url
-	var session_id: String = response.response.data.session_id
+	var authorization_url: String = response.response.data.data.authorization_url
+	var session_id: String = response.response.data.data.session_id
 
 	OS.shell_open(authorization_url)
 
 	# Poll until the browser half of the flow completes.
 	for i in 60:
 		response = await gamend_api.authenticate_oauth_session_status(session_id).finished
-		if response.response.data.status == "completed":
+		if response.response.data.data.status == "completed":
 			break
 		await get_tree().create_timer(1.0).timeout
 ```

@@ -7,10 +7,9 @@ defmodule GamendWeb.Api.V1.LobbyController do
   alias Gamend.Accounts.Scope
   alias Gamend.Accounts.User
   alias Gamend.Lobbies
-  alias Gamend.Lobbies.SpectatorTracker
   alias Gamend.Parties
   alias GamendWeb.Schemas
-  alias GamendWeb.Schemas.{Lobby, LobbyPage, LobbyResponse, LobbyStatsResponse}
+  alias GamendWeb.Schemas.{LobbyPage, LobbyResponse, LobbyStatsResponse, OkResponse}
   alias GamendWeb.Serializers
   alias OpenApiSpex.Schema
 
@@ -117,7 +116,7 @@ defmodule GamendWeb.Api.V1.LobbyController do
       }
     },
     responses: [
-      created: {"Lobby created", "application/json", Lobby},
+      created: {"Lobby created", "application/json", LobbyResponse},
       conflict: Schemas.error("User already in a lobby, or validation failed"),
       forbidden: Schemas.error("In a party without leading it, or the party cannot follow"),
       unauthorized: Schemas.error("Not authenticated"),
@@ -154,7 +153,7 @@ defmodule GamendWeb.Api.V1.LobbyController do
       }
     },
     responses: %{
-      200 => {"Updated lobby", "application/json", Lobby},
+      200 => {"Updated lobby", "application/json", LobbyResponse},
       400 => Schemas.error("Not in a lobby / missing state / malformed id"),
       401 => Schemas.error("Not authenticated"),
       403 => Schemas.error("No authority over the lobby"),
@@ -167,27 +166,25 @@ defmodule GamendWeb.Api.V1.LobbyController do
     with_target_lobby(conn, params, fn user, lobby ->
       case Lobbies.transition_state_by_host(user, lobby, state) do
         {:ok, updated} ->
-          json(conn, serialize_lobby(updated))
+          reply_data(conn, serialize_lobby(updated))
 
         {:error, :not_host} ->
-          conn |> put_status(:forbidden) |> json(%{error: "not_host"})
+          reply_error(conn, :forbidden, "not_host")
 
         {:error, :invalid_state} ->
-          conn |> put_status(:unprocessable_entity) |> json(%{error: "invalid_state"})
+          reply_error(conn, :unprocessable_entity, "invalid_state")
 
         {:error, {:hook_rejected, reason}} ->
-          conn
-          |> put_status(:unprocessable_entity)
-          |> json(%{error: "rejected", reason: inspect(reason)})
+          reply_error(conn, :unprocessable_entity, "rejected", rejection_message(reason))
 
         _other ->
-          conn |> put_status(:unprocessable_entity) |> json(%{error: "unexpected_error"})
+          reply_error(conn, :unprocessable_entity, "unexpected_error")
       end
     end)
   end
 
   def set_state(conn, _params) do
-    conn |> put_status(:bad_request) |> json(%{error: "state_required"})
+    reply_error(conn, :bad_request, "state_required")
   end
 
   operation(:update,
@@ -231,7 +228,7 @@ defmodule GamendWeb.Api.V1.LobbyController do
       }
     },
     responses: [
-      ok: {"Lobby updated", "application/json", Lobby},
+      ok: {"Lobby updated", "application/json", LobbyResponse},
       bad_request: Schemas.error("Not in a lobby, or malformed id"),
       forbidden: Schemas.error("No authority over the lobby"),
       not_found: Schemas.error("Not found"),
@@ -266,7 +263,7 @@ defmodule GamendWeb.Api.V1.LobbyController do
       }
     },
     responses: [
-      ok: {"Successfully joined", "application/json", Lobby},
+      ok: {"Successfully joined", "application/json", LobbyResponse},
       forbidden: Schemas.error("Cannot join (locked, full, wrong password, etc)"),
       not_found: Schemas.error("Lobby not found"),
       conflict: Schemas.error("A party member is already in a lobby"),
@@ -280,7 +277,7 @@ defmodule GamendWeb.Api.V1.LobbyController do
     description: "Leave the lobby you are currently in.",
     security: [%{"authorization" => []}],
     responses: [
-      ok: {"Success", "application/json", %Schema{type: :object}},
+      ok: {"Success", "application/json", OkResponse},
       bad_request: Schemas.error("Not in a lobby"),
       forbidden: Schemas.error("Rejected by a hook"),
       unauthorized: Schemas.error("Not authenticated"),
@@ -297,7 +294,7 @@ defmodule GamendWeb.Api.V1.LobbyController do
         "(matchmaking) lobby has no host to authorise it and is refused.",
     security: [%{"authorization" => []}],
     responses: [
-      ok: {"Success", "application/json", %Schema{type: :object}},
+      ok: {"Success", "application/json", OkResponse},
       bad_request: Schemas.error("Not in a lobby"),
       forbidden: Schemas.error("Not the lobby host"),
       unauthorized: Schemas.error("Not authenticated"),
@@ -328,7 +325,7 @@ defmodule GamendWeb.Api.V1.LobbyController do
       }
     },
     responses: [
-      ok: {"User kicked", "application/json", %Schema{type: :object}},
+      ok: {"User kicked", "application/json", OkResponse},
       bad_request: Schemas.error("Not in a lobby"),
       forbidden: Schemas.error("Not the host or cannot kick this user"),
       not_found: Schemas.error("Target not in the lobby"),
@@ -362,7 +359,7 @@ defmodule GamendWeb.Api.V1.LobbyController do
       }
     },
     responses: [
-      ok: {"Lobby joined or created", "application/json", Lobby},
+      ok: {"Lobby joined or created", "application/json", LobbyResponse},
       conflict: Schemas.error("User already in a lobby"),
       forbidden: Schemas.error("Not the party leader, members offline, or rejected"),
       unauthorized: Schemas.error("Not authenticated"),
@@ -380,7 +377,7 @@ defmodule GamendWeb.Api.V1.LobbyController do
     ]
   )
 
-  def stats(conn, _params), do: json(conn, %{data: Lobbies.stats()})
+  def stats(conn, _params), do: reply_data(conn, Lobbies.stats())
 
   def index(conn, params) do
     params = params || %{}
@@ -407,16 +404,15 @@ defmodule GamendWeb.Api.V1.LobbyController do
     {page, page_size} = GamendWeb.Pagination.params(params)
 
     lobbies = Lobbies.list_lobbies(filters, page: page, page_size: page_size)
-    serialized = Enum.map(lobbies, &serialize_lobby/1)
-    count = length(serialized)
-
     total_count = Lobbies.count_list_lobbies(filters)
 
-    json(conn, %{
-      data: serialized,
-      meta: GamendWeb.Pagination.meta(page, page_size, count, total_count)
-    })
+    reply_page(conn, Enum.map(lobbies, &serialize_lobby/1), page, page_size, total_count)
   end
+
+  # A hook may reject with a string for the player or any term; only a string
+  # is worth showing as-is.
+  defp rejection_message(reason) when is_binary(reason), do: reason
+  defp rejection_message(reason), do: inspect(reason)
 
   defp serialize_lobby(lobby) do
     Serializers.serialize_lobby(lobby, include_passworded: true, include_slowdown: true)
@@ -447,27 +443,23 @@ defmodule GamendWeb.Api.V1.LobbyController do
     with {:ok, lobby_id} <- Ecto.UUID.cast(id_str),
          %Gamend.Lobbies.Lobby{} = lobby <- Lobbies.get_lobby(lobby_id),
          true <- Lobbies.can_view_lobby?(Scope.user(conn.assigns[:current_scope]), lobby) do
-      members =
-        Lobbies.get_lobby_members(lobby)
-        |> Enum.map(&User.serialize_brief/1)
-
-      json(conn, %{
-        data: serialize_lobby(lobby),
-        members: members,
-        spectator_count: SpectatorTracker.count(lobby.id)
-      })
+      reply_data(
+        conn,
+        Serializers.serialize_lobby(lobby,
+          include_passworded: true,
+          include_slowdown: true,
+          include_members: true,
+          include_spectator_count: true
+        )
+      )
     else
       :error ->
-        conn
-        |> put_status(:bad_request)
-        |> json(%{error: "Invalid lobby id"})
+        reply_error(conn, :bad_request, "invalid_id")
 
       # 404 rather than 403 for a hidden lobby the caller is not in: a 403
       # confirms it exists, which is the thing hiding it is meant to conceal.
       _ ->
-        conn
-        |> put_status(:not_found)
-        |> json(%{error: "Lobby not found"})
+        reply_error(conn, :not_found, "not_found")
     end
   end
 
@@ -492,7 +484,7 @@ defmodule GamendWeb.Api.V1.LobbyController do
         cond do
           # Non-leader party members must leave the party first
           user.party_id != nil and not Parties.can_manage_party?(user, user.party_id) ->
-            conn |> put_status(:forbidden) |> json(%{error: "in_party"})
+            reply_error(conn, :forbidden, "in_party")
 
           # Party leader: automatically bring the whole party
           user.party_id != nil and Parties.can_manage_party?(user, user.party_id) ->
@@ -504,41 +496,32 @@ defmodule GamendWeb.Api.V1.LobbyController do
         end
 
       _ ->
-        conn |> put_status(:unauthorized) |> json(%{error: "Not authenticated"})
+        reply_error(conn, :unauthorized, "not_authenticated")
     end
   end
 
   defp create_lobby_as_party_leader(conn, user, params) do
     case Parties.create_lobby_with_party(user, params) do
       {:ok, lobby} ->
-        conn
-        |> put_status(:created)
-        |> json(serialize_lobby(lobby))
+        reply_data(conn, :created, serialize_lobby(lobby))
 
       {:error, :member_in_lobby} ->
-        conn |> put_status(:conflict) |> json(%{error: "member_in_lobby"})
+        reply_error(conn, :conflict, "member_in_lobby")
 
       {:error, :not_enough_space} ->
-        conn |> put_status(:forbidden) |> json(%{error: "not_enough_space"})
+        reply_error(conn, :forbidden, "not_enough_space")
 
       {:error, :member_offline} ->
-        conn |> put_status(:forbidden) |> json(%{error: "member_offline"})
+        reply_error(conn, :forbidden, "member_offline")
 
       {:error, :blocked} ->
-        conn |> put_status(:forbidden) |> json(%{error: "blocked"})
+        reply_error(conn, :forbidden, "blocked")
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        conn
-        |> put_status(:conflict)
-        |> json(%{
-          error: "validation_failed",
-          errors: GamendWeb.ChangesetErrors.errors(changeset)
-        })
+        uniqueness_conflict(conn, changeset)
 
       _other ->
-        conn
-        |> put_status(:unprocessable_entity)
-        |> json(%{error: "unexpected_error"})
+        reply_error(conn, :unprocessable_entity, "unexpected_error")
     end
   end
 
@@ -547,22 +530,13 @@ defmodule GamendWeb.Api.V1.LobbyController do
 
     case Lobbies.create_lobby(attrs) do
       {:ok, lobby} ->
-        conn
-        |> put_status(:created)
-        |> json(serialize_lobby(lobby))
+        reply_data(conn, :created, serialize_lobby(lobby))
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        conn
-        |> put_status(:conflict)
-        |> json(%{
-          error: "validation_failed",
-          errors: GamendWeb.ChangesetErrors.errors(changeset)
-        })
+        uniqueness_conflict(conn, changeset)
 
       _other ->
-        conn
-        |> put_status(:unprocessable_entity)
-        |> json(%{error: "unexpected_error"})
+        reply_error(conn, :unprocessable_entity, "unexpected_error")
     end
   end
 
@@ -577,7 +551,7 @@ defmodule GamendWeb.Api.V1.LobbyController do
             cond do
               # Non-leader party members cannot join a lobby individually
               user.party_id != nil and not Parties.can_manage_party?(user, user.party_id) ->
-                conn |> put_status(:forbidden) |> json(%{error: "in_party"})
+                reply_error(conn, :forbidden, "in_party")
 
               # Party leader: bring the whole party
               user.party_id != nil and Parties.can_manage_party?(user, user.party_id) ->
@@ -589,11 +563,11 @@ defmodule GamendWeb.Api.V1.LobbyController do
             end
 
           _ ->
-            conn |> put_status(:not_found) |> json(%{error: "not_found"})
+            reply_error(conn, :not_found, "not_found")
         end
 
       _ ->
-        conn |> put_status(:unauthorized) |> json(%{error: "Not authenticated"})
+        reply_error(conn, :unauthorized, "not_authenticated")
     end
   end
 
@@ -603,40 +577,40 @@ defmodule GamendWeb.Api.V1.LobbyController do
 
     case Parties.join_lobby_with_party(user, lobby_id, opts) do
       {:ok, lobby} ->
-        json(conn, serialize_lobby(lobby))
+        reply_data(conn, serialize_lobby(lobby))
 
       {:error, :invalid_lobby} ->
-        conn |> put_status(:not_found) |> json(%{error: "not_found"})
+        reply_error(conn, :not_found, "not_found")
 
       {:error, :locked} ->
-        conn |> put_status(:forbidden) |> json(%{error: "locked"})
+        reply_error(conn, :forbidden, "locked")
 
       {:error, :password_required} ->
-        conn |> put_status(:forbidden) |> json(%{error: "password_required"})
+        reply_error(conn, :forbidden, "password_required")
 
       {:error, :invalid_password} ->
-        conn |> put_status(:forbidden) |> json(%{error: "invalid_password"})
+        reply_error(conn, :forbidden, "invalid_password")
 
       {:error, :member_in_lobby} ->
-        conn |> put_status(:conflict) |> json(%{error: "member_in_lobby"})
+        reply_error(conn, :conflict, "member_in_lobby")
 
       {:error, :not_enough_space} ->
-        conn |> put_status(:forbidden) |> json(%{error: "not_enough_space"})
+        reply_error(conn, :forbidden, "not_enough_space")
 
       {:error, :member_offline} ->
-        conn |> put_status(:forbidden) |> json(%{error: "member_offline"})
+        reply_error(conn, :forbidden, "member_offline")
 
       {:error, :blocked} ->
-        conn |> put_status(:forbidden) |> json(%{error: "blocked"})
+        reply_error(conn, :forbidden, "blocked")
 
       {:error, :full} ->
-        conn |> put_status(:forbidden) |> json(%{error: "full"})
+        reply_error(conn, :forbidden, "full")
 
       {:error, {:hook_rejected, _}} ->
-        conn |> put_status(:forbidden) |> json(%{error: "rejected"})
+        reply_error(conn, :forbidden, "rejected")
 
       _ ->
-        conn |> put_status(:forbidden) |> json(%{error: "cannot_join"})
+        reply_error(conn, :forbidden, "cannot_join")
     end
   end
 
@@ -644,34 +618,34 @@ defmodule GamendWeb.Api.V1.LobbyController do
     case Lobbies.join_lobby(user, lobby_id, opts) do
       {:ok, _member} ->
         lobby = Lobbies.get_lobby!(lobby_id)
-        json(conn, serialize_lobby(lobby))
+        reply_data(conn, serialize_lobby(lobby))
 
       {:error, :invalid_lobby} ->
-        conn |> put_status(:not_found) |> json(%{error: "not_found"})
+        reply_error(conn, :not_found, "not_found")
 
       {:error, :already_in_lobby} ->
-        conn |> put_status(:forbidden) |> json(%{error: "already_in_lobby"})
+        reply_error(conn, :forbidden, "already_in_lobby")
 
       {:error, :password_required} ->
-        conn |> put_status(:forbidden) |> json(%{error: "password_required"})
+        reply_error(conn, :forbidden, "password_required")
 
       {:error, :invalid_password} ->
-        conn |> put_status(:forbidden) |> json(%{error: "invalid_password"})
+        reply_error(conn, :forbidden, "invalid_password")
 
       {:error, :locked} ->
-        conn |> put_status(:forbidden) |> json(%{error: "locked"})
+        reply_error(conn, :forbidden, "locked")
 
       {:error, :full} ->
-        conn |> put_status(:forbidden) |> json(%{error: "full"})
+        reply_error(conn, :forbidden, "full")
 
       {:error, :blocked} ->
-        conn |> put_status(:forbidden) |> json(%{error: "blocked"})
+        reply_error(conn, :forbidden, "blocked")
 
       {:error, {:hook_rejected, _}} ->
-        conn |> put_status(:forbidden) |> json(%{error: "rejected"})
+        reply_error(conn, :forbidden, "rejected")
 
       _ ->
-        conn |> put_status(:forbidden) |> json(%{error: "cannot_join"})
+        reply_error(conn, :forbidden, "cannot_join")
     end
   end
 
@@ -688,36 +662,32 @@ defmodule GamendWeb.Api.V1.LobbyController do
         end
 
       _ ->
-        conn |> put_status(:unauthorized) |> json(%{error: "Not authenticated"})
+        reply_error(conn, :unauthorized, "not_authenticated")
     end
   end
 
   defp do_party_quick_join(conn, user, params) do
     case Gamend.Parties.quick_join_with_party(user, params) do
       {:ok, lobby} ->
-        json(conn, serialize_lobby(lobby))
+        reply_data(conn, serialize_lobby(lobby))
 
       {:error, :not_leader} ->
-        conn |> put_status(:forbidden) |> json(%{error: "not_leader"})
+        reply_error(conn, :forbidden, "not_leader")
 
       {:error, :member_in_lobby} ->
-        conn
-        |> put_status(:conflict)
-        |> json(%{error: "member_in_lobby"})
+        reply_error(conn, :conflict, "member_in_lobby")
 
       {:error, :members_offline} ->
-        conn
-        |> put_status(:conflict)
-        |> json(%{error: "members_offline"})
+        reply_error(conn, :conflict, "members_offline")
 
       {:error, reason} when is_atom(reason) ->
-        conn |> put_status(:forbidden) |> json(%{error: to_string(reason)})
+        reply_error(conn, :forbidden, reason)
 
       {:error, {:hook_rejected, _}} ->
-        conn |> put_status(:forbidden) |> json(%{error: "rejected"})
+        reply_error(conn, :forbidden, "rejected")
 
       _other ->
-        conn |> put_status(:unprocessable_entity) |> json(%{error: "unexpected_error"})
+        reply_error(conn, :unprocessable_entity, "unexpected_error")
     end
   end
 
@@ -754,19 +724,19 @@ defmodule GamendWeb.Api.V1.LobbyController do
 
     case Lobbies.quick_join(user, title, max_users, metadata) do
       {:ok, lobby} ->
-        json(conn, serialize_lobby(lobby))
+        reply_data(conn, serialize_lobby(lobby))
 
       {:error, :already_in_lobby} ->
-        conn |> put_status(:conflict) |> json(%{error: "already_in_lobby"})
+        reply_error(conn, :conflict, "already_in_lobby")
 
       {:error, reason} when is_atom(reason) ->
-        conn |> put_status(:forbidden) |> json(%{error: to_string(reason)})
+        reply_error(conn, :forbidden, reason)
 
       {:error, {:hook_rejected, _}} ->
-        conn |> put_status(:forbidden) |> json(%{error: "rejected"})
+        reply_error(conn, :forbidden, "rejected")
 
       _other ->
-        conn |> put_status(:unprocessable_entity) |> json(%{error: "unexpected_error"})
+        reply_error(conn, :unprocessable_entity, "unexpected_error")
     end
   end
 
@@ -774,19 +744,19 @@ defmodule GamendWeb.Api.V1.LobbyController do
     with_target_lobby(conn, params, fn user, lobby ->
       case Lobbies.update_lobby_by_host(user, lobby, Map.drop(params, ["lobby_id", :lobby_id])) do
         {:ok, updated} ->
-          json(conn, serialize_lobby(updated))
+          reply_data(conn, serialize_lobby(updated))
 
         {:error, :not_host} ->
-          conn |> put_status(:forbidden) |> json(%{error: "not_host"})
+          reply_error(conn, :forbidden, "not_host")
 
         {:error, :too_small} ->
-          conn |> put_status(:unprocessable_entity) |> json(%{error: "too_small"})
+          reply_error(conn, :unprocessable_entity, "too_small")
 
         {:error, %Ecto.Changeset{} = changeset} ->
           unprocessable(conn, changeset)
 
         _other ->
-          conn |> put_status(:unprocessable_entity) |> json(%{error: "unexpected_error"})
+          reply_error(conn, :unprocessable_entity, "unexpected_error")
       end
     end)
   end
@@ -806,17 +776,17 @@ defmodule GamendWeb.Api.V1.LobbyController do
             fun.(user, lobby)
 
           {:error, :not_in_lobby} ->
-            conn |> put_status(:bad_request) |> json(%{error: "not_in_lobby"})
+            reply_error(conn, :bad_request, "not_in_lobby")
 
           {:error, :invalid_id} ->
-            conn |> put_status(:bad_request) |> json(%{error: "Invalid lobby id"})
+            reply_error(conn, :bad_request, "invalid_id")
 
           {:error, :not_found} ->
-            conn |> put_status(:not_found) |> json(%{error: "Lobby not found"})
+            reply_error(conn, :not_found, "not_found")
         end
 
       _ ->
-        conn |> put_status(:unauthorized) |> json(%{error: "Not authenticated"})
+        reply_error(conn, :unauthorized, "not_authenticated")
     end
   end
 
@@ -838,34 +808,34 @@ defmodule GamendWeb.Api.V1.LobbyController do
     case Scope.user(conn.assigns[:current_scope]) do
       %User{} = user ->
         if is_nil(user.lobby_id) do
-          conn |> put_status(:bad_request) |> json(%{error: "not_in_lobby"})
+          reply_error(conn, :bad_request, "not_in_lobby")
         else
           lobby = Lobbies.get_lobby!(user.lobby_id)
           target = Gamend.Accounts.get_user!(target_user_id)
 
           case Lobbies.kick_user(user, lobby, target) do
             {:ok, _} ->
-              json(conn, %{})
+              reply_ok(conn)
 
             {:error, :not_host} ->
-              conn |> put_status(:forbidden) |> json(%{error: "not_host"})
+              reply_error(conn, :forbidden, "not_host")
 
             {:error, :cannot_kick_self} ->
-              conn |> put_status(:forbidden) |> json(%{error: "cannot_kick_self"})
+              reply_error(conn, :forbidden, "cannot_kick_self")
 
             {:error, :not_found} ->
-              conn |> put_status(:not_found) |> json(%{error: "not_found"})
+              reply_error(conn, :not_found, "not_found")
 
             {:error, {:hook_rejected, _}} ->
-              conn |> put_status(:forbidden) |> json(%{error: "rejected"})
+              reply_error(conn, :forbidden, "rejected")
 
             _other ->
-              conn |> put_status(:unprocessable_entity) |> json(%{error: "unexpected_error"})
+              reply_error(conn, :unprocessable_entity, "unexpected_error")
           end
         end
 
       _ ->
-        conn |> put_status(:unauthorized) |> json(%{error: "Not authenticated"})
+        reply_error(conn, :unauthorized, "not_authenticated")
     end
   end
 
@@ -875,17 +845,17 @@ defmodule GamendWeb.Api.V1.LobbyController do
         do_disband(conn, user, Lobbies.get_lobby(lobby_id))
 
       %User{} ->
-        conn |> put_status(:bad_request) |> json(%{error: "not_in_lobby"})
+        reply_error(conn, :bad_request, "not_in_lobby")
 
       _ ->
-        conn |> put_status(:unauthorized) |> json(%{error: "Not authenticated"})
+        reply_error(conn, :unauthorized, "not_authenticated")
     end
   end
 
   # A hostless lobby is server-managed: nobody is its owner, so nobody can end
   # it from the API.
   defp do_disband(conn, _user, %{hostless: true}),
-    do: conn |> put_status(:forbidden) |> json(%{error: "not_host"})
+    do: reply_error(conn, :forbidden, "not_host")
 
   # Who may end a lobby is the context's rule — the same one `kick` and
   # `update` go through. Comparing host_id here was a second copy of it living
@@ -893,41 +863,41 @@ defmodule GamendWeb.Api.V1.LobbyController do
   defp do_disband(conn, user, %{} = lobby) do
     if Lobbies.can_manage_lobby?(user, lobby) do
       case Lobbies.delete_lobby(lobby) do
-        {:ok, _} -> json(conn, %{})
-        _ -> conn |> put_status(:unprocessable_entity) |> json(%{error: "unexpected_error"})
+        {:ok, _} -> reply_ok(conn)
+        _ -> reply_error(conn, :unprocessable_entity, "unexpected_error")
       end
     else
-      conn |> put_status(:forbidden) |> json(%{error: "not_host"})
+      reply_error(conn, :forbidden, "not_host")
     end
   end
 
   defp do_disband(conn, _user, _lobby),
-    do: conn |> put_status(:bad_request) |> json(%{error: "not_in_lobby"})
+    do: reply_error(conn, :bad_request, "not_in_lobby")
 
   def leave(conn, _params) do
     case Scope.user(conn.assigns[:current_scope]) do
       %User{} = user ->
         # Use the authenticated user's lobby (ignore path id)
         if is_nil(user.lobby_id) do
-          json(conn, %{})
+          reply_ok(conn)
         else
           case Lobbies.leave_lobby(user) do
             {:ok, _} ->
-              json(conn, %{})
+              reply_ok(conn)
 
             {:error, :not_in_lobby} ->
-              json(conn, %{})
+              reply_ok(conn)
 
             {:error, {:hook_rejected, _}} ->
-              conn |> put_status(:forbidden) |> json(%{error: "rejected"})
+              reply_error(conn, :forbidden, "rejected")
 
             _other ->
-              conn |> put_status(:unprocessable_entity) |> json(%{error: "unexpected_error"})
+              reply_error(conn, :unprocessable_entity, "unexpected_error")
           end
         end
 
       _ ->
-        conn |> put_status(:unauthorized) |> json(%{error: "Not authenticated"})
+        reply_error(conn, :unauthorized, "not_authenticated")
     end
   end
 end

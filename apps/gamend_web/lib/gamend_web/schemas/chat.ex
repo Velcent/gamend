@@ -135,19 +135,12 @@ defmodule GamendWeb.Schemas.ChatMuteRecordResponse do
   use GamendWeb.Schemas.Envelope, data: GamendWeb.Schemas.ChatMuteRecord
 end
 
-defmodule GamendWeb.Schemas.UnmuteResult do
-  @moduledoc "What lifting a mute answers."
-  require OpenApiSpex
-  alias OpenApiSpex.Schema
+defmodule GamendWeb.Schemas.ChatMessageResponse do
+  @moduledoc "One chat message under `data`."
+  use GamendWeb.Schemas.Envelope, data: GamendWeb.Schemas.ChatMessage
+end
 
-  OpenApiSpex.schema(%{
-    title: "UnmuteResult",
-    description: "The mute was lifted",
-    type: :object,
-    properties: %{
-      ok: %Schema{type: :boolean},
-      removed: %Schema{type: :integer, description: "Mutes removed; 0 when there was none"}
-    },
-    required: [:ok, :removed]
-  })
+defmodule GamendWeb.Schemas.ChatReadCursorResponse do
+  @moduledoc "The read cursor under `data`."
+  use GamendWeb.Schemas.Envelope, data: GamendWeb.Schemas.ChatReadCursor
 end

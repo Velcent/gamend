@@ -5,7 +5,7 @@ defmodule GamendWeb.Api.V1.SessionController do
   alias Gamend.Accounts
   alias GamendWeb.Auth.Guardian
   alias GamendWeb.Schemas
-  alias GamendWeb.Schemas.SessionResponse
+  alias GamendWeb.Schemas.{OkResponse, SessionResponse}
   alias OpenApiSpex.Schema
 
   tags(["Authentication"])
@@ -43,17 +43,15 @@ defmodule GamendWeb.Api.V1.SessionController do
         maybe_attach_device(conn, user)
         issue_tokens(conn, user)
       else
-        conn
-        |> put_status(:forbidden)
-        |> json(%{
-          error: "account_not_activated",
-          message: "Your account is pending activation by an administrator."
-        })
+        reply_error(
+          conn,
+          :forbidden,
+          "account_not_activated",
+          "Your account is pending activation by an administrator."
+        )
       end
     else
-      conn
-      |> put_status(:unauthorized)
-      |> json(%{error: "Invalid email or password"})
+      reply_error(conn, :unauthorized, "invalid_credentials", "Invalid email or password")
     end
   end
 
@@ -91,26 +89,19 @@ defmodule GamendWeb.Api.V1.SessionController do
           if Accounts.user_activated?(user) do
             issue_tokens(conn, user)
           else
-            conn
-            |> put_status(:forbidden)
-            |> json(%{
-              error: "account_not_activated",
-              message: "Your account is pending activation by an administrator."
-            })
+            reply_error(
+              conn,
+              :forbidden,
+              "account_not_activated",
+              "Your account is pending activation by an administrator."
+            )
           end
 
         {:error, changeset} ->
-          conn
-          |> put_status(:bad_request)
-          |> json(%{
-            error: "unable to create device user",
-            errors: GamendWeb.ChangesetErrors.errors(changeset)
-          })
+          unprocessable(conn, changeset)
       end
     else
-      conn
-      |> put_status(:forbidden)
-      |> json(%{error: "device-based authentication is disabled"})
+      reply_error(conn, :forbidden, "device_auth_disabled", "Device login is disabled")
     end
   end
 
@@ -124,7 +115,7 @@ defmodule GamendWeb.Api.V1.SessionController do
         "so a client with an already-expired token can still complete sign-out.",
     parameters: [],
     responses: [
-      ok: {"Logout successful", "application/json", %Schema{type: :object}}
+      ok: {"Logout successful", "application/json", OkResponse}
     ]
   )
 
@@ -144,7 +135,7 @@ defmodule GamendWeb.Api.V1.SessionController do
       _ = Accounts.revoke_all_tokens(user)
     end
 
-    json(conn, %{})
+    reply_ok(conn)
   end
 
   operation(:refresh,
@@ -183,34 +174,31 @@ defmodule GamendWeb.Api.V1.SessionController do
             {:ok, new_access_token, _claims} =
               Guardian.encode_and_sign(user, %{}, token_type: "access")
 
-            json(conn, %{
-              data: %{
-                access_token: new_access_token,
-                refresh_token: refresh_token,
-                user_id: user.id,
-                username: user.username || "",
-                display_name: user.display_name || "",
-                expires_in: 900
-              }
+            reply_data(conn, %{
+              access_token: new_access_token,
+              refresh_token: refresh_token,
+              user_id: user.id,
+              username: user.username || "",
+              display_name: user.display_name || "",
+              expires_in: 900
             })
 
           {:error, _reason} ->
-            conn
-            |> put_status(:unauthorized)
-            |> json(%{error: "Invalid refresh token"})
+            reply_error(conn, :unauthorized, "invalid_refresh_token")
         end
 
       {:error, _reason} ->
-        conn
-        |> put_status(:unauthorized)
-        |> json(%{error: "Invalid or expired refresh token"})
+        reply_error(
+          conn,
+          :unauthorized,
+          "invalid_refresh_token",
+          "Invalid or expired refresh token"
+        )
     end
   end
 
   def refresh(conn, _params) do
-    conn
-    |> put_status(:bad_request)
-    |> json(%{error: "refresh_token is required"})
+    reply_error(conn, :bad_request, "missing_param", "refresh_token is required")
   end
 
   # Best-effort device attachment when device_id is provided during email login
@@ -251,15 +239,13 @@ defmodule GamendWeb.Api.V1.SessionController do
     {:ok, refresh_token, _} =
       Guardian.encode_and_sign(user, %{}, token_type: "refresh", ttl: {30, :days})
 
-    json(conn, %{
-      data: %{
-        access_token: access_token,
-        refresh_token: refresh_token,
-        expires_in: 900,
-        user_id: user.id,
-        username: user.username || "",
-        display_name: user.display_name || ""
-      }
+    reply_data(conn, %{
+      access_token: access_token,
+      refresh_token: refresh_token,
+      expires_in: 900,
+      user_id: user.id,
+      username: user.username || "",
+      display_name: user.display_name || ""
     })
   end
 end

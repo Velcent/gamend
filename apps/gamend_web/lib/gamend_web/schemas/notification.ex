@@ -55,3 +55,8 @@ defmodule GamendWeb.Schemas.DeletedCountResponse do
   @moduledoc "The deleted count under `data`."
   use GamendWeb.Schemas.Envelope, data: GamendWeb.Schemas.DeletedCount
 end
+
+defmodule GamendWeb.Schemas.NotificationResponse do
+  @moduledoc "One notification under `data`."
+  use GamendWeb.Schemas.Envelope, data: GamendWeb.Schemas.Notification
+end

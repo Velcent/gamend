@@ -41,3 +41,8 @@ defmodule GamendWeb.Schemas.PushTokenPage do
   @moduledoc "A page of the user's devices."
   use GamendWeb.Schemas.Envelope, page: GamendWeb.Schemas.PushToken
 end
+
+defmodule GamendWeb.Schemas.PushTokenResponse do
+  @moduledoc "One registered device under `data`."
+  use GamendWeb.Schemas.Envelope, data: GamendWeb.Schemas.PushToken
+end

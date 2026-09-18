@@ -79,3 +79,13 @@ defmodule GamendWeb.Schemas.PartyStatsResponse do
   @moduledoc "Party counts under `data`."
   use GamendWeb.Schemas.Envelope, data: GamendWeb.Schemas.PartyStats
 end
+
+defmodule GamendWeb.Schemas.PartyResponse do
+  @moduledoc "One party under `data`."
+  use GamendWeb.Schemas.Envelope, data: GamendWeb.Schemas.Party
+end
+
+defmodule GamendWeb.Schemas.PartyInvitePage do
+  @moduledoc "A page of party invitations."
+  use GamendWeb.Schemas.Envelope, page: GamendWeb.Schemas.PartyInvite
+end

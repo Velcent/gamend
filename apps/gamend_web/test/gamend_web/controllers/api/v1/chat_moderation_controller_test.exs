@@ -262,7 +262,7 @@ defmodule GamendWeb.Api.V1.ChatModerationControllerTest do
         |> auth_conn(host)
         |> post("/api/v1/lobbies/unmute", %{target_user_id: member.id})
 
-      assert %{"ok" => true, "removed" => 1} = json_response(conn, 200)
+      assert %{"data" => %{"deleted" => 1}} = json_response(conn, 200)
       refute Chat.muted?(member.id, "lobby", lobby.id)
     end
 
@@ -333,7 +333,7 @@ defmodule GamendWeb.Api.V1.ChatModerationControllerTest do
         |> auth_conn(admin)
         |> post("/api/v1/groups/#{group.id}/unmute", %{target_user_id: member.id})
 
-      assert %{"ok" => true, "removed" => 1} = json_response(conn, 200)
+      assert %{"data" => %{"deleted" => 1}} = json_response(conn, 200)
       refute Chat.muted?(member.id, "group", group.id)
     end
 
@@ -401,7 +401,7 @@ defmodule GamendWeb.Api.V1.ChatModerationControllerTest do
         |> auth_conn(leader)
         |> post("/api/v1/parties/unmute", %{target_user_id: member.id})
 
-      assert %{"ok" => true, "removed" => 1} = json_response(conn, 200)
+      assert %{"data" => %{"deleted" => 1}} = json_response(conn, 200)
       refute Chat.muted?(member.id, "party", party.id)
     end
 

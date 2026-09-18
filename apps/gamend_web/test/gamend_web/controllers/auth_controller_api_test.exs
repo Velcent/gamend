@@ -69,7 +69,7 @@ defmodule GamendWeb.AuthControllerApiTest do
 
       assert conn.status == 200
 
-      body = json_response(conn, 200)
+      body = json_response(conn, 200)["data"]
 
       assert is_binary(body["authorization_url"]) and
                String.contains?(body["authorization_url"], "steamcommunity.com/openid/login")
@@ -87,7 +87,7 @@ defmodule GamendWeb.AuthControllerApiTest do
       # Create an API OAuth session (pending)
       resp = get(conn, ~p"/api/v1/auth/discord")
       assert resp.status == 200
-      body = json_response(resp, 200)
+      body = json_response(resp, 200)["data"]
       session_id = body["session_id"]
 
       # install a mock exchanger module that returns a successful discord payload
@@ -111,15 +111,15 @@ defmodule GamendWeb.AuthControllerApiTest do
       # session should be completed now and include user_id in data
       status_conn = get(conn, ~p"/api/v1/auth/session/#{session_id}")
       assert status_conn.status == 200
-      status_body = json_response(status_conn, 200)
+      status_body = json_response(status_conn, 200)["data"]
 
       assert status_body["status"] == "completed"
 
-      assert is_map(status_body["data"]) and is_binary(status_body["data"]["user_id"]) and
-               status_body["data"]["user_id"] != ""
+      assert is_map(status_body["result"]) and is_binary(status_body["result"]["user_id"]) and
+               status_body["result"]["user_id"] != ""
 
       # ensure user exists in DB
-      assert Gamend.Repo.get(Gamend.Accounts.User, status_body["data"]["user_id"]) != nil
+      assert Gamend.Repo.get(Gamend.Accounts.User, status_body["result"]["user_id"]) != nil
     end
 
     test "POST /api/v1/auth/:provider/callback exchanges code and returns tokens (discord)", %{

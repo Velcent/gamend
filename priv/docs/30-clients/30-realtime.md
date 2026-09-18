@@ -113,7 +113,7 @@ Detailed payload shapes for every event pushed from the server to the client, gr
 | chat_message_deleted | Friend DM deleted | {id} |
 | quest_progress / quest_completed / quest_claimed | A quest objective advanced / completed / rewards claimed | {id, user_id, quest_key, period_key, objective_progress, status, completed_at, claimed_at, metadata, inserted_at, updated_at} |
 | group_invite_accepted | Someone accepted your group invite | {group_id} |
-| group_invite_cancelled | Group deleted — pending invites cancelled | {group_id, group_name} |
+| group_invite_cancelled | Group deleted — pending invites cancelled | {group_id, group_title} |
 | group_join_request_approved | Your group join request was approved | {group_id} |
 | group_join_request_rejected | Your group join request was declined | {group_id} |
 | party_invite_accepted | Someone accepted your party invite | {party_id, user_id} |

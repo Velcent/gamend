@@ -98,7 +98,7 @@ defmodule Gamend.Groups.Shared do
             "metadata" => %{
               "type" => "group_invite_accepted",
               "group_id" => group_id,
-              "group_name" => group_title,
+              "group_title" => group_title,
               "user_id" => user_id,
               "user_name" => user_name
             }
@@ -140,7 +140,7 @@ defmodule Gamend.Groups.Shared do
       Phoenix.PubSub.broadcast(
         Gamend.PubSub,
         "user:#{uid}",
-        {:group_invite_cancelled, %{group_id: group.id, group_name: group.title}}
+        {:group_invite_cancelled, %{group_id: group.id, group_title: group.title}}
       )
     end
 
@@ -161,7 +161,7 @@ defmodule Gamend.Groups.Shared do
             "actor_user_id" => actor_user_id,
             "joining_user_id" => user_id,
             "group_id" => group.id,
-            "group_name" => group.title,
+            "group_title" => group.title,
             "group_type" => group.type,
             "group_metadata" => group.metadata || %{}
           })

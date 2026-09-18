@@ -133,7 +133,7 @@ func provider_auth(provider: String) -> String:
 		if auth_popup:
 			auth_popup.close()
 		return "Error: " + str(response.error.message)
-	var result: GamendOAuthAuthorization = response.response.data
+	var result: GamendOAuthAuthorization = response.response.data.data
 	var session_id = result.session_id
 	var open_error = null
 	if _apple_web:
@@ -147,12 +147,13 @@ func provider_auth(provider: String) -> String:
 	for i in 30:
 		response = await _api.authenticate_oauth_session_status(session_id)
 		if response.response:
-			if response.response.data.status == "completed":
+			var session_state: GamendOAuthSessionStatus = response.response.data.data
+			if session_state.status == "completed":
 				_cancel_apple_web()
 				return await save_session()
-			if response.response.data.status != "pending":
+			if session_state.status != "pending":
 				_cancel_apple_web()
-				return "Error: " + str(response.response.data.message)
+				return "Error: " + str(session_state.message)
 		await get_tree().create_timer(2.0).timeout
 	_cancel_apple_web()
 	if auth_popup:

@@ -9,7 +9,7 @@ defmodule GamendWeb.Api.V1.UserController do
   alias GamendWeb.Features
   alias GamendWeb.Pagination
   alias GamendWeb.Schemas
-  alias GamendWeb.Schemas.{PlayerStatsResponse, PublicUser, PublicUserPage}
+  alias GamendWeb.Schemas.{PlayerStatsResponse, PublicUserPage, PublicUserResponse}
   alias OpenApiSpex.Schema
 
   tags(["Users"])
@@ -32,7 +32,7 @@ defmodule GamendWeb.Api.V1.UserController do
     summary: "Get a user by id",
     parameters: [id: [in: :path, schema: %Schema{type: :string, format: :uuid}, required: true]],
     responses: [
-      ok: {"User", "application/json", PublicUser},
+      ok: {"User", "application/json", PublicUserResponse},
       bad_request: Schemas.error("Malformed id"),
       not_found: Schemas.error("Not found")
     ]
@@ -48,7 +48,7 @@ defmodule GamendWeb.Api.V1.UserController do
     ]
   )
 
-  def stats(conn, _params), do: json(conn, %{data: Accounts.player_stats()})
+  def stats(conn, _params), do: reply_data(conn, Accounts.player_stats())
 
   def index(conn, params) do
     q = Map.get(params, "q", "")
@@ -59,18 +59,18 @@ defmodule GamendWeb.Api.V1.UserController do
 
     total_count = if q == "", do: 0, else: Accounts.count_search_users(q)
 
-    json(conn, Pagination.envelope(serialized, page, page_size, total_count))
+    reply_page(conn, serialized, page, page_size, total_count)
   end
 
   def show(conn, %{"id" => id}) do
     case parse_id(id) do
       nil ->
-        conn |> put_status(:bad_request) |> json(%{error: "invalid_id"})
+        reply_error(conn, :bad_request, "invalid_id")
 
       user_id ->
         case Accounts.get_user(user_id) do
-          %{} = user -> json(conn, serialize_user(user))
-          nil -> conn |> put_status(:not_found) |> json(%{error: "not_found"})
+          %{} = user -> reply_data(conn, serialize_user(user))
+          nil -> reply_error(conn, :not_found, "not_found")
         end
     end
   end

@@ -62,17 +62,17 @@ The browser flow hands off to the provider and polls for the result, so it
 works from a game client with no redirect handler of its own:
 
 ```javascript
-const { authorization_url, session_id } = await authApi.oauthRequest('discord');
+const { authorization_url, session_id } = (await authApi.oauthRequest('discord')).data;
 window.open(authorization_url, '_blank');
 
 let session;
 do {
   await new Promise(r => setTimeout(r, 1000));
-  session = await authApi.oauthSessionStatus(session_id);
+  session = (await authApi.oauthSessionStatus(session_id)).data;
 } while (session.status === 'pending');
 
 if (session.status === 'completed') {
-  const { access_token, refresh_token, user_id } = session.data;
+  const { access_token, refresh_token, user_id } = session.result;
 }
 ```
 

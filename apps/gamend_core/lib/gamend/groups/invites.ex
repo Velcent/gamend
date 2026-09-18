@@ -169,7 +169,7 @@ defmodule Gamend.Groups.Invites do
             "metadata" => %{
               "type" => "group_invite",
               "group_id" => group_id,
-              "group_name" => group.title,
+              "group_title" => group.title,
               "sender_name" => Gamend.Accounts.display_name(sender),
               "recipient_name" => Gamend.Accounts.display_name(target)
             }
@@ -271,7 +271,7 @@ defmodule Gamend.Groups.Invites do
         "metadata" => %{
           "type" => "group_invite_declined",
           "group_id" => group_id,
-          "group_name" => group.title,
+          "group_title" => group.title,
           "user_id" => user_id,
           "user_name" => user_name,
           "reason" => "full"
@@ -312,7 +312,7 @@ defmodule Gamend.Groups.Invites do
         "metadata" => %{
           "type" => "group_invite_accepted",
           "group_id" => group_id,
-          "group_name" => group.title,
+          "group_title" => group.title,
           "user_id" => user_id,
           "user_name" => user_name
         }
@@ -482,7 +482,7 @@ defmodule Gamend.Groups.Invites do
             "metadata" => %{
               "type" => "group_invite_declined",
               "group_id" => invite.group_id,
-              "group_name" => group_title,
+              "group_title" => group_title,
               "user_id" => user_id,
               "user_name" => user_name
             }
@@ -507,7 +507,7 @@ defmodule Gamend.Groups.Invites do
     %{
       id: invite.id,
       group_id: invite.group_id,
-      group_name: invite.group.title,
+      group_title: invite.group.title,
       sender_id: invite.sender_id,
       sender_name: Gamend.Accounts.display_name(invite.sender),
       recipient_id: invite.recipient_id,

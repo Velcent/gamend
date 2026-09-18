@@ -72,6 +72,7 @@ defmodule GamendWeb.Api.V1.ChatControllerTest do
         |> auth_conn(owner)
         |> post("/api/v1/chat/messages", Map.put(where, :content, "first"))
         |> json_response(201)
+        |> Map.fetch!("data")
 
       assert conn |> auth_conn(member) |> get("/api/v1/chat/unread", where) |> json_response(200) ==
                %{"data" => %{"unread_count" => 1}}
@@ -81,6 +82,7 @@ defmodule GamendWeb.Api.V1.ChatControllerTest do
         |> auth_conn(member)
         |> get("/api/v1/chat/messages/#{sent["id"]}")
         |> json_response(200)
+        |> Map.fetch!("data")
 
       assert got["content"] == "first"
 
@@ -89,6 +91,7 @@ defmodule GamendWeb.Api.V1.ChatControllerTest do
         |> auth_conn(owner)
         |> patch("/api/v1/chat/messages/#{sent["id"]}", %{content: "edited"})
         |> json_response(200)
+        |> Map.fetch!("data")
 
       assert edited["content"] == "edited"
 
