@@ -9,26 +9,11 @@ defmodule GamendWeb.Api.V1.PushTokenController do
   alias Gamend.Accounts.Scope
   alias Gamend.Push
   alias GamendWeb.Pagination
+  alias GamendWeb.Schemas
+  alias GamendWeb.Schemas.{PushToken, PushTokenPage}
   alias OpenApiSpex.Schema
 
   tags(["Push"])
-
-  @error_schema %Schema{type: :object, properties: %{error: %Schema{type: :string}}}
-
-  @push_token_schema %Schema{
-    type: :object,
-    properties: %{
-      id: %Schema{type: :string, format: :uuid},
-      token: %Schema{type: :string},
-      platform: %Schema{type: :string, enum: ["android", "ios", "web"]},
-      provider: %Schema{type: :string, enum: ["fcm", "apns"]},
-      device_id: %Schema{type: :string},
-      disabled_at: %Schema{type: :string, format: :"date-time", nullable: true},
-      last_used_at: %Schema{type: :string, format: :"date-time", nullable: true},
-      metadata: %Schema{type: :object},
-      inserted_at: %Schema{type: :string, format: :"date-time"}
-    }
-  }
 
   operation(:create,
     operation_id: "register_push_token",
@@ -52,10 +37,10 @@ defmodule GamendWeb.Api.V1.PushTokenController do
          }
        }},
     responses: [
-      created: {"Registered token", "application/json", @push_token_schema},
-      bad_request: {"Too many devices", "application/json", @error_schema},
-      unprocessable_entity: {"Validation failed", "application/json", @error_schema},
-      unauthorized: {"Not authenticated", "application/json", @error_schema}
+      created: {"Registered token", "application/json", PushToken},
+      bad_request: Schemas.error("Too many devices"),
+      unprocessable_entity: Schemas.error("Validation failed"),
+      unauthorized: Schemas.error("Not authenticated")
     ]
   )
 
@@ -87,16 +72,8 @@ defmodule GamendWeb.Api.V1.PushTokenController do
       page_size: [in: :query, schema: %Schema{type: :integer, default: 25}, required: false]
     ],
     responses: [
-      ok:
-        {"Tokens", "application/json",
-         %Schema{
-           type: :object,
-           properties: %{
-             data: %Schema{type: :array, items: @push_token_schema},
-             meta: %Schema{type: :object}
-           }
-         }},
-      unauthorized: {"Not authenticated", "application/json", @error_schema}
+      ok: {"Tokens", "application/json", PushTokenPage},
+      unauthorized: Schemas.error("Not authenticated")
     ]
   )
 
@@ -121,9 +98,9 @@ defmodule GamendWeb.Api.V1.PushTokenController do
       id: [in: :path, schema: %Schema{type: :string, format: :uuid}, required: true]
     ],
     responses: [
-      ok: {"Deleted token", "application/json", @push_token_schema},
-      not_found: {"Unknown token", "application/json", @error_schema},
-      unauthorized: {"Not authenticated", "application/json", @error_schema}
+      ok: {"Deleted token", "application/json", PushToken},
+      not_found: Schemas.error("Unknown token"),
+      unauthorized: Schemas.error("Not authenticated")
     ]
   )
 

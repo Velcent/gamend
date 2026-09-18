@@ -13,7 +13,12 @@ paired with its counterpart in the new addon, then each nested property's
 class with the one at the same property, recursively. Pairing by position
 is what makes it exact: `ListFriends200Response`, `ListLobbies200Response`
 and a dozen others are all `{data, meta}`, so matching by shape would guess.
-A class no response reaches (a request body) maps to its prefixed twin.
+Request bodies pair the same way, through each operation's body parameter.
+When the old generator merged identical bodies, one old class maps to several
+new ones (`OpenLobbyReadyCheckRequest` served both ready-check operations); each
+use is then resolved at its call site: `var r := X.new()` passed to
+`gamend_api.fn(r)`, where `fn` reaches an operation through `GamendApi.gd`. A
+class nothing else reaches maps to its prefixed twin.
 
     clients/godot_migrate.py OLD_ADDON NEW_ADDON GAME_ROOT           # report
     clients/godot_migrate.py OLD_ADDON NEW_ADDON GAME_ROOT --write   # rewrite
@@ -31,6 +36,8 @@ from pathlib import Path
 
 FUNC = re.compile(r"^func (\w+)\(", re.M)
 RESPONSE = re.compile(r"bzz_response\.data = (\w+)\.bzz_denormalize_(?:single|multiple)\(")
+BODY = re.compile(r"# \w+: ([A-Z]\w*)")
+CALL_API = re.compile(r'_call_api\([^,]+, "(\w+)"')
 NESTED = re.compile(r'me\.(\w+) = (\w+)\.bzz_denormalize_(?:single|multiple)\(from_dict\["\w+"\]\)')
 IDENT = re.compile(r"(?<![A-Za-z0-9_])[A-Z][A-Za-z0-9_]*\b")
 
@@ -50,6 +57,41 @@ def responses(addon: Path) -> dict[str, str]:
             found = RESPONSE.search(text, start, end)
             if found and not name.endswith("_threaded"):
                 out[name] = found.group(1)
+    return out
+
+
+def functions(text: str) -> list[tuple[str, str]]:
+    """Each top-level function's name and text."""
+    starts = [(m.start(), m.group(1)) for m in FUNC.finditer(text)]
+    return [
+        (name, text[start : starts[i + 1][0] if i + 1 < len(starts) else len(text)])
+        for i, (start, name) in enumerate(starts)
+    ]
+
+
+def bodies(addon: Path) -> dict[str, str]:
+    """Operation name to the class of its request body."""
+    known = models(addon)
+    out: dict[str, str] = {}
+    for api in (addon / "apis").glob("*.gd"):
+        for name, block in functions(api.read_text()):
+            header = block.split("on_success", 1)[0]
+            found = [t for t in BODY.findall(header) if t in known]
+            if found and not name.endswith("_threaded"):
+                out[name] = found[-1]
+    return out
+
+
+def facade_operations(addon: Path) -> dict[str, str]:
+    """GamendApi.gd function to the operation it calls."""
+    facade = addon / "GamendApi.gd"
+    if not facade.is_file():
+        return {}
+    out: dict[str, str] = {}
+    for name, block in functions(facade.read_text()):
+        found = CALL_API.search(block)
+        if found:
+            out[name] = found.group(1)
     return out
 
 
@@ -80,6 +122,11 @@ def mapping(old_addon: Path, new_addon: Path) -> tuple[dict[str, str], dict[str,
         if operation in new_responses:
             pair(old, new_responses[operation])
 
+    new_bodies = bodies(new_addon)
+    for operation, old in bodies(old_addon).items():
+        if operation in new_bodies:
+            pair(old, new_bodies[operation])
+
     for old in models(old_addon):
         twin = "Gamend" + old
         if old not in pairs and twin in new_models:
@@ -91,6 +138,24 @@ def mapping(old_addon: Path, new_addon: Path) -> tuple[dict[str, str], dict[str,
     resolved = {old: next(iter(new)) for old, new in pairs.items() if len(new) == 1}
     ambiguous = {old: new for old, new in pairs.items() if len(new) > 1}
     return resolved, ambiguous
+
+
+def resolve_sites(text: str, name: str, choices: set[str], by_function: dict[str, str], by_operation: dict[str, str]) -> tuple[str, int]:
+    """Rewrite each `var v := NAME.new()` whose `v` is passed to a GamendApi
+    function, to that function's own body class. Returns the text and how many
+    uses of NAME are left unresolved."""
+    site = re.compile(r"var (\w+)(\s*:?=\s*|\s*:\s*)" + name + r"\b([^\n]*)")
+    out, pos = [], 0
+    for m in site.finditer(text):
+        call = re.search(r"\.(\w+)\([^)\n]*\b" + m.group(1) + r"\b", text[m.end():])
+        target = by_operation.get(by_function.get(call.group(1), "")) if call else None
+        if target in choices:
+            out.append(text[pos : m.start()])
+            out.append(m.group(0).replace(name, target))
+            pos = m.end()
+    out.append(text[pos:])
+    rewritten = "".join(out)
+    return rewritten, len(re.findall(r"\b" + name + r"\b", rewritten))
 
 
 def game_scripts(root: Path) -> list[Path]:
@@ -111,6 +176,8 @@ def main() -> int:
 
     resolved, ambiguous = mapping(args.old_addon, args.new_addon)
     old_models = models(args.old_addon)
+    by_function = facade_operations(args.new_addon)
+    by_operation = bodies(args.new_addon)
 
     used: dict[str, int] = {}
     unmapped: dict[str, list[str]] = {}
@@ -120,18 +187,25 @@ def main() -> int:
             if name not in old_models:
                 continue
             used[name] = used.get(name, 0) + text.count(name)
-            if name not in resolved:
+            if name in resolved:
+                continue
+            left = resolve_sites(text, name, ambiguous.get(name, set()), by_function, by_operation)[1]
+            if left:
                 unmapped.setdefault(name, []).append(str(script.relative_to(args.game_root)))
 
     for name in sorted(used):
-        target = resolved.get(name) or " | ".join(sorted(ambiguous.get(name, []))) or "?"
+        target = resolved.get(name) or ("per call site: " + " | ".join(sorted(ambiguous[name])) if name in ambiguous else "?")
         print(f"{name:55s} -> {target}")
 
     if args.write:
         changed = 0
         for script in game_scripts(args.game_root):
             text = script.read_text()
-            out = IDENT.sub(lambda m: resolved.get(m.group(0), m.group(0)) if m.group(0) in used else m.group(0), text)
+            out = text
+            for name in ambiguous:
+                if name in used:
+                    out = resolve_sites(out, name, ambiguous[name], by_function, by_operation)[0]
+            out = IDENT.sub(lambda m: resolved.get(m.group(0), m.group(0)) if m.group(0) in used else m.group(0), out)
             if out != text:
                 script.write_text(out)
                 changed += 1

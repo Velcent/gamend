@@ -7,44 +7,20 @@ defmodule GamendWeb.Api.V1.ChatController do
   alias Gamend.Accounts.Scope
   alias Gamend.Chat
   alias GamendWeb.Pagination
+  alias GamendWeb.Schemas
+
+  alias GamendWeb.Schemas.{
+    ChatMessage,
+    ChatMessagePage,
+    ChatReadCursor,
+    ChatUnreadResponse,
+    OkResponse
+  }
+
   alias GamendWeb.Serializers
   alias OpenApiSpex.Schema
 
   tags(["Chat"])
-
-  @message_schema %Schema{
-    type: :object,
-    properties: %{
-      id: %Schema{type: :string, format: :uuid, description: "Message ID"},
-      content: %Schema{type: :string, description: "Message text"},
-      metadata: %Schema{type: :object, description: "Arbitrary metadata"},
-      sender_id: %Schema{type: :string, format: :uuid, description: "User ID of the sender"},
-      sender_name: %Schema{type: :string, description: "Display name of the sender"},
-      chat_type: %Schema{
-        type: :string,
-        enum: ["lobby", "group", "friend", "party"],
-        description: "Type of chat conversation"
-      },
-      chat_ref_id: %Schema{
-        type: :string,
-        format: :uuid,
-        description: "Reference ID (lobby_id, group_id, party_id, or friend user_id)"
-      },
-      inserted_at: %Schema{type: :string, format: "date-time"},
-      updated_at: %Schema{type: :string, format: "date-time"}
-    },
-    example: %{
-      id: "0198c0de-0001-7000-8000-000000000001",
-      content: "Hello everyone!",
-      metadata: %{},
-      sender_id: "0198c0de-0002-7000-8000-000000000002",
-      sender_name: "Player1",
-      chat_type: "lobby",
-      chat_ref_id: "0198c0de-0002-7000-8000-000000000002",
-      inserted_at: "2026-01-01T00:00:00Z",
-      updated_at: "2026-01-01T00:00:00Z"
-    }
-  }
 
   # ---------------------------------------------------------------------------
   # Send message
@@ -77,11 +53,10 @@ defmodule GamendWeb.Api.V1.ChatController do
          }
        }},
     responses: [
-      created: {"Message sent", "application/json", @message_schema},
-      bad_request: {"Invalid input", "application/json", %Schema{type: :object}},
-      forbidden: {"Not allowed", "application/json", %Schema{type: :object}},
-      unprocessable_entity:
-        {"Validation or hook error", "application/json", %Schema{type: :object}}
+      created: {"Message sent", "application/json", ChatMessage},
+      bad_request: Schemas.error("Invalid input"),
+      forbidden: Schemas.error("Not allowed"),
+      unprocessable_entity: Schemas.error("Validation or hook error")
     ]
   )
 
@@ -159,8 +134,8 @@ defmodule GamendWeb.Api.V1.ChatController do
       ]
     ],
     responses: [
-      ok: {"Chat message", "application/json", @message_schema},
-      not_found: {"Message not found", "application/json", %Schema{type: :object}}
+      ok: {"Chat message", "application/json", ChatMessage},
+      not_found: Schemas.error("Message not found")
     ]
   )
 
@@ -244,15 +219,7 @@ defmodule GamendWeb.Api.V1.ChatController do
       ]
     ],
     responses: [
-      ok:
-        {"Chat messages", "application/json",
-         %Schema{
-           type: :object,
-           properties: %{
-             data: %Schema{type: :array, items: @message_schema},
-             meta: %Schema{type: :object}
-           }
-         }}
+      ok: {"Chat messages", "application/json", ChatMessagePage}
     ]
   )
 
@@ -311,8 +278,8 @@ defmodule GamendWeb.Api.V1.ChatController do
          }
        }},
     responses: [
-      ok: {"Read cursor updated", "application/json", %Schema{type: :object}},
-      unprocessable_entity: {"Error", "application/json", %Schema{type: :object}}
+      ok: {"Read cursor updated", "application/json", ChatReadCursor},
+      unprocessable_entity: Schemas.error("Error")
     ]
   )
 
@@ -371,17 +338,7 @@ defmodule GamendWeb.Api.V1.ChatController do
       ]
     ],
     responses: [
-      ok:
-        {"Unread count", "application/json",
-         %Schema{
-           type: :object,
-           properties: %{
-             data: %Schema{
-               type: :object,
-               properties: %{unread_count: %Schema{type: :integer}}
-             }
-           }
-         }}
+      ok: {"Unread count", "application/json", ChatUnreadResponse}
     ]
   )
 
@@ -434,10 +391,10 @@ defmodule GamendWeb.Api.V1.ChatController do
          }
        }},
     responses: [
-      ok: {"Updated message", "application/json", @message_schema},
-      not_found: {"Message not found", "application/json", %Schema{type: :object}},
-      forbidden: {"Not message sender", "application/json", %Schema{type: :object}},
-      unprocessable_entity: {"Validation error", "application/json", %Schema{type: :object}}
+      ok: {"Updated message", "application/json", ChatMessage},
+      not_found: Schemas.error("Message not found"),
+      forbidden: Schemas.error("Not message sender"),
+      unprocessable_entity: Schemas.error("Validation error")
     ]
   )
 
@@ -489,9 +446,9 @@ defmodule GamendWeb.Api.V1.ChatController do
       ]
     ],
     responses: [
-      ok: {"Deleted", "application/json", %Schema{type: :object}},
-      not_found: {"Message not found", "application/json", %Schema{type: :object}},
-      forbidden: {"Not message sender", "application/json", %Schema{type: :object}}
+      ok: {"Deleted", "application/json", OkResponse},
+      not_found: Schemas.error("Message not found"),
+      forbidden: Schemas.error("Not message sender")
     ]
   )
 
@@ -542,12 +499,11 @@ defmodule GamendWeb.Api.V1.ChatController do
          }
        }},
     responses: [
-      ok: {"Reported", "application/json", %Schema{type: :object}},
-      bad_request: {"Invalid id or own message", "application/json", %Schema{type: :object}},
-      not_found: {"Message not found", "application/json", %Schema{type: :object}},
-      conflict: {"Already reported", "application/json", %Schema{type: :object}},
-      too_many_requests:
-        {"Daily report limit reached", "application/json", %Schema{type: :object}}
+      ok: {"Reported", "application/json", OkResponse},
+      bad_request: Schemas.error("Invalid id or own message"),
+      not_found: Schemas.error("Message not found"),
+      conflict: Schemas.error("Already reported"),
+      too_many_requests: Schemas.error("Daily report limit reached")
     ]
   )
 

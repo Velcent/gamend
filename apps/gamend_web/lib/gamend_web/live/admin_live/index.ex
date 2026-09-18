@@ -921,14 +921,10 @@ defmodule GamendWeb.AdminLive.Index do
     :ets.tab2list(table)
     |> Enum.reduce(%{limited: 0}, fn
       {{key, _window}, count, _expiry}, acc when is_binary(key) ->
-        cond do
-          String.starts_with?(key, "auth:") or String.starts_with?(key, "general:") ->
-            limit = if String.starts_with?(key, "auth:"), do: auth_limit, else: general_limit
-            limited_inc = if count >= limit, do: 1, else: 0
-            %{acc | limited: acc.limited + limited_inc}
-
-          true ->
-            acc
+        case bucket_limit(key, auth_limit, general_limit) do
+          nil -> acc
+          limit when count >= limit -> %{acc | limited: acc.limited + 1}
+          _limit -> acc
         end
 
       _, acc ->
@@ -937,6 +933,12 @@ defmodule GamendWeb.AdminLive.Index do
   rescue
     _ -> %{limited: 0}
   end
+
+  # The limit a rate-limiter bucket key counts against, or nil for a key that
+  # is not a per-client bucket.
+  defp bucket_limit("auth:" <> _, auth_limit, _general_limit), do: auth_limit
+  defp bucket_limit("general:" <> _, _auth_limit, general_limit), do: general_limit
+  defp bucket_limit(_key, _auth_limit, _general_limit), do: nil
 
   defp cache_hit_rate_label(%{cache: []}), do: "—"
 

@@ -196,7 +196,13 @@ the tag added to the check, tests green, spec regenerated.
    switch showed no test reached the success response of any of the six
    party-invite operations; one flow test now covers invite, both lists,
    accept, cancel and decline.
-4. Chat, Notifications, Push.
+4. **Chat, Notifications, Push. Done.** 24 operations. `ChatMessage(Page)`,
+   `ChatReadCursor`, `ChatUnread(Response)`, `ChatMuteRecord` (with a page and
+   a response; the realtime `ChatMute` is the muted player's smaller notice,
+   hence the distinct name), `UnmuteResult`, `Notification(Page)`,
+   `DeletedCount(Response)`, `PushToken(Page)`, `OkResponse`. Eight success
+   responses had no test reaching them — the three mute lists and get, edit,
+   delete, mark-read and unread-count of a chat message — and now do.
 5. Leaderboards, Tournaments.
 6. Quests, Economy, Payments.
 7. KV, Hooks, Matchmaking, Ready checks, Time, Signaling, Storage.
@@ -204,17 +210,23 @@ the tag added to the check, tests green, spec regenerated.
 9. **Close-out.** Drop the tag list (enforce everywhere); add R15 to
    `mix gamend.api.lint` — no inline object schema with `properties` in any
    response; delete the per-model `perl` fixups from `generate_godot.sh` that
-   no longer match anything; name the request bodies several operations
-   share (see below); migrate `polyglot-pirates-game` with
+   no longer match anything; migrate `polyglot-pirates-game` with
    `clients/godot_migrate.py`.
 
-Request bodies were left inline on the reasoning that the generator names
-them `<OperationId>Request`. That holds for a body one operation uses. For
-identical bodies it deduplicates and names them after whichever operation
-came first, the same fault response names had: the group icon ticket takes an
-`AdminTournamentIconUploadUrlRequest`, and confirming it an
-`AdminSetQuestIconRequest`. Close-out names those (`UploadIntent`,
-`UploadedObject`).
+Request bodies stay inline, on the reasoning that the generator names them
+`<OperationId>Request`. That held for 72 of 93. The generator merges bodies
+that are identical down to their descriptions and keeps the first
+operation's name for all of them, and controllers share bodies through module
+attributes, so 21 operations took someone else's class: the player's own
+avatar upload an `AdminSetQuestIconRequest`, `join_lobby` a
+`PartyJoinLobbyRequest`, `kick_user` a `KickPartyMemberRequest`.
+**Fixed:** `GamendWeb.Schemas.RequestTitles`, the last step of
+`GamendWeb.ApiSpec.spec/0`, titles every inline object body
+`<OperationId>Request`. Distinct titles stop the merge, and the title is the
+name the generator already gave the other 72, so only the 21 change. A
+nested inline item under a titled body is referenced as
+`<Parent>_<snake>` by the GDScript generator; `generate_godot.sh` joins it
+back to the class name.
 
 ## SDK impact
 
@@ -287,6 +299,8 @@ Recorded as each slice finds them, for a later versioned change:
   a `title` and nothing is called `name`.
 - Party invitation lists are bare arrays: no `{data, meta}`, no paging.
 - Group invite actions answer `{status}`; the matching party ones `{}`.
+- A mute answers `{data: mute}`, while sending a notification or registering a
+  push token answers the bare entity.
 
 Schema drift the pilot fixed in the document (the wire was already right):
 
@@ -326,6 +340,15 @@ Found by the live JavaScript check, fixed across the whole API:
   belongs to does not exist. They declare the token as optional.
 - `GamendWeb.ApiSecurityTest` keeps router and document in agreement; the
   rule is in [api-conventions.md](api-conventions.md).
+
+Slice 4 (document only):
+
+- A mute answers `{data: mute}`; it was documented as the bare mute.
+- Unmute answers `{ok, removed}`, reporting and deleting a message
+  `{ok: true}`, marking read the read cursor; all four were documented as
+  empty objects.
+- Mute-list `meta` was documented with four of its six keys; the message and
+  push-token lists' `meta` as an empty object.
 
 Slice 3 (document only):
 

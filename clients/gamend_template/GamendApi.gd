@@ -1082,7 +1082,7 @@ func lobbies_create_lobby(create_request: GamendCreateLobbyRequest) -> GamendRes
 	return await _call_api(LobbiesApi.new(_config), "create_lobby", [create_request])
 
 ## Kick a user from the lobby (host only)
-func lobbies_kick_user(kick_request: GamendKickPartyMemberRequest) -> GamendResult:
+func lobbies_kick_user(kick_request: GamendKickUserRequest) -> GamendResult:
 	return await _call_api(LobbiesApi.new(_config), "kick_user", [kick_request])
 
 ## Leave the current lobby
@@ -1107,7 +1107,7 @@ func lobbies_quick_join(quick_request: GamendQuickJoinRequest) -> GamendResult:
 	return await _call_api(LobbiesApi.new(_config), "quick_join", [quick_request])
 
 ## Join a lobby
-func lobbies_join_lobby(id: String, join_request: GamendPartyJoinLobbyRequest = null) -> GamendResult:
+func lobbies_join_lobby(id: String, join_request: GamendJoinLobbyRequest = null) -> GamendResult:
 	return await _call_api(LobbiesApi.new(_config), "join_lobby", [id, join_request])
 
 ## Get a lobby by ID
@@ -1497,7 +1497,7 @@ func ready_checks_cancel_lobby() -> GamendResult:
 
 ## Open (or reset) the party board — leader only; pass timeout_ms to force ready
 ## (the request schema is shared with the lobby variant)
-func ready_checks_open_party(request: GamendOpenLobbyReadyCheckRequest = null) -> GamendResult:
+func ready_checks_open_party(request: GamendOpenPartyReadyCheckRequest = null) -> GamendResult:
 	return await _call_api(ReadyChecksApi.new(_config), "open_party_ready_check", [request])
 
 ## Call off the party board — leader only
@@ -1535,8 +1535,8 @@ func parties_list_sent_party_invitations() -> GamendResult:
 	return await _call_api(PartiesApi.new(_config), "list_sent_party_invitations", [])
 
 ## Kick a member from the party (leader only)
-func parties_kick_party_member(kickUserRequest: GamendKickPartyMemberRequest) -> GamendResult:
-	return await _call_api(PartiesApi.new(_config), "kick_party_member", [kickUserRequest])
+func parties_kick_party_member(kickPartyMemberRequest: GamendKickPartyMemberRequest) -> GamendResult:
+	return await _call_api(PartiesApi.new(_config), "kick_party_member", [kickPartyMemberRequest])
 
 ## Leave the current party
 func parties_leave_party() -> GamendResult:
@@ -1646,7 +1646,7 @@ func admin_kv_admin_list_kv_entries(page = 1, pageSize = 25, key = "", userId = 
 	return await _call_api(AdminKVApi.new(_config), "admin_list_kv_entries", [page, pageSize, key, userId, lobbyId, globalOnly])
 
 ## Create KV entry (admin)
-func admin_kv_admin_create_kv_entry(adminCreateKvEntryRequest: GamendAdminUpsertKvRequest) -> GamendResult:
+func admin_kv_admin_create_kv_entry(adminCreateKvEntryRequest: GamendAdminCreateKvEntryRequest) -> GamendResult:
 	return await _call_api(AdminKVApi.new(_config), "admin_create_kv_entry", [adminCreateKvEntryRequest])
 
 ## Delete KV entry by id (admin)
@@ -1662,8 +1662,8 @@ func admin_kv_admin_delete_kv(key: String, user_id = null, lobby_id = null) -> G
 	return await _call_api(AdminKVApi.new(_config), "admin_delete_kv", [key, user_id, lobby_id])
 
 ## Upsert KV by key (admin)
-func admin_kv_admin_upsert_kv(adminCreateKvEntryRequest: GamendAdminUpsertKvRequest) -> GamendResult:
-	return await _call_api(AdminKVApi.new(_config), "admin_upsert_kv", [adminCreateKvEntryRequest])
+func admin_kv_admin_upsert_kv(adminUpsertKvRequest: GamendAdminUpsertKvRequest) -> GamendResult:
+	return await _call_api(AdminKVApi.new(_config), "admin_upsert_kv", [adminUpsertKvRequest])
 
 ## ADMIN NOTIFICATIONS
 
@@ -1747,7 +1747,7 @@ func admin_quests_admin_create_quest(request: GamendAdminCreateQuestRequest) -> 
 	return await _call_api(AdminQuestsApi.new(_config), "admin_create_quest", [request])
 
 ## Update a quest (admin)
-func admin_quests_admin_update_quest(id: String, request: GamendAdminCreateQuestRequest) -> GamendResult:
+func admin_quests_admin_update_quest(id: String, request: GamendAdminUpdateQuestRequest) -> GamendResult:
 	return await _call_api(AdminQuestsApi.new(_config), "admin_update_quest", [id, request])
 
 ## Delete a quest and all user progress (admin)
@@ -1759,7 +1759,7 @@ func admin_quests_admin_list_quest_progress(page = 1, pageSize = 25) -> GamendRe
 	return await _call_api(AdminQuestsApi.new(_config), "admin_list_quest_progress", [page, pageSize])
 
 ## Force-complete a quest for a user (admin)
-func admin_quests_admin_grant_quest(request: GamendAdminResetQuestRequest) -> GamendResult:
+func admin_quests_admin_grant_quest(request: GamendAdminGrantQuestRequest) -> GamendResult:
 	return await _call_api(AdminQuestsApi.new(_config), "admin_grant_quest", [request])
 
 ## Reset a user's current-period quest progress (admin)
@@ -1767,7 +1767,7 @@ func admin_quests_admin_reset_quest(request: GamendAdminResetQuestRequest) -> Ga
 	return await _call_api(AdminQuestsApi.new(_config), "admin_reset_quest", [request])
 
 ## Claim a completed quest on a user's behalf (admin)
-func admin_quests_admin_claim_quest(request: GamendAdminResetQuestRequest) -> GamendResult:
+func admin_quests_admin_claim_quest(request: GamendAdminClaimQuestRequest) -> GamendResult:
 	return await _call_api(AdminQuestsApi.new(_config), "admin_claim_quest", [request])
 
 ## Per-status progress counts for one quest (admin)
@@ -1990,14 +1990,14 @@ func admin_economy_admin_spend_currency(adminSpendCurrencyRequest = null) -> Gam
 ### ADMIN LEADERBOARDS
 ## Request an upload ticket for a leaderboard icon (admin)
 ## Operation adminLeaderboardIconUploadUrl → POST /api/v1/admin/leaderboards/{id}/icon/upload_url
-func admin_leaderboards_admin_leaderboard_icon_upload_url(id: String, adminTournamentIconUploadUrlRequest = null) -> GamendResult:
-	return await _call_api(AdminLeaderboardsApi.new(_config), "admin_leaderboard_icon_upload_url", [id, adminTournamentIconUploadUrlRequest])
+func admin_leaderboards_admin_leaderboard_icon_upload_url(id: String, request = null) -> GamendResult:
+	return await _call_api(AdminLeaderboardsApi.new(_config), "admin_leaderboard_icon_upload_url", [id, request])
 
 
 ## Confirm an uploaded leaderboard icon (admin)
 ## Operation adminSetLeaderboardIcon → POST /api/v1/admin/leaderboards/{id}/icon
-func admin_leaderboards_admin_set_leaderboard_icon(id: String, adminSetQuestIconRequest = null) -> GamendResult:
-	return await _call_api(AdminLeaderboardsApi.new(_config), "admin_set_leaderboard_icon", [id, adminSetQuestIconRequest])
+func admin_leaderboards_admin_set_leaderboard_icon(id: String, request = null) -> GamendResult:
+	return await _call_api(AdminLeaderboardsApi.new(_config), "admin_set_leaderboard_icon", [id, request])
 
 
 ### ADMIN PUSH
@@ -2022,14 +2022,14 @@ func admin_push_admin_send_push(adminSendPushRequest = null) -> GamendResult:
 ### ADMIN QUESTS
 ## Request an upload ticket for a quest icon (admin)
 ## Operation adminQuestIconUploadUrl → POST /api/v1/admin/quests/{id}/icon/upload_url
-func admin_quests_admin_quest_icon_upload_url(id: String, adminTournamentIconUploadUrlRequest = null) -> GamendResult:
-	return await _call_api(AdminQuestsApi.new(_config), "admin_quest_icon_upload_url", [id, adminTournamentIconUploadUrlRequest])
+func admin_quests_admin_quest_icon_upload_url(id: String, request = null) -> GamendResult:
+	return await _call_api(AdminQuestsApi.new(_config), "admin_quest_icon_upload_url", [id, request])
 
 
 ## Confirm an uploaded quest icon (admin)
 ## Operation adminSetQuestIcon → POST /api/v1/admin/quests/{id}/icon
-func admin_quests_admin_set_quest_icon(id: String, adminSetQuestIconRequest = null) -> GamendResult:
-	return await _call_api(AdminQuestsApi.new(_config), "admin_set_quest_icon", [id, adminSetQuestIconRequest])
+func admin_quests_admin_set_quest_icon(id: String, request = null) -> GamendResult:
+	return await _call_api(AdminQuestsApi.new(_config), "admin_set_quest_icon", [id, request])
 
 
 ### ADMIN READY CHECKS
@@ -2134,14 +2134,14 @@ func admin_tournaments_admin_resolve_tournament_match(id: String, matchId: Strin
 
 ## Confirm an uploaded tournament icon (admin)
 ## Operation adminSetTournamentIcon → POST /api/v1/admin/tournaments/{id}/icon
-func admin_tournaments_admin_set_tournament_icon(id: String, adminSetQuestIconRequest = null) -> GamendResult:
-	return await _call_api(AdminTournamentsApi.new(_config), "admin_set_tournament_icon", [id, adminSetQuestIconRequest])
+func admin_tournaments_admin_set_tournament_icon(id: String, request = null) -> GamendResult:
+	return await _call_api(AdminTournamentsApi.new(_config), "admin_set_tournament_icon", [id, request])
 
 
 ## Request an upload ticket for a tournament icon (admin)
 ## Operation adminTournamentIconUploadUrl → POST /api/v1/admin/tournaments/{id}/icon/upload_url
-func admin_tournaments_admin_tournament_icon_upload_url(id: String, adminTournamentIconUploadUrlRequest = null) -> GamendResult:
-	return await _call_api(AdminTournamentsApi.new(_config), "admin_tournament_icon_upload_url", [id, adminTournamentIconUploadUrlRequest])
+func admin_tournaments_admin_tournament_icon_upload_url(id: String, request = null) -> GamendResult:
+	return await _call_api(AdminTournamentsApi.new(_config), "admin_tournament_icon_upload_url", [id, request])
 
 
 ## Update tournament (admin)
@@ -2265,14 +2265,14 @@ func friends_unblock_user(userId: String) -> GamendResult:
 ### GROUPS
 ## Request a group icon upload ticket (admin only)
 ## Operation createGroupIconUploadUrl → POST /api/v1/groups/{id}/icon/upload_url
-func groups_create_group_icon_upload_url(id: String, adminTournamentIconUploadUrlRequest = null) -> GamendResult:
-	return await _call_api(GroupsApi.new(_config), "create_group_icon_upload_url", [id, adminTournamentIconUploadUrlRequest])
+func groups_create_group_icon_upload_url(id: String, request = null) -> GamendResult:
+	return await _call_api(GroupsApi.new(_config), "create_group_icon_upload_url", [id, request])
 
 
 ## Confirm an uploaded group icon (admin only)
 ## Operation setGroupIcon → POST /api/v1/groups/{id}/icon
-func groups_set_group_icon(id: String, adminSetQuestIconRequest = null) -> GamendResult:
-	return await _call_api(GroupsApi.new(_config), "set_group_icon", [id, adminSetQuestIconRequest])
+func groups_set_group_icon(id: String, request = null) -> GamendResult:
+	return await _call_api(GroupsApi.new(_config), "set_group_icon", [id, request])
 
 
 ### LOBBIES
@@ -2441,8 +2441,8 @@ func user_create_current_user_avatar_upload_url(createCurrentUserAvatarUploadUrl
 
 ## Confirm an uploaded avatar
 ## Operation setCurrentUserAvatar → POST /api/v1/me/avatar
-func user_set_current_user_avatar(adminSetQuestIconRequest = null) -> GamendResult:
-	return await _call_api(UsersApi.new(_config), "set_current_user_avatar", [adminSetQuestIconRequest])
+func user_set_current_user_avatar(request = null) -> GamendResult:
+	return await _call_api(UsersApi.new(_config), "set_current_user_avatar", [request])
 
 
 ## Player counts

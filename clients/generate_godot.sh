@@ -54,12 +54,23 @@ if command -v id >/dev/null 2>&1; then
   fi
 fi
 
-docker run --rm $DOCKER_USER_OPT -v "$ROOT_DIR:/local" $GEN_IMAGE generate \
-  -i /local/clients/godot/openapi.json \
-  -g "$GENERATOR" \
-  -o /local/clients/godot \
-  --model-name-prefix "$MODEL_NAME_PREFIX" \
-  --additional-properties="$ADDITIONAL_PROPERTIES"
+# OPENAPI_GENERATOR_JAR runs a local openapi-generator-cli jar with Java instead
+# of the Docker image, for a machine where Docker is not running (or hangs).
+if [ -n "${OPENAPI_GENERATOR_JAR:-}" ]; then
+  java -jar "$OPENAPI_GENERATOR_JAR" generate \
+    -i "$ROOT_DIR/clients/godot/openapi.json" \
+    -g "$GENERATOR" \
+    -o "$ROOT_DIR/clients/godot" \
+    --model-name-prefix "$MODEL_NAME_PREFIX" \
+    --additional-properties="$ADDITIONAL_PROPERTIES"
+else
+  docker run --rm $DOCKER_USER_OPT -v "$ROOT_DIR:/local" $GEN_IMAGE generate \
+    -i /local/clients/godot/openapi.json \
+    -g "$GENERATOR" \
+    -o /local/clients/godot \
+    --model-name-prefix "$MODEL_NAME_PREFIX" \
+    --additional-properties="$ADDITIONAL_PROPERTIES"
+fi
 
 echo "Generation finished. See $OUT_DIR for generated files."
 
@@ -246,11 +257,21 @@ def snake(name):
 mapping = {snake(m): m for m in models}
 if prefix:
     mapping.update({prefix + snake(m[len(prefix):]): m for m in models if m.startswith(prefix)})
+# A nested inline model under a titled schema is declared PascalCase but
+# referenced as `<Parent>_<snake>` (`GamendAdminCreateQuestRequest_objectives_inner`
+# for `GamendAdminCreateQuestRequestObjectivesInner`). Join it back when that
+# class exists.
+known = set(models)
+def join_suffix(m):
+    candidate = m.group(1) + "".join(w.capitalize() for w in m.group(2).split("_"))
+    return candidate if candidate in known else m.group(0)
+suffixed = re.compile(r'\b([A-Z][A-Za-z0-9]*)_([a-z0-9]+(?:_[a-z0-9]+)*)\b')
 for f in glob.glob(os.path.join(out_dir, "**/*.gd"), recursive=True):
     src = open(f).read()
     out = src
     for sn, pc in mapping.items():
         out = re.sub(r'\b' + re.escape(sn) + r'\b', pc, out)
+    out = suffixed.sub(join_suffix, out)
     if out != src:
         open(f, "w").write(out)
 PYEOF

@@ -23,6 +23,9 @@ const SPOOL_EVERY = 1.0;
 /// How long before asking for the policy again after no answer.
 const RETRY = 30.0;
 
+/// A cursor past every line, which `log::since` answers with the newest.
+const NEWEST = 9223372036854775807;
+
 /// How much of the previous run's log file goes up when it recorded a
 /// failure.
 const TAIL = 200;
@@ -32,7 +35,7 @@ const TAIL = 200;
 pub fn setup(url) {
     let sink = #{
         url: "",
-        run: "",
+        run: gamend::run_id(),
         cursor: 0,
         pending: [],
         sending: [],
@@ -58,7 +61,20 @@ pub fn setup(url) {
     let server = if url is String { url } else { server_url() };
     sink.url = trimmed(server);
     sink.recovered = recovered();
+    if in_editor() {
+        // The editor's own lines came first in this process; the game's start
+        // here.
+        sink.cursor = log::since(NEWEST)["cursor"];
+    }
     sink
+}
+
+/// A game played inside the editor shares its process, its log and its log
+/// file, none of which are the game's to send.
+fn in_editor() {
+    let host = engine::platform();
+    let editor = host.get("editor").unwrap_or(false);
+    editor is bool && editor
 }
 
 /// The server this run talks to: the configured one, or `[gamend]`'s.
@@ -513,11 +529,10 @@ fn level_in(line) {
     "error"
 }
 
-/// Name the run once the clock reads, which it does from the first tick on.
-/// Unique per run and never kept: a reused id would merge two runs, and the
-/// server binds an id to the first player who sends it.
+/// Note when the run started once the clock reads, which it does from the
+/// first tick on; false until then.
 fn started(sink) {
-    if sink.run != "" {
+    if sink.started_at > 0.0 {
         return true;
     }
     let now = engine::unix_time();
@@ -525,11 +540,12 @@ fn started(sink) {
     if seconds <= 0.0 {
         return false;
     }
-    sink.run = format!("{}-{}", engine::device_id(), (seconds * 1000.0) as i64);
     sink.started_at = seconds;
     // Read now rather than in `setup`: the log file opens after `init`.
-    for record in previous_tail() {
-        sink.recovered.push(record);
+    if !in_editor() {
+        for record in previous_tail() {
+            sink.recovered.push(record);
+        }
     }
     for record in sink.recovered {
         if record["at"] == 0.0 {

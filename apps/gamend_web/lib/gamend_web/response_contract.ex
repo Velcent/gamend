@@ -39,7 +39,10 @@ defmodule GamendWeb.ResponseContract do
                    "Authentication",
                    "Friends",
                    "Groups",
-                   "Parties"
+                   "Parties",
+                   "Chat",
+                   "Notifications",
+                   "Push"
                  ])
 
   defmodule Violation do

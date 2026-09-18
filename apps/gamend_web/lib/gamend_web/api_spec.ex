@@ -4,6 +4,7 @@ defmodule GamendWeb.ApiSpec do
   """
 
   alias GamendWeb.{Endpoint, Router}
+  alias GamendWeb.Schemas.RequestTitles
   alias OpenApiSpex.{Components, Info, OpenApi, Paths, SecurityScheme, Server, Tag}
   @behaviour OpenApi
 
@@ -324,6 +325,7 @@ defmodule GamendWeb.ApiSpec do
       }
     }
     |> OpenApiSpex.resolve_schema_modules()
+    |> RequestTitles.put_titles()
   end
 
   defp api_version do

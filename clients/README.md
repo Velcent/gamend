@@ -6,6 +6,13 @@ To generate the Godot client, simply run:
 ./generate_godot.sh
 ```
 
+It runs openapi-generator in Docker. Without Docker, point it at a local
+openapi-generator-cli jar instead:
+
+```sh
+OPENAPI_GENERATOR_JAR=/path/to/openapi-generator-cli.jar ./generate_godot.sh
+```
+
 Then check it in a headless Godot 4 (`GODOT_BIN`, or `godot` on PATH): every
 addon script must compile, and with a server URL a set of live calls must land
 in their named model classes (`GamendLobby`, `GamendSession`, …):

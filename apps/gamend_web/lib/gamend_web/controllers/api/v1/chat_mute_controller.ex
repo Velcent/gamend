@@ -20,33 +20,11 @@ defmodule GamendWeb.Api.V1.ChatMuteController do
   alias Gamend.Groups
   alias Gamend.Lobbies
   alias Gamend.Parties
+  alias GamendWeb.Schemas
+  alias GamendWeb.Schemas.{ChatMuteRecordPage, ChatMuteRecordResponse, UnmuteResult}
   alias OpenApiSpex.Schema
 
   tags(["Chat"])
-
-  @mute_schema %Schema{
-    type: :object,
-    properties: %{
-      id: %Schema{type: :string, format: :uuid},
-      user_id: %Schema{type: :string, format: :uuid},
-      scope: %Schema{type: :string, enum: ["global", "lobby", "group", "party"]},
-      scope_ref_id: %Schema{type: :string},
-      expires_at: %Schema{type: :string, format: :"date-time", nullable: true},
-      reason: %Schema{type: :string},
-      muted_by: %Schema{type: :string},
-      inserted_at: %Schema{type: :string, format: :"date-time"}
-    }
-  }
-
-  @meta_schema %Schema{
-    type: :object,
-    properties: %{
-      page: %Schema{type: :integer},
-      page_size: %Schema{type: :integer},
-      total_count: %Schema{type: :integer},
-      total_pages: %Schema{type: :integer}
-    }
-  }
 
   @mute_request %Schema{
     type: :object,
@@ -82,9 +60,9 @@ defmodule GamendWeb.Api.V1.ChatMuteController do
     security: [%{"authorization" => []}],
     request_body: {"Mute", "application/json", @mute_request},
     responses: [
-      ok: {"Muted", "application/json", @mute_schema},
-      bad_request: {"Not in a lobby or invalid id", "application/json", %Schema{type: :object}},
-      forbidden: {"Not the lobby host", "application/json", %Schema{type: :object}}
+      ok: {"Muted", "application/json", ChatMuteRecordResponse},
+      bad_request: Schemas.error("Not in a lobby or invalid id"),
+      forbidden: Schemas.error("Not the lobby host")
     ]
   )
 
@@ -104,9 +82,9 @@ defmodule GamendWeb.Api.V1.ChatMuteController do
     security: [%{"authorization" => []}],
     request_body: {"Unmute", "application/json", @unmute_request},
     responses: [
-      ok: {"Unmuted", "application/json", %Schema{type: :object}},
-      bad_request: {"Not in a lobby or invalid id", "application/json", %Schema{type: :object}},
-      forbidden: {"Not the lobby host", "application/json", %Schema{type: :object}}
+      ok: {"Unmuted", "application/json", UnmuteResult},
+      bad_request: Schemas.error("Not in a lobby or invalid id"),
+      forbidden: Schemas.error("Not the lobby host")
     ]
   )
 
@@ -133,13 +111,8 @@ defmodule GamendWeb.Api.V1.ChatMuteController do
       ]
     ],
     responses: [
-      ok:
-        {"Mutes", "application/json",
-         %Schema{
-           type: :object,
-           properties: %{data: %Schema{type: :array, items: @mute_schema}, meta: @meta_schema}
-         }},
-      forbidden: {"Not the lobby host", "application/json", %Schema{type: :object}}
+      ok: {"Mutes", "application/json", ChatMuteRecordPage},
+      forbidden: Schemas.error("Not the lobby host")
     ]
   )
 
@@ -170,9 +143,9 @@ defmodule GamendWeb.Api.V1.ChatMuteController do
     ],
     request_body: {"Mute", "application/json", @mute_request},
     responses: [
-      ok: {"Muted", "application/json", @mute_schema},
-      bad_request: {"Invalid id", "application/json", %Schema{type: :object}},
-      forbidden: {"Not a group admin", "application/json", %Schema{type: :object}}
+      ok: {"Muted", "application/json", ChatMuteRecordResponse},
+      bad_request: Schemas.error("Invalid id"),
+      forbidden: Schemas.error("Not a group admin")
     ]
   )
 
@@ -196,9 +169,9 @@ defmodule GamendWeb.Api.V1.ChatMuteController do
     ],
     request_body: {"Unmute", "application/json", @unmute_request},
     responses: [
-      ok: {"Unmuted", "application/json", %Schema{type: :object}},
-      bad_request: {"Invalid id", "application/json", %Schema{type: :object}},
-      forbidden: {"Not a group admin", "application/json", %Schema{type: :object}}
+      ok: {"Unmuted", "application/json", UnmuteResult},
+      bad_request: Schemas.error("Invalid id"),
+      forbidden: Schemas.error("Not a group admin")
     ]
   )
 
@@ -227,13 +200,8 @@ defmodule GamendWeb.Api.V1.ChatMuteController do
       ]
     ],
     responses: [
-      ok:
-        {"Mutes", "application/json",
-         %Schema{
-           type: :object,
-           properties: %{data: %Schema{type: :array, items: @mute_schema}, meta: @meta_schema}
-         }},
-      forbidden: {"Not a group admin", "application/json", %Schema{type: :object}}
+      ok: {"Mutes", "application/json", ChatMuteRecordPage},
+      forbidden: Schemas.error("Not a group admin")
     ]
   )
 
@@ -252,9 +220,9 @@ defmodule GamendWeb.Api.V1.ChatMuteController do
     security: [%{"authorization" => []}],
     request_body: {"Mute", "application/json", @mute_request},
     responses: [
-      ok: {"Muted", "application/json", @mute_schema},
-      bad_request: {"Not in a party or invalid id", "application/json", %Schema{type: :object}},
-      forbidden: {"Not the party leader", "application/json", %Schema{type: :object}}
+      ok: {"Muted", "application/json", ChatMuteRecordResponse},
+      bad_request: Schemas.error("Not in a party or invalid id"),
+      forbidden: Schemas.error("Not the party leader")
     ]
   )
 
@@ -274,9 +242,9 @@ defmodule GamendWeb.Api.V1.ChatMuteController do
     security: [%{"authorization" => []}],
     request_body: {"Unmute", "application/json", @unmute_request},
     responses: [
-      ok: {"Unmuted", "application/json", %Schema{type: :object}},
-      bad_request: {"Not in a party or invalid id", "application/json", %Schema{type: :object}},
-      forbidden: {"Not the party leader", "application/json", %Schema{type: :object}}
+      ok: {"Unmuted", "application/json", UnmuteResult},
+      bad_request: Schemas.error("Not in a party or invalid id"),
+      forbidden: Schemas.error("Not the party leader")
     ]
   )
 
@@ -303,13 +271,8 @@ defmodule GamendWeb.Api.V1.ChatMuteController do
       ]
     ],
     responses: [
-      ok:
-        {"Mutes", "application/json",
-         %Schema{
-           type: :object,
-           properties: %{data: %Schema{type: :array, items: @mute_schema}, meta: @meta_schema}
-         }},
-      forbidden: {"Not the party leader", "application/json", %Schema{type: :object}}
+      ok: {"Mutes", "application/json", ChatMuteRecordPage},
+      forbidden: Schemas.error("Not the party leader")
     ]
   )
 

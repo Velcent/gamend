@@ -70,8 +70,10 @@
     <section>
       <h2 class="text-xl font-semibold mb-4">Contact Information</h2>
       <p :if={@contact_email} class="text-base-content/80">
-        If you have questions about the data deletion process or need assistance, email us at
-        <a href={"mailto:" <> @contact_email} class="link link-primary">{@contact_email}</a>.
+        If you have questions about the data deletion process or need assistance, email us at <a
+          href={"mailto:" <> @contact_email}
+          class="link link-primary"
+        >{@contact_email}</a>.
       </p>
       <p :if={!@contact_email} class="text-base-content/80">
         If you have questions about the data deletion process or need assistance, please contact
