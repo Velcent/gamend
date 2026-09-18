@@ -128,6 +128,14 @@ Count all parties matching the given filters.
 
 Count total members across all parties.
 
+# `count_party_invitations`
+
+```elixir
+@spec count_party_invitations(Gamend.Accounts.User.t()) :: non_neg_integer()
+```
+
+How many pending party invites the user has, for paging.
+
 # `count_party_members`
 
 ```elixir
@@ -135,6 +143,14 @@ Count total members across all parties.
 ```
 
 Count members in a party.
+
+# `count_sent_party_invitations`
+
+```elixir
+@spec count_sent_party_invitations(Gamend.Accounts.User.t()) :: non_neg_integer()
+```
+
+How many pending party invites the leader has sent, for paging.
 
 # `create_lobby_with_party`
 
@@ -282,7 +298,7 @@ List all parties with optional filters and pagination.
 # `list_party_invitations`
 
 ```elixir
-@spec list_party_invitations(Gamend.Accounts.User.t()) :: [map()]
+@spec list_party_invitations(Gamend.Accounts.User.t(), keyword()) :: [map()]
 ```
 
 List pending party invites for the given user.
@@ -290,7 +306,7 @@ List pending party invites for the given user.
 # `list_sent_party_invitations`
 
 ```elixir
-@spec list_sent_party_invitations(Gamend.Accounts.User.t()) :: [map()]
+@spec list_sent_party_invitations(Gamend.Accounts.User.t(), keyword()) :: [map()]
 ```
 
 List pending party invites sent by the given leader.

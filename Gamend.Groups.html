@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.4">
-    <meta name="project" content="gamend_core v1.0.1240">
+    <meta name="project" content="gamend_core v1.0.1241">
 
 
-    <title>Gamend.Groups — gamend_core v1.0.1240</title>
+    <title>Gamend.Groups — gamend_core v1.0.1241</title>
 
     <link rel="stylesheet" href="dist/html-elixir-RXHHCTJW.css" />
 
-    <script defer src="dist/sidebar_items-4494F1AF.js"></script>
+    <script defer src="dist/sidebar_items-9F9D5B1E.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-MI33G4N7.js"></script>
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1240
+          v1.0.1241
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr />Groups</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1240)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1241)</small>
 
     </h1>
 
@@ -2153,7 +2153,7 @@ one request into ~10,000 of each. Members talk to a group through group chat,
 which costs one row and one topic broadcast and is throttled per group. This
 function is the announcement primitive for plugins and hooks - callers are
 trusted, so it skips both the friends-only check and the per-recipient
-notification cap that <code class="inline">Notifications.send_notification/2</code> enforces.</p><p>The <code class="inline">group_id</code> / <code class="inline">group_name</code> are stored in metadata so the client can
+notification cap that <code class="inline">Notifications.send_notification/2</code> enforces.</p><p>The <code class="inline">group_id</code> / <code class="inline">group_title</code> are stored in metadata so the client can
 recognise and route it.</p><h2 id="notify_group/4-options" class="section-heading"><a href="#notify_group/4-options" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Options</span></h2><ul><li><code class="inline">title</code> – notification title string (default: <code class="inline">&quot;Group Notification&quot;</code>).
 The title is part of the unique constraint <code class="inline">(sender_id, recipient_id, title)</code>,
 so different titles create separate notification slots.</li></ul><p>Because of the unique constraint on <code class="inline">(sender_id, recipient_id, title)</code>, a
@@ -2462,9 +2462,9 @@ Cannot lower max_members below current member count.</p>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1240">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1241">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1240">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1241">Hex Preview</a>
 
             </span>
 

@@ -501,7 +501,7 @@ function is the announcement primitive for plugins and hooks - callers are
 trusted, so it skips both the friends-only check and the per-recipient
 notification cap that `Notifications.send_notification/2` enforces.
 
-The `group_id` / `group_name` are stored in metadata so the client can
+The `group_id` / `group_title` are stored in metadata so the client can
 recognise and route it.
 
 ## Options

@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.4">
-    <meta name="project" content="gamend_core v1.0.1240">
+    <meta name="project" content="gamend_core v1.0.1241">
 
 
-    <title>Gamend.Parties — gamend_core v1.0.1240</title>
+    <title>Gamend.Parties — gamend_core v1.0.1241</title>
 
     <link rel="stylesheet" href="dist/html-elixir-RXHHCTJW.css" />
 
-    <script defer src="dist/sidebar_items-4494F1AF.js"></script>
+    <script defer src="dist/sidebar_items-9F9D5B1E.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-MI33G4N7.js"></script>
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1240
+          v1.0.1241
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr />Parties</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1240)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1241)</small>
 
     </h1>
 
@@ -243,11 +243,31 @@ creating or joining a lobby together.</p><h2 id="module-usage" class="section-he
 
     <div class="summary-row">
       <div class="summary-signature">
+        <a href="#count_party_invitations/1" data-no-tooltip="" translate="no">count_party_invitations(user)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>How many pending party invites the user has, for paging.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
         <a href="#count_party_members/1" data-no-tooltip="" translate="no">count_party_members(party_id)</a>
 
       </div>
 
         <div class="summary-synopsis"><p>Count members in a party.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#count_sent_party_invitations/1" data-no-tooltip="" translate="no">count_sent_party_invitations(user)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>How many pending party invites the leader has sent, for paging.</p></div>
 
     </div>
 
@@ -386,7 +406,7 @@ atomically. The party is kept intact.</p></div>
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#list_party_invitations/1" data-no-tooltip="" translate="no">list_party_invitations(user)</a>
+        <a href="#list_party_invitations/2" data-no-tooltip="" translate="no">list_party_invitations(user, opts \\ [])</a>
 
       </div>
 
@@ -396,7 +416,7 @@ atomically. The party is kept intact.</p></div>
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#list_sent_party_invitations/1" data-no-tooltip="" translate="no">list_sent_party_invitations(leader)</a>
+        <a href="#list_sent_party_invitations/2" data-no-tooltip="" translate="no">list_sent_party_invitations(leader, opts \\ [])</a>
 
       </div>
 
@@ -518,7 +538,7 @@ atomically. The party is kept intact.</p></div>
       <h1 class="signature" translate="no">admin_delete_party(party_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L1802" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L1830" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -547,7 +567,7 @@ atomically. The party is kept intact.</p></div>
       <h1 class="signature" translate="no">admin_update_party(party, attrs)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L1782" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L1810" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -667,7 +687,7 @@ own <code class="inline">party_id</code> is the common case.</p>
       <h1 class="signature" translate="no">change_party(party)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L1776" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L1804" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -697,7 +717,7 @@ own <code class="inline">party_id</code> is the common case.</p>
       <h1 class="signature" translate="no">count_all_parties(filters \\ %{})</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L1768" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L1796" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -743,6 +763,34 @@ own <code class="inline">party_id</code> is the common case.</p>
 <p>Count total members across all parties.</p>
   </section>
 </section>
+<section class="detail" id="count_party_invitations/1">
+
+  <div class="detail-header">
+    <a href="#count_party_invitations/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">count_party_invitations(user)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L769" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> count_party_invitations(<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()) :: <a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">non_neg_integer</a>()</pre>
+
+      </div>
+
+<p>How many pending party invites the user has, for paging.</p>
+  </section>
+</section>
 <section class="detail" id="count_party_members/1">
 
   <div class="detail-header">
@@ -771,6 +819,34 @@ own <code class="inline">party_id</code> is the common case.</p>
 <p>Count members in a party.</p>
   </section>
 </section>
+<section class="detail" id="count_sent_party_invitations/1">
+
+  <div class="detail-header">
+    <a href="#count_sent_party_invitations/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">count_sent_party_invitations(user)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L811" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> count_sent_party_invitations(<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()) :: <a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">non_neg_integer</a>()</pre>
+
+      </div>
+
+<p>How many pending party invites the leader has sent, for paging.</p>
+  </section>
+</section>
 <section class="detail" id="create_lobby_with_party/2">
 
     <span id="create_lobby_with_party/1"></span>
@@ -783,7 +859,7 @@ own <code class="inline">party_id</code> is the common case.</p>
       <h1 class="signature" translate="no">create_lobby_with_party(user, lobby_attrs \\ %{})</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L1330" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L1358" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -873,7 +949,7 @@ atomically. The party is kept intact.</p><p>The lobby's <code class="inline">max
       <h1 class="signature" translate="no">disband(party)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L1006" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L1034" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1055,7 +1131,7 @@ If a pending invite already exists, returns <code class="inline">{:ok, existing_
       <h1 class="signature" translate="no">join_lobby_with_party(user, lobby_id, opts \\ %{})</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L1455" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L1483" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1085,7 +1161,7 @@ atomically. The party is kept intact.</p><p>The lobby must have enough free slot
       <h1 class="signature" translate="no">kick_member(leader, target_user_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L1012" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L1040" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1114,7 +1190,7 @@ atomically. The party is kept intact.</p><p>The lobby must have enough free slot
       <h1 class="signature" translate="no">leave_party(user)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L975" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L1003" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1150,7 +1226,7 @@ the party with them, since there is nobody to hand it to.</p><p>To end a party o
       <h1 class="signature" translate="no">list_all_parties(filters \\ %{}, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L1755" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L1783" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1168,14 +1244,16 @@ the party with them, since there is nobody to hand it to.</p><p>To end a party o
 <p>List all parties with optional filters and pagination.</p>
   </section>
 </section>
-<section class="detail" id="list_party_invitations/1">
+<section class="detail" id="list_party_invitations/2">
+
+    <span id="list_party_invitations/1"></span>
 
   <div class="detail-header">
-    <a href="#list_party_invitations/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+    <a href="#list_party_invitations/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
       <i class="ri-link-m" aria-hidden="true"></i>
     </a>
     <div class="heading-with-actions">
-      <h1 class="signature" translate="no">list_party_invitations(user)</h1>
+      <h1 class="signature" translate="no">list_party_invitations(user, opts \\ [])</h1>
 
 
         <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L763" class="icon-action" rel="help nofollow" aria-label="View Source">
@@ -1189,24 +1267,26 @@ the party with them, since there is nobody to hand it to.</p><p>To end a party o
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> list_party_invitations(<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()) :: [<a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">map</a>()]</pre>
+          <pre translate="no"><span class="attribute">@spec</span> list_party_invitations(<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>(), <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">keyword</a>()) :: [<a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">map</a>()]</pre>
 
       </div>
 
 <p>List pending party invites for the given user.</p>
   </section>
 </section>
-<section class="detail" id="list_sent_party_invitations/1">
+<section class="detail" id="list_sent_party_invitations/2">
+
+    <span id="list_sent_party_invitations/1"></span>
 
   <div class="detail-header">
-    <a href="#list_sent_party_invitations/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+    <a href="#list_sent_party_invitations/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
       <i class="ri-link-m" aria-hidden="true"></i>
     </a>
     <div class="heading-with-actions">
-      <h1 class="signature" translate="no">list_sent_party_invitations(leader)</h1>
+      <h1 class="signature" translate="no">list_sent_party_invitations(leader, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L789" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L801" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1217,7 +1297,7 @@ the party with them, since there is nobody to hand it to.</p><p>To end a party o
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> list_sent_party_invitations(<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()) :: [<a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">map</a>()]</pre>
+          <pre translate="no"><span class="attribute">@spec</span> list_sent_party_invitations(<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>(), <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">keyword</a>()) :: [<a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">map</a>()]</pre>
 
       </div>
 
@@ -1236,7 +1316,7 @@ the party with them, since there is nobody to hand it to.</p><p>To end a party o
       <h1 class="signature" translate="no">quick_join_with_party(user, params \\ %{})</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L1204" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L1232" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1300,7 +1380,7 @@ derived counts rather than a maintained size.</p>
       <h1 class="signature" translate="no">subscribe_parties()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L1745" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L1773" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1384,7 +1464,7 @@ derived counts rather than a maintained size.</p>
       <h1 class="signature" translate="no">update_party(user, attrs)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L1128" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/parties.ex#L1156" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1412,9 +1492,9 @@ derived counts rather than a maintained size.</p>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1240">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1241">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1240">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1241">Hex Preview</a>
 
             </span>
 
