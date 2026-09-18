@@ -141,7 +141,7 @@ defmodule GamendWeb.UserLive.Settings.FriendsTab do
                         "inline-block w-2 h-2 rounded-full shrink-0",
                         if(u.is_online, do: "bg-green-500", else: "bg-gray-400")
                       ]}
-                      title={if(u.is_online, do: "Online", else: "Offline")}
+                      title={if(u.is_online, do: gettext("Online"), else: gettext("Offline"))}
                     />
                     {LiveHelpers.public_user_name(u)}
                     <span class="text-xs text-base-content/60">
@@ -303,11 +303,9 @@ defmodule GamendWeb.UserLive.Settings.FriendsTab do
          |> put_flash(:info, gettext("Success."))
          |> refresh_friend_lists(user)}
 
-      {:error, %Ecto.Changeset{} = cs} ->
-        {:noreply, put_flash(socket, :error, gettext("Failed") <> ": " <> inspect(cs.errors))}
-
       {:error, reason} ->
-        {:noreply, put_flash(socket, :error, gettext("Failed") <> ": " <> inspect(reason))}
+        {:noreply,
+         put_flash(socket, :error, LiveHelpers.failure_message(gettext("Failed"), reason))}
     end
   end
 
@@ -320,7 +318,8 @@ defmodule GamendWeb.UserLive.Settings.FriendsTab do
         {:noreply, refresh_friend_lists(socket, user)}
 
       {:error, reason} ->
-        {:noreply, put_flash(socket, :error, gettext("Failed") <> ": " <> inspect(reason))}
+        {:noreply,
+         put_flash(socket, :error, LiveHelpers.failure_message(gettext("Failed"), reason))}
     end
   end
 
@@ -333,7 +332,8 @@ defmodule GamendWeb.UserLive.Settings.FriendsTab do
         {:noreply, refresh_friend_lists(socket, user)}
 
       {:error, reason} ->
-        {:noreply, put_flash(socket, :error, gettext("Failed") <> ": " <> inspect(reason))}
+        {:noreply,
+         put_flash(socket, :error, LiveHelpers.failure_message(gettext("Failed"), reason))}
     end
   end
 
@@ -346,7 +346,8 @@ defmodule GamendWeb.UserLive.Settings.FriendsTab do
         {:noreply, refresh_friend_lists(socket, user)}
 
       {:error, reason} ->
-        {:noreply, put_flash(socket, :error, gettext("Failed") <> ": " <> inspect(reason))}
+        {:noreply,
+         put_flash(socket, :error, LiveHelpers.failure_message(gettext("Failed"), reason))}
     end
   end
 
@@ -359,7 +360,8 @@ defmodule GamendWeb.UserLive.Settings.FriendsTab do
         {:noreply, refresh_friend_lists(socket, user)}
 
       {:error, reason} ->
-        {:noreply, put_flash(socket, :error, gettext("Failed") <> ": " <> inspect(reason))}
+        {:noreply,
+         put_flash(socket, :error, LiveHelpers.failure_message(gettext("Failed"), reason))}
     end
   end
 
@@ -372,7 +374,8 @@ defmodule GamendWeb.UserLive.Settings.FriendsTab do
         {:noreply, refresh_friend_lists(socket, user)}
 
       {:error, reason} ->
-        {:noreply, put_flash(socket, :error, gettext("Failed") <> ": " <> inspect(reason))}
+        {:noreply,
+         put_flash(socket, :error, LiveHelpers.failure_message(gettext("Failed"), reason))}
     end
   end
 
@@ -385,7 +388,8 @@ defmodule GamendWeb.UserLive.Settings.FriendsTab do
         {:noreply, refresh_friend_lists(socket, user)}
 
       {:error, reason} ->
-        {:noreply, put_flash(socket, :error, gettext("Failed") <> ": " <> inspect(reason))}
+        {:noreply,
+         put_flash(socket, :error, LiveHelpers.failure_message(gettext("Failed"), reason))}
     end
   end
 

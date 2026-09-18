@@ -129,7 +129,7 @@ defmodule GamendWeb.LobbyLive.Index do
              put_flash(
                socket,
                :error,
-               gettext("Failed") <> ": " <> inspect(reason)
+               LiveHelpers.failure_message(gettext("Failed"), reason)
              )}
         end
 
@@ -281,7 +281,7 @@ defmodule GamendWeb.LobbyLive.Index do
              put_flash(
                socket,
                :error,
-               gettext("Failed") <> ": " <> inspect(reason)
+               LiveHelpers.failure_message(gettext("Failed"), reason)
              )}
         end
 
@@ -316,7 +316,7 @@ defmodule GamendWeb.LobbyLive.Index do
              put_flash(
                socket,
                :error,
-               gettext("Failed") <> ": " <> inspect(reason)
+               LiveHelpers.failure_message(gettext("Failed"), reason)
              )}
         end
 
@@ -411,7 +411,7 @@ defmodule GamendWeb.LobbyLive.Index do
          put_flash(
            socket,
            :error,
-           gettext("Failed") <> ": " <> inspect(reason)
+           LiveHelpers.failure_message(gettext("Failed"), reason)
          )}
     end
   end
@@ -459,7 +459,7 @@ defmodule GamendWeb.LobbyLive.Index do
            put_flash(
              socket,
              :error,
-             gettext("Failed") <> ": " <> inspect(reason)
+             LiveHelpers.failure_message(gettext("Failed"), reason)
            )}
       end
     end

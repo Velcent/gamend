@@ -168,7 +168,7 @@ defmodule GamendWeb.PresentationPage do
           <a
             :if={@sections != []}
             href="#more-content"
-            aria-label="Scroll to content"
+            aria-label={gettext("Scroll to content")}
             class="absolute bottom-6 left-1/2 z-20 -translate-x-1/2 text-base-content/55 transition hover:text-base-content motion-safe:animate-bounce"
           >
             <.dynamic_icon name="hero-chevron-down-solid" class="size-9" />
@@ -220,7 +220,7 @@ defmodule GamendWeb.PresentationPage do
       <a
         :if={@sections != []}
         href="#more-content"
-        aria-label="Scroll to content"
+        aria-label={gettext("Scroll to content")}
         class="absolute bottom-6 left-1/2 z-20 -translate-x-1/2 text-white/70 transition hover:text-white motion-safe:animate-bounce"
       >
         <.dynamic_icon name="hero-chevron-down-solid" class="size-9" />

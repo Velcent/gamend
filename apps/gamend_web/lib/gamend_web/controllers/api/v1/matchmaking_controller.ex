@@ -49,7 +49,7 @@ defmodule GamendWeb.Api.V1.MatchmakingController do
     fit in `max_players`, and `already_queued` when the caller or any member is
     already in the queue.
     """,
-    security: [%{"bearer" => []}],
+    security: [%{"authorization" => []}],
     request_body:
       {"Ticket", "application/json",
        %Schema{
@@ -98,7 +98,7 @@ defmodule GamendWeb.Api.V1.MatchmakingController do
     operation_id: "matchmaking_cancel",
     summary: "Leave the matchmaking queue",
     description: "Cancels all of the caller's queued tickets.",
-    security: [%{"bearer" => []}],
+    security: [%{"authorization" => []}],
     responses: [
       ok:
         {"Cancelled", "application/json",
@@ -116,7 +116,7 @@ defmodule GamendWeb.Api.V1.MatchmakingController do
     operation_id: "matchmaking_my_ticket",
     summary: "Get my current ticket",
     description: "The caller's queued ticket, or null when not in the queue.",
-    security: [%{"bearer" => []}],
+    security: [%{"authorization" => []}],
     responses: [
       ok:
         {"Ticket", "application/json",

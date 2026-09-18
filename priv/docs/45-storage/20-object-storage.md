@@ -46,7 +46,7 @@ The object key is server-chosen (`<namespace>/<owner_id>/<random><ext>` via `Sto
 The backends give different guarantees at upload time, so the checks are split:
 
 - **At ticket time** (both backends): the declared content type must be in the allow-list: `image/png`, `image/jpeg`, `image/webp`, `image/gif` by default.
-- **At upload time** (local only): the size cap, the per-owner quota, and magic-byte sniffing all run, because the bytes pass through `PUT /storage/upload`. On the local backend the key also travels inside a signed token, never the query string.
+- **At upload time** (local only): the size cap, the per-owner quota, and magic-byte sniffing all run, because the bytes pass through `PUT /api/v1/storage/upload`. On the local backend the key also travels inside a signed token, never the query string.
 - **At confirm time** (both backends): size and magic bytes are re-checked against the *stored* object, and a failing object is deleted. On S3 a presigned PUT goes straight to the bucket, so confirm is the only point at which the server sees the object at all, so nothing may persist an object URL without going through it.
 
 Two limits bound the whole surface: `GAMEND_LIMITS_MAX_UPLOAD_BYTES` (5 MiB per object) and `GAMEND_LIMITS_MAX_UPLOAD_BYTES_PER_OWNER` (50 MiB per owner prefix, the cap on orphans left by tickets a client requests but never confirms).

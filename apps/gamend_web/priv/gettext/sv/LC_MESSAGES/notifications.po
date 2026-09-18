@@ -11,11 +11,6 @@ msgstr ""
 "Language: sv\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: lib/gamend_web/live/notifications_live.ex:291
-#, elixir-autogen, elixir-format
-msgid "Achievement Unlocked: %{name}"
-msgstr "Prestation upplåst: %{name}"
-
 #: lib/gamend_web/live/notifications_live.ex:285
 #, elixir-autogen, elixir-format
 msgid "New message in party"
@@ -36,3 +31,8 @@ msgstr "Nya meddelanden från vänner"
 #, elixir-autogen, elixir-format
 msgid "Quest completed: %{name}"
 msgstr "Uppdrag slutfört: %{name}"
+
+#: lib/gamend_web/live/notifications_live.ex:291
+#, elixir-autogen, elixir-format
+msgid "Achievement unlocked: %{name}"
+msgstr "Prestation upplåst: %{name}"

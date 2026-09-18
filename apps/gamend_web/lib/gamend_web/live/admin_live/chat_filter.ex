@@ -36,10 +36,25 @@ defmodule GamendWeb.AdminLive.ChatFilter do
       |> assign(:word_form, @blank_word)
       |> assign(:import_form, %{"lang" => List.first(languages) || "", "severity" => "block"})
       |> assign(:phrase, "")
+      |> assign(:chat_guide_url, chat_guide_url(socket))
       |> reload()
 
     {:ok, socket}
   end
+
+  @public_chat_guide "https://gamend.org/docs/chat"
+
+  # Core's guides are routed only when the host mounts them
+  # (`gamend_current_user_routes docs: …`); on a host that does not, the
+  # in-app link 404'd. Link to the published guide instead.
+  defp chat_guide_url(%{router: router}) when is_atom(router) and not is_nil(router) do
+    case Phoenix.Router.route_info(router, "GET", "/docs/setup", nil) do
+      :error -> @public_chat_guide
+      _route -> "/docs/setup?guide=chat"
+    end
+  end
+
+  defp chat_guide_url(_socket), do: @public_chat_guide
 
   # `?word=` pre-fills the add form, so another admin page can link straight to
   # blocking a word it is showing.
@@ -145,7 +160,12 @@ defmodule GamendWeb.AdminLive.ChatFilter do
           put_flash(
             socket,
             :info,
-            gettext("Imported %{count} words from the %{lang} list", count: count, lang: lang)
+            ngettext(
+              "Imported %{count} word from the %{lang} list",
+              "Imported %{count} words from the %{lang} list",
+              count,
+              lang: lang
+            )
           )
 
         {:error, :unknown_language} ->
@@ -169,7 +189,12 @@ defmodule GamendWeb.AdminLive.ChatFilter do
      socket
      |> put_flash(
        :info,
-       gettext("Removed %{count} words tagged %{lang}", count: count, lang: lang)
+       ngettext(
+         "Removed %{count} word tagged %{lang}",
+         "Removed %{count} words tagged %{lang}",
+         count,
+         lang: lang
+       )
      )
      |> reload()}
   end
@@ -209,9 +234,18 @@ defmodule GamendWeb.AdminLive.ChatFilter do
 
     total = Moderation.count_filter_words(filters)
 
+    # The node's matcher holds the whole blocklist, so it is compared with the
+    # unfiltered count; against `total` any active filter read as a missed
+    # broadcast.
+    db_words =
+      if Enum.all?(filters, fn {_key, value} -> is_nil(value) end),
+        do: total,
+        else: Moderation.count_filter_words()
+
     socket
     |> assign(:words, words)
     |> assign(:count, total)
+    |> assign(:db_words, db_words)
     |> assign(:cached_words, Cache.word_count())
     |> assign(:total_pages, LiveHelpers.total_pages(total, socket.assigns.page_size))
     |> assign_test_result()
@@ -359,12 +393,14 @@ defmodule GamendWeb.AdminLive.ChatFilter do
           </form>
 
           <p :if={@languages == []} class="text-sm text-base-content/60">
-            {gettext("No bundled lists are available. Drop one at priv/chat_filter/<lang>.txt.")}
+            {gettext(
+              "No bundled lists are available. Drop one at apps/gamend_core/priv/chat_filter/<lang>.txt."
+            )}
           </p>
 
           <p class="text-sm text-base-content/60 mt-2">
             {gettext("Gamend ships no word list of its own; en.txt holds two placeholders.")}
-            <a href="/docs/setup?guide=chat" class="link">
+            <a href={@chat_guide_url} class="link">
               {gettext("The Chat guide lists public sources and how to install one.")}
             </a>
           </p>
@@ -441,11 +477,11 @@ defmodule GamendWeb.AdminLive.ChatFilter do
               <span
                 class={[
                   "badge badge-sm",
-                  if(@cached_words == @count, do: "badge-ghost", else: "badge-warning")
+                  if(@cached_words == @db_words, do: "badge-ghost", else: "badge-warning")
                 ]}
                 title={
                   gettext(
-                    "Words loaded into this node's in-memory matcher. A number below the database count means this node missed a change broadcast."
+                    "Words loaded into this node's in-memory matcher. A number that differs from the database count means this node missed a change broadcast."
                   )
                 }
               >

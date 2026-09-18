@@ -13,7 +13,7 @@ defmodule GamendWeb.HostLayouts do
 
   @locale_labels %{
     "ar" => "العربية",
-    "bg" => "български език",
+    "bg" => "Български",
     "cs" => "Čeština",
     "da" => "Dansk",
     "de" => "Deutsch",

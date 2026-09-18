@@ -7,118 +7,25 @@ defmodule GamendWeb.Api.V1.GroupController do
   alias Gamend.Accounts.Scope
   alias Gamend.Accounts.User
   alias Gamend.Groups
+  alias GamendWeb.Schemas
+
+  alias GamendWeb.Schemas.{
+    Group,
+    GroupInvitePage,
+    GroupJoinRequest,
+    GroupJoinRequestPage,
+    GroupMember,
+    GroupMemberPage,
+    GroupPage,
+    StatusResponse,
+    UploadTicket
+  }
+
   alias GamendWeb.Serializers
   alias GamendWeb.Uploads
   alias OpenApiSpex.Schema
 
   tags(["Groups"])
-
-  # ---------------------------------------------------------------------------
-  # Shared schemas
-  # ---------------------------------------------------------------------------
-
-  @group_schema %Schema{
-    type: :object,
-    properties: %{
-      id: %Schema{type: :string, format: :uuid, description: "Group ID"},
-      title: %Schema{type: :string, description: "Display title"},
-      description: %Schema{type: :string, description: "Description"},
-      icon_url: %Schema{type: :string, description: "Icon URL; empty when unset"},
-      type: %Schema{
-        type: :string,
-        enum: ["public", "private", "hidden"],
-        description: "Visibility type"
-      },
-      max_members: %Schema{type: :integer, description: "Maximum number of members"},
-      metadata: %Schema{type: :object, description: "Server-managed metadata"},
-      creator_id: %Schema{
-        type: :string,
-        format: :uuid,
-        description: "User ID of the creator, or -1 for system groups"
-      },
-      creator_name: %Schema{
-        type: :string,
-        description: "Display name of the creator"
-      },
-      member_count: %Schema{type: :integer, description: "Current member count"},
-      slowdown: %Schema{type: :integer, description: "Chat slowdown in seconds (0 = disabled)"},
-      inserted_at: %Schema{type: :string, format: :"date-time"},
-      updated_at: %Schema{type: :string, format: :"date-time"}
-    },
-    example: %{
-      id: "0198c0de-0001-7000-8000-000000000001",
-      title: "Awesome Guild",
-      description: "A group for awesome players",
-      type: "public",
-      max_members: 100,
-      metadata: %{"lang_tag" => "en"},
-      creator_id: "0198c0de-0002-7000-8000-000000000002",
-      creator_name: "AwesomePlayer",
-      member_count: 12,
-      slowdown: 0
-    }
-  }
-
-  @error_schema %Schema{
-    type: :object,
-    properties: %{error: %Schema{type: :string}}
-  }
-
-  @meta_schema %Schema{
-    type: :object,
-    properties: %{
-      page: %Schema{type: :integer},
-      page_size: %Schema{type: :integer},
-      count: %Schema{type: :integer},
-      total_count: %Schema{type: :integer},
-      total_pages: %Schema{type: :integer},
-      has_more: %Schema{type: :boolean}
-    }
-  }
-
-  @member_schema %Schema{
-    type: :object,
-    properties: %{
-      id: %Schema{type: :string, format: :uuid, description: "Membership ID"},
-      user_id: %Schema{type: :string, format: :uuid},
-      group_id: %Schema{type: :string, format: :uuid},
-      role: %Schema{type: :string, enum: ["admin", "member"]},
-      username: %Schema{type: :string},
-      display_name: %Schema{type: :string},
-      profile_url: %Schema{type: :string, description: "Empty when unset"},
-      is_online: %Schema{type: :boolean},
-      last_seen_at: %Schema{type: :string, format: "date-time"},
-      inserted_at: %Schema{type: :string, format: :"date-time"}
-    }
-  }
-
-  @join_request_schema %Schema{
-    type: :object,
-    properties: %{
-      id: %Schema{type: :string, format: :uuid, description: "Join request ID"},
-      user_id: %Schema{type: :string, format: :uuid},
-      group_id: %Schema{type: :string, format: :uuid},
-      status: %Schema{type: :string, enum: ["pending", "accepted", "rejected"]},
-      username: %Schema{type: :string},
-      display_name: %Schema{type: :string},
-      inserted_at: %Schema{type: :string, format: :"date-time"}
-    }
-  }
-
-  @invitation_schema %Schema{
-    type: :object,
-    properties: %{
-      id: %Schema{type: :string, format: :uuid, description: "Invite ID"},
-      group_id: %Schema{type: :string, format: :uuid},
-      group_name: %Schema{type: :string},
-      sender_id: %Schema{type: :string, format: :uuid},
-      sender_name: %Schema{type: :string},
-      recipient_id: %Schema{type: :string, format: :uuid},
-      recipient_name: %Schema{type: :string},
-      status: %Schema{type: :string, description: "pending | accepted | declined | cancelled"},
-      inserted_at: %Schema{type: :string, format: :"date-time"}
-    }
-  }
 
   # ---------------------------------------------------------------------------
   # Operations
@@ -164,17 +71,13 @@ defmodule GamendWeb.Api.V1.GroupController do
       page_size: [in: :query, schema: %Schema{type: :integer}, description: "Page size"]
     ],
     responses: [
-      ok:
-        {"List of groups", "application/json",
-         %Schema{
-           type: :object,
-           properties: %{data: %Schema{type: :array, items: @group_schema}, meta: @meta_schema}
-         }}
+      ok: {"List of groups", "application/json", GroupPage}
     ]
   )
 
   operation(:show,
     operation_id: "get_group",
+    security: [%{}, %{"authorization" => []}],
     summary: "Get group details",
     description: "Get a single group by ID including member count.",
     parameters: [
@@ -186,8 +89,8 @@ defmodule GamendWeb.Api.V1.GroupController do
       ]
     ],
     responses: [
-      ok: {"Group details", "application/json", @group_schema},
-      not_found: {"Group not found", "application/json", @error_schema}
+      ok: {"Group details", "application/json", Group},
+      not_found: Schemas.error("Group not found")
     ]
   )
 
@@ -223,9 +126,9 @@ defmodule GamendWeb.Api.V1.GroupController do
       }
     },
     responses: [
-      created: {"Group created", "application/json", @group_schema},
-      conflict: {"Title taken or validation error", "application/json", @error_schema},
-      unauthorized: {"Not authenticated", "application/json", @error_schema}
+      created: {"Group created", "application/json", Group},
+      conflict: Schemas.error("Title taken or validation error"),
+      unauthorized: Schemas.error("Not authenticated")
     ]
   )
 
@@ -263,10 +166,10 @@ defmodule GamendWeb.Api.V1.GroupController do
       }
     },
     responses: [
-      ok: {"Group updated", "application/json", @group_schema},
-      forbidden: {"Not an admin", "application/json", @error_schema},
-      unprocessable_entity: {"Validation error", "application/json", @error_schema},
-      unauthorized: {"Not authenticated", "application/json", @error_schema}
+      ok: {"Group updated", "application/json", Group},
+      forbidden: Schemas.error("Not an admin"),
+      unprocessable_entity: Schemas.error("Validation error"),
+      unauthorized: Schemas.error("Not authenticated")
     ]
   )
 
@@ -287,13 +190,11 @@ defmodule GamendWeb.Api.V1.GroupController do
       ]
     ],
     responses: [
-      ok: {"Joined successfully (public group)", "application/json", @member_schema},
-      created: {"Join request created (private group)", "application/json", @join_request_schema},
-      forbidden:
-        {"Cannot join (full, hidden, already member, already requested)", "application/json",
-         @error_schema},
-      not_found: {"Group not found", "application/json", @error_schema},
-      unauthorized: {"Not authenticated", "application/json", @error_schema}
+      ok: {"Joined successfully (public group)", "application/json", GroupMember},
+      created: {"Join request created (private group)", "application/json", GroupJoinRequest},
+      forbidden: Schemas.error("Cannot join (full, hidden, already member, already requested)"),
+      not_found: Schemas.error("Group not found"),
+      unauthorized: Schemas.error("Not authenticated")
     ]
   )
 
@@ -312,8 +213,8 @@ defmodule GamendWeb.Api.V1.GroupController do
     ],
     responses: [
       ok: {"Left successfully", "application/json", %Schema{type: :object}},
-      bad_request: {"Not a member", "application/json", @error_schema},
-      unauthorized: {"Not authenticated", "application/json", @error_schema}
+      bad_request: Schemas.error("Not a member"),
+      unauthorized: Schemas.error("Not authenticated")
     ]
   )
 
@@ -344,13 +245,14 @@ defmodule GamendWeb.Api.V1.GroupController do
     },
     responses: [
       ok: {"User kicked", "application/json", %Schema{type: :object}},
-      forbidden: {"Not admin or cannot kick", "application/json", @error_schema},
-      unauthorized: {"Not authenticated", "application/json", @error_schema}
+      forbidden: Schemas.error("Not admin or cannot kick"),
+      unauthorized: Schemas.error("Not authenticated")
     ]
   )
 
   operation(:members,
     operation_id: "list_group_members",
+    security: [%{}, %{"authorization" => []}],
     summary: "List group members",
     description: "Get paginated members of a group with their roles.",
     parameters: [
@@ -368,16 +270,8 @@ defmodule GamendWeb.Api.V1.GroupController do
       ]
     ],
     responses: [
-      ok:
-        {"Members list", "application/json",
-         %Schema{
-           type: :object,
-           properties: %{
-             data: %Schema{type: :array, items: @member_schema},
-             meta: @meta_schema
-           }
-         }},
-      not_found: {"Group not found", "application/json", @error_schema}
+      ok: {"Members list", "application/json", GroupMemberPage},
+      not_found: Schemas.error("Group not found")
     ]
   )
 
@@ -406,9 +300,9 @@ defmodule GamendWeb.Api.V1.GroupController do
       }
     },
     responses: [
-      ok: {"Member promoted", "application/json", @member_schema},
-      forbidden: {"Not admin", "application/json", @error_schema},
-      unauthorized: {"Not authenticated", "application/json", @error_schema}
+      ok: {"Member promoted", "application/json", GroupMember},
+      forbidden: Schemas.error("Not admin"),
+      unauthorized: Schemas.error("Not authenticated")
     ]
   )
 
@@ -437,9 +331,9 @@ defmodule GamendWeb.Api.V1.GroupController do
       }
     },
     responses: [
-      ok: {"Member demoted", "application/json", @member_schema},
-      forbidden: {"Not admin", "application/json", @error_schema},
-      unauthorized: {"Not authenticated", "application/json", @error_schema}
+      ok: {"Member demoted", "application/json", GroupMember},
+      forbidden: Schemas.error("Not admin"),
+      unauthorized: Schemas.error("Not authenticated")
     ]
   )
 
@@ -459,17 +353,9 @@ defmodule GamendWeb.Api.V1.GroupController do
       page_size: [in: :query, schema: %Schema{type: :integer}, description: "Page size"]
     ],
     responses: [
-      ok:
-        {"Join requests", "application/json",
-         %Schema{
-           type: :object,
-           properties: %{
-             data: %Schema{type: :array, items: @join_request_schema},
-             meta: @meta_schema
-           }
-         }},
-      forbidden: {"Not admin", "application/json", @error_schema},
-      unauthorized: {"Not authenticated", "application/json", @error_schema}
+      ok: {"Join requests", "application/json", GroupJoinRequestPage},
+      forbidden: Schemas.error("Not admin"),
+      unauthorized: Schemas.error("Not authenticated")
     ]
   )
 
@@ -493,10 +379,10 @@ defmodule GamendWeb.Api.V1.GroupController do
       ]
     ],
     responses: [
-      ok: {"Request approved", "application/json", @member_schema},
-      forbidden: {"Not admin or group full", "application/json", @error_schema},
-      not_found: {"Request not found", "application/json", @error_schema},
-      unauthorized: {"Not authenticated", "application/json", @error_schema}
+      ok: {"Request approved", "application/json", GroupMember},
+      forbidden: Schemas.error("Not admin or group full"),
+      not_found: Schemas.error("Request not found"),
+      unauthorized: Schemas.error("Not authenticated")
     ]
   )
 
@@ -520,10 +406,10 @@ defmodule GamendWeb.Api.V1.GroupController do
       ]
     ],
     responses: [
-      ok: {"Request rejected", "application/json", @join_request_schema},
-      forbidden: {"Not admin", "application/json", @error_schema},
-      not_found: {"Request not found", "application/json", @error_schema},
-      unauthorized: {"Not authenticated", "application/json", @error_schema}
+      ok: {"Request rejected", "application/json", GroupJoinRequest},
+      forbidden: Schemas.error("Not admin"),
+      not_found: Schemas.error("Request not found"),
+      unauthorized: Schemas.error("Not authenticated")
     ]
   )
 
@@ -547,10 +433,10 @@ defmodule GamendWeb.Api.V1.GroupController do
       ]
     ],
     responses: [
-      ok: {"Request cancelled", "application/json", @join_request_schema},
-      forbidden: {"Not owner or not pending", "application/json", @error_schema},
-      not_found: {"Request not found", "application/json", @error_schema},
-      unauthorized: {"Not authenticated", "application/json", @error_schema}
+      ok: {"Request cancelled", "application/json", GroupJoinRequest},
+      forbidden: Schemas.error("Not owner or not pending"),
+      not_found: Schemas.error("Request not found"),
+      unauthorized: Schemas.error("Not authenticated")
     ]
   )
 
@@ -585,20 +471,11 @@ defmodule GamendWeb.Api.V1.GroupController do
     },
     responses: [
       ok:
-        {"Invitation sent or join request auto-approved", "application/json",
-         %Schema{
-           type: :object,
-           properties: %{
-             status: %Schema{
-               type: :string,
-               description:
-                 "\"invited\" if a new invite was created, \"request_approved\" if a pending join request was auto-approved"
-             }
-           }
-         }},
-      forbidden: {"Not admin or target already member", "application/json", @error_schema},
-      not_found: {"Group not found", "application/json", @error_schema},
-      unauthorized: {"Not authenticated", "application/json", @error_schema}
+        {"`invited` when an invite was created, `request_approved` when a pending join request was approved instead",
+         "application/json", StatusResponse},
+      forbidden: Schemas.error("Not admin or target already member"),
+      not_found: Schemas.error("Group not found"),
+      unauthorized: Schemas.error("Not authenticated")
     ]
   )
 
@@ -617,11 +494,10 @@ defmodule GamendWeb.Api.V1.GroupController do
       ]
     ],
     responses: [
-      ok: {"Joined successfully", "application/json", @member_schema},
-      forbidden:
-        {"Cannot join (full, already member, no invite)", "application/json", @error_schema},
-      not_found: {"Invite not found", "application/json", @error_schema},
-      unauthorized: {"Not authenticated", "application/json", @error_schema}
+      ok: {"Joined successfully", "application/json", GroupMember},
+      forbidden: Schemas.error("Cannot join (full, already member, no invite)"),
+      not_found: Schemas.error("Invite not found"),
+      unauthorized: Schemas.error("Not authenticated")
     ]
   )
 
@@ -640,14 +516,9 @@ defmodule GamendWeb.Api.V1.GroupController do
       ]
     ],
     responses: [
-      ok:
-        {"Invite declined", "application/json",
-         %Schema{
-           type: :object,
-           properties: %{status: %Schema{type: :string}}
-         }},
-      not_found: {"Invite not found", "application/json", @error_schema},
-      unauthorized: {"Not authenticated", "application/json", @error_schema}
+      ok: {"Invite declined", "application/json", StatusResponse},
+      not_found: Schemas.error("Invite not found"),
+      unauthorized: Schemas.error("Not authenticated")
     ]
   )
 
@@ -666,16 +537,8 @@ defmodule GamendWeb.Api.V1.GroupController do
       ]
     ],
     responses: [
-      ok:
-        {"Invitations list", "application/json",
-         %Schema{
-           type: :object,
-           properties: %{
-             data: %Schema{type: :array, items: @invitation_schema},
-             meta: @meta_schema
-           }
-         }},
-      unauthorized: {"Not authenticated", "application/json", @error_schema}
+      ok: {"Invitations list", "application/json", GroupInvitePage},
+      unauthorized: Schemas.error("Not authenticated")
     ]
   )
 
@@ -693,16 +556,8 @@ defmodule GamendWeb.Api.V1.GroupController do
       ]
     ],
     responses: [
-      ok:
-        {"My groups", "application/json",
-         %Schema{
-           type: :object,
-           properties: %{
-             data: %Schema{type: :array, items: @group_schema},
-             meta: @meta_schema
-           }
-         }},
-      unauthorized: {"Not authenticated", "application/json", @error_schema}
+      ok: {"My groups", "application/json", GroupPage},
+      unauthorized: Schemas.error("Not authenticated")
     ]
   )
 
@@ -721,32 +576,8 @@ defmodule GamendWeb.Api.V1.GroupController do
       ]
     ],
     responses: [
-      ok:
-        {"Sent invitations list", "application/json",
-         %Schema{
-           type: :object,
-           properties: %{
-             data: %Schema{
-               type: :array,
-               items: %Schema{
-                 type: :object,
-                 properties: %{
-                   id: %Schema{type: :string, format: :uuid},
-                   group_id: %Schema{type: :string, format: :uuid},
-                   group_name: %Schema{type: :string},
-                   sender_id: %Schema{type: :string, format: :uuid},
-                   sender_name: %Schema{type: :string},
-                   recipient_id: %Schema{type: :string, format: :uuid},
-                   recipient_name: %Schema{type: :string},
-                   status: %Schema{type: :string},
-                   inserted_at: %Schema{type: :string, format: :"date-time"}
-                 }
-               }
-             },
-             meta: @meta_schema
-           }
-         }},
-      unauthorized: {"Not authenticated", "application/json", @error_schema}
+      ok: {"Sent invitations list", "application/json", GroupInvitePage},
+      unauthorized: Schemas.error("Not authenticated")
     ]
   )
 
@@ -764,15 +595,10 @@ defmodule GamendWeb.Api.V1.GroupController do
       ]
     ],
     responses: [
-      ok:
-        {"Invitation cancelled", "application/json",
-         %Schema{
-           type: :object,
-           properties: %{status: %Schema{type: :string}}
-         }},
-      forbidden: {"Not allowed", "application/json", @error_schema},
-      not_found: {"Invitation not found", "application/json", @error_schema},
-      unauthorized: {"Not authenticated", "application/json", @error_schema}
+      ok: {"Invitation cancelled", "application/json", StatusResponse},
+      forbidden: Schemas.error("Not allowed"),
+      not_found: Schemas.error("Invitation not found"),
+      unauthorized: Schemas.error("Not authenticated")
     ]
   )
 
@@ -925,11 +751,11 @@ defmodule GamendWeb.Api.V1.GroupController do
       }
     },
     responses: [
-      ok: {"Upload ticket", "application/json", %Schema{type: :object}},
-      bad_request: {"Unsupported content type", "application/json", @error_schema},
-      forbidden: {"Not a group admin", "application/json", @error_schema},
-      unauthorized: {"Not authenticated", "application/json", @error_schema},
-      not_found: {"Group not found", "application/json", @error_schema}
+      ok: {"Upload ticket", "application/json", UploadTicket},
+      bad_request: Schemas.error("Unsupported content type"),
+      forbidden: Schemas.error("Not a group admin"),
+      unauthorized: Schemas.error("Not authenticated"),
+      not_found: Schemas.error("Group not found")
     ]
   )
 
@@ -960,11 +786,11 @@ defmodule GamendWeb.Api.V1.GroupController do
       %Schema{type: :object, properties: %{key: %Schema{type: :string}}, required: [:key]}
     },
     responses: [
-      ok: {"Group with the new icon", "application/json", @group_schema},
-      bad_request: {"Object not found", "application/json", @error_schema},
-      forbidden: {"Not a group admin or key not owned", "application/json", @error_schema},
-      unauthorized: {"Not authenticated", "application/json", @error_schema},
-      not_found: {"Group not found", "application/json", @error_schema}
+      ok: {"Group with the new icon", "application/json", Group},
+      bad_request: Schemas.error("Object not found"),
+      forbidden: Schemas.error("Not a group admin or key not owned"),
+      unauthorized: Schemas.error("Not authenticated"),
+      not_found: Schemas.error("Group not found")
     ]
   )
 

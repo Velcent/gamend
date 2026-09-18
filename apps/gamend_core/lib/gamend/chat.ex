@@ -283,15 +283,13 @@ defmodule Gamend.Chat do
   # party at a time (`users.lobby_id`, `users.party_id`), so those consolidate
   # by type and carry the id in metadata.
   defp send_chat_notifications(message) do
-    alias Gamend.Notifications
-
     case message.chat_type do
       "friend" ->
         # Consolidated: one notification per recipient for ALL friend DMs
         # Use recipient_id as sender_id so upsert groups all friend messages together
         recipient_id = message.chat_ref_id
 
-        Notifications.create_chat_notification(recipient_id, recipient_id, %{
+        notify_chat(recipient_id, %{
           "title" => "New messages from friends",
           "content" => "",
           "metadata" => %{"type" => "chat_friend", "chat_type" => "friend"}
@@ -310,7 +308,7 @@ defmodule Gamend.Chat do
         for member_id <- member_ids, member_id != message.sender_id do
           # Consolidated: one notification per recipient per group
           # Use recipient's own ID as sender_id so upsert groups all group messages together
-          Notifications.create_chat_notification(member_id, member_id, %{
+          notify_chat(member_id, %{
             "title" => "New messages in group #{group_name}",
             "content" => "",
             "metadata" => %{
@@ -326,7 +324,7 @@ defmodule Gamend.Chat do
 
         for user <- lobby_users, user.id != message.sender_id do
           # Consolidated: one notification per recipient per lobby
-          Notifications.create_chat_notification(user.id, user.id, %{
+          notify_chat(user.id, %{
             "title" => "New messages in your lobby",
             "content" => "",
             "metadata" => %{
@@ -350,12 +348,12 @@ defmodule Gamend.Chat do
   end
 
   defp send_party_chat_notifications(message) do
-    alias Gamend.{Notifications, Parties}
+    alias Gamend.Parties
 
     members = Parties.get_party_members(message.chat_ref_id)
 
     for member <- members, member.id != message.sender_id do
-      Notifications.create_chat_notification(member.id, member.id, %{
+      notify_chat(member.id, %{
         "title" => "New messages in your party",
         "content" => "",
         "metadata" => %{
@@ -369,6 +367,20 @@ defmodule Gamend.Chat do
     error ->
       Logger.warning("Party chat notification failed: #{inspect(error)}")
       :ok
+  end
+
+  # Runs in a background task, so a rejected write has no caller to return to.
+  # Log it: an unregistered `metadata["type"]` once dropped every chat
+  # notification without a trace.
+  defp notify_chat(recipient_id, attrs) do
+    case Gamend.Notifications.create_chat_notification(recipient_id, recipient_id, attrs) do
+      {:ok, _notification} ->
+        :ok
+
+      {:error, reason} ->
+        Logger.warning("chat notification not delivered to #{recipient_id}: #{inspect(reason)}")
+        :ok
+    end
   end
 
   # ---------------------------------------------------------------------------

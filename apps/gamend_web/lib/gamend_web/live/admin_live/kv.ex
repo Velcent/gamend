@@ -29,7 +29,13 @@ defmodule GamendWeb.AdminLive.KV do
                 <button
                   type="button"
                   phx-click="bulk_delete"
-                  data-confirm={"Delete #{MapSet.size(@selected_ids)} selected KV entries?"}
+                  data-confirm={
+                    ngettext(
+                      "Delete %{count} selected KV entry?",
+                      "Delete %{count} selected KV entries?",
+                      MapSet.size(@selected_ids)
+                    )
+                  }
                   class="btn btn-sm btn-outline btn-error"
                   disabled={MapSet.size(@selected_ids) == 0}
                 >
@@ -356,7 +362,11 @@ defmodule GamendWeb.AdminLive.KV do
     socket =
       cond do
         failed == 0 ->
-          put_flash(socket, :info, "Deleted #{deleted} entries")
+          put_flash(
+            socket,
+            :info,
+            ngettext("Deleted %{count} entry", "Deleted %{count} entries", deleted)
+          )
 
         deleted == 0 ->
           put_flash(socket, :error, "Failed to delete selected entries")
@@ -365,7 +375,12 @@ defmodule GamendWeb.AdminLive.KV do
           put_flash(
             socket,
             :error,
-            "Deleted #{deleted} entries; failed #{failed}"
+            ngettext(
+              "Deleted %{count} entry; %{failed} failed",
+              "Deleted %{count} entries; %{failed} failed",
+              deleted,
+              failed: failed
+            )
           )
       end
 
@@ -622,8 +637,8 @@ defmodule GamendWeb.AdminLive.KV do
     key = (Map.get(params, "key") || "") |> String.trim()
 
     with true <- key != "" || {:error, "Key is required"},
-         {:ok, user_id} <- parse_optional_id(Map.get(params, "user_id")),
-         {:ok, lobby_id} <- parse_optional_id(Map.get(params, "lobby_id")),
+         {:ok, user_id} <- parse_optional_id(Map.get(params, "user_id"), "User ID"),
+         {:ok, lobby_id} <- parse_optional_id(Map.get(params, "lobby_id"), "Lobby ID"),
          {:ok, value} <- decode_json_object(Map.get(params, "value_json"), "Value"),
          {:ok, metadata} <- decode_json_object(Map.get(params, "metadata_json"), "Metadata") do
       attrs = %{key: key, user_id: user_id, lobby_id: lobby_id, value: value, metadata: metadata}
@@ -648,9 +663,11 @@ defmodule GamendWeb.AdminLive.KV do
     end
   end
 
-  defp parse_optional_id(nil), do: {:ok, nil}
+  # `label` names the field: the error used to read "ID must be a valid UUID"
+  # with two ID fields on the form.
+  defp parse_optional_id(nil, _label), do: {:ok, nil}
 
-  defp parse_optional_id(raw) when is_binary(raw) do
+  defp parse_optional_id(raw, label) when is_binary(raw) do
     raw = String.trim(raw)
 
     if raw == "" do
@@ -658,7 +675,7 @@ defmodule GamendWeb.AdminLive.KV do
     else
       case Ecto.UUID.cast(raw) do
         {:ok, uuid} -> {:ok, uuid}
-        :error -> {:error, "ID must be a valid UUID"}
+        :error -> {:error, "#{label} must be a valid UUID"}
       end
     end
   end
@@ -685,8 +702,8 @@ defmodule GamendWeb.AdminLive.KV do
 
     global_only = parse_bool(Map.get(params, "global_only"))
 
-    with {:ok, user_id} <- parse_optional_id(Map.get(params, "user_id")),
-         {:ok, lobby_id} <- parse_optional_id(Map.get(params, "lobby_id")) do
+    with {:ok, user_id} <- parse_optional_id(Map.get(params, "user_id"), "User ID"),
+         {:ok, lobby_id} <- parse_optional_id(Map.get(params, "lobby_id"), "Lobby ID") do
       user_id = if(global_only, do: nil, else: user_id)
       lobby_id = if(global_only, do: nil, else: lobby_id)
 

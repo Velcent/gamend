@@ -76,7 +76,6 @@ defmodule GamendWeb.AdminLive.Quests do
                     <th>Rewards</th>
                     <th>Active</th>
                     <th>Funnel (act/comp/claim)</th>
-                    <th>i18n</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -219,7 +218,7 @@ defmodule GamendWeb.AdminLive.Quests do
                           phx-value-key={p.quest_key}
                           class="btn btn-xs btn-outline btn-success"
                         >
-                          Complete
+                          Force complete
                         </button>
                         <button
                           :if={p.status == "completed"}
@@ -359,7 +358,7 @@ defmodule GamendWeb.AdminLive.Quests do
               <.input
                 field={@form[:hidden]}
                 type="checkbox"
-                label="Hidden (only shown after completion)"
+                label="Hidden (listed as ??? until completed)"
               />
               <.input
                 field={@form[:auto_claim]}

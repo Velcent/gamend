@@ -224,11 +224,15 @@ defmodule GamendWeb.AdminLive.Push do
 
   @impl true
   def handle_event("send_push", %{"push" => params}, socket) do
-    user_id = Gamend.UUIDv7.cast_or_nil(params["user_id"])
+    raw_user_id = String.trim(params["user_id"] || "")
+    user_id = Gamend.UUIDv7.cast_or_nil(raw_user_id)
 
     cond do
-      is_nil(user_id) ->
+      raw_user_id == "" ->
         {:noreply, put_flash(socket, :error, "User ID is required")}
+
+      is_nil(user_id) ->
+        {:noreply, put_flash(socket, :error, "User ID must be a UUID")}
 
       not Push.user_has_live_tokens?(user_id) ->
         {:noreply, put_flash(socket, :error, "That user has no live devices")}

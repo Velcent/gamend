@@ -242,32 +242,34 @@ defmodule GamendWeb.ContentPages do
 
           <article class="markdown-content">{raw(@html)}</article>
 
+          <%!-- `Content.blog_neighbours/1` walks a newest-first list, so `prev`
+                is the NEWER post and `next` the older one. --%>
           <div class="grid gap-4 border-t border-base-300 pt-6 md:grid-cols-2">
             <div>
               <.link
-                :if={@next}
-                navigate={~p"/blog/#{@next.slug}"}
+                :if={@prev}
+                navigate={~p"/blog/#{@prev.slug}"}
                 class="group flex h-full flex-col rounded-2xl border border-base-300 bg-base-100/90 p-4 transition hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md"
               >
                 <span class="text-xs uppercase tracking-[0.2em] text-base-content/70">
                   {gettext("Newer")}
                 </span>
                 <span class="mt-2 text-lg font-semibold text-base-content/90 group-hover:text-primary">
-                  {@next.title}
+                  {@prev.title}
                 </span>
               </.link>
             </div>
             <div>
               <.link
-                :if={@prev}
-                navigate={~p"/blog/#{@prev.slug}"}
+                :if={@next}
+                navigate={~p"/blog/#{@next.slug}"}
                 class="group flex h-full flex-col rounded-2xl border border-base-300 bg-base-100/90 p-4 text-right transition hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md"
               >
                 <span class="text-xs uppercase tracking-[0.2em] text-base-content/70">
                   {gettext("Older")}
                 </span>
                 <span class="mt-2 text-lg font-semibold text-base-content/90 group-hover:text-primary">
-                  {@prev.title}
+                  {@next.title}
                 </span>
               </.link>
             </div>

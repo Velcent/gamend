@@ -20,8 +20,10 @@ touch and the invariants that are not visible from a type.
 These hold everywhere, so the tables below list only what is specific to them:
 
 - **Ids** are UUIDv7 strings — time-ordered, so they sort chronologically.
-- **Timestamps** are `utc_datetime` and always UTC. Every table has
-  `inserted_at` and `updated_at` unless noted.
+- **Timestamps** are always UTC. Every table has `inserted_at`; append-only
+  tables (`ledger_entries`, `inventory_ledger`, `users_tokens`,
+  `user_activity_days`, `tournament_brackets`, the lobby snapshot tables) have
+  no `updated_at`.
 - **`metadata`** is a free-form JSON map you own. Core never interprets it.
 - **Foreign keys** cascade on delete unless noted, so removing a user removes
   their rows.
@@ -33,7 +35,7 @@ These hold everywhere, so the tables below list only what is specific to them:
 | Column | Type | Notes |
 |---|---|---|
 | `email` | string | Unique; null for provider-only accounts |
-| `hashed_password` | string | bcrypt; null for OAuth-only accounts |
+| `hashed_password` | string | Argon2id (old bcrypt hashes still verify); null for OAuth-only accounts |
 | `username` | string | Unique lowercase handle, generated at registration |
 | `display_name` | string | Human-friendly, not unique |
 | `profile_url` | string | Avatar URL |
@@ -68,6 +70,7 @@ These hold everywhere, so the tables below list only what is specific to them:
 | `webrtc_topology` | string | `star` or `mesh`; nullable |
 | `webrtc_late_join` | boolean | Whether a non-member may connect to the room. Default `true` |
 | `webrtc_reconnect_timeout_ms` | integer | Grace period before a dropped peer is announced gone. Default 30 000 |
+| `webrtc_host_id` | FK users | Pinned star host; nullable. Also lets that user manage the lobby |
 | `metadata` | map | Searchable in lobby listings |
 
 Membership lives on `users.lobby_id`, not a join table, so a user is in at most
@@ -79,8 +82,8 @@ that wants a closed vocabulary rejects the move in `before_lobby_state_change`.
 
 The `webrtc_*` columns are the WebRTC signaling room: a room *is* a lobby, with
 no separate record. Like `state` they are server-owned: only
-`Gamend.Signaling.configure/2` writes them. The star host is always
-`host_id`. See the [WebRTC](/docs/webrtc) guide.
+`Gamend.Signaling.configure/2` writes them. The star host is
+`webrtc_host_id` when set, otherwise `host_id`. See the [WebRTC](/docs/webrtc) guide.
 
 ## parties
 
@@ -132,8 +135,9 @@ the two directions of joining, each with a `status`.
 | `lobby_id` | FK lobbies | Set for lobby-scoped keys; deleted with the lobby |
 | `value` | map | The stored JSON |
 
-Global entries leave both ids null. Writes are server-authoritative where a
-plugin declares a schema for the key.
+Global entries leave both ids null. Clients never write KV: they can only read
+(`GET /api/v1/kv/:key`, gated by the `before_kv_get` hook). Every write comes
+from server code or the admin API.
 
 ## quests
 
@@ -146,7 +150,7 @@ no separate achievements table.
 |---|---|---|
 | `key` | string | Unique slug, e.g. `daily_win_3` |
 | `title` `description` `icon_url` | string | Display |
-| `reset` | string | `never` / `daily` / `weekly` / `monthly` / `interval` |
+| `reset` | string | `never` / `daily` / `weekly` / `monthly` / `interval` / `repeat` (re-arms as soon as it is claimed) |
 | `reset_interval_days` | integer | With `reset: "interval"`; 14 = biweekly |
 | `category` | string | Free-form grouping, e.g. `achievement` |
 | `group_key` | string | Quests sharing it list as one entry; indexed, nullable |
@@ -194,7 +198,7 @@ are UTC.
 | `user_id` | FK users | Nullable — a record may belong to a label instead |
 | `label` | string | Team or arbitrary entrant name |
 | `score` | integer | Combined per the board's `operator` |
-| `rank` | integer | Materialised on write |
+| `rank` | integer | Virtual, not stored: computed when records are read |
 
 ## chat_messages and chat_read_cursors
 
@@ -202,8 +206,8 @@ are UTC.
 |---|---|---|
 | `sender_id` | FK users | |
 | `content` | string | 1-4096 chars |
-| `chat_type` | string | `lobby` / `group` / `friend` |
-| `chat_ref_id` | uuid | Lobby id, group id, or the other user's id |
+| `chat_type` | string | `lobby` / `group` / `party` / `friend` |
+| `chat_ref_id` | uuid | Lobby id, group id, party id, or the other user's id |
 
 | chat_read_cursors | Type | Notes |
 |---|---|---|
@@ -211,7 +215,7 @@ are UTC.
 | `chat_type` / `chat_ref_id` | | Which conversation |
 | `last_read_message_id` | FK chat_messages | Drives unread counts |
 
-Access is checked per type: lobby and group messages require membership, direct
+Access is checked per type: lobby, group and party messages require membership, direct
 messages require an accepted friendship and no block either way.
 
 ## chat_filter_words
@@ -280,7 +284,7 @@ deletes lapsed rows is hygiene only.
 
 `quest_completed` carries `{ quest_key, category, quest_title }`. Plugins
 declare their own types via `notification_types/0`; undeclared types are
-rejected at the push site.
+rejected at write time.
 
 ## wallets and inventory
 
@@ -317,4 +321,4 @@ ledger is the audit trail; the balance is a cache of it.
 | `analytics_daily_counts` | One row per `(day, key)` game-defined counter, incremented in place | Player analytics |
 
 Anything that grows without bound has a retention window; see the
-`RETENTION_*` variables in the Deployment guide.
+`GAMEND_RETENTION_*` variables in the [Data retention](/docs/data-retention) guide.

@@ -418,8 +418,7 @@ defmodule GamendWeb.Api.V1.LeaderboardController do
            }
          }},
       not_found: {"Leaderboard or user not found", "application/json", %Schema{type: :object}}
-    ],
-    security: [%{"bearer" => []}]
+    ]
   )
 
   def around(conn, %{"id" => id, "user_id" => user_id_str} = params) do
@@ -471,7 +470,7 @@ defmodule GamendWeb.Api.V1.LeaderboardController do
          }},
       not_found: {"Leaderboard or record not found", "application/json", %Schema{type: :object}}
     ],
-    security: [%{"bearer" => []}]
+    security: [%{"authorization" => []}]
   )
 
   def me(conn, %{"id" => id}) do

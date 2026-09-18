@@ -5,7 +5,8 @@ defmodule GamendWeb.Plugs.GeoCountry do
   **Resolution order** (first match wins):
 
   1. **Geolix MMDB lookup** — if a GeoLite2-Country (or compatible) database
-     is configured via `GEOIP_DB_PATH`, the client IP is resolved locally.
+     is configured via `GAMEND_CONTENT_GEOIP_DB_PATH`, the client IP is
+     resolved locally.
      This is the most accurate and works without any proxy.
 
   2. **Cloudflare `CF-IPCountry` header** — fallback when behind Cloudflare.
@@ -29,7 +30,7 @@ defmodule GamendWeb.Plugs.GeoCountry do
 
     or set a custom path in your environment:
 
-      GEOIP_DB_PATH=/path/to/GeoLite2-Country.mmdb
+      GAMEND_CONTENT_GEOIP_DB_PATH=/path/to/GeoLite2-Country.mmdb
 
   Download the free database from:
   https://dev.maxmind.com/geoip/geolite2-free-geolocation-data

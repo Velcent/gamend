@@ -197,9 +197,128 @@ defmodule GamendWeb.LiveHelpers do
   def put_failure(socket, message), do: Phoenix.LiveView.put_flash(socket, :error, message)
 
   @doc """
-  Format a common `Failed: reason` message for LiveViews.
+  The flash for a failed action: `reason`'s readable text when
+  `error_message/1` knows it, else `prefix` alone.
+
+  This used to append `inspect(reason)`, which showed players `:group_full` or
+  a raw Ecto error list. A reason with no player-facing text now shows only the
+  prefix (usually "Failed").
   """
-  def failure_message(prefix, reason), do: prefix <> ": " <> inspect(reason)
+  @spec failure_message(String.t(), term()) :: String.t()
+  def failure_message(prefix, reason), do: error_message(reason) || prefix
+
+  @doc """
+  Readable text for an `{:error, reason}` a player can act on, or `nil` when the
+  reason is internal and the caller should fall back to a generic message.
+
+  A changeset gives its first error, translated like a form error. A hook
+  rejection that carries a string is the game's own words and is shown as is.
+  """
+  @spec error_message(term()) :: String.t() | nil
+  def error_message(%Ecto.Changeset{errors: [{_field, error} | _]}),
+    do: GamendWeb.CoreComponents.translate_error(error)
+
+  def error_message({:hook_rejected, reason}) when is_binary(reason) and reason != "",
+    do: reason
+
+  def error_message({:hook_rejected, _reason}), do: gettext("Not allowed")
+
+  def error_message(reason) when reason in [:not_authorized, :forbidden, :disallowed],
+    do: gettext("Not allowed")
+
+  def error_message(reason) when reason in [:not_found, :party_not_found],
+    do: gettext("Not found")
+
+  def error_message(:user_not_found), do: gettext("Player not found.")
+
+  def error_message(reason)
+      when reason in [
+             :cannot_friend_self,
+             :cannot_block_self,
+             :cannot_kick_self,
+             :cannot_promote_self,
+             :cannot_demote_self
+           ],
+      do: gettext("You cannot do that to yourself.")
+
+  def error_message(:blocked), do: gettext("One of you has blocked the other.")
+  def error_message(:already_friends), do: gettext("You are already friends.")
+  def error_message(:already_requested), do: gettext("You already sent a request.")
+  def error_message(:too_many_friends), do: gettext("Your friend list is full.")
+
+  def error_message(reason)
+      when reason in [:too_many_pending_requests, :too_many_pending_invites],
+      do: gettext("Too many pending requests. Wait for some to be answered.")
+
+  def error_message(:not_connected),
+    do: gettext("You can only invite friends or players who share a group with you.")
+
+  def error_message(:not_admin), do: gettext("Only a group admin can do that.")
+
+  def error_message(reason) when reason in [:not_member, :not_in_group],
+    do: gettext("You are not a member of this group.")
+
+  def error_message(:already_member), do: gettext("Already a member.")
+  def error_message(:already_admin), do: gettext("Already an admin.")
+  def error_message(:last_admin), do: gettext("Make someone else an admin first.")
+  def error_message(:too_many_groups_created), do: gettext("You have created too many groups.")
+
+  def error_message(reason) when reason in [:max_members_too_low, :too_small],
+    do: gettext("That is fewer than the current number of members.")
+
+  def error_message(reason) when reason in [:full, :party_full, :tournament_full],
+    do: gettext("It is full.")
+
+  def error_message(:not_pending), do: gettext("This was already answered.")
+  def error_message(:no_invite), do: gettext("The invite is no longer valid.")
+  def error_message(:already_in_lobby), do: gettext("You are already in a lobby.")
+  def error_message(:not_in_lobby), do: gettext("You are not in this lobby.")
+  def error_message(:not_host), do: gettext("Only the host can do that.")
+  def error_message(:locked), do: gettext("It is locked.")
+  def error_message(:password_required), do: gettext("A password is required.")
+  def error_message(:invalid_password), do: gettext("Wrong password.")
+  def error_message(:already_in_party), do: gettext("You are already in a party.")
+  def error_message(:not_in_party), do: gettext("You are not in a party.")
+  def error_message(:not_leader), do: gettext("Only the party leader can do that.")
+  def error_message(:already_invited), do: gettext("Already invited.")
+  def error_message(:muted), do: gettext("You are muted.")
+  def error_message(:slowdown), do: gettext("You are sending messages too fast.")
+  def error_message(:blocked_content), do: gettext("That message is not allowed.")
+  def error_message(:not_friends), do: gettext("You can only message friends.")
+  def error_message(:already_registered), do: gettext("You are already registered.")
+  def error_message(:not_registered), do: gettext("You are not registered.")
+  def error_message(:registration_closed), do: gettext("Registration is closed.")
+  def error_message(_reason), do: nil
+
+  # ── Payment labels ──────────────────────────────────────────────────────
+  #
+  # Payments store lowercase codes ("stripe", "requires_action",
+  # "subscription"). The store and the Payments tab showed them raw.
+
+  @doc "The store a purchase went through, as a brand name."
+  def payment_provider_label("stripe"), do: "Stripe"
+  def payment_provider_label("apple"), do: "Apple"
+  def payment_provider_label("google"), do: "Google Play"
+  def payment_provider_label("steam"), do: "Steam"
+  def payment_provider_label(provider), do: provider
+
+  @doc "A product kind (`Gamend.Payments.Product`) in words."
+  def payment_kind_label("entitlement"), do: gettext("One-time")
+  def payment_kind_label("consumable"), do: gettext("Consumable")
+  def payment_kind_label("subscription"), do: gettext("Subscription")
+  def payment_kind_label(kind), do: kind
+
+  @doc "A purchase or entitlement status in words."
+  def payment_status_label("pending"), do: gettext("Pending")
+  def payment_status_label("requires_action"), do: gettext("Awaiting payment")
+  def payment_status_label("completed"), do: gettext("Completed")
+  def payment_status_label("failed"), do: gettext("Failed")
+  def payment_status_label("cancelled"), do: gettext("Cancelled")
+  def payment_status_label("refunded"), do: gettext("Refunded")
+  def payment_status_label("revoked"), do: gettext("Revoked")
+  def payment_status_label("active"), do: gettext("Active")
+  def payment_status_label("expired"), do: gettext("Expired")
+  def payment_status_label(status), do: status
 
   @doc """
   How a LiveView names a user it may only hold as a loaded struct, a serialized

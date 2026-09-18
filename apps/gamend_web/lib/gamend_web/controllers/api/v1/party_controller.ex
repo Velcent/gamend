@@ -7,62 +7,12 @@ defmodule GamendWeb.Api.V1.PartyController do
   alias Gamend.Accounts.Scope
   alias Gamend.Accounts.User
   alias Gamend.Parties
+  alias GamendWeb.Schemas
+  alias GamendWeb.Schemas.{Lobby, Party, PartyInvite, PartyStatsResponse}
   alias GamendWeb.Serializers
   alias OpenApiSpex.Schema
 
   tags(["Parties"])
-
-  @party_schema %Schema{
-    type: :object,
-    properties: %{
-      id: %Schema{type: :string, format: :uuid, description: "Party ID"},
-      leader_id: %Schema{type: :string, format: :uuid, description: "User ID of the party leader"},
-      leader_name: %Schema{type: :string, description: "Display name of the party leader"},
-      max_size: %Schema{type: :integer, description: "Maximum party members allowed"},
-      metadata: %Schema{type: :object, description: "Arbitrary metadata"},
-      members: %Schema{
-        type: :array,
-        description: "Current party members",
-        items: %Schema{
-          type: :object,
-          properties: %{
-            id: %Schema{type: :string, format: :uuid},
-            username: %Schema{type: :string},
-            display_name: %Schema{type: :string},
-            profile_url: %Schema{type: :string},
-            metadata: %Schema{
-              type: :object,
-              description: "User metadata (accessories, hat, color, etc.)"
-            },
-            is_online: %Schema{type: :boolean},
-            last_seen_at: %Schema{type: :string, format: "date-time"}
-          }
-        }
-      }
-    },
-    example: %{
-      id: "0198c0de-0001-7000-8000-000000000001",
-      leader_id: "0198c0de-0002-7000-8000-000000000002",
-      leader_name: "Player1",
-      max_size: 4,
-      metadata: %{},
-      members: [
-        %{
-          id: "0198c0de-0002-7000-8000-000000000002",
-          username: "player1-0001",
-          display_name: "Player1",
-          profile_url: "",
-          metadata: %{hat: "red", color: "#FF0000"},
-          is_online: true,
-          last_seen_at: "2025-01-15T10:30:00Z"
-        }
-      ]
-    }
-  }
-
-  # ---------------------------------------------------------------------------
-  # OpenApiSpex operation definitions
-  # ---------------------------------------------------------------------------
 
   operation(:show,
     operation_id: "show_party",
@@ -70,13 +20,9 @@ defmodule GamendWeb.Api.V1.PartyController do
     description: "Get the party the authenticated user is currently in, including members.",
     security: [%{"authorization" => []}],
     responses: [
-      ok: {"Party details", "application/json", @party_schema},
-      not_found:
-        {"Not in a party", "application/json",
-         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}},
-      unauthorized:
-        {"Not authenticated", "application/json",
-         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}}
+      ok: {"Party details", "application/json", Party},
+      not_found: Schemas.error("Not in a party"),
+      unauthorized: Schemas.error("Not authenticated")
     ]
   )
 
@@ -103,13 +49,9 @@ defmodule GamendWeb.Api.V1.PartyController do
       }
     },
     responses: [
-      created: {"Party created", "application/json", @party_schema},
-      conflict:
-        {"Already in a party", "application/json",
-         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}},
-      unauthorized:
-        {"Not authenticated", "application/json",
-         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}}
+      created: {"Party created", "application/json", Party},
+      conflict: Schemas.error("Already in a party"),
+      unauthorized: Schemas.error("Not authenticated")
     ]
   )
 
@@ -121,12 +63,8 @@ defmodule GamendWeb.Api.V1.PartyController do
     security: [%{"authorization" => []}],
     responses: [
       ok: {"Success", "application/json", %Schema{type: :object}},
-      bad_request:
-        {"Not in a party", "application/json",
-         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}},
-      unauthorized:
-        {"Not authenticated", "application/json",
-         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}}
+      bad_request: Schemas.error("Not in a party"),
+      unauthorized: Schemas.error("Not authenticated")
     ]
   )
 
@@ -139,15 +77,9 @@ defmodule GamendWeb.Api.V1.PartyController do
     security: [%{"authorization" => []}],
     responses: [
       ok: {"Success", "application/json", %Schema{type: :object}},
-      bad_request:
-        {"Not in a party", "application/json",
-         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}},
-      forbidden:
-        {"Not the party leader", "application/json",
-         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}},
-      unauthorized:
-        {"Not authenticated", "application/json",
-         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}}
+      bad_request: Schemas.error("Not in a party"),
+      forbidden: Schemas.error("Not the party leader"),
+      unauthorized: Schemas.error("Not authenticated")
     ]
   )
 
@@ -177,15 +109,9 @@ defmodule GamendWeb.Api.V1.PartyController do
     },
     responses: [
       ok: {"Invite sent", "application/json", %Schema{type: :object}},
-      forbidden:
-        {"Not the leader or target not connected", "application/json",
-         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}},
-      conflict:
-        {"Target already in a party or already invited", "application/json",
-         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}},
-      unauthorized:
-        {"Not authenticated", "application/json",
-         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}}
+      forbidden: Schemas.error("Not the leader or target not connected"),
+      conflict: Schemas.error("Target already in a party or already invited"),
+      unauthorized: Schemas.error("Not authenticated")
     ]
   )
 
@@ -212,12 +138,8 @@ defmodule GamendWeb.Api.V1.PartyController do
     },
     responses: [
       ok: {"Invite cancelled", "application/json", %Schema{type: :object}},
-      forbidden:
-        {"Not the leader", "application/json",
-         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}},
-      unauthorized:
-        {"Not authenticated", "application/json",
-         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}}
+      forbidden: Schemas.error("Not the leader"),
+      unauthorized: Schemas.error("Not authenticated")
     ]
   )
 
@@ -241,19 +163,11 @@ defmodule GamendWeb.Api.V1.PartyController do
       }
     },
     responses: [
-      ok: {"Joined party", "application/json", @party_schema},
-      not_found:
-        {"No invite found or party not found", "application/json",
-         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}},
-      conflict:
-        {"Already in a party", "application/json",
-         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}},
-      forbidden:
-        {"Party full", "application/json",
-         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}},
-      unauthorized:
-        {"Not authenticated", "application/json",
-         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}}
+      ok: {"Joined party", "application/json", Party},
+      not_found: Schemas.error("No invite found or party not found"),
+      conflict: Schemas.error("Already in a party"),
+      forbidden: Schemas.error("Party full"),
+      unauthorized: Schemas.error("Not authenticated")
     ]
   )
 
@@ -280,9 +194,7 @@ defmodule GamendWeb.Api.V1.PartyController do
     },
     responses: [
       ok: {"Invite declined", "application/json", %Schema{type: :object}},
-      unauthorized:
-        {"Not authenticated", "application/json",
-         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}}
+      unauthorized: Schemas.error("Not authenticated")
     ]
   )
 
@@ -292,30 +204,8 @@ defmodule GamendWeb.Api.V1.PartyController do
     description: "Returns all pending PartyInvite records addressed to the authenticated user.",
     security: [%{"authorization" => []}],
     responses: [
-      ok:
-        {"List of invitations", "application/json",
-         %Schema{
-           type: :array,
-           items: %Schema{
-             type: :object,
-             properties: %{
-               id: %Schema{type: :string, format: :uuid, description: "Invite ID"},
-               party_id: %Schema{type: :string, format: :uuid},
-               sender_id: %Schema{type: :string, format: :uuid},
-               sender_name: %Schema{type: :string},
-               recipient_id: %Schema{type: :string, format: :uuid},
-               recipient_name: %Schema{type: :string},
-               status: %Schema{
-                 type: :string,
-                 description: "pending | accepted | declined | cancelled"
-               },
-               inserted_at: %Schema{type: :string, format: "date-time"}
-             }
-           }
-         }},
-      unauthorized:
-        {"Not authenticated", "application/json",
-         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}}
+      ok: {"List of invitations", "application/json", %Schema{type: :array, items: PartyInvite}},
+      unauthorized: Schemas.error("Not authenticated")
     ]
   )
 
@@ -328,28 +218,8 @@ defmodule GamendWeb.Api.V1.PartyController do
     responses: [
       ok:
         {"List of sent invitations", "application/json",
-         %Schema{
-           type: :array,
-           items: %Schema{
-             type: :object,
-             properties: %{
-               id: %Schema{type: :string, format: :uuid, description: "Invite ID"},
-               party_id: %Schema{type: :string, format: :uuid},
-               sender_id: %Schema{type: :string, format: :uuid},
-               sender_name: %Schema{type: :string},
-               recipient_id: %Schema{type: :string, format: :uuid},
-               recipient_name: %Schema{type: :string},
-               status: %Schema{
-                 type: :string,
-                 description: "pending | accepted | declined | cancelled"
-               },
-               inserted_at: %Schema{type: :string, format: "date-time"}
-             }
-           }
-         }},
-      unauthorized:
-        {"Not authenticated", "application/json",
-         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}}
+         %Schema{type: :array, items: PartyInvite}},
+      unauthorized: Schemas.error("Not authenticated")
     ]
   )
 
@@ -376,12 +246,8 @@ defmodule GamendWeb.Api.V1.PartyController do
     },
     responses: [
       ok: {"User kicked", "application/json", %Schema{type: :object}},
-      forbidden:
-        {"Not the leader", "application/json",
-         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}},
-      unauthorized:
-        {"Not authenticated", "application/json",
-         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}}
+      forbidden: Schemas.error("Not the leader"),
+      unauthorized: Schemas.error("Not authenticated")
     ]
   )
 
@@ -404,13 +270,9 @@ defmodule GamendWeb.Api.V1.PartyController do
       }
     },
     responses: [
-      ok: {"Party updated", "application/json", @party_schema},
-      forbidden:
-        {"Not the leader", "application/json",
-         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}},
-      unauthorized:
-        {"Not authenticated", "application/json",
-         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}}
+      ok: {"Party updated", "application/json", Party},
+      forbidden: Schemas.error("Not the leader"),
+      unauthorized: Schemas.error("Not authenticated")
     ]
   )
 
@@ -437,14 +299,9 @@ defmodule GamendWeb.Api.V1.PartyController do
       }
     },
     responses: [
-      created:
-        {"Lobby created with all party members", "application/json", %Schema{type: :object}},
-      forbidden:
-        {"Not the leader or lobby too small", "application/json",
-         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}},
-      unauthorized:
-        {"Not authenticated", "application/json",
-         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}}
+      created: {"Lobby created with all party members", "application/json", Lobby},
+      forbidden: Schemas.error("Not the leader or lobby too small"),
+      unauthorized: Schemas.error("Not authenticated")
     ]
   )
 
@@ -474,13 +331,9 @@ defmodule GamendWeb.Api.V1.PartyController do
       }
     },
     responses: [
-      ok: {"Lobby joined with all party members", "application/json", %Schema{type: :object}},
-      forbidden:
-        {"Cannot join (not enough space, locked, wrong password, etc)", "application/json",
-         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}},
-      unauthorized:
-        {"Not authenticated", "application/json",
-         %Schema{type: :object, properties: %{error: %Schema{type: :string}}}}
+      ok: {"Lobby joined with all party members", "application/json", Lobby},
+      forbidden: Schemas.error("Cannot join (not enough space, locked, wrong password, etc)"),
+      unauthorized: Schemas.error("Not authenticated")
     ]
   )
 
@@ -494,11 +347,7 @@ defmodule GamendWeb.Api.V1.PartyController do
     description:
       "Aggregate party counts. Public, and cached — treat the numbers as up to a minute old.",
     responses: [
-      ok:
-        GamendWeb.ApiStatsSchema.response("Party stats", [
-          :parties_active,
-          :players_in_parties
-        ])
+      ok: {"Party stats", "application/json", PartyStatsResponse}
     ]
   )
 

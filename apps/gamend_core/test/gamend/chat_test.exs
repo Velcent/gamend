@@ -21,6 +21,26 @@ defmodule Gamend.ChatTest do
     {:ok, _} = Friends.accept_friend_request(req.id, user_b)
   end
 
+  describe "chat notifications" do
+    # The notification is written from a background task that drops errors, so
+    # a rejected write only shows up as the event never arriving.
+    test "a friend DM notifies the recipient" do
+      alice = create_user()
+      bob = create_user()
+      make_friends(alice, bob)
+      :ok = Gamend.Notifications.subscribe(bob.id)
+
+      {:ok, _} =
+        Chat.send_message(%{user: alice}, %{
+          "chat_type" => "friend",
+          "chat_ref_id" => bob.id,
+          "content" => "hi bob"
+        })
+
+      assert_receive {:notification_created, %{metadata: %{"type" => "chat_friend"}}}, 2_000
+    end
+  end
+
   describe "friend DM cleanup on user deletion" do
     test "removes friend messages referencing the deleted user (no orphans)" do
       alice = create_user()

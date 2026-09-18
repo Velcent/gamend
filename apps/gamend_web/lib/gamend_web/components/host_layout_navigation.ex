@@ -468,7 +468,9 @@ defmodule GamendWeb.HostLayoutNavigation do
           <.locale_option :for={link <- @locale_links} link={link} locale={@locale} />
         </ul>
       </div>
-      <label class="modal-backdrop" for="lang-modal">Close</label>
+      <label class="modal-backdrop" for="lang-modal">
+        {GamendWeb.HostLayouts.translate("Close")}
+      </label>
     </div>
     """
   end

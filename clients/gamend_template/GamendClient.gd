@@ -335,7 +335,7 @@ func _store_row(key: String, row: Dictionary) -> void:
 ## and GETs both), or "value" from older KV endpoints.
 ## The KV row out of a get_kv reply.
 ##
-## `response.data` is the DENORMALIZED model (GetKv200Response), not the raw
+## `response.data` is the DENORMALIZED model (GamendGetKv200Response), not the raw
 ## body — the generated api swaps it in before this ever runs. Requiring a
 ## Dictionary here therefore rejected every successful fetch and returned {},
 ## so a row with real data read as "no row": word stats, and anything else
@@ -437,7 +437,7 @@ var _pending_writes: Dictionary = {}
 ## caller decides logging/toasts; errors also fire rpc_failed.
 func rpc_call(fn: String, args: Array = []) -> Dictionary:
 	var start_ms := Time.get_ticks_msec()
-	var request := CallHookRequest.new()
+	var request := GamendCallHookRequest.new()
 	request.plugin = plugin
 	request.fn = fn
 	request.args = args
@@ -454,7 +454,7 @@ func rpc_call(fn: String, args: Array = []) -> Dictionary:
 
 
 ## JSON null and absent are the same thing to GDScript callers: hook payloads
-## are schemaless (CallHook200Response.data), so a null that survives to a
+## are schemaless (GamendCallHook200Response.data), so a null that survives to a
 ## typed variable is a runtime error the type system cannot catch. Strip nulls
 ## recursively so `.get(key, default)` applies the default — the same
 ## null-equals-absent rule generate_godot.sh already enforces for typed model
@@ -543,7 +543,7 @@ static func lobby_to_dict(response) -> Dictionary:
 	var payload = response.data if response is ApiApiResponseClient else response
 	var lobby_data = payload
 	var raw_members: Array = []
-	if payload is GetLobby200Response:
+	if payload is GamendLobbyResponse:
 		lobby_data = payload.data
 		raw_members = payload.members
 	elif payload is Dictionary:

@@ -104,7 +104,7 @@ defmodule GamendWeb.AdminLive.Blacklist do
               type="text"
               name="user_id"
               value={@user_filter}
-              placeholder="Filter by user id (either side)"
+              placeholder="Filter by user ID (either side)"
               phx-debounce="300"
               class="input input-sm w-80 font-mono"
             />

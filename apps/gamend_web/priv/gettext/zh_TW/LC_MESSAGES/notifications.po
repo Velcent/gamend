@@ -11,11 +11,6 @@ msgstr ""
 "Language: zh_TW\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: lib/gamend_web/live/notifications_live.ex:291
-#, elixir-autogen, elixir-format
-msgid "Achievement Unlocked: %{name}"
-msgstr "成就已解鎖：%{name}"
-
 #: lib/gamend_web/live/notifications_live.ex:285
 #, elixir-autogen, elixir-format
 msgid "New message in party"
@@ -36,3 +31,8 @@ msgstr "來自好友的新訊息"
 #, elixir-autogen, elixir-format
 msgid "Quest completed: %{name}"
 msgstr "任務完成：%{name}"
+
+#: lib/gamend_web/live/notifications_live.ex:291
+#, elixir-autogen, elixir-format
+msgid "Achievement unlocked: %{name}"
+msgstr "成就已解鎖：%{name}"

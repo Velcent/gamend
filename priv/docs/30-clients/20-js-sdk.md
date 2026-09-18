@@ -50,7 +50,9 @@ Access tokens last 15 minutes, refresh tokens 30 days. Refresh before the
 access token expires, or retry once on a `401`:
 
 ```javascript
-const refreshed = await authApi.refresh({ refreshRequest: { refresh_token } });
+const refreshed = (await authApi.refreshToken({
+  refreshTokenRequest: { refresh_token }
+})).data;
 apiClient.defaultHeaders = { Authorization: `Bearer ${refreshed.access_token}` };
 ```
 
@@ -84,7 +86,7 @@ server's JSON body:
 
 ```javascript
 try {
-  await lobbiesApi.joinLobby({ joinLobbyRequest: { lobby_id: id } });
+  await lobbiesApi.joinLobby(id);
 } catch (e) {
   switch (e.status) {
     case 401: /* token expired - refresh and retry */ break;

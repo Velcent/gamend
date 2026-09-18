@@ -150,6 +150,7 @@ defmodule GamendWeb.Api.V1.QuestController do
 
   operation(:me,
     operation_id: "my_quests",
+    security: [%{"authorization" => []}],
     summary: "List my quests",
     description:
       "List active quests with the authenticated user's progress for the current " <>
@@ -204,6 +205,7 @@ defmodule GamendWeb.Api.V1.QuestController do
 
   operation(:claim,
     operation_id: "claim_quest",
+    security: [%{"authorization" => []}],
     summary: "Claim a completed quest",
     description:
       "Claim the rewards of a completed quest for the current reset period. " <>
@@ -271,6 +273,7 @@ defmodule GamendWeb.Api.V1.QuestController do
 
   operation(:index,
     operation_id: "list_quests",
+    security: [%{}, %{"authorization" => []}],
     summary: "List quests",
     description:
       "Public quest catalog: active, in-window quest definitions. If authenticated, " <>
@@ -367,6 +370,7 @@ defmodule GamendWeb.Api.V1.QuestController do
 
   operation(:user_quests,
     operation_id: "user_quests",
+    security: [%{}, %{"authorization" => []}],
     summary: "List a user's completed quests",
     description:
       "Publicly visible completions for a specific user, newest first — " <>

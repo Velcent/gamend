@@ -30,7 +30,7 @@ defmodule GamendWeb.Components.TimestampTest do
     # A date alone cannot be misread as a local hour, and the localizer still
     # corrects it across a midnight boundary.
     date = render_component(&CoreComponents.timestamp/1, at: @at, format: "date")
-    assert date =~ "Aug 01, 2026"
+    assert date =~ "Aug 1, 2026"
     refute date =~ "UTC"
   end
 

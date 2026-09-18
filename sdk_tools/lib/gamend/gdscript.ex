@@ -17,9 +17,12 @@ defmodule Gamend.GDScript do
   operators, `if` / `elif` / `else`, `return`, arithmetic, comparison, `and` /
   `or` / `not`, arrays, dictionaries, indexing, field access, calls into the
   gamend contexts (`Economy.grant(...)`), and calls to other `func`s in the
-  same file.
+  same file. Also `for` / `while` / `break` / `continue`, `match` (including
+  array and dictionary patterns), `class_name`, inner `class`, `enum`,
+  `signal`, `static func` and `await` -- see the GDScript hooks guide for how
+  each maps to Elixir.
 
-  Anything else -- `for`, `while`, `class_name`, `signal`, engine types -- is a
+  Anything else -- `yield`, `export`, `onready`, `tool`, engine types -- is a
   compile error naming the line. There is no best-effort mode: a construct is
   either translated exactly or refused.
   """

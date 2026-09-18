@@ -7,10 +7,10 @@ Checklist for adding a feature. Keep PRs small; one feature at a time.
 - Schema in `apps/gamend_core/lib/gamend/<feature>/` using `use Gamend.Schema` (UUIDv7 ids).
 - Migration in `apps/gamend_core/priv/repo/migrations/`. Must work on **both SQLite and Postgres** — no `ALTER COLUMN` and no `DISTINCT ON` on SQLite (rebuild the table / group in Elixir instead), test with `GAMEND_DB_ADAPTER=postgres` too.
 - Index every column you filter, sort or count on. Use partial indexes for hot predicates (e.g. `create index(:t, [:deadline], where: "resolved_at IS NULL")`) — they serve sweeps and dashboard counters at once.
-- Size/count caps in `Gamend.Limits` (auto-exposed as `LIMIT_*` env vars), enforced in the changeset, and listed in `@limit_categories` on the admin Config page.
+- Size/count caps in `Gamend.Limits` (auto-exposed as `GAMEND_LIMITS_*` env vars), enforced in the changeset, and listed in `@limit_categories` on the admin Config page.
 - `timestamps(type: :utc_datetime)`, never a bare `timestamps()` — the bare form stores naive values that lose the zone and cannot be rendered safely (see **Time**).
-- **Does the table grow without bound?** If rows accumulate per event, per session or per message, add a class to `Gamend.Retention` with a `RETENTION_*` window, or say in the PR why the table is bounded by its owner. Entity and balance state (users, wallets, inventories) is deliberately never pruned.
-- Document the tables in the [Data Schema](https://gamend.org/docs/setup) guide (`priv/docs/10-setup/40-data-schema.md`).
+- **Does the table grow without bound?** If rows accumulate per event, per session or per message, add a class to `Gamend.Retention` with a `GAMEND_RETENTION_*` window, or say in the PR why the table is bounded by its owner. Entity and balance state (users, wallets, inventories) is deliberately never pruned.
+- Document the tables in the [Data Schema](https://gamend.org/docs/data-schema) guide (`priv/docs/10-setup/40-data-schema.md`).
 
 ## Time
 
@@ -29,7 +29,7 @@ zone is only known in their browser. So:
 - Every list function takes `:page` / `:page_size` and has a matching `count_*`. Pagination is not optional — assume 10k rows.
 - Advisory lock namespaces go in `Gamend.Repo.AdvisoryLock` `@namespaces` before `Gamend.Lock.serialize/3` can use them.
 - Any read-modify-write (merging a map, checking capacity before insert) must hold a lock. Plain "set field X" writes do not.
-- Background work (sweeps, schedulers) as a supervised GenServer — add it to `lib/gamend_host/application.ex` **and** to the starter repo's supervision tree.
+- Background work (sweeps, schedulers) as a supervised GenServer — add it to `GamendWeb.HostSupervision.children/1`, which every host (this repo and the starter) starts. A host-only process goes in that function's `:extra` option instead.
 
 ## Hooks (so plugins can extend the feature)
 
@@ -54,12 +54,12 @@ Adding one callback touches six places — miss one and plugins break in confusi
 
 ## Web
 
-- API controller in `apps/gamend_web/.../controllers/api/v1/` with OpenAPI schemas (ids are `type: :string, format: :uuid`). List endpoints return a `meta` block with `page`, `page_size`, `total_count`, `total_pages`.
-- Routes in `apps/gamend_web/lib/gamend_web/router/shared.ex`. Public listing endpoints get a `LIST_*_ENABLED` feature gate.
+- API controller in `apps/gamend_web/.../controllers/api/v1/` with OpenAPI schemas (ids are `type: :string, format: :uuid`). List endpoints return `data` plus the six-key `meta` block (`page`, `page_size`, `count`, `total_count`, `total_pages`, `has_more`) built by `GamendWeb.Pagination`.
+- Routes in `apps/gamend_web/lib/gamend_web/router/shared.ex`. Public listing endpoints get a `GAMEND_FEATURES_LIST_*` feature gate (a `setting` in `GamendWeb.Features`).
 - Server-authoritative actions get **no public endpoint** — expose them through hooks.
 - Realtime events via channel/PubSub if clients need pushes; forward them in `UserChannel` and subscribe/unsubscribe on join/terminate.
 - Public LiveView: copy the layout of an existing page (leaderboards is the reference) rather than inventing one — same heading sizes, card grid, badges and `<.pagination>` component.
-- Nav links live in **two** places: `theme/config.*.json` (`navigation.primary_links`) and the Elixir defaults in `host_layouts.ex`. A configured dropdown wins outright — nested items are not merged — so a link added only to the defaults will not appear.
+- Nav links live in **two** places: `theme/config.json` (`navigation.primary_links`) and the Elixir defaults (`default_primary_nav_links/0` in `host_layouts.ex`). A configured dropdown wins outright — nested items are not merged — so a link added only to the defaults will not appear.
 
 ## Admin
 
@@ -70,7 +70,7 @@ Adding one callback touches six places — miss one and plugins break in confusi
 ## Tests
 
 - Context tests in `apps/gamend_core/test/` — they run without the web app, so a test that needs a conn, a channel or a `GamendWeb` module belongs in `apps/gamend_web/test/` instead. Controller, admin API, channel and LiveView tests in `apps/gamend_web/test/`. Both share `apps/gamend_core/test/support` (`Gamend.DataCase`, fixtures, `Gamend.TestSupport.NoopHooks`); root `mix test` runs both suites.
-- Run against both adapters: `mix test` and with `POSTGRES_HOST` set. SQLite and Postgres differ in ways tests hide: `config/test.exs` sets `busy_timeout`, so concurrent-write failures that bite in dev never surface in CI.
+- Run against both adapters: `mix test`, and again with `GAMEND_DB_POSTGRES_HOST` and `GAMEND_DB_POSTGRES_USER` (or `GAMEND_DB_URL`) set, after `mix deps.clean gamend_core gamend_web --build`. SQLite and Postgres differ in ways tests hide: `config/test.exs` sets `busy_timeout`, so concurrent-write failures that bite in dev never surface in CI.
 - **Run the feature, don't only test it.** Boot the app (`mix run` a script, or the dev server) and exercise the real path — several classes of bug (hooks inside transactions, stale caches, missing supervision children) only appear at runtime.
 - Add a set to `mix demo.seed` so the feature can be viewed at volume (pagination, large brackets, long lists).
 
@@ -83,9 +83,9 @@ Adding one callback touches six places — miss one and plugins break in confusi
 
 ## Finish
 
-- Guide in `priv/docs/<NN-category>/<NN-name>.md` if user-facing — a markdown file is the whole change, no registration and no Elixir. The folder is the category, the numeric prefixes order it, the first `# ` heading is the title and the first paragraph becomes the one-line summary on the index. Also update the realtime events table and the feature list in `api_spec.ex`.
+- Guide in `priv/docs/<NN-category>/<NN-name>.md` if user-facing — a markdown file is the whole change, no registration and no Elixir. The folder is the category, the numeric prefixes order it, the first `# ` heading is the title and the first paragraph becomes the one-line summary on the index. Also register any new server→client event in `GamendWeb.RealtimeEvents` (a drift test fails otherwise) and its row in the realtime guide's event table, and update the feature list in `api_spec.ex`.
 - Keep guides short. They render inside a disclosure someone opened with a question in mind: lead with the answer, prefer a table or a short example over prose, and leave the exhaustive reference to the API docs.
 - New settings declared with `Gamend.Settings.Provider`, never read with `System.get_env/1`. The env var name derives from the declaration, and both `.env.example` and the public Settings guide are generated — run `mix gamend.settings.env_example` and `mix gamend.settings.guide`, and commit the result. Both take `--check` so CI catches a declaration whose docs were never regenerated.
-- `CHANGELOG.md` entry (`[added]` / `[changed]` / `[breaking]`), 3–4 words, grouped with related items.
+- `CHANGELOG.md` entry (`[added]` / `[changed]` / `[fixed]` / `[removed]` / `[breaking]`): a bold one-line summary, then what changed and why, grouped with related items.
 - `mix format`, `mix credo --strict`, full `mix test` green.
 - SDKs regenerate from the OpenAPI spec in CI — no manual SDK edits.

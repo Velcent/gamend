@@ -105,6 +105,7 @@ defmodule GamendWeb.Api.V1.TournamentController do
 
   operation(:show,
     operation_id: "get_tournament",
+    security: [%{}, %{"authorization" => []}],
     summary: "Tournament details (with the caller's participation when authenticated)",
     parameters: [id: [in: :path, schema: %Schema{type: :string}, required: true]],
     responses: [
@@ -140,7 +141,7 @@ defmodule GamendWeb.Api.V1.TournamentController do
     operation_id: "join_tournament",
     summary: "Register as an entry leader",
     parameters: [id: [in: :path, schema: %Schema{type: :string}, required: true]],
-    security: [%{"bearer" => []}],
+    security: [%{"authorization" => []}],
     responses: [
       ok: {"Joined", "application/json", %Schema{type: :object}},
       bad_request: {"Rejected", "application/json", @error_schema}
@@ -161,7 +162,7 @@ defmodule GamendWeb.Api.V1.TournamentController do
     operation_id: "leave_tournament",
     summary: "Withdraw the caller's entry (before the draw)",
     parameters: [id: [in: :path, schema: %Schema{type: :string}, required: true]],
-    security: [%{"bearer" => []}],
+    security: [%{"authorization" => []}],
     responses: [
       ok: {"Left", "application/json", %Schema{type: :object}},
       bad_request: {"Rejected", "application/json", @error_schema}
@@ -329,7 +330,7 @@ defmodule GamendWeb.Api.V1.TournamentController do
     operation_id: "tournament_my_match",
     summary: "The caller's current unresolved match, if any",
     parameters: [id: [in: :path, schema: %Schema{type: :string}, required: true]],
-    security: [%{"bearer" => []}],
+    security: [%{"authorization" => []}],
     responses: [ok: {"Match or null", "application/json", @match_schema}]
   )
 

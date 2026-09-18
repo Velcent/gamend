@@ -8,13 +8,14 @@ defmodule Gamend.Limits do
 
   ## Environment variables
 
-  Each limit can be set via an environment variable. The env var name maps to
-  the limit key with an uppercase `LIMIT_` prefix, e.g.:
+  Each limit is a `Gamend.Settings.Provider` setting, so its env var name is
+  derived from the key with the `GAMEND_LIMITS_` prefix, e.g.:
 
-      LIMIT_MAX_METADATA_SIZE=32768   -> :max_metadata_size
-      LIMIT_MAX_PAGE_SIZE=100         -> :max_page_size
+      GAMEND_LIMITS_MAX_METADATA_SIZE=32768   -> :max_metadata_size
+      GAMEND_LIMITS_MAX_PAGE_SIZE=100         -> :max_page_size
 
-  Env vars are read once at boot in `config/runtime.exs`.
+  Env vars are read once at boot by `Gamend.Settings.from_env/0`, which the
+  host's `config/runtime.exs` runs through `GamendWeb.HostRuntime.config/2`.
 
   ## Usage in schemas
 
@@ -29,9 +30,7 @@ defmodule Gamend.Limits do
       page_size = Gamend.Limits.clamp_page_size(params["page_size"])
   """
 
-  # Every limit is an optional integer with a compiled default; the `LIMIT_`
-  # env prefix predates the naming convention and is pinned here so the
-  # documented names keep working.
+  # Every limit is an optional integer with a compiled default.
   use Gamend.Settings.Provider,
     app: :gamend_core,
     group: :limits,

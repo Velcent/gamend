@@ -133,7 +133,7 @@ func provider_auth(provider: String) -> String:
 		if auth_popup:
 			auth_popup.close()
 		return "Error: " + str(response.error.message)
-	var result: OauthRequest200Response = response.response.data
+	var result: GamendOAuthAuthorization = response.response.data
 	var session_id = result.session_id
 	var open_error = null
 	if _apple_web:
@@ -175,7 +175,7 @@ func apple_native_auth() -> String:
 		return "Error: Apple Authorization timed out"
 	if _apple_login_error:
 		return _apple_login_error
-	var request = OauthCallbackApiAppleIosRequest.new()
+	var request = GamendOauthCallbackApiAppleIosRequest.new()
 	request.code = _apple_login_result
 	var response = await _api.authenticate_oauth_callback_api_apple_ios(request)
 	if response.error:
@@ -190,7 +190,7 @@ func discord_native_auth() -> String:
 	var auth = await discord_sdk.command_authorize("code", ["identify"], "")
 	if str(auth.get("code", "")).is_empty():
 		return "Error: Discord login failed"
-	var request = OauthApiCallbackRequest.new()
+	var request = GamendOauthApiCallbackRequest.new()
 	request.code = auth["code"]
 	var response = await _api.authenticate_oauth_api_callback(GamendApi.PROVIDER_DISCORD, request)
 	if response.error:

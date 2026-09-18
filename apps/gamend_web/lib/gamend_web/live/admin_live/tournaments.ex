@@ -60,7 +60,7 @@ defmodule GamendWeb.AdminLive.Tournaments do
                     <th>State</th>
                     <th>Starts</th>
                     <th>Entries</th>
-                    <th>Bracket</th>
+                    <th>Bracket / Round window</th>
                     <th>Recur</th>
                     <th></th>
                   </tr>
@@ -196,7 +196,7 @@ defmodule GamendWeb.AdminLive.Tournaments do
                   data-confirm="Cancel this tournament?"
                   class="btn btn-sm btn-error btn-outline"
                 >
-                  Cancel
+                  Cancel tournament
                 </button>
                 <button
                   :if={@detail.tournament.state == "cancelled"}

@@ -28,11 +28,30 @@ func _ready() -> void:
 	print_error_or_result(response)
 ```
 
+## Models
+
+`response.response.data` is a generated class named after the API schema,
+with a `Gamend` prefix, because GDScript class names are global and your game
+may have its own `Lobby`:
+
+| Call | `data` is |
+|---|---|
+| `lobbies_get_lobby(id)` | `GamendLobbyResponse`: `data` (a `GamendLobby`), `members`, `spectator_count` |
+| `lobbies_list_lobbies()` | `GamendLobbyPage`: `data` (`GamendLobby` rows), `meta` (a `GamendPageMeta`) |
+| `users_get_current_user()` | `GamendCurrentUser` |
+| `authenticate_device_login(id)` | `GamendSessionResponse`: `data` (a `GamendSession`) |
+
+Request bodies follow the operation: `GamendCreateLobbyRequest`,
+`GamendCallHookRequest`. A failed call sets `response.error` instead.
+
 ## Authentication
 
-The SDK captures tokens for you: after any login or OAuth call it stores the
-access and refresh tokens, calls `authorize()` itself, and schedules a refresh
-before expiry. You never pass a token to a later call.
+The SDK captures tokens for you: after `authenticate_login`,
+`authenticate_device_login`, `authenticate_refresh_token`,
+`authenticate_oauth_session_status`, `authenticate_oauth_api_callback` or
+`authenticate_oauth_callback_api_apple_ios` it stores the access and refresh
+tokens, calls `authorize()` itself, and schedules a refresh before expiry. You
+never pass a token to a later call.
 
 ```gdscript
 func do_discord_auth() -> void:
@@ -63,7 +82,7 @@ func _ready() -> void:
 	var me = await gamend_api.users_get_current_user().finished
 	print_error_or_result(me)
 
-	var call_hook := CallHookRequest.new()
+	var call_hook := GamendCallHookRequest.new()
 	call_hook.plugin = "my_game_hook"
 	call_hook.fn = "hello"
 	call_hook.args = ["1"]
@@ -72,9 +91,11 @@ func _ready() -> void:
 
 ## Realtime
 
-`GamendRealtime` wraps the Phoenix socket and takes its token from the same
-API instance, so it reconnects with a refreshed token automatically. Topics,
-events and payloads are in the Realtime guide.
+`gamend_api.realtime_start()` opens a `GamendWebSocket`, which wraps the
+Phoenix socket and takes its token from the same API instance, so it
+reconnects with a refreshed token automatically. Set
+`gamend_api.realtime_format = "protobuf"` before the call for binary frames.
+Topics, events and payloads are in the Realtime guide.
 
 ## Client logs
 
@@ -125,13 +146,15 @@ each client's next policy fetch, with no new build.
 
 ### Correlating with server logs
 
-`start_logs()` also stamps every request with `x-gamend-session` and sends the
-same id as a socket connect param. The server puts it in its own `Logger`
-metadata, so server lines carry it too:
+`GamendApi` stamps every request with `x-gamend-session` and sends the same id
+as the `client_session` socket connect param. It does this from the start, even
+before `start_logs()`. The server puts it in its own `Logger` metadata, so
+server lines carry it too. Client `error` and `warn` entries are logged at that
+`Logger` level; every other client level is logged at `info`:
 
-```
-[info] client_session=0f1e2d3c [client] session=0f1e2d3c level=error cat=auth | Refresh failed
-[info] client_session=0f1e2d3c lobby join rejected: seat taken
+```text
+12:00:01.120 client_session=0f1e2d3c [error] [client] session=0f1e2d3c level=error cat=auth | Refresh failed
+12:00:01.180 client_session=0f1e2d3c [info] lobby join rejected: seat taken
 ```
 
 Grep either your log store or `/admin/logs` for `session=<id>` and both sides
@@ -157,15 +180,18 @@ Alongside the session's own `platform`, `build`, `app_version`, `locale` and
 `device_id`. A field that comes back empty is omitted rather than sent blank,
 so a missing `gpu` means "not measurable here", not "no GPU".
 
-`heap_peak_mb` needs the web shell's `__heapPeak` helper (it ships in the
-default `template.html`); it is the high-water mark of the WASM heap, which is
-what gets a tab killed on iOS and is invisible from anywhere else.
+`heap_peak_mb` is sent only when your web export's HTML shell sets
+`window.__heapPeak = {mb: …}`. The SDK does not ship that shell: your custom
+template must sample the WASM heap and keep the high-water mark in MB. That peak
+is what gets a tab killed on iOS, and it is invisible from anywhere else.
 
-To add your own, put them in `meta`, which is free-form, capped at 32 keys and
-256 bytes per value:
+All of these travel in the session's `meta`. The server takes it free-form,
+capped at 32 keys and 256 characters per value, but the SDK fills it itself (up
+to 22 keys) and `submit` has no `meta` field, so there is no public way to add
+keys of your own. Per-line context goes in the entry instead:
 
 ```gdscript
-gamend_api.logs.submit({"message": "…", "category": "game"})
+gamend_api.logs.submit({"message": "Boss spawned", "category": "game", "screen": "boat", "lobby_id": lobby_id})
 ```
 
 One thing to weigh before adding more: this set is already close to a device

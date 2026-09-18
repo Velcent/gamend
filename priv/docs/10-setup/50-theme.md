@@ -4,8 +4,6 @@ icon: hero-swatch
 
 # Configure Theme
 
-Runtime theming (JSON)
-
 The host ships a default theme JSON for copy, navigation, footer sections, and reusable presentation pages. You can optionally override it at runtime with a different JSON file. Image fields may point at host-owned static assets, including GIFs.
 
 ## Configure theming JSON
@@ -16,68 +14,128 @@ Edit the packaged host default theme at theme/config.json, or place an override 
 theme/my_config.json
 ```
 
-With the following:
+Add presentation pages under `pages`. Each page needs a `path`; existing code-owned routes keep priority, and unmatched configured paths render through the shared presentation layout. A full example:
 
-Add presentation pages under pages. Each page needs a path; existing code-owned routes keep priority, and unmatched configured paths render through the shared presentation layout.
-
-```text
-title": "My Game", "tagline": "Play together", "theme_color": { "light": "#ffffff", "dark": "#1a1a2e,
-  "pages": home": { "path": "/", "hero": { "title": "My Game", "text": "**Fast** multiplayer backend for [your game](/play).", "image": { "light": "/images/banner.gif", "alt": "My Game,
+```json
+{
+  "title": "My Game",
+  "tagline": "Play together",
+  "theme_color": {
+    "light": "#ffffff",
+    "dark": "#1a1a2e"
+  },
+  "pages": {
+    "home": {
+      "path": "/",
+      "hero": {
+        "title": "My Game",
+        "text": "**Fast** multiplayer backend for [your game](/play).",
+        "image": {
+          "light": "/images/banner.gif",
+          "alt": "My Game"
+        },
         "image_position_desktop": "left",
         "image_position_mobile": "top",
         "media_width": "half",
         "media_size": "section",
         "buttons": [
-          label": "Play", "href": "/play", "icon": "hero-play-solid", "style": "primary
+          {
+            "label": "Play",
+            "href": "/play",
+            "icon": "hero-play-solid",
+            "style": "primary"
+          }
         ]
       },
       "sections_height": "half",
       "sections": [
-        title": "Matchmaking", "text": "Real-time lobbies, parties, and custom rules.", "image": { "light": "/images/matchmaking.gif", "dark": "/images/matchmaking_dark.gif", "alt": "Matchmaking,
+        {
+          "title": "Matchmaking",
+          "text": "Real-time lobbies, parties, and custom rules.",
+          "image": {
+            "light": "/images/matchmaking.gif",
+            "dark": "/images/matchmaking_dark.gif",
+            "alt": "Matchmaking"
+          },
           "media_width": "third",
           "image_position_desktop": "right",
           "image_position_mobile": "top",
           "buttons": [
-            label": "Docs", "href": "/docs/setup", "icon": "hero-book-open-solid
+            {
+              "label": "Docs",
+              "href": "/docs/setup",
+              "icon": "hero-book-open-solid"
+            }
           ]
         },
-        title": "Social", "text": "Friends, groups, chat, **leaderboards**, and quests.", "icon": "hero-user-group-solid", "height": "compact", "media_width": "third", "image_position_desktop": "left
+        {
+          "title": "Social",
+          "text": "Friends, groups, chat, **leaderboards**, and quests.",
+          "icon": "hero-user-group-solid",
+          "height": "compact",
+          "media_width": "third",
+          "image_position_desktop": "left"
+        }
       ]
     },
-    "brand": path": "/brand", "hero": { "title": "Brand", "text": "Another page using the same hero and sections renderer.", "image": { "light": "/images/banner.gif", "alt": "Brand
+    "brand": {
+      "path": "/brand",
+      "hero": {
+        "title": "Brand",
+        "text": "Another page using the same hero and sections renderer.",
+        "image": {
+          "light": "/images/banner.gif",
+          "alt": "Brand"
+        }
       },
       "sections": []
     }
   },
-  "navigation": primary_links": [ { "label": "Play", "href": "/play", "icon": "hero-play-solid,
-      label": "Social", "icon": "hero-user-group-solid", "items": [ { "label": "Leaderboards", "href": "/leaderboards", "icon": "hero-chart-bar-solid,
-          label": "Quests", "href": "/quests", "icon": "hero-trophy-solid,
-          label": "Groups", "href": "/groups", "icon": "hero-user-group-solid
+  "navigation": {
+    "primary_links": [
+      { "label": "Play", "href": "/play", "icon": "hero-play-solid" },
+      {
+        "label": "Social",
+        "icon": "hero-user-group-solid",
+        "items": [
+          { "label": "Leaderboards", "href": "/leaderboards", "icon": "hero-chart-bar-solid" },
+          { "label": "Quests", "href": "/quests", "icon": "hero-trophy-solid" },
+          { "label": "Groups", "href": "/groups", "icon": "hero-user-group-solid" }
         ]
       }
     ],
     "guest_links": [
-      label": "Guides", "href": "/docs/setup
+      { "label": "Guides", "href": "/docs/setup" }
     ],
     "authenticated_links": [
-      label": "Dashboard", "href": "/dashboard
+      { "label": "Dashboard", "href": "/dashboard" }
     ],
     "account_links": [
-      label": "Billing", "href": "/billing,
-      label": "Admin", "href": "/admin", "auth": "admin,
-      label": "Support", "href": "https://discord.gg/example", "external": true } ] }, "footer": { "sections": [ { "title": "Social", "links": [ { "label": "Discord", "href": "https://discord.gg/example", "external": true }, { "label": "Blog", "href": "/blog
+      { "label": "Billing", "href": "/billing" },
+      { "label": "Admin", "href": "/admin", "auth": "admin" },
+      { "label": "Support", "href": "https://discord.gg/example", "external": true }
+    ]
+  },
+  "footer": {
+    "sections": [
+      {
+        "title": "Social",
+        "links": [
+          { "label": "Discord", "href": "https://discord.gg/example", "external": true },
+          { "label": "Blog", "href": "/blog" }
         ]
       },
-      title": "Privacy & Terms", "links": [ { "label": "Privacy Policy", "href": "/privacy,
-          label": "Terms and Conditions", "href": "/terms
+      {
+        "title": "Privacy & Terms",
+        "links": [
+          { "label": "Privacy Policy", "href": "/privacy" },
+          { "label": "Terms and Conditions", "href": "/terms" }
         ]
       }
     ]
   }
 }
 ```
-
-Theme color (browser chrome)
 
 ## Browser theme color
 
@@ -88,7 +146,7 @@ The theme_color field tints the browser chrome (address bar, tab bar) in Safari 
 "theme_color": "#1a1a2e"
 
 // Separate light and dark:
-"theme_color": light": "#ffffff", "dark": "#1a1a2e
+"theme_color": { "light": "#ffffff", "dark": "#1a1a2e" }
 ```
 
 ## Contact email
@@ -157,17 +215,22 @@ Use the navigation object to move nav structure into config. Each section accept
 Example: grouped public links plus admin-only account entry:
 
 ```text
-"navigation": primary_links": [ { "label": "Status", "href": "/status,
-    label": "Social", "items": [ { "label": "Leaderboards", "href": "/leaderboards,
-        label": "Groups", "href": "/groups
+"navigation": {
+  "primary_links": [
+    { "label": "Status", "href": "/status" },
+    {
+      "label": "Social",
+      "items": [
+        { "label": "Leaderboards", "href": "/leaderboards" },
+        { "label": "Groups", "href": "/groups" }
       ]
     }
   ],
   "authenticated_links": [
-    label": "Dashboard", "href": "/dashboard
+    { "label": "Dashboard", "href": "/dashboard" }
   ],
   "account_links": [
-    label": "Billing", "href": "/billing,
+    { "label": "Billing", "href": "/billing" },
     { "label": "Admin", "href": "/admin", "admin_only": true }
   ]
 }

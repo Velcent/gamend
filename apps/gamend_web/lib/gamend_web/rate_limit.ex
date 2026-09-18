@@ -16,9 +16,10 @@ defmodule GamendWeb.RateLimit do
         backend: :redis,
         redis: [url: "redis://localhost:6379"]
 
-  Selected at runtime via the `RATE_LIMIT_BACKEND` env var (`"ets"` or
-  `"redis"`); the Redis URL falls back to `RATE_LIMIT_REDIS_URL`,
-  `CACHE_REDIS_URL`, then `REDIS_URL`.
+  Selected at runtime via the `GAMEND_RATELIMIT_BACKEND` env var (`"ets"` or
+  `"redis"`); the Redis URL falls back from `GAMEND_RATELIMIT_REDIS_URL` to
+  `GAMEND_CACHE_REDIS_URL`, then `GAMEND_CLUSTER_REDIS_URL`
+  (`GamendWeb.HostRuntime`).
 
   The configured backend is started in the host application supervision tree.
   """

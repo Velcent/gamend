@@ -11,7 +11,7 @@ defmodule GamendWeb.AdminLive.ConfigSections do
   """
   use GamendWeb, :html
 
-  import GamendWeb.AdminLive.ConfigDiagnostics, only: [mask_secret: 1]
+  import GamendWeb.AdminLive.ConfigDiagnostics, only: [mask_secret: 1, display_value: 1]
 
   @doc "Device login, account activation and the password policy."
   attr :config, :any, required: true
@@ -21,14 +21,14 @@ defmodule GamendWeb.AdminLive.ConfigSections do
     <tr>
       <td class="font-semibold">Device auth</td>
       <td>
-        <%= if @config.device_auth_enabled_app || @config.device_auth_enabled_env do %>
+        <%= if @config.device_auth_enabled do %>
           <span class="badge badge-success">Enabled</span>
         <% else %>
           <span class="badge badge-error">Disabled</span>
         <% end %>
       </td>
       <td class="font-mono text-sm break-all whitespace-normal">
-        GAMEND_AUTH_DEVICE_AUTH_ENABLED: {@config.device_auth_enabled_env || "<unset>"}
+        GAMEND_AUTH_DEVICE_AUTH_ENABLED: {display_value(@config.device_auth_enabled_env)}
       </td>
     </tr>
     <tr>
@@ -41,22 +41,21 @@ defmodule GamendWeb.AdminLive.ConfigSections do
         <% end %>
       </td>
       <td class="font-mono text-sm break-all whitespace-normal">
-        GAMEND_AUTH_REQUIRE_ACTIVATION: {@config.require_account_activation_env ||
-          "<unset>"}
+        GAMEND_AUTH_REQUIRE_ACTIVATION: {display_value(@config.require_account_activation_env)}
       </td>
     </tr>
     <tr>
       <td class="font-semibold">Password policy</td>
       <td>
-        <%= if @config.min_password_length_env do %>
+        <%= if @config.min_password_length_set? do %>
           <span class="badge badge-success">Custom</span>
         <% else %>
           <span class="badge badge-ghost">Default</span>
         <% end %>
       </td>
       <td class="font-mono text-sm break-all whitespace-normal">
-        GAMEND_AUTH_MIN_PASSWORD_LENGTH: {@config.min_password_length_env ||
-          "<undefined>"} <br /> Effective: {@config.min_password_length_effective} characters
+        GAMEND_AUTH_MIN_PASSWORD_LENGTH: {display_value(@config.min_password_length_env)}
+        <br /> Effective: {@config.min_password_length_effective} characters
       </td>
     </tr>
     """
@@ -317,7 +316,7 @@ defmodule GamendWeb.AdminLive.ConfigSections do
                       {Map.get(page, "path", "—")}
                     </span>
                     <span class="text-xs opacity-70">
-                      ({length(sections)} sections)
+                      ({ngettext("%{count} section", "%{count} sections", length(sections))})
                     </span>
                   </div>
                 <% end %>
@@ -372,7 +371,11 @@ defmodule GamendWeb.AdminLive.ConfigSections do
                   <div class="badge badge-ghost gap-1 py-3">
                     <span class="text-xs">{section["title"]}</span>
                     <span class="text-xs opacity-70">
-                      {length(Map.get(section, "links", []))} links
+                      {ngettext(
+                        "%{count} link",
+                        "%{count} links",
+                        length(Map.get(section, "links", []))
+                      )}
                     </span>
                   </div>
                 <% end %>
@@ -409,8 +412,8 @@ defmodule GamendWeb.AdminLive.ConfigSections do
       </td>
       <td class="font-mono text-sm break-all whitespace-normal">
         <%= if @config.discord_client_id do %>
-          DISCORD_CLIENT_ID: {mask_secret(@config.discord_client_id)}<br />
-          DISCORD_CLIENT_SECRET: {mask_secret(@config.discord_client_secret)}
+          GAMEND_OAUTH_DISCORD_CLIENT_ID: {mask_secret(@config.discord_client_id)}<br />
+          GAMEND_OAUTH_DISCORD_CLIENT_SECRET: {mask_secret(@config.discord_client_secret)}
         <% else %>
           <span class="text-error">Client ID missing</span>
         <% end %>
@@ -427,11 +430,11 @@ defmodule GamendWeb.AdminLive.ConfigSections do
       </td>
       <td class="font-mono text-sm break-all whitespace-normal">
         <%= if @config.apple_web_client_id || @config.apple_ios_client_id do %>
-          APPLE_WEB_CLIENT_ID: {mask_secret(@config.apple_web_client_id || "")}<br />
+          GAMEND_OAUTH_APPLE_CLIENT_ID: {mask_secret(@config.apple_web_client_id || "")}<br />
           GAMEND_OAUTH_APPLE_IOS_CLIENT_ID: {mask_secret(@config.apple_ios_client_id || "")}<br />
-          APPLE_TEAM_ID: {mask_secret(@config.apple_team_id || "")}<br />
-          APPLE_KEY_ID: {mask_secret(@config.apple_key_id || "")}<br />
-          APPLE_PRIVATE_KEY: {mask_secret(@config.apple_private_key)}
+          GAMEND_OAUTH_APPLE_TEAM_ID: {mask_secret(@config.apple_team_id || "")}<br />
+          GAMEND_OAUTH_APPLE_KEY_ID: {mask_secret(@config.apple_key_id || "")}<br />
+          GAMEND_OAUTH_APPLE_PRIVATE_KEY: {mask_secret(@config.apple_private_key)}
         <% else %>
           <span class="text-error">Disabled</span>
         <% end %>
@@ -448,8 +451,8 @@ defmodule GamendWeb.AdminLive.ConfigSections do
       </td>
       <td class="font-mono text-sm break-all whitespace-normal">
         <%= if @config.google_client_id do %>
-          GOOGLE_CLIENT_ID: {mask_secret(@config.google_client_id)}<br />
-          GOOGLE_CLIENT_SECRET: {mask_secret(@config.google_client_secret)}
+          GAMEND_OAUTH_GOOGLE_CLIENT_ID: {mask_secret(@config.google_client_id)}<br />
+          GAMEND_OAUTH_GOOGLE_CLIENT_SECRET: {mask_secret(@config.google_client_secret)}
         <% else %>
           <span class="text-error">Client ID missing</span>
         <% end %>
@@ -466,8 +469,8 @@ defmodule GamendWeb.AdminLive.ConfigSections do
       </td>
       <td class="font-mono text-sm break-all whitespace-normal">
         <%= if @config.facebook_client_id do %>
-          FACEBOOK_CLIENT_ID: {mask_secret(@config.facebook_client_id)}<br />
-          FACEBOOK_CLIENT_SECRET: {mask_secret(@config.facebook_client_secret)}
+          GAMEND_OAUTH_FACEBOOK_CLIENT_ID: {mask_secret(@config.facebook_client_id)}<br />
+          GAMEND_OAUTH_FACEBOOK_CLIENT_SECRET: {mask_secret(@config.facebook_client_secret)}
         <% else %>
           <span class="text-error">Client ID missing</span>
         <% end %>
@@ -502,15 +505,16 @@ defmodule GamendWeb.AdminLive.ConfigSections do
     <tr>
       <td class="font-semibold">CORS / Allowed Origins</td>
       <td>
-        <%= if @config.phx_allowed_origins_env do %>
+        <%= if @config.phx_allowed_origins_set? do %>
           <span class="badge badge-success">Configured</span>
         <% else %>
           <span class="badge badge-ghost">Default</span>
         <% end %>
       </td>
       <td class="font-mono text-sm break-all whitespace-normal">
-        GAMEND_HTTP_ALLOWED_ORIGINS: {@config.phx_allowed_origins_env || "<unset>"}<br />
-        Effective CORS origins: {inspect(@config.cors_allowed_origins)}<br />
+        GAMEND_HTTP_ALLOWED_ORIGINS: {if @config.phx_allowed_origins_set?,
+          do: display_value(@config.phx_allowed_origins_env),
+          else: "<unset>"}<br /> Effective CORS origins: {inspect(@config.cors_allowed_origins)}<br />
       </td>
     </tr>
     <tr>
@@ -531,7 +535,7 @@ defmodule GamendWeb.AdminLive.ConfigSections do
         Max DataChannels per peer: {@config.webrtc_max_channels}<br />
         Max DC message size: {@config.webrtc_max_message_size} bytes<br />
         <span class="text-xs text-base-content/60">
-          Set via RATE_LIMIT_* env vars
+          Set via GAMEND_RATELIMIT_* env vars
         </span>
       </td>
     </tr>
@@ -606,14 +610,15 @@ defmodule GamendWeb.AdminLive.ConfigSections do
       </td>
       <td class="text-sm break-words whitespace-normal">
         <div class="font-mono text-sm">
-          SMTP_USERNAME: {mask_secret(@config.smtp_username)}<br />
-          SMTP_PASSWORD: {mask_secret(@config.smtp_password)}<br />
-          SMTP_RELAY: {@config.smtp_relay || "<unset>"}<br />
-          SMTP_PORT: {@config.smtp_port || "<unset>"}<br />
-          SMTP_SSL: {@config.smtp_ssl || "<unset>"} SMTP_TLS: {@config.smtp_tls ||
-            "<unset>"}<br /> SMTP_SNI: {mask_secret(@config.smtp_sni)}<br />
-          SMTP_FROM_NAME: {mask_secret(@config.smtp_from_name || "")}<br />
-          SMTP_FROM_EMAIL: {mask_secret(@config.smtp_from_email || "")}
+          GAMEND_MAIL_SMTP_USERNAME: {mask_secret(@config.smtp_username)}<br />
+          GAMEND_MAIL_SMTP_PASSWORD: {mask_secret(@config.smtp_password)}<br />
+          GAMEND_MAIL_SMTP_RELAY: {display_value(@config.smtp_relay)}<br />
+          GAMEND_MAIL_SMTP_PORT: {display_value(@config.smtp_port)}<br />
+          GAMEND_MAIL_SMTP_SSL: {display_value(@config.smtp_ssl)} GAMEND_MAIL_SMTP_TLS: {display_value(
+            @config.smtp_tls
+          )}<br /> GAMEND_MAIL_SMTP_SNI: {mask_secret(@config.smtp_sni)}<br />
+          GAMEND_MAIL_SMTP_FROM_NAME: {mask_secret(@config.smtp_from_name || "")}<br />
+          GAMEND_MAIL_SMTP_FROM_EMAIL: {mask_secret(@config.smtp_from_email || "")}
         </div>
 
         <div class="mt-2 text-xs text-muted">
@@ -621,19 +626,19 @@ defmodule GamendWeb.AdminLive.ConfigSections do
           <ul class="list-disc ml-4">
             <li>
               <strong>SMTPS (implicit SSL)</strong>
-              — set <code>SMTP_SSL=true</code>
+              — set <code>GAMEND_MAIL_SMTP_SSL=true</code>
               and use an
-              implicit SSL port (eg. <code>2465</code>
+              implicit SSL port (e.g. <code>2465</code>
               or <code>465</code>). When using implicit SSL
-              it's recommended to set <code>SMTP_TLS=never</code>
-              and provide an <code>SMTP_SNI</code>
+              it's recommended to set <code>GAMEND_MAIL_SMTP_TLS=never</code>
+              and provide a <code>GAMEND_MAIL_SMTP_SNI</code>
               (Server Name Indication) when your provider requires it (example: <code>mail.resend.com</code>).
             </li>
             <li>
               <strong>STARTTLS</strong>
-              — use <code>SMTP_SSL=false</code>
-              with <code>SMTP_PORT=587</code>
-              and <code>SMTP_TLS=always</code>
+              — use <code>GAMEND_MAIL_SMTP_SSL=false</code>
+              with <code>GAMEND_MAIL_SMTP_PORT=587</code>
+              and <code>GAMEND_MAIL_SMTP_TLS=always</code>
               (preferred for most providers).
             </li>
           </ul>
@@ -653,15 +658,15 @@ defmodule GamendWeb.AdminLive.ConfigSections do
           <div class="mt-3 text-xs text-muted">
             <p class="mb-1 font-semibold">From address & domain verification</p>
             <p>
-              Ensure the <code>SMTP_FROM_EMAIL</code> you configure is a
+              Ensure the <code>GAMEND_MAIL_SMTP_FROM_EMAIL</code> you configure is a
               verified sender/domain in your SMTP provider — many providers
               require verification before relaying mail and may return errors
               like <code>450 domain not verified</code> otherwise.
             </p>
             <p class="mt-2">
-              You can set a friendly sender name via <code>SMTP_FROM_NAME</code>.
+              You can set a friendly sender name via <code>GAMEND_MAIL_SMTP_FROM_NAME</code>.
               If you need to test delivery, use the <em>Send test email</em>
-              button above to verify runtime delivery and messages.
+              button under Admin Tools below to verify runtime delivery and messages.
             </p>
           </div>
         </div>

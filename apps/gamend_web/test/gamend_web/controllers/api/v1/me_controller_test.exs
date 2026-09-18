@@ -69,6 +69,21 @@ defmodule GamendWeb.Api.V1.MeControllerTest do
     end
   end
 
+  describe "PATCH /api/v1/me/username" do
+    test "sets the handle, lowercased, and echoes it back", %{conn: conn} do
+      user = Gamend.AccountsFixtures.user_fixture()
+      {:ok, token, _} = Guardian.encode_and_sign(user)
+
+      conn =
+        conn
+        |> put_req_header("authorization", "Bearer " <> token)
+        |> patch("/api/v1/me/username", %{username: "New.Handle"})
+
+      assert %{"ok" => true, "id" => id, "username" => "new.handle"} = json_response(conn, 200)
+      assert id == user.id
+    end
+  end
+
   describe "PATCH /api/v1/me/password" do
     test "updates password for authenticated user", %{conn: conn} do
       user = Gamend.AccountsFixtures.user_fixture()

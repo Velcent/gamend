@@ -183,7 +183,7 @@ defmodule GamendWeb.AdminLive.Payments do
         <div class="card bg-base-200">
           <div class="card-body">
             <div class="flex flex-wrap items-center justify-between gap-3">
-              <h2 class="card-title">Provider Products ({@counts.provider_products || 0})</h2>
+              <h2 class="card-title">Provider SKUs ({@counts.provider_products || 0})</h2>
               <button type="button" phx-click="new_provider_product" class="btn btn-primary btn-sm">
                 + Provider SKU
               </button>
@@ -941,9 +941,35 @@ defmodule GamendWeb.AdminLive.Payments do
 
   defp json_preview(_value), do: ""
 
+  # Amounts are stored in the currency's minor unit (Stripe's convention), so
+  # 499 USD is 4.99 — this page printed the raw 499. Stripe's zero- and
+  # three-decimal currencies are the exceptions.
+  @zero_decimal_currencies ~w(BIF CLP DJF GNF JPY KMF KRW MGA PYG RWF UGX VND VUV XAF XOF XPF)
+  @three_decimal_currencies ~w(BHD JOD KWD OMR TND)
+
   defp format_amount(nil, currency), do: "- #{currency || ""}"
   defp format_amount(amount, nil), do: to_string(amount)
+
+  defp format_amount(amount, currency) when is_integer(amount) and is_binary(currency) do
+    code = String.upcase(currency)
+    "#{code} #{minor_to_major(amount, currency_decimals(code))}"
+  end
+
   defp format_amount(amount, currency), do: "#{amount} #{currency}"
+
+  defp currency_decimals(code) when code in @zero_decimal_currencies, do: 0
+  defp currency_decimals(code) when code in @three_decimal_currencies, do: 3
+  defp currency_decimals(_code), do: 2
+
+  defp minor_to_major(amount, 0), do: Integer.to_string(amount)
+
+  defp minor_to_major(amount, places) do
+    unit = Integer.pow(10, places)
+    magnitude = abs(amount)
+    fraction = magnitude |> rem(unit) |> Integer.to_string() |> String.pad_leading(places, "0")
+    sign = if amount < 0, do: "-", else: ""
+    "#{sign}#{div(magnitude, unit)}.#{fraction}"
+  end
 
   defp active_badge(true),
     do: Phoenix.HTML.raw(~s(<span class="badge badge-success">active</span>))

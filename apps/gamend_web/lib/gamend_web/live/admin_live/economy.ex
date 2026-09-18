@@ -71,10 +71,14 @@ defmodule GamendWeb.AdminLive.Economy do
            true <- qty > 0 and f["user_id"] not in [nil, ""] and f["item"] not in [nil, ""],
            {:ok, quantity} <-
              apply(Inventory, String.to_existing_atom(op), [f["user_id"], f["item"], qty, []]) do
-        put_flash(socket, :info, "#{op}: #{f["item"]} → #{quantity}")
+        put_flash(
+          socket,
+          :info,
+          "#{done_label(op)} #{qty} #{f["item"]}; quantity now #{quantity}"
+        )
       else
         {:error, reason} -> put_flash(socket, :error, "Failed: #{reason}")
-        _ -> put_flash(socket, :error, "Enter user_id, item and a positive quantity")
+        _ -> put_flash(socket, :error, "Enter a user ID, an item and a positive quantity")
       end
 
     {:noreply, reload(socket)}
@@ -104,10 +108,14 @@ defmodule GamendWeb.AdminLive.Economy do
                amount,
                [reason: blank(f["reason"]) || "admin_#{op}"]
              ]) do
-        put_flash(socket, :info, "#{String.capitalize(op)}: #{f["currency"]} → #{balance}")
+        put_flash(
+          socket,
+          :info,
+          "#{done_label(op)} #{amount} #{f["currency"]}; balance now #{balance}"
+        )
       else
         {:error, reason} -> put_flash(socket, :error, "Failed: #{reason}")
-        _ -> put_flash(socket, :error, "Enter user_id, currency and a positive amount")
+        _ -> put_flash(socket, :error, "Enter a user ID, a currency and a positive amount")
       end
 
     {:noreply, reload(socket)}
@@ -143,6 +151,12 @@ defmodule GamendWeb.AdminLive.Economy do
   defp blank(""), do: nil
   defp blank(v), do: v
 
+  # One flash shape for the wallet and inventory forms, which had drifted
+  # ("Grant: gold → 150" beside "grant_item: potion → 5").
+  defp done_label(op) when op in ~w(grant grant_item), do: "Granted"
+  defp done_label("spend"), do: "Spent"
+  defp done_label("consume_item"), do: "Consumed"
+
   # ── render ────────────────────────────────────────────────────────────────
 
   @impl true
@@ -167,7 +181,7 @@ defmodule GamendWeb.AdminLive.Economy do
               type="text"
               name="user_id"
               value={@form["user_id"]}
-              placeholder="user id"
+              placeholder="user ID"
               class="input input-sm input-bordered font-mono w-72"
             />
             <input
@@ -268,7 +282,7 @@ defmodule GamendWeb.AdminLive.Economy do
               type="text"
               name="user_id"
               value={@item_form["user_id"]}
-              placeholder="user id"
+              placeholder="user ID"
               class="input input-sm input-bordered font-mono w-72"
             />
             <input

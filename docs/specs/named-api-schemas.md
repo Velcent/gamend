@@ -138,13 +138,31 @@ declares OpenAPI operations, it:
    `ErrorResponse`, but need not be listed per operation: every error is the
    same type, so a missing status costs a client nothing. 5xx is skipped — a
    crash already fails the test, and the error page Phoenix renders after a
-   violation would otherwise replace the violation's own message.
+   violation would otherwise replace the violation's own message;
+4. fails when a response documented as a bare `type: object` (no properties,
+   no `additionalProperties`) has keys: a generator emits no type for it, so
+   the payload is invisible to a typed client. Nested bare objects —
+   `metadata`, KV values — are free-form by design and are not checked.
+
+Exceptions rendered by `GamendWeb.ErrorJSON` are skipped: that shape belongs
+to the endpoint, not the operation (see *Wire inconsistencies*).
 
 It raises inside the request, so the existing controller tests become the
 contract tests without being edited: the lobby suite's 44 tests exercise
 every lobby operation. Enforcement is by tag — a list in the plug that grows
 one domain per slice and is deleted when every domain is in. That list is a
 migration ratchet, not a baseline: it only ever grows, and it ends empty.
+
+Two switches for working a slice, both test-run only:
+
+- `RESPONSE_CONTRACT_REPORT=<file>` appends violations instead of raising, so
+  one run shows all of a domain's drift rather than the first per test.
+- `RESPONSE_CONTRACT_SEEN=<file>` records every checked operation and status.
+  The check only sees what tests request; this shows which operations no test
+  reaches, and each slice adds the tests that close that gap.
+
+Run a slice with `MIX_TEST_PARTITION=<n>` when other suites share the SQLite
+test database; concurrent runs otherwise fail with `Database busy`.
 
 ## Slices
 
@@ -157,8 +175,27 @@ the tag added to the check, tests green, spec regenerated.
    failed 17 of the 44 lobby tests — the drift below — and passes all of them
    on the named ones; the full web suite (1,993 tests) passes with it on.
    `generate_balaur.py` output is byte-identical before and after.
-2. Users, Authentication, Friends (the `User` family and `CurrentUser`).
-3. Groups, Parties.
+2. **Users, Authentication, Friends. Done.** 36 operations. `CurrentUser`,
+   `LinkedProviders`, `PublicUser(Page)`, `UserBriefPage`, `ProfileUpdate`,
+   `AvatarUpdate`, `UploadTicket`, `PlayerStats(Response)`,
+   `Session(Response)`, `OAuthResult(Response)`, `OAuthAuthorization`,
+   `AuthProvidersResponse`, `Friend(Page)`, `FriendRequest`,
+   `FriendRequestLists`, `FriendRequestMeta`, `FriendRequestsResponse`,
+   `BlockedFriendship(Page)`; `ErrorResponse` gains `message` and `details`.
+   The report run found 13 distinct drifts; two operations had no test
+   reaching their success response (`update_current_user_username`,
+   `reject_friend_request`) and now do. Full web suite green; Balaur
+   byte-identical. The OAuth exchanges answer tokens *or* a link result
+   depending on a bearer token, modelled as one flat `OAuthResult` with every
+   field optional rather than a `oneOf`, which game-engine generators handle
+   poorly.
+3. **Groups, Parties. Done.** 38 operations. `Group(Page)`,
+   `GroupMember(Page)`, `GroupJoinRequest(Page)`, `GroupInvite(Page)`,
+   `StatusResponse`, `Party`, `PartyInvite`, `PartyStats(Response)`; party
+   lobby actions reuse `Lobby`, the icon ticket `UploadTicket`. The coverage
+   switch showed no test reached the success response of any of the six
+   party-invite operations; one flow test now covers invite, both lists,
+   accept, cancel and decline.
 4. Chat, Notifications, Push.
 5. Leaderboards, Tournaments.
 6. Quests, Economy, Payments.
@@ -167,7 +204,17 @@ the tag added to the check, tests green, spec regenerated.
 9. **Close-out.** Drop the tag list (enforce everywhere); add R15 to
    `mix gamend.api.lint` — no inline object schema with `properties` in any
    response; delete the per-model `perl` fixups from `generate_godot.sh` that
-   no longer match anything.
+   no longer match anything; name the request bodies several operations
+   share (see below); migrate `polyglot-pirates-game` with
+   `clients/godot_migrate.py`.
+
+Request bodies were left inline on the reasoning that the generator names
+them `<OperationId>Request`. That holds for a body one operation uses. For
+identical bodies it deduplicates and names them after whichever operation
+came first, the same fault response names had: the group icon ticket takes an
+`AdminTournamentIconUploadUrlRequest`, and confirming it an
+`AdminSetQuestIconRequest`. Close-out names those (`UploadIntent`,
+`UploadedObject`).
 
 ## SDK impact
 
@@ -179,15 +226,37 @@ the wire moves, so an existing build keeps working until it regenerates.
   (`GamendLobby`), which also renames the request classes — once, in the same
   release as the response renames, rather than two breaks. The hand-written
   facade's references (`GamendApi.gd`, `GamendAuth.gd`, `GamendClient.gd`)
-  update in that change. *Decision needed before the first Godot release after
-  slice 1.*
+  update in that change. **Decided: `GamendLobby`.** Verified against
+  openapi-generator 7.26: named `$ref`s resolve to correct class names
+  (`GamendUserBrief.bzz_denormalize_multiple`), while references to
+  still-inline models come out as `Gamend<snake_case>`
+  (`Gamendaccept_party_invite_200_response_members_inner`) — 162 before slice
+  2, 138 after, zero at close-out. The generic fixup in `generate_godot.sh`
+  maps that form back to the class name until then. **Done:** the script
+  generates with the prefix and the facade uses the new names. Checked by
+  loading all 311 addon scripts in headless Godot 4.7 and by a live run of
+  13 calls against a dev server, each denormalizing into its named class.
+  That run found two generator faults, both fixed in post-processing: an
+  untyped property (`ErrorResponse.details`) came out as the nonexistent
+  `AnyType`, and every enum-array setter rejected its own value — so
+  `list_auth_providers` had always returned no providers.
 - **JavaScript.** Model classes are renamed; method names and call shapes are
   not. Only code importing model classes by name notices.
 - **Balaur.** Untouched — it is untyped, and request bodies stay inline.
-- **Migration table.** Each slice's CHANGELOG `[breaking]` entry lists old →
-  new generated names for its operations, produced by diffing the generator
-  output before and after, so `polyglot-pirates-game`'s 26 references are a
-  find-and-replace.
+- **Migration.** `clients/godot_migrate.py OLD_ADDON NEW_ADDON GAME_ROOT`
+  derives the old → new class names instead of a hand-kept table: it pairs
+  each operation's response class across the two addons, then each nested
+  property's class, and falls back to the prefixed twin for request bodies.
+  Pairing by position is what makes it exact — a dozen old envelopes are all
+  `{data, meta}`. On a copy of `polyglot-pirates-game` (vendored addon from
+  before slice 1, regenerated addon after slice 2) it mapped all 47 classes
+  the game names, rewrote 9 scripts, and the game compiled exactly as before
+  (764 scripts, the same one unrelated failure). The game itself is migrated
+  once, at close-out: every remaining slice renames more of what it uses.
+- **Checks.** `clients/check_godot.sh` compiles every addon script in headless
+  Godot; with a server URL it also makes live calls that must land in their
+  named classes. The JS `generate` script clears its previous output first,
+  so a renamed model does not linger in the package.
 
 ## Wire inconsistencies (found, not fixed here)
 
@@ -199,7 +268,25 @@ Recorded as each slice finds them, for a later versioned change:
 - `set_lobby_state` returns `{error, reason}` where `reason` is an
   `inspect/1` of an Elixir term.
 - `host_id` is `""` for a hostless lobby, so it cannot carry `format: :uuid`
-  (the never-null policy and the format disagree).
+  (the never-null policy and the format disagree). Same for `lobby_id` and
+  `party_id` on users.
+- Exceptions on API routes render `GamendWeb.ErrorJSON`:
+  `{"errors": {"detail": "Not Found"}}`, not `{"error": "not_found"}`. An
+  unknown or disabled OAuth provider answers this way.
+- Auth errors carry `message` (prose) and `details` (a string or a field map)
+  besides `error`; convention R12 puts field detail under `errors`.
+- `/me` profile changes answer validation failures with
+  `error: "invalid_data"` (R12 says `validation_failed`), status 400 not 422.
+- `PublicUser.lobby_id` and `party_id` are always `""`: kept so the shape
+  matches the member row, but they carry nothing.
+- Password, display-name and username changes answer `{ok, id, …}`; avatar
+  confirmation `{ok, profile_url}` — neither is `{data: …}`.
+- The OAuth exchange answers two unrelated shapes under `data` depending on
+  whether a bearer token was sent.
+- `GroupInvite.group_name` is the group's title; convention says a thing has
+  a `title` and nothing is called `name`.
+- Party invitation lists are bare arrays: no `{data, meta}`, no paging.
+- Group invite actions answer `{status}`; the matching party ones `{}`.
 
 Schema drift the pilot fixed in the document (the wire was already right):
 
@@ -209,6 +296,45 @@ Schema drift the pilot fixed in the document (the wire was already right):
   `""` when hostless.
 - `join_lobby` and `set_lobby_state` documented an empty object; both return
   a `Lobby`. Six operations gained the error statuses their code returns.
+
+Slice 2 (document fixes, plus two wire fixes that could not break a client):
+
+- Every user row lacked `is_activated`; `/me/blacklist` and `/me/blocked`
+  documented three of the member row's eight fields.
+- Device login was documented with the OAuth polling payload
+  (`OAuthSessionData`), which lacks `username`.
+- Password, display-name, username, avatar-ticket and avatar-confirm answers
+  were documented as empty objects.
+- *Wire:* a friend request whose requester or target was not preloaded sent a
+  six-field placeholder; it now goes through `serialize_brief/1` like a loaded
+  one, adding `profile_url` and `is_activated`.
+- *Wire:* an OAuth sign-up that failed validation put `changeset.errors` (a
+  keyword list of tuples) in the body, which Jason cannot encode — a 500. It
+  answers 400 with `errors` now.
+
+Found by the live JavaScript check, fixed across the whole API:
+
+- 17 operations behind `:api_auth` declared no usable security — nine none
+  at all, eight a `"bearer"` scheme the document does not define — so the
+  JavaScript SDK never sent its token and got 401 from all of them
+  (`get_lobby`, every chat operation, matchmaking, tournament join/leave/
+  my-match, `my_quests`, `claim_quest`, `get_my_record`). Godot hid it by
+  sending the token on every request. `list_records_around_user` declared
+  `"bearer"` on a route that does not authenticate; it declares nothing now.
+- The seven `:api_optional_auth` operations declared nothing, so a signed-in
+  JavaScript client called them anonymously and was told a hidden group it
+  belongs to does not exist. They declare the token as optional.
+- `GamendWeb.ApiSecurityTest` keeps router and document in agreement; the
+  rule is in [api-conventions.md](api-conventions.md).
+
+Slice 3 (document only):
+
+- Party members lacked `is_activated`: they are `UserBrief` rows.
+- `creator_id` was a UUID "or -1 for system groups"; it is `""` for one.
+- Creating or joining a lobby as a party was documented as an empty object;
+  both return the `Lobby`. The group icon ticket likewise, as `UploadTicket`.
+- `last_seen_at` on members carried `format: "date-time"` as a string, which
+  OpenApiSpex does not treat as the date-time format, so it was never checked.
 
 ## Definition of done (CONTRIBUTING)
 

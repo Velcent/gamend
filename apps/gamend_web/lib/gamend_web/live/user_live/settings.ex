@@ -62,7 +62,7 @@ defmodule GamendWeb.UserLive.Settings do
           <div class="card bg-warning/10 border-warning p-4 rounded-lg">
             <div class="flex items-start justify-between">
               <div>
-                <strong>{gettext("Failed")}</strong>
+                <strong>{gettext("This sign-in is already linked to another account")}</strong>
                 <div class="text-sm text-base-content/70">
                   {@conflict_provider} ({@conflict_user.id})
                 </div>
@@ -71,9 +71,11 @@ defmodule GamendWeb.UserLive.Settings do
                 <button
                   phx-click="delete_conflicting_account"
                   class="btn btn-error btn-sm"
-                  data-confirm={gettext("Delete?")}
+                  data-confirm={
+                    gettext("Delete the other account permanently? This cannot be undone.")
+                  }
                 >
-                  {gettext("Delete")}
+                  {gettext("Delete other account")}
                 </button>
               </div>
             </div>

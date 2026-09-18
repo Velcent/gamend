@@ -1,7 +1,5 @@
 ## 2026
 
-- **Rename to Gamend** — repo, code and docs.
-- **Chat moderation** — word filter, reports, mute.
 - **Cloud saves** — versioned save slots on object storage.
 - **Skill matchmaking** — ratings, widening bands, leaver refill.
 - **Webhooks & remote config** — signed and retried, on the job queue.

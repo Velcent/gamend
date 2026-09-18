@@ -35,6 +35,9 @@ rm -rf "$OUT_DIR/apis" "$OUT_DIR/models"
 GEN_IMAGE=${GEN_IMAGE:-openapitools/openapi-generator-cli}
 GENERATOR=${GENERATOR:-gdscript}
 ADDITIONAL_PROPERTIES=${ADDITIONAL_PROPERTIES:-coreNamePrefix=Api,coreNameSuffix=Client,allowUnicodeIdentifiers=false}
+# GDScript `class_name` is global: a model named `Lobby` or `Quest` would clash
+# with a game's own class, so every model is `Gamend<Name>` (`GamendLobby`).
+MODEL_NAME_PREFIX=${MODEL_NAME_PREFIX:-Gamend}
 
 echo "Generating GDScript client into $OUT_DIR using Docker image $GEN_IMAGE"
 
@@ -55,6 +58,7 @@ docker run --rm $DOCKER_USER_OPT -v "$ROOT_DIR:/local" $GEN_IMAGE generate \
   -i /local/clients/godot/openapi.json \
   -g "$GENERATOR" \
   -o /local/clients/godot \
+  --model-name-prefix "$MODEL_NAME_PREFIX" \
   --additional-properties="$ADDITIONAL_PROPERTIES"
 
 echo "Generation finished. See $OUT_DIR for generated files."
@@ -77,6 +81,20 @@ find "$OUT_DIR" -type f -iname "*.gd" -print0 | xargs -0 -r perl -0777 -pe "s/#s
 
 # Replace : Object with : Dictionary
 find "$OUT_DIR" -type f -iname "*.gd" -print0 | xargs -0 -r perl -0777 -pe "s/: Object/: Dictionary/g" -i
+
+# The enum check in a generated setter compares `str(value)` against the
+# allowed values, which for an array of enum strings is the whole array's text
+# (`["discord", "steam"]`): it never matches, and the setter returns without
+# assigning, so `list_auth_providers` came back with no providers. Check only
+# a String (`typeof`, since the setter's `value` is statically typed); an
+# array's items are the server's to get right.
+find "$OUT_DIR" -type f -iname "*.gd" -print0 | xargs -0 -r perl -0777 -pe 's/if str\(value\) != "" and not \(str\(value\) in (__\w+__allowable__values)\):/if typeof(value) == TYPE_STRING and str(value) != "" and not (str(value) in $1):/g' -i
+
+# A schema with no type (a field that is sometimes a string, sometimes a map,
+# like ErrorResponse.details) comes out as `@export var x: AnyType:`, a type
+# that does not exist. An exported property must be typed, so it becomes a
+# plain Variant property with its setter kept.
+find "$OUT_DIR" -type f -iname "*.gd" -print0 | xargs -0 -r perl -0777 -pe 's/\@export var (\w+): AnyType:/var $1:/g' -i
 
 # Other fixes
 # Replace login_200_response_data with Login200ResponseData
@@ -213,14 +231,21 @@ fi
 # Generic fix: the generator references models by snake_case names while the
 # model files declare PascalCase class_names. Derive the mapping from the
 # model filenames so new models never need to be added to the list above.
-python3 - "$OUT_DIR" <<'PYEOF'
+#
+# With a model prefix the reference keeps the prefix and snake-cases the rest
+# (`Gamendlist_friends_200_response_data_inner`), so that form is mapped too.
+# Only models the document leaves inline produce it: a named schema's `$ref`
+# already comes out as the class name.
+python3 - "$OUT_DIR" "$MODEL_NAME_PREFIX" <<'PYEOF'
 import os, re, glob, sys
-out_dir = sys.argv[1]
+out_dir, prefix = sys.argv[1], sys.argv[2]
 models = [os.path.splitext(os.path.basename(f))[0] for f in glob.glob(os.path.join(out_dir, "models/*.gd"))]
 def snake(name):
     s = re.sub(r'(?<=[a-zA-Z])(?=[A-Z][a-z])|(?<=[a-z])(?=[A-Z])|(?<=[a-zA-Z])(?=[0-9])|(?<=[0-9])(?=[a-zA-Z])', '_', name)
     return s.lower()
 mapping = {snake(m): m for m in models}
+if prefix:
+    mapping.update({prefix + snake(m[len(prefix):]): m for m in models if m.startswith(prefix)})
 for f in glob.glob(os.path.join(out_dir, "**/*.gd"), recursive=True):
     src = open(f).read()
     out = src

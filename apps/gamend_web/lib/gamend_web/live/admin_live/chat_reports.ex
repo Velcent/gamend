@@ -398,7 +398,7 @@ defmodule GamendWeb.AdminLive.ChatReports do
               type="text"
               name="reported_user_id"
               value={@user_filter}
-              placeholder={gettext("Filter by reported user id")}
+              placeholder={gettext("Filter by reported user ID")}
               phx-debounce="300"
               class="input input-sm w-80 font-mono"
             />
@@ -492,7 +492,7 @@ defmodule GamendWeb.AdminLive.ChatReports do
                         phx-value-id={report.id}
                         class="btn btn-outline btn-warning btn-xs"
                       >
-                        {gettext("Mute user")}
+                        {gettext("Mute player")}
                       </button>
                     </div>
                   </td>

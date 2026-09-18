@@ -177,7 +177,9 @@ defmodule GamendWeb.AdminLive.Matchmaking do
         <div class="card-body">
           <h2 class="card-title">
             {gettext("Ready checks")}
-            <span class="text-sm font-normal text-base-content/70">{gettext("last 24h")}</span>
+            <span class="text-sm font-normal text-base-content/70">
+              {gettext("counts: last 24h · list: 10 most recent")}
+            </span>
           </h2>
           <div class="flex flex-wrap gap-4 text-sm">
             <span>{gettext("Passed")}: <b>{Map.get(@ready_stats, "passed", 0)}</b></span>
@@ -204,7 +206,7 @@ defmodule GamendWeb.AdminLive.Matchmaking do
                   <td><span class={"badge #{status_class(check.status)}"}>{check.status}</span></td>
                   <td class="font-mono text-xs">{check_reason(check)}</td>
                   <td class="text-right font-mono">{ready_counts(check)}</td>
-                  <td class="text-xs">{check.inserted_at}</td>
+                  <td class="text-xs"><.timestamp at={check.inserted_at} format="full" /></td>
                   <td class="text-right">
                     <button
                       :if={check.status == "pending"}
@@ -282,9 +284,9 @@ defmodule GamendWeb.AdminLive.Matchmaking do
                   <td class="text-xs"><.timestamp at={ticket.queued_at} format="full" /></td>
                   <td class="font-mono text-xs">
                     <%= if ticket.match_id do %>
-                      <.link navigate={~p"/admin/lobbies"} class="link link-primary">
-                        {String.slice(ticket.match_id, 0, 8)}…
-                      </.link>
+                      <%!-- Not a link: /admin/lobbies takes no id filter, so it
+                            only ever opened the whole list. --%>
+                      <span title={ticket.match_id}>{String.slice(ticket.match_id, 0, 8)}…</span>
                     <% else %>
                       —
                     <% end %>

@@ -107,7 +107,7 @@ This application uses both session-based authentication (for browser flows) and 
 ### Browser Authentication
 
 - **Always** handle authentication flow at the router level with proper redirects
-- **Always** be mindful of where to place routes. The pipelines and `live_session` scopes are declared in `GamendWeb.Router.Shared`:
+- **Always** be mindful of where to place routes. Pipelines and `live_session` scopes are declared in `GamendWeb.Router.Shared`; the plugs and `on_mount` hooks live in `GamendWeb.UserAuth`:
   - A plug `:fetch_current_scope_for_user` that is included in the default browser pipeline
   - A plug `:require_authenticated_user` that redirects to the log in page when the user is not authenticated
   - A plug `:require_admin_user` for admin pages
@@ -202,7 +202,7 @@ invariants code must keep.
 | `Gamend.Groups` | [groups](priv/docs/40-gameplay/06-groups.md) | `public` / `private` / `hidden`. Invites in `Groups.Invites`, join requests in `Groups.JoinRequests`, re-exported from `Gamend.Groups` |
 | `Gamend.Friends` | [friends](priv/docs/40-gameplay/50-friends.md) | `blocked?/2` is bidirectional. Check it (or `any_blocked?/2`) on every invite and DM |
 | `Gamend.Chat` | [chat](priv/docs/40-gameplay/60-chat.md) | Types `lobby` / `group` / `party` / `friend`. Moderation (word filter, reports, mutes) lives under `Gamend.Chat.*` |
-| `Gamend.Notifications` | [notifications](priv/docs/40-gameplay/70-notifications.md) | The type set is closed: `Notifications.Types` plus plugin `notification_types/0`; an unknown `metadata.type` is rejected at write. Invite records are independent of the notification they send |
+| `Gamend.Notifications` | [notifications](priv/docs/40-gameplay/70-notifications.md) | The type set is closed: `Notifications.Types` plus plugin `notification_types/0`; an unknown `metadata.type` (string or atom key) is rejected at write. A code core emits goes in `Types` and in the list in `notification_types_test.exs`. Invite records are independent of the notification they send |
 | `Gamend.Push` | [push](priv/docs/40-gameplay/80-push-notifications.md) | Delivery per token (FCM / APNs) on the Oban `push` queue. No public send endpoint |
 | `Gamend.Quests` | [quests](priv/docs/40-gameplay/40-quests.md) | Achievements are quests with `category: "achievement"`; there is no Achievements context. Progress is server-authoritative, rewards pay exactly once |
 | `Gamend.Leaderboards` | [leaderboards](priv/docs/40-gameplay/10-leaderboards.md) | |
@@ -211,8 +211,8 @@ invariants code must keep.
 | `Gamend.Economy`, `Gamend.Inventory` | [economy](priv/docs/50-monetization/05-economy.md) | Ledgered through `Gamend.Ledger`. `Economy.spend/4` is one conditional SQL statement and needs no lock |
 | `Gamend.Payments` | [payments](priv/docs/50-monetization/10-payments.md) | |
 | `Gamend.KV` | [key-value](priv/docs/45-storage/10-key-value.md) | Client reads pass the `before_kv_get` hook |
-| `Gamend.Storage` | [object storage](priv/docs/45-storage/20-object-storage.md) | Local disk or S3. Uploads are presigned, never through the app server |
-| `Gamend.Retention` | [data retention](priv/docs/45-storage/30-data-retention.md) | Every table that grows without bound needs a retention class |
+| `Gamend.Storage` | [object storage](priv/docs/45-storage/20-object-storage.md) | Local disk or S3. Uploads are two steps per entity (`…/upload_url`, then confirm); there is no generic upload endpoint |
+| `Gamend.Retention` | [data retention](priv/docs/45-storage/30-data-retention.md) | A table that grows without bound needs a retention class, or a stated reason it is bounded |
 | `Gamend.Jobs`, `Gamend.Schedule` | [background jobs](priv/docs/60-operations/45-background-jobs.md) | Oban; the engine follows the Repo adapter (Lite on SQLite) |
 | `Gamend.Analytics`, `Gamend.ClientLogs`, `Gamend.LobbySnapshots` | [analytics](priv/docs/60-operations/50-player-analytics.md), [client logs](priv/docs/30-clients/60-client-logs.md), [snapshots](priv/docs/60-operations/55-lobby-snapshots.md) | |
 | `Gamend.Signaling`, `Gamend.Realtime`, `Gamend.Presence` | [realtime](priv/docs/30-clients/30-realtime.md), [webrtc](priv/docs/30-clients/50-webrtc.md) | |

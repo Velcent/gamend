@@ -138,6 +138,22 @@ An endpoint returning two parallel collections (friend requests) nests one
 standard meta per collection under `meta.incoming` / `meta.outgoing` rather
 than inventing a parallel-map shape.
 
+## Authentication in the document
+
+An operation's `security` says what its route's pipeline enforces, because a
+generated client sends the bearer token only where `security` asks for it:
+
+| Route pipeline | `security` |
+|---|---|
+| `:api_auth` | `[%{"authorization" => []}]` |
+| `:api_optional_auth` | `[%{}, %{"authorization" => []}]` — anonymous works, a signed-in caller sees more |
+| neither | none |
+
+`authorization` is the only scheme the document defines; a requirement naming
+another (`"bearer"`) is skipped by generators, which then send nothing.
+`GamendWeb.ApiSecurityTest` checks every `/api/v1` route against its
+operation.
+
 ## Paths
 
 **[R5]** Route paths use `snake_case` — `/me/push_tokens`, `/users/log_in`.

@@ -704,13 +704,13 @@ defmodule Gamend.Quests do
 
     Gamend.Async.run(fn ->
       Gamend.Notifications.admin_create_notification(user_id, user_id, %{
-        title: title,
-        content: "",
-        metadata: %{
-          type: "quest_completed",
-          quest_key: quest.key,
-          category: quest.category,
-          quest_title: quest.title
+        "title" => title,
+        "content" => "",
+        "metadata" => %{
+          "type" => "quest_completed",
+          "quest_key" => quest.key,
+          "category" => quest.category,
+          "quest_title" => quest.title
         }
       })
     end)

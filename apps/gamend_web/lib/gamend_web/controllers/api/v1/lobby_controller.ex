@@ -424,9 +424,10 @@ defmodule GamendWeb.Api.V1.LobbyController do
 
   operation(:show,
     operation_id: "get_lobby",
+    security: [%{"authorization" => []}],
     summary: "Get a single lobby",
     description:
-      "Return details for a single lobby. Non-hidden lobbies can be viewed by anyone. Also returns the current member list.",
+      "Return a lobby with its current members and spectator count. Requires a signed-in user; a hidden lobby is visible only to its own members, and anyone else gets 404.",
     parameters: [
       id: [
         in: :path,

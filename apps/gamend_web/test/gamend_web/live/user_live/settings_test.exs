@@ -162,7 +162,7 @@ defmodule GamendWeb.UserLive.SettingsTest do
         })
         |> render_submit()
 
-      assert result =~ "Success."
+      assert result =~ "Check your new email address"
       assert Accounts.get_user_by_email(user.email)
     end
 

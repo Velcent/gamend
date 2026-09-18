@@ -38,16 +38,18 @@ defmodule GamendWeb.AdminLive.Logs do
       <div class="space-y-4">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div class="flex items-center gap-3">
-            <.link navigate={~p"/admin"} class="btn btn-outline btn-sm">&larr; Admin</.link>
+            <.link navigate={~p"/admin"} class="btn btn-outline btn-sm">&larr; Back to Admin</.link>
             <h1 class="text-xl font-bold">Logs</h1>
           </div>
 
           <div class="flex items-center gap-2 text-xs text-base-content/70">
-            <span>Buffer: {@total_buffered} entries</span>
+            <span>
+              Buffer: {ngettext("%{count} entry", "%{count} entries", @total_buffered)}
+            </span>
             <span>&middot;</span>
             <span>{@source_counts.client} from clients</span>
             <span :if={@level_counts[:error]} class="text-error font-semibold">
-              &middot; {@level_counts[:error]} errors
+              &middot; {ngettext("%{count} error", "%{count} errors", @level_counts[:error])}
             </span>
           </div>
         </div>
@@ -73,8 +75,10 @@ defmodule GamendWeb.AdminLive.Logs do
           <div>
             <span class="font-semibold">Client entries are being discarded.</span>
             Collection asks for <span class="font-mono">{@policy.level}</span>
-            but this server's Logger level is <span class="font-mono">{@logger_level}</span>, which drops everything below <span class="font-mono">warn</span>. Lower the Logger level, or raise the client
-            capture level, or expect to see only warnings and errors.
+            but this server's Logger level is <span class="font-mono">{@logger_level}</span>, which drops everything below it. Lower the Logger level, or raise the client
+            capture level, or expect to see only entries at
+            <span class="font-mono">{@logger_level}</span>
+            and above.
           </div>
         </div>
 
@@ -143,7 +147,7 @@ defmodule GamendWeb.AdminLive.Logs do
           id="log-module-filter"
           name="module"
           value={@module_filter}
-          placeholder="Module (eg Gamend.Hooks)"
+          placeholder="Module (e.g. Gamend.Hooks)"
           class="input input-sm"
           phx-debounce="300"
         />
@@ -249,9 +253,9 @@ defmodule GamendWeb.AdminLive.Logs do
       <div :if={not @policy.enabled} class="alert alert-info text-sm">
         <div>
           <span class="font-semibold">Client log collection is off.</span>
-          Clients are told to send nothing. Enable it in
-          <.link navigate={~p"/admin/config"} class="link">config</.link>
-          (<span class="font-mono">client_logs.enabled</span>).
+          Clients are told to send nothing. Enable it with
+          <span class="font-mono">GAMEND_CLIENT_LOGS_ENABLED=true</span>
+          (see <.link navigate={~p"/admin/settings"} class="link">Settings</.link>) and restart.
         </div>
       </div>
 
@@ -334,7 +338,7 @@ defmodule GamendWeb.AdminLive.Logs do
               <th>Last seen</th>
               <th>Session</th>
               <th>User</th>
-              <th>Build</th>
+              <th>Platform · version</th>
               <th class="text-right">Entries</th>
               <th class="text-right">Errors</th>
               <th class="text-right">Dropped</th>
@@ -432,7 +436,11 @@ defmodule GamendWeb.AdminLive.Logs do
               started <.timestamp at={@selected.started_at} format="full" empty="—" />
             </span>
             <span :if={@selected.dropped_count > 0} class="text-warning font-semibold">
-              {@selected.dropped_count} entries never arrived
+              {ngettext(
+                "%{count} entry never arrived",
+                "%{count} entries never arrived",
+                @selected.dropped_count
+              )}
             </span>
           </div>
         </div>

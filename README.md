@@ -29,7 +29,7 @@ own server**; there is no hosted service to buy.
 
 Measured on Fly, one machine at a time, hardware read back off the machine
 before load was applied. **37,854 concurrent idle players on one core with
-3 GB**, against Nakama's published 20,277 on the hardware.
+3 GB**, against Nakama's published 20,277 on the same 1 vCPU / 3 GB configuration.
 
 Full per-size tables, the operations breakdown, and how to reproduce any of it:
 [Performance](https://gamend.org/docs/performance), 
@@ -41,7 +41,7 @@ Full per-size tables, the operations breakdown, and how to reproduce any of it:
 - **Users** — Profiles, metadata, device tokens, account lifecycle
 - **Lobbies** — Host-managed, max users, hidden/locked, passwords, real-time updates
 - **Groups** — Public / private / hidden communities, roles, join requests, invites
-- **Parties** — Ephemeral groups (2–10 players), invite-based, lobby integration
+- **Parties** — Ephemeral groups (2–32 players by default), invite-based, lobby integration
 - **Friends** — Requests, accept/reject, blocking
 - **Chat** — Lobby, group, party, and friend DMs with read cursors and unread counts
 - **Notifications** — Typed notifications for all social events, read/unread, real-time delivery
@@ -68,7 +68,7 @@ Full per-size tables, the operations breakdown, and how to reproduce any of it:
 
 - **Elixir 1.20 & Erlang/OTP 29** — see [`.tool-versions`](.tool-versions); with [asdf](https://asdf-vm.com/) just run `asdf install`
 - **Rust** ([rustup](https://rustup.rs/)) — required to build the WebRTC native dependency (`ex_sctp`)
-- **PostgreSQL** — optional. Dev uses SQLite by default; set `POSTGRES_*` or `DATABASE_URL` in `.env` to use Postgres instead. The adapter is chosen at compile time, so after changing these run `mix deps.clean gamend_core gamend_web --build` and recompile. (Docker: use the `-postgres` image tag or build with `GAMEND_DB_ADAPTER=postgres`.)
+- **PostgreSQL** — optional. Dev uses SQLite by default; set `GAMEND_DB_URL` or `GAMEND_DB_POSTGRES_*` in `.env` to use Postgres instead. The adapter is chosen at compile time, so after changing these run `mix deps.clean gamend_core gamend_web --build` and recompile. (Docker: use the `-postgres` image tag or build with `GAMEND_DB_ADAPTER=postgres`.)
 
 ### First run
 

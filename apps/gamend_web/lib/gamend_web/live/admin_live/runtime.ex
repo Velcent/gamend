@@ -218,7 +218,9 @@ defmodule GamendWeb.AdminLive.Runtime do
                 type="text"
                 name="q"
                 value={@search}
-                placeholder={"Search #{@count} entries..."}
+                placeholder={
+                  ngettext("Search %{count} entry...", "Search %{count} entries...", @count)
+                }
                 phx-debounce="200"
                 class="input input-sm w-full"
               />
@@ -245,7 +247,7 @@ defmodule GamendWeb.AdminLive.Runtime do
               phx-click="toggle_diagram"
               class="btn btn-outline btn-sm"
             >
-              {if @show_diagram, do: "Hide diagram", else: "Show ER diagram"}
+              {if @show_diagram, do: "Hide ER diagram", else: "Show ER diagram"}
             </button>
           </div>
 
@@ -267,7 +269,7 @@ defmodule GamendWeb.AdminLive.Runtime do
             </p>
             <details class="mt-2">
               <summary class="cursor-pointer text-xs text-base-content/60">
-                mermaid source (copyable)
+                Mermaid source (copyable)
               </summary>
               <pre class="text-xs overflow-x-auto mt-2"><code>{@diagram}</code></pre>
             </details>
@@ -281,7 +283,9 @@ defmodule GamendWeb.AdminLive.Runtime do
             Nothing matches.
           </div>
 
-          <div class="mt-4 flex justify-center">
+          <%!-- Not on Hooks: that tab renders every row at once, grouped by
+                category, so a page size there changed nothing. --%>
+          <div :if={@tab != "hooks"} class="mt-4 flex justify-center">
             <.pagination
               page={@page}
               total_pages={@total_pages}
@@ -705,7 +709,7 @@ defmodule GamendWeb.AdminLive.Runtime do
     <table class="table table-sm">
       <thead>
         <tr>
-          <th class="text-right">Id</th>
+          <th class="text-right">ID</th>
           <th>Namespace</th>
         </tr>
       </thead>

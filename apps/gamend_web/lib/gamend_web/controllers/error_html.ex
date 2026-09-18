@@ -120,6 +120,16 @@ defmodule GamendWeb.ErrorHTML do
     )
   end
 
+  defp message_for(413) do
+    gettext("That was too large to send. Try a smaller file.")
+  end
+
+  # A 4xx is the request, not the server: "something broke on our side" would
+  # be wrong, and telling the reader it was logged would be too.
+  defp message_for(status) when status in 400..499 do
+    gettext("The request could not be handled. Go back and try again.")
+  end
+
   defp message_for(_status) do
     gettext("Something broke on our side. It has been logged, and the rest of the site is fine.")
   end

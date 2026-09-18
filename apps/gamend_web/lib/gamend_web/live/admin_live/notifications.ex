@@ -88,7 +88,13 @@ defmodule GamendWeb.AdminLive.Notifications do
               <button
                 type="button"
                 phx-click="bulk_delete"
-                data-confirm={"Delete #{MapSet.size(@selected_ids)} selected notifications?"}
+                data-confirm={
+                  ngettext(
+                    "Delete %{count} selected notification?",
+                    "Delete %{count} selected notifications?",
+                    MapSet.size(@selected_ids)
+                  )
+                }
                 class="btn btn-sm btn-outline btn-error"
                 disabled={MapSet.size(@selected_ids) == 0}
               >
@@ -113,8 +119,8 @@ defmodule GamendWeb.AdminLive.Notifications do
                         />
                       </th>
                       <th>ID</th>
-                      <th>Sender ID</th>
-                      <th>Recipient ID</th>
+                      <th>Sender</th>
+                      <th>Recipient</th>
                       <th>Title</th>
                       <th>Content</th>
                       <th>Metadata</th>
@@ -239,62 +245,18 @@ defmodule GamendWeb.AdminLive.Notifications do
     sender_id = parse_id(params["sender_id"])
     recipient_id = parse_id(params["recipient_id"])
 
-    if is_nil(sender_id) or is_nil(recipient_id) do
-      {:noreply, put_flash(socket, :error, "Sender ID and Recipient ID are required")}
-    else
-      metadata =
-        case params["metadata"] do
-          nil ->
-            %{}
+    # Text that is not a JSON object is refused rather than sent as %{}.
+    metadata = decode_metadata(params["metadata"])
 
-          "" ->
-            %{}
+    cond do
+      is_nil(sender_id) or is_nil(recipient_id) ->
+        {:noreply, put_flash(socket, :error, "Sender ID and Recipient ID are required")}
 
-          s when is_binary(s) ->
-            case Jason.decode(s) do
-              {:ok, map} when is_map(map) -> map
-              _ -> %{}
-            end
+      metadata == :error ->
+        {:noreply, put_flash(socket, :error, "Metadata must be a JSON object")}
 
-          other ->
-            other
-        end
-
-      attrs = %{
-        "title" => params["title"],
-        "content" => params["content"],
-        "icon_url" => params["icon_url"],
-        "metadata" => metadata
-      }
-
-      case Notifications.admin_create_notification(sender_id, recipient_id, attrs) do
-        {:ok, _notification} ->
-          {:noreply,
-           socket
-           |> put_flash(:info, "Notification created")
-           |> assign(
-             :create_form,
-             to_form(
-               %{
-                 "sender_id" => "",
-                 "recipient_id" => "",
-                 "title" => "",
-                 "content" => "",
-                 "icon_url" => "",
-                 "metadata" => ""
-               },
-               as: :notification
-             )
-           )
-           |> reload_notifications()}
-
-        {:error, %Ecto.Changeset{} = changeset} ->
-          {:noreply,
-           put_flash(socket, :error, "Validation failed: #{changeset_error_summary(changeset)}")}
-
-        {:error, reason} ->
-          {:noreply, put_flash(socket, :error, "Failed: #{inspect(reason)}")}
-      end
+      true ->
+        create_notification(socket, sender_id, recipient_id, params, metadata)
     end
   end
 
@@ -349,7 +311,11 @@ defmodule GamendWeb.AdminLive.Notifications do
     socket =
       cond do
         failed == 0 ->
-          put_flash(socket, :info, "Deleted #{deleted} notifications")
+          put_flash(
+            socket,
+            :info,
+            ngettext("Deleted %{count} notification", "Deleted %{count} notifications", deleted)
+          )
 
         deleted == 0 ->
           put_flash(socket, :error, "Failed to delete selected notifications")
@@ -358,7 +324,12 @@ defmodule GamendWeb.AdminLive.Notifications do
           put_flash(
             socket,
             :error,
-            "Deleted #{deleted} notifications; failed #{failed}"
+            ngettext(
+              "Deleted %{count} notification; %{failed} failed",
+              "Deleted %{count} notifications; %{failed} failed",
+              deleted,
+              failed: failed
+            )
           )
       end
 
@@ -431,4 +402,66 @@ defmodule GamendWeb.AdminLive.Notifications do
     |> Ecto.Changeset.traverse_errors(fn {msg, _opts} -> msg end)
     |> Enum.map_join("; ", fn {field, messages} -> "#{field} #{Enum.join(messages, ", ")}" end)
   end
+
+  defp decode_metadata(nil), do: %{}
+
+  defp decode_metadata(json) when is_binary(json) do
+    case String.trim(json) do
+      "" ->
+        %{}
+
+      trimmed ->
+        case Jason.decode(trimmed) do
+          {:ok, map} when is_map(map) -> map
+          _ -> :error
+        end
+    end
+  end
+
+  defp decode_metadata(other), do: other
+
+  defp create_notification(socket, sender_id, recipient_id, params, metadata) do
+    attrs = %{
+      "title" => params["title"],
+      "content" => params["content"],
+      "icon_url" => params["icon_url"],
+      "metadata" => metadata
+    }
+
+    case Notifications.admin_create_notification(sender_id, recipient_id, attrs) do
+      {:ok, notification} ->
+        {:noreply,
+         socket
+         |> put_flash(:info, created_message(notification))
+         |> assign(
+           :create_form,
+           to_form(
+             %{
+               "sender_id" => "",
+               "recipient_id" => "",
+               "title" => "",
+               "content" => "",
+               "icon_url" => "",
+               "metadata" => ""
+             },
+             as: :notification
+           )
+         )
+         |> reload_notifications()}
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        {:noreply,
+         put_flash(socket, :error, "Validation failed: #{changeset_error_summary(changeset)}")}
+
+      {:error, reason} ->
+        {:noreply, put_flash(socket, :error, "Failed: #{inspect(reason)}")}
+    end
+  end
+
+  # `admin_create_notification/3` upserts on (sender, recipient, title): a
+  # second send replaces the first's content, and only `updated_at` moves.
+  defp created_message(%{inserted_at: at, updated_at: at}), do: "Notification created"
+
+  defp created_message(_notification),
+    do: "Notification updated: one with the same sender, recipient and title already existed"
 end

@@ -114,7 +114,7 @@ defmodule GamendWeb.UserLive.Settings.GroupsTab do
                 <.input
                   field={@create_group_form[:max_members]}
                   type="number"
-                  label={gettext("Members")}
+                  label={gettext("Max members")}
                 />
               </div>
               <div class="mt-3">
@@ -156,7 +156,7 @@ defmodule GamendWeb.UserLive.Settings.GroupsTab do
                 />
                 <.input
                   field={@group_edit_form[:max_members]}
-                  label={gettext("Members")}
+                  label={gettext("Max members")}
                   type="number"
                 />
                 <div class="flex gap-2">
@@ -188,11 +188,11 @@ defmodule GamendWeb.UserLive.Settings.GroupsTab do
                         true -> "badge-error"
                       end
                     ]}>
-                      {@group_detail.type}
+                      {group_type_label(@group_detail.type)}
                     </span>
                   </div>
                   <div>
-                    <strong>{gettext("Members")}:</strong> {@group_detail.max_members}
+                    <strong>{gettext("Max members")}:</strong> {@group_detail.max_members}
                   </div>
                   <div>
                     <strong>{gettext("Date")}:</strong> <.timestamp at={@group_detail.inserted_at} />
@@ -205,7 +205,7 @@ defmodule GamendWeb.UserLive.Settings.GroupsTab do
                       "badge badge-sm",
                       if(@group_detail_role == "admin", do: "badge-info", else: "badge-ghost")
                     ]}>
-                      {@group_detail_role || gettext("No results.")}
+                      {group_role_label(@group_detail_role)}
                     </span>
                   </div>
                   <div class="flex gap-2">
@@ -256,7 +256,9 @@ defmodule GamendWeb.UserLive.Settings.GroupsTab do
                             "inline-block w-2 h-2 rounded-full",
                             if(m.user.is_online, do: "bg-green-500", else: "bg-gray-400")
                           ]}
-                          title={if(m.user.is_online, do: "Online", else: "Offline")}
+                          title={
+                            if(m.user.is_online, do: gettext("Online"), else: gettext("Offline"))
+                          }
                         />
                       </td>
                       <td class="text-sm">{LiveHelpers.public_user_name(m.user)}</td>
@@ -265,7 +267,7 @@ defmodule GamendWeb.UserLive.Settings.GroupsTab do
                           "badge badge-sm",
                           if(m.role == "admin", do: "badge-info", else: "badge-ghost")
                         ]}>
-                          {m.role}
+                          {group_role_label(m.role)}
                         </span>
                       </td>
                       <td class="text-sm whitespace-nowrap">
@@ -326,7 +328,7 @@ defmodule GamendWeb.UserLive.Settings.GroupsTab do
             <%!-- Incoming Join Requests (admin only) --%>
             <div :if={@group_detail_role == "admin" && @group_join_requests != []} class="mt-6">
               <h4 class="font-semibold text-base mb-3">
-                {gettext("Request")} ({length(@group_join_requests)})
+                {gettext("Join requests")} ({length(@group_join_requests)})
               </h4>
               <div class="space-y-2">
                 <div
@@ -476,11 +478,11 @@ defmodule GamendWeb.UserLive.Settings.GroupsTab do
                 :for={
                   {tab, label} <- [
                     {"my_groups", gettext("Groups") <> " (#{@groups_count})"},
-                    {"browse", gettext("Search...")},
-                    {"invitations", gettext("Invite") <> " (#{length(@group_invitations)})"},
-                    {"requests", gettext("Request") <> " (#{length(@group_pending_requests)})"},
+                    {"browse", gettext("Find groups")},
+                    {"invitations", gettext("Invitations") <> " (#{length(@group_invitations)})"},
+                    {"requests", gettext("My requests") <> " (#{length(@group_pending_requests)})"},
                     {"sent_invitations",
-                     gettext("Send") <>
+                     gettext("Sent invitations") <>
                        " (#{length(@group_sent_invitations)})"}
                   ]
                 }
@@ -509,7 +511,7 @@ defmodule GamendWeb.UserLive.Settings.GroupsTab do
                     <tr>
                       <th>{gettext("Title")}</th>
                       <th>{gettext("Type")}</th>
-                      <th>{gettext("Members")}</th>
+                      <th>{gettext("Max members")}</th>
                       <th>{gettext("Role")}</th>
                       <th></th>
                     </tr>
@@ -537,7 +539,7 @@ defmodule GamendWeb.UserLive.Settings.GroupsTab do
                             true -> "badge-error"
                           end
                         ]}>
-                          {group.type}
+                          {group_type_label(group.type)}
                         </span>
                       </td>
                       <td class="text-sm">{group.max_members}</td>
@@ -546,7 +548,7 @@ defmodule GamendWeb.UserLive.Settings.GroupsTab do
                           "badge badge-sm",
                           if(role == "admin", do: "badge-info", else: "badge-ghost")
                         ]}>
-                          {role}
+                          {group_role_label(role)}
                         </span>
                       </td>
                       <td class="flex gap-1">
@@ -618,7 +620,7 @@ defmodule GamendWeb.UserLive.Settings.GroupsTab do
                   <tr>
                     <th>{gettext("Title")}</th>
                     <th>{gettext("Type")}</th>
-                    <th>{gettext("Members")}</th>
+                    <th>{gettext("Max members")}</th>
                     <th></th>
                   </tr>
                 </thead>
@@ -638,7 +640,7 @@ defmodule GamendWeb.UserLive.Settings.GroupsTab do
                         "badge badge-sm",
                         if(group.type == "public", do: "badge-success", else: "badge-warning")
                       ]}>
-                        {group.type}
+                        {group_type_label(group.type)}
                       </span>
                     </td>
                     <td class="text-sm">{group.max_members}</td>
@@ -710,11 +712,9 @@ defmodule GamendWeb.UserLive.Settings.GroupsTab do
                       :for={inv <- @group_invitations}
                       id={"group-inv-" <> to_string(inv.id)}
                     >
+                      <td class="text-sm font-mono">{inv.group_name}</td>
                       <td class="text-sm font-mono">
-                        {inv.group_name || "Group ##{inv.group_id}"}
-                      </td>
-                      <td class="text-sm font-mono">
-                        {inv.sender_name || "User ##{inv.sender_id}"}
+                        {inv.sender_name}
                       </td>
                       <td class="text-sm whitespace-nowrap">
                         <.timestamp at={inv.inserted_at} />
@@ -755,7 +755,7 @@ defmodule GamendWeb.UserLive.Settings.GroupsTab do
                     <tr>
                       <th>{gettext("Group")}</th>
                       <th>{gettext("Status")}</th>
-                      <th>{gettext("Request")}</th>
+                      <th>{gettext("Requested")}</th>
                       <th>{gettext("Actions")}</th>
                     </tr>
                   </thead>
@@ -766,7 +766,9 @@ defmodule GamendWeb.UserLive.Settings.GroupsTab do
                     >
                       <td class="text-sm font-mono">{req.group.title}</td>
                       <td>
-                        <span class="badge badge-sm badge-warning">{req.status}</span>
+                        <span class="badge badge-sm badge-warning">
+                          {if req.status == "pending", do: gettext("Pending"), else: req.status}
+                        </span>
                       </td>
                       <td class="text-sm whitespace-nowrap">
                         <.timestamp at={req.inserted_at} />
@@ -798,7 +800,7 @@ defmodule GamendWeb.UserLive.Settings.GroupsTab do
                   <thead>
                     <tr>
                       <th>{gettext("Group")}</th>
-                      <th>{gettext("Invite")}</th>
+                      <th>{gettext("To")}</th>
                       <th>{gettext("Date")}</th>
                       <th>{gettext("Actions")}</th>
                     </tr>
@@ -808,11 +810,9 @@ defmodule GamendWeb.UserLive.Settings.GroupsTab do
                       :for={inv <- @group_sent_invitations}
                       id={"group-sent-inv-" <> to_string(inv.id)}
                     >
+                      <td class="text-sm font-mono">{inv.group_name}</td>
                       <td class="text-sm font-mono">
-                        {inv.group_name || "Group ##{inv.group_id}"}
-                      </td>
-                      <td class="text-sm font-mono">
-                        {inv.recipient_name || "User ##{inv.recipient_id}"}
+                        {inv.recipient_name}
                       </td>
                       <td class="text-sm whitespace-nowrap">
                         <.timestamp at={inv.inserted_at} />
@@ -1092,7 +1092,8 @@ defmodule GamendWeb.UserLive.Settings.GroupsTab do
         {:noreply, assign(socket, group_edit_form: to_form(changeset, as: :group))}
 
       {:error, reason} ->
-        {:noreply, put_flash(socket, :error, gettext("Failed") <> ": " <> inspect(reason))}
+        {:noreply,
+         put_flash(socket, :error, LiveHelpers.failure_message(gettext("Failed"), reason))}
     end
   end
 
@@ -1110,7 +1111,8 @@ defmodule GamendWeb.UserLive.Settings.GroupsTab do
          |> reload_group_members()}
 
       {:error, reason} ->
-        {:noreply, put_flash(socket, :error, gettext("Failed") <> ": " <> inspect(reason))}
+        {:noreply,
+         put_flash(socket, :error, LiveHelpers.failure_message(gettext("Failed"), reason))}
     end
   end
 
@@ -1127,7 +1129,8 @@ defmodule GamendWeb.UserLive.Settings.GroupsTab do
          |> reload_group_members()}
 
       {:error, reason} ->
-        {:noreply, put_flash(socket, :error, gettext("Failed") <> ": " <> inspect(reason))}
+        {:noreply,
+         put_flash(socket, :error, LiveHelpers.failure_message(gettext("Failed"), reason))}
     end
   end
 
@@ -1144,7 +1147,8 @@ defmodule GamendWeb.UserLive.Settings.GroupsTab do
          |> reload_group_members()}
 
       {:error, reason} ->
-        {:noreply, put_flash(socket, :error, gettext("Failed") <> ": " <> inspect(reason))}
+        {:noreply,
+         put_flash(socket, :error, LiveHelpers.failure_message(gettext("Failed"), reason))}
     end
   end
 
@@ -1197,13 +1201,22 @@ defmodule GamendWeb.UserLive.Settings.GroupsTab do
            Enum.reject(socket.assigns.invite_friends, &(&1.id == uid))
          )}
 
-      {:error, :already_member} ->
-        {:noreply, put_flash(socket, :error, gettext("Failed"))}
-
       {:error, reason} ->
-        {:noreply, put_flash(socket, :error, gettext("Failed") <> ": " <> inspect(reason))}
+        {:noreply,
+         put_flash(socket, :error, LiveHelpers.failure_message(gettext("Failed"), reason))}
     end
   end
+
+  # The stored values are lowercase codes; show the words the create form uses.
+  defp group_type_label("public"), do: gettext("Public")
+  defp group_type_label("private"), do: gettext("Private")
+  defp group_type_label("hidden"), do: gettext("Hidden")
+  defp group_type_label(type), do: type
+
+  defp group_role_label("admin"), do: gettext("Admin")
+  defp group_role_label("member"), do: gettext("Member")
+  defp group_role_label(nil), do: "-"
+  defp group_role_label(role), do: role
 
   defp put_success_flash(socket), do: LiveHelpers.put_success(socket, gettext("Success."))
 

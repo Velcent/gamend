@@ -111,8 +111,10 @@ defmodule GamendWeb.AdminLive.Config do
       apple_web_client_id: Gamend.Settings.get(Gamend.OAuth.Providers, :apple_client_id),
       apple_ios_client_id: Gamend.Settings.get(Gamend.OAuth.Providers, :apple_ios_client_id),
       apple_team_id: Gamend.Settings.get(Gamend.OAuth.Providers, :apple_team_id),
-      apple_key_id: Gamend.Settings.get(Gamend.Payments.Settings, :apple_key_id),
-      apple_private_key: Gamend.Settings.get(Gamend.Payments.Settings, :apple_private_key),
+      # Sign in with Apple's own key, not the App Store payments key of the same
+      # name in Gamend.Payments.Settings.
+      apple_key_id: Gamend.Settings.get(Gamend.OAuth.Providers, :apple_key_id),
+      apple_private_key: Gamend.Settings.get(Gamend.OAuth.Providers, :apple_private_key),
       google_client_id: Gamend.Settings.get(Gamend.OAuth.Providers, :google_client_id),
       google_client_secret: Gamend.Settings.get(Gamend.OAuth.Providers, :google_client_secret),
       facebook_client_id: Gamend.Settings.get(Gamend.OAuth.Providers, :facebook_client_id),
@@ -169,13 +171,16 @@ defmodule GamendWeb.AdminLive.Config do
       node_name: node(),
       node_alive?: Node.alive?(),
       release_distribution_enabled?: Node.alive?(),
-      cache_enabled_env: Gamend.Settings.get(Gamend.Cache.Settings, :enabled),
-      cache_mode_env: Gamend.Settings.get(Gamend.Cache.Settings, :mode),
-      cache_l2_env: Gamend.Settings.get(Gamend.Cache.Settings, :l2),
+      # Only what the host set: the rows print "<unset (default: …)>" otherwise,
+      # which `Gamend.Settings.get/2` would never let them do.
+      cache_enabled_env: ConfigDiagnostics.setting_if_set(Gamend.Cache.Settings, :enabled),
+      cache_mode_env: ConfigDiagnostics.setting_if_set(Gamend.Cache.Settings, :mode),
+      cache_l2_env: ConfigDiagnostics.setting_if_set(Gamend.Cache.Settings, :l2),
       cache_redis_url_env:
         Gamend.Settings.get(Gamend.Cache.Settings, :redis_url) ||
           Gamend.Settings.get(Gamend.Cluster, :redis_url),
-      cache_redis_pool_size_env: Gamend.Settings.get(Gamend.Cache.Settings, :redis_pool_size),
+      cache_redis_pool_size_env:
+        ConfigDiagnostics.setting_if_set(Gamend.Cache.Settings, :redis_pool_size),
       cache_enabled_default: "true",
       cache_mode_default: "single",
       cache_l2_default: "partitioned",
@@ -196,7 +201,7 @@ defmodule GamendWeb.AdminLive.Config do
       db_queue_interval_env: Gamend.Settings.get(Gamend.Database, :queue_interval_ms),
       db_query_timeout_env: Gamend.Settings.get(Gamend.Database, :query_timeout_ms),
       postgres_port_env: Gamend.Settings.get(Gamend.Database, :postgres_port),
-      ecto_ipv6_env: Gamend.Settings.get(Gamend.Database, :ipv6),
+      ecto_ipv6_env: ConfigDiagnostics.setting_if_set(Gamend.Database, :ipv6),
       ecto_ipv6_recommended: clustering.ecto_ipv6_recommended,
       phx_server_env: Gamend.Settings.get(GamendWeb.Http, :server),
       fly_app_name_env: clustering.fly_app_name_env,
@@ -228,15 +233,18 @@ defmodule GamendWeb.AdminLive.Config do
         changelog: Content.path(:changelog),
         roadmap: Content.path(:roadmap)
       },
-      device_auth_enabled_app: Application.get_env(:gamend_core, :device_auth_enabled),
+      device_auth_enabled: Gamend.Accounts.device_auth_enabled?(),
       device_auth_enabled_env: Gamend.Settings.get(Gamend.Accounts, :device_auth_enabled),
       require_account_activation: Gamend.Accounts.require_account_activation?(),
       require_account_activation_env: Gamend.Settings.get(Gamend.Accounts, :require_activation),
       min_password_length_env: Gamend.Settings.get(Gamend.Accounts.User, :min_password_length),
+      min_password_length_set?:
+        ConfigDiagnostics.setting_set?(Gamend.Accounts.User, :min_password_length),
       min_password_length_effective: User.min_password_length(),
 
       # PHX/CORS runtime configuration (set via GAMEND_HTTP_ALLOWED_ORIGINS)
       phx_allowed_origins_env: Gamend.Settings.get(GamendWeb.Http, :allowed_origins),
+      phx_allowed_origins_set?: ConfigDiagnostics.setting_set?(GamendWeb.Http, :allowed_origins),
       cors_allowed_origins: Application.get_env(:gamend_web, :cors_allowed_origins, "*"),
 
       # HTTPS / TLS certificate diagnostics
@@ -248,73 +256,20 @@ defmodule GamendWeb.AdminLive.Config do
       ssl_enabled?: ConfigDiagnostics.ssl_enabled?(),
       ssl_cert_info: ConfigDiagnostics.ssl_cert_info(),
 
-      # Rate Limiting runtime configuration
-      rate_limit_enabled:
-        Keyword.get(
-          Application.get_env(:gamend_web, GamendWeb.Plugs.RateLimiter, []),
-          :enabled,
-          true
-        ),
-      rate_limit_general_limit:
-        Keyword.get(
-          Application.get_env(:gamend_web, GamendWeb.Plugs.RateLimiter, []),
-          :general_limit,
-          1200
-        ),
-      rate_limit_general_window:
-        Keyword.get(
-          Application.get_env(:gamend_web, GamendWeb.Plugs.RateLimiter, []),
-          :general_window_ms,
-          60_000
-        ),
-      rate_limit_auth_limit:
-        Keyword.get(
-          Application.get_env(:gamend_web, GamendWeb.Plugs.RateLimiter, []),
-          :auth_limit,
-          30
-        ),
-      rate_limit_auth_window:
-        Keyword.get(
-          Application.get_env(:gamend_web, GamendWeb.Plugs.RateLimiter, []),
-          :auth_window_ms,
-          60_000
-        ),
-      rate_limit_ws_limit:
-        Keyword.get(
-          Application.get_env(:gamend_web, GamendWeb.Plugs.RateLimiter, []),
-          :ws_limit,
-          300
-        ),
-      rate_limit_ws_window:
-        Keyword.get(
-          Application.get_env(:gamend_web, GamendWeb.Plugs.RateLimiter, []),
-          :ws_window_ms,
-          10_000
-        ),
-      rate_limit_dc_limit:
-        Keyword.get(
-          Application.get_env(:gamend_web, GamendWeb.Plugs.RateLimiter, []),
-          :dc_limit,
-          600
-        ),
-      rate_limit_dc_window:
-        Keyword.get(
-          Application.get_env(:gamend_web, GamendWeb.Plugs.RateLimiter, []),
-          :dc_window_ms,
-          10_000
-        ),
-      rate_limit_ice_limit:
-        Keyword.get(
-          Application.get_env(:gamend_web, GamendWeb.Plugs.RateLimiter, []),
-          :ice_limit,
-          150
-        ),
-      rate_limit_ice_window:
-        Keyword.get(
-          Application.get_env(:gamend_web, GamendWeb.Plugs.RateLimiter, []),
-          :ice_window_ms,
-          30_000
-        ),
+      # Rate limiting: the values the plug and channels enforce. These used to
+      # be `Keyword.get` reads with their own fallbacks (1200/30/300/600),
+      # which the page showed instead of the declared defaults (240/10/60/300).
+      rate_limit_enabled: rate_limit(:enabled),
+      rate_limit_general_limit: rate_limit(:general_limit),
+      rate_limit_general_window: rate_limit(:general_window_ms),
+      rate_limit_auth_limit: rate_limit(:auth_limit),
+      rate_limit_auth_window: rate_limit(:auth_window_ms),
+      rate_limit_ws_limit: rate_limit(:ws_limit),
+      rate_limit_ws_window: rate_limit(:ws_window_ms),
+      rate_limit_dc_limit: rate_limit(:dc_limit),
+      rate_limit_dc_window: rate_limit(:dc_window_ms),
+      rate_limit_ice_limit: rate_limit(:ice_limit),
+      rate_limit_ice_window: rate_limit(:ice_window_ms),
       webrtc_max_channels: 1,
       webrtc_max_message_size: 65_536,
       geoip_available?: GeoCountry.geoip_available?(),
@@ -493,7 +448,7 @@ defmodule GamendWeb.AdminLive.Config do
 
     case user && user.email do
       nil ->
-        {:noreply, put_flash(socket, :error, "No email address available for current admin")}
+        {:noreply, put_flash(socket, :error, "Your admin account has no email address.")}
 
       email when is_binary(email) ->
         case UserNotifier.deliver_test_email(email) do
@@ -596,6 +551,8 @@ defmodule GamendWeb.AdminLive.Config do
 
   def handle_event("close_docs", _params, socket),
     do: {:noreply, assign(socket, hooks_full_doc: nil, hooks_full_name: nil)}
+
+  defp rate_limit(key), do: Gamend.Settings.get(GamendWeb.Plugs.RateLimiter, key)
 
   defp plugin_build_options do
     PluginBuilder.list_buildable_plugins()

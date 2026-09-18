@@ -14,7 +14,7 @@ msgstr ""
 #: lib/gamend_web/components/core_components.ex:651
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:244
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:759
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:803
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:805
 #, elixir-autogen, elixir-format
 msgid "Actions"
 msgstr "Akcje"
@@ -22,15 +22,14 @@ msgstr "Akcje"
 #: lib/gamend_web/live/user_live/login.ex:52
 #: lib/gamend_web/live/user_live/login.ex:84
 #: lib/gamend_web/live/user_live/registration.ex:26
-#: lib/gamend_web/live/user_live/settings/account_tab.ex:91
-#: lib/gamend_web/live/user_live/settings/account_tab.ex:136
+#: lib/gamend_web/live/user_live/settings/account_tab.ex:92
+#: lib/gamend_web/live/user_live/settings/account_tab.ex:137
 #, elixir-autogen, elixir-format
 msgid "Email"
 msgstr "E-mail"
 
 #: lib/gamend_web/live/leaderboards_live.ex:27
 #: lib/gamend_web/live/leaderboards_live.ex:105
-#: lib/gamend_web/live/leaderboards_live.ex:288
 #, elixir-autogen, elixir-format
 msgid "Leaderboards"
 msgstr "Rankingi"
@@ -44,18 +43,17 @@ msgstr "Rankingi"
 #: lib/gamend_web/live/user_live/confirmation.ex:56
 #: lib/gamend_web/live/user_live/confirmation.ex:71
 #: lib/gamend_web/live/user_live/login.ex:14
-#: lib/gamend_web/live/user_live/login.ex:122
-#: lib/gamend_web/live/user_live/login.ex:153
+#: lib/gamend_web/live/user_live/login.ex:124
+#: lib/gamend_web/live/user_live/login.ex:155
 #: lib/gamend_web/live/user_live/registration.ex:17
-#: lib/gamend_web/live/user_live/settings/account_tab.ex:210
 #, elixir-autogen, elixir-format
 msgid "Log in"
 msgstr "Zaloguj się"
 
 #: lib/gamend_web/live/lobby_live/index.ex:815
 #: lib/gamend_web/live/user_live/login.ex:92
-#: lib/gamend_web/live/user_live/settings/account_tab.ex:148
-#: lib/gamend_web/live/user_live/settings/account_tab.ex:169
+#: lib/gamend_web/live/user_live/settings/account_tab.ex:149
+#: lib/gamend_web/live/user_live/settings/account_tab.ex:170
 #, elixir-autogen, elixir-format
 msgid "Password"
 msgstr "Hasło"
@@ -67,6 +65,7 @@ msgid "or"
 msgstr "lub"
 
 #: lib/gamend_web/live/groups_live.ex:656
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:1216
 #, elixir-autogen, elixir-format
 msgid "Admin"
 msgstr "Admin"
@@ -89,7 +88,7 @@ msgstr "Akceptuj"
 #: lib/gamend_web/live/groups_live.ex:435
 #: lib/gamend_web/live/quests_live.ex:330
 #: lib/gamend_web/live/quests_live.ex:376
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:597
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:599
 #, elixir-autogen, elixir-format
 msgid "All"
 msgstr "Wszystkie"
@@ -99,7 +98,7 @@ msgstr "Wszystkie"
 msgid "Apply"
 msgstr "Zastosuj"
 
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:351
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:353
 #, elixir-autogen, elixir-format
 msgid "Approve"
 msgstr "Zatwierdź"
@@ -119,17 +118,17 @@ msgstr "Wstecz"
 msgid "Block"
 msgstr "Zablokuj"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:505
+#: lib/gamend_web/live/admin_live/chat_filter.ex:541
 #: lib/gamend_web/live/admin_live/chat_mutes.ex:593
 #: lib/gamend_web/live/admin_live/chat_reports.ex:630
-#: lib/gamend_web/live/admin_live/lobbies.ex:373
-#: lib/gamend_web/live/admin_live/matchmaking.ex:215
+#: lib/gamend_web/live/admin_live/lobbies.ex:399
+#: lib/gamend_web/live/admin_live/matchmaking.ex:217
 #: lib/gamend_web/live/chat_live.ex:255
 #: lib/gamend_web/live/lobby_live/index.ex:822
 #: lib/gamend_web/live/user_live/settings/friends_tab.ex:113
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:74
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:169
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:781
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:783
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:827
 #, elixir-autogen, elixir-format
 msgid "Cancel"
@@ -137,7 +136,7 @@ msgstr "Anuluj"
 
 #: lib/gamend_web/live/lobby_live/index.ex:873
 #: lib/gamend_web/live/user_live/settings/data_tab.ex:54
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:608
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:610
 #, elixir-autogen, elixir-format
 msgid "Clear"
 msgstr "Wyczyść"
@@ -153,7 +152,6 @@ msgstr "Zamknij"
 #: lib/gamend_web/live/user_live/confirmation.ex:37
 #: lib/gamend_web/live/user_live/confirmation.ex:90
 #: lib/gamend_web/live/user_live/login.ex:17
-#: lib/gamend_web/live/user_live/settings/account_tab.ex:176
 #, elixir-autogen, elixir-format
 msgid "Confirm"
 msgstr "Potwierdź"
@@ -177,31 +175,27 @@ msgstr "Utwórz"
 #: lib/gamend_web/live/notifications_live.ex:44
 #: lib/gamend_web/live/user_live/settings/data_tab.ex:73
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:198
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:704
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:802
-#: lib/gamend_web/live/user_live/settings/payments_tab.ex:61
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:706
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:804
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:62
 #: lib/gamend_web/live/user_live/settings/wallet_tab.ex:62
 #, elixir-autogen, elixir-format
 msgid "Date"
 msgstr "Data"
 
-#: lib/gamend_web/controllers/page_controller.ex:23
-#: lib/gamend_web/live/admin_live/chat_filter.ex:582
+#: lib/gamend_web/live/admin_live/chat_filter.ex:618
 #: lib/gamend_web/live/chat_live.ex:280
 #: lib/gamend_web/live/chat_live.ex:282
-#: lib/gamend_web/live/notifications_live.ex:30
 #: lib/gamend_web/live/notifications_live.ex:91
-#: lib/gamend_web/live/user_live/settings.ex:76
 #, elixir-autogen, elixir-format
 msgid "Delete"
 msgstr "Usuń"
 
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:293
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:295
 #, elixir-autogen, elixir-format
 msgid "Demote"
 msgstr "Zdegraduj"
 
-#: lib/gamend_web/live/auth_success_live.ex:169
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:102
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:144
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:178
@@ -210,14 +204,14 @@ msgid "Description"
 msgstr "Opis"
 
 #: lib/gamend_web/live/notifications_live.ex:43
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:703
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:705
 #, elixir-autogen, elixir-format
 msgid "From"
 msgstr "Od"
 
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:702
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:704
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:756
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:800
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:802
 #, elixir-autogen, elixir-format
 msgid "Group"
 msgstr "Grupa"
@@ -226,32 +220,31 @@ msgstr "Grupa"
 #: lib/gamend_web/live/groups_live.ex:48
 #: lib/gamend_web/live/groups_live.ex:101
 #: lib/gamend_web/live/groups_live.ex:399
-#: lib/gamend_web/live/user_live/settings.ex:91
+#: lib/gamend_web/live/user_live/settings.ex:93
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:58
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:478
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:480
 #, elixir-autogen, elixir-format
 msgid "Groups"
 msgstr "Grupy"
 
 #: lib/gamend_web/live/lobby_live/index.ex:867
-#: lib/gamend_web/live/quests_live.ex:749
+#: lib/gamend_web/live/quests_live.ex:757
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:111
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:154
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:1213
 #, elixir-autogen, elixir-format
 msgid "Hidden"
 msgstr "Ukryta"
 
-#: lib/gamend_web/live/user_live/settings/account_tab.ex:90
+#: lib/gamend_web/live/user_live/settings/account_tab.ex:91
 #: lib/gamend_web/live/user_live/settings/data_tab.ex:71
 #, elixir-autogen, elixir-format
 msgid "ID"
 msgstr "ID"
 
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:367
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:418
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:457
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:480
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:801
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:369
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:420
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:459
 #, elixir-autogen, elixir-format
 msgid "Invite"
 msgstr "Zaproś"
@@ -261,7 +254,7 @@ msgstr "Zaproś"
 #: lib/gamend_web/live/lobby_live/index.ex:783
 #: lib/gamend_web/live/lobby_live/index.ex:795
 #: lib/gamend_web/live/tournaments_live.ex:749
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:661
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:663
 #, elixir-autogen, elixir-format
 msgid "Join"
 msgstr "Dołącz"
@@ -272,13 +265,13 @@ msgstr "Dołącz"
 #: lib/gamend_web/live/lobby_live/index.ex:721
 #: lib/gamend_web/live/tournaments_live.ex:116
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:242
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:649
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:651
 #, elixir-autogen, elixir-format
 msgid "Joined"
 msgstr "Dołączył(a)"
 
 #: lib/gamend_web/live/lobby_live/index.ex:920
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:303
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:305
 #, elixir-autogen, elixir-format
 msgid "Kick"
 msgstr "Wyrzuć"
@@ -288,7 +281,7 @@ msgstr "Wyrzuć"
 #: lib/gamend_web/live/lobby_live/index.ex:945
 #: lib/gamend_web/live/tournaments_live.ex:743
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:225
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:566
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:568
 #, elixir-autogen, elixir-format
 msgid "Leave"
 msgstr "Opuść"
@@ -296,29 +289,24 @@ msgstr "Opuść"
 #: lib/gamend_web/live/lobby_live/index.ex:776
 #: lib/gamend_web/live/lobby_live/index.ex:788
 #: lib/gamend_web/live/lobby_live/index.ex:858
-#: lib/gamend_web/live/quests_live.ex:697
+#: lib/gamend_web/live/quests_live.ex:705
 #, elixir-autogen, elixir-format
 msgid "Locked"
 msgstr "Zablokowane"
 
 #: lib/gamend_web/live/groups_live.ex:531
 #: lib/gamend_web/live/groups_live.ex:658
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:1217
 #, elixir-autogen, elixir-format
 msgid "Member"
 msgstr "Członek"
 
-#: lib/gamend_web/live/groups_live.ex:460
 #: lib/gamend_web/live/groups_live.ex:500
 #: lib/gamend_web/live/groups_live.ex:599
 #: lib/gamend_web/live/groups_live.ex:613
 #: lib/gamend_web/live/lobby_live/index.ex:891
 #: lib/gamend_web/live/lobby_live/index.ex:929
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:117
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:159
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:195
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:234
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:512
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:621
 #, elixir-autogen, elixir-format
 msgid "Members"
 msgstr "Członkowie"
@@ -327,13 +315,13 @@ msgstr "Członkowie"
 #: lib/gamend_web/live/groups_live.ex:636
 #: lib/gamend_web/live/leaderboards_live.ex:314
 #: lib/gamend_web/live/tournaments_live.ex:660
-#: lib/gamend_web/live/user_live/settings/account_tab.ex:119
+#: lib/gamend_web/live/user_live/settings/account_tab.ex:120
 #: lib/gamend_web/live/user_live/settings/data_tab.ex:72
 #: lib/gamend_web/live/user_live/settings/friends_tab.ex:232
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:141
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:176
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:240
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:389
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:391
 #, elixir-autogen, elixir-format
 msgid "Name"
 msgstr "Nazwa"
@@ -343,12 +331,12 @@ msgstr "Nazwa"
 msgid "Newest"
 msgstr "Najnowsze"
 
-#: lib/gamend_web/components/core_components.ex:1097
+#: lib/gamend_web/components/core_components.ex:1098
 #, elixir-autogen, elixir-format
 msgid "Next"
 msgstr "Następna"
 
-#: lib/gamend_web/components/core_components.ex:1081
+#: lib/gamend_web/components/core_components.ex:1082
 #, elixir-autogen, elixir-format
 msgid "Prev"
 msgstr "Wstecz"
@@ -358,12 +346,13 @@ msgstr "Wstecz"
 #: lib/gamend_web/live/groups_live.ex:580
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:110
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:153
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:599
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:601
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:1212
 #, elixir-autogen, elixir-format
 msgid "Private"
 msgstr "Prywatna"
 
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:284
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:286
 #, elixir-autogen, elixir-format
 msgid "Promote"
 msgstr "Awansuj"
@@ -373,19 +362,20 @@ msgstr "Awansuj"
 #: lib/gamend_web/live/groups_live.ex:578
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:109
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:152
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:598
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:600
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:1211
 #, elixir-autogen, elixir-format
 msgid "Public"
 msgstr "Publiczna"
 
 #: lib/gamend_web/live/user_live/settings/friends_tab.ex:73
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:358
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:360
 #, elixir-autogen, elixir-format
 msgid "Reject"
 msgstr "Odrzuć"
 
-#: lib/gamend_web/live/user_live/settings/account_tab.ex:221
-#: lib/gamend_web/live/user_live/settings/account_tab.ex:225
+#: lib/gamend_web/live/user_live/settings/account_tab.ex:222
+#: lib/gamend_web/live/user_live/settings/account_tab.ex:226
 #: lib/gamend_web/live/user_live/settings/devices_tab.ex:79
 #: lib/gamend_web/live/user_live/settings/friends_tab.ex:157
 #, elixir-autogen, elixir-format
@@ -394,10 +384,7 @@ msgstr "Usuń"
 
 #: lib/gamend_web/live/groups_live.ex:548
 #: lib/gamend_web/live/groups_live.ex:724
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:329
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:481
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:669
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:758
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:671
 #, elixir-autogen, elixir-format
 msgid "Request"
 msgstr "Prośba"
@@ -405,7 +392,7 @@ msgstr "Prośba"
 #: lib/gamend_web/live/groups_live.ex:637
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:203
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:241
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:513
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:515
 #, elixir-autogen, elixir-format
 msgid "Role"
 msgstr "Rola"
@@ -413,38 +400,35 @@ msgstr "Rola"
 #: lib/gamend_web/live/admin_live/chat_mutes.ex:595
 #: lib/gamend_web/live/chat_live.ex:252
 #: lib/gamend_web/live/lobby_live/index.ex:877
-#: lib/gamend_web/live/user_live/settings/account_tab.ex:106
-#: lib/gamend_web/live/user_live/settings/account_tab.ex:123
-#: lib/gamend_web/live/user_live/settings/account_tab.ex:141
-#: lib/gamend_web/live/user_live/settings/account_tab.ex:180
+#: lib/gamend_web/live/user_live/settings/account_tab.ex:107
+#: lib/gamend_web/live/user_live/settings/account_tab.ex:124
+#: lib/gamend_web/live/user_live/settings/account_tab.ex:142
+#: lib/gamend_web/live/user_live/settings/account_tab.ex:181
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:163
 #, elixir-autogen, elixir-format
 msgid "Save"
 msgstr "Zapisz"
 
-#: lib/gamend_web/live/user_live/settings/account_tab.ex:105
-#: lib/gamend_web/live/user_live/settings/account_tab.ex:122
-#: lib/gamend_web/live/user_live/settings/account_tab.ex:179
+#: lib/gamend_web/live/user_live/settings/account_tab.ex:106
+#: lib/gamend_web/live/user_live/settings/account_tab.ex:123
+#: lib/gamend_web/live/user_live/settings/account_tab.ex:180
 #, elixir-autogen, elixir-format
 msgid "Saving..."
 msgstr "Zapisywanie..."
 
-#: lib/gamend_web/live/chat_live.ex:311
 #: lib/gamend_web/live/chat_live.ex:316
 #: lib/gamend_web/live/user_live/settings/friends_tab.ex:251
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:483
 #, elixir-autogen, elixir-format
 msgid "Send"
 msgstr "Wyślij"
 
 #: lib/gamend_web/live/admin_live/chat_reports.ex:415
-#: lib/gamend_web/live/admin_live/matchmaking.ex:194
-#: lib/gamend_web/live/groups_live.ex:453
-#: lib/gamend_web/live/quests_live.ex:880
-#: lib/gamend_web/live/store_live/index.ex:146
+#: lib/gamend_web/live/admin_live/matchmaking.ex:196
+#: lib/gamend_web/live/quests_live.ex:889
+#: lib/gamend_web/live/store_live/index.ex:154
 #: lib/gamend_web/live/user_live/settings/devices_tab.ex:49
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:757
-#: lib/gamend_web/live/user_live/settings/payments_tab.ex:58
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:59
 #, elixir-autogen, elixir-format
 msgid "Status"
 msgstr "Status"
@@ -452,9 +436,9 @@ msgstr "Status"
 #: lib/gamend_web/live/lobby_live/index.ex:716
 #: lib/gamend_web/live/notifications_live.ex:42
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:96
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:510
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:589
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:619
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:512
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:591
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:621
 #, elixir-autogen, elixir-format
 msgid "Title"
 msgstr "Tytuł"
@@ -462,9 +446,9 @@ msgstr "Tytuł"
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:107
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:149
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:182
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:511
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:595
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:620
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:513
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:597
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:622
 #, elixir-autogen, elixir-format
 msgid "Type"
 msgstr "Typ"
@@ -486,7 +470,7 @@ msgstr "Odblokuj"
 #: lib/gamend_web/live/notifications_live.ex:246
 #: lib/gamend_web/live/notifications_live.ex:249
 #: lib/gamend_web/live/notifications_live.ex:252
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:558
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:560
 #, elixir-autogen, elixir-format
 msgid "View"
 msgstr "Zobacz"
@@ -496,7 +480,7 @@ msgstr "Zobacz"
 #: lib/gamend_web/live/tournaments_live.ex:682
 #: lib/gamend_web/live/tournaments_live.ex:746
 #: lib/gamend_web/live/tournaments_live.ex:814
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:306
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:308
 #, elixir-autogen, elixir-format
 msgid "You"
 msgstr "Ty"
@@ -505,9 +489,8 @@ msgstr "Ty"
 #: lib/gamend_web/live/leaderboards_live.ex:302
 #: lib/gamend_web/live/user_live/settings/data_tab.ex:47
 #: lib/gamend_web/live/user_live/settings/friends_tab.ex:225
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:372
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:380
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:479
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:374
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:382
 #, elixir-autogen, elixir-format
 msgid "Search..."
 msgstr "Szukaj..."
@@ -518,10 +501,10 @@ msgid "(edited)"
 msgstr "(edytowano)"
 
 #: lib/gamend_web/live/user_live/settings.ex:55
-#: lib/gamend_web/live/user_live/settings.ex:89
-#: lib/gamend_web/live/user_live/settings.ex:149
-#: lib/gamend_web/live/user_live/settings/account_tab.ex:41
-#: lib/gamend_web/live/user_live/settings/account_tab.ex:187
+#: lib/gamend_web/live/user_live/settings.ex:91
+#: lib/gamend_web/live/user_live/settings.ex:151
+#: lib/gamend_web/live/user_live/settings/account_tab.ex:42
+#: lib/gamend_web/live/user_live/settings/account_tab.ex:188
 #, elixir-autogen, elixir-format
 msgid "Account"
 msgstr "Konto"
@@ -537,7 +520,7 @@ msgstr "Czat"
 msgid "Decline"
 msgstr "Odmów"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:574
+#: lib/gamend_web/live/admin_live/chat_filter.ex:610
 #: lib/gamend_web/live/admin_live/chat_mutes.ex:497
 #: lib/gamend_web/live/chat_live.ex:271
 #: lib/gamend_web/live/chat_live.ex:273
@@ -548,10 +531,10 @@ msgid "Edit"
 msgstr "Edytuj"
 
 #: lib/gamend_web/live/chat_live.ex:115
-#: lib/gamend_web/live/user_live/settings.ex:90
+#: lib/gamend_web/live/user_live/settings.ex:92
 #: lib/gamend_web/live/user_live/settings/friends_tab.ex:45
 #: lib/gamend_web/live/user_live/settings/friends_tab.ex:130
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:434
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:436
 #, elixir-autogen, elixir-format
 msgid "Friends"
 msgstr "Znajomi"
@@ -574,14 +557,14 @@ msgstr "Powiadomienia"
 msgid "Select a conversation"
 msgstr "Wybierz rozmowę"
 
-#: lib/gamend_web/components/content_pages.ex:253
+#: lib/gamend_web/components/content_pages.ex:255
 #: lib/gamend_web/live/leaderboards_live.ex:250
 #: lib/gamend_web/live/tournaments_live.ex:559
 #, elixir-autogen, elixir-format
 msgid "Newer"
 msgstr "Nowsze"
 
-#: lib/gamend_web/components/content_pages.ex:267
+#: lib/gamend_web/components/content_pages.ex:269
 #: lib/gamend_web/live/chat_live.ex:203
 #: lib/gamend_web/live/leaderboards_live.ex:235
 #: lib/gamend_web/live/tournaments_live.ex:548
@@ -591,20 +574,20 @@ msgstr "Starsze"
 
 #: lib/gamend_web/live/auth_success_live.ex:78
 #: lib/gamend_web/live/auth_success_live.ex:110
-#: lib/gamend_web/live/auth_success_live.ex:205
+#: lib/gamend_web/live/auth_success_live.ex:198
 #: lib/gamend_web/live/user_live/confirmation.ex:28
 #: lib/gamend_web/live/user_live/confirmation.ex:34
 #: lib/gamend_web/live/user_live/confirmation.ex:53
 #: lib/gamend_web/live/user_live/confirmation.ex:62
 #: lib/gamend_web/live/user_live/confirmation.ex:68
 #: lib/gamend_web/live/user_live/registration.ex:35
-#: lib/gamend_web/live/user_live/settings/account_tab.ex:140
+#: lib/gamend_web/live/user_live/settings/account_tab.ex:141
 #, elixir-autogen, elixir-format
 msgid "Loading..."
 msgstr "Ładowanie..."
 
 #: lib/gamend_web/live/auth_success_live.ex:76
-#: lib/gamend_web/live/auth_success_live.ex:190
+#: lib/gamend_web/live/auth_success_live.ex:183
 #: lib/gamend_web/live/chat_live.ex:93
 #: lib/gamend_web/live/groups_live.ex:80
 #: lib/gamend_web/live/leaderboards_live.ex:47
@@ -613,15 +596,16 @@ msgstr "Ładowanie..."
 #: lib/gamend_web/live/lobby_live/index.ex:176
 #: lib/gamend_web/live/lobby_live/index.ex:191
 #: lib/gamend_web/live/tournaments_live.ex:396
-#: lib/gamend_web/live/user_live/settings/account_tab.ex:446
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:1368
+#: lib/gamend_web/live/user_live/settings/account_tab.ex:458
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:1381
+#: lib/gamend_web/live_helpers.ex:230
 #, elixir-autogen, elixir-format
 msgid "Not found"
 msgstr "Nie znaleziono"
 
-#: lib/gamend_web/controllers/auth_controller.ex:633
-#: lib/gamend_web/controllers/auth_controller.ex:672
-#: lib/gamend_web/controllers/auth_controller.ex:975
+#: lib/gamend_web/controllers/auth_controller.ex:632
+#: lib/gamend_web/controllers/auth_controller.ex:671
+#: lib/gamend_web/controllers/auth_controller.ex:974
 #: lib/gamend_web/controllers/user_session_controller.ex:9
 #: lib/gamend_web/controllers/user_session_controller.ex:13
 #: lib/gamend_web/controllers/user_session_controller.ex:73
@@ -635,29 +619,26 @@ msgstr "Nie znaleziono"
 #: lib/gamend_web/live/lobby_live/index.ex:270
 #: lib/gamend_web/live/notifications_live.ex:163
 #: lib/gamend_web/live/notifications_live.ex:178
-#: lib/gamend_web/live/user_live/login.ex:176
 #: lib/gamend_web/live/user_live/registration.ex:121
-#: lib/gamend_web/live/user_live/registration.ex:131
-#: lib/gamend_web/live/user_live/settings.ex:134
-#: lib/gamend_web/live/user_live/settings/account_tab.ex:293
-#: lib/gamend_web/live/user_live/settings/account_tab.ex:321
-#: lib/gamend_web/live/user_live/settings/account_tab.ex:351
-#: lib/gamend_web/live/user_live/settings/account_tab.ex:411
-#: lib/gamend_web/live/user_live/settings/account_tab.ex:429
-#: lib/gamend_web/live/user_live/settings/account_tab.ex:572
+#: lib/gamend_web/live/user_live/settings.ex:136
+#: lib/gamend_web/live/user_live/settings/account_tab.ex:327
+#: lib/gamend_web/live/user_live/settings/account_tab.ex:357
+#: lib/gamend_web/live/user_live/settings/account_tab.ex:423
+#: lib/gamend_web/live/user_live/settings/account_tab.ex:441
+#: lib/gamend_web/live/user_live/settings/account_tab.ex:584
 #: lib/gamend_web/live/user_live/settings/devices_tab.ex:118
 #: lib/gamend_web/live/user_live/settings/friends_tab.ex:303
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:1084
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:1108
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:1126
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:1143
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:1190
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:1208
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:1109
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:1128
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:1146
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:1194
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:1221
 #, elixir-autogen, elixir-format
 msgid "Success."
 msgstr "Udało się."
 
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:779
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:781
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:825
 #, elixir-autogen, elixir-format
 msgid "Cancel?"
@@ -669,9 +650,6 @@ msgid "Cannot be empty."
 msgstr "Nie może być puste."
 
 #: lib/gamend_web/live/chat_live.ex:278
-#: lib/gamend_web/live/notifications_live.ex:27
-#: lib/gamend_web/live/user_live/settings.ex:74
-#: lib/gamend_web/live/user_live/settings/account_tab.ex:258
 #: lib/gamend_web/live/user_live/settings/devices_tab.ex:76
 #, elixir-autogen, elixir-format
 msgid "Delete?"
@@ -688,20 +666,19 @@ msgstr "Usunąć?"
 #: lib/gamend_web/live/groups_live.ex:668
 #: lib/gamend_web/live/leaderboards_live.ex:169
 #: lib/gamend_web/live/leaderboards_live.ex:363
-#: lib/gamend_web/live/quests_live.ex:502
+#: lib/gamend_web/live/quests_live.ex:510
 #: lib/gamend_web/live/tournaments_live.ex:484
 #: lib/gamend_web/live/tournaments_live.ex:710
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:208
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:428
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:464
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:503
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:628
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:695
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:430
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:466
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:505
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:630
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:697
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:749
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:794
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:796
 #: lib/gamend_web/live/user_live/settings/items_tab.ex:59
-#: lib/gamend_web/live/user_live/settings/payments_tab.ex:48
-#: lib/gamend_web/live/user_live/settings/payments_tab.ex:101
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:49
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:103
 #: lib/gamend_web/live/user_live/settings/wallet_tab.ex:34
 #: lib/gamend_web/live/user_live/settings/wallet_tab.ex:92
 #, elixir-autogen, elixir-format
@@ -720,22 +697,18 @@ msgstr "Brak wyników."
 msgid "Open"
 msgstr "Otwarta"
 
-#: lib/gamend_web/controllers/auth_controller.ex:650
-#: lib/gamend_web/controllers/auth_controller.ex:663
-#: lib/gamend_web/controllers/auth_controller.ex:691
-#: lib/gamend_web/controllers/auth_controller.ex:932
+#: lib/gamend_web/controllers/auth_controller.ex:649
+#: lib/gamend_web/controllers/auth_controller.ex:662
+#: lib/gamend_web/controllers/auth_controller.ex:690
+#: lib/gamend_web/controllers/auth_controller.ex:931
 #: lib/gamend_web/controllers/user_session_controller.ex:34
 #: lib/gamend_web/controllers/user_session_controller.ex:56
 #: lib/gamend_web/controllers/user_session_controller.ex:76
 #: lib/gamend_web/controllers/user_session_controller.ex:104
-#: lib/gamend_web/live/admin_live/matchmaking.ex:184
+#: lib/gamend_web/live/admin_live/matchmaking.ex:186
 #: lib/gamend_web/live/auth_success_live.ex:72
 #: lib/gamend_web/live/auth_success_live.ex:74
-#: lib/gamend_web/live/auth_success_live.ex:137
-#: lib/gamend_web/live/auth_success_live.ex:141
-#: lib/gamend_web/live/auth_success_live.ex:161
-#: lib/gamend_web/live/auth_success_live.ex:164
-#: lib/gamend_web/live/auth_success_live.ex:194
+#: lib/gamend_web/live/auth_success_live.ex:187
 #: lib/gamend_web/live/chat_live.ex:368
 #: lib/gamend_web/live/chat_live.ex:371
 #: lib/gamend_web/live/chat_live.ex:480
@@ -753,31 +726,30 @@ msgstr "Otwarta"
 #: lib/gamend_web/live/tournaments_live.ex:174
 #: lib/gamend_web/live/user_live/confirmation.ex:95
 #: lib/gamend_web/live/user_live/registration.ex:151
-#: lib/gamend_web/live/user_live/settings.ex:65
-#: lib/gamend_web/live/user_live/settings.ex:137
-#: lib/gamend_web/live/user_live/settings/account_tab.ex:415
-#: lib/gamend_web/live/user_live/settings/account_tab.ex:418
-#: lib/gamend_web/live/user_live/settings/account_tab.ex:433
-#: lib/gamend_web/live/user_live/settings/account_tab.ex:541
-#: lib/gamend_web/live/user_live/settings/account_tab.ex:576
+#: lib/gamend_web/live/user_live/settings.ex:139
+#: lib/gamend_web/live/user_live/settings/account_tab.ex:427
+#: lib/gamend_web/live/user_live/settings/account_tab.ex:430
+#: lib/gamend_web/live/user_live/settings/account_tab.ex:445
+#: lib/gamend_web/live/user_live/settings/account_tab.ex:553
+#: lib/gamend_web/live/user_live/settings/account_tab.ex:588
 #: lib/gamend_web/live/user_live/settings/devices_tab.ex:122
-#: lib/gamend_web/live/user_live/settings/friends_tab.ex:307
-#: lib/gamend_web/live/user_live/settings/friends_tab.ex:310
-#: lib/gamend_web/live/user_live/settings/friends_tab.ex:323
+#: lib/gamend_web/live/user_live/settings/friends_tab.ex:308
+#: lib/gamend_web/live/user_live/settings/friends_tab.ex:322
 #: lib/gamend_web/live/user_live/settings/friends_tab.ex:336
-#: lib/gamend_web/live/user_live/settings/friends_tab.ex:349
-#: lib/gamend_web/live/user_live/settings/friends_tab.ex:362
-#: lib/gamend_web/live/user_live/settings/friends_tab.ex:375
-#: lib/gamend_web/live/user_live/settings/friends_tab.ex:388
+#: lib/gamend_web/live/user_live/settings/friends_tab.ex:350
+#: lib/gamend_web/live/user_live/settings/friends_tab.ex:364
+#: lib/gamend_web/live/user_live/settings/friends_tab.ex:378
+#: lib/gamend_web/live/user_live/settings/friends_tab.ex:392
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:883
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:1095
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:1113
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:1130
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:1147
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:1201
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:1204
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:1211
-#: lib/gamend_web/live/user_live/settings/payments_tab.ex:184
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:1096
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:1115
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:1133
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:1151
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:1206
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:1224
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:202
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:203
+#: lib/gamend_web/live_helpers.ex:315
 #: lib/gamend_web/user_auth.ex:256
 #: lib/gamend_web/user_auth.ex:280
 #: lib/gamend_web/user_auth.ex:298
@@ -787,7 +759,7 @@ msgstr "Otwarta"
 msgid "Failed"
 msgstr "Niepowodzenie"
 
-#: lib/gamend_web/controllers/auth_controller.ex:678
+#: lib/gamend_web/controllers/auth_controller.ex:677
 #: lib/gamend_web/controllers/user_session_controller.ex:28
 #: lib/gamend_web/controllers/user_session_controller.ex:50
 #: lib/gamend_web/controllers/user_session_controller.ex:98
@@ -800,19 +772,24 @@ msgstr "Twoje konto oczekuje na aktywację."
 msgid "In Progress"
 msgstr "W toku"
 
-#: lib/gamend_web/live/admin_live/matchmaking.ex:186
+#: lib/gamend_web/live/admin_live/matchmaking.ex:188
 #: lib/gamend_web/live/groups_live.ex:216
 #: lib/gamend_web/live/groups_live.ex:533
 #: lib/gamend_web/live/groups_live.ex:707
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:653
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:655
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:770
+#: lib/gamend_web/live_helpers.ex:312
 #, elixir-autogen, elixir-format
 msgid "Pending"
 msgstr "Oczekujące"
 
 #: lib/gamend_web/live/leaderboards_live.ex:156
 #: lib/gamend_web/live/leaderboards_live.ex:205
-#: lib/gamend_web/live/store_live/index.ex:148
+#: lib/gamend_web/live/stats_live.ex:90
+#: lib/gamend_web/live/stats_live.ex:95
+#: lib/gamend_web/live/store_live/index.ex:156
 #: lib/gamend_web/live/user_live/settings/devices_tab.ex:65
+#: lib/gamend_web/live_helpers.ex:319
 #, elixir-autogen, elixir-format
 msgid "Active"
 msgstr "Aktywna"
@@ -829,20 +806,20 @@ msgstr "Zakończona"
 msgid "Host"
 msgstr "Gospodarz"
 
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:301
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:303
 #, elixir-autogen, elixir-format
 msgid "Kick?"
 msgstr "Wyrzucić?"
 
 #: lib/gamend_web/live/user_live/settings/groups_tab.ex:223
-#: lib/gamend_web/live/user_live/settings/groups_tab.ex:564
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:566
 #, elixir-autogen, elixir-format
 msgid "Leave?"
 msgstr "Opuścić?"
 
 #: lib/gamend_web/live/lobby_live/index.ex:42
 #: lib/gamend_web/live/lobby_live/index.ex:729
-#: lib/gamend_web/live/stats_live.ex:108
+#: lib/gamend_web/live/stats_live.ex:109
 #, elixir-autogen, elixir-format
 msgid "Lobbies"
 msgstr "Lobby"
@@ -873,29 +850,29 @@ msgstr "Wynik"
 msgid "Terms"
 msgstr "Regulamin"
 
-#: lib/gamend_web/live/user_live/settings.ex:95
+#: lib/gamend_web/live/user_live/settings.ex:97
 #: lib/gamend_web/live/user_live/settings/data_tab.ex:32
 #, elixir-autogen, elixir-format
 msgid "Data"
 msgstr "Dane"
 
-#: lib/gamend_web/live/user_live/login.ex:188
+#: lib/gamend_web/live/user_live/login.ex:191
 #: lib/gamend_web/live/user_live/registration.ex:79
 #, elixir-autogen, elixir-format
 msgid "Too many attempts. Please try again later."
 msgstr "Zbyt wiele prób. Spróbuj ponownie później."
 
-#: lib/gamend_web/live/store_live/index.ex:194
+#: lib/gamend_web/live/store_live/index.ex:202
 #, elixir-autogen, elixir-format
 msgid "API only"
 msgstr "Tylko API"
 
-#: lib/gamend_web/live/user_live/settings/payments_tab.ex:59
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:60
 #, elixir-autogen, elixir-format
 msgid "Amount"
 msgstr "Kwota"
 
-#: lib/gamend_web/live/user_live/settings/payments_tab.ex:131
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:133
 #, elixir-autogen, elixir-format
 msgid "Auto-renews"
 msgstr "Odnawia się automatycznie"
@@ -905,51 +882,50 @@ msgstr "Odnawia się automatycznie"
 msgid "Blocked users"
 msgstr "Zablokowani użytkownicy"
 
-#: lib/gamend_web/live/store_live/index.ex:174
+#: lib/gamend_web/live/store_live/index.ex:182
 #, elixir-autogen, elixir-format
 msgid "Buy"
 msgstr "Kup"
 
-#: lib/gamend_web/live/user_live/settings/payments_tab.ex:147
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:149
 #, elixir-autogen, elixir-format
 msgid "Cancel renewal"
 msgstr "Anuluj odnowienie"
 
-#: lib/gamend_web/live/user_live/settings/payments_tab.ex:225
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:234
 #, elixir-autogen, elixir-format
 msgid "Cancels"
 msgstr "Wygasa"
 
-#: lib/gamend_web/live/user_live/settings/payments_tab.ex:153
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:155
 #, elixir-autogen, elixir-format
 msgid "Cancels at period end"
 msgstr "Wygasa z końcem okresu"
 
-#: lib/gamend_web/live/store_live/index.ex:82
+#: lib/gamend_web/live/store_live/index.ex:85
 #, elixir-autogen, elixir-format
 msgid "Checkout cancelled."
 msgstr "Zakup anulowany."
 
-#: lib/gamend_web/live/store_live/index.ex:248
+#: lib/gamend_web/live/store_live/index.ex:256
+#: lib/gamend_web/live/store_live/index.ex:284
 #, elixir-autogen, elixir-format
 msgid "Checkout failed."
 msgstr "Zakup nie powiódł się."
 
-#: lib/gamend_web/live/store_live/index.ex:260
-#: lib/gamend_web/live/store_live/index.ex:264
 #: lib/gamend_web/live/store_live/index.ex:268
-#: lib/gamend_web/live/store_live/index.ex:271
-#: lib/gamend_web/live/store_live/index.ex:273
+#: lib/gamend_web/live/store_live/index.ex:272
+#: lib/gamend_web/live/store_live/index.ex:277
 #, elixir-autogen, elixir-format
 msgid "Checkout failed: %{reason}"
 msgstr "Zakup nie powiódł się: %{reason}"
 
-#: lib/gamend_web/live/store_live/index.ex:253
+#: lib/gamend_web/live/store_live/index.ex:261
 #, elixir-autogen, elixir-format
 msgid "Checkout is already open for this item. Finish or cancel that checkout first."
 msgstr "Dla tego przedmiotu trwa już proces zakupu. Najpierw dokończ go lub anuluj."
 
-#: lib/gamend_web/live/store_live/index.ex:71
+#: lib/gamend_web/live/store_live/index.ex:74
 #, elixir-autogen, elixir-format
 msgid "Checkout returned."
 msgstr "Powrót z zakupu."
@@ -959,48 +935,48 @@ msgstr "Powrót z zakupu."
 msgid "Confirm and remember me"
 msgstr "Potwierdź i zapamiętaj mnie"
 
-#: lib/gamend_web/live/store_live/index.ex:92
+#: lib/gamend_web/live/store_live/index.ex:95
 #, elixir-autogen, elixir-format
 msgid "Create products and provider SKUs in Admin -> Payments."
 msgstr "Utwórz produkty i SKU dostawców w Admin -> Payments."
 
-#: lib/gamend_web/live/user_live/settings/account_tab.ex:245
+#: lib/gamend_web/live/user_live/settings/account_tab.ex:246
 #, elixir-autogen, elixir-format
 msgid "Danger zone"
 msgstr "Strefa zagrożenia"
 
-#: lib/gamend_web/live/user_live/settings/account_tab.ex:260
+#: lib/gamend_web/live/user_live/settings/account_tab.ex:261
 #, elixir-autogen, elixir-format
 msgid "Delete account"
 msgstr "Usuń konto"
 
-#: lib/gamend_web/live/user_live/settings/payments_tab.ex:160
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:162
 #, elixir-autogen, elixir-format
 msgid "Download"
 msgstr "Pobierz"
 
-#: lib/gamend_web/live/store_live/index.ex:350
+#: lib/gamend_web/live/store_live/index.ex:369
 #, elixir-autogen, elixir-format
 msgid "Downloadable"
 msgstr "Do pobrania"
 
-#: lib/gamend_web/live/user_live/settings/payments_tab.ex:60
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:61
 #, elixir-autogen, elixir-format
 msgid "Environment"
 msgstr "Środowisko"
 
 #: lib/gamend_web/live/admin_live/chat_mutes.ex:465
-#: lib/gamend_web/live/user_live/settings/payments_tab.ex:231
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:240
 #, elixir-autogen, elixir-format
 msgid "Expires"
 msgstr "Wygasa"
 
-#: lib/gamend_web/live/store_live/index.ex:352
+#: lib/gamend_web/live/store_live/index.ex:370
 #, elixir-autogen, elixir-format
 msgid "Grant"
 msgstr "Przyznaj"
 
-#: lib/gamend_web/live/store_live/index.ex:148
+#: lib/gamend_web/live/store_live/index.ex:156
 #: lib/gamend_web/live/user_live/settings/devices_tab.ex:68
 #, elixir-autogen, elixir-format
 msgid "Inactive"
@@ -1011,18 +987,18 @@ msgstr "Nieaktywna"
 msgid "Incoming requests"
 msgstr "Otrzymane prośby"
 
-#: lib/gamend_web/live/user_live/settings/payments_tab.ex:197
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:207
 #, elixir-autogen, elixir-format
 msgid "Invalid payment state"
 msgstr "Nieprawidłowy stan płatności"
 
-#: lib/gamend_web/live/admin_live/matchmaking.ex:193
-#: lib/gamend_web/live/user_live/settings/payments_tab.ex:122
+#: lib/gamend_web/live/admin_live/matchmaking.ex:195
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:124
 #, elixir-autogen, elixir-format
 msgid "Kind"
 msgstr "Rodzaj"
 
-#: lib/gamend_web/live/user_live/settings/account_tab.ex:229
+#: lib/gamend_web/live/user_live/settings/account_tab.ex:230
 #, elixir-autogen, elixir-format
 msgid "Link"
 msgstr "Połącz"
@@ -1032,60 +1008,50 @@ msgstr "Połącz"
 msgid "Log in and remember me"
 msgstr "Zaloguj się i zapamiętaj mnie"
 
-#: lib/gamend_web/live/user_live/settings/account_tab.ex:238
+#: lib/gamend_web/live/user_live/settings/account_tab.ex:239
 #: lib/gamend_web/live/user_live/settings/data_tab.ex:75
 #: lib/gamend_web/live/user_live/settings/items_tab.ex:42
 #, elixir-autogen, elixir-format
 msgid "Metadata"
 msgstr "Metadane"
 
-#: lib/gamend_web/live/store_live/index.ex:90
+#: lib/gamend_web/live/store_live/index.ex:93
 #, elixir-autogen, elixir-format
 msgid "No products configured."
 msgstr "Brak skonfigurowanych produktów."
 
-#: lib/gamend_web/live/store_live/index.ex:83
+#: lib/gamend_web/live/store_live/index.ex:86
 #, elixir-autogen, elixir-format
 msgid "No purchase was fulfilled."
 msgstr "Żaden zakup nie został zrealizowany."
 
-#: lib/gamend_web/live/user_live/settings/account_tab.ex:361
-#, elixir-autogen, elixir-format
-msgid "Not allowed: %{reason}"
-msgstr "Niedozwolone: %{reason}"
-
-#: lib/gamend_web/live/user_live/settings/payments_tab.ex:36
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:37
 #, elixir-autogen, elixir-format
 msgid "Open Store"
 msgstr "Otwórz sklep"
 
-#: lib/gamend_web/live/user_live/settings/payments_tab.ex:55
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:56
 #, elixir-autogen, elixir-format
 msgid "Order"
 msgstr "Zamówienie"
 
-#: lib/gamend_web/live/store_live/index.ex:232
+#: lib/gamend_web/live/store_live/index.ex:240
 #, elixir-autogen, elixir-format
 msgid "Order %{order_id} completed."
 msgstr "Zamówienie %{order_id} zrealizowane."
 
-#: lib/gamend_web/live/store_live/index.ex:241
+#: lib/gamend_web/live/store_live/index.ex:249
 #, elixir-autogen, elixir-format
 msgid "Order %{order_id} failed before payment was completed."
 msgstr "Zamówienie %{order_id} nie powiodło się przed zakończeniem płatności."
 
-#: lib/gamend_web/live/store_live/index.ex:237
-#, elixir-autogen, elixir-format
-msgid "Order %{order_id} is waiting for Stripe webhook confirmation."
-msgstr "Zamówienie %{order_id} czeka na potwierdzenie webhooka Stripe."
-
-#: lib/gamend_web/live/store_live/index.ex:245
+#: lib/gamend_web/live/store_live/index.ex:253
 #, elixir-autogen, elixir-format
 msgid "Order %{order_id} returned from checkout."
 msgstr "Zamówienie %{order_id} wróciło z procesu zakupu."
 
-#: lib/gamend_web/live/store_live/index.ex:162
-#: lib/gamend_web/live/user_live/settings/payments_tab.ex:96
+#: lib/gamend_web/live/store_live/index.ex:170
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:98
 #, elixir-autogen, elixir-format
 msgid "Owned"
 msgstr "Posiadane"
@@ -1095,52 +1061,47 @@ msgstr "Posiadane"
 msgid "Page"
 msgstr "Strona"
 
-#: lib/gamend_web/live/store_live/index.ex:228
-#, elixir-autogen, elixir-format
-msgid "Payment is still being processed. Refresh after webhook delivery."
-msgstr "Płatność jest nadal przetwarzana. Odśwież po dostarczeniu webhooka."
-
-#: lib/gamend_web/live/store_live/index.ex:63
-#: lib/gamend_web/live/user_live/settings.ex:94
-#: lib/gamend_web/live/user_live/settings/payments_tab.ex:33
+#: lib/gamend_web/live/store_live/index.ex:66
+#: lib/gamend_web/live/user_live/settings.ex:96
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:34
 #, elixir-autogen, elixir-format
 msgid "Payments"
 msgstr "Płatności"
 
-#: lib/gamend_web/live/store_live/index.ex:138
+#: lib/gamend_web/live/store_live/index.ex:146
 #, elixir-autogen, elixir-format
 msgid "Price"
 msgstr "Cena"
 
-#: lib/gamend_web/live/user_live/settings/payments_tab.ex:56
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:57
 #, elixir-autogen, elixir-format
 msgid "Product"
 msgstr "Produkt"
 
-#: lib/gamend_web/live/store_live/index.ex:134
-#: lib/gamend_web/live/store_live/index.ex:275
+#: lib/gamend_web/live/store_live/index.ex:140
+#: lib/gamend_web/live/store_live/index.ex:287
 #: lib/gamend_web/live/user_live/settings/devices_tab.ex:46
-#: lib/gamend_web/live/user_live/settings/payments_tab.ex:57
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:58
 #, elixir-autogen, elixir-format
 msgid "Provider"
 msgstr "Dostawca"
 
-#: lib/gamend_web/live/user_live/settings/payments_tab.ex:43
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:44
 #, elixir-autogen, elixir-format
 msgid "Purchases"
 msgstr "Zakupy"
 
-#: lib/gamend_web/live/user_live/settings/account_tab.ex:251
+#: lib/gamend_web/live/user_live/settings/account_tab.ex:252
 #, elixir-autogen, elixir-format
 msgid "Read data deletion instructions"
 msgstr "Przeczytaj instrukcję usuwania danych"
 
-#: lib/gamend_web/live/user_live/settings/payments_tab.ex:228
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:237
 #, elixir-autogen, elixir-format
 msgid "Renews"
 msgstr "Odnawia się"
 
-#: lib/gamend_web/live/store_live/index.ex:142
+#: lib/gamend_web/live/store_live/index.ex:150
 #, elixir-autogen, elixir-format
 msgid "SKU"
 msgstr "SKU"
@@ -1150,43 +1111,43 @@ msgstr "SKU"
 msgid "Sent requests"
 msgstr "Wysłane prośby"
 
-#: lib/gamend_web/live/store_live/index.ex:12
-#: lib/gamend_web/live/store_live/index.ex:55
+#: lib/gamend_web/live/store_live/index.ex:15
+#: lib/gamend_web/live/store_live/index.ex:58
 #, elixir-autogen, elixir-format
 msgid "Store"
 msgstr "Sklep"
 
-#: lib/gamend_web/live/store_live/index.ex:113
+#: lib/gamend_web/live/store_live/index.ex:119
 #, elixir-autogen, elixir-format
 msgid "Store item"
 msgstr "Przedmiot ze sklepu"
 
-#: lib/gamend_web/live/store_live/index.ex:257
+#: lib/gamend_web/live/store_live/index.ex:265
 #, elixir-autogen, elixir-format
 msgid "Stripe is not configured."
 msgstr "Stripe nie jest skonfigurowany."
 
-#: lib/gamend_web/live/user_live/settings/payments_tab.ex:180
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:182
 #, elixir-autogen, elixir-format
 msgid "Subscription will cancel at the end of the period."
 msgstr "Subskrypcja wygaśnie z końcem okresu."
 
-#: lib/gamend_web/live/store_live/index.ex:58
+#: lib/gamend_web/live/store_live/index.ex:61
 #, elixir-autogen, elixir-format
 msgid "Subscriptions, one-time items, and consumables."
 msgstr "Subskrypcje, przedmioty jednorazowe i zużywalne."
 
-#: lib/gamend_web/live/store_live/index.ex:256
+#: lib/gamend_web/live/store_live/index.ex:264
 #, elixir-autogen, elixir-format
 msgid "This item can only be bought once."
 msgstr "Ten przedmiot można kupić tylko raz."
 
-#: lib/gamend_web/live/user_live/settings/account_tab.ex:102
+#: lib/gamend_web/live/user_live/settings/account_tab.ex:103
 #, elixir-autogen, elixir-format
 msgid "Username"
 msgstr "Nazwa użytkownika"
 
-#: lib/gamend_web/live/store_live/index.ex:250
+#: lib/gamend_web/live/store_live/index.ex:258
 #, elixir-autogen, elixir-format
 msgid "You already own this item."
 msgstr "Już posiadasz ten przedmiot."
@@ -1216,8 +1177,9 @@ msgstr "Rozmiar drabinki"
 msgid "Brackets"
 msgstr "Drabinki"
 
-#: lib/gamend_web/live/admin_live/matchmaking.ex:185
+#: lib/gamend_web/live/admin_live/matchmaking.ex:187
 #: lib/gamend_web/live/tournaments_live.ex:972
+#: lib/gamend_web/live_helpers.ex:316
 #, elixir-autogen, elixir-format
 msgid "Cancelled"
 msgstr "Anulowany"
@@ -1359,6 +1321,7 @@ msgid "Left"
 msgstr "Opuszczono"
 
 #: lib/gamend_web/live/tournaments_live.ex:157
+#: lib/gamend_web/live_helpers.ex:290
 #, elixir-autogen, elixir-format
 msgid "Registration is closed."
 msgstr "Zapisy są zamknięte."
@@ -1374,11 +1337,13 @@ msgid "This tournament is full."
 msgstr "Ten turniej jest pełny."
 
 #: lib/gamend_web/live/tournaments_live.ex:158
+#: lib/gamend_web/live_helpers.ex:288
 #, elixir-autogen, elixir-format
 msgid "You are already registered."
 msgstr "Jesteś już zapisany."
 
 #: lib/gamend_web/live/tournaments_live.ex:160
+#: lib/gamend_web/live_helpers.ex:289
 #, elixir-autogen, elixir-format
 msgid "You are not registered."
 msgstr "Nie jesteś zapisany."
@@ -1388,7 +1353,7 @@ msgstr "Nie jesteś zapisany."
 msgid "All results"
 msgstr "Wszystkie wyniki"
 
-#: lib/gamend_web/live/user_live/settings/account_tab.ex:484
+#: lib/gamend_web/live/user_live/settings/account_tab.ex:496
 #, elixir-autogen, elixir-format
 msgid "Avatar updated."
 msgstr "Awatar zaktualizowany."
@@ -1403,12 +1368,12 @@ msgstr "Saldo"
 msgid "Change"
 msgstr "Zmiana"
 
-#: lib/gamend_web/live/user_live/settings/account_tab.ex:84
+#: lib/gamend_web/live/user_live/settings/account_tab.ex:85
 #, elixir-autogen, elixir-format
 msgid "Change avatar"
 msgstr "Zmień awatar"
 
-#: lib/gamend_web/live/user_live/settings/account_tab.ex:488
+#: lib/gamend_web/live/user_live/settings/account_tab.ex:500
 #, elixir-autogen, elixir-format
 msgid "Could not update avatar."
 msgstr "Nie udało się zaktualizować awatara."
@@ -1418,7 +1383,7 @@ msgstr "Nie udało się zaktualizować awatara."
 msgid "Currency"
 msgstr "Waluta"
 
-#: lib/gamend_web/live/user_live/settings/account_tab.ex:76
+#: lib/gamend_web/live/user_live/settings/account_tab.ex:77
 #, elixir-autogen, elixir-format
 msgid "File is too large or not a supported image."
 msgstr "Plik jest za duży lub nie jest obsługiwanym obrazem."
@@ -1428,7 +1393,7 @@ msgstr "Plik jest za duży lub nie jest obsługiwanym obrazem."
 msgid "Item"
 msgstr "Przedmiot"
 
-#: lib/gamend_web/live/user_live/settings.ex:93
+#: lib/gamend_web/live/user_live/settings.ex:95
 #: lib/gamend_web/live/user_live/settings/items_tab.ex:29
 #, elixir-autogen, elixir-format
 msgid "Items"
@@ -1439,7 +1404,7 @@ msgstr "Przedmioty"
 msgid "Open chat"
 msgstr "Otwórz czat"
 
-#: lib/gamend_web/live/user_live/settings/account_tab.ex:492
+#: lib/gamend_web/live/user_live/settings/account_tab.ex:504
 #, elixir-autogen, elixir-format
 msgid "Please choose an image first."
 msgstr "Najpierw wybierz obraz."
@@ -1454,13 +1419,13 @@ msgstr "Ilość"
 #: lib/gamend_web/live/admin_live/chat_mutes.ex:561
 #: lib/gamend_web/live/admin_live/chat_reports.ex:414
 #: lib/gamend_web/live/admin_live/chat_reports.ex:575
-#: lib/gamend_web/live/admin_live/matchmaking.ex:195
+#: lib/gamend_web/live/admin_live/matchmaking.ex:197
 #: lib/gamend_web/live/user_live/settings/wallet_tab.ex:66
 #, elixir-autogen, elixir-format
 msgid "Reason"
 msgstr "Powód"
 
-#: lib/gamend_web/live/user_live/settings/account_tab.ex:71
+#: lib/gamend_web/live/user_live/settings/account_tab.ex:72
 #, elixir-autogen, elixir-format
 msgid "Remove selected file"
 msgstr "Usuń wybrany plik"
@@ -1470,7 +1435,7 @@ msgstr "Usuń wybrany plik"
 msgid "Transactions"
 msgstr "Transakcje"
 
-#: lib/gamend_web/live/user_live/settings.ex:92
+#: lib/gamend_web/live/user_live/settings.ex:94
 #: lib/gamend_web/live/user_live/settings/wallet_tab.ex:30
 #, elixir-autogen, elixir-format
 msgid "Wallet"
@@ -1481,7 +1446,7 @@ msgstr "Portfel"
 msgid "Already claimed."
 msgstr "Już odebrano."
 
-#: lib/gamend_web/live/quests_live.ex:860
+#: lib/gamend_web/live/quests_live.ex:869
 #, elixir-autogen, elixir-format
 msgid "Claim"
 msgstr "Odbierz"
@@ -1492,18 +1457,19 @@ msgid "Claimable"
 msgstr "Do odebrania"
 
 #: lib/gamend_web/live/quests_live.ex:351
-#: lib/gamend_web/live/quests_live.ex:702
-#: lib/gamend_web/live/quests_live.ex:866
-#: lib/gamend_web/live/stats_live.ex:133
+#: lib/gamend_web/live/quests_live.ex:710
+#: lib/gamend_web/live/quests_live.ex:875
+#: lib/gamend_web/live/stats_live.ex:134
 #, elixir-autogen, elixir-format
 msgid "Claimed"
 msgstr "Odebrano"
 
 #: lib/gamend_web/live/quests_live.ex:352
 #: lib/gamend_web/live/quests_live.ex:379
-#: lib/gamend_web/live/quests_live.ex:704
-#: lib/gamend_web/live/quests_live.ex:875
-#: lib/gamend_web/live/stats_live.ex:132
+#: lib/gamend_web/live/quests_live.ex:712
+#: lib/gamend_web/live/quests_live.ex:884
+#: lib/gamend_web/live/stats_live.ex:133
+#: lib/gamend_web/live_helpers.ex:314
 #, elixir-autogen, elixir-format
 msgid "Completed"
 msgstr "Ukończono"
@@ -1518,21 +1484,21 @@ msgstr "Nie udało się odebrać tego zadania."
 msgid "Daily"
 msgstr "Dzienne"
 
-#: lib/gamend_web/live/quests_live.ex:833
+#: lib/gamend_web/live/quests_live.ex:842
 #, elixir-autogen, elixir-format
 msgid "Ends in %{time}"
 msgstr "Kończy się za %{time}"
 
 #: lib/gamend_web/live/quests_live.ex:38
-#: lib/gamend_web/live/quests_live.ex:451
-#: lib/gamend_web/live/quests_live.ex:659
-#: lib/gamend_web/live/stats_live.ex:129
-#: lib/gamend_web/live/stats_live.ex:131
+#: lib/gamend_web/live/quests_live.ex:453
+#: lib/gamend_web/live/quests_live.ex:667
+#: lib/gamend_web/live/stats_live.ex:130
+#: lib/gamend_web/live/stats_live.ex:132
 #, elixir-autogen, elixir-format
 msgid "Quests"
 msgstr "Zadania"
 
-#: lib/gamend_web/live/quests_live.ex:835
+#: lib/gamend_web/live/quests_live.ex:844
 #, elixir-autogen, elixir-format
 msgid "Resets in %{time}"
 msgstr "Reset za %{time}"
@@ -1547,11 +1513,6 @@ msgstr "Nagrody odebrane!"
 msgid "Weekly"
 msgstr "Tygodniowe"
 
-#: lib/gamend_web/live/quests_live.ex:493
-#, elixir-autogen, elixir-format
-msgid "You have %{count} quest(s) ready to claim!"
-msgstr "Masz %{count} zadań do odebrania!"
-
 #: lib/gamend_web/live/quests_live.ex:369
 #, elixir-autogen, elixir-format
 msgid "Every %{count}d"
@@ -1562,7 +1523,7 @@ msgstr "Co %{count} dni"
 msgid "Monthly"
 msgstr "Miesięczne"
 
-#: lib/gamend_web/live/user_live/settings.ex:96
+#: lib/gamend_web/live/user_live/settings.ex:98
 #: lib/gamend_web/live/user_live/settings/devices_tab.ex:30
 #, elixir-autogen, elixir-format
 msgid "Devices"
@@ -1588,13 +1549,13 @@ msgstr "Brak zarejestrowanych urządzeń."
 msgid "Platform"
 msgstr "Platforma"
 
-#: lib/gamend_web/live/admin_live/matchmaking.ex:183
+#: lib/gamend_web/live/admin_live/matchmaking.ex:185
 #, elixir-autogen, elixir-format
 msgid "Passed"
 msgstr "Zaliczone"
 
-#: lib/gamend_web/live/admin_live/lobbies.ex:403
-#: lib/gamend_web/live/admin_live/matchmaking.ex:196
+#: lib/gamend_web/live/admin_live/lobbies.ex:429
+#: lib/gamend_web/live/admin_live/matchmaking.ex:198
 #, elixir-autogen, elixir-format
 msgid "Ready"
 msgstr "Gotowy"
@@ -1604,45 +1565,40 @@ msgstr "Gotowy"
 msgid "Ready checks"
 msgstr "Sprawdzenia gotowości"
 
-#: lib/gamend_web/live/admin_live/matchmaking.ex:180
-#, elixir-autogen, elixir-format
-msgid "last 24h"
-msgstr "ostatnie 24 h"
-
-#: lib/gamend_web/live/admin_live/matchmaking.ex:197
+#: lib/gamend_web/live/admin_live/matchmaking.ex:199
 #, elixir-autogen, elixir-format
 msgid "Created"
 msgstr "Utworzono"
 
-#: lib/gamend_web/live/admin_live/lobbies.ex:360
+#: lib/gamend_web/live/admin_live/lobbies.ex:386
 #, elixir-autogen, elixir-format
 msgid "Ready check"
 msgstr "Sprawdzenie gotowości"
 
 #: lib/gamend_web/live/quests_live.ex:353
-#: lib/gamend_web/live/quests_live.ex:705
+#: lib/gamend_web/live/quests_live.ex:713
 #, elixir-autogen, elixir-format
 msgid "In progress"
 msgstr "W toku"
 
 #: lib/gamend_web/live/quests_live.ex:354
-#: lib/gamend_web/live/quests_live.ex:706
+#: lib/gamend_web/live/quests_live.ex:714
 #, elixir-autogen, elixir-format
 msgid "Not started"
 msgstr "Nierozpoczęte"
 
-#: lib/gamend_web/live/quests_live.ex:560
+#: lib/gamend_web/live/quests_live.ex:568
 #, elixir-autogen, elixir-format
 msgid "Quest chain"
 msgstr "Łańcuch zadań"
 
 #: lib/gamend_web/live/quests_live.ex:350
-#: lib/gamend_web/live/quests_live.ex:703
+#: lib/gamend_web/live/quests_live.ex:711
 #, elixir-autogen, elixir-format
 msgid "Ready to claim"
 msgstr "Gotowe do odebrania"
 
-#: lib/gamend_web/live/quests_live.ex:795
+#: lib/gamend_web/live/quests_live.ex:803
 #, elixir-autogen, elixir-format
 msgid "View quest chain"
 msgstr "Zobacz łańcuch zadań"
@@ -1713,12 +1669,12 @@ msgstr "Wyciszenie o ograniczonym zasięgu wymaga id lobby, grupy lub party."
 msgid "Active only"
 msgstr "Tylko aktywne"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:497
+#: lib/gamend_web/live/admin_live/chat_filter.ex:533
 #, elixir-autogen, elixir-format
 msgid "Add word"
 msgstr "Dodaj słowo"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:551
+#: lib/gamend_web/live/admin_live/chat_filter.ex:587
 #, elixir-autogen, elixir-format
 msgid "Added"
 msgstr "Dodano"
@@ -1733,7 +1689,7 @@ msgstr "Wiek"
 msgid "All scopes"
 msgstr "Wszystkie zasięgi"
 
-#: lib/gamend_web/live/user_live/settings/account_tab.ex:376
+#: lib/gamend_web/live/user_live/settings/account_tab.ex:388
 #, elixir-autogen, elixir-format
 msgid "Avatar uploads are not available."
 msgstr "Przesyłanie awatara jest niedostępne."
@@ -1744,17 +1700,17 @@ msgstr "Przesyłanie awatara jest niedostępne."
 msgid "Back to Admin"
 msgstr "Powrót do Admin"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:301
+#: lib/gamend_web/live/admin_live/chat_filter.ex:335
 #, elixir-autogen, elixir-format
 msgid "Blocked"
 msgstr "Zablokowane"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:440
+#: lib/gamend_web/live/admin_live/chat_filter.ex:476
 #, elixir-autogen, elixir-format
 msgid "Blocklist"
 msgstr "Lista blokowanych słów"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:321
+#: lib/gamend_web/live/admin_live/chat_filter.ex:355
 #, elixir-autogen, elixir-format
 msgid "Bundled lists"
 msgstr "Listy wbudowane"
@@ -1784,12 +1740,12 @@ msgstr "Nie udało się usunąć wiadomości"
 msgid "Could not mute the player"
 msgstr "Nie udało się wyciszyć gracza"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:158
+#: lib/gamend_web/live/admin_live/chat_filter.ex:178
 #, elixir-autogen, elixir-format
 msgid "Could not read the bundled list"
 msgstr "Nie udało się odczytać listy wbudowanej"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:239
+#: lib/gamend_web/live/admin_live/chat_filter.ex:273
 #, elixir-autogen, elixir-format
 msgid "Could not remove the word"
 msgstr "Nie udało się usunąć słowa"
@@ -1827,7 +1783,7 @@ msgstr "Odrzucone z kolejki zgłoszeń"
 msgid "Duration"
 msgstr "Czas trwania"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:307
+#: lib/gamend_web/live/admin_live/chat_filter.ex:341
 #, elixir-autogen, elixir-format
 msgid "Each hit becomes *** and the message is sent."
 msgstr "Każde trafienie zamienia się w *** i wiadomość zostaje wysłana."
@@ -1842,23 +1798,18 @@ msgstr "Podaj id gracza do wyciszenia."
 msgid "Filter"
 msgstr "Filtr"
 
-#: lib/gamend_web/live/admin_live/chat_reports.ex:401
-#, elixir-autogen, elixir-format
-msgid "Filter by reported user id"
-msgstr "Filtruj po id zgłoszonego użytkownika"
-
-#: lib/gamend_web/live/admin_live/chat_filter.ex:92
-#: lib/gamend_web/live/admin_live/chat_filter.ex:155
+#: lib/gamend_web/live/admin_live/chat_filter.ex:107
+#: lib/gamend_web/live/admin_live/chat_filter.ex:175
 #, elixir-autogen, elixir-format
 msgid "Filter word limit reached"
 msgstr "Osiągnięto limit słów filtra"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:303
+#: lib/gamend_web/live/admin_live/chat_filter.ex:337
 #, elixir-autogen, elixir-format
 msgid "Flagged"
 msgstr "Oznaczone"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:407
+#: lib/gamend_web/live/admin_live/chat_filter.ex:443
 #, elixir-autogen, elixir-format
 msgid "Flagged by"
 msgstr "Oznaczone przez"
@@ -1868,15 +1819,10 @@ msgstr "Oznaczone przez"
 msgid "Global mutes leave this empty"
 msgstr "Przy wyciszeniach globalnych zostaw puste"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:349
+#: lib/gamend_web/live/admin_live/chat_filter.ex:383
 #, elixir-autogen, elixir-format
 msgid "Import bundled list"
 msgstr "Importuj listę wbudowaną"
-
-#: lib/gamend_web/live/admin_live/chat_filter.ex:148
-#, elixir-autogen, elixir-format
-msgid "Imported %{count} words from the %{lang} list"
-msgstr "Zaimportowano %{count} słów z listy %{lang}"
 
 #: lib/gamend_web/live/stats_live.ex:83
 #, elixir-autogen, elixir-format
@@ -1888,22 +1834,22 @@ msgstr "W lobby"
 msgid "In parties"
 msgstr "W party"
 
-#: lib/gamend_web/live/stats_live.ex:111
+#: lib/gamend_web/live/stats_live.ex:112
 #, elixir-autogen, elixir-format
 msgid "In queue"
 msgstr "W kolejce"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:550
+#: lib/gamend_web/live/admin_live/chat_filter.ex:586
 #, elixir-autogen, elixir-format
 msgid "Lang"
 msgstr "Język"
 
-#: lib/gamend_web/live/user_live/settings/account_tab.ex:46
+#: lib/gamend_web/live/user_live/settings/account_tab.ex:47
 #, elixir-autogen, elixir-format
 msgid "Link an email or a sign-in provider to set a custom avatar."
 msgstr "Powiąż e-mail lub dostawcę logowania, aby ustawić własny awatar."
 
-#: lib/gamend_web/live/stats_live.ex:106
+#: lib/gamend_web/live/stats_live.ex:107
 #, elixir-autogen, elixir-format
 msgid "Lobbies and parties"
 msgstr "Lobby i party"
@@ -1914,27 +1860,28 @@ msgstr "Lobby i party"
 msgid "Lobby / group / party id"
 msgstr "Id lobby / grupy / party"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:302
+#: lib/gamend_web/live/admin_live/chat_filter.ex:336
 #, elixir-autogen, elixir-format
 msgid "Masked"
 msgstr "Zamaskowane"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:415
+#: lib/gamend_web/live/admin_live/chat_filter.ex:451
 #, elixir-autogen, elixir-format
 msgid "Masking left a match behind, so the message is rejected rather than sent half-masked."
 msgstr "Maskowanie pozostawiło trafienie, więc wiadomość jest odrzucana zamiast wysyłana w połowie zamaskowana."
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:549
+#: lib/gamend_web/live/admin_live/chat_filter.ex:585
 #, elixir-autogen, elixir-format
 msgid "Match"
 msgstr "Dopasowanie"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:323
+#: lib/gamend_web/live/admin_live/chat_filter.ex:357
 #, elixir-autogen, elixir-format
 msgid "Matching is language-agnostic: importing a language's list adds its words to one shared set, and lang only records where a row came from."
 msgstr "Dopasowywanie nie zależy od języka: import listy danego języka dodaje jej słowa do jednego wspólnego zbioru, a język zapisuje tylko to, skąd pochodzi dany wiersz."
 
 #: lib/gamend_web/live/admin_live/chat_reports.ex:413
+#: lib/gamend_web/live/chat_live.ex:311
 #, elixir-autogen, elixir-format
 msgid "Message"
 msgstr "Wiadomość"
@@ -1958,36 +1905,27 @@ msgstr "Nie znaleziono wyciszenia"
 
 #: lib/gamend_web/live/admin_live/chat_mutes.ex:428
 #: lib/gamend_web/live/admin_live/chat_reports.ex:290
+#: lib/gamend_web/live/admin_live/chat_reports.ex:495
 #, elixir-autogen, elixir-format
 msgid "Mute player"
 msgstr "Wycisz gracza"
-
-#: lib/gamend_web/live/admin_live/chat_reports.ex:495
-#, elixir-autogen, elixir-format
-msgid "Mute user"
-msgstr "Wycisz użytkownika"
 
 #: lib/gamend_web/live/admin_live/chat_mutes.ex:462
 #, elixir-autogen, elixir-format
 msgid "Muted by"
 msgstr "Wyciszony przez"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:152
+#: lib/gamend_web/live/admin_live/chat_filter.ex:172
 #, elixir-autogen, elixir-format
 msgid "No bundled list for %{lang}"
 msgstr "Brak listy wbudowanej dla %{lang}"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:362
-#, elixir-autogen, elixir-format
-msgid "No bundled lists are available. Drop one at priv/chat_filter/<lang>.txt."
-msgstr "Brak dostępnych list wbudowanych. Wrzuć jedną do priv/chat_filter/<lang>.txt."
-
-#: lib/gamend_web/live/admin_live/chat_filter.ex:591
+#: lib/gamend_web/live/admin_live/chat_filter.ex:627
 #, elixir-autogen, elixir-format
 msgid "No filter words."
 msgstr "Brak słów filtra."
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:304
+#: lib/gamend_web/live/admin_live/chat_filter.ex:338
 #, elixir-autogen, elixir-format
 msgid "No match"
 msgstr "Brak dopasowania"
@@ -2002,22 +1940,25 @@ msgstr "Brak wyciszeń."
 msgid "No reports."
 msgstr "Brak zgłoszeń."
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:430
+#: lib/gamend_web/live/admin_live/chat_filter.ex:466
 #, elixir-autogen, elixir-format
 msgid "Normalized"
 msgstr "Znormalizowane"
 
+#: lib/gamend_web/components/presence_indicator.ex:33
 #: lib/gamend_web/live/stats_live.ex:81
+#: lib/gamend_web/live/user_live/settings/friends_tab.ex:144
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:260
 #, elixir-autogen, elixir-format
 msgid "Online"
 msgstr "Online"
 
-#: lib/gamend_web/live/stats_live.ex:110
+#: lib/gamend_web/live/stats_live.ex:111
 #, elixir-autogen, elixir-format
 msgid "Parties"
 msgstr "Party"
 
-#: lib/gamend_web/live/stats_live.ex:125
+#: lib/gamend_web/live/stats_live.ex:126
 #, elixir-autogen, elixir-format
 msgid "Peers connected"
 msgstr "Połączone peery"
@@ -2044,37 +1985,32 @@ msgstr "Gracz wyciszony"
 msgid "Player unmuted"
 msgstr "Wyciszenie gracza cofnięte"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:455
+#: lib/gamend_web/live/admin_live/chat_filter.ex:491
 #: lib/gamend_web/live/admin_live/chat_mutes.ex:346
 #: lib/gamend_web/live/admin_live/chat_reports.ex:372
 #, elixir-autogen, elixir-format
 msgid "Refresh"
 msgstr "Odśwież"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:306
+#: lib/gamend_web/live/admin_live/chat_filter.ex:340
 #, elixir-autogen, elixir-format
 msgid "Rejected before it is stored or broadcast."
 msgstr "Odrzucona, zanim zostanie zapisana lub rozesłana."
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:354
+#: lib/gamend_web/live/admin_live/chat_filter.ex:388
 #, elixir-autogen, elixir-format
 msgid "Remove every word tagged with this language?"
 msgstr "Usunąć wszystkie słowa oznaczone tym językiem?"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:357
+#: lib/gamend_web/live/admin_live/chat_filter.ex:391
 #, elixir-autogen, elixir-format
 msgid "Remove this list"
 msgstr "Usuń tę listę"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:579
+#: lib/gamend_web/live/admin_live/chat_filter.ex:615
 #, elixir-autogen, elixir-format
 msgid "Remove this word?"
 msgstr "Usunąć to słowo?"
-
-#: lib/gamend_web/live/admin_live/chat_filter.ex:172
-#, elixir-autogen, elixir-format
-msgid "Removed %{count} words tagged %{lang}"
-msgstr "Usunięto %{count} słów oznaczonych %{lang}"
 
 #: lib/gamend_web/live/admin_live/chat_reports.ex:141
 #, elixir-autogen, elixir-format
@@ -2102,22 +2038,22 @@ msgstr "Zgłaszający"
 msgid "Reports players filed about a chat message, plus the ones the word filter files itself. Acting on a report resolves it."
 msgstr "Zgłoszenia wysłane przez graczy na temat wiadomości z czatu oraz te, które tworzy sam filtr słów. Każde działanie na zgłoszeniu rozpatruje je."
 
-#: lib/gamend_web/live/stats_live.ex:123
+#: lib/gamend_web/live/stats_live.ex:124
 #, elixir-autogen, elixir-format
 msgid "Rooms enabled"
 msgstr "Włączone pokoje"
 
-#: lib/gamend_web/live/stats_live.ex:124
+#: lib/gamend_web/live/stats_live.ex:125
 #, elixir-autogen, elixir-format
 msgid "Rooms in use"
 msgstr "Pokoje w użyciu"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:378
+#: lib/gamend_web/live/admin_live/chat_filter.ex:414
 #, elixir-autogen, elixir-format
 msgid "Runs the phrase through the live blocklist, exactly as chat does."
 msgstr "Przepuszcza frazę przez aktywną listę blokowanych słów, dokładnie tak jak czat."
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:497
+#: lib/gamend_web/live/admin_live/chat_filter.ex:533
 #, elixir-autogen, elixir-format
 msgid "Save word"
 msgstr "Zapisz słowo"
@@ -2129,17 +2065,17 @@ msgstr "Zapisz słowo"
 msgid "Scope"
 msgstr "Zasięg"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:403
+#: lib/gamend_web/live/admin_live/chat_filter.ex:439
 #, elixir-autogen, elixir-format
 msgid "Sent as"
 msgstr "Wysłane jako"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:309
+#: lib/gamend_web/live/admin_live/chat_filter.ex:343
 #, elixir-autogen, elixir-format
 msgid "Sent unchanged."
 msgstr "Wysłane bez zmian."
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:308
+#: lib/gamend_web/live/admin_live/chat_filter.ex:342
 #, elixir-autogen, elixir-format
 msgid "Sent verbatim, and a report is filed for the queue."
 msgstr "Wysłane dosłownie, a do kolejki trafia zgłoszenie."
@@ -2150,12 +2086,12 @@ msgstr "Wysłane dosłownie, a do kolejki trafia zgłoszenie."
 msgid "Server stats"
 msgstr "Statystyki serwera"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:548
+#: lib/gamend_web/live/admin_live/chat_filter.ex:584
 #, elixir-autogen, elixir-format
 msgid "Severity"
 msgstr "Waga"
 
-#: lib/gamend_web/live/stats_live.ex:109
+#: lib/gamend_web/live/stats_live.ex:110
 #, elixir-autogen, elixir-format
 msgid "Spectators"
 msgstr "Widzowie"
@@ -2165,12 +2101,12 @@ msgstr "Widzowie"
 msgid "System"
 msgstr "System"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:376
+#: lib/gamend_web/live/admin_live/chat_filter.ex:412
 #, elixir-autogen, elixir-format
 msgid "Test a phrase"
 msgstr "Przetestuj frazę"
 
-#: lib/gamend_web/live/user_live/settings/account_tab.ex:471
+#: lib/gamend_web/live/user_live/settings/account_tab.ex:483
 #, elixir-autogen, elixir-format
 msgid "That file is not a valid image."
 msgstr "Ten plik nie jest prawidłowym obrazem."
@@ -2180,7 +2116,7 @@ msgstr "Ten plik nie jest prawidłowym obrazem."
 msgid "Total"
 msgstr "Łącznie"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:386
+#: lib/gamend_web/live/admin_live/chat_filter.ex:422
 #, elixir-autogen, elixir-format
 msgid "Type a message to test…"
 msgstr "Wpisz wiadomość do testu…"
@@ -2195,34 +2131,34 @@ msgstr "Cofnij wyciszenie"
 msgid "Unmute this player?"
 msgstr "Cofnąć wyciszenie tego gracza?"
 
-#: lib/gamend_web/live/stats_live.ex:121
+#: lib/gamend_web/live/stats_live.ex:122
 #, elixir-autogen, elixir-format
 msgid "WebRTC"
 msgstr "WebRTC"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:547
+#: lib/gamend_web/live/admin_live/chat_filter.ex:583
 #, elixir-autogen, elixir-format
 msgid "Word"
 msgstr "Słowo"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:89
-#: lib/gamend_web/live/admin_live/chat_filter.ex:105
-#: lib/gamend_web/live/admin_live/chat_filter.ex:127
+#: lib/gamend_web/live/admin_live/chat_filter.ex:104
+#: lib/gamend_web/live/admin_live/chat_filter.ex:120
+#: lib/gamend_web/live/admin_live/chat_filter.ex:142
 #, elixir-autogen, elixir-format
 msgid "Word no longer exists"
 msgstr "Słowo już nie istnieje"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:238
+#: lib/gamend_web/live/admin_live/chat_filter.ex:272
 #, elixir-autogen, elixir-format
 msgid "Word removed"
 msgstr "Słowo usunięte"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:85
+#: lib/gamend_web/live/admin_live/chat_filter.ex:100
 #, elixir-autogen, elixir-format
 msgid "Word saved"
 msgstr "Słowo zapisane"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:524
+#: lib/gamend_web/live/admin_live/chat_filter.ex:560
 #, elixir-autogen, elixir-format
 msgid "all severities"
 msgstr "wszystkie wagi"
@@ -2232,17 +2168,12 @@ msgstr "wszystkie wagi"
 msgid "by"
 msgstr "przez"
 
-#: lib/gamend_web/live/admin_live/lobbies.ex:364
-#, elixir-autogen, elixir-format
-msgid "deadline_at"
-msgstr "deadline_at"
-
-#: lib/gamend_web/live/admin_live/chat_filter.ex:537
+#: lib/gamend_web/live/admin_live/chat_filter.ex:573
 #, elixir-autogen, elixir-format
 msgid "filter by lang"
 msgstr "filtruj po języku"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:519
+#: lib/gamend_web/live/admin_live/chat_filter.ex:555
 #, elixir-autogen, elixir-format
 msgid "filter by word"
 msgstr "filtruj po słowie"
@@ -2252,22 +2183,22 @@ msgstr "filtruj po słowie"
 msgid "just now"
 msgstr "przed chwilą"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:493
+#: lib/gamend_web/live/admin_live/chat_filter.ex:529
 #, elixir-autogen, elixir-format
 msgid "lang (optional)"
 msgstr "język (opcjonalnie)"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:468
+#: lib/gamend_web/live/admin_live/chat_filter.ex:504
 #, elixir-autogen, elixir-format
 msgid "word"
 msgstr "słowo"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:366
+#: lib/gamend_web/live/admin_live/chat_filter.ex:402
 #, elixir-autogen, elixir-format
 msgid "Gamend ships no word list of its own; en.txt holds two placeholders."
 msgstr "Gamend nie zawiera własnej listy słów; en.txt zawiera dwa przykłady."
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:368
+#: lib/gamend_web/live/admin_live/chat_filter.ex:404
 #, elixir-autogen, elixir-format
 msgid "The Chat guide lists public sources and how to install one."
 msgstr "Przewodnik Czat podaje publiczne źródła i sposób instalacji listy."
@@ -2355,26 +2286,16 @@ msgstr "Ostrzeż gracza"
 msgid "Warned from the report queue"
 msgstr "Ostrzeżony z kolejki zgłoszeń"
 
-#: lib/gamend_web/live/quests_live.ex:803
+#: lib/gamend_web/live/quests_live.ex:811
 #, elixir-autogen, elixir-format
 msgid "View every quest in this group"
 msgstr "Zobacz wszystkie zadania w tej grupie"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:452
+#: lib/gamend_web/live/admin_live/chat_filter.ex:488
 #: lib/gamend_web/live/admin_live/chat_mutes.ex:343
 #, elixir-autogen, elixir-format
 msgid "%{n} on this node"
 msgstr "%{n} na tym węźle"
-
-#: lib/gamend_web/live/stats_live.ex:94
-#, elixir-autogen, elixir-format
-msgid "Active this month"
-msgstr "Aktywni w tym miesiącu"
-
-#: lib/gamend_web/live/stats_live.ex:89
-#, elixir-autogen, elixir-format
-msgid "Active this week"
-msgstr "Aktywni w tym tygodniu"
 
 #: lib/gamend_web/live/stats_live.ex:87
 #, elixir-autogen, elixir-format
@@ -2407,23 +2328,18 @@ msgstr "Blog"
 msgid "Changelog"
 msgstr "Lista zmian"
 
-#: lib/gamend_web/live/store_live/index.ex:184
-#: lib/gamend_web/live/store_live/index.ex:341
+#: lib/gamend_web/live/store_live/index.ex:192
+#: lib/gamend_web/live/store_live/index.ex:356
 #, elixir-autogen, elixir-format
 msgid "Closed"
 msgstr "Zamknięte"
 
-#: lib/gamend_web/live/store_live/index.ex:344
-#, elixir-autogen, elixir-format
-msgid "Closes in %{n} days"
-msgstr "Zamknięcie za %{n} dni"
-
-#: lib/gamend_web/live/store_live/index.ex:343
+#: lib/gamend_web/live/store_live/index.ex:358
 #, elixir-autogen, elixir-format
 msgid "Closes in %{n}h"
 msgstr "Zamknięcie za %{n} godz."
 
-#: lib/gamend_web/live/store_live/index.ex:342
+#: lib/gamend_web/live/store_live/index.ex:357
 #, elixir-autogen, elixir-format
 msgid "Closes in under an hour"
 msgstr "Zamknięcie za mniej niż godzinę"
@@ -2438,12 +2354,10 @@ msgstr "Więcej w kategorii %{category}"
 msgid "More pages"
 msgstr "Więcej stron"
 
-#: lib/gamend_web/live/stats_live.ex:99
-#, elixir-autogen, elixir-format
-msgid "New this week"
-msgstr "Nowi w tym tygodniu"
-
 #: lib/gamend_web/controllers/error_html.ex:103
+#: lib/gamend_web/live/user_live/settings/account_tab.ex:372
+#: lib/gamend_web/live_helpers.ex:224
+#: lib/gamend_web/live_helpers.ex:227
 #, elixir-autogen, elixir-format
 msgid "Not allowed"
 msgstr "Niedozwolone"
@@ -2471,17 +2385,19 @@ msgstr "Zarejestruj katalog bloga, aby wyświetlać tutaj wpisy."
 msgid "Roadmap"
 msgstr "Plan rozwoju"
 
-#: lib/gamend_web/controllers/error_html.ex:124
+#: lib/gamend_web/controllers/error_html.ex:134
 #, elixir-autogen, elixir-format
 msgid "Something broke on our side. It has been logged, and the rest of the site is fine."
 msgstr "Coś zepsuło się po naszej stronie. Błąd został zapisany, a reszta serwisu działa normalnie."
 
 #: lib/gamend_web/controllers/error_html.ex:105
+#: lib/gamend_web/live/auth_success_live.ex:137
+#: lib/gamend_web/live/auth_success_live.ex:161
 #, elixir-autogen, elixir-format
 msgid "Something went wrong"
 msgstr "Coś poszło nie tak"
 
-#: lib/gamend_web/live/user_live/settings/account_tab.ex:551
+#: lib/gamend_web/live/user_live/settings/account_tab.ex:563
 #, elixir-autogen, elixir-format
 msgid "That account has its own sign-in method. Sign in to it and unlink the provider there."
 msgstr "To konto ma własną metodę logowania. Zaloguj się na nie i tam odłącz dostawcę."
@@ -2511,11 +2427,6 @@ msgstr "Aktywne wyciszenia wczytane do pamięci tego węzła. Egzekwowanie korzy
 msgid "Where to go next"
 msgstr "Dokąd dalej"
 
-#: lib/gamend_web/live/admin_live/chat_filter.ex:447
-#, elixir-autogen, elixir-format
-msgid "Words loaded into this node's in-memory matcher. A number below the database count means this node missed a change broadcast."
-msgstr "Słowa wczytane do filtra w pamięci tego węzła. Liczba mniejsza niż w bazie danych oznacza, że węzeł przegapił komunikat o zmianie."
-
 #: lib/gamend_web/controllers/error_html.ex:114
 #, elixir-autogen, elixir-format
 msgid "You do not have access to this page. Signing in may help."
@@ -2526,13 +2437,13 @@ msgstr "Nie masz dostępu do tej strony. Zalogowanie się może pomóc."
 msgid "You have made a lot of requests in a short time. Please wait a moment and try again."
 msgstr "Wysłano wiele żądań w krótkim czasie. Poczekaj chwilę i spróbuj ponownie."
 
-#: lib/gamend_web/live/stats_live.ex:96
+#: lib/gamend_web/live/stats_live.ex:97
 #, elixir-autogen, elixir-format
 msgid "last 30 days"
 msgstr "ostatnie 30 dni"
 
-#: lib/gamend_web/live/stats_live.ex:91
-#: lib/gamend_web/live/stats_live.ex:101
+#: lib/gamend_web/live/stats_live.ex:92
+#: lib/gamend_web/live/stats_live.ex:102
 #, elixir-autogen, elixir-format
 msgid "last 7 days"
 msgstr "ostatnie 7 dni"
@@ -2561,3 +2472,813 @@ msgstr "Zapamiętaj mnie"
 #, elixir-autogen, elixir-format
 msgid "Send yourself a magic link to log in, then set a new password on your Account page."
 msgstr "Wyślij sobie magiczny link, aby się zalogować, a następnie ustaw nowe hasło na stronie Konto."
+
+#: lib/gamend_web/live/admin_live/index.ex:960
+#, elixir-autogen, elixir-format
+msgid "%{count} country"
+msgid_plural "%{count} countries"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: lib/gamend_web/live/admin_live/lobby_snapshots.ex:52
+#, elixir-autogen, elixir-format
+msgid "%{count} coverage gap"
+msgid_plural "%{count} coverage gaps"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: lib/gamend_web/live/admin_live/logs.ex:47
+#: lib/gamend_web/live/admin_live/rate_limiting.ex:145
+#, elixir-autogen, elixir-format
+msgid "%{count} entry"
+msgid_plural "%{count} entries"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: lib/gamend_web/live/admin_live/logs.ex:439
+#, elixir-autogen, elixir-format
+msgid "%{count} entry never arrived"
+msgid_plural "%{count} entries never arrived"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: lib/gamend_web/live/admin_live/index.ex:98
+#: lib/gamend_web/live/admin_live/logs.ex:52
+#, elixir-autogen, elixir-format
+msgid "%{count} error"
+msgid_plural "%{count} errors"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: lib/gamend_web/live/admin_live/config_system_sections.ex:1011
+#, elixir-autogen, elixir-format
+msgid "%{count} job registered."
+msgid_plural "%{count} jobs registered."
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: lib/gamend_web/live/admin_live/index.ex:385
+#, elixir-autogen, elixir-format
+msgid "%{count} language"
+msgid_plural "%{count} languages"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: lib/gamend_web/live/admin_live/config_sections.ex:374
+#, elixir-autogen, elixir-format
+msgid "%{count} link"
+msgid_plural "%{count} links"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: lib/gamend_web/live/admin_live/index.ex:473
+#, elixir-autogen, elixir-format
+msgid "%{count} node"
+msgid_plural "%{count} nodes"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: lib/gamend_web/live/admin_live/lobby_snapshots.ex:95
+#, elixir-autogen, elixir-format
+msgid "%{count} run"
+msgid_plural "%{count} runs"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: lib/gamend_web/live/admin_live/config_sections.ex:319
+#, elixir-autogen, elixir-format
+msgid "%{count} section"
+msgid_plural "%{count} sections"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: lib/gamend_web/live/admin_live/lobby_snapshots.ex:50
+#, elixir-autogen, elixir-format
+msgid "%{count}+ coverage gap"
+msgid_plural "%{count}+ coverage gaps"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: lib/gamend_web/live_helpers.ex:278
+#, elixir-autogen, elixir-format
+msgid "A password is required."
+msgstr "Hasło jest wymagane."
+
+#: lib/gamend_web/live/user_live/registration.ex:131
+#, elixir-autogen, elixir-format
+msgid "Account created. Check your email for a link to confirm it."
+msgstr "Konto utworzone. Sprawdź e-mail — znajdziesz tam link do jego potwierdzenia."
+
+#: lib/gamend_web/live_helpers.ex:261
+#, elixir-autogen, elixir-format
+msgid "Already a member."
+msgstr "Już jest członkiem."
+
+#: lib/gamend_web/live_helpers.ex:262
+#, elixir-autogen, elixir-format
+msgid "Already an admin."
+msgstr "Już jest adminem."
+
+#: lib/gamend_web/live_helpers.ex:283
+#, elixir-autogen, elixir-format
+msgid "Already invited."
+msgstr "Już zaproszono."
+
+#: lib/gamend_web/live_helpers.ex:313
+#, elixir-autogen, elixir-format
+msgid "Awaiting payment"
+msgstr "Oczekuje na płatność"
+
+#: lib/gamend_web/live/store_live/index.ex:202
+#, elixir-autogen, elixir-format
+msgid "Buy in the game"
+msgstr "Kup w grze"
+
+#: lib/gamend_web/live/admin_live/connections.ex:65
+#, elixir-autogen, elixir-format
+msgid "Channel processes running on %{count} WebSocket connection."
+msgid_plural "Channel processes running on %{count} WebSocket connections."
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: lib/gamend_web/live/user_live/settings/account_tab.ex:298
+#, elixir-autogen, elixir-format
+msgid "Check your new email address for a link to confirm the change."
+msgstr "Sprawdź nowy adres e-mail — znajdziesz tam link do potwierdzenia zmiany."
+
+#: lib/gamend_web/live/store_live/index.ex:364
+#, elixir-autogen, elixir-format
+msgid "Closes in %{count} day"
+msgid_plural "Closes in %{count} days"
+msgstr[0] "Zamknięcie za %{count} dzień"
+msgstr[1] "Zamknięcie za %{count} dni"
+msgstr[2] "Zamknięcie za %{count} dni"
+
+#: lib/gamend_web/live/user_live/settings/account_tab.ex:177
+#, elixir-autogen, elixir-format
+msgid "Confirm password"
+msgstr "Potwierdź hasło"
+
+#: lib/gamend_web/live_helpers.ex:307
+#, elixir-autogen, elixir-format
+msgid "Consumable"
+msgstr "Zużywalny"
+
+#: lib/gamend_web/controllers/page_controller.ex:23
+#, elixir-autogen, elixir-format
+msgid "Data deletion"
+msgstr "Usuwanie danych"
+
+#: lib/gamend_web/live/admin_live/lobbies.ex:390
+#, elixir-autogen, elixir-format
+msgid "Deadline"
+msgstr ""
+
+#: lib/gamend_web/live/admin_live/kv.ex:33
+#, elixir-autogen, elixir-format
+msgid "Delete %{count} selected KV entry?"
+msgid_plural "Delete %{count} selected KV entries?"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: lib/gamend_web/live/admin_live/groups.ex:41
+#, elixir-autogen, elixir-format
+msgid "Delete %{count} selected group?"
+msgid_plural "Delete %{count} selected groups?"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: lib/gamend_web/live/admin_live/leaderboards.ex:44
+#, elixir-autogen, elixir-format
+msgid "Delete %{count} selected leaderboard and all its records?"
+msgid_plural "Delete %{count} selected leaderboards and all their records?"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: lib/gamend_web/live/admin_live/lobbies.ex:63
+#, elixir-autogen, elixir-format
+msgid "Delete %{count} selected lobby?"
+msgid_plural "Delete %{count} selected lobbies?"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: lib/gamend_web/live/admin_live/chat.ex:35
+#, elixir-autogen, elixir-format
+msgid "Delete %{count} selected message?"
+msgid_plural "Delete %{count} selected messages?"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: lib/gamend_web/live/admin_live/notifications.ex:92
+#, elixir-autogen, elixir-format
+msgid "Delete %{count} selected notification?"
+msgid_plural "Delete %{count} selected notifications?"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: lib/gamend_web/live/admin_live/parties.ex:55
+#, elixir-autogen, elixir-format
+msgid "Delete %{count} selected party?"
+msgid_plural "Delete %{count} selected parties?"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: lib/gamend_web/live/admin_live/sessions.ex:28
+#, elixir-autogen, elixir-format
+msgid "Delete %{count} selected session?"
+msgid_plural "Delete %{count} selected sessions?"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: lib/gamend_web/live/admin_live/users.ex:28
+#, elixir-autogen, elixir-format
+msgid "Delete %{count} selected user?"
+msgid_plural "Delete %{count} selected users?"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: lib/gamend_web/live/notifications_live.ex:30
+#, elixir-autogen, elixir-format
+msgid "Delete all"
+msgstr "Usuń wszystko"
+
+#: lib/gamend_web/live/notifications_live.ex:27
+#, elixir-autogen, elixir-format
+msgid "Delete all notifications?"
+msgstr "Usunąć wszystkie powiadomienia?"
+
+#: lib/gamend_web/live/user_live/settings.ex:78
+#, elixir-autogen, elixir-format
+msgid "Delete other account"
+msgstr "Usuń drugie konto"
+
+#: lib/gamend_web/live/user_live/settings.ex:75
+#, elixir-autogen, elixir-format
+msgid "Delete the other account permanently? This cannot be undone."
+msgstr "Trwale usunąć drugie konto? Tej operacji nie można cofnąć."
+
+#: lib/gamend_web/live/user_live/settings/account_tab.ex:259
+#, elixir-autogen, elixir-format
+msgid "Delete your account permanently? This cannot be undone."
+msgstr "Trwale usunąć twoje konto? Tej operacji nie można cofnąć."
+
+#: lib/gamend_web/live/admin_live/kv.ex:368
+#, elixir-autogen, elixir-format
+msgid "Deleted %{count} entry"
+msgid_plural "Deleted %{count} entries"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: lib/gamend_web/live/admin_live/kv.ex:378
+#, elixir-autogen, elixir-format
+msgid "Deleted %{count} entry; %{failed} failed"
+msgid_plural "Deleted %{count} entries; %{failed} failed"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: lib/gamend_web/live/admin_live/groups.ex:455
+#, elixir-autogen, elixir-format
+msgid "Deleted %{count} group"
+msgid_plural "Deleted %{count} groups"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: lib/gamend_web/live/admin_live/groups.ex:465
+#, elixir-autogen, elixir-format
+msgid "Deleted %{count} group; %{failed} failed"
+msgid_plural "Deleted %{count} groups; %{failed} failed"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: lib/gamend_web/live/admin_live/leaderboards.ex:482
+#, elixir-autogen, elixir-format
+msgid "Deleted %{count} leaderboard"
+msgid_plural "Deleted %{count} leaderboards"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: lib/gamend_web/live/admin_live/leaderboards.ex:492
+#, elixir-autogen, elixir-format
+msgid "Deleted %{count} leaderboard; %{failed} failed"
+msgid_plural "Deleted %{count} leaderboards; %{failed} failed"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: lib/gamend_web/live/admin_live/lobbies.ex:732
+#, elixir-autogen, elixir-format
+msgid "Deleted %{count} lobby"
+msgid_plural "Deleted %{count} lobbies"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: lib/gamend_web/live/admin_live/lobbies.ex:742
+#, elixir-autogen, elixir-format
+msgid "Deleted %{count} lobby; %{failed} failed"
+msgid_plural "Deleted %{count} lobbies; %{failed} failed"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: lib/gamend_web/live/admin_live/chat.ex:268
+#, elixir-autogen, elixir-format
+msgid "Deleted %{count} message"
+msgid_plural "Deleted %{count} messages"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: lib/gamend_web/live/admin_live/chat.ex:278
+#, elixir-autogen, elixir-format
+msgid "Deleted %{count} message; %{failed} failed"
+msgid_plural "Deleted %{count} messages; %{failed} failed"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: lib/gamend_web/live/admin_live/notifications.ex:317
+#, elixir-autogen, elixir-format
+msgid "Deleted %{count} notification"
+msgid_plural "Deleted %{count} notifications"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: lib/gamend_web/live/admin_live/notifications.ex:327
+#, elixir-autogen, elixir-format
+msgid "Deleted %{count} notification; %{failed} failed"
+msgid_plural "Deleted %{count} notifications; %{failed} failed"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: lib/gamend_web/live/admin_live/parties.ex:521
+#, elixir-autogen, elixir-format
+msgid "Deleted %{count} party"
+msgid_plural "Deleted %{count} parties"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: lib/gamend_web/live/admin_live/parties.ex:531
+#, elixir-autogen, elixir-format
+msgid "Deleted %{count} party; %{failed} failed"
+msgid_plural "Deleted %{count} parties; %{failed} failed"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: lib/gamend_web/live/admin_live/sessions.ex:216
+#, elixir-autogen, elixir-format
+msgid "Deleted %{count} session"
+msgid_plural "Deleted %{count} sessions"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: lib/gamend_web/live/admin_live/sessions.ex:226
+#, elixir-autogen, elixir-format
+msgid "Deleted %{count} session; %{failed} failed"
+msgid_plural "Deleted %{count} sessions; %{failed} failed"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: lib/gamend_web/live/admin_live/users.ex:967
+#, elixir-autogen, elixir-format
+msgid "Deleted %{count} user"
+msgid_plural "Deleted %{count} users"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: lib/gamend_web/live/admin_live/users.ex:977
+#, elixir-autogen, elixir-format
+msgid "Deleted %{count} user; %{failed} failed"
+msgid_plural "Deleted %{count} users; %{failed} failed"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: lib/gamend_web/live_helpers.ex:320
+#, elixir-autogen, elixir-format
+msgid "Expired"
+msgstr "Wygasło"
+
+#: lib/gamend_web/live/admin_live/chat_reports.ex:401
+#, elixir-autogen, elixir-format
+msgid "Filter by reported user ID"
+msgstr ""
+
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:481
+#, elixir-autogen, elixir-format
+msgid "Find groups"
+msgstr "Znajdź grupy"
+
+#: lib/gamend_web/live/play_live.ex:62
+#, elixir-autogen, elixir-format
+msgid "Game"
+msgstr "Gra"
+
+#: lib/gamend_web/live/user_live/login.ex:179
+#, elixir-autogen, elixir-format
+msgid "If that email has an account, we sent it a login link. Check your inbox."
+msgstr "Jeśli ten e-mail ma konto, wysłaliśmy na niego link do logowania. Sprawdź skrzynkę."
+
+#: lib/gamend_web/live/admin_live/chat_filter.ex:163
+#, elixir-autogen, elixir-format
+msgid "Imported %{count} word from the %{lang} list"
+msgid_plural "Imported %{count} words from the %{lang} list"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:482
+#, elixir-autogen, elixir-format
+msgid "Invitations"
+msgstr "Zaproszenia"
+
+#: lib/gamend_web/live_helpers.ex:270
+#, elixir-autogen, elixir-format
+msgid "It is full."
+msgstr "Brak wolnych miejsc."
+
+#: lib/gamend_web/live_helpers.ex:277
+#, elixir-autogen, elixir-format
+msgid "It is locked."
+msgstr "Jest zablokowane."
+
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:331
+#, elixir-autogen, elixir-format
+msgid "Join requests"
+msgstr "Prośby o dołączenie"
+
+#: lib/gamend_web/live/user_live/settings/account_tab.ex:211
+#, elixir-autogen, elixir-format
+msgid "Linked"
+msgstr "Połączono"
+
+#: lib/gamend_web/live_helpers.ex:263
+#, elixir-autogen, elixir-format
+msgid "Make someone else an admin first."
+msgstr "Najpierw nadaj komuś innemu rolę admina."
+
+#: lib/gamend_web/live/groups_live.ex:460
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:117
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:159
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:195
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:514
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:623
+#, elixir-autogen, elixir-format
+msgid "Max members"
+msgstr "Maks. członków"
+
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:483
+#, elixir-autogen, elixir-format
+msgid "My requests"
+msgstr "Moje prośby"
+
+#: lib/gamend_web/live/stats_live.ex:100
+#, elixir-autogen, elixir-format
+msgid "New players"
+msgstr "Nowi gracze"
+
+#: lib/gamend_web/live/admin_live/chat_filter.ex:396
+#, elixir-autogen, elixir-format
+msgid "No bundled lists are available. Drop one at apps/gamend_core/priv/chat_filter/<lang>.txt."
+msgstr ""
+
+#: lib/gamend_web/live/user_live/settings/account_tab.ex:211
+#, elixir-autogen, elixir-format
+msgid "Not linked"
+msgstr "Nie połączono"
+
+#: lib/gamend_web/live/store_live/index.ex:99
+#, elixir-autogen, elixir-format
+msgid "Nothing is for sale right now."
+msgstr "Obecnie nic nie jest na sprzedaż."
+
+#: lib/gamend_web/components/presence_indicator.ex:35
+#: lib/gamend_web/live/user_live/settings/friends_tab.ex:144
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:260
+#, elixir-autogen, elixir-format
+msgid "Offline"
+msgstr "Offline"
+
+#: lib/gamend_web/live_helpers.ex:244
+#, elixir-autogen, elixir-format
+msgid "One of you has blocked the other."
+msgstr "Jedno z was zablokowało drugie."
+
+#: lib/gamend_web/live_helpers.ex:306
+#, elixir-autogen, elixir-format
+msgid "One-time"
+msgstr "Jednorazowy"
+
+#: lib/gamend_web/live_helpers.ex:256
+#, elixir-autogen, elixir-format
+msgid "Only a group admin can do that."
+msgstr "Tylko admin grupy może to zrobić."
+
+#: lib/gamend_web/live_helpers.ex:276
+#, elixir-autogen, elixir-format
+msgid "Only the host can do that."
+msgstr "Tylko gospodarz może to zrobić."
+
+#: lib/gamend_web/live_helpers.ex:282
+#, elixir-autogen, elixir-format
+msgid "Only the party leader can do that."
+msgstr "Tylko lider party może to zrobić."
+
+#: lib/gamend_web/live/store_live/index.ex:245
+#, elixir-autogen, elixir-format
+msgid "Order %{order_id} is waiting for payment confirmation."
+msgstr "Zamówienie %{order_id} czeka na potwierdzenie płatności."
+
+#: lib/gamend_web/live/auth_success_live.ex:229
+#: lib/gamend_web/live_helpers.ex:232
+#, elixir-autogen, elixir-format
+msgid "Player not found."
+msgstr "Nie znaleziono gracza."
+
+#: lib/gamend_web/live/auth_success_live.ex:235
+#, elixir-autogen, elixir-format
+msgid "Please try again."
+msgstr "Spróbuj ponownie."
+
+#: lib/gamend_web/live/leaderboards_live.ex:288
+#, elixir-autogen, elixir-format
+msgid "Rankings"
+msgstr "Klasyfikacja"
+
+#: lib/gamend_web/components/presence_indicator.ex:34
+#, elixir-autogen, elixir-format
+msgid "Recently online"
+msgstr "Niedawno online"
+
+#: lib/gamend_web/live_helpers.ex:317
+#, elixir-autogen, elixir-format
+msgid "Refunded"
+msgstr "Zwrócono"
+
+#: lib/gamend_web/live/admin_live/chat_filter.ex:192
+#, elixir-autogen, elixir-format
+msgid "Removed %{count} word tagged %{lang}"
+msgid_plural "Removed %{count} words tagged %{lang}"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:758
+#, elixir-autogen, elixir-format
+msgid "Requested"
+msgstr "Wysłano"
+
+#: lib/gamend_web/live/admin_live/retention.ex:135
+#, elixir-autogen, elixir-format
+msgid "Retention sweep affected %{count} row."
+msgid_plural "Retention sweep affected %{count} rows."
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: lib/gamend_web/live/admin_live/users.ex:501
+#, elixir-autogen, elixir-format
+msgid "Revoke this user's %{count} session?"
+msgid_plural "Revoke all %{count} of this user's sessions?"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: lib/gamend_web/live_helpers.ex:318
+#, elixir-autogen, elixir-format
+msgid "Revoked"
+msgstr "Cofnięto"
+
+#: lib/gamend_web/live/admin_live/users.ex:760
+#, elixir-autogen, elixir-format
+msgid "Revoked %{count} session"
+msgid_plural "Revoked %{count} sessions"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: lib/gamend_web/components/presentation_page.ex:171
+#: lib/gamend_web/components/presentation_page.ex:223
+#, elixir-autogen, elixir-format
+msgid "Scroll to content"
+msgstr "Przewiń do treści"
+
+#: lib/gamend_web/live/admin_live/runtime.ex:222
+#, elixir-autogen, elixir-format
+msgid "Search %{count} entry..."
+msgid_plural "Search %{count} entries..."
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:485
+#, elixir-autogen, elixir-format
+msgid "Sent invitations"
+msgstr "Wysłane zaproszenia"
+
+#: lib/gamend_web/live/groups_live.ex:453
+#, elixir-autogen, elixir-format
+msgid "Sort by:"
+msgstr "Sortuj według:"
+
+#: lib/gamend_web/live_helpers.ex:308
+#, elixir-autogen, elixir-format
+msgid "Subscription"
+msgstr "Subskrypcja"
+
+#: lib/gamend_web/live_helpers.ex:267
+#, elixir-autogen, elixir-format
+msgid "That is fewer than the current number of members."
+msgstr "To mniej niż obecna liczba członków."
+
+#: lib/gamend_web/live_helpers.ex:286
+#, elixir-autogen, elixir-format
+msgid "That message is not allowed."
+msgstr "Ta wiadomość jest niedozwolona."
+
+#: lib/gamend_web/controllers/error_html.ex:124
+#, elixir-autogen, elixir-format
+msgid "That was too large to send. Try a smaller file."
+msgstr "To jest za duże do wysłania. Spróbuj mniejszego pliku."
+
+#: lib/gamend_web/live_helpers.ex:273
+#, elixir-autogen, elixir-format
+msgid "The invite is no longer valid."
+msgstr "To zaproszenie jest już nieważne."
+
+#: lib/gamend_web/controllers/error_html.ex:130
+#, elixir-autogen, elixir-format
+msgid "The request could not be handled. Go back and try again."
+msgstr "Nie udało się obsłużyć żądania. Wróć i spróbuj ponownie."
+
+#: lib/gamend_web/live/auth_success_live.ex:232
+#, elixir-autogen, elixir-format
+msgid "The sign-in was cancelled or did not complete. Please try again."
+msgstr "Logowanie zostało anulowane lub nie zostało ukończone. Spróbuj ponownie."
+
+#: lib/gamend_web/live/auth_success_live.ex:141
+#: lib/gamend_web/live/auth_success_live.ex:223
+#: lib/gamend_web/live/user_live/settings.ex:65
+#, elixir-autogen, elixir-format
+msgid "This sign-in is already linked to another account"
+msgstr "Ta metoda logowania jest już powiązana z innym kontem"
+
+#: lib/gamend_web/live_helpers.ex:272
+#, elixir-autogen, elixir-format
+msgid "This was already answered."
+msgstr "Na to już odpowiedziano."
+
+#: lib/gamend_web/live/user_live/settings/groups_tab.ex:803
+#, elixir-autogen, elixir-format
+msgid "To"
+msgstr "Do"
+
+#: lib/gamend_web/live_helpers.ex:251
+#, elixir-autogen, elixir-format
+msgid "Too many pending requests. Wait for some to be answered."
+msgstr "Zbyt wiele oczekujących próśb. Poczekaj, aż część z nich zostanie rozpatrzona."
+
+#: lib/gamend_web/live/admin_live/chat_filter.ex:483
+#, elixir-autogen, elixir-format
+msgid "Words loaded into this node's in-memory matcher. A number that differs from the database count means this node missed a change broadcast."
+msgstr ""
+
+#: lib/gamend_web/live_helpers.ex:279
+#, elixir-autogen, elixir-format
+msgid "Wrong password."
+msgstr "Nieprawidłowe hasło."
+
+#: lib/gamend_web/live_helpers.ex:246
+#, elixir-autogen, elixir-format
+msgid "You already sent a request."
+msgstr "Prośba została już wysłana."
+
+#: lib/gamend_web/live_helpers.ex:245
+#, elixir-autogen, elixir-format
+msgid "You are already friends."
+msgstr "Jesteście już znajomymi."
+
+#: lib/gamend_web/live_helpers.ex:274
+#, elixir-autogen, elixir-format
+msgid "You are already in a lobby."
+msgstr "Jesteś już w lobby."
+
+#: lib/gamend_web/live_helpers.ex:280
+#, elixir-autogen, elixir-format
+msgid "You are already in a party."
+msgstr "Jesteś już w party."
+
+#: lib/gamend_web/live_helpers.ex:284
+#, elixir-autogen, elixir-format
+msgid "You are muted."
+msgstr "Jesteś wyciszony."
+
+#: lib/gamend_web/live_helpers.ex:259
+#, elixir-autogen, elixir-format
+msgid "You are not a member of this group."
+msgstr "Nie jesteś członkiem tej grupy."
+
+#: lib/gamend_web/live_helpers.ex:281
+#, elixir-autogen, elixir-format
+msgid "You are not in a party."
+msgstr "Nie jesteś w party."
+
+#: lib/gamend_web/live_helpers.ex:275
+#, elixir-autogen, elixir-format
+msgid "You are not in this lobby."
+msgstr "Nie jesteś w tym lobby."
+
+#: lib/gamend_web/live_helpers.ex:285
+#, elixir-autogen, elixir-format
+msgid "You are sending messages too fast."
+msgstr "Wysyłasz wiadomości zbyt szybko."
+
+#: lib/gamend_web/live_helpers.ex:254
+#, elixir-autogen, elixir-format
+msgid "You can only invite friends or players who share a group with you."
+msgstr "Możesz zapraszać tylko znajomych lub graczy, z którymi masz wspólną grupę."
+
+#: lib/gamend_web/live_helpers.ex:287
+#, elixir-autogen, elixir-format
+msgid "You can only message friends."
+msgstr "Możesz pisać tylko do znajomych."
+
+#: lib/gamend_web/live_helpers.ex:242
+#, elixir-autogen, elixir-format
+msgid "You cannot do that to yourself."
+msgstr "Nie możesz tego zrobić sobie."
+
+#: lib/gamend_web/live/quests_live.ex:496
+#, elixir-autogen, elixir-format
+msgid "You have %{count} quest ready to claim!"
+msgid_plural "You have %{count} quests ready to claim!"
+msgstr[0] "Masz %{count} zadanie do odebrania!"
+msgstr[1] "Masz %{count} zadania do odebrania!"
+msgstr[2] "Masz %{count} zadań do odebrania!"
+
+#: lib/gamend_web/live_helpers.ex:264
+#, elixir-autogen, elixir-format
+msgid "You have created too many groups."
+msgstr "Utworzono zbyt wiele grup."
+
+#: lib/gamend_web/live/auth_success_live.ex:226
+#, elixir-autogen, elixir-format
+msgid "Your account is waiting for an administrator to activate it."
+msgstr "Twoje konto czeka na aktywację przez administratora."
+
+#: lib/gamend_web/live_helpers.ex:247
+#, elixir-autogen, elixir-format
+msgid "Your friend list is full."
+msgstr "Twoja lista znajomych jest pełna."
+
+#: lib/gamend_web/live/store_live/index.ex:236
+#, elixir-autogen, elixir-format
+msgid "Your payment is still being processed. Refresh this page in a moment."
+msgstr "Płatność jest wciąż przetwarzana. Odśwież tę stronę za chwilę."
+
+#: lib/gamend_web/live/admin_live/matchmaking.ex:181
+#, elixir-autogen, elixir-format
+msgid "counts: last 24h · list: 10 most recent"
+msgstr ""
+
+#: lib/gamend_web/live/admin_live/lobby_snapshots.ex:93
+#, elixir-autogen, elixir-format
+msgid "latest %{count} run"
+msgid_plural "latest %{count} runs"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""

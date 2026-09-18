@@ -20,7 +20,7 @@ defmodule GamendWeb.AdminLive.Storage do
       |> assign(:upload_path, "")
       |> assign(:adapter, adapter_label())
       # Admin has full control: any file type, at any path, up to the configured
-      # upload limit (LIMIT_MAX_UPLOAD_BYTES).
+      # upload limit (GAMEND_LIMITS_MAX_UPLOAD_BYTES).
       |> allow_upload(:object,
         accept: :any,
         max_entries: 1,

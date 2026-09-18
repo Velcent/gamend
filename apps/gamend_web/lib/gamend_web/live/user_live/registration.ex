@@ -128,7 +128,7 @@ defmodule GamendWeb.UserLive.Registration do
            socket
            |> put_flash(
              :info,
-             gettext("Success.")
+             gettext("Account created. Check your email for a link to confirm it.")
            )
            |> push_navigate(to: ~p"/users/log_in")}
         end

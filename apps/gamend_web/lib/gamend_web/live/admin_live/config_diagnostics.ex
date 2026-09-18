@@ -535,13 +535,13 @@ defmodule GamendWeb.AdminLive.ConfigDiagnostics do
           env_line("GAMEND_PAYMENTS_ENVIRONMENT", payments_environment()),
           "Secret key source: #{stripe.selected_secret_key || Enum.join(stripe.expected_secret_keys, " or ")}",
           env_line(
-            stripe.selected_secret_key || "STRIPE_*_SECRET_KEY",
+            stripe.selected_secret_key || "GAMEND_PAYMENTS_STRIPE_*_SECRET_KEY",
             ProviderConfig.stripe_secret_key(),
             secret: true
           ),
           "Webhook secret source: #{stripe.selected_webhook_secret || Enum.join(stripe.expected_webhook_secrets, " or ")}",
           env_line(
-            stripe.selected_webhook_secret || "STRIPE_*_WEBHOOK_SECRET",
+            stripe.selected_webhook_secret || "GAMEND_PAYMENTS_STRIPE_*_WEBHOOK_SECRET",
             ProviderConfig.stripe_webhook_secret(),
             secret: true
           ),
@@ -602,16 +602,16 @@ defmodule GamendWeb.AdminLive.ConfigDiagnostics do
             secret: true
           ),
           env_line(
-            "APPLE_KEY_ID",
+            "GAMEND_PAYMENTS_APPLE_KEY_ID",
             Gamend.Settings.get(Gamend.Payments.Settings, :apple_key_id)
           ),
           env_line(
-            "APPLE_PRIVATE_KEY",
+            "GAMEND_PAYMENTS_APPLE_PRIVATE_KEY",
             Gamend.Settings.get(Gamend.Payments.Settings, :apple_private_key),
             secret: true
           ),
           env_line(
-            "APPLE_PRIVATE_KEY_PATH",
+            "GAMEND_PAYMENTS_APPLE_PRIVATE_KEY_PATH",
             Gamend.Settings.get(Gamend.Payments.Settings, :apple_private_key_path)
           ),
           env_line("GAMEND_PAYMENTS_ENVIRONMENT", payments_environment())
@@ -632,7 +632,7 @@ defmodule GamendWeb.AdminLive.ConfigDiagnostics do
             secret: true
           ),
           env_line(
-            "STEAM_APP_ID",
+            "GAMEND_PAYMENTS_STEAM_APP_ID",
             Gamend.Settings.get(Gamend.Payments.Settings, :steam_app_id)
           ),
           env_line("GAMEND_PAYMENTS_ENVIRONMENT", payments_environment())
@@ -679,6 +679,37 @@ defmodule GamendWeb.AdminLive.ConfigDiagnostics do
       "••••••••" <> String.slice(s, -4, 4)
     end
   end
+
+  @doc """
+  Whether the host set a declared setting — in its config or through the env
+  var — rather than leaving the default.
+
+  `Gamend.Settings.get/2` answers the default for an unset key, so a badge that
+  tests its result for truthiness says "configured" for every setting that has
+  a default.
+  """
+  def setting_set?(module, key) do
+    case Enum.find(module.__settings__(), &(&1.key == key)) do
+      nil -> false
+      definition -> Gamend.Settings.describe(definition).source == :config
+    end
+  end
+
+  @doc "A declared setting's value when the host set one, otherwise nil."
+  def setting_if_set(module, key) do
+    if setting_set?(module, key), do: Gamend.Settings.get(module, key)
+  end
+
+  @doc """
+  A setting value as the config page prints it. Only nil and "" are unset:
+  `value || "<unset>"` printed `false` as unset, and HEEx cannot render an atom
+  or integer the way it renders a string.
+  """
+  def display_value(nil), do: "<unset>"
+  def display_value(""), do: "<unset>"
+  def display_value(value) when is_binary(value), do: value
+  def display_value(value) when is_atom(value) or is_number(value), do: to_string(value)
+  def display_value(value), do: inspect(value)
 
   def limits_grouped do
     defaults = Gamend.Limits.defaults()

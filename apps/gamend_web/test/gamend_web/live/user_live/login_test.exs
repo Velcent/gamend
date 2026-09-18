@@ -52,7 +52,7 @@ defmodule GamendWeb.UserLive.LoginTest do
         |> render_submit()
         |> follow_redirect(conn, ~p"/users/log_in")
 
-      assert html =~ "Success."
+      assert html =~ "If that email has an account, we sent it a login link."
 
       assert Gamend.Repo.get_by!(Gamend.Accounts.UserToken, user_id: user.id).context ==
                "login"
@@ -66,7 +66,7 @@ defmodule GamendWeb.UserLive.LoginTest do
         |> render_submit()
         |> follow_redirect(conn, ~p"/users/log_in")
 
-      assert html =~ "Success."
+      assert html =~ "If that email has an account, we sent it a login link."
     end
   end
 

@@ -20,7 +20,7 @@ defmodule GamendWeb.PageController do
 
   def data_deletion(conn, _params) do
     conn
-    |> assign(:page_title, gettext("Delete"))
+    |> assign(:page_title, gettext("Data deletion"))
     |> assign_contact_email()
     |> render(:data_deletion)
   end

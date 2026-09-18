@@ -113,7 +113,7 @@ defmodule GamendWeb.CaptchaAuthTest do
         |> render_submit(%{"cf-turnstile-response" => "good"})
         |> follow_redirect(conn, ~p"/users/log_in")
 
-      assert html =~ "Success."
+      assert html =~ "Account created. Check your email"
       assert Repo.get_by(User, email: email)
     end
 
@@ -168,7 +168,7 @@ defmodule GamendWeb.CaptchaAuthTest do
         |> render_submit(%{"cf-turnstile-response" => "good"})
         |> follow_redirect(conn, ~p"/users/log_in")
 
-      assert html =~ "Success."
+      assert html =~ "If that email has an account, we sent it a login link."
     end
 
     test "a missing token sends nothing", %{conn: conn, user: user} do

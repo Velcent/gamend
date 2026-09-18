@@ -11,11 +11,6 @@
 msgid ""
 msgstr ""
 
-#: lib/gamend_web/live/notifications_live.ex:291
-#, elixir-autogen, elixir-format
-msgid "Achievement Unlocked: %{name}"
-msgstr ""
-
 #: lib/gamend_web/live/notifications_live.ex:285
 #, elixir-autogen, elixir-format
 msgid "New message in party"
@@ -35,4 +30,9 @@ msgstr ""
 #: lib/gamend_web/live/notifications_live.ex:293
 #, elixir-autogen, elixir-format
 msgid "Quest completed: %{name}"
+msgstr ""
+
+#: lib/gamend_web/live/notifications_live.ex:291
+#, elixir-autogen, elixir-format
+msgid "Achievement unlocked: %{name}"
 msgstr ""

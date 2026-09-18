@@ -24,7 +24,13 @@ defmodule GamendWeb.AdminLive.Sessions do
               <button
                 type="button"
                 phx-click="bulk_delete"
-                data-confirm={"Delete #{MapSet.size(@selected_ids)} selected sessions?"}
+                data-confirm={
+                  ngettext(
+                    "Delete %{count} selected session?",
+                    "Delete %{count} selected sessions?",
+                    MapSet.size(@selected_ids)
+                  )
+                }
                 class="btn btn-sm btn-outline btn-error"
                 disabled={MapSet.size(@selected_ids) == 0}
               >
@@ -49,7 +55,9 @@ defmodule GamendWeb.AdminLive.Sessions do
                     <th>User Email</th>
                     <th>Context</th>
                     <th>Created</th>
-                    <th>Last Used</th>
+                    <%!-- `authenticated_at` is set once, at sign-in; nothing
+                         bumps it when the session is used. --%>
+                    <th>Signed in</th>
                     <th>Expires</th>
                     <th>Actions</th>
                   </tr>
@@ -76,7 +84,7 @@ defmodule GamendWeb.AdminLive.Sessions do
                       <%= if session.authenticated_at do %>
                         <.timestamp at={session.authenticated_at} />
                       <% else %>
-                        <span class="text-gray-500">Never</span>
+                        <span class="text-gray-500">-</span>
                       <% end %>
                     </td>
                     <td class="text-sm">
@@ -202,7 +210,11 @@ defmodule GamendWeb.AdminLive.Sessions do
     socket =
       cond do
         failed == 0 ->
-          put_flash(socket, :info, "Deleted #{deleted} sessions")
+          put_flash(
+            socket,
+            :info,
+            ngettext("Deleted %{count} session", "Deleted %{count} sessions", deleted)
+          )
 
         deleted == 0 ->
           put_flash(socket, :error, "Failed to delete selected sessions")
@@ -211,7 +223,12 @@ defmodule GamendWeb.AdminLive.Sessions do
           put_flash(
             socket,
             :error,
-            "Deleted #{deleted} sessions; failed #{failed}"
+            ngettext(
+              "Deleted %{count} session; %{failed} failed",
+              "Deleted %{count} sessions; %{failed} failed",
+              deleted,
+              failed: failed
+            )
           )
       end
 
@@ -248,7 +265,7 @@ defmodule GamendWeb.AdminLive.Sessions do
 
         {:noreply,
          socket
-         |> put_flash(:info, "Token deleted successfully")
+         |> put_flash(:info, "Session deleted successfully")
          |> assign(:sessions_count, sessions_count)
          |> assign(:recent_sessions, recent_sessions)
          |> assign(:sessions_page, page)
@@ -256,7 +273,7 @@ defmodule GamendWeb.AdminLive.Sessions do
          |> sync_selected_ids(session_ids(recent_sessions))}
 
       {:error, _changeset} ->
-        {:noreply, put_flash(socket, :error, "Failed to delete token")}
+        {:noreply, put_flash(socket, :error, "Failed to delete session")}
     end
   end
 

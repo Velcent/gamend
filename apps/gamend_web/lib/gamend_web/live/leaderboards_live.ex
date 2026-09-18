@@ -285,7 +285,7 @@ defmodule GamendWeb.LeaderboardsLive do
       <div class="card-body">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <h2 class="card-title">
-            {gettext("Leaderboards")}
+            {gettext("Rankings")}
             <span class="text-base-content/70 font-normal text-base">({@records_count})</span>
           </h2>
 

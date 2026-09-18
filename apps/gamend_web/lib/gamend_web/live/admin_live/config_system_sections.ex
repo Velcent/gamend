@@ -7,7 +7,7 @@ defmodule GamendWeb.AdminLive.ConfigSystemSections do
   """
   use GamendWeb, :html
 
-  import GamendWeb.AdminLive.ConfigDiagnostics, only: [mask_secret: 1]
+  import GamendWeb.AdminLive.ConfigDiagnostics, only: [mask_secret: 1, display_value: 1]
 
   alias Gamend.Accounts.Scope
   alias Gamend.Hooks.PluginBuilder
@@ -88,7 +88,8 @@ defmodule GamendWeb.AdminLive.ConfigSystemSections do
               <div class="text-xs opacity-70 max-w-md">
                 Bundling runs <code>mix</code>, which this image does not ship. Build the
                 bundle where the plugin sources live and mount the result, or run an
-                image built from the non-release Dockerfile.
+                image built from the Dockerfile's <code>full</code>
+                target instead of <code>release</code>.
               </div>
             <% end %>
           </.form>
@@ -263,17 +264,17 @@ defmodule GamendWeb.AdminLive.ConfigSystemSections do
           <span class="break-all">
             {env_with_default(@config.cache_l2_env, @config.cache_l2_default)}
           </span>
-          <br /> GAMEND_CACHE_REDIS_URL / REDIS_URL:
+          <br /> GAMEND_CACHE_REDIS_URL / GAMEND_CLUSTER_REDIS_URL:
           <span class="break-all">
             <%= if @config.cache_redis_url_env do %>
               {mask_secret(@config.cache_redis_url_env)}
             <% else %>
               <span class="opacity-70">
-                &lt;unset (required when GAMEND_CACHE_L2=redis)&gt;
+                &lt;unset (required when GAMEND_CACHE_MODE=multi and GAMEND_CACHE_L2=redis)&gt;
               </span>
             <% end %>
           </span>
-          <br /> CACHE_REDIS_POOL_SIZE:
+          <br /> GAMEND_CACHE_REDIS_POOL_SIZE:
           <span class="break-all">
             {env_with_default(
               @config.cache_redis_pool_size_env,
@@ -335,9 +336,11 @@ defmodule GamendWeb.AdminLive.ConfigSystemSections do
       </td>
       <td class="text-sm break-words whitespace-normal">
         <div class="font-mono text-sm">
-          GAMEND_OBSERVABILITY_LOG_LEVEL: <span class="break-all">{@config.log_level}</span>
+          GAMEND_OBSERVABILITY_LOG_LEVEL:
+          <span class="break-all">{display_value(@config.log_level_env)}</span>
+          <span class="opacity-70">(effective: {inspect(@config.log_level)})</span>
           <br /> GAMEND_OBSERVABILITY_ACCESS_LOG_LEVEL:
-          <span class="break-all">{@config.access_log_level_env || "<unset>"}</span>
+          <span class="break-all">{display_value(@config.access_log_level_env)}</span>
           <span class="opacity-70">
             (effective: {inspect(@config.access_log_level)})
           </span>
@@ -403,42 +406,42 @@ defmodule GamendWeb.AdminLive.ConfigSystemSections do
             <div class="mt-1 space-y-1">
               <div>
                 GAMEND_DB_POOL_SIZE:
-                <span class="font-mono">{@config.db_pool_size_env || "<unset>"}</span>
+                <span class="font-mono">{display_value(@config.db_pool_size_env)}</span>
               </div>
               <div>
-                DB_POOL_TIMEOUT:
+                GAMEND_DB_POOL_TIMEOUT_MS:
                 <span class="font-mono">
-                  {@config.db_pool_timeout_env || "<unset>"}
+                  {display_value(@config.db_pool_timeout_env)}
                 </span>
               </div>
               <div>
-                DB_QUEUE_TARGET:
+                GAMEND_DB_QUEUE_TARGET:
                 <span class="font-mono">
-                  {@config.db_queue_target_env || "<unset>"}
+                  {display_value(@config.db_queue_target_env)}
                 </span>
               </div>
               <div>
-                DB_QUEUE_INTERVAL:
+                GAMEND_DB_QUEUE_INTERVAL_MS:
                 <span class="font-mono">
-                  {@config.db_queue_interval_env || "<unset>"}
+                  {display_value(@config.db_queue_interval_env)}
                 </span>
               </div>
               <div>
-                DB_QUERY_TIMEOUT:
+                GAMEND_DB_QUERY_TIMEOUT_MS:
                 <span class="font-mono">
-                  {@config.db_query_timeout_env || "<unset>"}
+                  {display_value(@config.db_query_timeout_env)}
                 </span>
               </div>
               <div>
                 GAMEND_DB_POSTGRES_PORT:
-                <span class="font-mono">{@config.postgres_port_env || "<unset>"}</span>
+                <span class="font-mono">{display_value(@config.postgres_port_env)}</span>
               </div>
               <div>
-                GAMEND_DB_IPV6: <span class="font-mono">{@config.ecto_ipv6_env || "<unset>"}</span>
+                GAMEND_DB_IPV6: <span class="font-mono">{display_value(@config.ecto_ipv6_env)}</span>
               </div>
               <div>
                 GAMEND_HTTP_SERVER:
-                <span class="font-mono">{@config.phx_server_env || "<unset>"}</span>
+                <span class="font-mono">{display_value(@config.phx_server_env)}</span>
               </div>
             </div>
           </div>
@@ -483,9 +486,10 @@ defmodule GamendWeb.AdminLive.ConfigSystemSections do
           <span class="break-all">{@config.ssl_keyfile_env || "<unset>"}</span>
           <br /> GAMEND_TLS_PORT:
           <span class="break-all">
-            {@config.https_port_env || "<unset> (default: 443)"}
+            {display_value(@config.https_port_env)}
           </span>
-          <br /> GAMEND_TLS_FORCE: <span class="break-all">{@config.force_ssl_env || "<unset>"}</span>
+          <br /> GAMEND_TLS_FORCE:
+          <span class="break-all">{display_value(@config.force_ssl_env)}</span>
           <br /> GAMEND_TLS_ACME_WEBROOT:
           <span class="break-all">{@config.acme_webroot_env || "<unset>"}</span>
         </div>
@@ -555,7 +559,7 @@ defmodule GamendWeb.AdminLive.ConfigSystemSections do
         <%= if @config.secret_key_base do %>
           GAMEND_AUTH_SECRET_KEY_BASE: {mask_secret(@config.secret_key_base)}
         <% else %>
-          Disabled
+          GAMEND_AUTH_SECRET_KEY_BASE: &lt;unset&gt;
         <% end %>
       </td>
     </tr>
@@ -580,9 +584,11 @@ defmodule GamendWeb.AdminLive.ConfigSystemSections do
       <td colspan="2">
         <span class="badge badge-success badge-sm">PromEx enabled</span>
         <span class="text-xs text-base-content/60 ml-2">
-          /metrics endpoint — local/Docker IPs always allowed {if @config.metrics_auth_token,
-            do: ", external requires token",
-            else: " (no token set — open to all)"}
+          /metrics endpoint — {if @config.metrics_auth_token,
+            do:
+              "loopback always allowed; every other caller, private/Docker IPs included, must send the bearer token",
+            else:
+              "no token set: loopback and private/Docker IPs allowed, every other caller refused. Set GAMEND_OBSERVABILITY_METRICS_TOKEN to scrape from outside"}
         </span>
       </td>
     </tr>
@@ -738,7 +744,7 @@ defmodule GamendWeb.AdminLive.ConfigSystemSections do
                 id="hooks-args-input"
                 name="args"
                 value={@hooks_args_prefill.value || ""}
-                placeholder="JSON array args (eg [1,2] or [])"
+                placeholder="JSON array args (e.g. [1,2] or [])"
                 class="input input-sm w-full md:flex-1 min-w-0"
               />
               <select
@@ -831,7 +837,7 @@ defmodule GamendWeb.AdminLive.ConfigSystemSections do
 
         <p class="text-sm opacity-70 mb-4">
           Override any limit at boot via env vars:
-          <code class="font-mono text-xs">LIMIT_&lt;KEY&gt;=value</code>
+          <code class="font-mono text-xs">GAMEND_LIMITS_&lt;KEY&gt;=value</code>
           (e.g. <code class="font-mono text-xs">GAMEND_LIMITS_MAX_METADATA_SIZE=32768</code>).
         </p>
 
@@ -863,7 +869,7 @@ defmodule GamendWeb.AdminLive.ConfigSystemSections do
                       <% end %>
                     </td>
                     <td class="font-mono text-xs opacity-60">
-                      LIMIT_{String.upcase(to_string(key))}
+                      GAMEND_LIMITS_{String.upcase(to_string(key))}
                     </td>
                   </tr>
                 <% end %>
@@ -1002,7 +1008,11 @@ defmodule GamendWeb.AdminLive.ConfigSystemSections do
             </table>
           </div>
           <div class="text-xs text-base-content/60 mt-2">
-            {length(@scheduled_jobs)} job(s) registered. Jobs are distributed-safe via database locks.
+            {ngettext(
+              "%{count} job registered.",
+              "%{count} jobs registered.",
+              length(@scheduled_jobs)
+            )} Each run is enqueued as a unique Oban job, so it runs once per period across the cluster.
           </div>
         <% end %>
       </div>
@@ -1033,11 +1043,20 @@ defmodule GamendWeb.AdminLive.ConfigSystemSections do
     |> String.trim()
   end
 
-  defp env_with_default(v, _default) when is_binary(v) and v != "", do: v
-  defp env_with_default(_v, default), do: "<unset (default: #{default})>"
+  # Any set value prints, not only a string: the cache and IPv6 settings are
+  # booleans, atoms and integers, and printed as unset whatever they held.
+  defp env_with_default(v, default) when v in [nil, ""], do: "<unset (default: #{default})>"
+  defp env_with_default(v, _default), do: display_value(v)
 
-  defp env_with_recommended(v, _recommended) when is_binary(v) and v != "", do: v
-  defp env_with_recommended(_v, recommended), do: "<unset (recommended: #{recommended})>"
+  # Off Fly there is no recommendation for some of these; "(recommended: )"
+  # read like a missing value.
+  defp env_with_recommended(v, recommended) when v in [nil, ""] and recommended in [nil, ""],
+    do: "<unset>"
+
+  defp env_with_recommended(v, recommended) when v in [nil, ""],
+    do: "<unset (recommended: #{recommended})>"
+
+  defp env_with_recommended(v, _recommended), do: display_value(v)
 
   defp format_limit_value(v) when is_integer(v) and v < 0 do
     "-#{format_limit_value(abs(v))}"

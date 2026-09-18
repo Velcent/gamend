@@ -63,7 +63,7 @@ defmodule GamendWeb.UserLive.SettingsPaymentsTest do
     rendered = render(view)
     assert rendered =~ coins_purchase.order_id
     assert rendered =~ pass_purchase.order_id
-    assert rendered =~ "completed"
+    assert rendered =~ "Completed"
     assert rendered =~ "Starter Pack"
     assert rendered =~ "starter_pack"
     assert rendered =~ "Download"

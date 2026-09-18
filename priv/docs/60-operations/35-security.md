@@ -4,7 +4,7 @@ icon: hero-shield-check
 
 # Security & Rate Limiting
 
-Requests pass through a fixed chain in the endpoint: the real client IP is extracted from proxy headers, banned IPs are rejected, security headers are set, CORS is applied, and the request is rate-limited, all before the router runs. This guide covers each layer, what it protects against, and what to configure for production.
+Requests pass through a fixed chain in the endpoint: security headers are set and static files are served first, then the real client IP is extracted from proxy headers, banned IPs are rejected, CORS is applied, and the request is rate-limited, all before the router runs. This guide covers each layer, what it protects against, and what to configure for production.
 
 ## The real client IP
 
@@ -14,7 +14,7 @@ The headers are only parsed when the connecting peer *is* a trusted proxy (loopb
 
 ## IP bans
 
-An IP ban is checked in ETS on every request: a banned address gets a bare `403` before any routing happens. Bans are persisted so they survive restarts, and broadcast over PubSub so every instance in a cluster applies them within moments of the ban being placed.
+An IP ban is checked in ETS on every request that reaches it: a banned address gets a bare `403` before any routing happens. Static files are served earlier in the chain, so a ban does not cover them. Bans are persisted so they survive restarts, and broadcast over PubSub so every instance in a cluster applies them within moments of the ban being placed.
 
 Ban and unban from [/admin/rate_limiting](/admin/rate_limiting) (permanent or with a TTL), or from server code:
 
@@ -64,7 +64,7 @@ With the keys unset, dev and test fall back to Cloudflare's published dummy pair
 
 Every response carries baseline headers (`nosniff`, `SAMEORIGIN` framing, a strict referrer policy, a deny-by-default permissions policy, and same-origin resource policy), and every HTTPS response gets a one-year HSTS header. In production the `x-request-id` response header is stripped so internal correlation ids do not leak; the id stays available for log correlation.
 
-Browser pages run under a strict Content-Security-Policy (no inline or third-party scripts). Two admin-only scopes carry their own slightly wider policies for Swagger UI and Oban Web, and when the captcha is enabled the policy is widened at request time to admit the Turnstile script, so deployments that never enable it keep exactly the strict policy.
+Browser pages run under a strict Content-Security-Policy (no inline or third-party scripts). Two scopes carry their own slightly wider policies: Swagger UI at `/api/docs`, which is public unless `GAMEND_FEATURES_OPENAPI=false`, and the admin-only Oban Web. When the captcha is enabled the policy is widened at request time to admit the Turnstile script, so deployments that never enable it keep exactly the strict policy.
 
 ## CORS
 
@@ -98,6 +98,6 @@ GAMEND_TLS_FORCE=true
 
 ## Reference
 
-- **Every variable:** the [Settings guide](/docs/settings) — the Rate limiting, Captcha, TLS and Server & HTTP groups.
+- **Every variable:** the [Settings guide](/docs/settings) — the Rate limiting, Captcha, TLS & certificates and Server & HTTP groups.
 - **Admin pages:** [/admin/rate_limiting](/admin/rate_limiting), [/admin/users](/admin/users), [/admin/sessions](/admin/sessions).
 - **Scaling:** the [Scaling guide](/docs/scaling) for running the Redis-backed limiter under Docker Compose.

@@ -6,8 +6,9 @@ icon: hero-flag
 
 One engine for achievements, dailies, seasonal events and quest lines. A quest is objectives + rewards plus five independent settings that combine freely.
 
-| reset | When progress restarts: `never`, `daily`, `weekly`, `monthly`, or `interval` with `reset_interval_days` (biweekly = 14, any cadence). Every period boundary is 00:00 UTC, the same instant for every player - so a daily rolls over at noon in New Zealand and the previous afternoon on the US west coast. Show players the countdown a quest already carries rather than a reset time. |
+| Setting | What it does |
 |---|---|
+| reset | When progress restarts: `never`, `daily`, `weekly`, `monthly`, or `interval` with `reset_interval_days` (biweekly = 14, any cadence). Every period boundary is 00:00 UTC, the same instant for every player - so a daily rolls over at noon in New Zealand and the previous afternoon on the US west coast. Show players the countdown a quest already carries rather than a reset time. |
 | starts_at / ends_at | Availability window. Set them and it is an "event". |
 | prerequisite_quest_key | Must be completed first. Set it and it is a "chain" — hidden and frozen until unlocked. |
 | category | Free-form label for your UI tabs. No engine behavior. |

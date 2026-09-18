@@ -11,6 +11,7 @@ defmodule GamendWeb.UserLive.Settings.AccountTab do
   alias Gamend.Accounts
   alias Gamend.OAuth.Providers
   alias Gamend.Storage
+  alias GamendWeb.LiveHelpers
   alias GamendWeb.UserLive.Settings.Shared
 
   def assign_defaults(socket, user) do
@@ -173,7 +174,7 @@ defmodule GamendWeb.UserLive.Settings.AccountTab do
             <.input
               field={@password_form[:password_confirmation]}
               type="password"
-              label={gettext("Confirm")}
+              label={gettext("Confirm password")}
               autocomplete="new-password"
             />
             <.button variant="primary" phx-disable-with={gettext("Saving...")}>
@@ -207,7 +208,7 @@ defmodule GamendWeb.UserLive.Settings.AccountTab do
             <div>
               <strong>{provider |> Atom.to_string() |> String.capitalize()}</strong>
               <div class="text-sm text-base-content/70">
-                {gettext("Log in")}
+                {if linked_id, do: gettext("Linked"), else: gettext("Not linked")}
               </div>
             </div>
             <div class="flex items-center gap-2">
@@ -255,7 +256,7 @@ defmodule GamendWeb.UserLive.Settings.AccountTab do
           <button
             phx-click="delete_user"
             class="btn btn-error"
-            data-confirm={gettext("Delete?")}
+            data-confirm={gettext("Delete your account permanently? This cannot be undone.")}
           >
             {gettext("Delete account")}
           </button>
@@ -290,7 +291,12 @@ defmodule GamendWeb.UserLive.Settings.AccountTab do
           &url(~p"/users/settings/confirm_email/#{&1}")
         )
 
-        {:noreply, put_flash(socket, :info, gettext("Success."))}
+        {:noreply,
+         put_flash(
+           socket,
+           :info,
+           gettext("Check your new email address for a link to confirm the change.")
+         )}
 
       changeset ->
         {:noreply, assign(socket, :email_form, to_form(changeset, action: :insert))}
@@ -356,9 +362,15 @@ defmodule GamendWeb.UserLive.Settings.AccountTab do
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, username_form: to_form(changeset, action: :insert))}
 
+      # Anything else is the `before_user_update` hook refusing: its own words
+      # when it gave a string, a plain refusal otherwise.
       {:error, reason} ->
         {:noreply,
-         put_flash(socket, :error, gettext("Not allowed: %{reason}", reason: inspect(reason)))}
+         put_flash(
+           socket,
+           :error,
+           LiveHelpers.failure_message(gettext("Not allowed"), {:hook_rejected, reason})
+         )}
     end
   end
 

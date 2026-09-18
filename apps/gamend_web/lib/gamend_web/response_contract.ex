@@ -19,6 +19,10 @@ defmodule GamendWeb.ResponseContract do
   contract test without being edited. Raising stops a test at its first
   violation; to see all of a domain's drift in one run, set
   `RESPONSE_CONTRACT_REPORT=<file>` and violations are appended there instead.
+  The check only sees what the tests request: `RESPONSE_CONTRACT_SEEN=<file>`
+  records each checked operation and status, which shows the ones no test
+  reaches. Both are environment variables rather than declared settings
+  because they switch a single test run, not a server.
 
   Only operations under `@enforced_tags` are checked. The list grows one domain
   per slice of `docs/specs/named-api-schemas.md` and is deleted, with the tag
@@ -29,7 +33,14 @@ defmodule GamendWeb.ResponseContract do
   alias OpenApiSpex.{Cast, Operation, PathItem, Reference, Response, Schema}
   alias OpenApiSpex.Plug.PutApiSpec
 
-  @enforced_tags MapSet.new(["Lobbies", "Users", "Authentication", "Friends"])
+  @enforced_tags MapSet.new([
+                   "Lobbies",
+                   "Users",
+                   "Authentication",
+                   "Friends",
+                   "Groups",
+                   "Parties"
+                 ])
 
   defmodule Violation do
     @moduledoc "A response that contradicts its documented schema."
@@ -95,6 +106,10 @@ defmodule GamendWeb.ResponseContract do
   defp method_key(method), do: method |> String.downcase() |> String.to_existing_atom()
 
   defp verify(conn, spec, operation) do
+    with path when is_binary(path) <- System.get_env("RESPONSE_CONTRACT_SEEN") do
+      File.write!(path, "#{operation.operationId} #{conn.status}\n", [:append])
+    end
+
     case documented_schema(operation, conn.status) do
       %{} = schema ->
         verify_body(conn, spec.components.schemas, operation, schema)

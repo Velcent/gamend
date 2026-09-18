@@ -164,6 +164,20 @@ defmodule Gamend.QuestsTest do
       assert progress.quest_key == quest.key
     end
 
+    test "completion sends a registered quest_completed notification" do
+      quest = create_quest(%{objectives: [%{event: "boss_down", target: 1}]})
+      user = user_fixture()
+      :ok = Gamend.Notifications.subscribe(user.id)
+
+      {:ok, [%{status: "completed"}]} = Quests.report_event(user.id, "boss_down")
+
+      # String keys, like every other emitter: push routing and the realtime
+      # payload both read `metadata["type"]`.
+      assert_receive {:notification_created, notification}, 2_000
+      assert notification.metadata["type"] == "quest_completed"
+      assert notification.metadata["quest_key"] == quest.key
+    end
+
     test "completes a multi-objective quest only when every objective is met" do
       create_quest(%{
         key: "multi",

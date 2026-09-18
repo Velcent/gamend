@@ -20,12 +20,20 @@ ordinary Elixir way instead, and everything ends at `Application` config:
 config :gamend_core, Gamend.Retention, chat_messages_days: 90
 ```
 
-To feed the variables below in, a host adds one line to
-`config/runtime.exs`:
+To feed the variables below in, a host's `config/runtime.exs` runs one loop
+over `GamendWeb.HostRuntime.config/2`. It folds in
+`Gamend.Settings.from_env/0` and also derives the Repo, Endpoint, mailer and
+push configuration from these settings, so a loop over `from_env/0` alone
+boots a production server with no Repo or Endpoint configuration:
 
 ```elixir
-for {app, module, opts} <- Gamend.Settings.from_env() do
-  config app, module, opts
+host_root = System.get_env("RELEASE_ROOT") || Path.expand("..", __DIR__)
+
+for entry <- GamendWeb.HostRuntime.config(config_env(), host_root: host_root) do
+  case entry do
+    {app, opts} -> config app, opts
+    {app, key, value} -> config app, key, value
+  end
 end
 ```
 
@@ -55,7 +63,7 @@ Live values, and where each one came from, are on the
 | `GAMEND_CACHE_L2` | atom | `:partitioned` | redis or partitioned. Only used when mode is multi; partitioned needs clustering. |
 | `GAMEND_CACHE_MODE` | atom | `:single` | single (L1 local only) or multi (L1 + a shared L2). |
 | `GAMEND_CACHE_REDIS_POOL_SIZE` | integer | `10` |  |
-| `GAMEND_CACHE_REDIS_URL` | string | - | Redis URL for the shared L2. **Required in production.** |
+| `GAMEND_CACHE_REDIS_URL` | string | - | Redis URL for the shared L2. **Required in production when `GAMEND_CACHE_MODE` is `multi` and `GAMEND_CACHE_L2` is `redis`.** |
 
 
 ## Captcha
@@ -63,8 +71,8 @@ Live values, and where each one came from, are on the
 | Variable | Type | Default | Notes |
 |---|---|---|---|
 | `GAMEND_CAPTCHA_ENABLED` | boolean | `false` | Require a captcha on the register and magic-link forms. |
-| `GAMEND_CAPTCHA_SECRET_KEY` | string | - | Turnstile secret key, for server-side verification. **Required in production.** Secret - never log or commit it. |
-| `GAMEND_CAPTCHA_SITE_KEY` | string | - | Turnstile sitekey (public, rendered into the page). Warns when unset. |
+| `GAMEND_CAPTCHA_SECRET_KEY` | string | - | Turnstile secret key, for server-side verification. **Required in production when `GAMEND_CAPTCHA_ENABLED` is `true`.** Secret - never log or commit it. |
+| `GAMEND_CAPTCHA_SITE_KEY` | string | - | Turnstile sitekey (public, rendered into the page). Warns if unset when `GAMEND_CAPTCHA_ENABLED` is `true`. |
 | `GAMEND_CAPTCHA_TIMEOUT_MS` | integer | `5000` | How long to wait for Cloudflare before giving up on a verification. |
 
 
@@ -72,7 +80,7 @@ Live values, and where each one came from, are on the
 
 | Variable | Type | Default | Notes |
 |---|---|---|---|
-| `GAMEND_CLIENT_LOGS_CATEGORY_LEVELS` | list | `` | Per-category level overrides as category:level pairs, e.g. perf:off,network:warn. Overrides the floor for that category only; off drops it entirely. |
+| `GAMEND_CLIENT_LOGS_CATEGORY_LEVELS` | list | - | Per-category level overrides as category:level pairs, e.g. perf:off,network:warn. Overrides the floor for that category only; off drops it entirely. |
 | `GAMEND_CLIENT_LOGS_ENABLED` | boolean | `false` | Accept log batches from game clients and re-emit them into the server's own logs, indexed at /admin/logs. |
 | `GAMEND_CLIENT_LOGS_LEVEL` | string | `"info"` | Lowest client level to collect: trace, debug, info, warn or error. Clients gate their own uploads on this. |
 | `GAMEND_CLIENT_LOGS_RETENTION_DAYS` | integer | `14` | Delete client sessions after N days of inactivity. 0 keeps them forever. |
@@ -122,32 +130,19 @@ Live values, and where each one came from, are on the
 | `GAMEND_DB_URL` | string | - | Full ecto:// URL. Takes precedence over the individual postgres_* values. Secret - never log or commit it. |
 
 
-## Public features
+## Email
 
 | Variable | Type | Default | Notes |
 |---|---|---|---|
-| `GAMEND_FEATURES_LIST_GROUPS` | boolean | `true` | GET /api/v1/groups*, the "groups" channel and the /groups pages. |
-| `GAMEND_FEATURES_LIST_LEADERBOARDS` | boolean | `true` | Public GET/resolve /api/v1/leaderboards* and the /leaderboards pages. |
-| `GAMEND_FEATURES_LIST_LOBBIES` | boolean | `true` | GET /api/v1/lobbies and the "lobbies" channel. |
-| `GAMEND_FEATURES_LIST_MATCHMAKING` | boolean | `true` | GET /api/v1/matchmaking/stats. Own-ticket endpoints stay. |
-| `GAMEND_FEATURES_LIST_QUESTS` | boolean | `true` | Public GET /api/v1/quests* and the /quests page. |
-| `GAMEND_FEATURES_LIST_USERS` | boolean | `true` | GET /api/v1/users and /users/:id. |
-| `GAMEND_FEATURES_MAILBOX_PREVIEW` | boolean | `false` | Serve the in-browser mailbox at /dev/mailbox outside dev. Every sent email is readable there. |
-| `GAMEND_FEATURES_OPENAPI` | boolean | `true` | OpenAPI spec + Swagger UI. A complete map of your API — consider off in production. |
-| `GAMEND_FEATURES_PUBLIC_STATS` | boolean | `true` | The unauthenticated stats endpoints: GET /api/v1/users/stats, /api/v1/lobbies/stats, /api/v1/parties/stats, /api/v1/quests/stats, /api/v1/signaling/stats and /api/v1/matchmaking/stats. Aggregate counts only, never per-row data — but they do reveal how busy the server is. |
-| `GAMEND_FEATURES_PUBLIC_USER_METADATA_KEYS` | list | `` | Top-level `user.metadata` keys GET /api/v1/users and /users/:id may return. Empty means none. Those endpoints are unauthenticated, so anything named here is world-readable and findable by name prefix — never list a key holding position, routing or contact data. |
-| `GAMEND_FEATURES_USER_IMAGE_UPLOADS` | boolean | `true` | Player-supplied images: avatars (POST /api/v1/me/avatar*) and group icons (POST /api/v1/groups/:id/icon*). Objects land in public storage and are served without authentication, so on a service children can reach this is an unscreened image surface — turn it off unless the game actually uses it and you have a way to screen what arrives. |
-
-
-## Server & HTTP
-
-| Variable | Type | Default | Notes |
-|---|---|---|---|
-| `GAMEND_HTTP_ALLOWED_ORIGINS` | list | `` | Browser CORS/WebSocket origin allowlist. Empty allows any origin. Prefix an entry with `regex:` for a pattern. |
-| `GAMEND_HTTP_HOST` | string | `"localhost"` | Public hostname, used to build URLs and OAuth redirect URIs. |
-| `GAMEND_HTTP_PORT` | integer | `4000` | TCP port the HTTP listener binds. |
-| `GAMEND_HTTP_SCHEME` | string | - | http or https. Defaults to http for localhost, https otherwise. |
-| `GAMEND_HTTP_SERVER` | boolean | `false` | Start the HTTP listener. Only needed when running as a release. |
+| `GAMEND_MAIL_SMTP_FROM_EMAIL` | string | - |  |
+| `GAMEND_MAIL_SMTP_FROM_NAME` | string | `"Gamend"` |  |
+| `GAMEND_MAIL_SMTP_PASSWORD` | string | - | SMTP password, or the provider's API key. Warns if unset once `GAMEND_MAIL_SMTP_RELAY` or `GAMEND_MAIL_SMTP_USERNAME` is set. Secret - never log or commit it. |
+| `GAMEND_MAIL_SMTP_PORT` | integer | `465` |  |
+| `GAMEND_MAIL_SMTP_RELAY` | string | - | SMTP host, e.g. smtp.resend.com. Warns if unset once `GAMEND_MAIL_SMTP_PASSWORD` or `GAMEND_MAIL_SMTP_USERNAME` is set. |
+| `GAMEND_MAIL_SMTP_SNI` | string | - | TLS server name indication. Defaults to the relay host. |
+| `GAMEND_MAIL_SMTP_SSL` | boolean | `true` |  |
+| `GAMEND_MAIL_SMTP_TLS` | atom | `:never` | STARTTLS policy: never \| if_available \| always. |
+| `GAMEND_MAIL_SMTP_USERNAME` | string | - | Warns if unset once `GAMEND_MAIL_SMTP_PASSWORD` or `GAMEND_MAIL_SMTP_RELAY` is set. |
 
 
 ## IndexNow
@@ -156,7 +151,7 @@ Live values, and where each one came from, are on the
 |---|---|---|---|
 | `GAMEND_INDEX_NOW_ENABLED` | boolean | `false` | Notify IndexNow search engines (Bing, Yandex, Seznam — not Google) when pages change. |
 | `GAMEND_INDEX_NOW_ENDPOINT` | string | `"https://api.indexnow.org/indexnow"` | IndexNow submission endpoint. Any participating engine's endpoint reaches all of them. |
-| `GAMEND_INDEX_NOW_KEY` | string | - | IndexNow key, 8-128 hex characters. Public by design — it is served at /<key>.txt to prove domain ownership. Warns when unset. |
+| `GAMEND_INDEX_NOW_KEY` | string | - | IndexNow key, 8-128 hex characters. Public by design — it is served at /<key>.txt to prove domain ownership. Warns if unset when `GAMEND_INDEX_NOW_ENABLED` is `true`. |
 | `GAMEND_INDEX_NOW_TIMEOUT_MS` | integer | `10000` | How long to wait for the IndexNow endpoint before giving up. |
 
 
@@ -239,42 +234,27 @@ Live values, and where each one came from, are on the
 |---|---|---|---|
 | `GAMEND_LOBBY_SNAPSHOTS_ENABLED` | boolean | `false` | Record a durable per-run snapshot of lobby state, browsable at /admin/lobby_snapshots. |
 | `GAMEND_LOBBY_SNAPSHOTS_MAX_KV_ENTRIES` | integer | `200` | Cap on KV entries captured per snapshot. |
-| `GAMEND_LOBBY_SNAPSHOTS_USER_KV_KEYS` | list | `` | User-scoped KV keys to capture. Empty captures none — the widest exposure in a snapshot. |
-
-
-## Email
-
-| Variable | Type | Default | Notes |
-|---|---|---|---|
-| `GAMEND_MAIL_SMTP_FROM_EMAIL` | string | - |  |
-| `GAMEND_MAIL_SMTP_FROM_NAME` | string | `"Gamend"` |  |
-| `GAMEND_MAIL_SMTP_PASSWORD` | string | - | SMTP password, or the provider's API key. Warns when unset. Secret - never log or commit it. |
-| `GAMEND_MAIL_SMTP_PORT` | integer | `465` |  |
-| `GAMEND_MAIL_SMTP_RELAY` | string | - | SMTP host, e.g. smtp.resend.com. Warns when unset. |
-| `GAMEND_MAIL_SMTP_SNI` | string | - | TLS server name indication. Defaults to the relay host. |
-| `GAMEND_MAIL_SMTP_SSL` | boolean | `true` |  |
-| `GAMEND_MAIL_SMTP_TLS` | atom | `:never` | STARTTLS policy: never \| if_available \| always. |
-| `GAMEND_MAIL_SMTP_USERNAME` | string | - | Warns when unset. |
+| `GAMEND_LOBBY_SNAPSHOTS_USER_KV_KEYS` | list | - | User-scoped KV keys to capture. Empty captures none — the widest exposure in a snapshot. |
 
 
 ## OAuth providers
 
 | Variable | Type | Default | Notes |
 |---|---|---|---|
-| `GAMEND_OAUTH_APPLE_CLIENT_ID` | string | - | Services id (web audience) for Sign in with Apple. Warns when unset. |
+| `GAMEND_OAUTH_APPLE_CLIENT_ID` | string | - | Services id (web audience) for Sign in with Apple. Warns if unset once `GAMEND_OAUTH_APPLE_TEAM_ID`, `GAMEND_OAUTH_APPLE_KEY_ID` or `GAMEND_OAUTH_APPLE_PRIVATE_KEY` is set. |
 | `GAMEND_OAUTH_APPLE_ENABLED` | boolean | `true` | Offer apple sign-in. Only takes effect once its credentials are set. |
 | `GAMEND_OAUTH_APPLE_IOS_CLIENT_ID` | string | - | Bundle id (iOS audience) used when verifying Apple ID tokens. |
-| `GAMEND_OAUTH_APPLE_KEY_ID` | string | - | Key id of the Sign in with Apple auth key (Apple Developer -> Keys). Warns when unset. |
-| `GAMEND_OAUTH_APPLE_PRIVATE_KEY` | string | - | Contents of the Sign in with Apple .p8 key. Warns when unset. Secret - never log or commit it. |
-| `GAMEND_OAUTH_APPLE_TEAM_ID` | string | - | Warns when unset. |
-| `GAMEND_OAUTH_DISCORD_CLIENT_ID` | string | - | Warns when unset. |
-| `GAMEND_OAUTH_DISCORD_CLIENT_SECRET` | string | - | Warns when unset. Secret - never log or commit it. |
+| `GAMEND_OAUTH_APPLE_KEY_ID` | string | - | Key id of the Sign in with Apple auth key (Apple Developer -> Keys). Warns if unset once `GAMEND_OAUTH_APPLE_CLIENT_ID`, `GAMEND_OAUTH_APPLE_TEAM_ID` or `GAMEND_OAUTH_APPLE_PRIVATE_KEY` is set. |
+| `GAMEND_OAUTH_APPLE_PRIVATE_KEY` | string | - | Contents of the Sign in with Apple .p8 key. Warns if unset once `GAMEND_OAUTH_APPLE_CLIENT_ID`, `GAMEND_OAUTH_APPLE_TEAM_ID` or `GAMEND_OAUTH_APPLE_KEY_ID` is set. Secret - never log or commit it. |
+| `GAMEND_OAUTH_APPLE_TEAM_ID` | string | - | Warns if unset once `GAMEND_OAUTH_APPLE_CLIENT_ID`, `GAMEND_OAUTH_APPLE_KEY_ID` or `GAMEND_OAUTH_APPLE_PRIVATE_KEY` is set. |
+| `GAMEND_OAUTH_DISCORD_CLIENT_ID` | string | - | Warns if unset once `GAMEND_OAUTH_DISCORD_CLIENT_SECRET` is set. |
+| `GAMEND_OAUTH_DISCORD_CLIENT_SECRET` | string | - | Warns if unset once `GAMEND_OAUTH_DISCORD_CLIENT_ID` is set. Secret - never log or commit it. |
 | `GAMEND_OAUTH_DISCORD_ENABLED` | boolean | `true` | Offer discord sign-in. Only takes effect once its credentials are set. |
-| `GAMEND_OAUTH_FACEBOOK_CLIENT_ID` | string | - | Warns when unset. |
-| `GAMEND_OAUTH_FACEBOOK_CLIENT_SECRET` | string | - | Warns when unset. Secret - never log or commit it. |
+| `GAMEND_OAUTH_FACEBOOK_CLIENT_ID` | string | - | Warns if unset once `GAMEND_OAUTH_FACEBOOK_CLIENT_SECRET` is set. |
+| `GAMEND_OAUTH_FACEBOOK_CLIENT_SECRET` | string | - | Warns if unset once `GAMEND_OAUTH_FACEBOOK_CLIENT_ID` is set. Secret - never log or commit it. |
 | `GAMEND_OAUTH_FACEBOOK_ENABLED` | boolean | `true` | Offer facebook sign-in. Only takes effect once its credentials are set. |
-| `GAMEND_OAUTH_GOOGLE_CLIENT_ID` | string | - | Warns when unset. |
-| `GAMEND_OAUTH_GOOGLE_CLIENT_SECRET` | string | - | Warns when unset. Secret - never log or commit it. |
+| `GAMEND_OAUTH_GOOGLE_CLIENT_ID` | string | - | Warns if unset once `GAMEND_OAUTH_GOOGLE_CLIENT_SECRET` is set. |
+| `GAMEND_OAUTH_GOOGLE_CLIENT_SECRET` | string | - | Warns if unset once `GAMEND_OAUTH_GOOGLE_CLIENT_ID` is set. Secret - never log or commit it. |
 | `GAMEND_OAUTH_GOOGLE_ENABLED` | boolean | `true` | Offer google sign-in. Only takes effect once its credentials are set. |
 | `GAMEND_OAUTH_GOOGLE_WEB_CLIENT_ID` | string | - | Native-app client id used to verify Google ID tokens from SDK sign-in. |
 | `GAMEND_OAUTH_STEAM_API_KEY` | string | - | Steam Web API key, used for OpenID sign-in. Secret - never log or commit it. |
@@ -301,27 +281,44 @@ Live values, and where each one came from, are on the
 | Variable | Type | Default | Notes |
 |---|---|---|---|
 | `GAMEND_PAYMENTS_APPLE_APP_STORE_SERVER_BASE_URL` | string | - |  |
-| `GAMEND_PAYMENTS_APPLE_BUNDLE_ID` | string | - | Warns when unset. |
-| `GAMEND_PAYMENTS_APPLE_ISSUER_ID` | string | - | Issuer id from App Store Connect -> Users and Access -> Integrations. Warns when unset. Secret - never log or commit it. |
-| `GAMEND_PAYMENTS_APPLE_KEY_ID` | string | - | Key id of the App Store Connect API key — not the Sign in with Apple key. Warns when unset. |
+| `GAMEND_PAYMENTS_APPLE_BUNDLE_ID` | string | - | Warns if unset once `GAMEND_PAYMENTS_APPLE_ISSUER_ID` or `GAMEND_PAYMENTS_APPLE_KEY_ID` is set. |
+| `GAMEND_PAYMENTS_APPLE_ISSUER_ID` | string | - | Issuer id from App Store Connect -> Users and Access -> Integrations. Warns if unset once `GAMEND_PAYMENTS_APPLE_BUNDLE_ID` or `GAMEND_PAYMENTS_APPLE_KEY_ID` is set. Secret - never log or commit it. |
+| `GAMEND_PAYMENTS_APPLE_KEY_ID` | string | - | Key id of the App Store Connect API key — not the Sign in with Apple key. Warns if unset once `GAMEND_PAYMENTS_APPLE_BUNDLE_ID` or `GAMEND_PAYMENTS_APPLE_ISSUER_ID` is set. |
 | `GAMEND_PAYMENTS_APPLE_PRIVATE_KEY` | string | - | Inline .p8 contents for the App Store Connect API key. Secret - never log or commit it. |
 | `GAMEND_PAYMENTS_APPLE_PRIVATE_KEY_PATH` | string | - |  |
 | `GAMEND_PAYMENTS_ENVIRONMENT` | atom | `:production` | sandbox while validating, production for real transactions. |
 | `GAMEND_PAYMENTS_GOOGLE_PLAY_ACCESS_TOKEN` | string | - | Secret - never log or commit it. |
 | `GAMEND_PAYMENTS_GOOGLE_PLAY_AUTO_ACKNOWLEDGE` | boolean | `false` |  |
-| `GAMEND_PAYMENTS_GOOGLE_PLAY_PACKAGE_NAME` | string | - | Warns when unset. |
+| `GAMEND_PAYMENTS_GOOGLE_PLAY_PACKAGE_NAME` | string | - | Warns if unset once `GAMEND_PAYMENTS_GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` is set. |
 | `GAMEND_PAYMENTS_GOOGLE_PLAY_PUBLISHER_BASE_URL` | string | - |  |
 | `GAMEND_PAYMENTS_GOOGLE_PLAY_RTDN_TOKEN` | string | - | Shared bearer token on the Pub/Sub push webhook. Without it the RTDN endpoint fails closed in production. Secret - never log or commit it. |
-| `GAMEND_PAYMENTS_GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` | string | - | Inline service-account JSON. Use the _PATH variant to read it from a file instead. Warns when unset. Secret - never log or commit it. |
+| `GAMEND_PAYMENTS_GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` | string | - | Inline service-account JSON. Use the _PATH variant to read it from a file instead. Warns if unset once `GAMEND_PAYMENTS_GOOGLE_PLAY_PACKAGE_NAME` is set. Secret - never log or commit it. |
 | `GAMEND_PAYMENTS_GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_PATH` | string | - |  |
 | `GAMEND_PAYMENTS_STEAM_APP_ID` | string | - |  |
 | `GAMEND_PAYMENTS_STEAM_MICROTXN_BASE_URL` | string | - |  |
 | `GAMEND_PAYMENTS_STEAM_WEB_API_KEY` | string | - | Falls back to the OAuth Steam key when unset. Secret - never log or commit it. |
 | `GAMEND_PAYMENTS_STRIPE_API_VERSION` | string | `"2022-11-15"` |  |
-| `GAMEND_PAYMENTS_STRIPE_PRODUCTION_SECRET_KEY` | string | - | sk_live_... key, used when environment is production. Warns when unset. Secret - never log or commit it. |
+| `GAMEND_PAYMENTS_STRIPE_PRODUCTION_SECRET_KEY` | string | - | sk_live_... key, used when environment is production. Warns if unset when `GAMEND_PAYMENTS_ENVIRONMENT` is `production`. Secret - never log or commit it. |
 | `GAMEND_PAYMENTS_STRIPE_PRODUCTION_WEBHOOK_SECRET` | string | - | Secret - never log or commit it. |
 | `GAMEND_PAYMENTS_STRIPE_SANDBOX_SECRET_KEY` | string | - | sk_test_... key, used when environment is sandbox. Secret - never log or commit it. |
 | `GAMEND_PAYMENTS_STRIPE_SANDBOX_WEBHOOK_SECRET` | string | - | Secret - never log or commit it. |
+
+
+## Public features
+
+| Variable | Type | Default | Notes |
+|---|---|---|---|
+| `GAMEND_FEATURES_LIST_GROUPS` | boolean | `true` | GET /api/v1/groups*, the "groups" channel and the /groups pages. |
+| `GAMEND_FEATURES_LIST_LEADERBOARDS` | boolean | `true` | Public GET/resolve /api/v1/leaderboards* and the /leaderboards pages. |
+| `GAMEND_FEATURES_LIST_LOBBIES` | boolean | `true` | GET /api/v1/lobbies and the "lobbies" channel. |
+| `GAMEND_FEATURES_LIST_MATCHMAKING` | boolean | `true` | GET /api/v1/matchmaking/stats. Own-ticket endpoints stay. |
+| `GAMEND_FEATURES_LIST_QUESTS` | boolean | `true` | Public GET /api/v1/quests* and the /quests page. |
+| `GAMEND_FEATURES_LIST_USERS` | boolean | `true` | GET /api/v1/users and /users/:id. |
+| `GAMEND_FEATURES_MAILBOX_PREVIEW` | boolean | `false` | Serve the in-browser mailbox at /dev/mailbox outside dev. Every sent email is readable there. |
+| `GAMEND_FEATURES_OPENAPI` | boolean | `true` | OpenAPI spec + Swagger UI. A complete map of your API — consider off in production. |
+| `GAMEND_FEATURES_PUBLIC_STATS` | boolean | `true` | The unauthenticated stats endpoints: GET /api/v1/stats, /api/v1/users/stats, /api/v1/lobbies/stats, /api/v1/parties/stats, /api/v1/quests/stats, /api/v1/signaling/stats and /api/v1/matchmaking/stats, plus the /stats page. Aggregate counts only, never per-row data — but they do reveal how busy the server is. |
+| `GAMEND_FEATURES_PUBLIC_USER_METADATA_KEYS` | list | - | Top-level `user.metadata` keys GET /api/v1/users and /users/:id may return. Empty means none. Those endpoints are unauthenticated, so anything named here is world-readable and findable by name prefix — never list a key holding position, routing or contact data. |
+| `GAMEND_FEATURES_USER_IMAGE_UPLOADS` | boolean | `true` | Player-supplied images: avatars (POST /api/v1/me/avatar*) and group icons (POST /api/v1/groups/:id/icon*). Objects land in public storage and are served without authentication, so on a service children can reach this is an unscreened image surface — turn it off unless the game actually uses it and you have a way to screen what arrives. |
 
 
 ## Push notifications
@@ -330,10 +327,10 @@ Live values, and where each one came from, are on the
 |---|---|---|---|
 | `GAMEND_PUSH_ADAPTER` | atom | `:auto` | Set to `log` to route every delivery to the Log provider, credentials or not. |
 | `GAMEND_PUSH_APNS_ENV` | atom | `:production` | `production`, or `sandbox` for dev builds. |
-| `GAMEND_PUSH_APNS_KEY_ID` | string | - | 10-character key id of the APNs auth key. Warns when unset. |
-| `GAMEND_PUSH_APNS_PRIVATE_KEY` | string | - | APNs .p8 key contents, or a path to the file. Warns when unset. Secret - never log or commit it. |
-| `GAMEND_PUSH_APNS_TEAM_ID` | string | - | Apple developer team id. Warns when unset. |
-| `GAMEND_PUSH_APNS_TOPIC` | string | - | App bundle id, sent as apns-topic. Warns when unset. |
+| `GAMEND_PUSH_APNS_KEY_ID` | string | - | 10-character key id of the APNs auth key. Warns if unset once `GAMEND_PUSH_APNS_PRIVATE_KEY`, `GAMEND_PUSH_APNS_TEAM_ID` or `GAMEND_PUSH_APNS_TOPIC` is set. |
+| `GAMEND_PUSH_APNS_PRIVATE_KEY` | string | - | APNs .p8 key contents, or a path to the file. Warns if unset once `GAMEND_PUSH_APNS_KEY_ID`, `GAMEND_PUSH_APNS_TEAM_ID` or `GAMEND_PUSH_APNS_TOPIC` is set. Secret - never log or commit it. |
+| `GAMEND_PUSH_APNS_TEAM_ID` | string | - | Apple developer team id. Warns if unset once `GAMEND_PUSH_APNS_PRIVATE_KEY`, `GAMEND_PUSH_APNS_KEY_ID` or `GAMEND_PUSH_APNS_TOPIC` is set. |
+| `GAMEND_PUSH_APNS_TOPIC` | string | - | App bundle id, sent as apns-topic. Warns if unset once `GAMEND_PUSH_APNS_PRIVATE_KEY`, `GAMEND_PUSH_APNS_KEY_ID` or `GAMEND_PUSH_APNS_TEAM_ID` is set. |
 | `GAMEND_PUSH_FCM_CREDENTIALS` | string | - | FCM service-account JSON, inline or a path to the file. Secret - never log or commit it. |
 | `GAMEND_PUSH_FCM_PROJECT_ID` | string | - | Defaults to the project id inside the FCM credentials. |
 | `GAMEND_PUSH_QUEUE_CONCURRENCY` | integer | `10` | Per-node concurrent deliveries on the push queue. |
@@ -355,7 +352,7 @@ Live values, and where each one came from, are on the
 | `GAMEND_RATELIMIT_GENERAL_WINDOW_MS` | integer | `60000` | General HTTP window, in milliseconds. |
 | `GAMEND_RATELIMIT_ICE_LIMIT` | integer | `150` | Max ICE candidate messages per window, per user. |
 | `GAMEND_RATELIMIT_ICE_WINDOW_MS` | integer | `30000` | ICE candidate window, in milliseconds. |
-| `GAMEND_RATELIMIT_REDIS_URL` | string | - | Redis URL for shared counters. **Required in production.** |
+| `GAMEND_RATELIMIT_REDIS_URL` | string | - | Redis URL for shared counters. **Required in production when `GAMEND_RATELIMIT_BACKEND` is `redis`.** |
 | `GAMEND_RATELIMIT_WS_LIMIT` | integer | `60` | Max WebSocket channel messages per window, per user. |
 | `GAMEND_RATELIMIT_WS_WINDOW_MS` | integer | `10000` | WebSocket window, in milliseconds. |
 
@@ -392,18 +389,29 @@ Live values, and where each one came from, are on the
 | `GAMEND_RETENTION_TOURNAMENTS_DAYS` | integer | `0` | Delete finished tournaments older than N days. 0 keeps forever. |
 
 
+## Server & HTTP
+
+| Variable | Type | Default | Notes |
+|---|---|---|---|
+| `GAMEND_HTTP_ALLOWED_ORIGINS` | list | - | Browser CORS/WebSocket origin allowlist. Empty allows any origin. Prefix an entry with `regex:` for a pattern. |
+| `GAMEND_HTTP_HOST` | string | `"localhost"` | Public hostname, used to build URLs and OAuth redirect URIs. |
+| `GAMEND_HTTP_PORT` | integer | `4000` | TCP port the HTTP listener binds. |
+| `GAMEND_HTTP_SCHEME` | string | - | http or https. Defaults to http for localhost, https otherwise. |
+| `GAMEND_HTTP_SERVER` | boolean | `false` | Start the HTTP listener. Only needed when running as a release. |
+
+
 ## Storage
 
 | Variable | Type | Default | Notes |
 |---|---|---|---|
-| `GAMEND_STORAGE_ACCESS_KEY_ID` | string | - | **Required in production.** Secret - never log or commit it. |
+| `GAMEND_STORAGE_ACCESS_KEY_ID` | string | - | **Required in production when `GAMEND_STORAGE_ADAPTER` is `s3`.** Secret - never log or commit it. |
 | `GAMEND_STORAGE_ADAPTER` | atom | `:local` | Backend for avatars and uploads: local \| s3 (any S3-compatible service). |
-| `GAMEND_STORAGE_BUCKET` | string | - | **Required in production.** |
+| `GAMEND_STORAGE_BUCKET` | string | - | **Required in production when `GAMEND_STORAGE_ADAPTER` is `s3`.** |
 | `GAMEND_STORAGE_DIR` | string | `"priv/storage"` | Directory the local adapter writes objects to. Point this at persistent storage (a mounted volume) in production — the default lives with the app and does not survive a redeploy. |
 | `GAMEND_STORAGE_ENDPOINT` | string | - | Custom endpoint, e.g. https://<account>.r2.cloudflarestorage.com. |
 | `GAMEND_STORAGE_PUBLIC_URL` | string | - | CDN or base URL serving stored objects, whichever backend is behind it. |
 | `GAMEND_STORAGE_REGION` | string | `"auto"` | Region, or "auto" for services that do not use one (R2, MinIO). |
-| `GAMEND_STORAGE_SECRET_ACCESS_KEY` | string | - | **Required in production.** Secret - never log or commit it. |
+| `GAMEND_STORAGE_SECRET_ACCESS_KEY` | string | - | **Required in production when `GAMEND_STORAGE_ADAPTER` is `s3`.** Secret - never log or commit it. |
 
 
 ## TLS & certificates
@@ -411,8 +419,8 @@ Live values, and where each one came from, are on the
 | Variable | Type | Default | Notes |
 |---|---|---|---|
 | `GAMEND_TLS_ACME_WEBROOT` | string | - | Webroot for Let's Encrypt HTTP-01 challenge files. Defaults to /var/www/acme. |
-| `GAMEND_TLS_CERTFILE` | string | - | Path to fullchain.pem (certificate + CA chain). Warns when unset. |
+| `GAMEND_TLS_CERTFILE` | string | - | Path to fullchain.pem (certificate + CA chain). Warns if unset once `GAMEND_TLS_KEYFILE` is set. |
 | `GAMEND_TLS_FORCE` | boolean | - | Redirect HTTP to HTTPS. Off unless set: a host that serves port 80 itself keeps a plain-HTTP twin of every page until you enable it. Read per request by GamendWeb.Plugs.ForceSSL; HSTS is sent on every HTTPS response regardless, by GamendWeb.Plugs.SecurityHeaders. |
-| `GAMEND_TLS_KEYFILE` | string | - | Path to privkey.pem. Warns when unset. |
+| `GAMEND_TLS_KEYFILE` | string | - | Path to privkey.pem. Warns if unset once `GAMEND_TLS_CERTFILE` is set. |
 | `GAMEND_TLS_PORT` | integer | `443` | HTTPS listen port. |
 

@@ -62,7 +62,7 @@ defmodule GamendWeb.UserLive.RegistrationTest do
         |> follow_redirect(conn, ~p"/users/log_in")
 
       assert html =~
-               "Success."
+               "Account created. Check your email"
     end
 
     test "renders errors for duplicated email", %{conn: conn} do

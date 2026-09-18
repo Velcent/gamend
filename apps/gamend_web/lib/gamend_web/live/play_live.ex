@@ -59,6 +59,7 @@ defmodule GamendWeb.PlayLive do
               boots a second WASM instance. See the moduledoc. --%>
         <iframe
           id="game-frame"
+          title={gettext("Game")}
           src="/game/index.html"
           class="w-full h-full border-0"
           allow="autoplay; fullscreen"

@@ -367,7 +367,11 @@ defmodule GamendWeb.HostLayoutShell do
   """
   def breadcrumbs(assigns) do
     ~H"""
-    <nav :if={length(@trail) > 1} aria-label="Breadcrumb" class="text-sm text-base-content/60">
+    <nav
+      :if={length(@trail) > 1}
+      aria-label={GamendWeb.HostLayouts.translate("Breadcrumb")}
+      class="text-sm text-base-content/60"
+    >
       <ol class="flex flex-wrap items-center gap-2">
         <li :for={{{label, path}, index} <- Enum.with_index(@trail)} class="flex items-center gap-2">
           <span :if={index > 0} aria-hidden="true">/</span>

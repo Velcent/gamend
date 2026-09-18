@@ -41,10 +41,14 @@ magic-link forms; it does not apply to any of the game-client flows.
      Client ──► POST /api/v1/refresh         ──► Guardian exchanges token
                 { refresh_token }                  │
                                                    ▼
-            ◄── { access_token, refresh_token } ◄─ New token pair
+            ◄── { access_token, refresh_token } ◄─ New access token
 ```
 
-Access tokens are short-lived (15 min). Refresh tokens last 30 days. Both are stateless JWTs, with no database lookup on each request.
+Access tokens are short-lived (15 min). Refresh tokens last 30 days. Both are signed JWTs, but each authenticated request still loads the user from the database. So a token stops working once the account is deactivated or its tokens are revoked (logout, password or email change).
+
+Refresh returns a new access token and sends back the same refresh token; it does not issue a new one. Log in again before the refresh token's 30 days run out.
+
+Token responses wrap their fields in a `data` object (`{"data": {"access_token": "..."}}`); the diagrams leave that wrapper out.
 
 ## OAuth: browser redirect (polling)
 
@@ -52,9 +56,9 @@ For game clients that can't handle OAuth natively. The client opens a browser, t
 
 ```text
   Client ──► GET /api/v1/auth/{provider}
-         ◄── { session_id, auth_url }
+         ◄── { session_id, authorization_url }
 
-  Client ──► Opens auth_url in browser
+  Client ──► Opens authorization_url in browser
              Browser ──► OAuth Provider ──► User authenticates
              Provider ──► Callback to server
              Server stores result in DB
@@ -63,6 +67,8 @@ For game clients that can't handle OAuth natively. The client opens a browser, t
          ◄── { status: "pending" }                   (repeat)
          ◄── { status: "completed", access_token, refresh_token }
 ```
+
+The tokens are served once. Later polls return the status without them.
 
 ## OAuth: direct code exchange
 
@@ -73,7 +79,7 @@ For clients that handle OAuth natively (mobile SDKs, Steam auth tickets). No bro
   Provider ──► Returns authorization code to client
 
   Client ──► POST /api/v1/auth/{provider}/callback  { code: "..." }
-         ◄── { access_token, refresh_token, user }
+         ◄── { access_token, refresh_token, user_id }
 ```
 
 ## Provider linking

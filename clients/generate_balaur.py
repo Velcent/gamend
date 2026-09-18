@@ -258,6 +258,17 @@ def write_readme(ops: list[dict], aliases: dict[str, str], table: list[dict]) ->
         "",
         f"{len(ops)} operations and {len({r['signal'] for r in table})} realtime events.",
         "",
+        "Beside the generated `api.rn` and `events.rn`, written by hand:",
+        "",
+        "| Module | For |",
+        "| --- | --- |",
+        "| `client.rn` | `configure`, the socket, hooks and the key-value cache |",
+        "| `auth.rn` | Sign-in through a provider, and the kept session |",
+        "| `presence.rn` | The user cache |",
+        "| `prefs.rn` | The player's prefs on this device |",
+        "| `logs.rn`, `log_sink.rn` | This run's log, shipped in batches; put `log_sink.rn` on a node that lives as long as the game |",
+        "| `editor/gamend.rn` | The Gamend dock in the Balaur editor |",
+        "",
     ]
     by_tag: dict[str, list[dict]] = {}
     for op in ops:

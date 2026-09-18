@@ -378,13 +378,15 @@ defmodule GamendWeb.QuestsLive do
   defp status_label("claimable"), do: gettext("Claimable")
   defp status_label("done"), do: gettext("Completed")
 
-  # Whichever comes first: the window closing, or the next reset.
+  # Whichever comes first: the window closing, or the next reset — tagged, so
+  # the card says "Resets in" when the reset is what it is counting down to.
+  # It used to say "Ends in" whenever the quest had a window at all.
   defp time_left(quest, now) do
-    [window_left(quest, now), reset_left(quest, now)]
-    |> Enum.reject(&is_nil/1)
+    [{:ends, window_left(quest, now)}, {:resets, reset_left(quest, now)}]
+    |> Enum.reject(fn {_kind, seconds} -> is_nil(seconds) end)
     |> case do
       [] -> nil
-      values -> Enum.min(values)
+      values -> Enum.min_by(values, &elem(&1, 1))
     end
   end
 
@@ -490,7 +492,13 @@ defmodule GamendWeb.QuestsLive do
         <%= if @claimable_count > 0 do %>
           <div class="alert alert-success">
             <.icon name="hero-gift" class="w-5 h-5" />
-            <span>{gettext("You have %{count} quest(s) ready to claim!", count: @claimable_count)}</span>
+            <span>
+              {ngettext(
+                "You have %{count} quest ready to claim!",
+                "You have %{count} quests ready to claim!",
+                @claimable_count
+              )}
+            </span>
           </div>
         <% end %>
 
@@ -829,10 +837,11 @@ defmodule GamendWeb.QuestsLive do
         <div class="flex items-center gap-1.5 text-base-content/70">
           <.icon name="hero-clock" class="w-3.5 h-3.5" />
           <span class="text-xs">
-            <%= if @quest.ends_at do %>
-              {gettext("Ends in %{time}", time: format_duration(@left))}
-            <% else %>
-              {gettext("Resets in %{time}", time: format_duration(@left))}
+            <%= case @left do %>
+              <% {:ends, seconds} -> %>
+                {gettext("Ends in %{time}", time: format_duration(seconds))}
+              <% {:resets, seconds} -> %>
+                {gettext("Resets in %{time}", time: format_duration(seconds))}
             <% end %>
           </span>
         </div>

@@ -214,7 +214,7 @@ defmodule Gamend.Storage do
   Validate an upload's content type and size before issuing a ticket.
 
   Options: `:content_types` (allow-list, defaults to common images),
-  `:max_bytes` (defaults to `LIMIT_MAX_UPLOAD_BYTES`).
+  `:max_bytes` (defaults to `GAMEND_LIMITS_MAX_UPLOAD_BYTES`).
   """
   @spec validate_upload(String.t(), non_neg_integer(), keyword()) ::
           :ok | {:error, :unsupported_content_type | :too_large}

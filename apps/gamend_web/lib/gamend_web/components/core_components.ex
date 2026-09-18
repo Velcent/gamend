@@ -982,7 +982,7 @@ defmodule GamendWeb.CoreComponents do
 
     ~H"""
     <time datetime={@iso} data-local-time="calendar-date" class={@class}>
-      {Calendar.strftime(@at, "%b %d, %Y")}
+      {Calendar.strftime(@at, "%b %-d, %Y")}
     </time>
     """
   end
@@ -999,7 +999,8 @@ defmodule GamendWeb.CoreComponents do
   # visibly reflow when the localizer runs. No UTC marker on a date alone: it is
   # an hour shown in the wrong zone that misleads, and the localizer corrects
   # the date across a midnight boundary anyway.
-  defp utc_text(at, "date"), do: Calendar.strftime(at, "%b %d, %Y")
+  # `%-d`, not `%d`: "Sep 8", as `dateStyle: "medium"` writes it, not "Sep 08".
+  defp utc_text(at, "date"), do: Calendar.strftime(at, "%b %-d, %Y")
   defp utc_text(at, "time"), do: Calendar.strftime(at, "%H:%M UTC")
   defp utc_text(at, "full"), do: Calendar.strftime(at, "%Y-%m-%d %H:%M:%S UTC")
   defp utc_text(at, _datetime), do: Calendar.strftime(at, "%Y-%m-%d %H:%M UTC")

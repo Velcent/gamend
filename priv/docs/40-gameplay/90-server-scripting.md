@@ -8,7 +8,7 @@ icon: hero-command-line
 
 The application exposes a lightweight server-side scripting surface via the `Gamend.Hooks` behaviour. Hooks let you run custom code on lifecycle events (eg. user register/login, lobby create/update) and optionally expose RPC functions.
 
-Hooks can be written in **Elixir** (this guide), in **GDScript** (see [GDScript hooks](95-gdscript-hooks.md)), or in any other BEAM language; see [Other BEAM languages](#other-beam-languages-gleam-lfe-erlang) below.
+Hooks can be written in **Elixir** (this guide), in **GDScript** (see [GDScript hooks](/docs/gdscript-hooks)), or in any other BEAM language; see [Other BEAM languages](#other-beam-languages-gleam-lfe-erlang) below.
 
 ## Add a lifecycle callback
 
@@ -39,7 +39,7 @@ end
 
 Hooks are loaded from OTP plugin applications under `modules/plugins/*`. You can override the plugins directory using:
 
-```elixir
+```bash
 GAMEND_CONTENT_PLUGINS_DIR=modules/plugins
 ```
 
@@ -70,7 +70,7 @@ Three optional callbacks tell the server what your game adds, so it shows up in 
 
 ```elixir
 def notification_types do
-  %{"quest_completed" => "Player finished a quest"}
+  %{"rival_online" => "A rival the player follows came online"}
 end
 
 def realtime_events do
@@ -129,7 +129,23 @@ end
 before_push_send/2 runs once per recipient before any delivery job is enqueued. It receives the user id and the message as a string-keyed map; return {:ok, message} to allow (optionally rewritten, and the result is re-validated against the push limits) or {:error, reason} to drop the push for that user. It is where per-user opt-out, quiet hours, or moderation belong. after_push_sent/3 observes each device's final outcome: "delivered", "invalid" (token disabled), or "failed". Send a push from any hook with Gamend.Push.send_to_user/2. Delivery is queued, retried, and never blocks the caller:
 
 ```elixir
-@impl true def before_push_send(user_id, message) do # Example: respect a per-user mute stored in KV case Gamend.KV.get("push_muted", user_id: user_id) do {:ok, %{value: %{"muted" => true}}} -> {:error, :muted} _ -> {:ok, message} end end # From any hook: ping an offline player def on_turn_ready(user_id, match_id) do Gamend.Push.send_to_user(user_id, %{ "title" => "Your move!", "body" => "It is your turn.", "data" => %{"match_id" => match_id}, "collapse_key" => "turn-#{match_id})
+@impl true
+def before_push_send(user_id, message) do
+  # Example: respect a per-user mute stored in KV
+  case Gamend.KV.get("push_muted", user_id: user_id) do
+    {:ok, %{value: %{"muted" => true}}} -> {:error, :muted}
+    _ -> {:ok, message}
+  end
+end
+
+# From any hook: ping an offline player
+def on_turn_ready(user_id, match_id) do
+  Gamend.Push.send_to_user(user_id, %{
+    "title" => "Your move!",
+    "body" => "It is your turn.",
+    "data" => %{"match_id" => match_id},
+    "collapse_key" => "turn-#{match_id}"
+  })
 end
 ```
 
@@ -171,7 +187,7 @@ end
 
 ### Ready check hooks
 
-before_ready_check_open/2 can veto a check before it opens (veto-only: it never rewrites its args). after_ready_check_passed/1 is the "everyone answered ready" callback, the natural place to start the match. after_ready_check_failed/3 receives (check, reason, not_ready) where reason is "declined\
+before_ready_check_open/2 can veto a check before it opens (veto-only: it never rewrites its args). after_ready_check_passed/1 is the "everyone answered ready" callback, the natural place to start the match. after_ready_check_failed/3 receives (check, reason, not_ready) where reason is "declined" (a matchmaking accept check only; a "no" on a ready check leaves it pending), "timeout" or "cancelled". Core deliberately does nothing on failure: it kicks nobody, deletes no lobby and moves no lobby state, so whether a slow player is removed is your decision. Note that ready state gates nothing by itself. Wire it to your own start in before_lobby_state_change:
 
 ```elixir
 @impl true
@@ -205,7 +221,7 @@ defmodule MyApp.HooksImpl do
 end
 ```
 
-You can now call this function via the API (or better yet from the client SDK's), eg:
+You can now call this function via the API (or better yet from a client SDK), e.g.:
 
 ```bash
 curl -X POST https://your-gamend.com/api/v1/hooks/call \
@@ -219,7 +235,8 @@ curl -X POST https://your-gamend.com/api/v1/hooks/call \
 A few domain functions accept options that the HTTP and channel surfaces never pass, so they are reachable only from server-side code. The main one is seating a player in a locked lobby:
 
 ```elixir
-# Join succeeds even though the lobby is locked Gamend.Lobbies.join_lobby(user, lobby_id, %{bypass_lock: true})
+# Join succeeds even though the lobby is locked
+Gamend.Lobbies.join_lobby(user, lobby_id, %{bypass_lock: true})
 ```
 
 Useful for reconnects, admin tooling, or seating a late player into a match already in progress. Capacity and blacklist checks still apply: bypass_lock only skips the lock, so it cannot be used to overfill a lobby or to put two players who blocked each other together.
@@ -229,13 +246,24 @@ Useful for reconnects, admin tooling, or seating a late player into a match alre
 For work that must survive a restart, retry on failure, or run later, enqueue a hook as a durable background job instead of doing it inline. Args are stored as JSON, so callbacks receive a string-keyed map:
 
 ```elixir
-# Run now, retried with backoff on failure Gamend.Jobs.enqueue_hook(:on_welcome_email, %{"user_id" => user.id}) # Run in 24 hours Gamend.Jobs.enqueue_in(24 * 60 * 60, :on_trial_reminder, %{"user_id" => user.id}) def on_welcome_email(%{"user_id" => user_id}), do: :ok
+# Run now, retried with backoff on failure
+Gamend.Jobs.enqueue_hook(:on_welcome_email, %{"user_id" => user.id})
+
+# Run in 24 hours
+Gamend.Jobs.enqueue_in(24 * 60 * 60, :on_trial_reminder, %{"user_id" => user.id})
+
+def on_welcome_email(%{"user_id" => user_id}), do: :ok
 ```
 
 For recurring work, register cron-like schedules from your after_startup hook. These are durable and distributed-safe, and exactly one instance runs each job per period:
 
 ```elixir
-def after_startup do Gamend.Schedule.hourly(:on_hourly) Gamend.Schedule.daily(:on_morning_report, hour: 9) Gamend.Schedule.cron(:sweep, "*/15 * * * *", :on_every_15m) :ok end
+def after_startup do
+  Gamend.Schedule.hourly(:on_hourly)
+  Gamend.Schedule.daily(:on_morning_report, hour: 9)
+  Gamend.Schedule.cron(:sweep, "*/15 * * * *", :on_every_15m)
+  :ok
+end
 ```
 
 ### Virtual economy (wallets)
@@ -243,7 +271,13 @@ def after_startup do Gamend.Schedule.hourly(:on_hourly) Gamend.Schedule.daily(:o
 Grant and spend virtual currency from hooks. Currencies are free-form codes; every change is atomic and recorded in a ledger, so two concurrent spends can never overspend:
 
 ```elixir
-# On match win, reward the player Gamend.Economy.grant(user_id, "gold", 100, reason: "match_reward") # Charge for a store item — refuses to go negative case Gamend.Economy.spend(user_id, "gold", 30, reason: "store_purchase") do {:ok, balance} -> {:ok, %{"gold" => balance}} {:error, :insufficient_funds} -> {:error, "not enough gold
+# On match win, reward the player
+Gamend.Economy.grant(user_id, "gold", 100, reason: "match_reward")
+
+# Charge for a store item; refuses to go negative
+case Gamend.Economy.spend(user_id, "gold", 30, reason: "store_purchase") do
+  {:ok, balance} -> {:ok, %{"gold" => balance}}
+  {:error, :insufficient_funds} -> {:error, "not enough gold"}
 end
 
 Gamend.Economy.balances(user_id)   # => %{"gold" => 70}

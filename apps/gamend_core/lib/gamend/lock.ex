@@ -32,7 +32,7 @@ defmodule Gamend.Lock do
 
   ## Prefer an atomic write
 
-  Prefer an atomic write where one exists: `Economy.debit/3` does
+  Prefer an atomic write where one exists: `Economy.spend/4` does
   `balance = balance - x where balance >= x` in one statement, which needs no
   lock at all.
 
@@ -46,7 +46,8 @@ defmodule Gamend.Lock do
 
   The `namespace` argument can be:
 
-  - A **predefined atom**: `:lobby` (1), `:group` (2), `:party` (3)
+  - A **registered atom**: `:lobby` (1), `:group` (2), `:party` (3), … — the
+    full list is `@namespaces` in `Gamend.Repo.AdvisoryLock`
   - An **arbitrary string**: hashed to a stable integer, e.g. `"word_guessed"`
 
   The `resource_id` is typically the lobby, group, or user id that scopes

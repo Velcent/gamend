@@ -24,10 +24,10 @@ defmodule GamendWeb.NotificationsLive do
               <button
                 type="button"
                 phx-click="delete_all"
-                data-confirm={gettext("Delete?")}
+                data-confirm={gettext("Delete all notifications?")}
                 class="btn btn-sm btn-outline btn-error"
               >
-                {gettext("Delete")}
+                {gettext("Delete all")}
               </button>
             <% end %>
           </div>
@@ -69,7 +69,7 @@ defmodule GamendWeb.NotificationsLive do
                         <% Ecto.assoc_loaded?(n.sender) && n.sender -> %>
                           {LiveHelpers.public_user_name(n.sender)}
                         <% true -> %>
-                          {"User #{n.sender_id}"}
+                          {LiveHelpers.public_user_name(n.sender_id)}
                       <% end %>
                     </td>
                     <td class="text-sm whitespace-nowrap">
@@ -288,7 +288,7 @@ defmodule GamendWeb.NotificationsLive do
     name = n.metadata["quest_title"] || ""
 
     if n.metadata["kind"] == "achievement" do
-      dgettext("notifications", "Achievement Unlocked: %{name}", name: name)
+      dgettext("notifications", "Achievement unlocked: %{name}", name: name)
     else
       dgettext("notifications", "Quest completed: %{name}", name: name)
     end

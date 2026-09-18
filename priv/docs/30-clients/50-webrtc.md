@@ -53,9 +53,11 @@ config :gamend_web, :webrtc,
 |---|---|---|
 | C → S | `webrtc:offer` / S → C `webrtc:answer` | `{sdp, type}` |
 | Both | `webrtc:ice` | `{candidate, sdpMid, sdpMLineIndex}` |
-| C → S | `webrtc:send`, `webrtc:close` | `{channel, data}`, `{}` |
-| S → C | `webrtc:data` | `{channel, data}` |
+| C → S | `webrtc:close` | `{}` |
 | S → C | `webrtc:state`, `webrtc:channel_open`, `webrtc:channel_closed` | `{state}`, `{channel}`, `{}` |
+
+There is no send or data event on the channel: game data goes over the
+DataChannels only.
 
 ### Hook RPC
 
@@ -92,8 +94,9 @@ webrtc.connect_webrtc()
 var result = await webrtc.call_hook("my_plugin", "my_func", [1, 2])
 ```
 
-Deployment: Rust toolchain in the image, UDP ports open, TURN recommended;
-on Fly.io `ExWebRTC.ICE.FlyIpFilter` handles public IP binding.
+Deployment: Rust toolchain in the image, UDP ports open, TURN recommended.
+The peer connection gets only `ice_servers`; no ICE IP filter is wired (for
+example Fly.io's `ExWebRTC.ICE.FlyIpFilter`).
 
 ## Peer-to-peer signaling
 
@@ -133,7 +136,8 @@ recomputed from the lobby on every read, so a host change applies immediately.
 | C → S | `broadcast_offer` | `{sdp}` — star host only |
 | C → S | `list_users` | `{}` |
 | S → C | `offer` / `answer` / `ice` | `{sdp \| candidate, from_user_id}` |
-| S → C | `user_joined` / `user_rejoined` / `user_left` | `{user_id, role}` |
+| S → C | `user_joined` / `user_rejoined` | `{user_id, role}` |
+| S → C | `user_left` | `{user_id}` |
 | S → C | `room_closed` | `{}` |
 
 On join the server pushes one `user_joined` per peer already connected. Rate
@@ -154,8 +158,9 @@ add_child(p2p)
 p2p.broadcast_text("events", "hello")
 ```
 
-The bundled `webrtc_lobby_hook` plugin enables star signaling on every lobby,
-closes rooms on delete, and pushes `webrtc:room_ready` (with the topic to join)
-to the host's `user:<id>` channel so a headless host connects on its own. Drop
-it to call `Signaling.configure/2` yourself, e.g. mesh rooms, or signaling only
-once a match starts.
+The bundled `webrtc_lobby_hook` plugin enables mesh signaling on every new
+lobby and closes the room when the lobby is deleted. If you switch a lobby to
+star yourself, it also pushes `webrtc:room_ready` (with the topic to join) to
+the new host's `user:<id>` channel when the lobby host changes, so a headless
+host connects on its own. Drop it to call `Signaling.configure/2` yourself,
+e.g. star rooms, or signaling only once a match starts.

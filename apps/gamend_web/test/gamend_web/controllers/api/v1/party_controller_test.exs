@@ -184,6 +184,70 @@ defmodule GamendWeb.Api.V1.PartyControllerTest do
     end
   end
 
+  describe "party invites" do
+    # The leader may invite friends, so each invitee is made one first.
+    defp befriend(a, b) do
+      {:ok, request} = Gamend.Friends.create_request(a, b.id)
+      {:ok, _} = Gamend.Friends.accept_friend_request(request.id, b)
+    end
+
+    test "invite, list both ways, accept, cancel and decline", %{conn: conn} do
+      leader = AccountsFixtures.user_fixture()
+      [joiner, cancelled, decliner] = for _ <- 1..3, do: AccountsFixtures.user_fixture()
+      Enum.each([joiner, cancelled, decliner], &befriend(leader, &1))
+
+      party =
+        conn |> auth_conn(leader) |> post("/api/v1/parties", %{max_size: 4}) |> json_response(201)
+
+      for user <- [joiner, cancelled, decliner] do
+        assert conn
+               |> auth_conn(leader)
+               |> post("/api/v1/parties/invite", %{target_user_id: user.id})
+               |> json_response(200) == %{}
+      end
+
+      sent =
+        conn |> auth_conn(leader) |> get("/api/v1/parties/invitations/sent") |> json_response(200)
+
+      assert Enum.sort(Enum.map(sent, & &1["recipient_id"])) ==
+               Enum.sort([joiner.id, cancelled.id, decliner.id])
+
+      [received] =
+        conn |> auth_conn(joiner) |> get("/api/v1/parties/invitations") |> json_response(200)
+
+      assert received["party_id"] == party["id"]
+      assert received["sender_id"] == leader.id
+
+      joined =
+        conn
+        |> auth_conn(joiner)
+        |> post("/api/v1/parties/invite/accept", %{party_id: party["id"]})
+        |> json_response(200)
+
+      assert Enum.any?(joined["members"], &(&1["id"] == joiner.id))
+
+      assert conn
+             |> auth_conn(leader)
+             |> post("/api/v1/parties/invite/cancel", %{target_user_id: cancelled.id})
+             |> json_response(200) == %{}
+
+      assert conn
+             |> auth_conn(decliner)
+             |> post("/api/v1/parties/invite/decline", %{party_id: party["id"]})
+             |> json_response(200) == %{}
+
+      assert conn
+             |> auth_conn(cancelled)
+             |> get("/api/v1/parties/invitations")
+             |> json_response(200) == []
+
+      assert conn
+             |> auth_conn(decliner)
+             |> get("/api/v1/parties/invitations")
+             |> json_response(200) == []
+    end
+  end
+
   describe "POST /api/v1/parties/kick" do
     test "leader can kick a member", %{conn: conn} do
       leader = AccountsFixtures.user_fixture()

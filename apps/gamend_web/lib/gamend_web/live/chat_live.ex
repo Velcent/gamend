@@ -308,7 +308,7 @@ defmodule GamendWeb.ChatLive do
                 type="text"
                 name="content"
                 value={@draft}
-                placeholder={gettext("Send")}
+                placeholder={gettext("Message")}
                 class="input input-bordered input-sm flex-1"
                 autocomplete="off"
               />
@@ -750,7 +750,7 @@ defmodule GamendWeb.ChatLive do
     if Ecto.assoc_loaded?(msg.sender) && msg.sender do
       LiveHelpers.public_user_name(msg.sender)
     else
-      "User #{msg.sender_id}"
+      LiveHelpers.public_user_name(msg.sender_id)
     end
   end
 

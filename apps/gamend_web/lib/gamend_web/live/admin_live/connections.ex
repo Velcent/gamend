@@ -62,7 +62,11 @@ defmodule GamendWeb.AdminLive.Connections do
                 <span class="badge badge-sm badge-primary">{@conn_stats.total_channels}</span>
               </h2>
               <p class="text-xs text-base-content/60 mb-2">
-                Channel processes running on {@conn_stats.ws_sockets} WebSocket connections
+                {ngettext(
+                  "Channel processes running on %{count} WebSocket connection.",
+                  "Channel processes running on %{count} WebSocket connections.",
+                  @conn_stats.ws_sockets
+                )} Signaling channels (WebRTC setup) are not tracked, so they are not counted here.
               </p>
               <div class="overflow-x-auto">
                 <table class="table table-sm">
@@ -117,7 +121,7 @@ defmodule GamendWeb.AdminLive.Connections do
                       </td>
                     </tr>
                     <tr class="font-bold border-t border-base-300">
-                      <td>Total Channels</td>
+                      <td>Total (excl. signaling)</td>
                       <td class="text-right font-mono">{@conn_stats.total_channels}</td>
                       <td></td>
                     </tr>
@@ -181,7 +185,7 @@ defmodule GamendWeb.AdminLive.Connections do
                     <table class="table table-sm">
                       <thead>
                         <tr>
-                          <th>User ID</th>
+                          <th>User</th>
                           <th>PID</th>
                         </tr>
                       </thead>
@@ -243,9 +247,9 @@ defmodule GamendWeb.AdminLive.Connections do
                 <table class="table table-sm table-zebra">
                   <thead>
                     <tr>
-                      <th>User ID</th>
-                      <th>Connection Types</th>
+                      <th>User</th>
                       <th>Wire</th>
+                      <th>Connection Types</th>
                       <th>Details</th>
                     </tr>
                   </thead>

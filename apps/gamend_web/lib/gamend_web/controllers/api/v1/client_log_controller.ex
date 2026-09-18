@@ -31,6 +31,7 @@ defmodule GamendWeb.Api.V1.ClientLogController do
 
   operation(:policy,
     operation_id: "get_client_log_policy",
+    security: [%{}, %{"authorization" => []}],
     summary: "Client log capture policy",
     description:
       "What the client should collect and upload: whether collection is on at all, the " <>
@@ -45,6 +46,7 @@ defmodule GamendWeb.Api.V1.ClientLogController do
 
   operation(:create,
     operation_id: "upload_client_logs",
+    security: [%{}, %{"authorization" => []}],
     summary: "Upload a batch of client log entries",
     description:
       "Entries are re-emitted into the server's own log stream, so a search for the " <>

@@ -52,6 +52,7 @@ defmodule GamendWeb.Api.V1.ChatController do
 
   operation(:send,
     operation_id: "send_chat_message",
+    security: [%{"authorization" => []}],
     summary: "Send a chat message",
     description:
       "Send a message to a lobby, group, party, or friend conversation. Requires authentication and membership/friendship.",
@@ -145,6 +146,7 @@ defmodule GamendWeb.Api.V1.ChatController do
 
   operation(:show,
     operation_id: "get_chat_message",
+    security: [%{"authorization" => []}],
     summary: "Get a single chat message",
     description:
       "Retrieve a single chat message by ID. Useful for refreshing a message after an update notification.",
@@ -213,6 +215,7 @@ defmodule GamendWeb.Api.V1.ChatController do
 
   operation(:index,
     operation_id: "list_chat_messages",
+    security: [%{"authorization" => []}],
     summary: "List chat messages",
     description:
       "List messages for a lobby, group, party, or friend conversation. Paginated, newest first.",
@@ -293,6 +296,7 @@ defmodule GamendWeb.Api.V1.ChatController do
 
   operation(:mark_read,
     operation_id: "mark_chat_read",
+    security: [%{"authorization" => []}],
     summary: "Mark chat as read",
     description: "Update the read cursor for the current user in a chat conversation.",
     request_body:
@@ -351,6 +355,7 @@ defmodule GamendWeb.Api.V1.ChatController do
 
   operation(:unread,
     operation_id: "chat_unread_count",
+    security: [%{"authorization" => []}],
     summary: "Get unread message count",
     description: "Get the number of unread messages for the current user in a chat conversation.",
     parameters: [
@@ -407,6 +412,7 @@ defmodule GamendWeb.Api.V1.ChatController do
 
   operation(:update,
     operation_id: "update_chat_message",
+    security: [%{"authorization" => []}],
     summary: "Update your own chat message",
     description:
       "Edit the content or metadata of a message you sent. Only the sender can update their own message.",
@@ -470,6 +476,7 @@ defmodule GamendWeb.Api.V1.ChatController do
 
   operation(:delete,
     operation_id: "delete_chat_message",
+    security: [%{"authorization" => []}],
     summary: "Delete your own chat message",
     description:
       "Permanently delete a message you sent. Only the sender can delete their own message.",

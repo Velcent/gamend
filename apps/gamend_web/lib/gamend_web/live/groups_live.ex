@@ -450,14 +450,14 @@ defmodule GamendWeb.GroupsLive do
     </div>
 
     <div class="flex gap-2 items-center" id="groups-sort">
-      <span class="text-sm text-base-content/60">{gettext("Status")}:</span>
+      <span class="text-sm text-base-content/60">{gettext("Sort by:")}</span>
       <button
         :for={
           {label, value} <- [
             {gettext("Date"), "updated_at"},
             {gettext("Newest"), "inserted_at"},
             {gettext("Name"), "title"},
-            {gettext("Members"), "max_members"}
+            {gettext("Max members"), "max_members"}
           ]
         }
         phx-click="sort_by"

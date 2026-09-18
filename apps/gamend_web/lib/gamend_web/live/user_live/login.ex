@@ -94,7 +94,7 @@ defmodule GamendWeb.UserLive.Login do
             />
             <%!-- `@form`, not `f`: a `:let` variable re-renders with the slot, and
                   a re-render would put the box back to checked under the player. --%>
-            <div class="flex items-start justify-between gap-2">
+            <div class="flex items-center justify-between gap-2">
               <.input
                 field={@form[:remember_me]}
                 type="checkbox"
@@ -106,7 +106,7 @@ defmodule GamendWeb.UserLive.Login do
               <button
                 type="button"
                 id="forgot_password_link"
-                class="text-sm font-semibold text-brand hover:underline"
+                class="mb-2 text-sm font-semibold text-brand hover:underline"
                 phx-click={
                   JS.show(to: "#forgot_password_hint")
                   |> JS.focus(to: "#login_form_magic input[type=email]")
@@ -175,7 +175,8 @@ defmodule GamendWeb.UserLive.Login do
         deliver_magic_link(user)
       end
 
-      info = gettext("Success.")
+      info =
+        gettext("If that email has an account, we sent it a login link. Check your inbox.")
 
       {:noreply,
        socket
@@ -191,7 +192,7 @@ defmodule GamendWeb.UserLive.Login do
     end
   end
 
-  # The player is always told "Success." so this cannot be used to probe which
+  # The player always gets the same message so this cannot be used to probe which
   # emails exist — which also means a failure here is invisible unless it is
   # logged. A raise (a locked database, an unreachable relay) would otherwise
   # only kill the event and look like the button did nothing.

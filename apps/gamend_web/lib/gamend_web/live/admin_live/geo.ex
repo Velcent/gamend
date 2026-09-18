@@ -20,7 +20,7 @@ defmodule GamendWeb.AdminLive.Geo do
         <%!-- Header --%>
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div class="flex items-center gap-3">
-            <.link navigate={~p"/admin"} class="btn btn-outline btn-sm">&larr; Admin</.link>
+            <.link navigate={~p"/admin"} class="btn btn-outline btn-sm">&larr; Back to Admin</.link>
             <h1 class="text-xl font-bold">Geo Traffic</h1>
           </div>
 
@@ -88,7 +88,8 @@ defmodule GamendWeb.AdminLive.Geo do
           <div>
             <div class="font-semibold">No GeoIP database loaded</div>
             <div class="text-xs opacity-80">
-              All requests are counted as "XX" (Unknown). Download
+              Countries come only from Cloudflare's CF-IPCountry header; a request without
+              it is counted as "XX" (Unknown). Download
               <a
                 href="https://dev.maxmind.com/geoip/geolite2-free-geolocation-data"
                 target="_blank"
@@ -97,8 +98,8 @@ defmodule GamendWeb.AdminLive.Geo do
                 GeoLite2-Country.mmdb
               </a>
               under <code class="bg-base-200 px-1 rounded">data</code>
-              or set <code class="bg-base-200 px-1 rounded">GEOIP_DB_PATH</code>
-              to a custom location to enable country resolution.
+              or set <code class="bg-base-200 px-1 rounded">GAMEND_CONTENT_GEOIP_DB_PATH</code>
+              to a custom location to resolve countries from the client IP.
             </div>
           </div>
         </div>
