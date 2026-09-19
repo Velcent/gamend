@@ -315,6 +315,7 @@ defmodule GamendWeb.Router.Shared do
         get "/health", HealthController, :index
         get "/time", TimeController, :show
         post "/login", SessionController, :create
+        post "/register", SessionController, :register
         post "/login/device", SessionController, :create_device
         post "/refresh", SessionController, :refresh
         delete "/logout", SessionController, :delete

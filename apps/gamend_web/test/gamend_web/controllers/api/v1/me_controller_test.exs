@@ -150,5 +150,26 @@ defmodule GamendWeb.Api.V1.MeControllerTest do
       conn = delete(conn, "/api/v1/me")
       assert json_response(conn, 401)
     end
+
+    test "an account with a password is deleted only with it in the body", %{conn: conn} do
+      {:ok, user} =
+        Gamend.Accounts.register_user_with_password(%{
+          email: "leaving@example.com",
+          password: "hello world!"
+        })
+
+      {:ok, token, _} = Guardian.encode_and_sign(user)
+      authed = put_req_header(conn, "authorization", "Bearer " <> token)
+
+      refused = delete(authed, "/api/v1/me")
+      assert json_response(refused, 401)["error"] == "invalid_current_password"
+
+      wrong = delete(authed, "/api/v1/me", %{current_password: "not it at all"})
+      assert json_response(wrong, 401)["error"] == "invalid_current_password"
+
+      deleted = delete(authed, "/api/v1/me", %{current_password: "hello world!"})
+      assert deleted.status == 200
+      assert Gamend.Repo.get(Gamend.Accounts.User, user.id) == nil
+    end
   end
 end

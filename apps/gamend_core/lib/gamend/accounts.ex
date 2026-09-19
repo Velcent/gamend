@@ -110,6 +110,9 @@ defmodule Gamend.Accounts do
   @doc delegate_to: {Registration, :register_user, 1}
   defdelegate register_user(attrs), to: Registration
 
+  @doc delegate_to: {Registration, :register_user_with_password, 1}
+  defdelegate register_user_with_password(attrs), to: Registration
+
   @doc delegate_to: {Registration, :confirm_user, 1}
   defdelegate confirm_user(user), to: Registration
 
@@ -676,6 +679,14 @@ defmodule Gamend.Accounts do
       "Allow POST /api/v1/login/device. When on, any unknown device_id creates an anonymous account."
   )
 
+  setting(:api_registration_enabled, :boolean,
+    default: true,
+    doc:
+      "Allow POST /api/v1/register: sign-up with an email and a password from a game " <>
+        "client. It sends no email, so it cannot be used to mail an address; the auth " <>
+        "rate limit applies."
+  )
+
   setting(:anonymous_can_upload_avatar, :boolean,
     default: false,
     doc:
@@ -706,6 +717,11 @@ defmodule Gamend.Accounts do
   @doc "Whether device-based auth is enabled. Defaults to on."
   @spec device_auth_enabled?() :: boolean()
   def device_auth_enabled?, do: Gamend.Settings.get(__MODULE__, :device_auth_enabled) == true
+
+  @doc "Whether game clients may register with an email and a password. Defaults to on."
+  @spec api_registration_enabled?() :: boolean()
+  def api_registration_enabled?,
+    do: Gamend.Settings.get(__MODULE__, :api_registration_enabled) == true
 
   @doc """
   Whether new accounts require manual admin activation before they can log in.

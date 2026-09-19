@@ -8,7 +8,8 @@ The platform supports multiple authentication methods. All API authentication us
 
 ## Supported methods
 
-- **Email / Password** — traditional registration with confirmation emails
+- **Email / Password** — registration in the browser with a confirmation email,
+  or from a game client with `POST /api/v1/register`
 - **Magic link** — passwordless login via email link
 - **Device token** — anonymous / guest authentication via unique device IDs
 - **OAuth** — Discord, Google, Apple, Facebook, Steam
@@ -23,6 +24,13 @@ An optional **captcha** (see below) protects the browser registration and
 magic-link forms; it does not apply to any of the game-client flows.
 
 ## JWT token flow (Email / Password / Device)
+
+A game client signs a player up with `POST /api/v1/register` (`email`,
+`password`, optional `username`). It answers `201` with the same tokens as
+login, sends no email, and returns `409` for a taken email or username and
+`403 registration_closed` when `GAMEND_AUTH_API_REGISTRATION_ENABLED` is off.
+Deleting an account (`DELETE /api/v1/me`) sends `current_password` when the
+account has one.
 
 ```text
   1. LOGIN
@@ -103,9 +111,9 @@ proof. Both forms already carry a per-IP rate limit; the captcha adds cover
 against distributed abuse, where a botnet stays under the per-IP limit by
 spreading itself across thousands of addresses.
 
-**Game clients are unaffected.** Registration is browser-only and device login
-is untouched, so turning the captcha on cannot break a shipped Godot or JS
-client.
+**Game clients are unaffected.** `POST /api/v1/register` sends no email, so it
+is not a relay and has no captcha, and device login is untouched: turning the
+captcha on cannot break a shipped Godot or JS client.
 
 ### Setup
 

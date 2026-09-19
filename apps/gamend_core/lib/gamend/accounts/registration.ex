@@ -70,7 +70,21 @@ defmodule Gamend.Accounts.Registration do
   """
   @spec register_user(Types.user_registration_attrs()) ::
           {:ok, User.t()} | {:error, Ecto.Changeset.t()}
-  def register_user(attrs) do
+  def register_user(attrs), do: register(attrs, &User.email_changeset/2)
+
+  @doc """
+  Registers a user with an email and a password, which is how a game client
+  signs up (`POST /api/v1/register`).
+
+  No confirmation email is sent: the endpoint behind this must not mail an
+  address its caller has not shown they own. The first user becomes the admin
+  and account activation applies, as for every registration.
+  """
+  @spec register_user_with_password(Types.user_registration_attrs()) ::
+          {:ok, User.t()} | {:error, Ecto.Changeset.t()}
+  def register_user_with_password(attrs), do: register(attrs, &User.registration_changeset/2)
+
+  defp register(attrs, base_changeset) do
     # Normalize keys to strings to match form submissions
     attrs = Map.new(attrs, fn {k, v} -> {to_string(k), v} end)
 
@@ -79,7 +93,7 @@ defmodule Gamend.Accounts.Registration do
 
     changeset_fun = fn attrs ->
       %User{}
-      |> User.email_changeset(attrs)
+      |> base_changeset.(attrs)
       |> User.username_changeset(attrs)
       |> maybe_make_first_user_admin(is_first_user)
       |> maybe_deactivate_new_user(is_first_user)

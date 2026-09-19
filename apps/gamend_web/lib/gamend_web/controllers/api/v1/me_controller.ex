@@ -256,8 +256,25 @@ defmodule GamendWeb.Api.V1.MeController do
   operation(:delete,
     operation_id: "delete_current_user",
     summary: "Delete current user",
-    description: "Deletes the authenticated user's account",
+    description:
+      "Deletes the authenticated user's account. An account with a password sends " <>
+        "it as `current_password`; a device or OAuth-only one sends nothing.",
     security: [%{"authorization" => []}],
+    request_body: {
+      "Current password, for an account that has one",
+      "application/json",
+      %Schema{
+        type: :object,
+        properties: %{
+          current_password: %Schema{
+            type: :string,
+            format: :password,
+            description: "The account's password"
+          }
+        }
+      },
+      required: false
+    },
     responses: [
       ok: {"Account deleted", "application/json", OkResponse},
       bad_request: Schemas.error("Failed to delete account"),

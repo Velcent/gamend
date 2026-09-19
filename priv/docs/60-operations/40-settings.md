@@ -7,7 +7,7 @@ generated: by `mix gamend.settings.guide` - do not edit by hand; edit the
 # Settings
 
 Every setting the server has, with the environment variable that sets it.
-252 settings across 22 groups.
+253 settings across 22 groups.
 
 A setting is declared in the module that owns it, so this page and
 `.env.example` are generated from the same source the server reads. The
@@ -46,6 +46,7 @@ Live values, and where each one came from, are on the
 | Variable | Type | Default | Notes |
 |---|---|---|---|
 | `GAMEND_AUTH_ANONYMOUS_CAN_UPLOAD_AVATAR` | boolean | `false` | Allow device-only accounts to upload an avatar. Off by default: an anonymous account costs one request to create, so this is the cheapest way for a bot to burn object storage. |
+| `GAMEND_AUTH_API_REGISTRATION_ENABLED` | boolean | `true` | Allow POST /api/v1/register: sign-up with an email and a password from a game client. It sends no email, so it cannot be used to mail an address; the auth rate limit applies. |
 | `GAMEND_AUTH_ARGON2_MEMORY_LOG2` | integer | `14` | Argon2id memory per hash, as a power of two in KiB — 14 is 16 MiB. Peak use is this times the vCPU count, not times the request rate, because the BEAM runs at most one hash per dirty CPU scheduler. Below 12 (4 MiB) it stops being meaningfully memory-hard. |
 | `GAMEND_AUTH_ARGON2_TIME_COST` | integer | `3` | Argon2id passes over memory. Raise to compensate when lowering memory. |
 | `GAMEND_AUTH_DEVICE_AUTH_ENABLED` | boolean | `true` | Allow POST /api/v1/login/device. When on, any unknown device_id creates an anonymous account. |

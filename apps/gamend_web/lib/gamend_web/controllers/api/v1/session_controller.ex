@@ -55,6 +55,85 @@ defmodule GamendWeb.Api.V1.SessionController do
     end
   end
 
+  operation(:register,
+    operation_id: "register",
+    summary: "Register",
+    description:
+      "Create an account with an email and a password, and sign it in: the tokens " <>
+        "come back as from login. No confirmation email is sent. The first account " <>
+        "becomes the admin, and account activation applies as for every sign-up.",
+    request_body: {
+      "Registration",
+      "application/json",
+      %Schema{
+        type: :object,
+        properties: %{
+          email: %Schema{type: :string, format: :email, description: "User email"},
+          password: %Schema{type: :string, format: :password, description: "User password"},
+          username: %Schema{
+            type: :string,
+            description: "Optional; one is generated when it is left out"
+          }
+        },
+        required: [:email, :password],
+        example: %{
+          email: "user@example.com",
+          password: "securepassword123"
+        }
+      }
+    },
+    responses: [
+      created: {"Account created and signed in", "application/json", SessionResponse},
+      bad_request: Schemas.error("Email or password missing (missing_param)"),
+      forbidden:
+        Schemas.error("Registration closed, or the account awaits activation by an admin"),
+      conflict: Schemas.error("Email or username already taken"),
+      unprocessable_entity: Schemas.error("Invalid email, username or password")
+    ]
+  )
+
+  def register(conn, %{"email" => email, "password" => password} = params)
+      when is_binary(email) and is_binary(password) do
+    if Accounts.api_registration_enabled?() do
+      params
+      |> Map.take(["email", "password", "username"])
+      |> Accounts.register_user_with_password()
+      |> registered(conn)
+    else
+      reply_error(conn, :forbidden, "registration_closed", "Registration is closed")
+    end
+  end
+
+  def register(conn, _params) do
+    reply_error(conn, :bad_request, "missing_param", "email and password are required")
+  end
+
+  defp registered({:ok, user}, conn) do
+    if Accounts.user_activated?(user) do
+      conn |> put_status(:created) |> issue_tokens(user)
+    else
+      reply_error(
+        conn,
+        :forbidden,
+        "account_not_activated",
+        "Your account is pending activation by an administrator."
+      )
+    end
+  end
+
+  defp registered({:error, %Ecto.Changeset{} = changeset}, conn) do
+    if taken?(changeset),
+      do: uniqueness_conflict(conn, changeset),
+      else: unprocessable(conn, changeset)
+  end
+
+  # An email or a username someone already has: 409, the input was fine.
+  defp taken?(%Ecto.Changeset{errors: errors}) do
+    Enum.any?(errors, fn {_field, {_message, opts}} ->
+      opts[:constraint] == :unique or opts[:validation] == :unsafe_unique
+    end)
+  end
+
   operation(:create_device,
     operation_id: "device_login",
     summary: "Device login",
@@ -214,7 +293,7 @@ defmodule GamendWeb.Api.V1.SessionController do
 
   # Generate access + refresh JWTs and return the token response
   defp issue_tokens(conn, user) do
-    # Only real logins reach here (password and device create); `refresh/2`
+    # Only real logins reach here (password, device and registration); `refresh/2`
     # builds its own token. Same login side-effects as the web session path.
     #
     # `touch_last_seen/1` joins them rather than running inline: it is two more

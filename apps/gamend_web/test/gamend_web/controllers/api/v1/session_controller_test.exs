@@ -218,6 +218,93 @@ defmodule GamendWeb.Api.V1.SessionControllerTest do
     end
   end
 
+  defp put_accounts_setting(key, value) do
+    existing = Application.get_env(:gamend_core, Gamend.Accounts, [])
+    Application.put_env(:gamend_core, Gamend.Accounts, Keyword.put(existing, key, value))
+  end
+
+  describe "POST /api/v1/register" do
+    setup do
+      accounts = Application.get_env(:gamend_core, Gamend.Accounts, [])
+      on_exit(fn -> Application.put_env(:gamend_core, Gamend.Accounts, accounts) end)
+      :ok
+    end
+
+    test "creates an account and signs it in, and its password logs in", %{conn: conn} do
+      created =
+        post(conn, "/api/v1/register", %{email: "new@example.com", password: @valid_password})
+
+      assert %{"data" => %{"access_token" => token, "user_id" => user_id}} =
+               json_response(created, 201)
+
+      assert is_binary(token)
+
+      login =
+        post(build_conn(), "/api/v1/login", %{
+          email: "new@example.com",
+          password: @valid_password
+        })
+
+      assert json_response(login, 200)["data"]["user_id"] == user_id
+    end
+
+    test "sends no email", %{conn: conn} do
+      post(conn, "/api/v1/register", %{email: "quiet@example.com", password: @valid_password})
+
+      Swoosh.TestAssertions.assert_no_email_sent()
+    end
+
+    test "keeps a username the caller picked", %{conn: conn} do
+      created =
+        post(conn, "/api/v1/register", %{
+          email: "named@example.com",
+          password: @valid_password,
+          username: "quail"
+        })
+
+      assert json_response(created, 201)["data"]["username"] == "quail"
+    end
+
+    test "answers 409 for an email already taken", %{conn: conn} do
+      taken = post(conn, "/api/v1/register", %{email: @valid_email, password: @valid_password})
+
+      assert %{"error" => "validation_failed", "errors" => %{"email" => _}} =
+               json_response(taken, 409)
+    end
+
+    test "answers 422 for a password too short", %{conn: conn} do
+      short = post(conn, "/api/v1/register", %{email: "short@example.com", password: "x"})
+
+      assert %{"errors" => %{"password" => _}} = json_response(short, 422)
+    end
+
+    test "answers 400 without a password", %{conn: conn} do
+      missing = post(conn, "/api/v1/register", %{email: "nopass@example.com"})
+
+      assert json_response(missing, 400)["error"] == "missing_param"
+    end
+
+    test "answers 403 registration_closed when switched off", %{conn: conn} do
+      put_accounts_setting(:api_registration_enabled, false)
+
+      closed =
+        post(conn, "/api/v1/register", %{email: "closed@example.com", password: @valid_password})
+
+      assert json_response(closed, 403)["error"] == "registration_closed"
+      refute Repo.get_by(User, email: "closed@example.com")
+    end
+
+    test "keeps an account awaiting activation but signs nobody in", %{conn: conn} do
+      put_accounts_setting(:require_activation, true)
+
+      pending =
+        post(conn, "/api/v1/register", %{email: "beta@example.com", password: @valid_password})
+
+      assert json_response(pending, 403)["error"] == "account_not_activated"
+      assert %User{is_activated: false} = Repo.get_by(User, email: "beta@example.com")
+    end
+  end
+
   describe "DELETE /api/v1/logout" do
     test "returns 200 with empty object", %{conn: conn} do
       conn = delete(conn, "/api/v1/logout")
