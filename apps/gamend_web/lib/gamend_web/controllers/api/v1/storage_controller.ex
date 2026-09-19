@@ -26,7 +26,11 @@ defmodule GamendWeb.Api.V1.StorageController do
   # as an opaque download.
   @servable_types ~w(image/png image/jpeg image/webp image/gif)
 
-  @doc "PUT /storage/upload?key=...&token=... — authenticated raw-body upload (local backend)."
+  @doc """
+  PUT /storage/upload?key=...&token=... — authenticated raw-body upload (local
+  backend). Answers `{"ok": true}`: the client already holds the key from its
+  ticket, and an S3 presigned PUT answers with no body at all.
+  """
   def upload(conn, %{"token" => token} = params) do
     content_type = Uploads.request_content_type(conn)
     max = Gamend.Limits.get(:max_upload_bytes)
@@ -37,29 +41,29 @@ defmodule GamendWeb.Api.V1.StorageController do
          :ok <- verify_magic_bytes(body, content_type),
          :ok <- check_owner_quota(key, byte_size(body)),
          {:ok, ^key} <- Storage.put(key, body, content_type: content_type) do
-      json(conn, %{ok: true, key: key})
+      reply_ok(conn)
     else
       {:error, :forbidden} ->
-        conn |> put_status(:forbidden) |> json(%{error: "forbidden"})
+        reply_error(conn, :forbidden, "forbidden")
 
       {:error, :content_mismatch} ->
-        conn |> put_status(:unsupported_media_type) |> json(%{error: "content_mismatch"})
+        reply_error(conn, :unsupported_media_type, "content_mismatch")
 
       {:error, :too_large} ->
-        conn |> put_status(:request_entity_too_large) |> json(%{error: "too_large"})
+        reply_error(conn, :request_entity_too_large, "too_large")
 
       {:error, :quota_exceeded} ->
-        conn |> put_status(:insufficient_storage) |> json(%{error: "quota_exceeded"})
+        reply_error(conn, :insufficient_storage, "quota_exceeded")
 
       {:error, :unsupported_content_type} ->
-        conn |> put_status(:unsupported_media_type) |> json(%{error: "unsupported_content_type"})
+        reply_error(conn, :unsupported_media_type, "unsupported_content_type")
 
       _ ->
-        conn |> put_status(:bad_request) |> json(%{error: "upload_failed"})
+        reply_error(conn, :bad_request, "upload_failed")
     end
   end
 
-  def upload(conn, _), do: conn |> put_status(:bad_request) |> json(%{error: "missing_token"})
+  def upload(conn, _), do: reply_error(conn, :bad_request, "missing_param", "token is required")
 
   @doc "GET /storage/*key — serve a stored object (local backend)."
   def show(conn, %{"key" => segments}) do
@@ -68,7 +72,7 @@ defmodule GamendWeb.Api.V1.StorageController do
     if publicly_servable?(key) do
       serve_object(conn, key)
     else
-      conn |> put_status(:not_found) |> json(%{error: "not_found"})
+      reply_error(conn, :not_found, "not_found")
     end
   end
 
@@ -107,7 +111,7 @@ defmodule GamendWeb.Api.V1.StorageController do
         end
 
       {:error, _} ->
-        conn |> put_status(:not_found) |> json(%{error: "not_found"})
+        reply_error(conn, :not_found, "not_found")
     end
   end
 

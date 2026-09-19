@@ -3,7 +3,6 @@ defmodule GamendWeb.Api.V1.LeaderboardController do
   use OpenApiSpex.ControllerSpecs
 
   alias Gamend.Leaderboards
-  alias Gamend.Leaderboards.Leaderboard
   alias GamendWeb.Pagination
   alias GamendWeb.Schemas
 
@@ -15,6 +14,7 @@ defmodule GamendWeb.Api.V1.LeaderboardController do
     LeaderboardsBySlugResponse
   }
 
+  alias GamendWeb.Serializers
   alias OpenApiSpex.Schema
 
   tags(["Leaderboards"])
@@ -338,23 +338,7 @@ defmodule GamendWeb.Api.V1.LeaderboardController do
 
   defp not_found(conn), do: reply_error(conn, :not_found, "not_found")
 
-  defp serialize_leaderboard(lb) do
-    %{
-      id: lb.id,
-      slug: lb.slug,
-      title: lb.title,
-      description: lb.description || "",
-      icon_url: lb.icon_url || "",
-      sort_order: to_string(lb.sort_order),
-      operator: to_string(lb.operator),
-      starts_at: lb.starts_at,
-      ends_at: lb.ends_at,
-      is_active: Leaderboard.active?(lb),
-      metadata: lb.metadata || %{},
-      inserted_at: lb.inserted_at,
-      updated_at: lb.updated_at
-    }
-  end
+  defp serialize_leaderboard(lb), do: Serializers.serialize_leaderboard(lb)
 
   defp serialize_record(record) do
     base = %{

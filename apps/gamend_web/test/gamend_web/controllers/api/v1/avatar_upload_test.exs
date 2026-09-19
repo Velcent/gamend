@@ -58,7 +58,7 @@ defmodule GamendWeb.Api.V1.AvatarUploadTest do
         |> put_req_header("content-type", "image/png")
         |> put(upload_path(key, token), @png)
 
-      assert json_response(up, 200)["key"] == key
+      assert json_response(up, 200) == %{"ok" => true}
 
       # served publicly, with immutable caching + an ETag (avatar keys are
       # content-unique, so the URL changes whenever the image does)
@@ -88,7 +88,7 @@ defmodule GamendWeb.Api.V1.AvatarUploadTest do
         |> put_req_header("content-type", "image/png")
         |> put("/api/v1/storage/upload?key=avatars/#{user.id}/x.png", @png)
 
-      assert json_response(up, 400)["error"] == "missing_token"
+      assert json_response(up, 400)["error"] == "missing_param"
     end
 
     test "rejects a token that does not match the requested key", %{conn: conn} do

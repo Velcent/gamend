@@ -40,6 +40,7 @@ may have its own `Lobby`:
 | `lobbies_list_lobbies()` | `GamendLobbyPage`: `data` (`GamendLobby` rows), `meta` (a `GamendPageMeta`) |
 | `users_get_current_user()` | `GamendCurrentUserResponse`: `data`, a `GamendCurrentUser` |
 | `authenticate_device_login(id)` | `GamendSessionResponse`: `data`, a `GamendSession` |
+| `tournaments_tournament_bracket(id)` | `GamendTournamentBracketPage`: `data` (`GamendTournamentBracket` rows, each with its `matches` and `entries`), `meta` |
 | `lobbies_leave_lobby()` | `GamendOkResponse`: `ok` |
 
 Every answer has the same four shapes (see API conventions): the resource

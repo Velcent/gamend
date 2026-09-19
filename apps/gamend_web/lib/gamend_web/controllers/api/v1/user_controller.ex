@@ -89,21 +89,18 @@ defmodule GamendWeb.Api.V1.UserController do
   # Steam or Facebook profile, which means it is frequently a photograph of the
   # account holder. Handing that out from an unauthenticated endpoint, keyed to
   # a name prefix, is the picture and the name together.
+  #
+  # No lobby or party id either. A lobby id is enough to join a lobby or walk
+  # into a WebRTC signaling room, so "which room is this player in" next to a
+  # name search was the discovery half of several other problems. The fields
+  # went out blank for a while, carrying nothing; now they are gone.
+  # Authenticated callers get membership from the lobby, party and channel
+  # APIs, which check the caller's relationship to it.
   defp serialize_user(user) do
     user
     |> User.serialize_brief()
     |> Map.drop([:profile_url])
     |> Map.put(:metadata, public_metadata(user.metadata))
-    |> Map.merge(%{
-      # Deliberately blank on the public endpoints. These are unauthenticated
-      # (`list_users` gate only), and a lobby id is enough to join a lobby or
-      # walk into a WebRTC signaling room — so publishing "which room is this
-      # player in" alongside a name search was the discovery half of several
-      # other problems. Authenticated callers get membership from the lobby,
-      # party and channel APIs, which check the caller's relationship to it.
-      lobby_id: "",
-      party_id: ""
-    })
   end
 
   defp public_metadata(metadata) when is_map(metadata) do

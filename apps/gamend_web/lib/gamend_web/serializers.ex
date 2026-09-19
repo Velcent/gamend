@@ -13,6 +13,7 @@ defmodule GamendWeb.Serializers do
   alias Gamend.Accounts
   alias Gamend.Accounts.User
   alias Gamend.Groups
+  alias Gamend.Leaderboards.Leaderboard
   alias Gamend.Lobbies
   alias Gamend.Lobbies.SpectatorTracker
   alias Gamend.Parties
@@ -138,6 +139,49 @@ defmodule GamendWeb.Serializers do
     )
   end
 
+  @doc "A leaderboard as the player and admin APIs send it (`GamendWeb.Schemas.Leaderboard`)."
+  @spec serialize_leaderboard(Leaderboard.t()) :: map()
+  def serialize_leaderboard(%Leaderboard{} = lb) do
+    %{
+      id: lb.id,
+      slug: lb.slug,
+      title: lb.title,
+      description: lb.description || "",
+      icon_url: lb.icon_url || "",
+      sort_order: to_string(lb.sort_order),
+      operator: to_string(lb.operator),
+      starts_at: lb.starts_at,
+      ends_at: lb.ends_at,
+      is_active: Leaderboard.active?(lb),
+      metadata: lb.metadata || %{},
+      inserted_at: lb.inserted_at,
+      updated_at: lb.updated_at
+    }
+  end
+
+  @doc """
+  A tournament match as the player and admin APIs send it
+  (`GamendWeb.Schemas.TournamentMatch`); `leaders` maps each entry id to its
+  leader's user id.
+  """
+  @spec serialize_tournament_match(term(), %{optional(term()) => term()}) :: map()
+  def serialize_tournament_match(match, leaders) do
+    %{
+      id: match.id,
+      bracket_index: match.bracket_index,
+      round: match.round,
+      slot: match.slot,
+      a_entry_id: match.a_entry_id || "",
+      b_entry_id: match.b_entry_id || "",
+      a_leader_id: leaders[match.a_entry_id] || "",
+      b_leader_id: leaders[match.b_entry_id] || "",
+      winner_entry_id: match.winner_entry_id || "",
+      deadline_at: match.deadline_at,
+      resolved_at: match.resolved_at,
+      metadata: match.metadata || %{}
+    }
+  end
+
   @spec serialize_quest_progress(term()) :: map()
   def serialize_quest_progress(progress) do
     %{
@@ -260,7 +304,7 @@ defmodule GamendWeb.Serializers do
       key: entry.key,
       user_id: entry.user_id || "",
       lobby_id: entry.lobby_id || "",
-      data: entry.value,
+      data: entry.value || %{},
       metadata: entry.metadata || %{},
       inserted_at: entry.inserted_at,
       updated_at: entry.updated_at

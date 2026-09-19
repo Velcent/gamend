@@ -94,6 +94,8 @@ Stripe docs: [API keys](https://docs.stripe.com/keys),
 
 Entitlement and subscription products are buy-once while active: checkout quantity must be 1, and users with an active grant or in-progress checkout cannot start another checkout for that product. Consumables can be bought repeatedly.
 
+Checkout answers `{"data": {"purchase": ..., "checkout_url": ..., "provider_session_id": ...}}`. A refusal is a code: `quantity_not_allowed` (400); `already_owned` or `purchase_already_in_progress` (409); a `*_not_found` product (404); `stripe_not_configured` and every other `*_not_configured` (503), because the server is missing something, not the request. The catalog (`GET /api/v1/payments/catalog`) and the player's entitlements (`GET /api/v1/payments/entitlements`) are pages.
+
 Apple, Google, Steam, and Stripe products that unlock the same thing must point to the same internal product, or their internal products must share the same grant_config.entitlement_key. Ownership checks use that entitlement key across providers.
 
 Currency display is handled by Stripe Checkout. Enable Stripe Adaptive Pricing in Stripe Dashboard, or configure multi-currency Prices with currency options. The provider SKU still stores the Stripe Price ID.

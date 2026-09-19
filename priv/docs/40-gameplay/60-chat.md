@@ -203,7 +203,10 @@ compiled app's `priv/` via `Application.app_dir/2`, so a file added *after* the
 build is not visible to a running server; it ships with the release like any
 other asset. Anything you drop there appears in the picker automatically, and a
 whole imported list can be removed again in one click (or with
-`DELETE /api/v1/admin/chat/filter_words?lang=de`).
+`DELETE /api/v1/admin/chat/filter_words?lang=de`). Over the admin API,
+`GET /api/v1/admin/chat/filter_words/languages` lists what can be imported and
+`POST /api/v1/admin/chat/filter_words/import` with `{"lang": "de"}` imports it,
+answering `{"data": {"imported": n}}`.
 
 **Over the admin API (no rebuild).** Send each word to
 `POST /api/v1/admin/chat/filter_words` with `{"word": "...", "severity":

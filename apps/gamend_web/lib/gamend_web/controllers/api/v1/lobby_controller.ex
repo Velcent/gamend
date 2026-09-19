@@ -266,7 +266,7 @@ defmodule GamendWeb.Api.V1.LobbyController do
       ok: {"Successfully joined", "application/json", LobbyResponse},
       forbidden: Schemas.error("Cannot join (locked, full, wrong password, etc)"),
       not_found: Schemas.error("Lobby not found"),
-      conflict: Schemas.error("A party member is already in a lobby"),
+      conflict: Schemas.error("Already in a lobby, or a party member is"),
       unauthorized: Schemas.error("Not authenticated")
     ]
   )
@@ -624,7 +624,7 @@ defmodule GamendWeb.Api.V1.LobbyController do
         reply_error(conn, :not_found, "not_found")
 
       {:error, :already_in_lobby} ->
-        reply_error(conn, :forbidden, "already_in_lobby")
+        reply_error(conn, :conflict, "already_in_lobby")
 
       {:error, :password_required} ->
         reply_error(conn, :forbidden, "password_required")

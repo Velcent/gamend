@@ -103,6 +103,10 @@ Every active quest with a matching objective advances (an objective's params mus
 Player endpoints live under `/api/v1/me/quests` and the catalogue under
 `/api/v1/quests` (gated by `GAMEND_FEATURES_LIST_QUESTS`) - see [/api/docs](/api/docs).
 
+- **Claiming:** `POST /api/v1/me/quests/:key/claim` answers the progress and
+  the rewards paid. A quest not yet completed answers `not_completed` (403), a
+  second claim `already_claimed` (409), and a `before_quest_claim` veto
+  `rejected` (403) with the hook's reason as `message`.
 - **Channel events:** `quest_progress`, `quest_completed`, `quest_claimed`
 - **Hooks:** `before_quest_claim/3` (may veto), `after_quest_completed/1`,
   `after_quest_claimed/1`

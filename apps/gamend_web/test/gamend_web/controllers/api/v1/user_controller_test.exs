@@ -64,8 +64,9 @@ defmodule GamendWeb.Api.V1.UserControllerTest do
     resp = json_response(conn, 200)["data"]
     assert resp["id"] == u.id
     refute Map.has_key?(resp, "email")
-    assert Map.has_key?(resp, "lobby_id")
-    assert resp["lobby_id"] == ""
+    # Another user's lobby and party are private: not even an empty field.
+    refute Map.has_key?(resp, "lobby_id")
+    refute Map.has_key?(resp, "party_id")
     assert resp["last_seen_at"] == "1970-01-01T00:00:00Z"
   end
 

@@ -45,7 +45,8 @@ func _run() -> void:
 		failures += 1
 		print("FAIL device_login: no token captured")
 
-	_expect(await api.users_get_current_user(), "get_current_user", GamendCurrentUserResponse)
+	var me = _expect(await api.users_get_current_user(), "get_current_user", GamendCurrentUserResponse)
+	var user_id: String = me.data.id if me else ""
 
 	var join := GamendQuickJoinRequest.new()
 	join.title = "godot-check"
@@ -104,5 +105,60 @@ func _run() -> void:
 	else:
 		print("ok   leave_party")
 
+	var boards = _expect(await api.leaderboards_list_leaderboards(), "list_leaderboards", GamendLeaderboardPage)
+	_expect(await api.leaderboards_resolve_slugs(["godot-check"]), "resolve_leaderboard_slugs", GamendLeaderboardsBySlugResponse)
+	if boards and boards.data.size() > 0:
+		var board: GamendLeaderboard = boards.data[0]
+		_expect(await api.leaderboards_get_leaderboard(board.id), "get_leaderboard", GamendLeaderboardResponse)
+		_expect(await api.leaderboards_list_leaderboard_records(board.id), "list_leaderboard_records", GamendLeaderboardRecordPage)
+		_expect(await api.leaderboards_list_records_around_user(board.id, user_id), "list_records_around_user", GamendLeaderboardRecordPage)
+
+	var cups = _expect(await api.tournaments_list_tournaments(), "list_tournaments", GamendTournamentPage)
+	if cups and cups.data.size() > 0:
+		var cup: GamendTournament = cups.data[0]
+		_expect(await api.tournaments_get_tournament(cup.id), "get_tournament", GamendTournamentResponse)
+		_expect(await api.tournaments_tournament_entries(cup.id), "tournament_entries", GamendTournamentEntryPage)
+		_expect(await api.tournaments_tournament_bracket(cup.id), "tournament_bracket", GamendTournamentBracketPage)
+		_expect(await api.tournaments_tournament_standings(cup.id), "tournament_standings", GamendTournamentStandingsResponse)
+
+	_expect(await api.quests_my_quests(), "my_quests", GamendQuestPage)
+	_expect(await api.quests_list_quests(), "list_quests", GamendQuestPage)
+	_expect(await api.quests_quest_stats(), "quest_stats", GamendQuestStatsResponse)
+	_expect(await api.economy_get_current_user_wallet(), "get_current_user_wallet", GamendWalletBalancesResponse)
+	_expect(await api.economy_get_current_user_inventory(), "get_current_user_inventory", GamendInventoryResponse)
+	_expect(await api.economy_list_current_user_ledger(), "list_current_user_ledger", GamendLedgerEntryPage)
+	_expect(await api.payments_catalog(), "payments_catalog", GamendPaymentCatalogEntryPage)
+	_expect(await api.payments_entitlements(), "payments_entitlements", GamendEntitlementPage)
+
+	_expect(await api.health_index(), "health", GamendHealthResponse)
+	_expect(await api.time_get_server_time(), "get_server_time", GamendServerTimeResponse)
+	_expect(await api.stats_get_stats(), "get_stats", GamendServerStatsResponse)
+	_expect(await api.signaling_stats(), "signaling_stats", GamendSignalingStatsResponse)
+	_expect(await api.matchmaking_stats(), "matchmaking_stats", GamendMatchmakingStatsResponse)
+	_expect(await api.hooks_list_hooks(), "list_hooks", GamendHookFunctionPage)
+	_expect(await api.ready_checks_get_mine(), "get_my_ready_check", GamendMyReadyChecksResponse)
+
+	_check_kv_row()
+
 	print("failures=", failures)
 	quit(1 if failures > 0 else 0)
+
+
+# GamendClient reads a KV row out of a get_kv answer by hand. The typed model,
+# a raw body and an older server's shape must all give the stored row: when
+# the answer became `{data: KvEntry}` this read the entry, not the row, and
+# every HTTP fetch came back empty with nothing failing.
+func _check_kv_row() -> void:
+	var entry := {"key": "k", "user_id": "", "lobby_id": "", "data": {"a": 1}, "metadata": {}}
+	var cases := {
+		"model": GamendKvEntryResponse.bzz_denormalize_single({"data": entry}),
+		"raw": {"data": entry},
+		"legacy": {"data": {"a": 1}},
+	}
+	for label in cases:
+		var row: Dictionary = GamendClient._kv_row(cases[label])
+		if row == {"a": 1}:
+			print("ok   kv_row ", label)
+		else:
+			failures += 1
+			print("FAIL kv_row ", label, ": got ", row)

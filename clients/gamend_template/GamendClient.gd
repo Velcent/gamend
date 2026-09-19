@@ -331,26 +331,36 @@ func _store_row(key: String, row: Dictionary) -> void:
 	kv_row_changed.emit(key, get_row(key))
 
 
-## The subscribe/get reply body carries the row under "data" (subscribe pushes
-## and GETs both), or "value" from older KV endpoints.
 ## The KV row out of a get_kv reply.
 ##
-## `response.data` is the DENORMALIZED model (GamendGetKv200Response), not the raw
-## body — the generated api swaps it in before this ever runs. Requiring a
-## Dictionary here therefore rejected every successful fetch and returned {},
-## so a row with real data read as "no row": word stats, and anything else
-## fetched over HTTP rather than pushed on the channel. Both shapes are handled
-## because a raw Dictionary is still what a hand-rolled or cached reply gives.
+## The answer is `{data: KvEntry}` and the entry's own `data` is the stored
+## row, the same fields the channel's `kv_updated` push carries. `response.data`
+## is the DENORMALIZED model (GamendKvEntryResponse) — the generated api swaps
+## it in before this runs — so requiring a Dictionary rejected every
+## successful fetch and read a real row as "no row". A raw Dictionary is still
+## what a hand-rolled or cached reply gives, and a server from before the
+## entry shape answered `{data: row}` (or `{value: row}` earlier still), so
+## every form is taken.
 func _row_from_body(result) -> Dictionary:
 	if result.response == null:
 		return {}
-	var body: Variant = result.response.data
+	return _kv_row(result.response.data)
+
+
+static func _kv_row(body: Variant) -> Dictionary:
+	var entry: Variant = null
 	if body is Dictionary:
-		var raw: Variant = (body as Dictionary).get("data", (body as Dictionary).get("value", {}))
-		return (raw as Dictionary) if raw is Dictionary else {}
-	if body != null and "data" in body:
-		var value: Variant = body.data
-		return (value as Dictionary) if value is Dictionary else {}
+		entry = (body as Dictionary).get("data", (body as Dictionary).get("value", {}))
+	elif body != null and "data" in body:
+		entry = body.data
+	if entry is Dictionary:
+		var fields := entry as Dictionary
+		if fields.has("key") and fields.get("data") is Dictionary:
+			return fields["data"]
+		return fields
+	if entry != null and "data" in entry:
+		var row: Variant = entry.data
+		return (row as Dictionary) if row is Dictionary else {}
 	return {}
 
 
@@ -454,7 +464,7 @@ func rpc_call(fn: String, args: Array = []) -> Dictionary:
 
 
 ## JSON null and absent are the same thing to GDScript callers: hook payloads
-## are schemaless (GamendCallHook200Response.data), so a null that survives to a
+## are schemaless (GamendHookCallResponse.data), so a null that survives to a
 ## typed variable is a runtime error the type system cannot catch. Strip nulls
 ## recursively so `.get(key, default)` applies the default — the same
 ## null-equals-absent rule generate_godot.sh already enforces for typed model

@@ -52,7 +52,7 @@ GAMEND_OBSERVABILITY_LOG_FILE_MAX_FILES=5          # ~50MB total
 
 ## Health
 
-`GET /api/v1/health` is unauthenticated and returns `{"status": "ok"}` with a timestamp. Point load-balancer and uptime checks at it.
+`GET /api/v1/health` is unauthenticated and returns `{"data": {"status": "ok", "timestamp": …}}`. Point load-balancer and uptime checks at it.
 
 ## Public stats
 

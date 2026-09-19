@@ -26,28 +26,15 @@ defmodule GamendWeb.ResponseContract do
   reaches. Both are environment variables rather than declared settings
   because they switch a single test run, not a server.
 
-  Only operations under `@enforced_tags` are checked. The list grows one domain
-  per slice of `docs/specs/named-api-schemas.md` and is deleted, with the tag
-  filter, once every domain is in.
+  Every documented operation is checked. It started as a ratchet over a list
+  of tags, one domain at a time (`docs/specs/named-api-schemas.md`); the list
+  went once every domain was in, so a new endpoint is held to its schema from
+  its first test.
   """
   @behaviour Plug
 
   alias OpenApiSpex.{Cast, Operation, PathItem, Reference, Response, Schema}
   alias OpenApiSpex.Plug.PutApiSpec
-
-  @enforced_tags MapSet.new([
-                   "Lobbies",
-                   "Users",
-                   "Authentication",
-                   "Friends",
-                   "Groups",
-                   "Parties",
-                   "Chat",
-                   "Notifications",
-                   "Push",
-                   "Leaderboards",
-                   "Tournaments"
-                 ])
 
   defmodule Violation do
     @moduledoc "A response that contradicts its documented schema."
@@ -64,8 +51,7 @@ defmodule GamendWeb.ResponseContract do
   @spec check(Plug.Conn.t()) :: Plug.Conn.t()
   def check(conn) do
     with true <- json?(conn),
-         {:ok, spec, operation} <- operation(conn),
-         true <- enforced?(operation) do
+         {:ok, spec, operation} <- operation(conn) do
       verify(conn, spec, operation)
     end
 
@@ -78,14 +64,6 @@ defmodule GamendWeb.ResponseContract do
     conn.status != 204 and conn.status < 500 and
       Enum.any?(Plug.Conn.get_resp_header(conn, "content-type"), &(&1 =~ "json"))
   end
-
-  @doc """
-  Whether an operation's tags are in the migration ratchet. Shared with
-  `GamendWeb.ApiShapeTest`, so the document and the responses convert together.
-  """
-  @spec enforced?(Operation.t()) :: boolean()
-  def enforced?(%Operation{tags: tags}),
-    do: Enum.any?(tags || [], &MapSet.member?(@enforced_tags, &1))
 
   # The spec is only on conns that went through the `:api` pipeline, which is
   # also exactly the set of responses the document describes.

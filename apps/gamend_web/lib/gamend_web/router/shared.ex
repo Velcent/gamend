@@ -710,6 +710,7 @@ defmodule GamendWeb.Router.Shared do
         delete "/sessions/:id", SessionController, :delete
         delete "/users/:id/sessions", SessionController, :delete_user_sessions
         get "/storage", StorageController, :index
+        get "/storage/usage", StorageController, :usage
         delete "/storage", StorageController, :delete
         put "/storage/object", StorageController, :upload
         get "/storage/object", StorageController, :download
@@ -748,6 +749,7 @@ defmodule GamendWeb.Router.Shared do
         post "/chat/mutes", ChatModerationController, :create_mute
         delete "/chat/mutes/:id", ChatModerationController, :delete_mute
         get "/chat/filter_words", ChatModerationController, :list_filter_words
+        get "/chat/filter_words/languages", ChatModerationController, :filter_languages
         post "/chat/filter_words", ChatModerationController, :create_filter_word
         patch "/chat/filter_words/:id", ChatModerationController, :update_filter_word
         delete "/chat/filter_words/:id", ChatModerationController, :delete_filter_word

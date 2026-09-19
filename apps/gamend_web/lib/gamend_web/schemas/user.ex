@@ -83,15 +83,7 @@ defmodule GamendWeb.Schemas.PublicUser do
       },
       is_online: %Schema{type: :boolean},
       is_activated: %Schema{type: :boolean},
-      last_seen_at: %Schema{type: :string, format: :"date-time"},
-      lobby_id: %Schema{
-        type: :string,
-        description: "Always empty: another user's lobby is private"
-      },
-      party_id: %Schema{
-        type: :string,
-        description: "Always empty: another user's party is private"
-      }
+      last_seen_at: %Schema{type: :string, format: :"date-time"}
     },
     required: [
       :id,
@@ -100,9 +92,7 @@ defmodule GamendWeb.Schemas.PublicUser do
       :metadata,
       :is_online,
       :is_activated,
-      :last_seen_at,
-      :lobby_id,
-      :party_id
+      :last_seen_at
     ]
   })
 end

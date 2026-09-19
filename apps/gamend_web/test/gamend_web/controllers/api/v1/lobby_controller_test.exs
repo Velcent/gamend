@@ -352,6 +352,21 @@ defmodule GamendWeb.Api.V1.LobbyControllerTest do
     assert conn.status == 401
   end
 
+  test "POST /api/v1/lobbies/:id/join answers 409 when already in a lobby", %{conn: conn} do
+    host = AccountsFixtures.user_fixture()
+    {:ok, _own} = Lobbies.create_lobby(%{title: "own-room", host_id: host.id})
+    {:ok, other} = Lobbies.create_lobby(%{title: "other-room", hostless: true})
+    {:ok, token, _} = Guardian.encode_and_sign(host)
+
+    resp =
+      conn
+      |> put_req_header("authorization", "Bearer " <> token)
+      |> post("/api/v1/lobbies/#{other.id}/join", %{})
+      |> json_response(409)
+
+    assert resp["error"] == "already_in_lobby"
+  end
+
   test "POST /api/v1/lobbies/:id/join requires auth and manages lobby membership", %{conn: conn} do
     host = AccountsFixtures.user_fixture()
     other = AccountsFixtures.user_fixture()

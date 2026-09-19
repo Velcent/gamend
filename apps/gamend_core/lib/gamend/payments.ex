@@ -129,23 +129,42 @@ defmodule Gamend.Payments do
     |> preload_product()
   end
 
-  @spec list_catalog(String.t() | nil) :: [ProviderProduct.t()]
-  def list_catalog(provider \\ nil) do
+  @doc """
+  Active catalog entries, optionally for one provider. Pass `:page` and
+  `:page_size` for one page; without them, every entry.
+  """
+  @spec list_catalog(String.t() | nil, keyword()) :: [ProviderProduct.t()]
+  def list_catalog(provider \\ nil, opts \\ []) do
+    provider
+    |> catalog_query()
+    |> order_by([pp, p], asc: pp.provider, asc: p.sku)
+    |> preload([pp, p], product: p)
+    |> maybe_page(opts)
+    |> Repo.all()
+  end
+
+  @doc "Counts `list_catalog/2`'s entries."
+  @spec count_catalog(String.t() | nil) :: non_neg_integer()
+  def count_catalog(provider \\ nil) do
+    provider |> catalog_query() |> Repo.aggregate(:count)
+  end
+
+  defp catalog_query(provider) do
     query =
       from pp in ProviderProduct,
         join: p in assoc(pp, :product),
-        where: pp.active == true and p.active == true,
-        preload: [product: p],
-        order_by: [asc: pp.provider, asc: p.sku]
+        where: pp.active == true and p.active == true
 
-    query =
-      if is_binary(provider) and provider != "" do
-        from pp in query, where: pp.provider == ^provider
-      else
-        query
-      end
+    if is_binary(provider) and provider != "" do
+      from pp in query, where: pp.provider == ^provider
+    else
+      query
+    end
+  end
 
-    Repo.all(query)
+  # Paging is opt-in: the store page and downloads want every row.
+  defp maybe_page(query, opts) do
+    if Keyword.has_key?(opts, :page), do: Gamend.Query.page(query, opts), else: query
   end
 
   # ---------------------------------------------------------------------------
@@ -470,28 +489,37 @@ defmodule Gamend.Payments do
   # Entitlements
   # ---------------------------------------------------------------------------
 
+  @doc """
+  The user's entitlements, by key: active ones only unless
+  `include_inactive: true`. Pass `:page` and `:page_size` for one page.
+  """
   @spec list_user_entitlements(Ecto.UUID.t(), keyword()) :: [Entitlement.t()]
   def list_user_entitlements(user_id, opts \\ []) when is_binary(user_id) do
-    include_inactive = Keyword.get(opts, :include_inactive, false)
-    now = DateTime.utc_now(:second)
+    user_id
+    |> entitlements_query(opts)
+    |> order_by([e], asc: e.key)
+    |> preload([:product, :source_purchase])
+    |> maybe_page(opts)
+    |> Repo.all()
+  end
 
-    query =
-      from e in Entitlement,
-        where: e.user_id == ^user_id,
-        order_by: [asc: e.key],
-        preload: [:product, :source_purchase]
+  @doc "Counts `list_user_entitlements/2`'s entitlements; takes `:include_inactive`."
+  @spec count_user_entitlements(Ecto.UUID.t(), keyword()) :: non_neg_integer()
+  def count_user_entitlements(user_id, opts \\ []) when is_binary(user_id) do
+    user_id |> entitlements_query(opts) |> Repo.aggregate(:count)
+  end
 
-    query =
-      if include_inactive do
-        query
-      else
-        from e in query,
-          where:
-            e.status == "active" and
-              (is_nil(e.expires_at) or e.expires_at > ^now)
-      end
+  defp entitlements_query(user_id, opts) do
+    query = from e in Entitlement, where: e.user_id == ^user_id
 
-    Repo.all(query)
+    if Keyword.get(opts, :include_inactive, false) do
+      query
+    else
+      now = DateTime.utc_now(:second)
+
+      from e in query,
+        where: e.status == "active" and (is_nil(e.expires_at) or e.expires_at > ^now)
+    end
   end
 
   @spec has_entitlement?(Ecto.UUID.t(), String.t()) :: boolean()

@@ -104,7 +104,7 @@ defmodule GamendWeb.Api.V1.Admin.IconUploadTest do
           @png
         )
 
-      assert json_response(up, 200)["key"] == key, "#{segment} could not upload its icon"
+      assert json_response(up, 200) == %{"ok" => true}, "#{segment} could not upload its icon"
       assert Storage.exists?(key)
     end
   end

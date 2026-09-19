@@ -6,7 +6,6 @@ defmodule GamendWeb.ApiShapeTest do
   # fails the suite.
   use ExUnit.Case, async: true
 
-  alias GamendWeb.ResponseContract
   alias OpenApiSpex.{MediaType, Operation, PathItem, Reference, Response, Schema}
 
   @verbs [:get, :put, :post, :delete, :patch]
@@ -22,7 +21,6 @@ defmodule GamendWeb.ApiShapeTest do
       for {_path, %PathItem{} = item} <- spec.paths,
           verb <- @verbs,
           %Operation{} = operation <- [Map.get(item, verb)],
-          ResponseContract.enforced?(operation),
           do: operation
 
     %{schemas: spec.components.schemas, operations: operations}
@@ -67,6 +65,19 @@ defmodule GamendWeb.ApiShapeTest do
       end)
 
     assert wrong == [], "rename (a thing has a title): #{inspect(wrong)}"
+  end
+
+  test "a string is never null, except a date or date-time (R6)", ctx do
+    wrong =
+      ctx.operations
+      |> Enum.flat_map(&json_responses/1)
+      |> Enum.flat_map(fn {_status, schema} ->
+        nullable_strings(schema, ctx.schemas, MapSet.new())
+      end)
+      |> Enum.uniq()
+      |> Enum.sort()
+
+    assert wrong == [], "coalesce to \"\" and drop nullable: #{inspect(wrong)}"
   end
 
   # ── shapes ───────────────────────────────────────────────────────────────
@@ -162,4 +173,31 @@ defmodule GamendWeb.ApiShapeTest do
   end
 
   defp property_names(_other, _schemas, _seen), do: []
+
+  # `Owner.property` for every nullable string that is not a date or date-time.
+  defp nullable_strings(%Reference{"$ref": "#/components/schemas/" <> name} = ref, schemas, seen) do
+    if MapSet.member?(seen, name),
+      do: [],
+      else: nullable_strings(resolve(ref, schemas), schemas, MapSet.put(seen, name))
+  end
+
+  defp nullable_strings(%Schema{} = schema, schemas, seen) do
+    own =
+      for {key, %Schema{type: :string, nullable: true, format: format}} <-
+            schema.properties || %{},
+          format not in [:date, :"date-time", "date", "date-time"],
+          do: "#{schema.title || "inline"}.#{key}"
+
+    children =
+      Map.values(schema.properties || %{}) ++
+        List.wrap(schema.items) ++
+        List.wrap(schema.allOf) ++
+        List.wrap(
+          if is_struct(schema.additionalProperties, Schema), do: schema.additionalProperties
+        )
+
+    own ++ Enum.flat_map(children, &nullable_strings(&1, schemas, seen))
+  end
+
+  defp nullable_strings(_other, _schemas, _seen), do: []
 end

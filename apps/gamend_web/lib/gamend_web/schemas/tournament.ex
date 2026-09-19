@@ -97,8 +97,9 @@ end
 
 defmodule GamendWeb.Schemas.TournamentMatch do
   @moduledoc """
-  One match of a bracket. A slot not yet filled has null entry and leader
-  ids; `winner_entry_id` and `resolved_at` stay null until it is decided.
+  One match of a bracket. A slot not yet filled has empty entry and leader
+  ids; `winner_entry_id` stays empty and `resolved_at` null until it is
+  decided.
   """
   require OpenApiSpex
   alias OpenApiSpex.Schema
@@ -112,11 +113,11 @@ defmodule GamendWeb.Schemas.TournamentMatch do
       bracket_index: %Schema{type: :integer},
       round: %Schema{type: :integer, description: "1 is the first round"},
       slot: %Schema{type: :integer, description: "Position within the round"},
-      a_entry_id: %Schema{type: :string, format: :uuid, nullable: true},
-      b_entry_id: %Schema{type: :string, format: :uuid, nullable: true},
-      a_leader_id: %Schema{type: :string, format: :uuid, nullable: true},
-      b_leader_id: %Schema{type: :string, format: :uuid, nullable: true},
-      winner_entry_id: %Schema{type: :string, format: :uuid, nullable: true},
+      a_entry_id: %Schema{type: :string, description: "Empty until the slot is filled"},
+      b_entry_id: %Schema{type: :string, description: "Empty until the slot is filled"},
+      a_leader_id: %Schema{type: :string, description: "Empty until the slot is filled"},
+      b_leader_id: %Schema{type: :string, description: "Empty until the slot is filled"},
+      winner_entry_id: %Schema{type: :string, description: "Empty until decided"},
       deadline_at: %Schema{type: :string, format: :"date-time", nullable: true},
       resolved_at: %Schema{type: :string, format: :"date-time", nullable: true},
       metadata: %Schema{type: :object}

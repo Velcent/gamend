@@ -935,8 +935,8 @@ func hooks_call_hook_ws(plugin: String, fn_name: String, args: Array = [], topic
 	return _realtime.call_hook(plugin, fn_name, args, topic)
 
 ## List available hook functions
-func hooks_list_hooks() -> GamendResult:
-	return await _call_api(HooksApi.new(_config), "list_hooks", [])
+func hooks_list_hooks(page = 1, pageSize = 25) -> GamendResult:
+	return await _call_api(HooksApi.new(_config), "list_hooks", [page, pageSize])
 
 ### USERS
 
@@ -2323,14 +2323,14 @@ func payments_stripe_webhook(body = null) -> GamendResult:
 
 ## List active payment catalog entries
 ## Operation paymentsCatalog → GET /api/v1/payments/catalog
-func payments_catalog(provider = "") -> GamendResult:
-	return await _call_api(PaymentsApi.new(_config), "payments_catalog", [provider])
+func payments_catalog(provider = "", page = 1, pageSize = 25) -> GamendResult:
+	return await _call_api(PaymentsApi.new(_config), "payments_catalog", [provider, page, pageSize])
 
 
 ## List current user's active entitlements
 ## Operation paymentsEntitlements → GET /api/v1/payments/entitlements
-func payments_entitlements() -> GamendResult:
-	return await _call_api(PaymentsApi.new(_config), "payments_entitlements")
+func payments_entitlements(page = 1, pageSize = 25) -> GamendResult:
+	return await _call_api(PaymentsApi.new(_config), "payments_entitlements", [page, pageSize])
 
 
 ## Create a Steam MicroTxn transaction
@@ -2381,6 +2381,13 @@ func push_register_push_token(registerPushTokenRequest = null) -> GamendResult:
 ## Operation questStats → GET /api/v1/quests/stats
 func quests_quest_stats() -> GamendResult:
 	return await _call_api(QuestsApi.new(_config), "quest_stats")
+
+
+### STATS
+## All public server counters in one call
+## Operation getStats → GET /api/v1/stats
+func stats_get_stats() -> GamendResult:
+	return await _call_api(StatsApi.new(_config), "get_stats", [])
 
 
 ### SIGNALING

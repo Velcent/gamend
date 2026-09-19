@@ -19,6 +19,7 @@ defmodule GamendWeb.Api.V1.TournamentController do
     TournamentStandingsResponse
   }
 
+  alias GamendWeb.Serializers
   alias OpenApiSpex.Schema
 
   tags(["Tournaments"])
@@ -240,7 +241,10 @@ defmodule GamendWeb.Api.V1.TournamentController do
     end
   end
 
-  defp render_bracket(conn, tournament, %{"index" => index} = _params) do
+  # An empty `index` is no index, like every other optional query parameter:
+  # the Godot SDK sends an unset one as a bare `?index`.
+  defp render_bracket(conn, tournament, %{"index" => index} = _params)
+       when index not in [nil, ""] do
     with {index, ""} <- Integer.parse(to_string(index)),
          %{} = bracket <- Tournaments.get_bracket(tournament.id, index) do
       reply_page(conn, serialize_brackets(tournament, [bracket]), 1, 1, 1)
@@ -376,22 +380,7 @@ defmodule GamendWeb.Api.V1.TournamentController do
     }
   end
 
-  defp serialize_match(match, leaders) do
-    %{
-      id: match.id,
-      bracket_index: match.bracket_index,
-      round: match.round,
-      slot: match.slot,
-      a_entry_id: match.a_entry_id,
-      b_entry_id: match.b_entry_id,
-      a_leader_id: leaders[match.a_entry_id],
-      b_leader_id: leaders[match.b_entry_id],
-      winner_entry_id: match.winner_entry_id,
-      deadline_at: match.deadline_at,
-      resolved_at: match.resolved_at,
-      metadata: match.metadata || %{}
-    }
-  end
+  defp serialize_match(match, leaders), do: Serializers.serialize_tournament_match(match, leaders)
 
   defp not_found(conn), do: reply_error(conn, :not_found, "not_found")
 

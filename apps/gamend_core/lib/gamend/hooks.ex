@@ -1287,7 +1287,8 @@ defmodule Gamend.Hooks do
 
         # Group functions by name -> arities and then filter out the excluded set
         func_map =
-          mod.__info__(:functions)
+          mod
+          |> public_functions()
           |> Enum.group_by(fn {name, _arity} -> name end, fn {_name, arity} -> arity end)
           |> Enum.reject(fn {name, _arities} -> MapSet.member?(excluded, name) end)
 
@@ -1314,6 +1315,18 @@ defmodule Gamend.Hooks do
 
       {:error, _} ->
         []
+    end
+  end
+
+  # `__info__/1` exists only on Elixir modules, so a plugin built from Gleam,
+  # LFE or Erlang crashed `GET /api/v1/hooks` (the RPC path, `PluginManager`,
+  # already knew). `module_info/1` is on every BEAM module; it also lists
+  # itself, which is no hook.
+  defp public_functions(mod) do
+    if function_exported?(mod, :__info__, 1) do
+      mod.__info__(:functions)
+    else
+      Enum.reject(mod.module_info(:exports), fn {name, _arity} -> name == :module_info end)
     end
   end
 

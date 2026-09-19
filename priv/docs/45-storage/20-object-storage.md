@@ -76,7 +76,7 @@ Gamend.Storage.list_objects(prefix: "icons/", offset: 0, limit: 50)
 ## Operations
 
 - **Admin → Storage** (`/admin/storage`): usage summary (object count and bytes), a paginated object list filterable by key prefix with preview and per-object delete, and a direct upload. Backend-agnostic: the page works the same over local disk and S3.
-- The admin HTTP API mirrors it: `GET` / `DELETE /api/v1/admin/storage` and `PUT` / `GET /api/v1/admin/storage/object`.
+- The admin HTTP API mirrors it: `GET` / `DELETE /api/v1/admin/storage` (a page of objects), `GET /api/v1/admin/storage/usage` (count and bytes under a `prefix`), and `PUT` / `GET /api/v1/admin/storage/object`.
 - Stored avatars whose owner no longer exists are swept automatically; see [Data Retention](/docs/data-retention).
 
 ## Reference

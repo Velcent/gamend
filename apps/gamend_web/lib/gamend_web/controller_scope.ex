@@ -16,7 +16,7 @@ defmodule GamendWeb.ControllerScope do
   same duplication one level down.
   """
 
-  import Plug.Conn, only: [put_status: 2]
+  import GamendWeb.Reply, only: [reply_error: 3]
 
   alias Gamend.Accounts.Scope
   alias Gamend.Accounts.User
@@ -28,7 +28,7 @@ defmodule GamendWeb.ControllerScope do
   def with_user(conn, fun) do
     case Scope.user(conn.assigns[:current_scope]) do
       %User{} = user -> fun.(user)
-      _ -> error(conn, :unauthorized, "Not authenticated")
+      _ -> reply_error(conn, :unauthorized, "not_authenticated")
     end
   end
 
@@ -37,7 +37,7 @@ defmodule GamendWeb.ControllerScope do
   def with_lobby(conn, fun) do
     with_user(conn, fn user ->
       if is_nil(user.lobby_id) do
-        error(conn, :bad_request, "not_in_lobby")
+        reply_error(conn, :bad_request, "not_in_lobby")
       else
         fun.(user, Lobbies.get_lobby!(user.lobby_id))
       end
@@ -50,12 +50,8 @@ defmodule GamendWeb.ControllerScope do
     with_user(conn, fn user ->
       case user.party_id && Parties.get_party(user.party_id) do
         %Parties.Party{} = party -> fun.(user, party)
-        _ -> error(conn, :bad_request, "not_in_party")
+        _ -> reply_error(conn, :bad_request, "not_in_party")
       end
     end)
-  end
-
-  defp error(conn, status, reason) do
-    conn |> put_status(status) |> Phoenix.Controller.json(%{error: reason})
   end
 end

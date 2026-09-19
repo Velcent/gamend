@@ -74,4 +74,14 @@ defmodule GamendWeb.Reply do
     body = if message, do: Map.put(body, :message, message), else: body
     conn |> put_status(status) |> Controller.json(body)
   end
+
+  @doc """
+  403 `rejected`: a game hook vetoed the action. The hook's reason is the
+  `message` — as written when it is a string, `inspect`ed otherwise.
+  """
+  @spec reply_rejected(Plug.Conn.t(), term()) :: Plug.Conn.t()
+  def reply_rejected(conn, reason) do
+    message = if is_binary(reason), do: reason, else: inspect(reason)
+    reply_error(conn, :forbidden, "rejected", message)
+  end
 end

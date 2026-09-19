@@ -58,7 +58,8 @@ defmodule Gamend.ApiConventions do
        inline_display_name_fallback() ++
        stale_documented_routes() ++
        role_named_predicates() ++
-       inline_ownership_checks())
+       inline_ownership_checks() ++
+       unnamed_responses())
     |> Enum.sort_by(&{&1.rule, &1.file, &1.line})
   end
 
@@ -170,7 +171,7 @@ defmodule Gamend.ApiConventions do
     for {file, line, text} <- source_lines(source_dirs()),
         String.contains?(text, "nullable: true"),
         String.contains?(text, "type: :string"),
-        not String.contains?(text, "format:"),
+        not Regex.match?(~r/format: :?"?date/, text),
         [_, field] <- [Regex.run(~r/^\s*(\w+): %Schema\{/, text)] do
       %{
         rule: "R6-schema-nullable",
@@ -511,6 +512,88 @@ defmodule Gamend.ApiConventions do
       }
     end
   end
+
+  # ── R15: an API controller answers in one of the four shapes ───────────────
+  #
+  # `GamendWeb.Reply` writes them; `GamendWeb.ApiShapeTest` holds the document
+  # to them and `GamendWeb.ResponseContract` every response a test provokes.
+  # Both see only documented operations, so this catches what slips past them
+  # in source: an API controller calling `json/2` itself (the upload target
+  # and the API 404 are undocumented, and kept their own shapes that way), and
+  # a response documented with an inline schema instead of a named
+  # `GamendWeb.Schemas` module.
+
+  defp unnamed_responses do
+    for path <- ex_files(source_dirs()),
+        String.contains?(path, "/controllers/api/"),
+        text = File.read!(path),
+        violation <- direct_json(path, text) ++ inline_response_schemas(path, text),
+        do: violation
+  end
+
+  defp direct_json(path, text) do
+    for {line_text, line} <- Enum.with_index(String.split(text, "\n"), 1),
+        not String.starts_with?(String.trim_leading(line_text), "#"),
+        Regex.match?(~r/(?<![\w.])json\(/, line_text) do
+      %{
+        rule: "R15-response-shape",
+        file: path,
+        line: line,
+        message: "answer through GamendWeb.Reply (reply_data, reply_page, reply_ok, reply_error)"
+      }
+    end
+  end
+
+  defp inline_response_schemas(path, text) do
+    for {start, _len} <- responses_blocks(text),
+        [{offset, _}] <-
+          Regex.scan(~r/"application\/json",\s*%(OpenApiSpex\.)?Schema\{/, block_at(text, start),
+            return: :index
+          ) do
+      %{
+        rule: "R15-response-shape",
+        file: path,
+        line: line_of(text, start + offset),
+        message:
+          "document the response with a named GamendWeb.Schemas module, not an inline schema"
+      }
+    end
+  end
+
+  # Where each `responses: [...]` or `responses: %{...}` value starts.
+  defp responses_blocks(text) do
+    Regex.scan(~r/responses:\s*(?=\[|%\{)/, text, return: :index)
+    |> Enum.map(fn [{index, length}] -> {index + length, 0} end)
+  end
+
+  # The bracketed value starting at `start`, up to its matching close. Only
+  # the opening bracket's own kind is counted, so a brace in a description
+  # string cannot end a list early.
+  defp block_at(text, start) do
+    rest = binary_part(text, start, byte_size(text) - start)
+    {open, close} = if String.starts_with?(rest, "["), do: {"[", "]"}, else: {"{", "}"}
+
+    rest
+    |> String.graphemes()
+    |> Enum.reduce_while({0, []}, fn char, {depth, acc} ->
+      depth =
+        cond do
+          char == open -> depth + 1
+          char == close -> depth - 1
+          true -> depth
+        end
+
+      if depth == 0 and char == close,
+        do: {:halt, {depth, [char | acc]}},
+        else: {:cont, {depth, [char | acc]}}
+    end)
+    |> elem(1)
+    |> Enum.reverse()
+    |> Enum.join()
+  end
+
+  defp line_of(text, offset),
+    do: text |> binary_part(0, offset) |> String.split("\n") |> length()
 
   defp decision_site?(file),
     do: String.contains?(file, "/controllers/") or String.contains?(file, "/channels/")

@@ -86,7 +86,7 @@ defmodule GamendWeb.Api.V1.AnonymousAvatarTest do
         @png
       )
 
-    assert json_response(up, 200)["key"] == key
+    assert json_response(up, 200) == %{"ok" => true}
 
     assert json_response(post(anon, "/api/v1/me/avatar", %{key: key}), 200)["data"]["profile_url"] =~
              key

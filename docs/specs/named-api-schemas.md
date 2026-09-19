@@ -150,9 +150,10 @@ to the endpoint, not the operation (see *Wire inconsistencies*).
 
 It raises inside the request, so the existing controller tests become the
 contract tests without being edited: the lobby suite's 44 tests exercise
-every lobby operation. Enforcement is by tag — a list in the plug that grows
-one domain per slice and is deleted when every domain is in. That list is a
-migration ratchet, not a baseline: it only ever grows, and it ends empty.
+every lobby operation. Enforcement was by tag — a list in the plug that grew
+one domain per slice, a migration ratchet rather than a baseline. It was
+deleted at close-out, once every domain was in: every documented operation is
+checked, so a new endpoint meets its schema from its first test.
 
 Two switches for working a slice, both test-run only:
 
@@ -204,15 +205,66 @@ the tag added to the check, tests green, spec regenerated.
    `DeletedCount(Response)`, `PushToken(Page)`, `OkResponse`. Eight success
    responses had no test reaching them — the three mute lists and get, edit,
    delete, mark-read and unread-count of a chat message — and now do.
-5. Leaderboards, Tournaments Named and reshaped together.
-6. Quests, Economy, Payments Named and reshaped together.
-7. KV, Hooks, Matchmaking, Ready checks, Time, Signaling, Storage Named and reshaped together.
-8. Admin – * (mostly `Admin<T>` variants and pages of existing entities).
-9. **Close-out.** Drop the tag list (enforce everywhere); add R15 to
-   `mix gamend.api.lint` — no inline object schema with `properties` in any
-   response; delete the per-model `perl` fixups from `generate_godot.sh` that
-   no longer match anything; migrate `polyglot-pirates-game` with
-   `clients/godot_migrate.py`.
+5. **Leaderboards, Tournaments. Done.** 14 operations, named and reshaped
+   in one change. `Leaderboard(Page, Response)`, `LeaderboardRecord(Page,
+   Response)`, `LeaderboardsBySlug(Response)`, `Tournament(Page,
+   Response)`, `TournamentEntry(Page, Response)`, `TournamentMatchResponse`,
+   `TournamentBracketPage`, `TournamentStandings(Response)` with
+   `TournamentPlacement`. The report run flagged seven of the eight
+   tournament operations (documented `{}` or a bare entity; join answered
+   `{ok, entry}`) and every leaderboard error, which was prose. Eight error
+   responses had no test reaching them and now do.
+6. **Quests, Economy, Payments. Done.** 18 operations. `Quest(Page)`,
+   `QuestObjective`, `QuestReward`, `QuestProgress`, `QuestClaim(Response)`,
+   `QuestStats(Response)`, `LedgerEntry(Page)`, `WalletBalances(Response)`,
+   `Inventory(Response)`, `PaymentProduct`, `PaymentCatalogEntry(Page)`,
+   `Purchase(Response)`, `Entitlement(Page)`, `StripeCheckout(Response)`,
+   `SteamCheckout(Response)`, `PurchaseValidation(Response)`,
+   `PaymentWebhookReceipt(Response)`. `Gamend.Payments` gained opt-in paging
+   for the catalog and entitlements (`count_catalog/1`,
+   `count_user_entitlements/2`). The report run found no drift in what was
+   sent, only in what was documented; eight responses had no test reaching
+   them and now do. The payment controllers share one error mapper,
+   `GamendWeb.Api.V1.PaymentErrors`. `ApiShapeTest` gained R6 on the document,
+   which caught five nullable ids in slice 5's `TournamentMatch`.
+7. **KV, Hooks, Matchmaking, Ready checks, Time, Signaling, Health, Client
+   logs, Stats. Done.** 19 operations (Storage has no player operation; its
+   uploads live on their entities). `KvEntry(Response)`, `HookFunction(Page)`,
+   `HookSignature`, `HookCallResponse`, `MatchmakingTicket(Response)`,
+   `MatchmakingQueue`, `MatchmakingStats(Response)`, `CancelledCount(Response)`,
+   `ReadyCheckState(Response)`, `ReadyCheckParticipant`,
+   `MyReadyChecks(Response)`, `ServerTime(Response)`, `Health(Response)`,
+   `ClientLogPolicyResponse`, `ClientLogResultResponse`,
+   `SignalingStats(Response)`, `ActivityStats`, `TournamentStats`,
+   `TournamentMatchCounts`, `ServerStats(Response)`; `GamendWeb.ApiStatsSchema`
+   is gone. Every non-admin tag is now enforced. The report run found no
+   violations once shaped; `list_hooks` and `get_server_time` had no test and
+   now do. `HookFunction` is declared `struct?: false`: its `fn` property is
+   reserved in Elixir.
+8. **Admin – \*. Done.** 94 operations in 17 tags, in three passes (social,
+   game, operations). An admin answer with the player's shape is the
+   player's type (`Lobby`, `Group`, `Notification`, `ChatMessage`,
+   `Leaderboard`, `TournamentMatch`, `ServerStats`): `serialize_leaderboard/1`
+   and `serialize_tournament_match/2` moved to `GamendWeb.Serializers` so
+   both sides send one shape. Everything else is an `Admin<T>` or a named
+   report (`ChatReport`, `ChatFilterWord`, `QuestFunnel`, `RetentionStatus`,
+   `AnalyticsSummary`, `StorageUsage`, ...). Only 17 of the 94 had a test
+   reaching their success response; every one with a JSON body does now (the
+   storage download is bytes). Two 500s surfaced on the way (below).
+   Every tag in the document is now enforced.
+9. **Close-out. Done, but for the game.** The tag list is gone: every
+   operation is checked. R15 is in `mix gamend.api.lint`: an API controller
+   answers through `GamendWeb.Reply`, never `json/2`, and documents a JSON
+   response with a named module, never an inline `%Schema{}`. The rule found
+   the two undocumented API controllers (the local upload target and the
+   `/api/v1` 404), which kept their own shapes because no contract saw them.
+   `generate_godot.sh` lost 46 of its 56 `perl` rewrites and its snake_case
+   class mapping: replayed one by one against the raw generator output, the
+   44 per-model renames, the per-call `bzz_denormalize` rename, the
+   `OAuthSessionData_details` rename (the suffix join already does it) and the
+   mapping change nothing, and the script without them writes a
+   byte-identical addon.
+   **Left:** migrating `polyglot-pirates-game` with `clients/godot_migrate.py`.
 
 Request bodies stay inline, on the reasoning that the generator names them
 `<OperationId>Request`. That held for 72 of 93. The generator merges bodies
@@ -244,8 +296,10 @@ the wire moves, so an existing build keeps working until it regenerates.
   (`GamendUserBrief.bzz_denormalize_multiple`), while references to
   still-inline models come out as `Gamend<snake_case>`
   (`Gamendaccept_party_invite_200_response_members_inner`) — 162 before slice
-  2, 138 after, zero at close-out. The generic fixup in `generate_godot.sh`
-  maps that form back to the class name until then. **Done:** the script
+  2, 138 after, zero at close-out, when the generic snake_case mapping in
+  `generate_godot.sh` went with them. What the document still leaves inline
+  (request body items, `OAuthSessionData.details`) is referenced as
+  `<Parent>_<snake>`, which the script joins back to the class name. **Done:** the script
   generates with the prefix and the facade uses the new names. Checked by
   loading all 311 addon scripts in headless Godot 4.7 and by a live run of
   13 calls against a dev server, each denormalizing into its named class.
@@ -310,7 +364,9 @@ by the reshaping above, except where noted:
 - `/me` profile changes answer validation failures with
   `error: "invalid_data"` (R12 says `validation_failed`), status 400 not 422.
 - `PublicUser.lobby_id` and `party_id` are always `""`: kept so the shape
-  matches the member row, but they carry nothing. *(Still open.)*
+  matches the member row, but they carry nothing. *(Fixed at close-out: gone,
+  and the test asserts their absence, since a public lobby id is the
+  discovery half of joining a room uninvited.)*
 - Password, display-name and username changes answer `{ok, id, …}`; avatar
   confirmation `{ok, profile_url}` — neither is `{data: …}`.
 - The OAuth exchange answers two unrelated shapes under `data` depending on
@@ -321,6 +377,89 @@ by the reshaping above, except where noted:
 - Group invite actions answer `{status}`; the matching party ones `{}`.
 - A mute answers `{data: mute}`, while sending a notification or registering a
   push token answers the bare entity.
+
+Slice 5, all fixed in the same change:
+
+- Leaderboard errors were prose (`"Leaderboard not found"`, `"No record found
+  for this user"`, a sentence for a missing `slugs`); now `not_found`,
+  `record_not_found`, `missing_param`.
+- Records around a user were an array without `meta`; now one complete page.
+- Tournament join answered `{ok, entry}`; now the entry under `data`.
+- The bracket answered `{data: {brackets, entries, matches}, meta}`: three
+  lists beside one page's `meta`. Now a page of brackets, each carrying its
+  own matches and the entries they name.
+- `my_match` answered `{"data": null}` when there was no match; now 404
+  `no_current_match`, like `not_in_party`.
+- Standings sent their placements under `entries`, the key that holds
+  `TournamentEntry` rows everywhere else; now `placements`.
+- The entries page counted every entry whatever the `state` filter, so
+  `total_count` and `has_more` were wrong for a filtered list.
+- Every tournament refusal was 400, and a failed changeset 400
+  `invalid_data` with `errors` (R12). Refusals now follow the status rule in
+  api-conventions.md; the changeset answers 422 `validation_failed`.
+- `TournamentMatch` did not document `a_entry_id` and `b_entry_id`, which it
+  always sent.
+- Across slices 1–3, `already_member`, `already_admin` and `already_in_lobby`
+  answered 403 from four operations and 409 from the others; now 409
+  everywhere.
+
+Slice 6, all fixed in the same change:
+
+- The payments catalog and entitlements were bare arrays under `data`: no
+  `meta`, no paging.
+- Seven of the eight payment operations documented `{}`, so a generated
+  client had no type for any purchase, checkout or entitlement.
+- Every payment error was 400, and a reason that was not an atom went out as
+  its `inspect/1` text. A failed changeset was 400 `invalid_data`.
+- Webhooks answered `{ok, status}`; Steam finalize wrapped its purchase in
+  `{purchase}` with nothing beside it.
+- A quest claim vetoed by a hook answered `{error, reason}` with `reason` an
+  `inspect/1` of the hook's term; `not_completed` was 409, though nothing
+  about it already holds.
+- `Quest.category` and `prerequisite_quest_key` were documented nullable while
+  the serializer sends `""`.
+
+Slice 7, all fixed in the same change:
+
+- Health, the clock and both client-log answers were bare top-level objects;
+  a KV read put `metadata` beside `data`; ready checks answered bare, and
+  cancelling one `{}`.
+- `GET /matchmaking/tickets/me` answered `{"data": null}` with no ticket.
+- Answering a ready check with none open was 409 while cancelling one was
+  404, for the same `no_open_check`.
+- A hook call's refusals carried `max`, `max_bytes` and `details` beside
+  `error`; an unknown plugin was 400.
+- `ControllerScope` answered `"Not authenticated"`, a sentence, for every
+  controller using it (chat mutes and ready checks).
+- The hook listing named each function's name `name` (R16), while
+  `call_hook` takes it as `fn`.
+- The ready check documented no `metadata`, which it always sent.
+
+Found by the R6 document check: twelve admin schemas declared a nullable
+`format: :uuid` string (`user_id`, `lobby_id`, `host_id`, `match_id`,
+`opened_by`). `mix gamend.api.lint` exempted any line with `format:`, which is
+why it missed them. *(Fixed in slice 8: the inline schemas are gone, the
+serializers send `""`, and the lint exempts dates only.)*
+
+Slice 8, all fixed in the same change:
+
+- 77 of the 94 admin operations documented a bare `{}` or an inline schema
+  no test reached; admin leaderboards, records and quests answered raw Ecto
+  structs through their `Jason.Encoder`, so the admin quest never gained
+  `group_key`/`group_title` and a label record sent `user_id: null`.
+- Two lists put a second value beside the page: the filter words'
+  `languages` and storage's `usage`. Each is now its own endpoint.
+- Deletes answered `{}`, `{ok, key}`, `{ok, removed}` or `{data: {deleted:
+  true}}`; grants `{ok, user_id, currency, balance}`; resolving a match
+  `{ok, winner_entry_id}`; analytics, retention and the quest funnel were
+  bare top-level objects.
+- Quest and chat-moderation changesets answered `{errors}` with no `error`,
+  or `invalid` with `details`; admin push answered 400 `invalid_message`
+  with an `errors` list of strings.
+- `DELETE /admin/groups/:id` for an unknown group raised
+  `Ecto.NoResultsError` (500), and a hook veto was reported as not found.
+- Admin finish right after an early draw set `ends_at == starts_at`, failed
+  validation on a hard `{:ok, _} =` match and answered 500.
 
 Schema drift the pilot fixed in the document (the wire was already right):
 
@@ -381,13 +520,13 @@ Slice 3 (document only):
 
 ## Definition of done (CONTRIBUTING)
 
-- [ ] Every response schema is a `GamendWeb.Schemas.*` module or a `$ref` to
+- [x] Every response schema is a `GamendWeb.Schemas.*` module or a `$ref` to
       one; request bodies inline unless shared.
-- [ ] `GamendWeb.ResponseContract` enforced for every tag; tag list removed.
-- [ ] Title uniqueness test.
-- [ ] R15 in `Gamend.ApiConventions` with no violations; documented in
+- [x] `GamendWeb.ResponseContract` enforced for every tag; tag list removed.
+- [x] Title uniqueness test.
+- [x] R15 in `Gamend.ApiConventions` with no violations; documented in
       [api-conventions.md](api-conventions.md), including the naming table.
-- [ ] `generate_godot.sh` regenerated with the model prefix; dead `perl`
+- [x] `generate_godot.sh` regenerated with the model prefix; dead `perl`
       fixups removed; facade updated; JS SDK regenerated; Balaur `--check`
       clean.
 - [ ] CHANGELOG `[breaking]` per slice with the old → new name table.

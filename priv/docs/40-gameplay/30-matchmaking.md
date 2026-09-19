@@ -32,7 +32,10 @@ Blacklists are applied while the group is being formed, not after: two players w
 ## Client flow
 
 Queue operations are HTTP under `/api/v1/matchmaking/tickets` - see
-[/api/docs](/api/docs). The socket is only used for the result.
+[/api/docs](/api/docs). The socket is only used for the result. Joining answers
+the ticket (201); joining twice is `already_queued` (409); a party member who is
+not the leader gets `not_party_leader` (403). `GET /tickets/me` answers the
+caller's ticket, or 404 `not_queued` when there is none.
 
 After joining, keep the user channel connected and wait for `match_found` on
 `user:{user_id}`, carrying `{lobby_id, match_params}`. Disconnecting cancels
@@ -137,7 +140,7 @@ Closing the user channel cancels the player's tickets at once, so a disconnect l
 
 A ready check asks a set of players to each answer before something proceeds. A host opens one over their lobby with POST /lobbies/ready_check and calls it off with DELETE, for host-managed lobbies only, since a hostless matchmaking lobby belongs to the server. The host is pre-marked ready: clicking the button is their answer.
 
-A player is in at most one open check per lane: the match lane (a lobby ready-up or a matchmaking accept) and the party lane (the party's ready board, opened with POST /parties/ready_check). So answering needs no id, only a scope: GET /me/ready_check returns `{"data": {"lobby": …, "party": …}}`, each the open check or null, and POST /me/ready_check with {"ready": true} or false answers one, with `"scope": "lobby"` (the default, which also answers a matchmaking accept) or `"scope": "party"`. Members see each other's states; the four events ready_check_started, ready_check_updated, ready_check_passed and ready_check_failed arrive on the lobby channel for a lobby check, on the party channel for a party check, and on the user channel for a matchmaking accept.
+A player is in at most one open check per lane: the match lane (a lobby ready-up or a matchmaking accept) and the party lane (the party's ready board, opened with POST /parties/ready_check). So answering needs no id, only a scope: GET /me/ready_check returns `{"data": {"lobby": …, "party": …}}`, each the open check or null (answering a lane with no open check is 404 `no_open_check`), and POST /me/ready_check with {"ready": true} or false answers one, with `"scope": "lobby"` (the default, which also answers a matchmaking accept) or `"scope": "party"`. Members see each other's states; the four events ready_check_started, ready_check_updated, ready_check_passed and ready_check_failed arrive on the lobby channel for a lobby check, on the party channel for a party check, and on the user channel for a matchmaking accept.
 
 What core does on failure is nothing. A declined or timed-out check kicks nobody, deletes no lobby and moves no lobby state. It records who did not answer and stops there. The host can kick them with the kick they already have, or your after_ready_check_failed hook can decide. Likewise a passed check starts no match by itself: call Lobbies.transition_state/3 from after_ready_check_passed, and gate your own start in before_lobby_state_change with ReadyChecks.passed?/1.
 

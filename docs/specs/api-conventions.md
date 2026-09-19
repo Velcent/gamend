@@ -102,9 +102,11 @@ defimpl Jason.Encoder, for: MySchema do
 end
 ```
 
-**[R6]** An OpenAPI string property must not declare `nullable: true`. A
-schema that contradicts its serializer is worse than no schema — clients
-generate code from it.
+**[R6]** An OpenAPI string property must not declare `nullable: true`,
+unless it is a date or date-time. A schema that contradicts its serializer is
+worse than no schema — clients generate code from it. The lint checks the
+source line; `GamendWeb.ApiShapeTest` checks every property of the built
+document, nested and referenced ones included.
 
 ## Response shapes
 
@@ -142,6 +144,15 @@ the table.
   on; `message` is optional prose for a person; nothing else rides along.
   Exceptions the endpoint renders (an unknown route, a crash) take the same
   shape: `{"error": "not_found", "message": "Not Found"}`.
+- **The status follows the reason.** 404 for a thing that is not there,
+  including the caller's own current thing (`not_in_party`,
+  `no_current_match`: never `{"data": null}`); 409 when what was asked for
+  already holds (`already_member`, `already_registered`, every `already_*`);
+  403 for a refusal (`full`, `registration_closed`, a game hook's
+  `rejected`, whose words go in `message`, and a quest not yet
+  `not_completed`); 400 for a malformed request (`missing_param`,
+  `invalid_index`); 503 when the server, not the request, lacks something
+  (`stripe_not_configured`, every `*_not_configured`).
 
 **[R12]** A failed changeset adds the per-field detail under `errors`, keyed by
 field, each value a list of already-interpolated, already-translated messages.
@@ -164,11 +175,16 @@ lobby title already taken):
 
 **Enforcement.** `GamendWeb.ApiShapeTest` checks the OpenAPI document: every
 success response is a named component in one of the first three shapes, every
-error response is `ErrorResponse`, and R16 holds for every property. At run
+error response is `ErrorResponse`, R16 holds for every property, and
+no string but a date or date-time is nullable (R6). At run
 time `GamendWeb.ResponseContract` checks every response the test suite
 provokes against its documented schema, rejects undeclared keys, and holds
 error bodies to the rules above. Together they mean a new endpoint cannot
-answer in a fifth shape without failing CI. See
+answer in a fifth shape without failing CI. Both see only documented
+operations, so **[R15]** in `mix gamend.api.lint` covers the source: an API
+controller answers through `GamendWeb.Reply`, never `json/2`, and documents a
+JSON response with a named `GamendWeb.Schemas` module, never an inline
+`%Schema{}`. See
 [named-api-schemas.md](named-api-schemas.md) for how the documented schemas
 are named.
 

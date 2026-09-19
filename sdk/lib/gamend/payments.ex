@@ -41,6 +41,20 @@ defmodule Gamend.Payments do
     end
   end
 
+  @doc ~S"""
+    Counts `list_catalog/2`'s entries.
+  """
+  @spec count_catalog(String.t() | nil) :: non_neg_integer()
+  def count_catalog(_provider \\ nil) do
+    case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        0
+
+      _ ->
+        raise "Gamend.Payments.count_catalog/1 is a stub - only available at runtime on Gamend"
+    end
+  end
+
   @doc false
   @spec count_entitlements(keyword()) :: non_neg_integer()
   def count_entitlements(_opts \\ []) do
@@ -110,6 +124,23 @@ defmodule Gamend.Payments do
 
       _ ->
         raise "Gamend.Payments.count_reconciliation_cursors/1 is a stub - only available at runtime on Gamend"
+    end
+  end
+
+  @doc ~S"""
+    Counts `list_user_entitlements/2`'s entitlements; takes `:include_inactive`.
+  """
+  @spec count_user_entitlements(
+          Ecto.UUID.t(),
+          keyword()
+        ) :: non_neg_integer()
+  def count_user_entitlements(_user_id, _opts \\ []) do
+    case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        0
+
+      _ ->
+        raise "Gamend.Payments.count_user_entitlements/2 is a stub - only available at runtime on Gamend"
     end
   end
 
@@ -435,15 +466,22 @@ defmodule Gamend.Payments do
     end
   end
 
-  @doc false
-  @spec list_catalog(String.t() | nil) :: [Gamend.Payments.ProviderProduct.t()]
-  def list_catalog(_provider \\ nil) do
+  @doc ~S"""
+    Active catalog entries, optionally for one provider. Pass `:page` and
+    `:page_size` for one page; without them, every entry.
+    
+  """
+  @spec list_catalog(
+          String.t() | nil,
+          keyword()
+        ) :: [Gamend.Payments.ProviderProduct.t()]
+  def list_catalog(_provider \\ nil, _opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         []
 
       _ ->
-        raise "Gamend.Payments.list_catalog/1 is a stub - only available at runtime on Gamend"
+        raise "Gamend.Payments.list_catalog/2 is a stub - only available at runtime on Gamend"
     end
   end
 
@@ -483,7 +521,11 @@ defmodule Gamend.Payments do
     end
   end
 
-  @doc false
+  @doc ~S"""
+    The user's entitlements, by key: active ones only unless
+    `include_inactive: true`. Pass `:page` and `:page_size` for one page.
+    
+  """
   @spec list_user_entitlements(
           Ecto.UUID.t(),
           keyword()

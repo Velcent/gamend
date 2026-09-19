@@ -176,6 +176,15 @@ defmodule Gamend.Hooks.CallTest do
     assert id2 == user.id
   end
 
+  test "exported_functions lists a module from another BEAM language" do
+    # A Gleam or Erlang plugin has no `__info__/1`; listing it used to crash
+    # `GET /api/v1/hooks` with an UndefinedFunctionError.
+    names = :math |> Gamend.Hooks.exported_functions() |> Enum.map(& &1.name)
+
+    assert "sqrt" in names
+    refute "module_info" in names
+  end
+
   test "exported_functions returns empty for default module and handles multiple arities" do
     # ensure default module is used
     Application.put_env(:gamend_core, :hooks_module, Gamend.Hooks.Default)

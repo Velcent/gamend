@@ -49,11 +49,23 @@ defmodule GamendWeb.ChangesetErrors do
 
       {:error, %Ecto.Changeset{} = changeset} -> unprocessable(conn, changeset)
   """
-  @spec unprocessable(Plug.Conn.t(), Changeset.t()) :: Plug.Conn.t()
+  @spec unprocessable(Plug.Conn.t(), Changeset.t() | %{atom() => String.t() | [String.t()]}) ::
+          Plug.Conn.t()
   def unprocessable(conn, %Changeset{} = changeset) do
     conn
     |> put_status(:unprocessable_entity)
     |> Phoenix.Controller.json(%{error: "validation_failed", errors: errors(changeset)})
+  end
+
+  # A validation that is not a changeset (a push message) reports per-field
+  # messages the same way: each field's value is a list.
+  def unprocessable(conn, errors) when is_map(errors) do
+    conn
+    |> put_status(:unprocessable_entity)
+    |> Phoenix.Controller.json(%{
+      error: "validation_failed",
+      errors: Map.new(errors, fn {field, messages} -> {field, List.wrap(messages)} end)
+    })
   end
 
   @doc """

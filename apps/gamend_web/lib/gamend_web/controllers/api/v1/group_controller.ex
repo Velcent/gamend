@@ -304,6 +304,7 @@ defmodule GamendWeb.Api.V1.GroupController do
     responses: [
       ok: {"Member promoted", "application/json", GroupMemberResponse},
       forbidden: Schemas.error("Not admin"),
+      conflict: Schemas.error("Already an admin"),
       unauthorized: Schemas.error("Not authenticated")
     ]
   )
@@ -335,6 +336,7 @@ defmodule GamendWeb.Api.V1.GroupController do
     responses: [
       ok: {"Member demoted", "application/json", GroupMemberResponse},
       forbidden: Schemas.error("Not admin"),
+      conflict: Schemas.error("Already a plain member"),
       unauthorized: Schemas.error("Not authenticated")
     ]
   )
@@ -475,7 +477,8 @@ defmodule GamendWeb.Api.V1.GroupController do
       ok:
         {"`invited` when an invite was created, `request_approved` when a pending join request was approved instead",
          "application/json", GroupInviteOutcomeResponse},
-      forbidden: Schemas.error("Not admin or target already member"),
+      forbidden: Schemas.error("Not admin, or blocked"),
+      conflict: Schemas.error("Target is already a member"),
       not_found: Schemas.error("Group not found"),
       unauthorized: Schemas.error("Not authenticated")
     ]
@@ -497,7 +500,8 @@ defmodule GamendWeb.Api.V1.GroupController do
     ],
     responses: [
       ok: {"Joined successfully", "application/json", GroupMemberResponse},
-      forbidden: Schemas.error("Cannot join (full, already member, no invite)"),
+      forbidden: Schemas.error("Cannot join (full, no invite)"),
+      conflict: Schemas.error("Already a member"),
       not_found: Schemas.error("Invite not found"),
       unauthorized: Schemas.error("Not authenticated")
     ]
@@ -976,7 +980,7 @@ defmodule GamendWeb.Api.V1.GroupController do
               reply_error(conn, :not_found, "not_member")
 
             {:error, :already_admin} ->
-              reply_error(conn, :forbidden, "already_admin")
+              reply_error(conn, :conflict, "already_admin")
 
             {:error, reason} ->
               reply_error(conn, :forbidden, reason)
@@ -1011,7 +1015,7 @@ defmodule GamendWeb.Api.V1.GroupController do
               reply_error(conn, :not_found, "not_member")
 
             {:error, :already_member} ->
-              reply_error(conn, :forbidden, "already_member")
+              reply_error(conn, :conflict, "already_member")
 
             {:error, reason} ->
               reply_error(conn, :forbidden, reason)
@@ -1153,7 +1157,7 @@ defmodule GamendWeb.Api.V1.GroupController do
               reply_error(conn, :forbidden, "not_admin")
 
             {:error, :already_member} ->
-              reply_error(conn, :forbidden, "already_member")
+              reply_error(conn, :conflict, "already_member")
 
             {:error, :blocked} ->
               reply_error(conn, :forbidden, "blocked")
