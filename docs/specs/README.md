@@ -62,7 +62,9 @@ Not a plan; a living reference.
   TypeScript, Rust, Lua, GML), which generator serves which target, and one
   conformance scenario every SDK must pass.
 - [cpp-sdk.md](cpp-sdk.md) — **C++ SDK.** Engine-free C++17 core with pluggable
-  transports and a per-frame `poll()`, the base the Unreal plugin wraps.
+  transports and a per-frame `poll()`, the base the Unreal plugin wraps. Built
+  and released as `gamend-cpp-sdk.tar.gz`; open until CI has built it on
+  Windows.
 
 ## Resolved — shipped
 

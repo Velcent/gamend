@@ -53,6 +53,7 @@ defmodule Gamend.GDScript.API do
       "generate_user_session_token" => [1],
       "revoke_all_tokens" => [1],
       "player_stats" => [0],
+      "register_user_with_password_and_deliver" => [2, 3],
       "broadcast_member_update" => [1],
       "sudo_mode?" => [1, 2],
       "user_activated?" => [1],

@@ -41,12 +41,12 @@ keeps doing what `generate_balaur.py` does.
 | C++ | our generator | The C++ targets bind a transport (`cpp-restsdk` needs cpprestsdk, in maintenance mode) — ours must be pluggable |
 | Rune (Balaur), Lua, GML | our generator | No target exists, or it is untyped and a thin table-in/table-out layer is the idiom |
 
-**Our generator becomes one tool with several emitters.** `generate_balaur.py`
-already reads the document and the events table into a list of operations;
-that becomes `clients/sdkgen/` — a shared model (`operations`, `events`, and,
-after the named-schema work, `schemas`) with one emitter per target
-(`balaur.py`, `cpp.py`, later `lua.py`, `gml.py`), each keeping `--check` for
-CI. The split happens when C++ becomes the second emitter, not before.
+**Our generator is one tool with several emitters.** `clients/sdkgen/` reads
+the document and the events table into a shared model (`model.py`:
+operations, events, names; `schemas` when typed models land) with one emitter
+per target (`balaur.py`, `cpp.py`, later `lua.py`, `gml.py`), each keeping
+`--check` for CI. It was `generate_balaur.py` until C++ became the second
+emitter.
 
 ## Order
 
@@ -80,13 +80,17 @@ running one scenario, so "works" means the same thing everywhere.
 8. Leave the lobby; disconnect cleanly.
 
 [clients/test_js.js](../../clients/test_js.js) already covers most of this
-for JavaScript and becomes the reference implementation of the list.
+for JavaScript. The C++ SDK's `gamend_conformance` runs all eight (plus a
+WebRTC hook call) in CI against a booted server, in JSON and protobuf; it is
+the reference implementation of the list.
 
 ## Shared conventions
 
-- **Names follow Godot's façade** (`GamendApi.gd`), as Balaur's do
-  (`clients/balaur_names.json`), so a game ported between engines calls the
-  same thing.
+- **Names follow Godot's façade** (`GamendApi.gd`, mapped in
+  `clients/balaur_names.json`), so a game ported between engines calls the
+  same thing. Balaur is the exception: its modules are called by path, one
+  per tag, so a name drops the tag the path already carries
+  (`gamend::lobbies::create_lobby` for `lobbies_create_lobby`).
 - **Events come from `events.json`**, never a hand-kept list per SDK.
 - **Callbacks arrive on the game's thread.** I/O runs off it; results queue
   and are delivered when the game pumps the client (`poll()` / per-tick).

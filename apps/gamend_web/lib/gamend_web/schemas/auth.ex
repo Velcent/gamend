@@ -1,7 +1,7 @@
 defmodule GamendWeb.Schemas.Session do
   @moduledoc """
-  A signed-in session: what email login, device login and refresh answer
-  under `data`.
+  A signed-in session: what every sign-in (email, device, registration, a
+  provider) and a refresh answer under `data`.
   """
   require OpenApiSpex
   alias OpenApiSpex.Schema
@@ -33,37 +33,6 @@ end
 defmodule GamendWeb.Schemas.SessionResponse do
   @moduledoc "A session under `data`."
   use GamendWeb.Schemas.Envelope, data: GamendWeb.Schemas.Session
-end
-
-defmodule GamendWeb.Schemas.OAuthResult do
-  @moduledoc """
-  What a provider token exchange answers. Two outcomes share it, because the
-  wire does: without a bearer token the user signs in and the token fields are
-  set; with one, the provider is linked to that account and `linked` and
-  `provider` are set instead.
-  """
-  require OpenApiSpex
-  alias OpenApiSpex.Schema
-
-  OpenApiSpex.schema(%{
-    title: "OAuthResult",
-    description:
-      "Tokens when signing in; `linked` and `provider` when linking to the bearer's account",
-    type: :object,
-    properties: %{
-      access_token: %Schema{type: :string, description: "Sign-in only"},
-      refresh_token: %Schema{type: :string, description: "Sign-in only"},
-      expires_in: %Schema{type: :integer, description: "Sign-in only: seconds until expiry"},
-      user_id: %Schema{type: :string, format: :uuid, description: "Sign-in only"},
-      linked: %Schema{type: :boolean, description: "Link only: always true"},
-      provider: %Schema{type: :string, description: "Link only: the account field linked"}
-    }
-  })
-end
-
-defmodule GamendWeb.Schemas.OAuthResultResponse do
-  @moduledoc "An OAuth exchange result under `data`."
-  use GamendWeb.Schemas.Envelope, data: GamendWeb.Schemas.OAuthResult
 end
 
 defmodule GamendWeb.Schemas.OAuthAuthorization do
@@ -110,4 +79,36 @@ end
 defmodule GamendWeb.Schemas.OAuthSessionStatusResponse do
   @moduledoc "An OAuth session's state under `data`."
   use GamendWeb.Schemas.Envelope, data: GamendWeb.Schemas.OAuthSessionStatus
+end
+
+defmodule GamendWeb.Schemas.ProviderLinkStatus do
+  @moduledoc """
+  A provider link started with `POST /api/v1/me/providers/{provider}/authorize`,
+  as its owner polls it.
+  """
+  require OpenApiSpex
+  alias OpenApiSpex.Schema
+
+  OpenApiSpex.schema(%{
+    title: "ProviderLinkStatus",
+    description: "Where a provider link stands",
+    type: :object,
+    properties: %{
+      status: %Schema{type: :string, enum: ["pending", "completed", "error"]},
+      error: %Schema{
+        type: :string,
+        description:
+          "The code when `status` is `error` (`provider_already_linked`, `link_failed`, " <>
+            "`authentication_failed`), else empty"
+      },
+      message: %Schema{type: :string, description: "For a person; may be empty"},
+      provider: %Schema{type: :string, description: "The provider being linked"}
+    },
+    required: [:status, :error, :message, :provider]
+  })
+end
+
+defmodule GamendWeb.Schemas.ProviderLinkStatusResponse do
+  @moduledoc "A provider link's state under `data`."
+  use GamendWeb.Schemas.Envelope, data: GamendWeb.Schemas.ProviderLinkStatus
 end

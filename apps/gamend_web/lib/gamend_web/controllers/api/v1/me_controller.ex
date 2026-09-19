@@ -7,6 +7,7 @@ defmodule GamendWeb.Api.V1.MeController do
   alias Gamend.Accounts.User
   alias GamendWeb.Schemas
   alias GamendWeb.Schemas.{CurrentUserResponse, OkResponse, UploadTicketResponse}
+  alias GamendWeb.Serializers
   alias GamendWeb.Uploads
   alias OpenApiSpex.Schema
 
@@ -305,22 +306,5 @@ defmodule GamendWeb.Api.V1.MeController do
     end
   end
 
-  # The signed-in user as `GET /me` sends it; every profile change answers the
-  # same, so a client never merges a partial echo into its copy.
-  defp current_user(%User{} = user) do
-    %{
-      id: user.id,
-      email: user.email || "",
-      profile_url: user.profile_url || "",
-      metadata: user.metadata || %{},
-      username: user.username || "",
-      display_name: user.display_name || "",
-      lobby_id: user.lobby_id || "",
-      party_id: user.party_id || "",
-      is_online: user.is_online || false,
-      last_seen_at: User.last_seen_at_or_fallback(user),
-      linked_providers: Accounts.get_linked_providers(user),
-      has_password: Accounts.has_password?(user)
-    }
-  end
+  defp current_user(%User{} = user), do: Serializers.serialize_current_user(user)
 end

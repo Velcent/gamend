@@ -484,11 +484,11 @@ func _schedule_token_refresh() -> void:
 
 func _verify_login_result(method_name: String, data):
 	if data && method_name in ["oauth_session_status", "oauth_api_callback", "login", "register", "device_login", "refresh_token", "oauth_callback_api_apple_ios", "oauth_google_id_token"]:
-		# Every answer is {data: ...}; a polled OAuth session carries its tokens
-		# one level further in, under data.result.
+		# Every answer is {data: ...}; a polled OAuth sign-in carries its tokens
+		# one level further in, under data.session (null until it completes).
 		var inner = data.bzz_normalize().get("data")
 		if method_name == "oauth_session_status" and inner != null:
-			inner = inner.bzz_normalize().get("result")
+			inner = inner.bzz_normalize().get("session")
 		if inner == null:
 			return
 		data = inner.bzz_normalize() if inner is Object else inner
@@ -1009,6 +1009,34 @@ func authenticate_logout() -> GamendResult:
 ## Unlink OAuth provider
 func authenticate_unlink_provider(provider: String) -> GamendResult:
 	return await _call_api(AuthenticationApi.new(_config), "unlink_provider", [provider])
+
+## Link a provider to the signed-in account with a code (for Steam, a session
+## ticket). Signing in with one is authenticate_oauth_api_callback.
+func authenticate_link_provider(provider: String, code: String) -> GamendResult:
+	var link_request := GamendLinkProviderRequest.new()
+	link_request.code = code
+	return await _call_api(AuthenticationApi.new(_config), "link_provider", [provider, link_request])
+
+## Link Google to the signed-in account with a Google ID token
+func authenticate_link_google_id_token(id_token: String) -> GamendResult:
+	var link_request := GamendLinkGoogleIdTokenRequest.new()
+	link_request.id_token = id_token
+	return await _call_api(AuthenticationApi.new(_config), "link_google_id_token", [link_request])
+
+## Link Apple to the signed-in account with a native Sign in with Apple code
+func authenticate_link_apple_ios(code: String) -> GamendResult:
+	var link_request := GamendLinkAppleIosRequest.new()
+	link_request.code = code
+	return await _call_api(AuthenticationApi.new(_config), "link_apple_ios", [link_request])
+
+## Start linking a provider through its page: answers the URL to open and a
+## session to poll with authenticate_link_session_status
+func authenticate_link_provider_request(provider: String) -> GamendResult:
+	return await _call_api(AuthenticationApi.new(_config), "link_provider_request", [provider])
+
+## Poll a provider link started with authenticate_link_provider_request
+func authenticate_link_session_status(session_id: String) -> GamendResult:
+	return await _call_api(AuthenticationApi.new(_config), "link_session_status", [session_id])
 
 ## Unlink device
 func authenticate_unlink_device() -> GamendResult:

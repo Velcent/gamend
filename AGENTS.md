@@ -297,7 +297,7 @@ theme/config.json         # branding, navigation, pages
 blog/                     # blog posts (markdown)
 modules/plugins/          # loaded hook plugins; plugins_examples/ = examples
 sdk/, sdk_tools/          # Elixir plugin SDK stubs; plugin.bundle and GDScript tasks
-clients/                  # JS / Godot client generators and templates
+clients/                  # SDK generators and templates: JS, Godot, Balaur, C++ (sdkgen/)
 proto/                    # realtime protobuf schema
 stress/                   # load tests
 docs/specs/               # design specs

@@ -117,6 +117,29 @@ defmodule GamendWeb.Serializers do
     }
   end
 
+  @doc """
+  The signed-in user as `GET /me` sends it (`GamendWeb.Schemas.CurrentUser`).
+  Every change to the caller's own account answers the same, so a client
+  never merges a partial echo into its copy.
+  """
+  @spec serialize_current_user(User.t()) :: map()
+  def serialize_current_user(%User{} = user) do
+    %{
+      id: user.id,
+      email: user.email || "",
+      profile_url: user.profile_url || "",
+      metadata: user.metadata || %{},
+      username: user.username || "",
+      display_name: user.display_name || "",
+      lobby_id: user.lobby_id || "",
+      party_id: user.party_id || "",
+      is_online: user.is_online || false,
+      last_seen_at: User.last_seen_at_or_fallback(user),
+      linked_providers: Accounts.get_linked_providers(user),
+      has_password: Accounts.has_password?(user)
+    }
+  end
+
   @spec serialize_chat_message(term(), keyword()) :: map()
   def serialize_chat_message(message, opts \\ []) do
     sender = loaded_assoc(message, :sender)

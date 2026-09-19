@@ -630,36 +630,81 @@ defmodule GamendWeb.AuthControllerTest do
     assert OAuthSessions.get_session(session_id) == nil
   end
 
-  test "GET /api/v1/auth/session/:session_id returns status, message, data at top level", %{
-    conn: conn
-  } do
+  test "GET /api/v1/auth/session/:session_id hands the session over once", %{conn: conn} do
+    user = Gamend.AccountsFixtures.user_fixture()
     session_id = "sid-#{System.unique_integer([:positive])}"
 
     OAuthSessions.create_session(session_id, %{provider: "google", status: "completed"})
-    OAuthSessions.update_session(session_id, %{data: %{access_token: "tok", message: "done"}})
 
-    conn = get(conn, "/api/v1/auth/session/#{session_id}")
-    body = json_response(conn, 200)["data"]
+    OAuthSessions.update_session(session_id, %{
+      data: %{
+        access_token: "tok",
+        refresh_token: "ref",
+        expires_in: 900,
+        user_id: user.id,
+        username: user.username,
+        display_name: "",
+        message: "done"
+      }
+    })
 
-    assert body["status"] == "completed"
-    assert body["message"] == "done"
-    assert is_map(body["result"])
-    assert body["result"]["access_token"] == "tok"
-    refute Map.has_key?(body["result"], "message")
+    body = conn |> get("/api/v1/auth/session/#{session_id}") |> json_response(200)
+    data = body["data"]
+
+    assert data["status"] == "completed"
+    assert data["message"] == "done"
+    assert data["error"] == ""
+    assert data["session"]["access_token"] == "tok"
+    assert data["session"]["user_id"] == user.id
+    assert data["session"]["username"] == user.username
+
+    again = conn |> get("/api/v1/auth/session/#{session_id}") |> json_response(200)
+    assert again["data"]["status"] == "completed"
+    assert again["data"]["session"] == nil
   end
 
-  test "GET /api/v1/auth/session/:session_id returns empty message and {} data when session has no data",
-       %{conn: conn} do
+  test "GET /api/v1/auth/session/:session_id is pending with no session yet", %{conn: conn} do
     session_id = "sid-#{System.unique_integer([:positive])}"
 
     OAuthSessions.create_session(session_id, %{provider: "google", status: "pending"})
 
-    conn = get(conn, "/api/v1/auth/session/#{session_id}")
-    body = json_response(conn, 200)["data"]
+    body = conn |> get("/api/v1/auth/session/#{session_id}") |> json_response(200)
 
-    assert body["status"] == "pending"
-    assert body["message"] == ""
-    assert body["result"] == %{}
+    assert body["data"] == %{
+             "status" => "pending",
+             "error" => "",
+             "message" => "",
+             "session" => nil
+           }
+  end
+
+  test "GET /api/v1/auth/session/:session_id reports a failed sign-in by code", %{conn: conn} do
+    session_id = "sid-#{System.unique_integer([:positive])}"
+
+    OAuthSessions.create_session(session_id, %{
+      provider: "google",
+      status: "error",
+      data: %{error: "account_not_activated", message: "Pending activation"}
+    })
+
+    body = conn |> get("/api/v1/auth/session/#{session_id}") |> json_response(200)
+
+    assert %{"status" => "error", "error" => "account_not_activated", "session" => nil} =
+             body["data"]
+  end
+
+  test "GET /api/v1/auth/session/:session_id does not show a link session", %{conn: conn} do
+    user = Gamend.AccountsFixtures.user_fixture()
+    session_id = "sid-#{System.unique_integer([:positive])}"
+
+    OAuthSessions.create_session(session_id, %{
+      provider: "google",
+      status: "completed",
+      data: %{link_user_id: user.id, provider: "google"}
+    })
+
+    body = conn |> get("/api/v1/auth/session/#{session_id}") |> json_response(404)
+    assert body["error"] == "session_not_found"
   end
 
   test "GET /api/v1/auth/session/:session_id returns 404 error object when missing", %{conn: conn} do

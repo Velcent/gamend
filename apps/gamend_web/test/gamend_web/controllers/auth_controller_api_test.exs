@@ -115,11 +115,11 @@ defmodule GamendWeb.AuthControllerApiTest do
 
       assert status_body["status"] == "completed"
 
-      assert is_map(status_body["result"]) and is_binary(status_body["result"]["user_id"]) and
-               status_body["result"]["user_id"] != ""
+      # The whole Session, as email and device login answer it.
+      assert %{"user_id" => user_id, "access_token" => "" <> _, "username" => "" <> _} =
+               status_body["session"]
 
-      # ensure user exists in DB
-      assert Gamend.Repo.get(Gamend.Accounts.User, status_body["result"]["user_id"]) != nil
+      assert Gamend.Repo.get(Gamend.Accounts.User, user_id) != nil
     end
 
     test "POST /api/v1/auth/:provider/callback exchanges code and returns tokens (discord)", %{

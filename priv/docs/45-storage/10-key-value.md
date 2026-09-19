@@ -53,6 +53,26 @@ var row: Dictionary = await client.fetch_row("progress")
 
 `register_kv` options: `user_scoped` (default `true`, subscribing under the current user's id), `persist` (mirror to disk across sessions), `subscribe` (`false` registers cache-only). Underneath sit `GamendApi.kv_get_kv(key, user_id, lobby_id)`, `kv_subscribe_ws` / `kv_unsubscribe_ws`, and the `kv_updated` / `kv_deleted` signals.
 
+## C++ client
+
+`client.kv()` keeps the same registry and row cache:
+
+```cpp
+// Subscribes now or when the user channel joins, and again on reconnect.
+client.kv().subscribe({"progress", user_id});
+client.kv().on_change([](const gamend::KvKey& key, const gamend::KvRow& row) {
+  if (key.key == "progress" && row.exists) show(row.data);
+});
+
+// Cache-first read; a 404 caches "no row yet" (row.exists == false).
+client.kv().fetch({"progress", user_id}, false, [](const gamend::KvResult& r) {
+  if (r.ok) show(r.row.data);
+});
+```
+
+`kv().row(key)` is the latest cached value from any source. See the
+[C++ SDK](/docs/cpp-sdk) guide.
+
 ## Server scripting
 
 ```elixir

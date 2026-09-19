@@ -781,7 +781,7 @@ jobs:
 
   build-godot-sdk:
     runs-on: ubuntu-latest
-    name: Generate Godot client and upload addons
+    name: Generate the Godot, Balaur and C++ SDKs
 
     steps:
       - name: Checkout repository
@@ -836,26 +836,232 @@ jobs:
           cd clients
           ./generate_godot.sh
 
+      - name: Check the Balaur SDK is current
+        # generate_godot.sh just wrote the document it is generated from.
+        run: python3 clients/sdkgen balaur --check
+
+      - name: Stamp the version into the Balaur SDK
+        env:
+          APP_VERSION: ${{ env.APP_VERSION }}
+        run: clients/generate_balaur.sh
+
+      # cpp_sdk/ is not committed: the jobs below build and test this copy,
+      # and release-cpp-sdk publishes it.
+      - name: Generate the C++ SDK
+        env:
+          APP_VERSION: ${{ env.APP_VERSION }}
+        run: clients/generate_cpp.sh
+
+      - name: Upload the C++ SDK
+        uses: actions/upload-artifact@v7
+        with:
+          name: cpp_sdk
+          path: cpp_sdk
+
       - name: Upload addons zip
         uses: actions/upload-artifact@v7
         with:
           name: godot_addons
           path: godot_addons
 
+      - name: Upload the Balaur addon
+        uses: actions/upload-artifact@v7
+        with:
+          name: balaur_addons
+          path: balaur_addons
+
       - name: Archive
         shell: sh
         run: |
           zip -r "godot_addons.zip" godot_addons
+          zip -r "balaur_addons.zip" balaur_addons
+
+      # release-cpp-sdk adds gamend-cpp-sdk.tar.gz to this release once the
+      # C++ builds and the conformance run pass.
       - name: Release
         if: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
         uses: softprops/action-gh-release@v3
         with:
           tag_name: latest
-          name: Gamend Godot SDK Nightly
+          name: Gamend SDKs Nightly
+          body: |
+            The Gamend client SDKs, built from the latest `main` (version ${{ env.APP_VERSION }}):
+
+            - **Godot**: `godot_addons.zip`. Copy `addons/gamend` into your project, or install it from the [Godot Asset Library](https://godotengine.org/asset-library/asset/4510). [Guide](https://gamend.org/docs/godot-sdk)
+            - **Rune (Balaur)**: `balaur_addons.zip`, Rune scripts for the Balaur engine. Copy `addons/gamend` into your Balaur project; its `README.md` lists every module.
+            - **C++**: `gamend-cpp-sdk.tar.gz`. Fetch it with CMake's `FetchContent`, or build it and `cmake --install` it for `find_package(gamend)`. [Guide](https://gamend.org/docs/cpp-sdk)
+
+            The JavaScript SDK is on npm: [`@ughuuu/gamend`](https://www.npmjs.com/package/@ughuuu/gamend).
           files: |
             godot_addons.zip
+            balaur_addons.zip
           generate_release_notes: false
           make_latest: true
+          fail_on_unmatched_files: true
+
+  cpp-sdk:
+    name: C++ SDK (${{ matrix.os }})
+    needs: [build-godot-sdk]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            flags: -DGAMEND_WARNINGS_AS_ERRORS=ON -DGAMEND_WITH_WEBRTC=ON
+          - os: macos-latest
+            flags: -DGAMEND_WARNINGS_AS_ERRORS=ON -DGAMEND_WITH_WEBRTC=ON
+          - os: windows-latest
+            # libcurl comes from FetchContent over Schannel. IXWebSocket's TLS
+            # on Windows is mbedTLS, and libdatachannel wants OpenSSL: the
+            # runner has neither.
+            flags: -DGAMEND_IXWEBSOCKET_TLS=OFF
+
+    steps:
+      - name: Download the C++ SDK
+        uses: actions/download-artifact@v8
+        with:
+          name: cpp_sdk
+          path: cpp_sdk
+
+      - name: Install libcurl and OpenSSL
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libcurl4-openssl-dev libssl-dev
+
+      - name: Configure
+        run: cmake -S cpp_sdk -B build -DCMAKE_BUILD_TYPE=Release ${{ matrix.flags }}
+
+      - name: Build
+        run: cmake --build build --config Release --parallel
+
+      - name: Unit tests
+        run: ctest --test-dir build -C Release --output-on-failure
+
+      - name: Install, and build a game against find_package(gamend)
+        shell: bash
+        run: |
+          cmake --install build --config Release --prefix "$RUNNER_TEMP/gamend"
+          cmake -S cpp_sdk/tests/package -B build-package -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_PREFIX_PATH="$RUNNER_TEMP/gamend"
+          cmake --build build-package --config Release --parallel
+
+  cpp-conformance:
+    name: C++ SDK conformance (live server)
+    needs: [build-godot-sdk]
+    runs-on: ubuntu-latest
+
+    container:
+      image: elixir:1.20.1-otp-29
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Install system dependencies
+        run: |
+          apt update
+          apt install -y build-essential cmake ninja-build git erlang-dev curl libsrtp2-dev \
+            pkg-config libcurl4-openssl-dev libssl-dev
+
+      - name: Install Rust toolchain (for ex_sctp WebRTC DataChannels)
+        run: |
+          curl https://sh.rustup.rs -sSf | sh -s -- -y
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+      - name: Set up Elixir helpers
+        working-directory: /tmp
+        run: |
+          mix local.hex --force
+          mix local.rebar --force
+
+      - name: Install dependencies
+        run: mix deps.get
+
+      # Steps 5 and 9 call example_hook.hello, so the server loads the
+      # example plugins, bundled as the loader reads them.
+      - name: Bundle the example plugin
+        working-directory: modules/plugins_examples/example_hook
+        run: |
+          mix deps.get
+          mix plugin.bundle
+
+      - name: Prepare database
+        run: |
+          mix ecto.create --quiet -r Gamend.Repo
+          mix db.migrate
+
+      - name: Start the server
+        env:
+          GAMEND_DEV_BENCH: "1"
+          GAMEND_CONTENT_PLUGINS_DIR: modules/plugins_examples
+          PORT: "4000"
+        run: |
+          nohup mix phx.server > server.log 2>&1 &
+          for i in $(seq 1 120); do
+            if curl -sf http://127.0.0.1:4000/api/v1/health > /dev/null; then exit 0; fi
+            sleep 5
+          done
+          tail -100 server.log
+          exit 1
+
+      # The first account on a fresh database is the admin; step 6 writes KV
+      # as one.
+      - name: Sign up the admin
+        run: |
+          curl -sf -X POST http://127.0.0.1:4000/api/v1/register \
+            -H 'content-type: application/json' \
+            -d '{"email":"admin@example.com","password":"conformance-password-1"}' > /dev/null
+
+      - name: Download the C++ SDK
+        uses: actions/download-artifact@v8
+        with:
+          name: cpp_sdk
+          path: cpp_sdk
+
+      - name: Build the C++ SDK with every transport
+        run: |
+          cmake -S cpp_sdk -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+            -DGAMEND_WITH_WEBRTC=ON -DGAMEND_WARNINGS_AS_ERRORS=ON -DGAMEND_BUILD_TESTS=OFF
+          cmake --build build --target gamend_conformance
+
+      - name: Conformance (JSON)
+        env:
+          GAMEND_ADMIN_EMAIL: admin@example.com
+          GAMEND_ADMIN_PASSWORD: conformance-password-1
+        run: build/gamend_conformance http://127.0.0.1:4000
+
+      - name: Conformance (protobuf)
+        env:
+          GAMEND_ADMIN_EMAIL: admin@example.com
+          GAMEND_ADMIN_PASSWORD: conformance-password-1
+        run: build/gamend_conformance http://127.0.0.1:4000 --protobuf
+
+      - name: Server log
+        if: failure()
+        run: tail -200 server.log
+
+  release-cpp-sdk:
+    name: Release the C++ SDK
+    needs: [build-godot-sdk, cpp-sdk, cpp-conformance]
+    if: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download the C++ SDK
+        uses: actions/download-artifact@v8
+        with:
+          name: cpp_sdk
+          path: cpp_sdk
+
+      - name: Archive
+        run: tar -czf gamend-cpp-sdk.tar.gz cpp_sdk
+
+      # Next to godot_addons.zip on the release build-godot-sdk made.
+      - name: Release
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: latest
+          files: gamend-cpp-sdk.tar.gz
           fail_on_unmatched_files: true
 
   publish-hex:

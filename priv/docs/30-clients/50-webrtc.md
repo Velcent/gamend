@@ -64,7 +64,7 @@ DataChannels only.
 Messages on `"events"` with `{"type": "call_hook", "plugin": ..., "fn": ..., "args": [...]}`
 invoke plugin hooks without an HTTP round-trip; the reply (`hook_reply` /
 `hook_error`) arrives on the same channel. The `"state"` channel stays an opaque
-byte pipe.
+byte pipe. A connection holds up to four channels; the server refuses more.
 
 JSON is the default; a channel opts into protobuf via the DataChannel protocol
 field (envelope: `RtcEnvelope` in `proto/gamend_realtime.proto`). **Prefer
@@ -93,6 +93,22 @@ add_child(webrtc)
 webrtc.connect_webrtc()
 var result = await webrtc.call_hook("my_plugin", "my_func", [1, 2])
 ```
+
+```cpp
+// Built with GAMEND_WITH_WEBRTC; the realtime connection is up.
+config.webrtc = gamend::make_libdatachannel_transport();
+config.webrtc_format = gamend::RealtimeFormat::Protobuf;
+// ...
+client.webrtc().connect([&](const std::string& error) {
+  if (!error.empty()) return;
+  client.webrtc().send("events", R"({"type":"move","x":10})");
+  client.webrtc().call_hook("my_plugin", "my_func", gamend::json::array({1, 2}),
+    [](const gamend::HookResult& r) { if (r.ok) use(r.data); });
+});
+```
+
+The C++ SDK opens only `events` by default; `Config::data_channels` adds
+more, up to the server's four.
 
 Deployment: Rust toolchain in the image, UDP ports open, TURN recommended.
 The peer connection gets only `ice_servers`; no ICE IP filter is wired (for

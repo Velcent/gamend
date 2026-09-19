@@ -37,7 +37,7 @@ client.auth().login_device("device-123", [&](const gamend::AuthResult& r) {
 
 client.api().lobbies_quick_join({{"title", "duel"}, {"max_users", 2}},
   [](const gamend::Response& r) {
-    if (r.ok()) use(r.body["id"]);
+    if (r.ok()) use(r.data());
   });
 
 client.realtime().on_event([](const gamend::Event& e) {
@@ -146,8 +146,10 @@ emitter writes a struct per component with `from_json`/`to_json`, and
 ## Layout and build
 
 - Source: `clients/cpp_template/` (hand-written) + the emitter.
-- Output: `cpp_sdk/` — committed, with `generate_cpp.sh --check` in CI, as
-  `balaur_addons/` is — so a game can vendor it or `FetchContent` it.
+- Output: `cpp_sdk/`, not committed, as the Godot addon is not. CI generates
+  it, builds and tests it, and puts it on the `latest` release as
+  `gamend-cpp-sdk.tar.gz`, which a game fetches with `FetchContent` or
+  installs for `find_package(gamend)`.
 - CMake ≥ 3.20, C++17. Dependencies through `FetchContent` by default,
   `find_package` first when the host already has them; a vcpkg port later.
 - CI: build and unit tests on Linux, macOS and Windows; iOS and Android
@@ -166,36 +168,90 @@ emitter writes a struct per component with `from_json`/`to_json`, and
 
 ## Phases
 
+All five are built; see *As built* for where they differ from the plan.
+
 1. **REST.** Skeleton, both transports, `Session`/`Auth` with refresh, the
    emitter (and the `sdkgen/` split), unit tests. Conformance steps 1–2.
 2. **Realtime.** `Phoenix`, `Realtime`, events, hooks, reconnect.
    Conformance steps 3–8.
 3. **Helpers.** KV subscribe + row cache, presence, as `GamendClient.gd`
-   offers them; typed models once named schemas land.
-4. **WebRTC.** libdatachannel behind `GAMEND_WITH_WEBRTC`; `events`
-   (reliable) and `state` (unreliable) channels like the JS client. The
-   server side is already exercised by libdatachannel through
-   `node-datachannel` in `clients/test_js.js`.
-5. **Protobuf.** Binary event frames behind `GAMEND_WITH_PROTOBUF`; the
-   choice between libprotobuf-lite and nanopb is made then.
+   offers them; typed models from the named schemas.
+4. **WebRTC.** libdatachannel behind `GAMEND_WITH_WEBRTC`; hook calls over
+   the `events` DataChannel in JSON and protobuf, like the JS client.
+5. **Protobuf.** Binary event frames, decoded by a table generated from
+   `proto/gamend_realtime.proto`: neither libprotobuf-lite nor nanopb.
 
 Then the Unreal plugin gets its own spec: adapters, `UGamendSubsystem`,
 Blueprint nodes, `poll()` from the subsystem's tick.
 
 ## Open questions
 
-- Distribution beyond the committed `cpp_sdk/`: a release zip, a mirror repo
-  for `FetchContent`, a vcpkg port — which first.
+- Distribution beyond the release tarball: a mirror repo with a tag per
+  version, so a game can pin one, and a vcpkg port or Conan recipe. Not
+  planned for now.
 - Minimum platforms in CI for phase 1 (desktop only is the proposal).
 
-## Definition of done (phase 1)
+## Definition of done
 
-- [ ] `clients/sdkgen/` with the Balaur emitter moved in, output unchanged
-      (`generate_balaur.sh --check` clean).
-- [ ] C++ emitter; `cpp_sdk/` committed; `--check` in CI.
-- [ ] `Client`, `Session`/`Auth`, `Rest`, curl + IXWebSocket transports,
+- [x] `clients/sdkgen/` with the Balaur emitter moved in, output unchanged
+      (`generate_balaur.sh --check` clean). Byte-identical on the move; the
+      banner and a `$ref` body's required fields changed after it, on purpose.
+- [x] C++ emitter. CI generates `cpp_sdk/` in the Godot SDK job, which
+      already writes the document, and hands it to the build jobs.
+- [x] `Client`, `Session`/`Auth`, `Rest`, curl + IXWebSocket transports,
       fake transports.
-- [ ] Builds with `-fno-exceptions -fno-rtti`, warning-free under
-      `-Wall -Wextra`.
-- [ ] Unit tests green on Linux, macOS, Windows; conformance 1–2 live.
-- [ ] Guide page `priv/docs/30-clients/`; README *Client SDKs*; CHANGELOG.
+- [x] Builds with `-fno-exceptions -fno-rtti`, warning-free under
+      `-Wall -Wextra -Wpedantic` with Clang and GCC
+      (`GAMEND_WARNINGS_AS_ERRORS=ON`); the unit tests are held to the same
+      flags. The libdatachannel adapter alone compiles with exceptions and
+      catches them all at its boundary.
+- [x] `Realtime`, `Kv`, `Presence`, typed models, protobuf decoding, `WebRtc`.
+- [ ] Unit tests green on Linux, macOS, Windows. macOS locally (Clang and
+      GCC 15), also under ASan/UBSan and TSan; the CI matrix is written and
+      has not run yet, and Windows (MSVC without exceptions) is the one never
+      compiled.
+- [x] Conformance live: steps 1–8, plus WebRTC as step 9, pass against a dev
+      server in JSON and protobuf, and steps 1–8 again under ASan and TSan.
+      The `cpp-conformance` CI job, which boots a server and runs both, is
+      written and has not run yet.
+- [x] Guide page `priv/docs/30-clients/25-cpp-sdk.md`; README *Client SDKs*;
+      CHANGELOG.
+
+### As built
+
+Where the SDK differs from the shape above:
+
+- `events.hpp` has `signal_of(topic, event)` and `channel_of(topic)`;
+  `Event` carries `topic`, `event`, `kind` (the signal), `payload`, and for a
+  binary frame `binary` and, when nothing decodes it, `bytes`.
+- `Response` carries `data()`, `meta()`, `code()`, `message()` and
+  `errors()` for the four response shapes, `text` for a download, and
+  `as<T>()` / `page<T>()` for the typed models (`gamend::models`). Envelopes
+  (`{data}`, `{data, meta}`) get no struct; `additionalProperties` schemas are
+  `std::map`s. Reads never abort: a missing or mistyped field keeps its
+  default.
+- A method whose query keys are all optional also comes without `options`.
+- `Auth::login_steam` signs in; `Auth::link` and `Auth::link_steam` link,
+  since the server now keeps the two apart.
+- Timers (refresh, sign-in polling, heartbeat, reconnect) run in `poll()`
+  under both dispatch modes; `Dispatch::Immediate` only moves transport
+  completions. Public methods take the loop's lock, so they are safe from any
+  thread.
+- Reconnect backs off 0.1 s → 10 s (`Config::reconnect_delays`) and
+  refreshes the token first when the previous attempt never opened. A
+  `phx_error` rejoins its topic after a second; a `phx_close` (a kick) does
+  not; a join refused as `unauthorized`/`forbidden`/`not_found` is dropped.
+- WebRTC is behind a third transport interface, `PeerTransport`, like HTTP
+  and WebSocket, so an engine can bring its own. It opens one DataChannel,
+  `events`, the only one the server reads. (The server held one per peer,
+  which refused `events` whenever the JS and Godot clients' `state` opened
+  first; it holds four now.)
+- Protobuf needs no library: `sdkgen` turns the `.proto` into a field table
+  (`src/proto_schema.cpp`) and a hand-written reader decodes against it,
+  mirroring the server's `EventCodec` table. Game metadata or KV data sent
+  as `*_pb` goes to a decoder the game registers
+  (`register_metadata_decoder`, `register_kv_decoder`, as the JS client's
+  `registerMetaSchema` / `registerKvSchema`), and stays base64 without one.
+  `WebRtc::call_hook_raw` is the JS client's `callHookRaw`.
+- The Balaur and Godot names were reconciled first: all 259 operations are
+  named alike in the Godot, Balaur and C++ SDKs.

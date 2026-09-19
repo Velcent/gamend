@@ -53,11 +53,21 @@ Request bodies follow the operation: `GamendCreateLobbyRequest`,
 ## Authentication
 
 The SDK captures tokens for you: after `authenticate_login`,
-`authenticate_device_login`, `authenticate_refresh_token`,
-`authenticate_oauth_session_status`, `authenticate_oauth_api_callback` or
+`authenticate_register`, `authenticate_device_login`,
+`authenticate_refresh_token`, `authenticate_oauth_session_status` (once it
+answers a `session`), `authenticate_oauth_api_callback`,
+`authenticate_oauth_google_id_token` or
 `authenticate_oauth_callback_api_apple_ios` it stores the access and refresh
 tokens, calls `authorize()` itself, and schedules a refresh before expiry. You
 never pass a token to a later call.
+
+Those always sign in, even when a player is signed in already. To add a
+provider to the signed-in account, use the link calls instead:
+`authenticate_link_provider`, `authenticate_link_google_id_token`,
+`authenticate_link_apple_ios`, or `authenticate_link_provider_request` polled
+with `authenticate_link_session_status`. `GamendAuth` wraps both:
+`provider_auth` / `provider_link`, `apple_native_auth` / `apple_native_link`,
+`discord_native_auth` / `discord_native_link`.
 
 ```gdscript
 func do_discord_auth() -> void:

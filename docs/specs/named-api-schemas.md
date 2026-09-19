@@ -370,7 +370,9 @@ by the reshaping above, except where noted:
 - Password, display-name and username changes answer `{ok, id, …}`; avatar
   confirmation `{ok, profile_url}` — neither is `{data: …}`.
 - The OAuth exchange answers two unrelated shapes under `data` depending on
-  whether a bearer token was sent. *(Still open: one flat `OAuthResult`.)*
+  whether a bearer token was sent. *(Fixed: sign-in answers `Session`, linking
+  is its own endpoints under `/api/v1/me/providers` and answers the current
+  user; `OAuthResult` and `OAuthSessionData` are gone.)*
 - `GroupInvite.group_name` is the group's title; convention says a thing has
   a `title` and nothing is called `name`.
 - Party invitation lists are bare arrays: no `{data, meta}`, no paging.

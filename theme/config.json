@@ -80,6 +80,11 @@
               "label": "Godot SDK",
               "href": "/docs/godot-sdk",
               "icon": "hero-puzzle-piece-solid"
+            },
+            {
+              "label": "C++ SDK",
+              "href": "/docs/cpp-sdk",
+              "icon": "hero-cpu-chip-solid"
             }
           ]
         },

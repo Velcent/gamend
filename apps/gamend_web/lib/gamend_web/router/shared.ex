@@ -506,6 +506,13 @@ defmodule GamendWeb.Router.Shared do
         post "/payments/checkout/steam", PaymentController, :steam_checkout
         post "/payments/steam/finalize", PaymentController, :steam_finalize
         post "/payments/validate/:provider", PaymentController, :validate
+        # Linking a provider to the signed-in account; signing in with one is
+        # `/api/v1/auth`. The fixed paths are declared before `:provider` ones.
+        post "/me/providers/google/id_token", ProviderController, :link_google_id_token
+        post "/me/providers/apple/ios", ProviderController, :link_apple_ios
+        get "/me/providers/sessions/:session_id", ProviderController, :link_session_status
+        post "/me/providers/:provider/authorize", ProviderController, :authorize
+        post "/me/providers/:provider", ProviderController, :link
         delete "/me/providers/:provider", ProviderController, :unlink
         post "/me/device", ProviderController, :link_device
         delete "/me/device", ProviderController, :unlink_device

@@ -37,6 +37,12 @@ gamend_api.realtime_format = "protobuf"  # set before realtime_start()
 await gamend_api.realtime_start()
 ```
 
+```cpp
+config.realtime_format = gamend::RealtimeFormat::Protobuf;  // before Client
+gamend::Client client(std::move(config));
+client.realtime().connect();
+```
+
 - Decoded protobuf payloads keep the JSON field names, with two documented differences: timestamps are unix-millisecond integers (last_seen_at_ms, inserted_at_ms, ...) instead of ISO 8601 strings, and metadata/data values arrive already parsed.
 - Every event pushed by the server is protobuf-mapped, except the webrtc:* signaling events and phx_reply payloads (join/push replies), which remain JSON. Any future unmapped event is delivered as JSON on the same socket, so coverage can grow without breaking clients.
 - The format is negotiated per connection, so JSON and protobuf clients coexist freely on the same server.

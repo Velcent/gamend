@@ -143,8 +143,7 @@ fi
 # `GamendAdminCreateQuestRequestObjectivesInner`). Join it back when that class
 # exists. Every response is a named schema, whose `$ref` already comes out as
 # the class name, so only what the document still leaves inline takes this:
-# request body items, and `OAuthSessionData.details` (a string-or-object
-# `oneOf`).
+# request body items.
 python3 - "$OUT_DIR" <<'PYEOF'
 import os, re, glob, sys
 out_dir = sys.argv[1]

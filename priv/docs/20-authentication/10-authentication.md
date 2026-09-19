@@ -73,11 +73,14 @@ For game clients that can't handle OAuth natively. The client opens a browser, t
              Server stores result in DB
 
   Client ──► GET /api/v1/auth/session/{session_id}   (poll)
-         ◄── { status: "pending" }                   (repeat)
-         ◄── { status: "completed", access_token, refresh_token }
+         ◄── { status: "pending", session: null }    (repeat)
+         ◄── { status: "completed", session: { access_token, refresh_token, ... } }
 ```
 
-The tokens are served once. Later polls return the status without them.
+`session` is the same `Session` email login answers, served once: later polls
+say `completed` with `session: null`. A sign-in the server refuses ends as
+`status: "error"` with a code in `error` (`account_not_activated`,
+`sign_in_failed`, `authentication_failed`) and prose in `message`.
 
 ## OAuth: direct code exchange
 
@@ -88,12 +91,36 @@ For clients that handle OAuth natively (mobile SDKs, Steam auth tickets). No bro
   Provider ──► Returns authorization code to client
 
   Client ──► POST /api/v1/auth/{provider}/callback  { code: "..." }
-         ◄── { access_token, refresh_token, user_id }
+         ◄── { access_token, refresh_token, user_id, username, display_name }
 ```
+
+Native Google (`POST /api/v1/auth/google/id_token`, `{id_token}`) and native
+Apple (`POST /api/v1/auth/apple/ios/callback`, `{code}`) answer the same. For
+Steam, `code` is the hex ticket from `ISteamUser::GetAuthTicketForWebApi`.
+
+Every one of these signs in, finding or creating the account. A bearer token
+on the request changes nothing; linking is its own endpoint.
 
 ## Provider linking
 
-Users can link multiple OAuth providers to a single account and unlink them later. The user table stores provider IDs as nullable fields (discord_id, google_id, apple_id, facebook_id, steam_id, device_id).
+A signed-in player can add providers to their account, and unlink them later.
+The user table stores provider IDs as nullable fields (discord_id, google_id,
+apple_id, facebook_id, steam_id, device_id). Linking mirrors signing in, under
+`/api/v1/me` and with the player's bearer token:
+
+| Sign in (`/api/v1/auth`) | Link (`/api/v1/me/providers`) |
+| --- | --- |
+| `POST /{provider}/callback` `{code}` | `POST /{provider}` `{code}` |
+| `POST /google/id_token` `{id_token}` | `POST /google/id_token` `{id_token}` |
+| `POST /apple/ios/callback` `{code}` | `POST /apple/ios` `{code}` |
+| `GET /{provider}`, then poll `GET /session/{id}` | `POST /{provider}/authorize`, then poll `GET /sessions/{id}` |
+
+A link answers the whole current user, whose `linked_providers` shows the new
+one, and pushes `user_updated` on the user channel. A provider account that
+already belongs to another player is `409 provider_already_linked`; a polled
+link ends with that code in `error`. `DELETE /api/v1/me/providers/{provider}`
+unlinks, refusing the last provider (`last_auth_method`); `POST` and
+`DELETE /api/v1/me/device` do the same for the device id.
 
 ## Captcha
 

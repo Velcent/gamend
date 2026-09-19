@@ -4,6 +4,7 @@ defmodule GamendWeb.Api.V1.SessionController do
 
   alias Gamend.Accounts
   alias GamendWeb.Auth.Guardian
+  alias GamendWeb.Auth.Tokens
   alias GamendWeb.Schemas
   alias GamendWeb.Schemas.{OkResponse, SessionResponse}
   alias OpenApiSpex.Schema
@@ -266,14 +267,7 @@ defmodule GamendWeb.Api.V1.SessionController do
             {:ok, new_access_token, _claims} =
               Guardian.encode_and_sign(user, %{}, token_type: "access")
 
-            reply_data(conn, %{
-              access_token: new_access_token,
-              refresh_token: refresh_token,
-              user_id: user.id,
-              username: user.username || "",
-              display_name: user.display_name || "",
-              expires_in: 900
-            })
+            reply_data(conn, Tokens.session(user, new_access_token, refresh_token))
 
           {:error, _reason} ->
             reply_error(conn, :unauthorized, "invalid_refresh_token")
@@ -304,40 +298,8 @@ defmodule GamendWeb.Api.V1.SessionController do
     :ok
   end
 
-  # Generate access + refresh JWTs and return the token response
-  defp issue_tokens(conn, user) do
-    # Only real logins reach here (password, device and registration); `refresh/2`
-    # builds its own token. Same login side-effects as the web session path.
-    #
-    # `touch_last_seen/1` joins them rather than running inline: it is two more
-    # writes (the `last_seen_at` update, and the activity-day insert behind it)
-    # on a path that already wrote the user row, and both are fire-and-forget by
-    # construction — nothing in the response depends on either. On SQLite's
-    # single writer those writes were the difference between a login returning
-    # and a login waiting, and signup throughput fell as concurrency rose
-    # because of them. The work still happens, and still costs the same; the
-    # caller no longer holds a connection while it does.
-    #
-    # Tests run `Gamend.Async` inline, so anything asserting on `last_seen_at`
-    # straight after a login still sees it.
-    Gamend.Async.run(fn ->
-      Accounts.touch_last_seen(user)
-      Gamend.Hooks.internal_call(:after_user_logged_in, [user])
-      Gamend.Quests.report_event(user.id, "login")
-    end)
-
-    {:ok, access_token, _} = Guardian.encode_and_sign(user, %{}, token_type: "access")
-
-    {:ok, refresh_token, _} =
-      Guardian.encode_and_sign(user, %{}, token_type: "refresh", ttl: {30, :days})
-
-    reply_data(conn, %{
-      access_token: access_token,
-      refresh_token: refresh_token,
-      expires_in: 900,
-      user_id: user.id,
-      username: user.username || "",
-      display_name: user.display_name || ""
-    })
-  end
+  # Only real logins reach here (password, device and registration); `refresh/2`
+  # keeps its refresh token. Provider sign-ins go through the same
+  # `Tokens.sign_in/1`.
+  defp issue_tokens(conn, user), do: reply_data(conn, Tokens.sign_in(user))
 end
