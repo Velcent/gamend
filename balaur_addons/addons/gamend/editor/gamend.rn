@@ -502,8 +502,12 @@ fn logs(S, k) {
     let field = S.kit.field;
     section(k, "This run");
     let path = log::file();
-    let file = if path is String { path } else { "none: [log] file is off" };
-    field(S, k, "log file", file, #{ copy: true });
+    if path is String {
+        let short = S.kit.short_path;
+        field(S, k, "log file", short(path), #{ copy: true, copy_text: path });
+    } else {
+        field(S, k, "log file", "none: [log] file is off", #{});
+    }
     section(k, "Shipping to Gamend");
     let report = sink_report();
     if report is Object {
