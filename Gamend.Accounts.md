@@ -376,6 +376,8 @@ Accepts a user ID and clears both the primary and all index caches.
 
 # `register_user_and_deliver`
 
+# `register_user_with_password_and_deliver`
+
 # `require_account_activation?`
 
 ```elixir

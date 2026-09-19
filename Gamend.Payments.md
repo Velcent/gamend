@@ -10,6 +10,14 @@ context remains the source of truth for what a user owns inside the game.
 
 # `cancel_stripe_subscription_at_period_end`
 
+# `count_catalog`
+
+```elixir
+@spec count_catalog(String.t() | nil) :: non_neg_integer()
+```
+
+Counts `list_catalog/2`'s entries.
+
 # `count_entitlements`
 
 # `count_products`
@@ -21,6 +29,14 @@ context remains the source of truth for what a user owns inside the game.
 # `count_purchases`
 
 # `count_reconciliation_cursors`
+
+# `count_user_entitlements`
+
+```elixir
+@spec count_user_entitlements(Ecto.UUID.t(), keyword()) :: non_neg_integer()
+```
+
+Counts `list_user_entitlements/2`'s entitlements; takes `:include_inactive`.
 
 # `create_product`
 
@@ -150,8 +166,13 @@ context remains the source of truth for what a user owns inside the game.
 # `list_catalog`
 
 ```elixir
-@spec list_catalog(String.t() | nil) :: [Gamend.Payments.ProviderProduct.t()]
+@spec list_catalog(String.t() | nil, keyword()) :: [
+  Gamend.Payments.ProviderProduct.t()
+]
 ```
+
+Active catalog entries, optionally for one provider. Pass `:page` and
+`:page_size` for one page; without them, every entry.
 
 # `list_products`
 
@@ -170,6 +191,9 @@ context remains the source of truth for what a user owns inside the game.
   Gamend.Payments.Entitlement.t()
 ]
 ```
+
+The user's entitlements, by key: active ones only unless
+`include_inactive: true`. Pass `:page` and `:page_size` for one page.
 
 # `list_user_purchases`
 

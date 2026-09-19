@@ -106,6 +106,20 @@ that receives the encoded token and returns the confirmation URL string.
 If sending the confirmation email fails the transaction is rolled back and
 `{:error, reason}` is returned. On success it returns `{:ok, user}`.
 
+# `register_user_with_password_and_deliver`
+
+```elixir
+@spec register_user_with_password_and_deliver(
+  Gamend.Types.user_registration_attrs(),
+  (String.t() -&gt; String.t()),
+  module()
+) :: {:ok, Gamend.Accounts.User.t()} | {:error, Ecto.Changeset.t() | term()}
+```
+
+Register a user with an email and a password and send the confirmation
+email, as `register_user_and_deliver/3` does for the browser form: how a
+game client signs up (`POST /api/v1/register`).
+
 ---
 
 *Consult [api-reference.md](api-reference.md) for complete listing*
