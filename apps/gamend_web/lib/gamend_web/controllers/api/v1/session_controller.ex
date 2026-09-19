@@ -59,9 +59,10 @@ defmodule GamendWeb.Api.V1.SessionController do
     operation_id: "register",
     summary: "Register",
     description:
-      "Create an account with an email and a password, and sign it in: the tokens " <>
-        "come back as from login. No confirmation email is sent. The first account " <>
-        "becomes the admin, and account activation applies as for every sign-up.",
+      "Create an account with an email and a password, send its confirmation email " <>
+        "as browser sign-up does, and sign it in: the tokens come back as from login. " <>
+        "The first account becomes the admin and is confirmed without an email; account " <>
+        "activation applies as for every sign-up.",
     request_body: {
       "Registration",
       "application/json",
@@ -85,23 +86,25 @@ defmodule GamendWeb.Api.V1.SessionController do
     responses: [
       created: {"Account created and signed in", "application/json", SessionResponse},
       bad_request: Schemas.error("Email or password missing (missing_param)"),
-      forbidden:
-        Schemas.error("Registration closed, or the account awaits activation by an admin"),
+      forbidden: Schemas.error("The account awaits activation by an admin"),
       conflict: Schemas.error("Email or username already taken"),
-      unprocessable_entity: Schemas.error("Invalid email, username or password")
+      unprocessable_entity: Schemas.error("Invalid email, username or password"),
+      service_unavailable: Schemas.error("The confirmation email could not be sent")
     ]
   )
 
   def register(conn, %{"email" => email, "password" => password} = params)
       when is_binary(email) and is_binary(password) do
-    if Accounts.api_registration_enabled?() do
-      params
-      |> Map.take(["email", "password", "username"])
-      |> Accounts.register_user_with_password()
-      |> registered(conn)
-    else
-      reply_error(conn, :forbidden, "registration_closed", "Registration is closed")
-    end
+    # The notifier the browser sign-up reads, so both paths send one email.
+    notifier = Application.get_env(:gamend_web, :user_notifier, Gamend.Accounts.UserNotifier)
+
+    params
+    |> Map.take(["email", "password", "username"])
+    |> Accounts.register_user_with_password_and_deliver(
+      fn token -> url(~p"/users/confirm/#{token}") end,
+      notifier
+    )
+    |> registered(conn)
   end
 
   def register(conn, _params) do
@@ -125,6 +128,16 @@ defmodule GamendWeb.Api.V1.SessionController do
     if taken?(changeset),
       do: uniqueness_conflict(conn, changeset),
       else: unprocessable(conn, changeset)
+  end
+
+  # The mail did not go, and the account was rolled back with it.
+  defp registered({:error, _reason}, conn) do
+    reply_error(
+      conn,
+      :service_unavailable,
+      "email_delivery_failed",
+      "The confirmation email could not be sent"
+    )
   end
 
   # An email or a username someone already has: 409, the input was fine.

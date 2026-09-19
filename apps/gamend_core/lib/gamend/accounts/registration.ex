@@ -70,21 +70,7 @@ defmodule Gamend.Accounts.Registration do
   """
   @spec register_user(Types.user_registration_attrs()) ::
           {:ok, User.t()} | {:error, Ecto.Changeset.t()}
-  def register_user(attrs), do: register(attrs, &User.email_changeset/2)
-
-  @doc """
-  Registers a user with an email and a password, which is how a game client
-  signs up (`POST /api/v1/register`).
-
-  No confirmation email is sent: the endpoint behind this must not mail an
-  address its caller has not shown they own. The first user becomes the admin
-  and account activation applies, as for every registration.
-  """
-  @spec register_user_with_password(Types.user_registration_attrs()) ::
-          {:ok, User.t()} | {:error, Ecto.Changeset.t()}
-  def register_user_with_password(attrs), do: register(attrs, &User.registration_changeset/2)
-
-  defp register(attrs, base_changeset) do
+  def register_user(attrs) do
     # Normalize keys to strings to match form submissions
     attrs = Map.new(attrs, fn {k, v} -> {to_string(k), v} end)
 
@@ -93,7 +79,7 @@ defmodule Gamend.Accounts.Registration do
 
     changeset_fun = fn attrs ->
       %User{}
-      |> base_changeset.(attrs)
+      |> User.email_changeset(attrs)
       |> User.username_changeset(attrs)
       |> maybe_make_first_user_admin(is_first_user)
       |> maybe_deactivate_new_user(is_first_user)
@@ -133,6 +119,29 @@ defmodule Gamend.Accounts.Registration do
         notifier \\ Gamend.Accounts.UserNotifier
       )
       when is_function(confirmation_url_fun, 1) do
+    register_and_deliver(attrs, &User.email_changeset/2, confirmation_url_fun, notifier)
+  end
+
+  @doc """
+  Register a user with an email and a password and send the confirmation
+  email, as `register_user_and_deliver/3` does for the browser form: how a
+  game client signs up (`POST /api/v1/register`).
+  """
+  @spec register_user_with_password_and_deliver(
+          Types.user_registration_attrs(),
+          (String.t() -> String.t()),
+          module()
+        ) :: {:ok, User.t()} | {:error, Ecto.Changeset.t() | term()}
+  def register_user_with_password_and_deliver(
+        attrs,
+        confirmation_url_fun,
+        notifier \\ Gamend.Accounts.UserNotifier
+      )
+      when is_function(confirmation_url_fun, 1) do
+    register_and_deliver(attrs, &User.registration_changeset/2, confirmation_url_fun, notifier)
+  end
+
+  defp register_and_deliver(attrs, base_changeset, confirmation_url_fun, notifier) do
     # Normalize keys to strings to match form submissions
     attrs = Map.new(attrs, fn {k, v} -> {to_string(k), v} end)
 
@@ -141,7 +150,7 @@ defmodule Gamend.Accounts.Registration do
 
     changeset_fun = fn attrs ->
       %User{}
-      |> User.email_changeset(attrs)
+      |> base_changeset.(attrs)
       |> User.username_changeset(attrs)
       |> maybe_make_first_user_admin(is_first_user)
       |> maybe_deactivate_new_user(is_first_user)

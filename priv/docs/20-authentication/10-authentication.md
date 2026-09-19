@@ -26,9 +26,10 @@ magic-link forms; it does not apply to any of the game-client flows.
 ## JWT token flow (Email / Password / Device)
 
 A game client signs a player up with `POST /api/v1/register` (`email`,
-`password`, optional `username`). It answers `201` with the same tokens as
-login, sends no email, and returns `409` for a taken email or username and
-`403 registration_closed` when `GAMEND_AUTH_API_REGISTRATION_ENABLED` is off.
+`password`, optional `username`). It sends the confirmation email as the
+browser form does and answers `201` with the same tokens as login; a taken
+email or username is `409`, and an email that cannot be sent is `503` with no
+account kept.
 Deleting an account (`DELETE /api/v1/me`) sends `current_password` when the
 account has one.
 
@@ -111,9 +112,9 @@ proof. Both forms already carry a per-IP rate limit; the captcha adds cover
 against distributed abuse, where a botnet stays under the per-IP limit by
 spreading itself across thousands of addresses.
 
-**Game clients are unaffected.** `POST /api/v1/register` sends no email, so it
-is not a relay and has no captcha, and device login is untouched: turning the
-captcha on cannot break a shipped Godot or JS client.
+**Game clients are unaffected.** The captcha guards the browser forms only;
+`POST /api/v1/register` and device login take none, so turning it on cannot
+break a shipped Godot or JS client. The API sign-up has the auth rate limit.
 
 ### Setup
 

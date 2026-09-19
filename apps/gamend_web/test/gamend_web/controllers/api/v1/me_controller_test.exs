@@ -152,11 +152,13 @@ defmodule GamendWeb.Api.V1.MeControllerTest do
     end
 
     test "an account with a password is deleted only with it in the body", %{conn: conn} do
+      _admin = Gamend.AccountsFixtures.user_fixture()
+
       {:ok, user} =
-        Gamend.Accounts.register_user_with_password(%{
-          email: "leaving@example.com",
-          password: "hello world!"
-        })
+        Gamend.Accounts.register_user_with_password_and_deliver(
+          %{email: "leaving@example.com", password: "hello world!"},
+          fn token -> token end
+        )
 
       {:ok, token, _} = Guardian.encode_and_sign(user)
       authed = put_req_header(conn, "authorization", "Bearer " <> token)

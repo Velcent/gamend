@@ -223,6 +223,10 @@ defmodule GamendWeb.Api.V1.SessionControllerTest do
     Application.put_env(:gamend_core, Gamend.Accounts, Keyword.put(existing, key, value))
   end
 
+  defmodule FailNotifier do
+    def deliver_confirmation_instructions(_user, _url), do: {:error, :smtp_failed}
+  end
+
   describe "POST /api/v1/register" do
     setup do
       accounts = Application.get_env(:gamend_core, Gamend.Accounts, [])
@@ -248,10 +252,30 @@ defmodule GamendWeb.Api.V1.SessionControllerTest do
       assert json_response(login, 200)["data"]["user_id"] == user_id
     end
 
-    test "sends no email", %{conn: conn} do
-      post(conn, "/api/v1/register", %{email: "quiet@example.com", password: @valid_password})
+    test "sends the confirmation email, as browser sign-up does", %{conn: conn} do
+      post(conn, "/api/v1/register", %{email: "mailed@example.com", password: @valid_password})
 
-      Swoosh.TestAssertions.assert_no_email_sent()
+      Swoosh.TestAssertions.assert_email_sent(
+        to: "mailed@example.com",
+        subject: "Confirmation instructions"
+      )
+    end
+
+    test "keeps no account when its email cannot be sent", %{conn: conn} do
+      notifier = Application.get_env(:gamend_web, :user_notifier)
+      Application.put_env(:gamend_web, :user_notifier, __MODULE__.FailNotifier)
+
+      on_exit(fn ->
+        if notifier,
+          do: Application.put_env(:gamend_web, :user_notifier, notifier),
+          else: Application.delete_env(:gamend_web, :user_notifier)
+      end)
+
+      failed =
+        post(conn, "/api/v1/register", %{email: "bounced@example.com", password: @valid_password})
+
+      assert json_response(failed, 503)["error"] == "email_delivery_failed"
+      refute Repo.get_by(User, email: "bounced@example.com")
     end
 
     test "keeps a username the caller picked", %{conn: conn} do
@@ -282,16 +306,6 @@ defmodule GamendWeb.Api.V1.SessionControllerTest do
       missing = post(conn, "/api/v1/register", %{email: "nopass@example.com"})
 
       assert json_response(missing, 400)["error"] == "missing_param"
-    end
-
-    test "answers 403 registration_closed when switched off", %{conn: conn} do
-      put_accounts_setting(:api_registration_enabled, false)
-
-      closed =
-        post(conn, "/api/v1/register", %{email: "closed@example.com", password: @valid_password})
-
-      assert json_response(closed, 403)["error"] == "registration_closed"
-      refute Repo.get_by(User, email: "closed@example.com")
     end
 
     test "keeps an account awaiting activation but signs nobody in", %{conn: conn} do
