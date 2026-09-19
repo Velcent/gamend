@@ -575,7 +575,8 @@ defmodule GamendWeb.Api.V1.FriendController do
       f.status == "pending" and f.requester_id == user.id ->
         case Friends.cancel_request(f.id, user) do
           {:ok, :cancelled} -> reply_ok(conn)
-          err -> reply_error(conn, :bad_request, err)
+          {:error, :not_found} -> reply_error(conn, :not_found, "not_found")
+          {:error, _reason} -> reply_error(conn, :bad_request, "remove_failed")
         end
 
       f.status == "accepted" and (f.requester_id == user.id or f.target_id == user.id) ->
@@ -584,7 +585,7 @@ defmodule GamendWeb.Api.V1.FriendController do
                if(f.requester_id == user.id, do: f.target_id, else: f.requester_id)
              ) do
           {:ok, _} -> reply_ok(conn)
-          err -> reply_error(conn, :bad_request, err)
+          {:error, _reason} -> reply_error(conn, :bad_request, "remove_failed")
         end
 
       true ->

@@ -953,6 +953,13 @@ jobs:
     container:
       image: elixir:1.20.1-otp-29
 
+    # For every step, not only the server's: bench mode is compile-time
+    # config, so the deps have to be built under it too.
+    env:
+      GAMEND_DEV_BENCH: "1"
+      GAMEND_CONTENT_PLUGINS_DIR: modules/plugins_examples
+      GAMEND_RATELIMIT_ENABLED: "false"
+
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -992,8 +999,6 @@ jobs:
 
       - name: Start the server
         env:
-          GAMEND_DEV_BENCH: "1"
-          GAMEND_CONTENT_PLUGINS_DIR: modules/plugins_examples
           PORT: "4000"
         run: |
           nohup mix phx.server > server.log 2>&1 &

@@ -99,8 +99,8 @@ defmodule GamendWeb.Api.V1.KvController do
           key: key,
           user_id: user_id || "",
           lobby_id: lobby_id || "",
-          data: value || %{},
-          metadata: metadata || %{}
+          data: value,
+          metadata: metadata
         })
 
       :error ->

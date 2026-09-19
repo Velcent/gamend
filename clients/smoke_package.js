@@ -30,9 +30,10 @@ function check (name, ok, detail) {
   }
 }
 
+// Answers as GET /api/v1/health does: the one-object shape, under `data`.
 const server = http.createServer((req, res) => {
   res.setHeader('content-type', 'application/json')
-  res.end(JSON.stringify({ status: 'ok', path: req.url, method: req.method }))
+  res.end(JSON.stringify({ data: { status: 'ok', timestamp: new Date().toISOString() } }))
 })
 
 server.listen(0, '127.0.0.1', async () => {
@@ -44,8 +45,8 @@ server.listen(0, '127.0.0.1', async () => {
     client.basePath = `http://127.0.0.1:${port}`
 
     const body = await new HealthApi(client).index()
-    check('generated client completes an HTTP request', body && body.status === 'ok',
-      `got ${JSON.stringify(body)}`)
+    check('generated client completes an HTTP request',
+      body && body.data && body.data.status === 'ok', `got ${JSON.stringify(body)}`)
 
     check('GameRealtime is exported', typeof GameRealtime === 'function')
     check('GameWebRTC is exported', typeof GameWebRTC === 'function')

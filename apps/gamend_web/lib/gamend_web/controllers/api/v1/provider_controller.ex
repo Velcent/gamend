@@ -335,9 +335,6 @@ defmodule GamendWeb.Api.V1.ProviderController do
 
       {:error, %Ecto.Changeset{} = changeset} ->
         unprocessable(conn, changeset)
-
-      {:error, _reason} ->
-        reply_error(conn, :bad_request, "link_failed")
     end
   end
 

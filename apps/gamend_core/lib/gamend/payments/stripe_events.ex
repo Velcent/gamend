@@ -20,7 +20,11 @@ defmodule Gamend.Payments.StripeEvents do
 
   @spec create_stripe_checkout(User.t(), map()) ::
           {:ok,
-           %{purchase: Purchase.t(), checkout_url: String.t(), provider_session_id: String.t()}}
+           %{
+             purchase: Purchase.t(),
+             checkout_url: String.t() | nil,
+             provider_session_id: String.t() | nil
+           }}
           | {:error, term()}
   def create_stripe_checkout(%User{} = user, attrs) when is_map(attrs) do
     attrs = attrs |> Params.normalize() |> Payments.client_checkout_attrs()

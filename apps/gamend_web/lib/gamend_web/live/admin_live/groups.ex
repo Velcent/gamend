@@ -683,9 +683,6 @@ defmodule GamendWeb.AdminLive.Groups do
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, :form, to_form(changeset, as: "group"))}
-
-      {:error, reason} ->
-        {:noreply, put_flash(socket, :error, "Update failed: #{inspect(reason)}")}
     end
   end
 

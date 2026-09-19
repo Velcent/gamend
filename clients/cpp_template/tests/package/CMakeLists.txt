@@ -13,3 +13,6 @@ find_package(gamend CONFIG REQUIRED)
 
 add_executable(gamend_package_test ../../examples/conformance.cpp)
 target_link_libraries(gamend_package_test PRIVATE gamend::gamend)
+if(MSVC)
+  target_compile_definitions(gamend_package_test PRIVATE _CRT_SECURE_NO_WARNINGS)
+endif()

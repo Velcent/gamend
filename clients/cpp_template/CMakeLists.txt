@@ -157,6 +157,13 @@ if(GAMEND_WITH_WEBRTC)
       GIT_SHALLOW TRUE
       GIT_SUBMODULES_RECURSE TRUE)
     FetchContent_MakeAvailable(libdatachannel)
+    # Its headers trip -Wpedantic (an extra `;`), and they are not ours.
+    foreach(target datachannel datachannel-static)
+      if(TARGET ${target})
+        set_property(TARGET ${target} APPEND PROPERTY INTERFACE_SYSTEM_INCLUDE_DIRECTORIES
+          $<TARGET_PROPERTY:${target},INTERFACE_INCLUDE_DIRECTORIES>)
+      endif()
+    endforeach()
   endif()
   target_sources(gamend PRIVATE src/libdatachannel_transport.cpp)
   # libdatachannel reports errors by throwing; this one file catches them.
@@ -228,7 +235,10 @@ if(GAMEND_BUILD_TESTS)
   target_include_directories(gamend_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
   target_link_libraries(gamend_tests PRIVATE gamend doctest::doctest)
   # The tests hold the headers to the core's rules too: no exceptions, no RTTI.
-  target_compile_definitions(gamend_tests PRIVATE DOCTEST_CONFIG_NO_EXCEPTIONS_BUT_WITH_ALL_ASSERTS)
+  # doctest's own forward declaration of std::basic_ostream breaks on MSVC's
+  # newer standard library; the real headers do not.
+  target_compile_definitions(gamend_tests PRIVATE
+    DOCTEST_CONFIG_NO_EXCEPTIONS_BUT_WITH_ALL_ASSERTS DOCTEST_CONFIG_USE_STD_HEADERS)
   gamend_strict(gamend_tests)
   add_test(NAME gamend_tests COMMAND gamend_tests)
 endif()
@@ -237,4 +247,8 @@ if(GAMEND_BUILD_EXAMPLES AND GAMEND_WITH_CURL)
   add_executable(gamend_conformance examples/conformance.cpp)
   target_link_libraries(gamend_conformance PRIVATE gamend)
   gamend_strict(gamend_conformance)
+  if(MSVC)
+    # It reads its admin credentials with std::getenv.
+    target_compile_definitions(gamend_conformance PRIVATE _CRT_SECURE_NO_WARNINGS)
+  endif()
 endif()
