@@ -31,8 +31,8 @@ the same name.
   {:ok,
    %{
      purchase: Gamend.Payments.Purchase.t(),
-     checkout_url: String.t(),
-     provider_session_id: String.t()
+     checkout_url: String.t() | nil,
+     provider_session_id: String.t() | nil
    }}
   | {:error, term()}
 ```

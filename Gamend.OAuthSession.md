@@ -13,11 +13,11 @@ provider-specific data in the `data` field for debugging and eventing.
 @type t() :: %Gamend.OAuthSession{
   __meta__: term(),
   data: map(),
-  id: integer() | nil,
+  id: Ecto.UUID.t() | nil,
   inserted_at: term(),
-  provider: String.t(),
+  provider: String.t() | nil,
   session_id: String.t(),
-  status: String.t(),
+  status: String.t() | nil,
   updated_at: term()
 }
 ```
