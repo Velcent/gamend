@@ -12,6 +12,8 @@ primary_region = "ams"
   # Uploads and mirrored avatars, on the same volume as the database. The
   # default lives inside the release image, which every deploy replaces.
   GAMEND_STORAGE_DIR = "/data/storage"
+  # Games ship their logs here (POST /api/v1/client_logs); off by default.
+  GAMEND_CLIENT_LOGS_ENABLED = "true"
 
 [http_service]
   internal_port = 4000
