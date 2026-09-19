@@ -483,7 +483,7 @@ func _schedule_token_refresh() -> void:
 			_refresh_timer.start()
 
 func _verify_login_result(method_name: String, data):
-	if data && method_name in ["oauth_session_status", "oauth_api_callback", "login", "device_login", "refresh_token", "oauth_callback_api_apple_ios", "oauth_google_id_token"]:
+	if data && method_name in ["oauth_session_status", "oauth_api_callback", "login", "register", "device_login", "refresh_token", "oauth_callback_api_apple_ios", "oauth_google_id_token"]:
 		# Every answer is {data: ...}; a polled OAuth session carries its tokens
 		# one level further in, under data.result.
 		var inner = data.bzz_normalize().get("data")
@@ -1025,6 +1025,16 @@ func authenticate_refresh_token(refresh_token: String) -> GamendResult:
 	var refresh_param:= GamendRefreshTokenRequest.new()
 	refresh_param.refresh_token = refresh_token
 	return await _call_api(AuthenticationApi.new(_config), "refresh_token", [refresh_param])
+
+## Register: a new account with an email and a password, signed in as it is
+## made. The server generates a username when none is given.
+func authenticate_register(email: String, password: String, username := "") -> GamendResult:
+	var register_request := GamendRegisterRequest.new()
+	register_request.email = email
+	register_request.password = password
+	if username != "":
+		register_request.username = username
+	return await _call_api(AuthenticationApi.new(_config), "register", [register_request])
 
 ### FRIENDS
 
@@ -1872,6 +1882,37 @@ static func parse_last_seen(last_seen_str: String) -> float:
 # ─────────────────────────────────────────────────────────────────────────
 
 
+### ADMIN ANALYTICS
+## DAU / WAU / MAU, D1 / D7 / D30 and payer conversion (admin)
+## Operation adminGetAnalyticsSummary → GET /api/v1/admin/analytics
+func admin_analytics_admin_get_analytics_summary() -> GamendResult:
+	return await _call_api(AdminAnalyticsApi.new(_config), "admin_get_analytics_summary")
+
+
+## Per-day active / new users and cohort retention (admin)
+## Operation adminGetAnalyticsDaily → GET /api/v1/admin/analytics/daily
+func admin_analytics_admin_get_analytics_daily(days = 30) -> GamendResult:
+	return await _call_api(AdminAnalyticsApi.new(_config), "admin_get_analytics_daily", [days])
+
+
+## Currency granted / spent per day per ledger reason (admin)
+## Operation adminGetAnalyticsEconomy → GET /api/v1/admin/analytics/economy
+func admin_analytics_admin_get_analytics_economy(days = 7, currency = "") -> GamendResult:
+	return await _call_api(AdminAnalyticsApi.new(_config), "admin_get_analytics_economy", [days, currency])
+
+
+## Daily counters by key or prefix (admin)
+## Operation adminGetAnalyticsCounts → GET /api/v1/admin/analytics/counts
+func admin_analytics_admin_get_analytics_counts(key = "*", days = 7) -> GamendResult:
+	return await _call_api(AdminAnalyticsApi.new(_config), "admin_get_analytics_counts", [key, days])
+
+
+## Live counters: players, lobbies, parties, quests, matchmaking, tournaments (admin)
+## Operation adminGetAnalyticsSnapshot → GET /api/v1/admin/analytics/snapshot
+func admin_analytics_admin_get_analytics_snapshot() -> GamendResult:
+	return await _call_api(AdminAnalyticsApi.new(_config), "admin_get_analytics_snapshot")
+
+
 ### ADMIN CHAT
 ## Add a blocklist word (admin)
 ## Operation adminCreateChatFilterWord → POST /api/v1/admin/chat/filter_words
@@ -1919,6 +1960,12 @@ func admin_chat_admin_import_chat_filter_words(adminImportChatFilterWordsRequest
 ## Operation adminListChatFilterWords → GET /api/v1/admin/chat/filter_words
 func admin_chat_admin_list_chat_filter_words(word = "", severity = "", lang = "", page = 1, pageSize = 25) -> GamendResult:
 	return await _call_api(AdminChatApi.new(_config), "admin_list_chat_filter_words", [word, severity, lang, page, pageSize])
+
+
+## Languages with a bundled word list (admin)
+## Operation adminListChatFilterLanguages → GET /api/v1/admin/chat/filter_words/languages
+func admin_chat_admin_list_chat_filter_languages() -> GamendResult:
+	return await _call_api(AdminChatApi.new(_config), "admin_list_chat_filter_languages")
 
 
 ## List chat mutes (admin)
@@ -2088,6 +2135,12 @@ func admin_storage_admin_download_storage_object(key: String) -> GamendResult:
 ## Operation adminListStorageObjects → GET /api/v1/admin/storage
 func admin_storage_admin_list_storage_objects(prefix = "", page = 1, pageSize = 25) -> GamendResult:
 	return await _call_api(AdminStorageApi.new(_config), "admin_list_storage_objects", [prefix, page, pageSize])
+
+
+## Objects and bytes stored under a prefix (admin)
+## Operation adminStorageUsage → GET /api/v1/admin/storage/usage
+func admin_storage_admin_storage_usage(prefix = "") -> GamendResult:
+	return await _call_api(AdminStorageApi.new(_config), "admin_storage_usage", [prefix])
 
 
 ## Upload or overwrite an object at any key (admin)
@@ -2381,6 +2434,19 @@ func push_register_push_token(registerPushTokenRequest = null) -> GamendResult:
 ## Operation questStats → GET /api/v1/quests/stats
 func quests_quest_stats() -> GamendResult:
 	return await _call_api(QuestsApi.new(_config), "quest_stats")
+
+
+### CLIENT LOGS
+## Client log capture policy
+## Operation getClientLogPolicy → GET /api/v1/client_logs/policy
+func client_logs_get_client_log_policy() -> GamendResult:
+	return await _call_api(ClientLogsApi.new(_config), "get_client_log_policy")
+
+
+## Upload a batch of client log entries
+## Operation uploadClientLogs → POST /api/v1/client_logs
+func client_logs_upload_client_logs(client_log_batch: GamendClientLogBatch) -> GamendResult:
+	return await _call_api(ClientLogsApi.new(_config), "upload_client_logs", [client_log_batch])
 
 
 ### STATS
