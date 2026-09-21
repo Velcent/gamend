@@ -81,6 +81,23 @@ Every declared setting, across every registered app.
 
 Apps scanned for providers.
 
+Core's two, the host application, and anything `add_app/1` registered.
+
+The host is derived rather than registered because the alternative is silence:
+a host that declares settings and is never scanned gets no boot validation, no
+row on the admin Settings page and nothing in `.env.example`, while `get/2`
+keeps answering with the compiled default — so its env vars do nothing and say
+nothing. Deriving it here rather than in the boot path also covers the mix
+tasks, which run `app.config` without starting the application and so never
+reach `GamendWeb.HostSupervision.init_runtime/1`; `mix gamend.settings.guide`
+and `mix gamend.settings.env_example` would otherwise document core's settings
+and quietly omit the host's.
+
+`:host_static_app` is the key a host already sets to name its own OTP app, and
+reading it is a lookup, not a dependency — core does not compile against
+`gamend_web`. It defaults to `:gamend_web`, which is scanned anyway, so an
+unconfigured deployment sees no change.
+
 # `cast`
 
 ```elixir

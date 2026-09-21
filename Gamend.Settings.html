@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.4">
-    <meta name="project" content="gamend_core v1.0.1254">
+    <meta name="project" content="gamend_core v1.0.1255">
 
 
-    <title>Gamend.Settings — gamend_core v1.0.1254</title>
+    <title>Gamend.Settings — gamend_core v1.0.1255</title>
 
     <link rel="stylesheet" href="dist/html-elixir-RXHHCTJW.css" />
 
-    <script defer src="dist/sidebar_items-283A1537.js"></script>
+    <script defer src="dist/sidebar_items-99E43541.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-MI33G4N7.js"></script>
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1254
+          v1.0.1255
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr />Settings</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1254)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1255)</small>
 
     </h1>
 
@@ -425,7 +425,7 @@ when it is set, the compiled default otherwise.</p></div>
       <h1 class="signature" translate="no">add_app(app)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/settings.ex#L419" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/settings.ex#L440" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -454,7 +454,7 @@ after boot. Clears the cache so the next read picks them up.</p>
       <h1 class="signature" translate="no">add_provider(module)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/settings.ex#L426" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/settings.ex#L447" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -511,7 +511,7 @@ app's module list — a plugin compiled at runtime, or a test.</p>
       <h1 class="signature" translate="no">apps()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/settings.ex#L409" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/settings.ex#L428" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -526,7 +526,18 @@ app's module list — a plugin compiled at runtime, or a test.</p>
 
       </div>
 
-<p>Apps scanned for providers.</p>
+<p>Apps scanned for providers.</p><p>Core's two, the host application, and anything <a href="#add_app/1"><code class="inline">add_app/1</code></a> registered.</p><p>The host is derived rather than registered because the alternative is silence:
+a host that declares settings and is never scanned gets no boot validation, no
+row on the admin Settings page and nothing in <code class="inline">.env.example</code>, while <a href="#get/2"><code class="inline">get/2</code></a>
+keeps answering with the compiled default — so its env vars do nothing and say
+nothing. Deriving it here rather than in the boot path also covers the mix
+tasks, which run <code class="inline">app.config</code> without starting the application and so never
+reach <code class="inline">GamendWeb.HostSupervision.init_runtime/1</code>; <a href="Mix.Tasks.Gamend.Settings.Guide.html"><code class="inline">mix gamend.settings.guide</code></a>
+and <a href="Mix.Tasks.Gamend.Settings.EnvExample.html"><code class="inline">mix gamend.settings.env_example</code></a> would otherwise document core's settings
+and quietly omit the host's.</p><p><code class="inline">:host_static_app</code> is the key a host already sets to name its own OTP app, and
+reading it is a lookup, not a dependency — core does not compile against
+<code class="inline">gamend_web</code>. It defaults to <code class="inline">:gamend_web</code>, which is scanned anyway, so an
+unconfigured deployment sees no change.</p>
   </section>
 </section>
 <section class="detail" id="cast/2">
@@ -634,7 +645,7 @@ vars are resolved into <a href="https://elixir.hexdocs.pm/Application.html"><cod
       <h1 class="signature" translate="no">env_name(root, group, key)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/settings.ex#L533" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/settings.ex#L554" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -780,7 +791,7 @@ not a runtime condition.</p>
       <h1 class="signature" translate="no">providers()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/settings.ex#L463" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/settings.ex#L484" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -808,7 +819,7 @@ not a runtime condition.</p>
       <h1 class="signature" translate="no">reload()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/settings.ex#L456" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/settings.ex#L477" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -836,7 +847,7 @@ not a runtime condition.</p>
       <h1 class="signature" translate="no">remove_provider(module)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/settings.ex#L430" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/settings.ex#L451" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -954,9 +965,9 @@ Test is silent because the suite boots hundreds of times.</p>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1254">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1255">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1254">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1255">Hex Preview</a>
 
             </span>
 

@@ -1,5 +1,5 @@
 # `Gamend.Hooks.Default`
-[🔗](https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/hooks.ex#L1423)
+[🔗](https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/hooks.ex#L1468)
 
 Default no-op implementation for Gamend.Hooks
 

@@ -815,6 +815,43 @@ Return the configured module that implements the hooks behaviour.
 True when the hook transforms its input (a `before_*` pipeline hook) rather
 than fanning out notifications. Exposed for the admin runtime page.
 
+# `pipeline_hooks`
+
+```elixir
+@spec pipeline_hooks() :: [atom()]
+```
+
+Pipeline hook names registered on top of core's own.
+
+# `register_pipeline_hook`
+
+```elixir
+@spec register_pipeline_hook(atom()) :: :ok
+```
+
+Register a `before_*` hook name owned by a host application or a plugin.
+
+A pipeline hook transforms its input: each plugin receives the previous
+plugin's output, returns `{:ok, value}` to allow a possibly-modified value or
+`{:error, reason}` to block, and the chain halts at the first refusal.
+
+Core's own names are a fixed list, so a host's `before_*` hook fell through to
+the fan-out path instead, where every plugin is called with the *same*
+arguments, only the first one's result is returned, and the others run
+regardless of whether the first refused. With one plugin the difference is
+invisible; with two, the second plugin's changes are dropped and its side
+effects happen even after the first blocked the operation.
+
+    Gamend.Hooks.register_pipeline_hook(:before_build)
+
+# `unregister_pipeline_hook`
+
+```elixir
+@spec unregister_pipeline_hook(atom()) :: :ok
+```
+
+Undoes `register_pipeline_hook/1`.
+
 ---
 
 *Consult [api-reference.md](api-reference.md) for complete listing*

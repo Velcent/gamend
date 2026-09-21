@@ -47,6 +47,18 @@ running on several instances at once is harmless; each class is batched and
 failure-isolated, and emits `[:gamend, :retention, :pruned]` telemetry with
 its count.
 
+## Classes a host or plugin adds
+
+A host application and a plugin have tables of their own, and the rule that
+an unbounded table needs a retention class applies to them too. Register one
+and it runs, is failure-isolated, and emits telemetry exactly like core's:
+
+    Gamend.Retention.register_class(:forge_builds, &Forge.Builds.prune/0)
+
+The function takes no arguments and answers how many rows it deleted.
+Registering the same name twice replaces the first, so a module can call this
+at every boot without accumulating duplicates.
+
 # `child_spec`
 
 Returns a specification to start this module under a supervisor.
@@ -61,6 +73,29 @@ See `Supervisor`.
 
 Runs all configured pruning steps once. Returns a map of deleted row
 counts per table.
+
+# `register_class`
+
+```elixir
+@spec register_class(atom(), (-&gt; non_neg_integer())) :: :ok
+```
+
+Register a pruning class owned by a host application or a plugin.
+
+Core's own classes are a fixed list in `prune_all/0`, which left a host with
+no way to bound its own tables: `CONTRIBUTING.md` requires every unbounded
+table to have a class or a stated reason it is bounded, and a fork could not
+comply. Registering by name rather than appending means a module can call
+this on every boot — the second registration replaces the first instead of
+pruning twice.
+
+# `registered_classes`
+
+```elixir
+@spec registered_classes() :: %{required(atom()) =&gt; (-&gt; non_neg_integer())}
+```
+
+Classes registered on top of core's own.
 
 # `run_now`
 
@@ -86,6 +121,14 @@ never overlap.
 
 What the last sweep did, for the admin page. Falls back to "never run" when
 the sweeper is not supervised (tests, or an instance with it disabled).
+
+# `unregister_class`
+
+```elixir
+@spec unregister_class(atom()) :: :ok
+```
+
+Undoes `register_class/2`.
 
 ---
 

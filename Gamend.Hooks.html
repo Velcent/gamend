@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.4">
-    <meta name="project" content="gamend_core v1.0.1254">
+    <meta name="project" content="gamend_core v1.0.1255">
 
 
-    <title>Gamend.Hooks — gamend_core v1.0.1254</title>
+    <title>Gamend.Hooks — gamend_core v1.0.1255</title>
 
     <link rel="stylesheet" href="dist/html-elixir-RXHHCTJW.css" />
 
-    <script defer src="dist/sidebar_items-283A1537.js"></script>
+    <script defer src="dist/sidebar_items-99E43541.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-MI33G4N7.js"></script>
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1254
+          v1.0.1255
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr />Hooks</span> <small>behaviour</small>
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1254)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1255)</small>
 
     </h1>
 
@@ -1029,6 +1029,36 @@ when the value is a user struct or map containing <code class="inline">:id</code
 
         <div class="summary-synopsis"><p>True when the hook transforms its input (a <code class="inline">before_*</code> pipeline hook) rather
 than fanning out notifications. Exposed for the admin runtime page.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#pipeline_hooks/0" data-no-tooltip="" translate="no">pipeline_hooks()</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Pipeline hook names registered on top of core's own.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#register_pipeline_hook/1" data-no-tooltip="" translate="no">register_pipeline_hook(name)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Register a <code class="inline">before_*</code> hook name owned by a host application or a plugin.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#unregister_pipeline_hook/1" data-no-tooltip="" translate="no">unregister_pipeline_hook(name)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Undoes <a href="#register_pipeline_hook/1"><code class="inline">register_pipeline_hook/1</code></a>.</p></div>
 
     </div>
 
@@ -3927,7 +3957,7 @@ timeout to avoid long-running user code.</p><p>Returns {:ok, result} | {:error, 
       <h1 class="signature" translate="no">caller()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/hooks.ex#L1364" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/hooks.ex#L1409" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -3959,7 +3989,7 @@ when the value is a user struct or map containing <code class="inline">:id</code
       <h1 class="signature" translate="no">caller_id()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/hooks.ex#L1369" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/hooks.ex#L1414" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -3987,7 +4017,7 @@ when the value is a user struct or map containing <code class="inline">:id</code
       <h1 class="signature" translate="no">caller_user()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/hooks.ex#L1383" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/hooks.ex#L1428" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -4020,7 +4050,7 @@ when the value is a user struct or map containing <code class="inline">:id</code
       <h1 class="signature" translate="no">exported_functions(mod \\ module())</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/hooks.ex#L1269" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/hooks.ex#L1314" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -4162,6 +4192,97 @@ function doesn't exist.</p>
 than fanning out notifications. Exposed for the admin runtime page.</p>
   </section>
 </section>
+<section class="detail" id="pipeline_hooks/0">
+
+  <div class="detail-header">
+    <a href="#pipeline_hooks/0" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">pipeline_hooks()</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/hooks.ex#L709" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> pipeline_hooks() :: [<a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">atom</a>()]</pre>
+
+      </div>
+
+<p>Pipeline hook names registered on top of core's own.</p>
+  </section>
+</section>
+<section class="detail" id="register_pipeline_hook/1">
+
+  <div class="detail-header">
+    <a href="#register_pipeline_hook/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">register_pipeline_hook(name)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/hooks.ex#L687" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> register_pipeline_hook(<a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">atom</a>()) :: :ok</pre>
+
+      </div>
+
+<p>Register a <code class="inline">before_*</code> hook name owned by a host application or a plugin.</p><p>A pipeline hook transforms its input: each plugin receives the previous
+plugin's output, returns <code class="inline">{:ok, value}</code> to allow a possibly-modified value or
+<code class="inline">{:error, reason}</code> to block, and the chain halts at the first refusal.</p><p>Core's own names are a fixed list, so a host's <code class="inline">before_*</code> hook fell through to
+the fan-out path instead, where every plugin is called with the <em>same</em>
+arguments, only the first one's result is returned, and the others run
+regardless of whether the first refused. With one plugin the difference is
+invisible; with two, the second plugin's changes are dropped and its side
+effects happen even after the first blocked the operation.</p><pre><code class="makeup elixir" translate="no"><span class="nc">Gamend.Hooks</span><span class="o">.</span><span class="n">register_pipeline_hook</span><span class="p" data-group-id="group-1">(</span><span class="ss">:before_build</span><span class="p" data-group-id="group-1">)</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="unregister_pipeline_hook/1">
+
+  <div class="detail-header">
+    <a href="#unregister_pipeline_hook/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">unregister_pipeline_hook(name)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/hooks.ex#L700" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> unregister_pipeline_hook(<a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">atom</a>()) :: :ok</pre>
+
+      </div>
+
+<p>Undoes <a href="#register_pipeline_hook/1"><code class="inline">register_pipeline_hook/1</code></a>.</p>
+  </section>
+</section>
 
     </div>
   </section>
@@ -4171,9 +4292,9 @@ than fanning out notifications. Exposed for the admin runtime page.</p>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1254">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1255">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1254">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1255">Hex Preview</a>
 
             </span>
 
