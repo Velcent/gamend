@@ -664,9 +664,54 @@ defmodule Gamend.Hooks do
   def pipeline_hook?(name, arity), do: lifecycle_pipeline_hook?(name, arity)
 
   defp lifecycle_pipeline_hook?(name, arity) when is_atom(name) and is_integer(arity) do
-    # Pipeline-style hooks transform their inputs. These are the "before_*" hooks
-    # used by domain flows.
-    name in [
+    (name in core_pipeline_hooks() or name in pipeline_hooks()) and arity > 0
+  end
+
+  @doc """
+  Register a `before_*` hook name owned by a host application or a plugin.
+
+  A pipeline hook transforms its input: each plugin receives the previous
+  plugin's output, returns `{:ok, value}` to allow a possibly-modified value or
+  `{:error, reason}` to block, and the chain halts at the first refusal.
+
+  Core's own names are a fixed list, so a host's `before_*` hook fell through to
+  the fan-out path instead, where every plugin is called with the *same*
+  arguments, only the first one's result is returned, and the others run
+  regardless of whether the first refused. With one plugin the difference is
+  invisible; with two, the second plugin's changes are dropped and its side
+  effects happen even after the first blocked the operation.
+
+      Gamend.Hooks.register_pipeline_hook(:before_build)
+  """
+  @spec register_pipeline_hook(atom()) :: :ok
+  def register_pipeline_hook(name) when is_atom(name) do
+    config = Application.get_env(:gamend_core, __MODULE__, [])
+    names = config |> Keyword.get(:pipeline_hooks, []) |> List.delete(name)
+
+    Application.put_env(
+      :gamend_core,
+      __MODULE__,
+      Keyword.put(config, :pipeline_hooks, [name | names])
+    )
+  end
+
+  @doc "Undoes `register_pipeline_hook/1`."
+  @spec unregister_pipeline_hook(atom()) :: :ok
+  def unregister_pipeline_hook(name) when is_atom(name) do
+    config = Application.get_env(:gamend_core, __MODULE__, [])
+    names = config |> Keyword.get(:pipeline_hooks, []) |> List.delete(name)
+
+    Application.put_env(:gamend_core, __MODULE__, Keyword.put(config, :pipeline_hooks, names))
+  end
+
+  @doc "Pipeline hook names registered on top of core's own."
+  @spec pipeline_hooks() :: [atom()]
+  def pipeline_hooks do
+    :gamend_core |> Application.get_env(__MODULE__, []) |> Keyword.get(:pipeline_hooks, [])
+  end
+
+  defp core_pipeline_hooks do
+    [
       :before_user_register,
       :before_user_update,
       :before_lobby_create,
@@ -693,7 +738,7 @@ defmodule Gamend.Hooks do
       :before_quest_claim,
       :before_lobby_state_change,
       :before_ready_check_open
-    ] and arity > 0
+    ]
   end
 
   # Ensure all plain-map arguments passed to before_* hooks have string keys.

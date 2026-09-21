@@ -3,7 +3,7 @@ defmodule GamendWeb.ApiSpec do
   OpenAPI specification for the Gamend API.
   """
 
-  alias GamendWeb.{Endpoint, Router}
+  alias GamendWeb.Endpoint
   alias GamendWeb.Schemas.RequestTitles
   alias OpenApiSpex.{Components, Info, OpenApi, Paths, SecurityScheme, Server, Tag}
   @behaviour OpenApi
@@ -236,7 +236,7 @@ defmodule GamendWeb.ApiSpec do
         ```
         """
       },
-      paths: filter_api_paths(Paths.from_router(Router)),
+      paths: filter_api_paths(Paths.from_router(router())),
       tags: [
         # --- Public API ---
         %Tag{
@@ -327,6 +327,14 @@ defmodule GamendWeb.ApiSpec do
     |> OpenApiSpex.resolve_schema_modules()
     |> RequestTitles.put_titles()
   end
+
+  # The same resolution `GamendWeb.Endpoint.dispatch_router/2` uses. It read
+  # `GamendWeb.Router` directly, so a host that adds its own API routes served
+  # them and documented none of them: they were missing from `/api/docs`, from
+  # the generated SDKs, and from the route existence checks in
+  # `mix gamend.api.lint`. Core's own default is unchanged, since that is what
+  # the config falls back to.
+  defp router, do: Application.get_env(:gamend_web, :router, GamendWeb.Router)
 
   defp api_version do
     # The declared setting wins: the image supplies it at runtime, while the

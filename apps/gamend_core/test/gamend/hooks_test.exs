@@ -180,4 +180,76 @@ defmodule Gamend.HooksTest do
       refute MapSet.member?(Schedule.registered_callbacks(), :temp_job)
     end
   end
+
+  defmodule HostPipelineHooks do
+    use Gamend.TestSupport.NoopHooks
+
+    def before_build(attrs) do
+      case attrs do
+        %{"block" => true} -> {:error, :blocked_by_plugin}
+        _ -> {:ok, Map.put(attrs, "touched", true)}
+      end
+    end
+  end
+
+  describe "register_pipeline_hook/1" do
+    setup do
+      Application.put_env(:gamend_core, :hooks_module, HostPipelineHooks)
+      on_exit(fn -> Gamend.Hooks.unregister_pipeline_hook(:before_build) end)
+      :ok
+    end
+
+    # The predicate is what routes a name to the chaining path instead of the
+    # fan-out one, and the admin runtime page reads it too.
+    test "a host hook is not a pipeline hook until it is registered" do
+      refute Gamend.Hooks.pipeline_hook?(:before_build, 1)
+
+      Gamend.Hooks.register_pipeline_hook(:before_build)
+
+      assert Gamend.Hooks.pipeline_hook?(:before_build, 1)
+    end
+
+    test "unregister_pipeline_hook/1 puts it back" do
+      Gamend.Hooks.register_pipeline_hook(:before_build)
+      Gamend.Hooks.unregister_pipeline_hook(:before_build)
+
+      refute Gamend.Hooks.pipeline_hook?(:before_build, 1)
+    end
+
+    # Pipeline hooks normalize map arguments to string keys before the chain
+    # runs, so a plugin never has to handle both key styles.
+    test "a registered host hook receives string keys" do
+      Gamend.Hooks.register_pipeline_hook(:before_build)
+
+      assert {:ok, %{"touched" => true, "a" => 1}} =
+               Gamend.Hooks.internal_call(:before_build, [%{a: 1}])
+    end
+
+    test "a registered host hook transforms its input" do
+      Gamend.Hooks.register_pipeline_hook(:before_build)
+
+      assert {:ok, %{"touched" => true, "a" => 1}} =
+               Gamend.Hooks.internal_call(:before_build, [%{"a" => 1}])
+    end
+
+    test "a registered host hook can block" do
+      Gamend.Hooks.register_pipeline_hook(:before_build)
+
+      assert {:error, :blocked_by_plugin} =
+               Gamend.Hooks.internal_call(:before_build, [%{"block" => true}])
+    end
+
+    test "registering twice does not duplicate the name" do
+      Gamend.Hooks.register_pipeline_hook(:before_build)
+      Gamend.Hooks.register_pipeline_hook(:before_build)
+
+      assert Enum.count(Gamend.Hooks.pipeline_hooks(), &(&1 == :before_build)) == 1
+    end
+
+    test "core's own pipeline hooks still work with none registered" do
+      assert Gamend.Hooks.pipeline_hooks() == []
+
+      assert {:ok, %{}} = Gamend.Hooks.internal_call(:before_lobby_create, [%{}])
+    end
+  end
 end

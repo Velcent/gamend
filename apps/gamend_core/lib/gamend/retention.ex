@@ -45,6 +45,18 @@ defmodule Gamend.Retention do
   running on several instances at once is harmless; each class is batched and
   failure-isolated, and emits `[:gamend, :retention, :pruned]` telemetry with
   its count.
+
+  ## Classes a host or plugin adds
+
+  A host application and a plugin have tables of their own, and the rule that
+  an unbounded table needs a retention class applies to them too. Register one
+  and it runs, is failure-isolated, and emits telemetry exactly like core's:
+
+      Gamend.Retention.register_class(:forge_builds, &Forge.Builds.prune/0)
+
+  The function takes no arguments and answers how many rows it deleted.
+  Registering the same name twice replaces the first, so a module can call this
+  at every boot without accumulating duplicates.
   """
 
   use GenServer
@@ -170,49 +182,56 @@ defmodule Gamend.Retention do
   end
 
   @doc """
+  Register a pruning class owned by a host application or a plugin.
+
+  Core's own classes are a fixed list in `prune_all/0`, which left a host with
+  no way to bound its own tables: `CONTRIBUTING.md` requires every unbounded
+  table to have a class or a stated reason it is bounded, and a fork could not
+  comply. Registering by name rather than appending means a module can call
+  this on every boot — the second registration replaces the first instead of
+  pruning twice.
+  """
+  @spec register_class(atom(), (-> non_neg_integer())) :: :ok
+  def register_class(class, fun) when is_atom(class) and is_function(fun, 0) do
+    Application.put_env(:gamend_core, __MODULE__, put_class(class, fun))
+  end
+
+  @doc "Undoes `register_class/2`."
+  @spec unregister_class(atom()) :: :ok
+  def unregister_class(class) when is_atom(class) do
+    Application.put_env(:gamend_core, __MODULE__, drop_class(class))
+  end
+
+  @doc "Classes registered on top of core's own."
+  @spec registered_classes() :: %{atom() => (-> non_neg_integer())}
+  def registered_classes do
+    :gamend_core |> Application.get_env(__MODULE__, []) |> Keyword.get(:classes, %{})
+  end
+
+  defp put_class(class, fun) do
+    config = Application.get_env(:gamend_core, __MODULE__, [])
+
+    Keyword.put(config, :classes, Map.put(registered_classes(), class, fun))
+  end
+
+  defp drop_class(class) do
+    config = Application.get_env(:gamend_core, __MODULE__, [])
+
+    Keyword.put(config, :classes, Map.delete(registered_classes(), class))
+  end
+
+  @doc """
   Runs all configured pruning steps once. Returns a map of deleted row
   counts per table.
   """
   @spec prune_all() :: %{atom() => non_neg_integer()}
   def prune_all do
     results =
-      %{
-        chat_messages: fn ->
-          prune_older_than(Gamend.Chat.Message, config(:chat_messages_days))
-        end,
-        notifications: fn ->
-          prune_older_than(Gamend.Notifications.Notification, config(:notifications_days))
-        end,
-        payment_events: fn ->
-          prune_older_than(Gamend.Payments.ProviderEvent, config(:payment_events_days))
-        end,
-        oauth_sessions: fn ->
-          prune_older_than(Gamend.OAuthSession, @oauth_session_ttl_days)
-        end,
-        expired_ip_bans: &prune_expired_ip_bans/0,
-        expired_user_tokens: &prune_expired_user_tokens/0,
-        lobby_snapshots: &prune_lobby_snapshots/0,
-        client_sessions: &prune_client_sessions/0,
-        lobby_snapshot_blobs: &prune_lobby_snapshot_blobs/0,
-        offline_lobby_memberships: &release_offline_lobby_memberships/0,
-        offline_party_memberships: &release_offline_party_memberships/0,
-        abandoned_parties: &disband_abandoned_parties/0,
-        lobbies: &prune_lobbies/0,
-        resolved_invites: &prune_resolved_invites/0,
-        matchmaking_tickets: &prune_stale_tickets/0,
-        finished_tournaments: &prune_finished_tournaments/0,
-        ledger_entries: &prune_ledgers/0,
-        activity_days: fn ->
-          prune_older_than(Gamend.Analytics.ActivityDay, config(:activity_days))
-        end,
-        quest_periods: &Gamend.Quests.prune_old_periods/0,
-        quest_reward_recoveries: &Gamend.Quests.recover_pending_rewards/0,
-        push_tokens: &prune_push_tokens/0,
-        anonymous_users: &prune_anonymous_users/0,
-        inactive_user_warnings: &warn_inactive_users/0,
-        inactive_users: &prune_inactive_users/0,
-        orphaned_avatars: &prune_orphaned_avatars/0
-      }
+      core_classes()
+      # A host's classes cannot silently shadow one of core's: a name collision
+      # would drop core's pruning and leave the table growing, which is the
+      # failure this module exists to prevent.
+      |> Map.merge(Map.drop(registered_classes(), Map.keys(core_classes())))
       |> Map.new(fn {class, fun} -> {class, run_class(class, fun)} end)
 
     pruned = results |> Map.values() |> Enum.sum()
@@ -222,6 +241,48 @@ defmodule Gamend.Retention do
     end
 
     results
+  end
+
+  # Core's own classes. Separate from `prune_all/0` so a registered class can be
+  # checked against them by name.
+  defp core_classes do
+    %{
+      chat_messages: fn ->
+        prune_older_than(Gamend.Chat.Message, config(:chat_messages_days))
+      end,
+      notifications: fn ->
+        prune_older_than(Gamend.Notifications.Notification, config(:notifications_days))
+      end,
+      payment_events: fn ->
+        prune_older_than(Gamend.Payments.ProviderEvent, config(:payment_events_days))
+      end,
+      oauth_sessions: fn ->
+        prune_older_than(Gamend.OAuthSession, @oauth_session_ttl_days)
+      end,
+      expired_ip_bans: &prune_expired_ip_bans/0,
+      expired_user_tokens: &prune_expired_user_tokens/0,
+      lobby_snapshots: &prune_lobby_snapshots/0,
+      client_sessions: &prune_client_sessions/0,
+      lobby_snapshot_blobs: &prune_lobby_snapshot_blobs/0,
+      offline_lobby_memberships: &release_offline_lobby_memberships/0,
+      offline_party_memberships: &release_offline_party_memberships/0,
+      abandoned_parties: &disband_abandoned_parties/0,
+      lobbies: &prune_lobbies/0,
+      resolved_invites: &prune_resolved_invites/0,
+      matchmaking_tickets: &prune_stale_tickets/0,
+      finished_tournaments: &prune_finished_tournaments/0,
+      ledger_entries: &prune_ledgers/0,
+      activity_days: fn ->
+        prune_older_than(Gamend.Analytics.ActivityDay, config(:activity_days))
+      end,
+      quest_periods: &Gamend.Quests.prune_old_periods/0,
+      quest_reward_recoveries: &Gamend.Quests.recover_pending_rewards/0,
+      push_tokens: &prune_push_tokens/0,
+      anonymous_users: &prune_anonymous_users/0,
+      inactive_user_warnings: &warn_inactive_users/0,
+      inactive_users: &prune_inactive_users/0,
+      orphaned_avatars: &prune_orphaned_avatars/0
+    }
   end
 
   defp prune_older_than(_schema, days) when not is_integer(days) or days <= 0, do: 0

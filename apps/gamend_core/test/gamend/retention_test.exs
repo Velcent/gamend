@@ -839,4 +839,57 @@ defmodule Gamend.RetentionTest do
       assert Storage.exists?(foreign)
     end
   end
+
+  describe "register_class/2" do
+    setup do
+      on_exit(fn -> Gamend.Retention.unregister_class(:test_host_table) end)
+      :ok
+    end
+
+    # CONTRIBUTING requires every unbounded table to have a retention class, and
+    # a host application's tables are no exception — but core's list was fixed,
+    # so a fork could not comply with a rule core enforces on itself.
+    test "a registered class runs with core's and reports its count" do
+      Gamend.Retention.register_class(:test_host_table, fn -> 7 end)
+
+      results = Gamend.Retention.prune_all()
+
+      assert results[:test_host_table] == 7
+      assert Map.has_key?(results, :chat_messages)
+    end
+
+    test "registering the same name twice replaces it, so a boot-time call cannot double-prune" do
+      Gamend.Retention.register_class(:test_host_table, fn -> 1 end)
+      Gamend.Retention.register_class(:test_host_table, fn -> 2 end)
+
+      assert map_size(Gamend.Retention.registered_classes()) == 1
+      assert Gamend.Retention.prune_all()[:test_host_table] == 2
+    end
+
+    test "unregister_class/1 removes it" do
+      Gamend.Retention.register_class(:test_host_table, fn -> 1 end)
+      Gamend.Retention.unregister_class(:test_host_table)
+
+      refute Map.has_key?(Gamend.Retention.prune_all(), :test_host_table)
+    end
+
+    # Shadowing a core class would silently stop core pruning that table, which
+    # is exactly the unbounded growth this module exists to prevent.
+    test "a class cannot shadow one of core's" do
+      Gamend.Retention.register_class(:chat_messages, fn -> 999 end)
+      on_exit(fn -> Gamend.Retention.unregister_class(:chat_messages) end)
+
+      refute Gamend.Retention.prune_all()[:chat_messages] == 999
+    end
+
+    # A host's class must not be able to take the whole sweep down with it.
+    test "a raising class is isolated and counted as zero" do
+      Gamend.Retention.register_class(:test_host_table, fn -> raise "boom" end)
+
+      results = Gamend.Retention.prune_all()
+
+      assert results[:test_host_table] == 0
+      assert Map.has_key?(results, :chat_messages)
+    end
+  end
 end

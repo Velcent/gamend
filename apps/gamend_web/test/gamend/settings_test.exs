@@ -35,6 +35,54 @@ defmodule Gamend.SettingsTest do
     Application.put_env(:gamend_core, Sample, Keyword.put(config, key, value))
   end
 
+  describe "apps/0" do
+    # A host that declares settings and is never scanned fails silently:
+    # get/2 keeps answering with the compiled default, so its env vars do
+    # nothing and say nothing. The host is derived here rather than registered
+    # at boot so the mix tasks see it too — they run app.config without
+    # starting the application, and would otherwise generate .env.example and
+    # the settings guide with core's settings and none of the host's.
+    setup do
+      original = Application.get_env(:gamend_web, :host_static_app)
+
+      on_exit(fn ->
+        if original do
+          Application.put_env(:gamend_web, :host_static_app, original)
+        else
+          Application.delete_env(:gamend_web, :host_static_app)
+        end
+      end)
+
+      :ok
+    end
+
+    test "includes core's own apps" do
+      assert :gamend_core in Settings.apps()
+      assert :gamend_web in Settings.apps()
+    end
+
+    test "includes the host app named by :host_static_app" do
+      Application.put_env(:gamend_web, :host_static_app, :my_game)
+
+      assert :my_game in Settings.apps()
+    end
+
+    test "an unconfigured host adds nothing" do
+      Application.delete_env(:gamend_web, :host_static_app)
+
+      assert Enum.sort(Settings.apps()) == Enum.sort(Enum.uniq(Settings.apps()))
+      assert :gamend_web in Settings.apps()
+    end
+
+    test "never lists an app twice" do
+      Application.put_env(:gamend_web, :host_static_app, :gamend_core)
+
+      apps = Settings.apps()
+
+      assert Enum.count(apps, &(&1 == :gamend_core)) == 1
+    end
+  end
+
   describe "env name derivation" do
     test "derives <ROOT>_<GROUP>_<KEY>" do
       definition = definition(:chat_days)

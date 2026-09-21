@@ -342,7 +342,10 @@ defmodule Gamend.GDScript.API do
       "internal_hooks" => [0],
       "invoke" => [1, 2],
       "module" => [0],
-      "pipeline_hook?" => [2]
+      "pipeline_hook?" => [2],
+      "pipeline_hooks" => [0],
+      "register_pipeline_hook" => [1],
+      "unregister_pipeline_hook" => [1]
     },
     "Inventory" => %{
       "consume_item" => [3, 4],
