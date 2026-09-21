@@ -37,7 +37,10 @@ install carries the libraries it fetched, so those are found too.
 
 It brings [nlohmann/json](https://github.com/nlohmann/json), and libcurl and
 [IXWebSocket](https://github.com/machinezone/IXWebSocket) for the transports it
-ships, each from your build when it already has them. WebRTC is opt-in
+ships, each from your build when it already has them. IXWebSocket has no
+Schannel backend, so on Windows `wss://` goes through OpenSSL when the build
+has one and through an [mbedTLS](https://github.com/Mbed-TLS/mbedtls) built
+alongside the SDK when it does not. WebRTC is opt-in
 (`GAMEND_WITH_WEBRTC=ON`, through
 [libdatachannel](https://github.com/paullouisageneau/libdatachannel)). An
 engine with its own HTTP, WebSocket or WebRTC stack turns those off and

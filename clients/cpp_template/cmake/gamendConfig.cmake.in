@@ -9,6 +9,11 @@ if(@GAMEND_WITH_CURL@)
   find_dependency(CURL)
 endif()
 if(@GAMEND_WITH_IXWEBSOCKET@)
+  if(@GAMEND_FETCHED_MBEDTLS@)
+    # IXWebSocket links the mbedTLS installed with the SDK, and its own
+    # package does not look for it.
+    find_dependency(MbedTLS CONFIG)
+  endif()
   find_dependency(ixwebsocket CONFIG)
 endif()
 if(@GAMEND_WITH_WEBRTC@)

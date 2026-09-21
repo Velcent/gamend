@@ -912,10 +912,12 @@ jobs:
           - os: macos-latest
             flags: -DGAMEND_WARNINGS_AS_ERRORS=ON -DGAMEND_WITH_WEBRTC=ON
           - os: windows-latest
-            # libcurl comes from FetchContent over Schannel. IXWebSocket's TLS
-            # on Windows is mbedTLS, and libdatachannel wants OpenSSL: the
-            # runner has neither.
-            flags: -DGAMEND_IXWEBSOCKET_TLS=OFF
+            # libcurl comes from FetchContent over Schannel, and IXWebSocket's
+            # TLS from the mbedTLS the SDK builds when the machine has none —
+            # which is what a game on Windows gets, so CI builds it too.
+            # WebRTC stays off: libdatachannel wants an OpenSSL the runner
+            # does not have.
+            flags: ""
 
     steps:
       - name: Download the C++ SDK

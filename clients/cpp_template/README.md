@@ -56,7 +56,7 @@ always, and for the transports that use them libcurl,
 | --- | --- | --- |
 | `GAMEND_WITH_CURL` | `ON` | The libcurl HTTP transport, `make_curl_transport()` |
 | `GAMEND_WITH_IXWEBSOCKET` | `ON` | The IXWebSocket transport, `make_ix_websocket_transport()` |
-| `GAMEND_IXWEBSOCKET_TLS` | `ON` | `wss://` for it (Secure Transport on Apple, OpenSSL on Linux, mbedTLS on Windows) |
+| `GAMEND_IXWEBSOCKET_TLS` | `ON` | `wss://` for it: Secure Transport on Apple, OpenSSL on Linux, and on Windows OpenSSL when the build has one, else an [mbedTLS](https://github.com/Mbed-TLS/mbedtls) built here |
 | `GAMEND_WITH_WEBRTC` | `OFF` | The libdatachannel peer, `make_libdatachannel_transport()`; needs OpenSSL |
 | `GAMEND_BUILD_TESTS` | top level only | The unit tests, `ctest` |
 | `GAMEND_BUILD_EXAMPLES` | top level only | `gamend_conformance` |

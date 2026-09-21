@@ -124,16 +124,72 @@ if(GAMEND_WITH_CURL)
   target_compile_definitions(gamend PUBLIC GAMEND_WITH_CURL=1)
 endif()
 
+set(GAMEND_FETCHED_MBEDTLS OFF)
 if(GAMEND_WITH_IXWEBSOCKET)
   find_package(ixwebsocket CONFIG QUIET)
   if(NOT ixwebsocket_FOUND)
     set(USE_TLS ${GAMEND_IXWEBSOCKET_TLS} CACHE BOOL "" FORCE)
     set(USE_ZLIB OFF CACHE BOOL "" FORCE)
     set(IXWEBSOCKET_INSTALL ${GAMEND_INSTALL} CACHE BOOL "" FORCE)
+
+    # IXWebSocket speaks TLS through OpenSSL, mbedTLS or (on Apple) Secure
+    # Transport, never Schannel: on Windows it asks for mbedTLS, which Windows
+    # does not ship, and the build stops at `Could NOT find MbedTLS`. Take
+    # OpenSSL when this build has one, and otherwise build mbedTLS here, so
+    # `wss://` works with nothing installed by hand.
+    if(GAMEND_IXWEBSOCKET_TLS AND NOT USE_OPEN_SSL AND NOT USE_SECURE_TRANSPORT)
+      if(NOT USE_MBED_TLS AND WIN32)
+        find_package(OpenSSL QUIET)
+        if(OpenSSL_FOUND)
+          set(USE_OPEN_SSL ON CACHE BOOL "" FORCE)
+        else()
+          set(USE_MBED_TLS ON CACHE BOOL "" FORCE)
+        endif()
+      endif()
+      if(USE_MBED_TLS)
+        # What IXWebSocket's own FindMbedTLS looks for; when it is there, let
+        # it find that one.
+        find_path(GAMEND_MBEDTLS_INCLUDE_DIR mbedtls/ssl.h)
+        find_library(GAMEND_MBEDTLS_LIBRARY NAMES mbedtls libmbedtls)
+        if(NOT GAMEND_MBEDTLS_INCLUDE_DIR OR NOT GAMEND_MBEDTLS_LIBRARY)
+          set(GAMEND_FETCHED_MBEDTLS ON)
+        endif()
+      endif()
+    endif()
+
+    if(GAMEND_FETCHED_MBEDTLS)
+      set(ENABLE_PROGRAMS OFF CACHE BOOL "" FORCE)
+      set(ENABLE_TESTING OFF CACHE BOOL "" FORCE)
+      # Its CMake package installs with the SDK, so a game that installs the
+      # SDK can find_package(gamend) and get this back.
+      if(GAMEND_INSTALL)
+        set(DISABLE_PACKAGE_CONFIG_AND_INSTALL OFF CACHE BOOL "" FORCE)
+      else()
+        set(DISABLE_PACKAGE_CONFIG_AND_INSTALL ON CACHE BOOL "" FORCE)
+      endif()
+      FetchContent_Declare(mbedtls
+        URL https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-3.6.7/mbedtls-3.6.7.tar.bz2
+        URL_HASH SHA256=a7e8bcbec0e6f761b4af24f25677626b35f762f68eef79c08677a363212d11f6)
+      FetchContent_MakeAvailable(mbedtls)
+      # What IXWebSocket's FindMbedTLS would have set, so it takes this one
+      # instead of looking for an installed copy.
+      set(MBEDTLS_FOUND TRUE)
+      set(MBEDTLS_INCLUDE_DIRS ${mbedtls_SOURCE_DIR}/include)
+      set(MBEDTLS_LIBRARIES mbedtls mbedx509 mbedcrypto)
+    endif()
+
     FetchContent_Declare(ixwebsocket
       URL https://github.com/machinezone/IXWebSocket/archive/refs/tags/v11.4.6.tar.gz
       URL_HASH SHA256=c024334f8e45980836c67008979a884d6dcc5ef067dd2eb1fa7241f4c17ddc32)
     FetchContent_MakeAvailable(ixwebsocket)
+
+    if(GAMEND_FETCHED_MBEDTLS)
+      # The 3.x API, which IXWebSocket only defines when it found mbedTLS
+      # itself. Its headers are a dependency's, not ours.
+      target_compile_definitions(ixwebsocket PRIVATE IXWEBSOCKET_USE_MBED_TLS_MIN_VERSION_3)
+      set_property(TARGET ixwebsocket APPEND PROPERTY INTERFACE_SYSTEM_INCLUDE_DIRECTORIES
+        ${MBEDTLS_INCLUDE_DIRS})
+    endif()
   endif()
   target_sources(gamend PRIVATE src/ix_websocket_transport.cpp)
   target_link_libraries(gamend PRIVATE ixwebsocket::ixwebsocket)
