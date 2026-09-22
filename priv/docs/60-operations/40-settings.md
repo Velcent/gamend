@@ -7,7 +7,7 @@ generated: by `mix gamend.settings.guide` - do not edit by hand; edit the
 # Settings
 
 Every setting the server has, with the environment variable that sets it.
-252 settings across 22 groups.
+253 settings across 23 groups.
 
 A setting is declared in the module that owns it, so this page and
 `.env.example` are generated from the same source the server reads. The
@@ -387,6 +387,13 @@ Live values, and where each one came from, are on the
 | `GAMEND_RETENTION_PAYMENT_EVENTS_DAYS` | integer | `0` | Delete payment provider webhook events older than N days. Purchases are never pruned. |
 | `GAMEND_RETENTION_PUSH_TOKENS_DAYS` | integer | `270` | Delete push tokens untouched for N days. Defaults to Google's stale-token guidance. |
 | `GAMEND_RETENTION_TOURNAMENTS_DAYS` | integer | `0` | Delete finished tournaments older than N days. 0 keeps forever. |
+
+
+## Secrets
+
+| Variable | Type | Default | Notes |
+|---|---|---|---|
+| `GAMEND_SECRETS_KEYS` | string | - | Comma-separated id:key pairs for encrypting customer secrets, each key 32 bytes base64. The first is used for new writes; the rest let rows written before a rotation still be read. Unset disables the store. Secret - never log or commit it. |
 
 
 ## Server & HTTP

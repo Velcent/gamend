@@ -59,6 +59,7 @@ defmodule Gamend.Secrets do
 
   import Ecto.Query
 
+  alias Gamend.Query
   alias Gamend.Repo
   alias Gamend.Secrets.Secret
 
@@ -211,7 +212,7 @@ defmodule Gamend.Secrets do
       stale =
         Secret
         |> where([s], s.key_id != ^key_id)
-        |> limit(^batch)
+        |> Query.page(page: 1, page_size: batch)
         |> Repo.all()
 
       {moved, stuck} =

@@ -583,6 +583,7 @@ defmodule Gamend.GDScript.API do
       "count_progress" => [0, 1],
       "subscribe_quests" => [0],
       "list_user_quests" => [1, 2],
+      "active_quests_for_event" => [1],
       "stats" => [0],
       "visible_categories" => [0, 1],
       "dashboard_stats" => [0],

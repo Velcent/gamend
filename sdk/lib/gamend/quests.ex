@@ -76,6 +76,34 @@ defmodule Gamend.Quests do
   end
 
   @doc ~S"""
+    The active quests with an objective listening to `event`.
+    
+    `report_event/4` is the hottest write a player makes, and it used to scan
+    every active quest to find the handful that care. That is linear in the size
+    of the whole catalogue, so a host that adds a large family of quests — one
+    per language, say — pays for all of them on every unrelated event.
+    
+    Cached **per event**, not as one grouped map. Nebulex copies a value out on
+    read, so a single map of every event's quests would copy the entire
+    catalogue on every lookup, which is the cost this exists to remove. One key
+    per event copies only the quests that event can advance.
+    
+    Both keys carry `quests_version/0`, so creating, updating or deleting a
+    definition drops these along with `active_quests/0`.
+    
+  """
+  @spec active_quests_for_event(String.t()) :: [Gamend.Quests.Quest.t()]
+  def active_quests_for_event(_event) do
+    case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        []
+
+      _ ->
+        raise "Gamend.Quests.active_quests_for_event/1 is a stub - only available at runtime on Gamend"
+    end
+  end
+
+  @doc ~S"""
     Claim on a user's behalf, skipping the `before_quest_claim` veto (admin).
   """
   @spec admin_claim(user_id(), String.t()) ::
