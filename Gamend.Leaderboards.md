@@ -296,9 +296,13 @@ Lists records for a leaderboard, ordered by rank.
 
 ## Options
 
-See `t:Gamend.Types.pagination_opts/0` for available options.
+See `t:Gamend.Types.pagination_opts/0` for available options, plus:
 
-Returns records with `rank` field populated.
+  * `:meta` — `{key, value}`, keeping only records whose `metadata[key]`
+    equals `value`. Ranks are computed **within** the filtered set, because
+    "the Spanish board" means first among Spanish, not 57th overall. That is
+    the opposite of `:search`, which ranks over the whole board so a found
+    player's real position is what shows.
 
 # `list_records_around_user`
 

@@ -69,6 +69,27 @@ timestamp, and why clients should show a countdown rather than an hour.
 
 All active quest definitions (cached — this backs event dispatch).
 
+# `active_quests_for_event`
+
+```elixir
+@spec active_quests_for_event(String.t()) :: [Gamend.Quests.Quest.t()]
+```
+
+The active quests with an objective listening to `event`.
+
+`report_event/4` is the hottest write a player makes, and it used to scan
+every active quest to find the handful that care. That is linear in the size
+of the whole catalogue, so a host that adds a large family of quests — one
+per language, say — pays for all of them on every unrelated event.
+
+Cached **per event**, not as one grouped map. Nebulex copies a value out on
+read, so a single map of every event's quests would copy the entire
+catalogue on every lookup, which is the cost this exists to remove. One key
+per event copies only the quests that event can advance.
+
+Both keys carry `quests_version/0`, so creating, updating or deleting a
+definition drops these along with `active_quests/0`.
+
 # `admin_claim`
 
 ```elixir
