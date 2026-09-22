@@ -204,7 +204,8 @@ defmodule Gamend.Secrets do
 
   Answers how many rows moved, and how many could not be opened at all.
   """
-  @spec rotate(pos_integer()) :: {:ok, %{moved: non_neg_integer(), stuck: non_neg_integer()}}
+  @spec rotate(pos_integer()) ::
+          {:ok, %{moved: non_neg_integer(), stuck: non_neg_integer()}} | {:error, :no_key}
   def rotate(batch \\ 100) do
     with {:ok, {key_id, _key}} <- current_key() do
       stale =
