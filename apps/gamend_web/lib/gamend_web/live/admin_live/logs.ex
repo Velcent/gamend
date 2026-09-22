@@ -48,8 +48,8 @@ defmodule GamendWeb.AdminLive.Logs do
             </span>
             <span>&middot;</span>
             <span>{@source_counts.client} from clients</span>
-            <span :if={@level_counts[:error]} class="text-error font-semibold">
-              &middot; {ngettext("%{count} error", "%{count} errors", @level_counts[:error])}
+            <span :if={@buffer_level_counts[:error]} class="text-error font-semibold">
+              &middot; {ngettext("%{count} error", "%{count} errors", @buffer_level_counts[:error])}
             </span>
           </div>
         </div>
@@ -117,7 +117,7 @@ defmodule GamendWeb.AdminLive.Logs do
           <span :if={level != "all"} class="ml-1 opacity-70">
             ({Map.get(@level_counts, String.to_existing_atom(level), 0)})
           </span>
-          <span :if={level == "all"} class="ml-1 opacity-70">({@total_buffered})</span>
+          <span :if={level == "all"} class="ml-1 opacity-70">({@facet_total})</span>
         </button>
       </div>
 
@@ -238,7 +238,15 @@ defmodule GamendWeb.AdminLive.Logs do
       </div>
 
       <div class="flex items-center justify-between text-xs text-base-content/70">
-        <span>Showing {length(@logs)} of {@total_buffered} buffered entries</span>
+        <%!-- Two numbers, because they answer two different questions: how much
+              the filters match, and how much is in the buffer behind them. One
+              number here read as "the buffer only has one error in it". --%>
+        <span>
+          Showing {length(@logs)} of {@matching_total} matching
+          <span :if={@matching_total != @total_buffered} class="opacity-70">
+            ({@total_buffered} buffered)
+          </span>
+        </span>
         <span>Errors in last hour: {@recent_errors}</span>
       </div>
     </div>
@@ -690,33 +698,82 @@ defmodule GamendWeb.AdminLive.Logs do
 
   # ── Loading ─────────────────────────────────────────────────────────────────
 
-  defp refresh_logs(socket) do
-    assign(socket,
-      logs:
-        AdminLogBuffer.list(
-          module: socket.assigns.module_filter,
-          level: socket.assigns.level_filter,
-          query: socket.assigns.search_query,
-          session: socket.assigns.session_filter,
-          user: socket.assigns.user_filter,
-          source: socket.assigns.source_filter,
-          limit: @page_size
-        )
-    )
+  defp filter_opts(socket) do
+    [
+      module: socket.assigns.module_filter,
+      level: socket.assigns.level_filter,
+      query: socket.assigns.search_query,
+      session: socket.assigns.session_filter,
+      user: socket.assigns.user_filter,
+      source: socket.assigns.source_filter
+    ]
   end
 
-  defp refresh_counts(socket) do
-    level_counts = safe(&AdminLogBuffer.count_by_level/0, %{})
+  defp refresh_logs(socket) do
+    socket
+    |> assign(
+      logs:
+        safe(
+          fn -> AdminLogBuffer.list(Keyword.put(filter_opts(socket), :limit, @page_size)) end,
+          []
+        )
+    )
+    |> refresh_filter_counts()
+  end
+
+  # The level chips are a filter control, so each count has to mean "how many
+  # you would see if you clicked this": every other filter applied, the level
+  # itself ignored. Counting the whole buffer instead is what let this page
+  # offer `error(7)` and then list one entry — six of those seven were client
+  # entries, and `source_filter` defaults to server-only.
+  #
+  # Recomputed with the list rather than on the counts tick, so it can never
+  # disagree with the rows underneath it.
+  defp refresh_filter_counts(socket) do
+    level_counts = safe(fn -> AdminLogBuffer.count_by_level(filter_opts(socket)) end, %{})
+    facet_total = level_counts |> Map.values() |> Enum.sum()
+
+    matching_total =
+      case level_atom(socket.assigns.level_filter) do
+        nil -> facet_total
+        level -> Map.get(level_counts, level, 0)
+      end
 
     assign(socket,
       level_counts: level_counts,
+      facet_total: facet_total,
+      matching_total: matching_total
+    )
+  end
+
+  # `nil` means "no level filter" — including a level string that names no
+  # level, which `AdminLogBuffer` also ignores rather than filtering to nothing.
+  defp level_atom(level) when level in [nil, "", "all"], do: nil
+
+  defp level_atom(level) when is_binary(level) do
+    String.to_existing_atom(level)
+  rescue
+    ArgumentError -> nil
+  end
+
+  defp level_atom(_level), do: nil
+
+  defp refresh_counts(socket) do
+    # Unfiltered, deliberately: the header line is labelled "Buffer", and a
+    # number under that label must describe the buffer and not the view.
+    buffer_level_counts = safe(&AdminLogBuffer.count_by_level/0, %{})
+
+    socket
+    |> assign(
+      buffer_level_counts: buffer_level_counts,
       source_counts: safe(&AdminLogBuffer.count_by_source/0, %{server: 0, client: 0}),
-      total_buffered: Enum.reduce(level_counts, 0, fn {_, v}, acc -> acc + v end),
+      total_buffered: buffer_level_counts |> Map.values() |> Enum.sum(),
       recent_errors: safe(fn -> AdminLogBuffer.count_recent_errors(3600) end, 0),
       policy: ClientLogs.capture_policy(),
       logger_level: Logger.level(),
       logger_blocks: ClientLogs.logger_level_blocks_collection?()
     )
+    |> refresh_filter_counts()
   end
 
   defp load_sessions(socket) do

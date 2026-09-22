@@ -307,6 +307,35 @@ defmodule Gamend.Quests do
     |> Repo.all()
   end
 
+  @doc """
+  The active quests with an objective listening to `event`.
+
+  `report_event/4` is the hottest write a player makes, and it used to scan
+  every active quest to find the handful that care. That is linear in the size
+  of the whole catalogue, so a host that adds a large family of quests — one
+  per language, say — pays for all of them on every unrelated event.
+
+  Cached **per event**, not as one grouped map. Nebulex copies a value out on
+  read, so a single map of every event's quests would copy the entire
+  catalogue on every lookup, which is the cost this exists to remove. One key
+  per event copies only the quests that event can advance.
+
+  Both keys carry `quests_version/0`, so creating, updating or deleting a
+  definition drops these along with `active_quests/0`.
+  """
+  @spec active_quests_for_event(String.t()) :: [Quest.t()]
+  def active_quests_for_event(event) when is_binary(event) do
+    Gamend.Cache.cached(
+      {:quests, :for_event, event, quests_version()},
+      [ttl: @cache_ttl_ms],
+      fn ->
+        Enum.filter(active_quests(), fn quest ->
+          Enum.any?(quest.objectives, &(&1.event == event))
+        end)
+      end
+    )
+  end
+
   # ---------------------------------------------------------------------------
   # Event dispatch (the engine)
   # ---------------------------------------------------------------------------
@@ -328,7 +357,8 @@ defmodule Gamend.Quests do
     meta = Gamend.Parse.string_keys(meta)
 
     advanced =
-      active_quests()
+      event
+      |> active_quests_for_event()
       |> Enum.filter(fn quest ->
         within_window?(quest, now) and quest_listens_to?(quest, event, meta) and
           not done_cached?(user_id, quest, now)

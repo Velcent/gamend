@@ -34,6 +34,7 @@ defmodule Gamend.Leaderboards do
   alias Gamend.Accounts
   alias Gamend.Leaderboards.Leaderboard
   alias Gamend.Leaderboards.Record
+  alias Gamend.Repo.AdvisoryLock
 
   @leaderboards_cache_ttl_ms 60_000
   @records_cache_ttl_ms 10_000
@@ -928,9 +929,13 @@ defmodule Gamend.Leaderboards do
 
   ## Options
 
-  See `t:Gamend.Types.pagination_opts/0` for available options.
+  See `t:Gamend.Types.pagination_opts/0` for available options, plus:
 
-  Returns records with `rank` field populated.
+    * `:meta` — `{key, value}`, keeping only records whose `metadata[key]`
+      equals `value`. Ranks are computed **within** the filtered set, because
+      "the Spanish board" means first among Spanish, not 57th overall. That is
+      the opposite of `:search`, which ranks over the whole board so a found
+      player's real position is what shows.
   """
   @spec list_records(String.t()) :: [Record.t()]
   @spec list_records(String.t(), keyword()) :: [Record.t()]
@@ -943,13 +948,53 @@ defmodule Gamend.Leaderboards do
         page = Keyword.get(opts, :page, 1)
         page_size = Keyword.get(opts, :page_size, 25)
 
-        case search_pattern(opts) do
-          nil ->
+        case {search_pattern(opts), meta_filter(opts)} do
+          {nil, nil} ->
             list_records_cached(leaderboard.id, leaderboard.sort_order, page, page_size)
 
-          pattern ->
+          {nil, meta} ->
+            meta_records(leaderboard.id, leaderboard.sort_order, meta, page, page_size)
+
+          {pattern, _meta} ->
             search_records(leaderboard.id, leaderboard.sort_order, pattern, page, page_size)
         end
+    end
+  end
+
+  # One filtered page, ranked within the filter. Uncached for the same reason
+  # `search_records/5` is: the value is caller-supplied, and caching would fill
+  # the cache with one entry per value anyone ever picked.
+  defp meta_records(leaderboard_id, sort_order, {key, value}, page, page_size) do
+    offset = max((page - 1) * page_size, 0)
+
+    from(r in Record,
+      where: r.leaderboard_id == ^leaderboard_id,
+      where: ^meta_match(key, value),
+      order_by: ^record_order(sort_order),
+      offset: ^offset,
+      limit: ^page_size,
+      preload: [:user]
+    )
+    |> Repo.all()
+    |> Enum.with_index(offset + 1)
+    |> Enum.map(fn {record, rank} -> %{record | rank: rank} end)
+  end
+
+  defp meta_filter(opts) do
+    case Keyword.get(opts, :meta) do
+      {key, value} when is_binary(key) and is_binary(value) and value != "" -> {key, value}
+      _ -> nil
+    end
+  end
+
+  # Adapter-specific, the same way `Gamend.Notifications` reads a metadata key:
+  # Postgres wants `->>`, SQLite `json_extract`. Both compare as text, so the
+  # value is bound as a parameter rather than spliced into the fragment.
+  defp meta_match(key, value) do
+    if AdvisoryLock.postgres?() do
+      dynamic([r], fragment("?->>? = ?", r.metadata, ^key, ^value))
+    else
+      dynamic([r], fragment("json_extract(?, '$.' || ?) = ?", r.metadata, ^key, ^value))
     end
   end
 
@@ -1031,7 +1076,17 @@ defmodule Gamend.Leaderboards do
   def count_records(leaderboard_id, opts \\ []) when is_binary(leaderboard_id) do
     case search_pattern(opts) do
       nil ->
-        count_records_cached(leaderboard_id)
+        case meta_filter(opts) do
+          nil ->
+            count_records_cached(leaderboard_id)
+
+          {key, value} ->
+            from(r in Record,
+              where: r.leaderboard_id == ^leaderboard_id,
+              where: ^meta_match(key, value)
+            )
+            |> Repo.aggregate(:count, :id)
+        end
 
       pattern ->
         from(r in Record,
