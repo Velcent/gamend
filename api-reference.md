@@ -1,4 +1,4 @@
-# gamend_core v1.0.1256 - API Reference
+# gamend_core v1.0.1257 - API Reference
 
 ## Modules
 
@@ -33,6 +33,9 @@ everywhere.
 - [Gamend.Presence](Gamend.Presence.md): Cluster-wide tracking of who is connected where.
 - [Gamend.Query](Gamend.Query.md): Query-building pieces shared by the contexts. Right now: paging.
 - [Gamend.Release](Gamend.Release.md): Release-time equivalents of the `host.*` mix tasks.
+- [Gamend.Secrets](Gamend.Secrets.md): Somewhere to keep a credential that belongs to a *customer*.
+- [Gamend.Secrets.Secret](Gamend.Secrets.Secret.md): One encrypted value, and the metadata a person needs to manage something
+they can never read back.
 - [Gamend.Signaling](Gamend.Signaling.md): WebRTC signaling: who is in a room, and relaying offers between them.
 - [Gamend.Signals](Gamend.Signals.md): Server-side signals: a plugin emits a named event, another part of the plugin
 waits for it.

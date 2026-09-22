@@ -175,6 +175,8 @@ Gamend.Retention.html
 Gamend.Schedule.html
 Gamend.Schema.html
 Gamend.SchemaJSON.html
+Gamend.Secrets.Secret.html
+Gamend.Secrets.html
 Gamend.Settings.Provider.html
 Gamend.Settings.html
 Gamend.Signaling.html
@@ -215,8 +217,8 @@ dist/lato-latin-700-normal-2XVSBPG4.woff2
 dist/lato-latin-ext-400-normal-N27NCBWW.woff2
 dist/lato-latin-ext-700-normal-Q2L5DVMW.woff2
 dist/remixicon-ZWU5GQ4X.woff2
-dist/search_data-ED9B5164.js
-dist/sidebar_items-2F575683.js
+dist/search_data-D6B5FAE5.js
+dist/sidebar_items-18A73DA8.js
 index.html
 readme.html
 search.html
