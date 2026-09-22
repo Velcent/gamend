@@ -134,6 +134,7 @@ and `:created_by_id`.
 ```elixir
 @spec rotate(pos_integer()) ::
   {:ok, %{moved: non_neg_integer(), stuck: non_neg_integer()}}
+  | {:error, :no_key}
 ```
 
 Re-encrypt every row not already written under the current key.
