@@ -647,7 +647,7 @@ defmodule GamendWeb.GroupsLive do
                     <.user_avatar user={member.user} class="w-8 h-8" />
                     <.presence_dot status={PresenceStatus.status(member.user)} />
                     <span>
-                      {LiveHelpers.public_user_name(member.user)}
+                      <.player_name name={LiveHelpers.public_user_name(member.user)} />
                     </span>
                   </div>
                 </td>

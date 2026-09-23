@@ -954,8 +954,9 @@ func user_update_current_user_display_name(display_name: String) -> GamendResult
 	request.display_name = display_name
 	return await _call_api(UsersApi.new(_config), "update_current_user_display_name", [request])
 
-## Update current user's unique username handle (lowercased on save; 3-32 chars
-## of a-z, 0-9 and non-consecutive . _ - separators). Fails when taken/invalid.
+## Update current user's unique username handle (lowercased on save; 3-32
+## letters or digits of one script, with non-consecutive . _ - separators).
+## Fails when taken/invalid.
 func user_update_current_user_username(username: String) -> GamendResult:
 	var request := GamendUpdateCurrentUserUsernameRequest.new()
 	request.username = username
@@ -1023,10 +1024,14 @@ func authenticate_link_google_id_token(id_token: String) -> GamendResult:
 	link_request.id_token = id_token
 	return await _call_api(AuthenticationApi.new(_config), "link_google_id_token", [link_request])
 
-## Link Apple to the signed-in account with a native Sign in with Apple code
-func authenticate_link_apple_ios(code: String) -> GamendResult:
+## Link Apple to the signed-in account with a native Sign in with Apple code.
+## given_name/family_name come from the credential (Apple sends them only on
+## the first authorization) and fill a blank display name.
+func authenticate_link_apple_ios(code: String, given_name := "", family_name := "") -> GamendResult:
 	var link_request := GamendLinkAppleIosRequest.new()
 	link_request.code = code
+	link_request.given_name = given_name
+	link_request.family_name = family_name
 	return await _call_api(AuthenticationApi.new(_config), "link_apple_ios", [link_request])
 
 ## Start linking a provider through its page: answers the URL to open and a

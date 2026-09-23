@@ -321,6 +321,52 @@ defmodule GamendWeb.AuthControllerTest do
     assert session.status == "completed"
   end
 
+  # Apple sends the name once, as a `user` form field beside the code, and
+  # never in the ID token: a callback that ignores it leaves the account
+  # nameless for good.
+  test "callback (apple) takes the display name from the one-time user field", %{conn: conn} do
+    orig = Application.get_env(:gamend_web, :oauth_exchanger)
+    oauth_orig = Application.get_env(:ueberauth, Ueberauth.Strategy.Apple.OAuth)
+
+    Gamend.SettingsHelpers.put(
+      :gamend_core,
+      Gamend.OAuth.Providers,
+      :apple_client_id,
+      "com.example.web"
+    )
+
+    Application.put_env(:ueberauth, Ueberauth.Strategy.Apple.OAuth,
+      client_id: "com.example.web",
+      client_secret: "dummy-secret"
+    )
+
+    defmodule TestExchanger.AppleWithName do
+      def exchange_apple_code(_code, _client_id, _secret, _redirect) do
+        {:ok, %{"sub" => "apple-with-name", "email" => "apple-with-name@example.com"}}
+      end
+    end
+
+    Application.put_env(:gamend_web, :oauth_exchanger, TestExchanger.AppleWithName)
+
+    on_exit(fn ->
+      Application.put_env(:gamend_web, :oauth_exchanger, orig)
+      Application.put_env(:ueberauth, Ueberauth.Strategy.Apple.OAuth, oauth_orig)
+    end)
+
+    state = oauth_state_from_redirect(get(conn, "/auth/apple"))
+    user = ~s({"name":{"firstName":" Ada ","lastName":"Lovelace"},"email":"x@y.z"})
+
+    conn =
+      post(build_conn(), "/auth/apple/callback", %{
+        "code" => "xxx",
+        "state" => state,
+        "user" => user
+      })
+
+    assert redirected_to(conn) == "/"
+    assert Accounts.get_user_by_apple_id("apple-with-name").display_name == "Ada Lovelace"
+  end
+
   test "callback (apple) browser form_post works without callback session cookie", %{conn: conn} do
     orig = Application.get_env(:gamend_web, :oauth_exchanger)
     oauth_orig = Application.get_env(:ueberauth, Ueberauth.Strategy.Apple.OAuth)

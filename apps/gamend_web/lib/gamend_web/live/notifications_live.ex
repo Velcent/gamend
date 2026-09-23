@@ -67,9 +67,9 @@ defmodule GamendWeb.NotificationsLive do
                             {gettext("Chat")}
                           </span>
                         <% Ecto.assoc_loaded?(n.sender) && n.sender -> %>
-                          {LiveHelpers.public_user_name(n.sender)}
+                          <.player_name name={LiveHelpers.public_user_name(n.sender)} />
                         <% true -> %>
-                          {LiveHelpers.public_user_name(n.sender_id)}
+                          <.player_name name={LiveHelpers.public_user_name(n.sender_id)} />
                       <% end %>
                     </td>
                     <td class="text-sm whitespace-nowrap">

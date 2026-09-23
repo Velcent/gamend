@@ -895,7 +895,7 @@ defmodule GamendWeb.LobbyLive.Index do
                             id={"member-" <> to_string(m.id)}
                             class="flex items-center justify-between py-1"
                           >
-                            <div>{LiveHelpers.public_user_name(m)}</div>
+                            <div><.player_name name={LiveHelpers.public_user_name(m)} /></div>
                             <div class="flex items-center gap-2">
                               <%= if m.id == lobby.host_id do %>
                                 <span class="text-xs text-muted">
@@ -933,7 +933,7 @@ defmodule GamendWeb.LobbyLive.Index do
                             id={"member-" <> to_string(m.id)}
                             class="flex items-center justify-between py-1"
                           >
-                            <div>{LiveHelpers.public_user_name(m)}</div>
+                            <div><.player_name name={LiveHelpers.public_user_name(m)} /></div>
                             <div>
                               <%= if m.id == lobby.host_id do %>
                                 <span class="text-xs text-muted">

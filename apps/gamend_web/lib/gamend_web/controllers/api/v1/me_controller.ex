@@ -132,8 +132,8 @@ defmodule GamendWeb.Api.V1.MeController do
     operation_id: "update_current_user_username",
     summary: "Update current user's username",
     description:
-      "Sets the unique username handle. Lowercased on save; 3-32 chars of a-z, 0-9 and " <>
-        "non-consecutive . _ - separators, starting and ending alphanumeric. " <>
+      "Sets the unique username handle. Lowercased on save; 3-32 letters or digits of one script and " <>
+        "non-consecutive . _ - separators, starting and ending on a letter or digit. " <>
         "Answers 422 validation_failed when the username is malformed or already taken.",
     request_body: {
       "Username payload",

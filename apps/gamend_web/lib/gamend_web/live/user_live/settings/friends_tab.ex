@@ -56,7 +56,7 @@ defmodule GamendWeb.UserLive.Settings.FriendsTab do
                 class="p-2 border rounded mt-2"
               >
                 <div class="text-sm">
-                  {LiveHelpers.public_user_name(req.requester || req.requester_id)}
+                  <.player_name name={LiveHelpers.public_user_name(req.requester || req.requester_id)} />
                   <span class="text-xs text-base-content/60 ms-2">
                     {LiveHelpers.public_user_handle(req.requester)}
                   </span>
@@ -103,7 +103,7 @@ defmodule GamendWeb.UserLive.Settings.FriendsTab do
                 class="p-2 border rounded mt-2"
               >
                 <div class="text-sm">
-                  {LiveHelpers.public_user_name(req.target || req.target_id)}
+                  <.player_name name={LiveHelpers.public_user_name(req.target || req.target_id)} />
                   <span class="text-xs text-base-content/60 ms-2">
                     {LiveHelpers.public_user_handle(req.target)}
                   </span>
@@ -143,7 +143,7 @@ defmodule GamendWeb.UserLive.Settings.FriendsTab do
                       ]}
                       title={if(u.is_online, do: gettext("Online"), else: gettext("Offline"))}
                     />
-                    {LiveHelpers.public_user_name(u)}
+                    <.player_name name={LiveHelpers.public_user_name(u)} />
                     <span class="text-xs text-base-content/60">
                       {LiveHelpers.public_user_handle(u)}
                     </span>
@@ -184,7 +184,7 @@ defmodule GamendWeb.UserLive.Settings.FriendsTab do
                 class="p-2 border rounded mt-2 flex items-center justify-between"
               >
                 <div class="text-sm">
-                  {LiveHelpers.public_user_name(b.requester || b.requester_id)}
+                  <.player_name name={LiveHelpers.public_user_name(b.requester || b.requester_id)} />
                   <span class="text-xs text-base-content/60 ms-2">
                     {LiveHelpers.public_user_handle(b.requester)}
                   </span>
@@ -237,7 +237,7 @@ defmodule GamendWeb.UserLive.Settings.FriendsTab do
               <div :for={{dom_id, s} <- @streams.search_results} id={dom_id}>
                 <div class="p-2 border rounded bg-base-100 flex items-center justify-between">
                   <div class="text-sm">
-                    {LiveHelpers.public_user_name(s)}
+                    <.player_name name={LiveHelpers.public_user_name(s)} />
                     <span class="text-xs text-base-content/60 ms-2">
                       {LiveHelpers.public_user_handle(s)}
                     </span>

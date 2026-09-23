@@ -33,6 +33,7 @@ defmodule Gamend.Accounts.User do
 
   alias Gamend.Accounts.AgePolicy
   alias Gamend.Accounts.PasswordHash
+  alias Gamend.Accounts.Username
 
   @last_seen_fallback ~U[1970-01-01 00:00:00Z]
 
@@ -302,7 +303,10 @@ defmodule Gamend.Accounts.User do
     |> unsafe_validate_unique(:discord_id, Gamend.Repo)
     |> unique_constraint(:email)
     |> unique_constraint(:discord_id)
-    |> validate_length(:display_name, max: Gamend.Limits.get(:max_display_name))
+    |> validate_length(:display_name,
+      max: Gamend.Limits.get(:max_display_name),
+      count: :codepoints
+    )
     |> discard_oversized_profile_url()
     |> put_change(:confirmed_at, DateTime.utc_now(:second))
   end
@@ -328,7 +332,10 @@ defmodule Gamend.Accounts.User do
     |> unsafe_validate_unique(:steam_id, Gamend.Repo)
     |> unique_constraint(:email)
     |> unique_constraint(:steam_id)
-    |> validate_length(:display_name, max: Gamend.Limits.get(:max_display_name))
+    |> validate_length(:display_name,
+      max: Gamend.Limits.get(:max_display_name),
+      count: :codepoints
+    )
     |> discard_oversized_profile_url()
     |> put_change(:confirmed_at, DateTime.utc_now(:second))
   end
@@ -354,7 +361,10 @@ defmodule Gamend.Accounts.User do
     |> unsafe_validate_unique(:apple_id, Gamend.Repo)
     |> unique_constraint(:email)
     |> unique_constraint(:apple_id)
-    |> validate_length(:display_name, max: Gamend.Limits.get(:max_display_name))
+    |> validate_length(:display_name,
+      max: Gamend.Limits.get(:max_display_name),
+      count: :codepoints
+    )
     |> put_change(:confirmed_at, DateTime.utc_now(:second))
   end
 
@@ -379,7 +389,10 @@ defmodule Gamend.Accounts.User do
     |> unsafe_validate_unique(:google_id, Gamend.Repo)
     |> unique_constraint(:email)
     |> unique_constraint(:google_id)
-    |> validate_length(:display_name, max: Gamend.Limits.get(:max_display_name))
+    |> validate_length(:display_name,
+      max: Gamend.Limits.get(:max_display_name),
+      count: :codepoints
+    )
     |> discard_oversized_profile_url()
     |> put_change(:confirmed_at, DateTime.utc_now(:second))
   end
@@ -405,7 +418,10 @@ defmodule Gamend.Accounts.User do
     |> unsafe_validate_unique(:facebook_id, Gamend.Repo)
     |> unique_constraint(:email)
     |> unique_constraint(:facebook_id)
-    |> validate_length(:display_name, max: Gamend.Limits.get(:max_display_name))
+    |> validate_length(:display_name,
+      max: Gamend.Limits.get(:max_display_name),
+      count: :codepoints
+    )
     |> discard_oversized_profile_url()
     |> put_change(:confirmed_at, DateTime.utc_now(:second))
   end
@@ -419,7 +435,11 @@ defmodule Gamend.Accounts.User do
   def device_changeset(user, attrs) do
     user
     |> cast(attrs, [:display_name, :metadata])
-    |> validate_length(:display_name, min: 1, max: Gamend.Limits.get(:max_display_name))
+    |> validate_length(:display_name,
+      min: 1,
+      max: Gamend.Limits.get(:max_display_name),
+      count: :codepoints
+    )
     |> put_change(:confirmed_at, DateTime.utc_now(:second))
     |> Gamend.Limits.validate_metadata_size(:metadata)
   end
@@ -444,34 +464,43 @@ defmodule Gamend.Accounts.User do
     user
     |> cast(attrs, [:is_admin, :is_activated, :metadata, :display_name])
     |> validate_required([:is_admin])
-    |> validate_length(:display_name, max: Gamend.Limits.get(:max_display_name))
+    |> validate_length(:display_name,
+      max: Gamend.Limits.get(:max_display_name),
+      count: :codepoints
+    )
     |> Gamend.Limits.validate_metadata_size(:metadata)
   end
 
   @doc """
   A changeset for the unique username handle.
 
-  Input is lowercased on cast. Valid usernames are 3–32 chars
-  (`Gamend.Limits` `:min_username`/`:max_username`) of `a-z`, `0-9` and
-  non-consecutive `.` `_` `-` separators, starting and ending alphanumeric.
-  Uniqueness is enforced by the DB unique index.
+  Input is NFKC-normalized and lowercased on cast. Valid usernames are 3–32
+  characters (`Gamend.Limits` `:min_username`/`:max_username`) of letters and
+  digits in any ONE script, joined by non-consecutive `.` `_` `-` separators
+  and starting and ending on a letter or digit — `Gamend.Accounts.Username`
+  has the rules and why. Uniqueness is enforced by the DB unique index.
   """
   def username_changeset(user_or_changeset, attrs) do
     user_or_changeset
     |> cast(attrs, [:username])
     |> update_change(:username, fn
       nil -> nil
-      username -> String.downcase(username)
+      username -> Username.normalize(username)
     end)
     |> validate_required([:username])
     |> validate_length(:username,
       min: Gamend.Limits.get(:min_username),
       max: Gamend.Limits.get(:max_username)
     )
-    |> validate_format(:username, ~r/^[a-z0-9](?:[._-]?[a-z0-9])*$/,
+    |> validate_format(:username, Username.format(),
       message:
-        "only a-z, 0-9 and non-consecutive . _ - separators; must start and end alphanumeric"
+        "only letters, digits and non-consecutive . _ - separators; must start and end with a letter or digit"
     )
+    |> validate_change(:username, fn :username, username ->
+      if Username.single_script?(username),
+        do: [],
+        else: [username: "must not mix alphabets"]
+    end)
     |> unique_constraint(:username)
   end
 
@@ -483,7 +512,10 @@ defmodule Gamend.Accounts.User do
   def display_name_changeset(user, attrs) do
     user
     |> cast(attrs, [:display_name])
-    |> validate_length(:display_name, max: Gamend.Limits.get(:max_display_name))
+    |> validate_length(:display_name,
+      max: Gamend.Limits.get(:max_display_name),
+      count: :codepoints
+    )
   end
 
   @doc "Changeset for setting the avatar URL (`profile_url`) from an upload."

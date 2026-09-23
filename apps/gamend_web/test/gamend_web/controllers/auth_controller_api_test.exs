@@ -513,6 +513,41 @@ defmodule GamendWeb.AuthControllerApiTest do
       assert_received {:apple_ios_client_id, "com.example.ios"}
     end
 
+    test "POST /api/v1/auth/apple/ios/callback fills the display name from given/family name", %{
+      conn: conn
+    } do
+      SettingsHelpers.put(
+        :gamend_core,
+        Gamend.OAuth.Providers,
+        :apple_ios_client_id,
+        "com.ex.ios"
+      )
+
+      on_exit(fn ->
+        SettingsHelpers.delete(:gamend_core, Gamend.OAuth.Providers, :apple_ios_client_id)
+      end)
+
+      defmodule MockExchangerAppleIosName do
+        def exchange_apple_code("valid_ticket", _cid, _secret, _redirect),
+          do: {:ok, %{"sub" => "a_ios_named"}}
+
+        def exchange_apple_code("valid_ticket", _cid, _secret, _redirect, _opts),
+          do: {:ok, %{"sub" => "a_ios_named"}}
+      end
+
+      Application.put_env(:gamend_web, :oauth_exchanger, MockExchangerAppleIosName)
+
+      conn =
+        post(conn, "/api/v1/auth/apple/ios/callback", %{
+          code: "valid_ticket",
+          given_name: "Grace",
+          family_name: "Hopper"
+        })
+
+      assert conn.status == 200
+      assert Gamend.Accounts.get_user_by_apple_id("a_ios_named").display_name == "Grace Hopper"
+    end
+
     test "POST /api/v1/auth/steam/callback skips profile lookup when user already has profile", %{
       conn: conn
     } do

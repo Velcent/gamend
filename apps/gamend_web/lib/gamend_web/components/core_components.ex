@@ -36,6 +36,25 @@ defmodule GamendWeb.CoreComponents do
   alias Phoenix.HTML.Form
   alias Phoenix.LiveView.JS
 
+  attr :name, :string, required: true
+
+  attr :class, :any,
+    default: "max-w-[24ch]",
+    doc: "width cap; replaced, not merged, so pass the cap you want (`max-w-full` in a sized box)"
+
+  attr :rest, :global
+
+  @doc """
+  A player's display name on one line: cut with an ellipsis where it does not
+  fit, whole on hover (`title`). A display name may be 255 characters, so any
+  place that prints one bare can be pushed wide by a single player.
+  """
+  def player_name(assigns) do
+    ~H"""
+    <span class={["inline-block min-w-0 truncate align-bottom", @class]} title={@name} {@rest}>{@name}</span>
+    """
+  end
+
   attr :code, :any, required: true, doc: "ISO alpha-2 country code, or nil for none"
   attr :square, :boolean, default: false, doc: "1:1 box instead of 4:3"
   attr :eager, :boolean, default: false, doc: "visible at load: fetch and decode with the page"

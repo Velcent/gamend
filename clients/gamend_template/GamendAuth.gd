@@ -41,6 +41,10 @@ var before_session_save: Callable = Callable()
 ## sends it exactly once, so the game reads it after apple_native_auth to
 ## apply its own display-name policy.
 var last_apple_full_name := ""
+## The parts of that name, sent to the server with the code so the account is
+## created with it (the name is not in Apple's token).
+var _apple_given_name := ""
+var _apple_family_name := ""
 
 var _api: GamendApi
 var _state := "initial"
@@ -196,6 +200,8 @@ func apple_native_auth() -> String:
 		return got[1]
 	var request = GamendOauthCallbackApiAppleIosRequest.new()
 	request.code = got[0]
+	request.given_name = _apple_given_name
+	request.family_name = _apple_family_name
 	var response = await _api.authenticate_oauth_callback_api_apple_ios(request)
 	if response.error:
 		return str(response.error.message)
@@ -207,7 +213,7 @@ func apple_native_link() -> String:
 	var got: Array = await _apple_native_code()
 	if got[1] or got[0].is_empty():
 		return got[1]
-	var response = await _api.authenticate_link_apple_ios(got[0])
+	var response = await _api.authenticate_link_apple_ios(got[0], _apple_given_name, _apple_family_name)
 	if response.error:
 		return "Error: " + str(response.error.message)
 	return ""
@@ -219,6 +225,8 @@ func _apple_native_code() -> Array:
 	_apple_login_result = ""
 	_apple_login_error = ""
 	last_apple_full_name = ""
+	_apple_given_name = ""
+	_apple_family_name = ""
 	if not ClassDB.class_exists("ASAuthorizationController"):
 		return ["", ""]
 	_apple_sign_in.signin_with_scopes(["full_name", "email"])
@@ -299,9 +307,12 @@ func _on_api_user_updated(user: Dictionary) -> void:
 func _on_apple_authorization_completed(credential: RefCounted) -> void:
 	if credential.is_class("ASAuthorizationAppleIDCredential"):
 		_apple_login_result = credential.authorization_code.get_string_from_utf8()
-		last_apple_full_name = (str(credential.full_name.get("given_name", "")) + " " + str(credential.full_name.get("family_name", ""))).strip_edges()
+		_apple_given_name = str(credential.full_name.get("given_name", "")).strip_edges()
+		_apple_family_name = str(credential.full_name.get("family_name", "")).strip_edges()
+		last_apple_full_name = (_apple_given_name + " " + _apple_family_name).strip_edges()
 		if last_apple_full_name.is_empty():
 			last_apple_full_name = str(credential.full_name.get("nickname", "")).strip_edges()
+			_apple_given_name = last_apple_full_name
 	else:
 		_apple_login_error = "Error: Failed to login with Apple. Wrong credential type."
 	_apple_auth_revision += 1

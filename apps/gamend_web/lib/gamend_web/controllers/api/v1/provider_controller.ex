@@ -124,7 +124,14 @@ defmodule GamendWeb.Api.V1.ProviderController do
        %Schema{
          type: :object,
          required: [:code],
-         properties: %{code: %Schema{type: :string, description: "Apple authorization code"}}
+         properties: %{
+           code: %Schema{type: :string, description: "Apple authorization code"},
+           given_name: %Schema{
+             type: :string,
+             description: "Given name from the credential; fills a blank display name"
+           },
+           family_name: %Schema{type: :string, description: "Family name, as `given_name`"}
+         }
        }},
     responses: [
       ok: {"Linked", "application/json", CurrentUserResponse},
@@ -139,7 +146,8 @@ defmodule GamendWeb.Api.V1.ProviderController do
   def link_apple_ios(conn, params) do
     with :ok <- enabled("apple"),
          {:ok, user_params} <- OAuthExchange.apple_ios_params(params["code"]) do
-      link_with(conn, "apple", user_params)
+      name = OAuthExchange.apple_name(params["given_name"], params["family_name"])
+      link_with(conn, "apple", OAuthExchange.put_apple_name(user_params, name))
     else
       {:error, :unknown_provider} -> unknown_provider(conn)
       {:error, reason} -> OAuthExchange.reply_refused(conn, reason)

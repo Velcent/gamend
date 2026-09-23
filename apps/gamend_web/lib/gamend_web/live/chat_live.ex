@@ -132,7 +132,7 @@ defmodule GamendWeb.ChatLive do
               >
                 <.user_avatar user={f} class="w-6 h-6 shrink-0" />
                 <.presence_dot status={PresenceStatus.status(f)} />
-                <span class="truncate flex-1">{LiveHelpers.public_user_name(f)}</span>
+                <.player_name name={LiveHelpers.public_user_name(f)} class="flex-1 max-w-full" />
                 <%= if (count = Map.get(@friend_unread, f.id, 0)) > 0 do %>
                   <span class="badge badge-sm badge-info">{count}</span>
                 <% end %>

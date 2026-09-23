@@ -224,7 +224,7 @@ defmodule GamendWeb.UserLive.SettingsTest do
     test "renders errors with invalid data (too long) (phx-change)", %{conn: conn} do
       {:ok, lv, _html} = live(conn, ~p"/users/settings")
 
-      long_name = String.duplicate("a", 200)
+      long_name = String.duplicate("a", Gamend.Limits.get(:max_display_name) + 1)
 
       result =
         lv

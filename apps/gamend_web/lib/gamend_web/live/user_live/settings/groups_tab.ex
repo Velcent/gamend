@@ -261,7 +261,9 @@ defmodule GamendWeb.UserLive.Settings.GroupsTab do
                           }
                         />
                       </td>
-                      <td class="text-sm">{LiveHelpers.public_user_name(m.user)}</td>
+                      <td class="text-sm">
+                        <.player_name name={LiveHelpers.public_user_name(m.user)} />
+                      </td>
                       <td>
                         <span class={[
                           "badge badge-sm",
@@ -337,7 +339,7 @@ defmodule GamendWeb.UserLive.Settings.GroupsTab do
                 >
                   <div class="flex items-center gap-2">
                     <div class="text-sm font-medium">
-                      {LiveHelpers.public_user_name(req.user)}
+                      <.player_name name={LiveHelpers.public_user_name(req.user)} />
                     </div>
                     <span class="text-xs text-base-content/70">
                       {LiveHelpers.public_user_handle(req.user)} &mdash;
@@ -404,7 +406,9 @@ defmodule GamendWeb.UserLive.Settings.GroupsTab do
                         )
                       ]} />
                       <div>
-                        <span class="text-sm font-medium">{LiveHelpers.public_user_name(u)}</span>
+                        <span class="text-sm font-medium"><.player_name name={
+                          LiveHelpers.public_user_name(u)
+                        } /></span>
                         <span class="text-xs text-base-content/70 ms-1">
                           {LiveHelpers.public_user_handle(u)}
                         </span>
@@ -448,7 +452,7 @@ defmodule GamendWeb.UserLive.Settings.GroupsTab do
                           else: "bg-base-content/30"
                         )
                       ]} />
-                      <span class="text-sm">{LiveHelpers.public_user_name(f)}</span>
+                      <span class="text-sm"><.player_name name={LiveHelpers.public_user_name(f)} /></span>
                     </div>
                     <button
                       phx-click="group_invite_user"

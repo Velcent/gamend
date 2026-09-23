@@ -387,9 +387,9 @@ defmodule GamendWeb.TournamentsLive do
     end
   end
 
-  defp player_name(%{display_name: name}) when is_binary(name) and name != "", do: name
-  defp player_name(%{username: name}) when is_binary(name) and name != "", do: name
-  defp player_name(_leader), do: gettext("Player")
+  defp leader_name(%{display_name: name}) when is_binary(name) and name != "", do: name
+  defp leader_name(%{username: name}) when is_binary(name) and name != "", do: name
+  defp leader_name(_leader), do: gettext("Player")
 
   defp not_found(socket) do
     socket
@@ -674,7 +674,7 @@ defmodule GamendWeb.TournamentsLive do
                     <.user_avatar user={e.leader} class="w-8 h-8" />
                     <div class="flex flex-col leading-tight">
                       <span class={[e.leader_id == @current_user_id && "font-bold"]}>
-                        {player_name(e.leader)}
+                        <.player_name name={leader_name(e.leader)} />
                       </span>
                       <.user_title user={e.leader} />
                     </div>
@@ -810,7 +810,7 @@ defmodule GamendWeb.TournamentsLive do
         <div>
           <span class="text-sm text-base-content/70">{gettext("Showing")}</span>
           <div class="text-xl font-bold flex items-center gap-2">
-            {player_name(@highlight.leader)}
+            <.player_name name={leader_name(@highlight.leader)} />
             <span :if={@own?} class="badge badge-primary badge-sm">{gettext("You")}</span>
           </div>
           <.user_title user={@highlight.leader} class="text-sm text-base-content/60" />
@@ -915,7 +915,7 @@ defmodule GamendWeb.TournamentsLive do
   defp slot_name(entries, entry_id) do
     case Map.get(entries, entry_id) do
       nil -> gettext("Player")
-      entry -> player_name(entry.leader)
+      entry -> leader_name(entry.leader)
     end
   end
 

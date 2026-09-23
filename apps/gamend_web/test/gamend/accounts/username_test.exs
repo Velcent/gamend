@@ -100,6 +100,30 @@ defmodule Gamend.Accounts.UsernameTest do
       assert updated.username == String.downcase(handle)
     end
 
+    test "accepts one script of any alphabet, and Han with kana or Hangul" do
+      user = AccountsFixtures.user_fixture()
+
+      for good <- ["nicö", "дмитрий", "山田太郎", "やまだ太郎", "김민준", "δημήτρης", "tiệp", "مريم"] do
+        n = System.unique_integer([:positive])
+        handle = good <> "-#{n}"
+        assert {:ok, updated} = Accounts.update_username(user, %{"username" => handle})
+        assert updated.username == handle
+      end
+    end
+
+    test "normalizes fullwidth and decomposed forms onto one spelling" do
+      user = AccountsFixtures.user_fixture()
+      n = System.unique_integer([:positive])
+
+      assert {:ok, updated} = Accounts.update_username(user, %{"username" => "ＤＲＡＧＯＳ#{n}"})
+      assert updated.username == "dragos#{n}"
+
+      decomposed = "s\u0326tefan#{n}"
+      assert {:ok, updated} = Accounts.update_username(user, %{"username" => decomposed})
+      assert updated.username == String.normalize(decomposed, :nfc)
+      assert Accounts.get_user_by_username("S\u0326TEFAN#{n}").id == user.id
+    end
+
     test "rejects a taken username" do
       taken = AccountsFixtures.user_fixture()
       user = AccountsFixtures.user_fixture()
@@ -113,7 +137,18 @@ defmodule Gamend.Accounts.UsernameTest do
     test "rejects malformed usernames" do
       user = AccountsFixtures.user_fixture()
 
-      for bad <- ["ab", "-leading", "trailing-", "two..dots", "spaced name", "nicö"] do
+      for bad <- [
+            "ab",
+            "-leading",
+            "trailing-",
+            "two..dots",
+            "spaced name",
+            # Cyrillic а inside Latin: renders as "paypal"
+            "pаypal",
+            "zero\u200Bwidth",
+            "za\u0301\u0301\u0301\u0301\u0301lgo",
+            "emoji😀"
+          ] do
         result = Accounts.update_username(user, %{"username" => bad})
         assert {:error, changeset} = result
         assert Keyword.has_key?(changeset.errors, :username), "expected #{inspect(bad)} rejected"
@@ -135,9 +170,26 @@ defmodule Gamend.Accounts.UsernameTest do
       assert UsernameGenerator.slug("A_B..C") == "a_b-c"
     end
 
+    test "keeps a script that does not transliterate" do
+      assert UsernameGenerator.slug("山田 太郎") == "山田-太郎"
+      assert UsernameGenerator.slug("Дмитрий") == "дмитрий"
+    end
+
+    test "a long non-Latin name still generates a valid username" do
+      {:ok, user} =
+        Accounts.find_or_create_from_device(unique_device_id(), %{
+          display_name: String.duplicate("山田太郎", 12)
+        })
+
+      assert user.username =~ ~r/^山田太郎.*-\d{4}$/u
+      assert String.length(user.username) <= Gamend.Limits.get(:max_username)
+    end
+
     test "returns nil when too little survives" do
       assert UsernameGenerator.slug(nil) == nil
       assert UsernameGenerator.slug("阿明") == nil
+      # Mixed scripts: the ASCII half is what survives.
+      assert UsernameGenerator.slug("Ivan Иван") == "ivan"
       assert UsernameGenerator.slug("--") == nil
     end
   end

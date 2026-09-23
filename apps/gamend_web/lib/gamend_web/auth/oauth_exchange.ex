@@ -203,6 +203,46 @@ defmodule GamendWeb.Auth.OAuthExchange do
 
   def apple_ios_params(_code), do: {:error, :missing_param}
 
+  @doc """
+  The display name from Apple's web `user` form field: a JSON string,
+  `{"name": {"firstName", "lastName"}, "email"}`. Apple sends it only on a
+  player's FIRST authorization and never puts the name in the ID token, so
+  dropping it here loses it for good.
+  """
+  @spec apple_web_name(term()) :: String.t() | nil
+  def apple_web_name(user) when is_binary(user) do
+    case Jason.decode(user) do
+      {:ok, %{"name" => %{} = name}} -> apple_name(name["firstName"], name["lastName"])
+      _ -> nil
+    end
+  end
+
+  def apple_web_name(_user), do: nil
+
+  @doc """
+  "Given Family", trimmed, or nil when both are blank. A name past the
+  display-name limit is dropped whole rather than cut: kept, it would fail
+  the changeset and with it the whole sign-in.
+  """
+  @spec apple_name(term(), term()) :: String.t() | nil
+  def apple_name(given, family) do
+    [given, family]
+    |> Enum.filter(&is_binary/1)
+    |> Enum.map(&String.trim/1)
+    |> Enum.reject(&(&1 == ""))
+    |> Enum.join(" ")
+    |> case do
+      "" -> nil
+      # Codepoints, as the changeset and the column count them.
+      name -> if length(String.codepoints(name)) <= Gamend.Limits.get(:max_display_name), do: name
+    end
+  end
+
+  @doc "Sets the Apple-provided name when there is one; a nil keeps the params."
+  @spec put_apple_name(map(), String.t() | nil) :: map()
+  def put_apple_name(user_params, nil), do: user_params
+  def put_apple_name(user_params, name), do: Map.put(user_params, :display_name, name)
+
   @doc "The answer to a code, ticket or token the provider would not vouch for."
   @spec reply_refused(Plug.Conn.t(), term()) :: Plug.Conn.t()
   def reply_refused(conn, :missing_param),

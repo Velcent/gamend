@@ -53,7 +53,13 @@ defmodule Gamend.Limits do
   )
 
   # ── User ────────────────────────────────────────────────
-  setting(:max_display_name, :integer, default: 80)
+  setting(:max_display_name, :integer,
+    default: 255,
+    doc:
+      "Max display-name length in codepoints. 255 is the users.display_name " <>
+        "column's own limit on Postgres (varchar(255)); higher fails the insert there."
+  )
+
   setting(:min_username, :integer, default: 3)
   setting(:max_username, :integer, default: 32)
 

@@ -144,7 +144,7 @@ defmodule GamendWeb.HostLayoutNavigation do
         )
       ]}>
         <.user_avatar user={Scope.user(@current_scope)} class="w-6 h-6" />
-        <span class="max-w-[8rem] truncate">{display_name(Scope.user(@current_scope))}</span>
+        <.player_name name={display_name(Scope.user(@current_scope))} class="max-w-[8rem]" />
         <span
           :if={@notif_unread_count > 0}
           class="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 text-xs font-bold rounded-full bg-error text-error-content"
@@ -160,7 +160,10 @@ defmodule GamendWeb.HostLayoutNavigation do
               else, so it is not a surprise to see it here. --%>
         <li class="menu-title px-2 py-1">
           <span class="flex flex-col leading-tight text-base-content">
-            <span class="truncate font-semibold">{display_name(Scope.user(@current_scope))}</span>
+            <.player_name
+              name={display_name(Scope.user(@current_scope))}
+              class="max-w-full font-semibold"
+            />
             <.user_title user={Scope.user(@current_scope)} />
           </span>
         </li>
@@ -610,7 +613,7 @@ defmodule GamendWeb.HostLayoutNavigation do
         ]}>
           <span class="flex items-center gap-2">
             <.user_avatar user={Scope.user(@current_scope)} class="w-5 h-5" />
-            <span class="truncate">{display_name(Scope.user(@current_scope))}</span>
+            <.player_name name={display_name(Scope.user(@current_scope))} class="max-w-full" />
             <span
               :if={@notif_unread_count > 0}
               class="ms-0.5 inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 text-xs font-bold rounded-full bg-error text-error-content"

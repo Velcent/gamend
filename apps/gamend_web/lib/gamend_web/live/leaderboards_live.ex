@@ -341,7 +341,9 @@ defmodule GamendWeb.LeaderboardsLive do
                       <span class={[
                         record.user_id != nil && record.user_id == @current_user_id && "font-bold"
                       ]}>
-                        {record.label || LiveHelpers.public_user_name(record.user || record.user_id)}
+                        <.player_name name={
+                          record.label || LiveHelpers.public_user_name(record.user || record.user_id)
+                        } />
                       </span>
                       <.user_title user={record.user} />
                     </div>
