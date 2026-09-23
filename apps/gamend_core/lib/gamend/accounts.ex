@@ -33,6 +33,7 @@ defmodule Gamend.Accounts do
     Sessions,
     Stats,
     User,
+    Username,
     UserToken
   }
 
@@ -661,7 +662,7 @@ defmodule Gamend.Accounts do
   """
   @spec get_user_by_username(String.t()) :: User.t() | nil
   def get_user_by_username(username) when is_binary(username) do
-    get_user_by_field(:username, Gamend.Accounts.Username.normalize(username))
+    get_user_by_field(:username, Username.normalize(username))
   end
 
   @doc """
