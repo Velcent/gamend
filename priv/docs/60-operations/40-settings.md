@@ -169,7 +169,7 @@ Live values, and where each one came from, are on the
 | `GAMEND_LIMITS_MAX_CHAT_MESSAGES_PER_DAY` | integer | `5000` | Rolling 24h; 0 disables. Needs rate limiting on; ETS backend counts per instance. |
 | `GAMEND_LIMITS_MAX_CHAT_REPORTS_PER_USER_PER_DAY` | integer | `50` | Rolling 24h; 0 disables. Needs rate limiting on; ETS backend counts per instance. |
 | `GAMEND_LIMITS_MAX_DEVICE_ID` | integer | `256` |  |
-| `GAMEND_LIMITS_MAX_DISPLAY_NAME` | integer | `80` |  |
+| `GAMEND_LIMITS_MAX_DISPLAY_NAME` | integer | `255` | Max display-name length in codepoints. 255 is the users.display_name column's own limit on Postgres (varchar(255)); higher fails the insert there. |
 | `GAMEND_LIMITS_MAX_EMAIL` | integer | `160` |  |
 | `GAMEND_LIMITS_MAX_FRIENDS_PER_USER` | integer | `500` |  |
 | `GAMEND_LIMITS_MAX_GROUPS_CREATED_PER_USER` | integer | `20` |  |
