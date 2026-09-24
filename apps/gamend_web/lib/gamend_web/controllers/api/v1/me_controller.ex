@@ -134,7 +134,8 @@ defmodule GamendWeb.Api.V1.MeController do
     description:
       "Sets the unique username handle. Lowercased on save; 3-32 letters or digits and " <>
         "non-consecutive . _ - separators, starting and ending on a letter or digit. Letters keep to " <>
-        "one script, except that Latin mixes with Chinese, Japanese or Korean. " <>
+        "one script, except that Latin mixes with Chinese, Japanese or Korean; a host may restrict " <>
+        "handles to a-z and 0-9. " <>
         "Answers 422 validation_failed when the username is malformed or already taken.",
     request_body: {
       "Username payload",

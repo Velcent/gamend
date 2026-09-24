@@ -180,7 +180,7 @@ Then translate priv/gettext/LOCALE/LC_MESSAGES/theme.po. A missing translation f
 
 ## Host-owned branding and content
 
-Branding behavior is host-owned. The host layout decides which logo, banner, favicon, and CSS are used at runtime. Presentation media can use an image object for PNG/JPG/GIF assets, or omit image and set icon to render a plain icon.
+Branding behavior is host-owned. The host layout decides which logo, banner, favicon, and CSS are used at runtime. A top-level `logo_dark` names the mark the navbar shows on the dark theme, for a logo drawn in colours that vanish on a dark page; without it the one `logo` serves both. Presentation media can use an image object for PNG/JPG/GIF assets, or omit image and set icon to render a plain icon.
 
 Set image.light for the default presentation image, image.dark for a dark-mode variant, and image.alt for alt text.
 
@@ -191,6 +191,37 @@ Presentation media is visual only. Use buttons for links and calls to action.
 Edit assets/css/app.css when you want to change the full base stylesheet. The compiled bundle is written to priv/static/assets/css/app.css. Use priv/static/theme.css for a small layer of token or color overrides without forking the whole base CSS.
 
 Changelog, roadmap, and blog pages are host-owned, and their Markdown content now lives at the repository root as CHANGELOG.md, ROADMAP.md, and blog/. They are no longer configured through GAMEND_CONTENT_THEME_CONFIG.
+
+### Markdown content
+
+Every collection — the guides, the blog, the changelog — renders through one pipeline. A file may open with a `---` frontmatter block of `key: value` lines, `[a, b]` flow lists and `- a` block lists; nothing nested. Headings get ids, so `#section` links and a table of contents work. Footnotes render. An admonition is written either way and looks the same:
+
+```
+:::tip[For animators]
+The clip plays on its own.
+:::
+
+> [!WARNING]
+> This deletes the project.
+```
+
+A ```` ```mermaid ```` fence becomes a diagram, drawn by the `MermaidDiagram` hook when the page loads. A fixed set of raw HTML passes the sanitiser — `<figure>`, `<video>`, `<details>`, a `<div class>`, an inline `<svg>` — so a guide can hold a clip or a gallery; anything that runs is stripped.
+
+#### Guides
+
+A collection registered with `nesting: :tree` (`Gamend.Content.register_path/2`) reads folders at any depth. A folder is a category; its `_category.md` frontmatter gives it a `title`, `icon`, `color`, `position`, `description` and `collapsed`. An `index.md` in a folder is the category's own page. A file's slug is its path with each segment's numeric prefix stripped: `10-manual/20-scenes.md` is `manual/scenes`. Frontmatter on a guide: `title`, `description`, `sidebar_label` (or `label`), `position` (or `sidebar_position`), `slug` (`/reference` for the whole thing), `image`, `keywords`, `icon`. A name beginning with `_` is not a page.
+
+With `base_path: "/docs"`, a link to a neighbouring file — `[Scenes](./scenes.md#nodes)`, `[Reference](../reference/index.md)` — is rewritten to that guide's route. With `assets: :static`, an image at a root-absolute path such as `/img/x.png` is left for `priv/static` to serve; relative paths still go through `/content/<collection>/`.
+
+`use GamendWeb.DocsLive, layout: :sidebar` renders such a collection with the tree beside every page, a table of contents, breadcrumbs, a landing page per category and an "Edit this page" link (`edit_url:`); route it as `live "/docs/*path"`. The default `:cards` layout is the one-level index gamend's own guides use.
+
+#### Blog
+
+A post's frontmatter may give `title`, `slug`, `date`, `description`, `authors`, `image`, `keywords` and `tags`; without it, the first `# ` heading and the `YYYY-MM-DD-slug.md` filename still work. `authors: [dragos]` is resolved from `blog/_authors/dragos.md` (`name`, `title`, `url`, `image`). `<!-- truncate -->` marks where the excerpt ends. Feeds are at `/blog/rss.xml` and `/blog/atom.xml`.
+
+#### Pages
+
+Register a `:pages` collection (`nesting: :tree`, `base_path: "/"`) and a markdown file answers its path with nothing routed: `content/pages/faq.md` is `/faq`, `content/pages/help/install.md` is `/help/install`. `layout: wide` in its frontmatter widens the frame.
 
 ## Configure navigation
 

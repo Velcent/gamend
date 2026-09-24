@@ -110,18 +110,35 @@ joined by single `.` `_` `-` separators. It is stored NFKC-normalized
 ([UAX #15](https://www.unicode.org/reports/tr15/)) and lowercased, so `Wang`,
 `ＷＡＮＧ` and `wang` are one name.
 
-Mixing scripts follows the rules browsers use to display international domain
-names, so one name cannot pass for another:
+Against impersonation it applies the two rules of Unicode's security standard
+that browsers apply to international domain names, and nothing more:
 
 | Rule | Allowed | Refused | Source |
 | --- | --- | --- | --- |
-| One script, or Latin with Chinese, Japanese or Korean | `дмитрий`, `王wang`, `小明abc`, `yamada太郎`, `김민준kim` | `pаypal` (Cyrillic `а`), `ivanиван` | [UTS #39](https://www.unicode.org/reports/tr39/#Restriction_Level_Detection) "Highly Restrictive" |
-| CJK characters that look like Latin letters or punctuation (`一` `丨` `十` `工` `ー` `ン` …) only among Chinese or Japanese | `一刀tom`, `ラーメン` | `tom一号`, `paypa丨`, `abーcd` | [Chromium's IDN spoof checks](https://chromium.googlesource.com/chromium/src/+/main/docs/idn.md) |
-| Hangul as whole syllables | `이민` | `goㅇgle` | [UTS #39](https://www.unicode.org/reports/tr39/#Identifier_Status_and_Type): lone jamo are Obsolete |
-| Accents never doubled, at most four stacked | `nguyễn`, `tiệp` | `café` with the accent typed twice | [UTS #39](https://www.unicode.org/reports/tr39/#Optional_Detection) section 5.4 |
+| One script, or Latin with Chinese, Japanese or Korean | `дмитрий`, `王wang`, `小明abc`, `yamada太郎`, `김민준kim` | `pаypal` (Cyrillic `а`), `ivanиван` | [UTS #39](https://www.unicode.org/reports/tr39/#Restriction_Level_Detection) section 5.2, "Highly Restrictive" |
+| Accents never repeated, at most four stacked | `nguyễn`, `tiệp` | `café` with the accent typed twice | [UTS #39](https://www.unicode.org/reports/tr39/#Optional_Detection) section 5.4 |
+
+Latin, Cyrillic and Greek share dozens of identical letters, so mixing them
+lets one handle pass for another; Chinese, Japanese and Korean share none
+with Latin, so mixing those is safe. A CJK character that resembles a Latin
+letter or separator (`丨`, `一`) is no more confusable than `1` and `-`, which
+any ASCII handle holds, so `tom一号` is fine.
 
 A refused handle answers `422 validation_failed` with the rule it broke in
 `errors.username`. Display names have none of these rules.
+
+For the GitHub and Discord model, ASCII handles and Unicode display names,
+set `GAMEND_LIMITS_USERNAME_ASCII_ONLY=true`: a handle is then `a-z`, `0-9`
+and the separators, input is still normalized first (`ＷＡＮＧ` is `wang`),
+and a generated handle transliterates the name (`Drágoș` is `dragos`) or
+picks a random word.
+
+A plugin can tighten the rules but not loosen them: `before_user_update`
+refuses a player's change with its own message (banned words, reserved
+names, a stricter character set), and `before_user_register` swaps the
+generated handle at sign-up. Core re-validates after both, and a sign-up
+always ends with a valid handle, so a plugin bug never locks a player out.
+Details in the [server scripting guide](/docs/server-scripting).
 
 ## Provider linking
 

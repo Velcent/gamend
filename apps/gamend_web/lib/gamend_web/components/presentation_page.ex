@@ -471,6 +471,77 @@ defmodule GamendWeb.PresentationPage do
 
   defp has_links?(_item), do: false
 
+  attr :cards, :list, default: []
+
+  @doc """
+  A section's `"cards"`: a grid of small cards, each an icon, a title and a
+  line of text, optionally a link.
+
+  For the section whose point is a *set* — twelve features, five personas,
+  the four things a product does — where a paragraph would list them and a
+  reader would skim past. Three across from `lg`, two from `sm`, one below.
+  `icon` is a heroicon name; `href` makes the whole card the link.
+  """
+  def card_grid(assigns) do
+    cards = if is_list(assigns.cards), do: assigns.cards, else: []
+
+    assigns = assign(assigns, cards: Enum.filter(cards, &non_empty_string(&1["title"])))
+
+    ~H"""
+    <ul :if={@cards != []} class="grid w-full gap-4 text-start sm:grid-cols-2 lg:grid-cols-3">
+      <li :for={card <- @cards} class="h-full">
+        <.card_body card={card} />
+      </li>
+    </ul>
+    """
+  end
+
+  attr :card, :map, required: true
+
+  # One card, a link when it has somewhere to go. The two markups differ only
+  # in the outer element, so the inner block is written once below.
+  defp card_body(%{card: %{"href" => href}} = assigns) when is_binary(href) and href != "" do
+    ~H"""
+    <a
+      href={@card["href"]}
+      class="flex h-full flex-col gap-2 rounded-xl border border-base-300 bg-base-100/80 p-4 transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
+    >
+      <.card_inner card={@card} />
+    </a>
+    """
+  end
+
+  defp card_body(assigns) do
+    ~H"""
+    <div class="flex h-full flex-col gap-2 rounded-xl border border-base-300 bg-base-100/80 p-4">
+      <.card_inner card={@card} />
+    </div>
+    """
+  end
+
+  attr :card, :map, required: true
+
+  defp card_inner(assigns) do
+    ~H"""
+    <span :if={non_empty_string(@card["icon"])} class="text-primary">
+      <.icon name={@card["icon"]} class="size-6" />
+    </span>
+    <span class="font-bold">{@card["title"]}</span>
+    <span :if={non_empty_string(@card["text"])} class="text-sm leading-relaxed text-base-content/75">
+      {rich_text(@card["text"])}
+    </span>
+    """
+  end
+
+  defp has_cards?(item) when is_map(item) do
+    case Map.get(item, "cards") do
+      cards when is_list(cards) -> cards != []
+      _ -> false
+    end
+  end
+
+  defp has_cards?(_item), do: false
+
   attr :item, :map, required: true
   attr :variant, :string, default: "section"
 
@@ -721,6 +792,7 @@ defmodule GamendWeb.PresentationPage do
           {rich_text(Map.get(@section, "text", ""))}
         </div>
         <.link_chips :if={has_links?(@section)} links={Map.get(@section, "links")} align="center" />
+        <.card_grid :if={has_cards?(@section)} cards={Map.get(@section, "cards")} />
         <div :if={has_buttons?(@section)} class="pt-1">
           <.buttons buttons={Map.get(@section, "buttons", [])} />
         </div>
@@ -753,6 +825,7 @@ defmodule GamendWeb.PresentationPage do
           {rich_text(Map.get(@section, "text", ""))}
         </div>
         <.link_chips :if={has_links?(@section)} links={Map.get(@section, "links")} />
+        <.card_grid :if={has_cards?(@section)} cards={Map.get(@section, "cards")} />
         <div :if={has_buttons?(@section)} class="pt-1 md:pt-2">
           <.buttons buttons={Map.get(@section, "buttons", [])} />
         </div>

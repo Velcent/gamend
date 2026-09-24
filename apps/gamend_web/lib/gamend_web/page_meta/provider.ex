@@ -32,5 +32,21 @@ defmodule GamendWeb.PageMeta.Provider do
   @doc "schema.org objects for `path`, rendered as `application/ld+json`."
   @callback json_ld(path :: String.t()) :: [map()]
 
-  @optional_callbacks describe: 1, title: 1, json_ld: 1
+  @doc """
+  The `og:image` for `path` — a root-relative path or an absolute URL — or
+  `nil` for the theme's banner. A guide with a social card of its own, a
+  blog post with a cover: the image a link to the page unfurls with.
+  """
+  @callback image(path :: String.t()) :: String.t() | nil
+
+  @doc """
+  The breadcrumb trail for `path`, as `{label, path}` pairs ending with the
+  current page (whose path may be `nil`), or `[]` for none.
+  """
+  @callback breadcrumbs(path :: String.t()) :: [{String.t(), String.t() | nil}]
+
+  @doc ~S'The `<meta name="robots">` value for `path` ("noindex, follow"), or `nil`.'
+  @callback robots(path :: String.t()) :: String.t() | nil
+
+  @optional_callbacks describe: 1, title: 1, json_ld: 1, image: 1, breadcrumbs: 1, robots: 1
 end

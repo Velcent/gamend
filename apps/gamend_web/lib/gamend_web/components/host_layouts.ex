@@ -122,6 +122,10 @@ defmodule GamendWeb.HostLayouts do
     default: false,
     doc: "when true, render content edge-to-edge with no main wrapper, padding, or footer"
 
+  attr :wide, :boolean,
+    default: false,
+    doc: "when true, the content column widens for a page with its own side columns"
+
   attr :background_icons, :any,
     default: nil,
     doc:
@@ -416,7 +420,15 @@ defmodule GamendWeb.HostLayouts do
   # is global and only re-read on deploy, and `:current_path` is kept in step
   # by the `:set_current_path` hook in `GamendWeb.UserAuth`, so a `push_patch`
   # to another URL does change the nav highlight.
-  @shell_assign_inputs [:background_icons, :conn, :current_path, :current_scope, :flush, :theme]
+  @shell_assign_inputs [
+    :background_icons,
+    :conn,
+    :current_path,
+    :current_scope,
+    :flush,
+    :theme,
+    :wide
+  ]
 
   # The assigns `HostLayoutShell.app/1` renders from, derived from the handful
   # of attrs `app/1` takes. Public so the change-tracking contract above can be

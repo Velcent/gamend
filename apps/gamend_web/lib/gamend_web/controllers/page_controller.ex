@@ -7,8 +7,25 @@ defmodule GamendWeb.PageController do
     render_presentation_page(conn, "/", gettext("Home"))
   end
 
+  # A markdown page from the `:pages` collection, when the host registered one
+  # — `content/pages/faq.md` answering `/faq` with nothing routed — else a
+  # theme page from the JSON. A host without the collection sees no change.
   def configured_page(conn, %{"path" => path}) do
-    render_presentation_page(conn, "/" <> Enum.join(path, "/"), gettext("Page"))
+    slug = Enum.join(path, "/")
+
+    case Gamend.Content.get_doc(:pages, slug) do
+      nil -> render_presentation_page(conn, "/" <> slug, gettext("Page"))
+      page -> render_markdown_page(conn, page, slug)
+    end
+  end
+
+  defp render_markdown_page(conn, page, slug) do
+    conn
+    |> assign(:page_title, page.title)
+    |> assign(:page, page)
+    |> assign(:html, Gamend.Content.doc_html(:pages, slug))
+    |> assign(:wide, Map.get(page, :meta, %{})["layout"] == "wide")
+    |> render(:markdown_page)
   end
 
   def privacy(conn, _params) do

@@ -8,6 +8,7 @@ defmodule GamendWeb.HostLayoutShell do
   attr :current_path, :string, default: nil
   attr :current_query, :string, default: ""
   attr :flush, :boolean, default: false
+  attr :wide, :boolean, default: false
   attr :theme, :map, required: true
   attr :navigation, :map, default: %{}
   attr :footer, :map, default: %{}
@@ -83,6 +84,21 @@ defmodule GamendWeb.HostLayoutShell do
               loading="eager"
               decoding="sync"
               fetchpriority="high"
+              class={theme_logo_dark(@theme) && "[[data-theme=dark]_&]:hidden"}
+            />
+            <%!-- A mark drawn for a light page can vanish on a dark one. The
+                  theme's `logo_dark` takes its place, swapped by the same
+                  attribute the presentation images follow, so no script picks
+                  one and the two never both show. --%>
+            <img
+              :if={theme_logo_dark(@theme)}
+              src={theme_logo_dark(@theme)}
+              width="36"
+              height="36"
+              alt=""
+              loading="eager"
+              decoding="sync"
+              class="hidden [[data-theme=dark]_&]:block"
             />
             <span class="text-lg font-bold">{Map.get(@theme, "title")}</span>
             <span
@@ -174,8 +190,18 @@ defmodule GamendWeb.HostLayoutShell do
                 knocks a full-height hero off centre. `--breadcrumb-offset` is
                 the trail's own height plus the stack gap; a hero subtracts it
                 from `100dvh` so its first screen still ends at the fold. --%>
+          <%!-- Reading width by default. A `wide` page brings its own side
+                columns — a docs sidebar, a table of contents — and the article
+                between them is what should keep the reading width, so the
+                frame lets it out to the screen. --%>
           <div
-            class="mx-auto max-w-2xl md:max-w-3xl lg:max-w-4xl xl:max-w-6xl space-y-4"
+            class={[
+              "mx-auto space-y-4",
+              if(@wide,
+                do: "max-w-2xl md:max-w-3xl lg:max-w-5xl xl:max-w-7xl 2xl:max-w-screen-2xl",
+                else: "max-w-2xl md:max-w-3xl lg:max-w-4xl xl:max-w-6xl"
+              )
+            ]}
             style={if length(@breadcrumbs) > 1, do: "--breadcrumb-offset: 2.25rem"}
           >
             <.breadcrumbs trail={@breadcrumbs} />
@@ -388,6 +414,13 @@ defmodule GamendWeb.HostLayoutShell do
   defp theme_logo(theme) do
     logo = Map.get(theme, "logo")
     GamendWeb.SRI.versioned_path(logo) || logo
+  end
+
+  defp theme_logo_dark(theme) do
+    case Map.get(theme, "logo_dark") do
+      logo when is_binary(logo) and logo != "" -> GamendWeb.SRI.versioned_path(logo) || logo
+      _ -> nil
+    end
   end
 
   defp theme_tagline(theme) do

@@ -146,12 +146,16 @@ defmodule Gamend.ApiConventions do
 
   # ── R5: route paths use underscores ────────────────────────────────────────
 
+  # A path that names a file is spelled the way the world spells that file:
+  # `sitemap.xml`, `llms-full.txt`, `.well-known`. The rule is about the
+  # paths this app coins.
   defp hyphenated_route_paths do
     for {file, line, text} <- source_lines(source_dirs()),
         String.contains?(file, "router"),
         [_, verb, path] <-
           [Regex.run(~r/^\s*(get|post|put|patch|delete|live) "(\/[^"]*)"/, text)],
-        String.contains?(path, "-") do
+        String.contains?(path, "-"),
+        not Regex.match?(~r/\.[a-z0-9]+$/, path) do
       %{
         rule: "R5-path-underscore",
         file: file,

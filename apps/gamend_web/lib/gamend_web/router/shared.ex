@@ -981,6 +981,10 @@ defmodule GamendWeb.Router.Shared do
       if blog do
         quote do
           live "/blog", unquote(blog), :index
+          # The feeds before `:slug`, which would otherwise take "rss.xml"
+          # for a post and 404 it.
+          get "/blog/rss.xml", BlogFeedController, :rss
+          get "/blog/atom.xml", BlogFeedController, :atom
           live "/blog/:slug", unquote(blog), :show
         end
       end

@@ -232,7 +232,7 @@ defmodule Gamend.Theme.JSONConfig do
   end
 
   defp normalize_asset_paths(map) when is_map(map) do
-    Enum.reduce(["css", "logo", "banner", "favicon"], map, fn key, acc ->
+    Enum.reduce(["css", "logo", "logo_dark", "banner", "favicon"], map, fn key, acc ->
       case Map.get(acc, key) do
         value when is_binary(value) -> Map.put(acc, key, normalize_path(value))
         _ -> acc

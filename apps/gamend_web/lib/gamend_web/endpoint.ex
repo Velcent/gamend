@@ -18,9 +18,18 @@ defmodule GamendWeb.Endpoint do
     websocket: [log: false, compress: true, max_frame_size: 131_072, timeout: 300_000],
     longpoll: false
 
+  # `:user_agent` alongside the peer data: a page that adapts to the
+  # visitor's platform — a download page highlighting their OS — reads it in
+  # `mount/3` from the dead render and again on connect, and without it the
+  # connected mount got `nil` and the highlight dropped a moment after it
+  # appeared.
   socket "/live", Phoenix.LiveView.Socket,
-    websocket: [connect_info: [:peer_data, session: @session_options], log: false, compress: true],
-    longpoll: [connect_info: [session: @session_options], log: false]
+    websocket: [
+      connect_info: [:peer_data, :user_agent, session: @session_options],
+      log: false,
+      compress: true
+    ],
+    longpoll: [connect_info: [:user_agent, session: @session_options], log: false]
 
   plug GamendWeb.Plugs.AcmeChallenge
   # After AcmeChallenge so certbot's HTTP-01 fetch is answered before any
@@ -101,6 +110,10 @@ defmodule GamendWeb.Endpoint do
   plug GamendWeb.Plugs.LocalePath
   plug GamendWeb.Plugs.DynamicCors
   plug GamendWeb.Plugs.RateLimiter
+  # After the static plugs — a file that exists is served as asked for — and
+  # before the router, so `/docs/intro/` becomes `/docs/intro` for every
+  # route rather than each page checking its own spelling.
+  plug GamendWeb.Plugs.TrailingSlash
   plug :dispatch_router
 
   @access_log_pt_key {__MODULE__, :access_log_level}

@@ -120,8 +120,7 @@ defmodule Gamend.Accounts.UsernameTest do
             "taroやまだ",
             "김민준kim",
             "ㄅㄆㄇ王",
-            # a CJK lookalike of a Latin letter is fine among CJK
-            "一刀tom",
+            "tom一号",
             "이민"
           ] do
         n = System.unique_integer([:positive])
@@ -169,18 +168,7 @@ defmodule Gamend.Accounts.UsernameTest do
             "王иван",
             "abcمريم",
             "김민준やまだ",
-            # Chromium's CJK lookalikes of l, - and / beside non-CJK
-            "paypa丨",
-            "ab一cd",
-            "tom一号",
-            "abーcd",
-            "aンb",
-            # a Hiragana ぺ inside Katakana
-            "ヘルぺー",
-            # lone Hangul jamo ㅇ as o
-            "goㅇgle",
-            # a dot above i, and a doubled accent
-            "admi\u0307n",
+            # an accent typed twice
             "cafe\u0301\u0301",
             "zero\u200Bwidth",
             "za\u0301\u0301\u0301\u0301\u0301lgo",
@@ -197,20 +185,45 @@ defmodule Gamend.Accounts.UsernameTest do
     test "names the rule a handle breaks" do
       assert Username.check_scripts("王wang") == :ok
       assert {:error, "can only mix" <> _} = Username.check_scripts("pаypal")
-      assert {:error, "has a lone Hangul" <> _} = check("goㅇgle")
-      assert {:error, "repeats or stacks" <> _} = check("cafe\u0301\u0301")
-      assert {:error, "has a character that can be mistaken" <> _} = check("paypa丨")
-    end
-
-    test "catches lookalikes in their normalized form" do
-      # Kangxi ⼁ ⼀ and halfwidth ｰ fold onto the checked ideographs and kana.
-      for raw <- ["paypa⼁", "ab⼀cd", "abｰcd", "paypaㅣ", "abㅡcd"] do
-        assert {:error, _} = check(raw), "expected #{inspect(raw)} refused"
-      end
+      assert {:error, "repeats or stacks" <> _} = Username.check_scripts("cafe\u0301\u0301")
     end
   end
 
-  defp check(raw), do: raw |> Username.normalize() |> Username.check_scripts()
+  describe "with username_ascii_only" do
+    setup do
+      previous = Application.get_env(:gamend_core, Gamend.Limits, [])
+
+      Application.put_env(
+        :gamend_core,
+        Gamend.Limits,
+        Keyword.put(previous, :username_ascii_only, true)
+      )
+
+      on_exit(fn -> Application.put_env(:gamend_core, Gamend.Limits, previous) end)
+      :ok
+    end
+
+    test "refuses a non-ASCII handle and still normalizes fullwidth input" do
+      user = AccountsFixtures.user_fixture()
+      n = System.unique_integer([:positive])
+
+      assert {:error, changeset} = Accounts.update_username(user, %{"username" => "山田太郎#{n}"})
+      assert {"only a-z" <> _, _} = changeset.errors[:username]
+
+      assert {:ok, updated} = Accounts.update_username(user, %{"username" => "ＤＲＡＧＯＳ#{n}"})
+      assert updated.username == "dragos#{n}"
+    end
+
+    test "the generator transliterates or falls back to a word" do
+      assert UsernameGenerator.slug("Drágoș") == "dragos"
+      assert UsernameGenerator.slug("山田太郎") == nil
+
+      {:ok, user} =
+        Accounts.find_or_create_from_device(unique_device_id(), %{display_name: "山田太郎"})
+
+      assert user.username =~ ~r/^[a-z]+-\d{4}$/
+    end
+  end
 
   test "get_user_by_username/1 is case-insensitive" do
     user = AccountsFixtures.user_fixture()

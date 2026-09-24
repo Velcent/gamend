@@ -185,18 +185,36 @@ defmodule GamendWeb.ContentPages do
                 <div class="space-y-4">
                   <article
                     :for={post <- posts}
-                    class="rounded-3xl border border-base-300 bg-base-100/95 p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                    class="overflow-hidden rounded-3xl border border-base-300 bg-base-100/95 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
                   >
-                    <.link navigate={~p"/blog/#{post.slug}"} class="block space-y-2">
-                      <div class="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-base-content/70">
-                        <span><.timestamp at={post.date} format="date" /></span>
+                    <.link navigate={~p"/blog/#{post.slug}"} class="block sm:flex">
+                      <%!-- The cover, when the post has one: cropped to a
+                            landscape tile beside the text, whole on the post
+                            itself. --%>
+                      <img
+                        :if={post[:image]}
+                        src={post.image}
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
+                        class="aspect-video w-full object-cover sm:w-64 sm:shrink-0"
+                      />
+                      <div class="space-y-2 p-5">
+                        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs uppercase tracking-[0.18em] text-base-content/70">
+                          <span><.timestamp at={post.date} format="date" /></span>
+                          <span :if={post[:reading_minutes]}>
+                            {ngettext("%{count} min read", "%{count} min read", post.reading_minutes)}
+                          </span>
+                        </div>
+
+                        <h4 class="text-xl font-semibold text-base-content/90 transition-colors hover:text-primary">
+                          {post.title}
+                        </h4>
+
+                        <p class="text-sm leading-6 text-base-content/70">{post.excerpt}</p>
+
+                        <.post_authors :if={post[:authors] not in [nil, []]} authors={post.authors} />
                       </div>
-
-                      <h4 class="text-xl font-semibold text-base-content/90 transition-colors hover:text-primary">
-                        {post.title}
-                      </h4>
-
-                      <p class="text-sm leading-6 text-base-content/70">{post.excerpt}</p>
                     </.link>
                   </article>
                 </div>
@@ -230,6 +248,9 @@ defmodule GamendWeb.ContentPages do
               </.link>
               <span>/</span>
               <span><.timestamp at={@post.date} format="date" /></span>
+              <span :if={@post[:reading_minutes]}>
+                · {ngettext("%{count} min read", "%{count} min read", @post.reading_minutes)}
+              </span>
             </div>
 
             <div class="space-y-3">
@@ -237,7 +258,16 @@ defmodule GamendWeb.ContentPages do
                 {@post.title}
               </h1>
               <p class="max-w-2xl text-base leading-7 text-base-content/70">{@post.excerpt}</p>
+              <.post_authors :if={@post[:authors] not in [nil, []]} authors={@post.authors} />
             </div>
+
+            <img
+              :if={@post[:image]}
+              src={@post.image}
+              alt=""
+              decoding="async"
+              class="w-full rounded-2xl border border-base-300"
+            />
           </div>
 
           <article class="markdown-content">{raw(@html)}</article>
@@ -277,6 +307,34 @@ defmodule GamendWeb.ContentPages do
         </article>
       </div>
     </Layouts.app>
+    """
+  end
+
+  attr :authors, :list, required: true
+
+  # Who wrote it: a name, its role when the author file gives one, an avatar
+  # when it gives that, and a link when it gives a URL. A post's `authors:`
+  # keys that have no file still show as names.
+  defp post_authors(assigns) do
+    ~H"""
+    <ul class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+      <li :for={author <- @authors} class="flex items-center gap-2">
+        <img
+          :if={author[:image]}
+          src={author.image}
+          alt=""
+          loading="lazy"
+          class="size-7 rounded-full border border-base-300"
+        />
+        <span class="flex flex-col leading-tight">
+          <a :if={author[:url]} href={author.url} class="font-medium link link-hover" rel="noopener">
+            {author.name}
+          </a>
+          <span :if={!author[:url]} class="font-medium">{author.name}</span>
+          <span :if={author[:title]} class="text-xs text-base-content/70">{author.title}</span>
+        </span>
+      </li>
+    </ul>
     """
   end
 

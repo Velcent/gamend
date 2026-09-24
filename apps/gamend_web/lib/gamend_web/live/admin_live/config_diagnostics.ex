@@ -160,7 +160,9 @@ defmodule GamendWeb.AdminLive.ConfigDiagnostics do
     banner_dark_path = derive_dark_path(banner_path)
 
     logo_path = (theme_map && Map.get(theme_map, "logo")) || ""
-    logo_dark_path = derive_dark_path(logo_path)
+    # The theme names its dark mark when the light one's name does not
+    # follow the `_dark` convention; the derived path is the fallback.
+    logo_dark_path = (theme_map && Map.get(theme_map, "logo_dark")) || derive_dark_path(logo_path)
 
     favicon_path = (theme_map && Map.get(theme_map, "favicon")) || ""
     favicon_dark_path = derive_dark_path(favicon_path)
