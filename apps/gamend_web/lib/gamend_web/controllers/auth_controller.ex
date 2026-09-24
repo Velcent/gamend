@@ -25,6 +25,7 @@ defmodule GamendWeb.AuthController do
     "google" => :google,
     "apple" => :apple,
     "facebook" => :facebook,
+    "github" => :github,
     "steam" => :steam
   }
 
@@ -369,7 +370,7 @@ defmodule GamendWeb.AuthController do
         name: "provider",
         schema: %OpenApiSpex.Schema{
           type: :string,
-          enum: ["discord", "apple", "google", "facebook", "steam"]
+          enum: ["discord", "apple", "google", "facebook", "github", "steam"]
         },
         required: true
       ]
@@ -421,6 +422,20 @@ defmodule GamendWeb.AuthController do
 
     url =
       "https://www.facebook.com/v18.0/dialog/oauth?client_id=#{client_id}&redirect_uri=#{URI.encode_www_form(redirect_uri)}&response_type=code&scope=#{URI.encode_www_form(scope)}&state=#{URI.encode_www_form(state)}"
+
+    redirect(conn, external: url)
+  end
+
+  # No scope: a GitHub App ignores it, its permissions are set on the App.
+  def request(conn, %{"provider" => "github"}) do
+    client_id = Gamend.Settings.get(Gamend.OAuth.Providers, :github_client_id)
+
+    base = GamendWeb.endpoint().url()
+    redirect_uri = "#{base}/auth/github/callback"
+    {conn, state} = put_oauth_state(conn, "github")
+
+    url =
+      "https://github.com/login/oauth/authorize?client_id=#{client_id}&redirect_uri=#{URI.encode_www_form(redirect_uri)}&state=#{URI.encode_www_form(state)}"
 
     redirect(conn, external: url)
   end
@@ -502,7 +517,7 @@ defmodule GamendWeb.AuthController do
   # API flows include a 'state' parameter with session_id
   # Browser flows don't have state
   def callback(conn, %{"provider" => provider, "code" => code} = params)
-      when provider in ["discord", "google", "facebook", "apple"] do
+      when provider in ["discord", "google", "facebook", "github", "apple"] do
     case OAuthExchange.exchange_code(provider, code) do
       {:ok, user_params} ->
         user_params =
@@ -656,7 +671,7 @@ defmodule GamendWeb.AuthController do
     name: "provider",
     schema: %OpenApiSpex.Schema{
       type: :string,
-      enum: ["discord", "apple", "google", "facebook", "steam"]
+      enum: ["discord", "apple", "google", "facebook", "github", "steam"]
     },
     description: "OAuth provider",
     required: true,

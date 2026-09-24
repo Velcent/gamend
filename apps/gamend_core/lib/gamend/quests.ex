@@ -1249,11 +1249,15 @@ defmodule Gamend.Quests do
 
   Hidden quests are listed but carry no details until earned (callers obscure
   them). Chain quests only appear once their prerequisite is met. Grouped
-  quests collapse to one entry carrying `:group_size`.
+  quests collapse to one entry carrying `:group_size` and `collapsed: true`;
+  the members of a group listed in full carry the size alone.
 
   ## Options
   - `:category` — filter by category
-  - `:group` — expand this one group's members; every other group stays collapsed
+  - `:group` — expand this one group's members; every other group stays
+    collapsed
+  - `:drop_groups` — group keys to leave out entirely, collapsed or not: what
+    a page with a selector over some groups does with the ones not picked
   - `:status` — `"in_progress"` (not yet completed), `"claimable"`
     (completed, waiting to be claimed) or `"done"` (completed or claimed)
   - `:page` / `:page_size`
@@ -1312,6 +1316,26 @@ defmodule Gamend.Quests do
 
   defp category_names(quests) do
     quests |> Enum.map(& &1.category) |> Enum.reject(&is_nil/1) |> Enum.uniq() |> Enum.sort()
+  end
+
+  @doc """
+  The groups this viewer's quests fall into, as `%{key, title}` in the order
+  the list would show them — what a group selector offers. `title` is the
+  stored `group_title` (the first member's when they disagree), untranslated,
+  like every other stored string here. `category` narrows it the way the list
+  filter does; `nil` is the signed-out catalog.
+  """
+  @spec groups(user_id() | nil, String.t() | nil) :: [%{key: String.t(), title: String.t()}]
+  def groups(user_id, category \\ nil) do
+    now = DateTime.utc_now(:second)
+
+    active_quests()
+    |> Enum.filter(fn q ->
+      is_binary(q.group_key) and within_window?(q, now) and category in [nil, q.category]
+    end)
+    |> host_visible(user_id)
+    |> Enum.uniq_by(& &1.group_key)
+    |> Enum.map(&%{key: &1.group_key, title: &1.group_title || &1.group_key})
   end
 
   @doc """
@@ -1375,10 +1399,13 @@ defmodule Gamend.Quests do
   # pagination are resolved in memory; the user's rows come from one query.
   defp visible_quests(user_id, now, opts) do
     category = Keyword.get(opts, :category)
+    drop = Keyword.get(opts, :drop_groups, [])
 
     quests =
       active_quests()
-      |> Enum.filter(fn q -> within_window?(q, now) and category in [nil, q.category] end)
+      |> Enum.filter(fn q ->
+        within_window?(q, now) and category in [nil, q.category] and q.group_key not in drop
+      end)
       |> host_visible(user_id)
 
     keys = Enum.map(quests, & &1.key)
@@ -1414,9 +1441,11 @@ defmodule Gamend.Quests do
     |> Enum.filter(&matches_status?(&1, status))
   end
 
-  # One entry per group, carrying `:group_size` so a UI can say "and 51 more".
-  # `opened` lists that one group's members in full; the rest stay collapsed
-  # behind the member worth acting on (claimable first, then furthest along).
+  # One entry per group, carrying `:group_size` so a UI can say "and 51 more"
+  # and `collapsed: true`, which is what tells a card it stands for the group.
+  # `opened` lists that one group's members in full — the same size, not
+  # collapsed; the rest stay behind the member worth acting on (claimable
+  # first, then furthest along).
   defp collapse_groups(entries, opened) do
     # First-appearance order, so a group lands where its best member sorted.
     # chunk_by would only catch members sort_order happened to make adjacent.
@@ -1436,7 +1465,12 @@ defmodule Gamend.Quests do
         if key == opened do
           Enum.map(members, &Map.put(&1, :group_size, size))
         else
-          [Map.put(group_representative(members), :group_size, size)]
+          [
+            members
+            |> group_representative()
+            |> Map.put(:group_size, size)
+            |> Map.put(:collapsed, true)
+          ]
         end
     end)
   end

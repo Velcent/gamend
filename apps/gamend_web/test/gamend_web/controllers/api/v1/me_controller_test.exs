@@ -30,6 +30,7 @@ defmodule GamendWeb.Api.V1.MeControllerTest do
       assert Map.has_key?(body, "linked_providers")
       assert body["linked_providers"]["google"] == false
       assert body["linked_providers"]["facebook"] == false
+      assert body["linked_providers"]["github"] == false
       assert body["linked_providers"]["discord"] == false
       assert body["linked_providers"]["apple"] == false
       assert body["linked_providers"]["steam"] == false

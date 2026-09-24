@@ -31,7 +31,10 @@ defmodule GamendWeb.Api.V1.ProviderController do
   @provider_param [
     in: :path,
     name: "provider",
-    schema: %Schema{type: :string, enum: ["discord", "apple", "google", "facebook", "steam"]},
+    schema: %Schema{
+      type: :string,
+      enum: ["discord", "apple", "google", "facebook", "github", "steam"]
+    },
     required: true
   ]
 

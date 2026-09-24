@@ -15,7 +15,7 @@ defmodule Gamend.Accounts.Search do
   # Fields the ADMIN search matches. Deliberately wider than search_users/2
   # (username + display_name only): email, device id and provider ids are
   # sensitive and must never be searchable through the public player search.
-  @admin_search_fields ~w(email username display_name device_id google_id apple_id facebook_id steam_id discord_id)a
+  @admin_search_fields ~w(email username display_name device_id google_id apple_id facebook_id github_id steam_id discord_id)a
 
   @doc """
   Search users by display name (case-insensitive prefix match) or exact numeric id.
@@ -132,7 +132,8 @@ defmodule Gamend.Accounts.Search do
   sensitive fields a player cannot, so it is admin-only.
 
   `filters` keys (string or atom): `:search` (term or full id), `:facets` (list
-  of `"online"`, `"unactivated"`, and provider names). `opts`: `:page`,
+  of `"online"`, `"unactivated"`, `"unverified"` — an email never confirmed —
+  and provider names). `opts`: `:page`,
   `:page_size`, `:sort_field`, `:sort_dir`.
   """
   @spec list_all_users(map(), keyword()) :: [User.t()]
@@ -193,7 +194,12 @@ defmodule Gamend.Accounts.Search do
     |> then(fn q ->
       if "unactivated" in facets, do: where(q, [u], u.is_activated == false), else: q
     end)
-    |> apply_provider_presence(facets -- ["online", "unactivated"])
+    |> then(fn q ->
+      if "unverified" in facets,
+        do: where(q, [u], not is_nil(u.email) and is_nil(u.confirmed_at)),
+        else: q
+    end)
+    |> apply_provider_presence(facets -- ["online", "unactivated", "unverified"])
   end
 
   defp apply_provider_presence(query, providers) do
@@ -217,6 +223,9 @@ defmodule Gamend.Accounts.Search do
 
   defp provider_presence_clause("facebook"),
     do: dynamic([u], not is_nil(u.facebook_id) and u.facebook_id != "")
+
+  defp provider_presence_clause("github"),
+    do: dynamic([u], not is_nil(u.github_id) and u.github_id != "")
 
   defp provider_presence_clause("steam"),
     do: dynamic([u], not is_nil(u.steam_id) and u.steam_id != "")

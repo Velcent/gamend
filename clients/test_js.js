@@ -208,7 +208,7 @@ async function runAllTests() {
   await testWebRTCFullFlow(rtToken, rtUserId);
   console.log('');
 
-  const providers = ['steam', 'discord', 'google', 'facebook', 'apple'];
+  const providers = ['steam', 'discord', 'google', 'facebook', 'github', 'apple'];
   for (const provider of providers) {
     console.log(`\n--- Testing ${provider.toUpperCase()} ---\n`);
     const result = await runOAuthFlow(provider);

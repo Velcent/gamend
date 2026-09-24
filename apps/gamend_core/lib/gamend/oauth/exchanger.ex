@@ -165,6 +165,82 @@ defmodule Gamend.OAuth.Exchanger do
     end
   end
 
+  @github_token_url "https://github.com/login/oauth/access_token"
+  @github_user_url "https://api.github.com/user"
+  @github_emails_url "https://api.github.com/user/emails"
+
+  @spec exchange_github_code(String.t(), String.t(), String.t(), String.t(), keyword()) ::
+          {:ok, map()} | {:error, term()}
+  def exchange_github_code(code, client_id, client_secret, redirect_uri, _opts \\ []) do
+    body = %{
+      client_id: client_id,
+      client_secret: client_secret,
+      code: code,
+      redirect_uri: redirect_uri
+    }
+
+    # GitHub answers a bad code with a 200 whose body is `{"error": ...}`, so
+    # only a body carrying `access_token` counts as success.
+    case http_client().post(@github_token_url,
+           form: body,
+           headers: [{"accept", "application/json"}]
+         ) do
+      {:ok, %{status: 200, body: %{"access_token" => access_token}}}
+      when is_binary(access_token) ->
+        headers = github_headers(access_token)
+
+        case http_client().get(@github_user_url, headers: headers) do
+          {:ok, %{status: 200, body: user_info}} when is_map(user_info) ->
+            {:ok, github_put_email(user_info, headers)}
+
+          other ->
+            log_oauth_failure("GitHub", "user info", other)
+            {:error, "Failed to get user info"}
+        end
+
+      other ->
+        log_oauth_failure("GitHub", "token exchange", other)
+        {:error, "Failed to exchange code"}
+    end
+  end
+
+  defp github_headers(access_token) do
+    [
+      {"authorization", "Bearer #{access_token}"},
+      {"accept", "application/vnd.github+json"},
+      {"x-github-api-version", "2022-11-28"},
+      {"user-agent", "Gamend"}
+    ]
+  end
+
+  # `/user` only carries the email a person chose to show publicly. The
+  # primary address is on `/user/emails`, which a GitHub App can read only with
+  # the email permission — without it the profile alone is enough, and the
+  # account is created with no email, as a Steam account is.
+  defp github_put_email(user_info, headers) do
+    case http_client().get(@github_emails_url, headers: headers) do
+      {:ok, %{status: 200, body: emails}} when is_list(emails) ->
+        case github_primary_email(emails) do
+          %{"email" => email} = entry when is_binary(email) ->
+            user_info
+            |> Map.put("email", email)
+            |> Map.put("email_verified", entry["verified"] == true)
+
+          _ ->
+            user_info
+        end
+
+      other ->
+        Logger.info("GitHub OAuth: email list unavailable, using the profile: #{inspect(other)}")
+        user_info
+    end
+  end
+
+  defp github_primary_email(emails) do
+    Enum.find(emails, &match?(%{"primary" => true}, &1)) ||
+      Enum.find(emails, &match?(%{"verified" => true}, &1))
+  end
+
   @spec exchange_apple_code(String.t(), String.t(), String.t(), String.t(), keyword()) ::
           {:ok, map()} | {:error, term()}
   def exchange_apple_code(code, client_id, client_secret, _redirect_uri, opts \\ []) do

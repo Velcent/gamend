@@ -93,7 +93,7 @@ defmodule Gamend.CaptchaTest do
       assert_received {:sent, sent}
       assert %{"secret" => "secret", "response" => "tok", "remoteip" => "203.0.113.7"} = sent
 
-      # "unknown" is what LiveHelpers.client_ip/1 returns with no peer data.
+      # "unknown" is what LiveHelpers.client_ip/2 returns with no known address.
       # Forwarding it literally would have Cloudflare score a bogus address.
       assert :ok = Captcha.verify("tok", "unknown")
       assert_received {:sent, sent}

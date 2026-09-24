@@ -194,6 +194,7 @@ defmodule GamendWeb.UserLive.Settings.AccountTab do
                 @user.apple_id,
                 @user.google_id,
                 @user.facebook_id,
+                @user.github_id,
                 @user.steam_id
               ],
               fn v ->
@@ -206,7 +207,7 @@ defmodule GamendWeb.UserLive.Settings.AccountTab do
             class="flex items-center justify-between"
           >
             <div>
-              <strong>{provider |> Atom.to_string() |> String.capitalize()}</strong>
+              <strong>{provider_name(provider)}</strong>
               <div class="text-sm text-base-content/70">
                 {if linked_id, do: gettext("Linked"), else: gettext("Not linked")}
               </div>
@@ -591,6 +592,11 @@ defmodule GamendWeb.UserLive.Settings.AccountTab do
 
   # Rows in the Account card: every linked provider (a disabled one must stay
   # unlinkable) plus every enabled one.
+  # Brand names: never translated. `capitalize/1` covers every provider but
+  # the one with a capital in the middle.
+  defp provider_name(:github), do: "GitHub"
+  defp provider_name(provider), do: provider |> Atom.to_string() |> String.capitalize()
+
   defp provider_rows(user) do
     Providers.all()
     |> Enum.map(&{&1, linked_provider_id(user, &1)})

@@ -39,7 +39,7 @@ These hold everywhere, so the tables below list only what is specific to them:
 | `username` | string | Unique lowercase handle, generated at registration |
 | `display_name` | string | Human-friendly, not unique |
 | `profile_url` | string | Avatar URL |
-| `discord_id` `google_id` `facebook_id` `steam_id` `apple_id` `device_id` | string | Linked identities, all nullable |
+| `discord_id` `google_id` `facebook_id` `github_id` `steam_id` `apple_id` `device_id` | string | Linked identities, all nullable |
 | `is_admin` | boolean | Grants `/admin` and the admin API |
 | `is_activated` | boolean | `false` blocks login without deleting the account |
 | `is_online` | boolean | Presence; cleared on disconnect |

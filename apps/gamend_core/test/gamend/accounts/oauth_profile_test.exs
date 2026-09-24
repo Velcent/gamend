@@ -28,6 +28,49 @@ defmodule Gamend.Accounts.OAuthProfileTest do
       assert user.profile_url == "https://example.com/f.png"
     end
 
+    test "saves github profile_url and display_name on create" do
+      attrs = %{
+        github_id: "583231",
+        email: "octocat@example.com",
+        profile_url: "https://avatars.githubusercontent.com/u/583231",
+        display_name: "The Octocat"
+      }
+
+      assert {:ok, user} = Accounts.find_or_create_from_github(attrs)
+      assert user.github_id == "583231"
+      assert user.profile_url == "https://avatars.githubusercontent.com/u/583231"
+      assert user.display_name == "The Octocat"
+      assert Accounts.get_user_by_github_id("583231").id == user.id
+      assert Accounts.get_linked_providers(user).github == true
+    end
+
+    test "creates a github user with no email, as a Steam user is" do
+      assert {:ok, user} = Accounts.find_or_create_from_github(%{github_id: "7", email: nil})
+      assert user.github_id == "7"
+      assert user.email == nil
+    end
+
+    test "links github to an existing account only on a verified email" do
+      {:ok, user} = Gamend.Accounts.register_user(%{email: "ghlink@example.com"})
+
+      assert {:error, _} =
+               Accounts.find_or_create_from_github(%{
+                 github_id: "gh_unverified",
+                 email: user.email,
+                 email_verified: false
+               })
+
+      assert {:ok, linked} =
+               Accounts.find_or_create_from_github(%{
+                 github_id: "gh_verified",
+                 email: user.email,
+                 email_verified: true
+               })
+
+      assert linked.id == user.id
+      assert linked.github_id == "gh_verified"
+    end
+
     test "saves display_name from google and facebook on create" do
       gattrs = %{
         google_id: "g_name",

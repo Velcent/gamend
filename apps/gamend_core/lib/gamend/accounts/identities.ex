@@ -1,7 +1,7 @@
 defmodule Gamend.Accounts.Identities do
   @moduledoc """
   How a person signs in without a password — Discord, Apple, Google, Facebook,
-  Steam or a device id — and linking those identities to an existing account or
+  GitHub, Steam or a device id — and linking those identities to an existing account or
   removing them from one.
 
   Split out of `Gamend.Accounts`, which still exposes every function here under
@@ -111,6 +111,25 @@ defmodule Gamend.Accounts.Identities do
       attrs,
       :facebook_id,
       &User.facebook_oauth_changeset/2
+    )
+  end
+
+  @doc """
+  Finds a user by GitHub ID or creates a new user from OAuth data.
+
+  ## Examples
+
+      iex> find_or_create_from_github(%{github_id: "123", email: "user@example.com"})
+      {:ok, %User{}}
+
+  """
+  @spec find_or_create_from_github(map()) ::
+          {:ok, User.t()} | {:error, Ecto.Changeset.t() | term()}
+  def find_or_create_from_github(attrs) do
+    find_or_create_from_oauth(
+      attrs,
+      :github_id,
+      &User.github_oauth_changeset/2
     )
   end
 
@@ -532,7 +551,7 @@ defmodule Gamend.Accounts.Identities do
       {:ok, user}
     else
       # Check if user has at least one OAuth provider or password
-      providers = [:discord_id, :apple_id, :google_id, :facebook_id, :steam_id]
+      providers = [:discord_id, :apple_id, :google_id, :facebook_id, :github_id, :steam_id]
 
       has_provider =
         Enum.any?(providers, fn f ->
@@ -568,21 +587,24 @@ defmodule Gamend.Accounts.Identities do
   @doc """
   Unlink an OAuth provider from a user's account.
 
-  provider should be one of :discord, :apple, :google, :facebook.
+  provider should be one of :discord, :apple, :google, :facebook, :github, :steam.
   This will return {:ok, user} when successful or {:error, reason}.
 
   Guard: we only allow unlinking when the user will still have at least
   one other social provider remaining. This prevents users losing all
   social logins unexpectedly.
   """
-  @spec unlink_provider(User.t(), :discord | :apple | :google | :facebook | :steam) ::
+  @spec unlink_provider(
+          User.t(),
+          :discord | :apple | :google | :facebook | :github | :steam
+        ) ::
           {:ok, User.t()} | {:error, :last_provider | Ecto.Changeset.t() | term()}
   def unlink_provider(%User{} = user, provider)
-      when provider in [:discord, :apple, :google, :facebook, :steam] do
+      when provider in [:discord, :apple, :google, :facebook, :github, :steam] do
     provider_field = provider_field(provider)
 
     # Count remaining linked providers (only non-empty, non-nil strings)
-    providers = [:discord_id, :apple_id, :google_id, :facebook_id, :steam_id]
+    providers = [:discord_id, :apple_id, :google_id, :facebook_id, :github_id, :steam_id]
 
     present =
       Enum.count(providers, fn f ->
@@ -627,5 +649,6 @@ defmodule Gamend.Accounts.Identities do
   defp provider_field(:apple), do: :apple_id
   defp provider_field(:google), do: :google_id
   defp provider_field(:facebook), do: :facebook_id
+  defp provider_field(:github), do: :github_id
   defp provider_field(:steam), do: :steam_id
 end

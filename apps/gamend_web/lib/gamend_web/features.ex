@@ -53,6 +53,16 @@ defmodule GamendWeb.Features do
     doc: "Public GET /api/v1/quests* and the /quests page."
   )
 
+  setting(:list_tournaments, :boolean,
+    default: true,
+    doc: "Public GET /api/v1/tournaments* and the /tournaments pages."
+  )
+
+  setting(:play, :boolean,
+    default: true,
+    doc: "The /play page, which hands a signed-in player a token for the game client."
+  )
+
   setting(:list_matchmaking, :boolean,
     default: true,
     doc: "GET /api/v1/matchmaking/stats. Own-ticket endpoints stay."

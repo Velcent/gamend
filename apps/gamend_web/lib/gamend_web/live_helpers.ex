@@ -96,12 +96,36 @@ defmodule GamendWeb.LiveHelpers do
   end
 
   @doc """
-  Extract the client IP from a LiveView socket's `connect_info`.
+  The client IP for a `live_session`'s `:session` MFA, resolved on the HTTP
+  request.
 
-  Falls back to `"unknown"` when the socket has no peer data (e.g. during
-  the initial static render or in tests).
+  That request has been through `GamendWeb.Plugs.RealIp`, so `remote_ip` is
+  the client behind the proxy rather than the proxy. The socket's own
+  `peer_data` is not: behind a reverse proxy it is the proxy for every
+  visitor, and the longpoll transport has none at all. The session is signed
+  into the page, so a client cannot choose the address it is limited under.
   """
-  def client_ip(socket) do
+  @spec client_ip_session(Plug.Conn.t()) :: %{String.t() => String.t()}
+  def client_ip_session(%Plug.Conn{remote_ip: ip}) do
+    %{"client_ip" => ip |> :inet.ntoa() |> to_string()}
+  end
+
+  @doc """
+  The client IP a LiveView rate-limits under.
+
+  Read from the session `client_ip_session/1` signed into the page, falling
+  back to the socket's peer data and then to `"unknown"`, which is a bucket
+  like any other rather than a pass.
+  """
+  @spec client_ip(Phoenix.LiveView.Socket.t(), map()) :: String.t()
+  def client_ip(socket, session) do
+    case session do
+      %{"client_ip" => ip} when is_binary(ip) -> ip
+      _ -> peer_ip(socket)
+    end
+  end
+
+  defp peer_ip(socket) do
     case Phoenix.LiveView.get_connect_info(socket, :peer_data) do
       %{address: addr} -> addr |> :inet.ntoa() |> to_string()
       _ -> "unknown"
@@ -111,15 +135,13 @@ defmodule GamendWeb.LiveHelpers do
   @doc """
   Check a rate limit bucket for the given IP.
 
-  Bucket types:
-    - `:auth` — 30 requests per 60 seconds (matches the HTTP auth bucket)
-    - `:general` — 1200 requests per 60 seconds
+  Bucket types, sharing the HTTP limiter's settings:
+    - `:auth` — `auth_limit` per `auth_window_ms`
+    - `:general` — `general_limit` per `general_window_ms`
 
   Returns `:ok` or `{:error, retry_after_ms}`.
   """
   def check_rate_limit(ip, bucket_type \\ :general)
-
-  def check_rate_limit("unknown", _bucket_type), do: :ok
 
   def check_rate_limit(ip, :auth) do
     {limit, window} = auth_limits()

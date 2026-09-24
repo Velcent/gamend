@@ -10,12 +10,13 @@ defmodule GamendWeb.Schemas.LinkedProviders do
     properties: %{
       google: %Schema{type: :boolean},
       facebook: %Schema{type: :boolean},
+      github: %Schema{type: :boolean},
       discord: %Schema{type: :boolean},
       apple: %Schema{type: :boolean},
       steam: %Schema{type: :boolean},
       device: %Schema{type: :boolean}
     },
-    required: [:google, :facebook, :discord, :apple, :steam, :device]
+    required: [:google, :facebook, :github, :discord, :apple, :steam, :device]
   })
 end
 

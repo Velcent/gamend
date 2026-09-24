@@ -79,7 +79,7 @@ defmodule GamendWeb.HostRuntime do
 
   # ── OAuth providers ───────────────────────────────────────────────────────
   # Only the providers Ueberauth actually serves get their credentials mirrored
-  # into its application env. Discord, Google and Facebook are exchanged by
+  # into its application env. Discord, Google, Facebook and GitHub are exchanged by
   # Gamend.OAuth.Exchanger, which reads Gamend.Settings at call time and never
   # consults this env; mirroring them here was dead config.
   defp oauth_entries(setting, scheme, host) do

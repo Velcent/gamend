@@ -42,6 +42,24 @@ defmodule Gamend.OAuth.ExchangerExchangeTest do
       end
     end
 
+    # GitHub answers a bad code with a 200 whose body carries `error`, not a
+    # 4xx, so the exchanger must read the body rather than the status.
+    def post("https://github.com/login/oauth/access_token", opts) do
+      case opts[:form] do
+        %{code: "ok_code"} ->
+          {:ok, %{status: 200, body: %{"access_token" => "gh_token"}}}
+
+        %{code: "private_email_code"} ->
+          {:ok, %{status: 200, body: %{"access_token" => "gh_private"}}}
+
+        %{code: "no_email_scope_code"} ->
+          {:ok, %{status: 200, body: %{"access_token" => "gh_noscope"}}}
+
+        _ ->
+          {:ok, %{status: 200, body: %{"error" => "bad_verification_code"}}}
+      end
+    end
+
     def post("https://api.steampowered.com/ISteamUserAuth/AuthenticateUserTicket/v1/", opts) do
       case opts[:form] do
         # A Family Sharing ticket: `steamid` is the account actually playing,
@@ -99,6 +117,59 @@ defmodule Gamend.OAuth.ExchangerExchangeTest do
 
         _ ->
           {:error, :bad}
+      end
+    end
+
+    def get("https://api.github.com/user", opts) do
+      case List.keyfind(opts[:headers], "authorization", 0) do
+        {_, "Bearer gh_token"} ->
+          {:ok,
+           %{
+             status: 200,
+             body: %{
+               "id" => 583_231,
+               "login" => "octocat",
+               "name" => "The Octocat",
+               "avatar_url" => "https://avatars.githubusercontent.com/u/583231",
+               "email" => "octocat@example.com"
+             }
+           }}
+
+        {_, "Bearer gh_private"} ->
+          {:ok, %{status: 200, body: %{"id" => 42, "login" => "private", "email" => nil}}}
+
+        {_, "Bearer gh_noscope"} ->
+          {:ok, %{status: 200, body: %{"id" => 7, "login" => "noscope", "email" => nil}}}
+
+        _ ->
+          {:error, :bad}
+      end
+    end
+
+    def get("https://api.github.com/user/emails", opts) do
+      case List.keyfind(opts[:headers], "authorization", 0) do
+        {_, "Bearer gh_token"} ->
+          {:ok,
+           %{
+             status: 200,
+             body: [
+               %{"email" => "octocat@example.com", "primary" => true, "verified" => true}
+             ]
+           }}
+
+        {_, "Bearer gh_private"} ->
+          {:ok,
+           %{
+             status: 200,
+             body: [
+               %{"email" => "old@example.com", "primary" => false, "verified" => true},
+               %{"email" => "private@example.com", "primary" => true, "verified" => true}
+             ]
+           }}
+
+        # A GitHub App without the email permission.
+        _ ->
+          {:ok, %{status: 403, body: %{"message" => "Resource not accessible by integration"}}}
       end
     end
 
@@ -229,6 +300,40 @@ defmodule Gamend.OAuth.ExchangerExchangeTest do
     test "returns error if user info parse fails" do
       # Provide a flow where exchange returns non-200
       assert {:error, _} = Exchanger.exchange_facebook_code("bad", "cid", "sec", "r")
+    end
+  end
+
+  describe "exchange_github_code/4" do
+    test "returns the profile with the primary email and its verified flag" do
+      assert {:ok, user_info} = Exchanger.exchange_github_code("ok_code", "cid", "sec", "r")
+      assert user_info["id"] == 583_231
+      assert user_info["login"] == "octocat"
+      assert user_info["email"] == "octocat@example.com"
+      assert user_info["email_verified"] == true
+    end
+
+    test "a private email comes from /user/emails, not the null on /user" do
+      assert {:ok, user_info} =
+               Exchanger.exchange_github_code("private_email_code", "cid", "sec", "r")
+
+      assert user_info["id"] == 42
+      assert user_info["email"] == "private@example.com"
+      assert user_info["email_verified"] == true
+    end
+
+    test "an App without the email permission still signs in, with no email" do
+      assert {:ok, user_info} =
+               Exchanger.exchange_github_code("no_email_scope_code", "cid", "sec", "r")
+
+      assert user_info["id"] == 7
+      assert user_info["email"] == nil
+      refute Map.has_key?(user_info, "email_verified")
+    end
+
+    test "a 200 without access_token is a failed exchange" do
+      ExUnit.CaptureLog.capture_log(fn ->
+        assert {:error, _} = Exchanger.exchange_github_code("bad", "cid", "sec", "r")
+      end)
     end
   end
 

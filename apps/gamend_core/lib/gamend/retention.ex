@@ -34,6 +34,9 @@ defmodule Gamend.Retention do
     `0`; the table grows by at most one row per active user per day, and a
     window shorter than the analytics cohort span (60 days) blanks the
     retention numbers.
+  - `GAMEND_RETENTION_ANONYMOUS_USERS_DAYS` (90) — device-only accounts inactive
+    for N days. `GAMEND_RETENTION_UNCONFIRMED_USERS_DAYS` (30) — email accounts
+    whose address was never confirmed, inactive for N days.
   - `GAMEND_RETENTION_ABANDONED_LOBBY_MINUTES` (15) — lobbies nobody has been seen in
     for N minutes, in minutes rather than days. The same window releases a lobby
     seat held by a long-offline player. A party everyone abandoned is disbanded
@@ -279,6 +282,7 @@ defmodule Gamend.Retention do
       quest_reward_recoveries: &Gamend.Quests.recover_pending_rewards/0,
       push_tokens: &prune_push_tokens/0,
       anonymous_users: &prune_anonymous_users/0,
+      unconfirmed_users: &prune_unconfirmed_users/0,
       inactive_user_warnings: &warn_inactive_users/0,
       inactive_users: &prune_inactive_users/0,
       orphaned_avatars: &prune_orphaned_avatars/0
@@ -447,6 +451,20 @@ defmodule Gamend.Retention do
     end
   end
 
+  # An address nobody ever proved they own is not an identity worth keeping: a
+  # sign-up costs one request, and without this the email tier is the one a
+  # bot can fill forever. Keyed off activity, not age, because API sign-up
+  # signs the account in unconfirmed — a player who is still playing keeps it.
+  defp prune_unconfirmed_users do
+    case config(:unconfirmed_users_days) do
+      days when is_integer(days) and days > 0 ->
+        :unconfirmed |> deletable_users(days) |> delete_users()
+
+      _ ->
+        0
+    end
+  end
+
   defp prune_inactive_users do
     case config(:inactive_users_days) do
       days when is_integer(days) and days > 0 ->
@@ -523,6 +541,16 @@ defmodule Gamend.Retention do
   # and would quietly hand back admins and paying users.
   defp identity_condition(:anonymous) do
     Enum.reduce(User.identity_fields(), dynamic(true), fn field, acc ->
+      dynamic([u], ^acc and is_nil(field(u, ^field)))
+    end)
+  end
+
+  # Email is the only identity, and it was never confirmed. An account that
+  # also holds a provider id can be recovered through it, so it is left alone.
+  defp identity_condition(:unconfirmed) do
+    unconfirmed = dynamic([u], not is_nil(u.email) and is_nil(u.confirmed_at))
+
+    Enum.reduce(User.identity_fields() -- [:email], unconfirmed, fn field, acc ->
       dynamic([u], ^acc and is_nil(field(u, ^field)))
     end)
   end
@@ -1010,6 +1038,13 @@ defmodule Gamend.Retention do
       "Delete device-only accounts inactive for N days. 0 keeps forever. These accounts " <>
         "cost one unauthenticated request to create, so they are the tier that actually " <>
         "needs a sweep."
+  )
+
+  setting(:unconfirmed_users_days, :integer,
+    default: 30,
+    doc:
+      "Delete email accounts that never confirmed their address and have been inactive " <>
+        "for N days. 0 keeps forever. Accounts that also have a provider login are kept."
   )
 
   setting(:inactive_users_days, :integer,

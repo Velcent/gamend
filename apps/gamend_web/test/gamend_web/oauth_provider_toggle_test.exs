@@ -34,10 +34,10 @@ defmodule GamendWeb.OAuthProviderToggleTest do
       assert Providers.enabled() == []
     end
 
-    test "true once the presence key is set" do
-      configure(discord_client_id: "id", steam_api_key: "key")
+    test "true once the presence key is set, in display order" do
+      configure(discord_client_id: "id", github_client_id: "id", steam_api_key: "key")
 
-      assert Providers.enabled() == [:discord, :steam]
+      assert Providers.enabled() == [:discord, :github, :steam]
     end
 
     test "an explicit disable wins over credentials" do

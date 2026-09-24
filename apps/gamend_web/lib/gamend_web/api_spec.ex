@@ -30,6 +30,7 @@ defmodule GamendWeb.ApiSpec do
         - **Discord OAuth**: Use `/api/v1/auth/discord` flow
         - **Google OAuth**: Use `/api/v1/auth/google` flow
         - **Facebook OAuth**: Use `/api/v1/auth/facebook` flow
+        - **GitHub OAuth**: Use `/api/v1/auth/github` flow
         - **Apple Sign In**: Use `/auth/apple` browser flow or apple sdk flow
         - **Steam (OpenID)**: Use `/api/v1/auth/steam` flow
 
@@ -319,7 +320,7 @@ defmodule GamendWeb.ApiSpec do
             scheme: "bearer",
             bearerFormat: "JWT",
             description:
-              "JWT access token - obtain from /api/v1/login, /api/v1/auth/discord/callback, /api/v1/auth/google/callback, /api/v1/auth/facebook/callback, or /auth/apple"
+              "JWT access token - obtain from /api/v1/login, /api/v1/auth/discord/callback, /api/v1/auth/google/callback, /api/v1/auth/facebook/callback, /api/v1/auth/github/callback, or /auth/apple"
           }
         }
       }

@@ -133,6 +133,7 @@ var TIME_TO_WAIT_RECONNECT = 5000
 const PROVIDER_DISCORD = "discord"
 const PROVIDER_APPLE = "apple"
 const PROVIDER_FACEBOOK = "facebook"
+const PROVIDER_GITHUB = "github"
 const PROVIDER_GOOGLE = "google"
 const PROVIDER_STEAM = "steam"
 const LOG_REDACTED := "[redacted]"
@@ -955,7 +956,8 @@ func user_update_current_user_display_name(display_name: String) -> GamendResult
 	return await _call_api(UsersApi.new(_config), "update_current_user_display_name", [request])
 
 ## Update current user's unique username handle (lowercased on save; 3-32
-## letters or digits of one script, with non-consecutive . _ - separators).
+## letters or digits, with non-consecutive . _ - separators; letters keep to
+## one script, except Latin mixes with Chinese, Japanese or Korean).
 ## Fails when taken/invalid.
 func user_update_current_user_username(username: String) -> GamendResult:
 	var request := GamendUpdateCurrentUserUsernameRequest.new()

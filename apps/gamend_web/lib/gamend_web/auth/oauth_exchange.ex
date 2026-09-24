@@ -24,7 +24,7 @@ defmodule GamendWeb.Auth.OAuthExchange do
           finder: (map() -> {:ok, User.t()} | {:error, term()})
         }
 
-  @providers ~w(discord google facebook apple steam)
+  @providers ~w(discord google facebook github apple steam)
 
   @doc "The providers the API names in a path."
   @spec providers() :: [provider()]
@@ -59,6 +59,16 @@ defmodule GamendWeb.Auth.OAuthExchange do
        id_field: :facebook_id,
        changeset: &User.facebook_oauth_changeset/2,
        finder: &Accounts.find_or_create_from_facebook/1
+     }}
+  end
+
+  def provider("github") do
+    {:ok,
+     %{
+       label: "GitHub",
+       id_field: :github_id,
+       changeset: &User.github_oauth_changeset/2,
+       finder: &Accounts.find_or_create_from_github/1
      }}
   end
 
@@ -137,6 +147,16 @@ defmodule GamendWeb.Auth.OAuthExchange do
       redirect_uri: redirect_uri("facebook"),
       response_type: "code",
       scope: "email",
+      state: state
+    )
+  end
+
+  # No `scope`: a GitHub App ignores it, its permissions are set on the App.
+  def authorization_url("github", state) do
+    query(
+      "https://github.com/login/oauth/authorize",
+      client_id: setting(:github_client_id),
+      redirect_uri: redirect_uri("github"),
       state: state
     )
   end
@@ -364,6 +384,18 @@ defmodule GamendWeb.Auth.OAuthExchange do
     {:ok, if(profile_url, do: Map.put(user_params, :profile_url, profile_url), else: user_params)}
   end
 
+  # GitHub's `id` is an integer in its JSON; the column is a string.
+  def user_params("github", %{"id" => github_id} = user_info) do
+    {:ok,
+     %{
+       email: user_info["email"],
+       email_verified: verified_email?(user_info["email_verified"]),
+       github_id: to_string(github_id),
+       display_name: Map.get(user_info, "name") || Map.get(user_info, "login"),
+       profile_url: Map.get(user_info, "avatar_url")
+     }}
+  end
+
   def user_params("apple", %{"sub" => apple_id} = user_info) do
     {:ok,
      %{
@@ -413,6 +445,15 @@ defmodule GamendWeb.Auth.OAuthExchange do
       setting(:facebook_client_id),
       setting(:facebook_client_secret),
       redirect_uri("facebook")
+    )
+  end
+
+  defp exchange_provider_code("github", code, :web) do
+    exchanger().exchange_github_code(
+      code,
+      setting(:github_client_id),
+      setting(:github_client_secret),
+      redirect_uri("github")
     )
   end
 

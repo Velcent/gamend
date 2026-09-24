@@ -66,7 +66,10 @@ defmodule GamendWeb.Schemas.AuthProvidersResponse do
   use GamendWeb.Schemas.Envelope,
     data: %Schema{
       type: :array,
-      items: %Schema{type: :string, enum: ["discord", "google", "apple", "facebook", "steam"]}
+      items: %Schema{
+        type: :string,
+        enum: ["discord", "google", "apple", "facebook", "github", "steam"]
+      }
     },
     description: "Enabled sign-in providers under `data`"
 end

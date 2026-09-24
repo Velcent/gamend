@@ -7,7 +7,7 @@ generated: by `mix gamend.settings.guide` - do not edit by hand; edit the
 # Settings
 
 Every setting the server has, with the environment variable that sets it.
-253 settings across 23 groups.
+260 settings across 23 groups.
 
 A setting is declared in the module that owns it, so this page and
 `.env.example` are generated from the same source the server reads. The
@@ -70,6 +70,7 @@ Live values, and where each one came from, are on the
 
 | Variable | Type | Default | Notes |
 |---|---|---|---|
+| `GAMEND_CAPTCHA_API_REGISTER` | boolean | `false` | Also require a captcha token (`captcha_token`) on POST /api/v1/register. Needs `enabled`; a client that cannot render the widget cannot register. |
 | `GAMEND_CAPTCHA_ENABLED` | boolean | `false` | Require a captcha on the register and magic-link forms. |
 | `GAMEND_CAPTCHA_SECRET_KEY` | string | - | Turnstile secret key, for server-side verification. **Required in production when `GAMEND_CAPTCHA_ENABLED` is `true`.** Secret - never log or commit it. |
 | `GAMEND_CAPTCHA_SITE_KEY` | string | - | Turnstile sitekey (public, rendered into the page). Warns if unset when `GAMEND_CAPTCHA_ENABLED` is `true`. |
@@ -253,6 +254,9 @@ Live values, and where each one came from, are on the
 | `GAMEND_OAUTH_FACEBOOK_CLIENT_ID` | string | - | Warns if unset once `GAMEND_OAUTH_FACEBOOK_CLIENT_SECRET` is set. |
 | `GAMEND_OAUTH_FACEBOOK_CLIENT_SECRET` | string | - | Warns if unset once `GAMEND_OAUTH_FACEBOOK_CLIENT_ID` is set. Secret - never log or commit it. |
 | `GAMEND_OAUTH_FACEBOOK_ENABLED` | boolean | `true` | Offer facebook sign-in. Only takes effect once its credentials are set. |
+| `GAMEND_OAUTH_GITHUB_CLIENT_ID` | string | - | Warns if unset once `GAMEND_OAUTH_GITHUB_CLIENT_SECRET` is set. |
+| `GAMEND_OAUTH_GITHUB_CLIENT_SECRET` | string | - | Warns if unset once `GAMEND_OAUTH_GITHUB_CLIENT_ID` is set. Secret - never log or commit it. |
+| `GAMEND_OAUTH_GITHUB_ENABLED` | boolean | `true` | Offer github sign-in. Only takes effect once its credentials are set. |
 | `GAMEND_OAUTH_GOOGLE_CLIENT_ID` | string | - | Warns if unset once `GAMEND_OAUTH_GOOGLE_CLIENT_SECRET` is set. |
 | `GAMEND_OAUTH_GOOGLE_CLIENT_SECRET` | string | - | Warns if unset once `GAMEND_OAUTH_GOOGLE_CLIENT_ID` is set. Secret - never log or commit it. |
 | `GAMEND_OAUTH_GOOGLE_ENABLED` | boolean | `true` | Offer google sign-in. Only takes effect once its credentials are set. |
@@ -313,9 +317,11 @@ Live values, and where each one came from, are on the
 | `GAMEND_FEATURES_LIST_LOBBIES` | boolean | `true` | GET /api/v1/lobbies and the "lobbies" channel. |
 | `GAMEND_FEATURES_LIST_MATCHMAKING` | boolean | `true` | GET /api/v1/matchmaking/stats. Own-ticket endpoints stay. |
 | `GAMEND_FEATURES_LIST_QUESTS` | boolean | `true` | Public GET /api/v1/quests* and the /quests page. |
+| `GAMEND_FEATURES_LIST_TOURNAMENTS` | boolean | `true` | Public GET /api/v1/tournaments* and the /tournaments pages. |
 | `GAMEND_FEATURES_LIST_USERS` | boolean | `true` | GET /api/v1/users and /users/:id. |
 | `GAMEND_FEATURES_MAILBOX_PREVIEW` | boolean | `false` | Serve the in-browser mailbox at /dev/mailbox outside dev. Every sent email is readable there. |
 | `GAMEND_FEATURES_OPENAPI` | boolean | `true` | OpenAPI spec + Swagger UI. A complete map of your API — consider off in production. |
+| `GAMEND_FEATURES_PLAY` | boolean | `true` | The /play page, which hands a signed-in player a token for the game client. |
 | `GAMEND_FEATURES_PUBLIC_STATS` | boolean | `true` | The unauthenticated stats endpoints: GET /api/v1/stats, /api/v1/users/stats, /api/v1/lobbies/stats, /api/v1/parties/stats, /api/v1/quests/stats, /api/v1/signaling/stats and /api/v1/matchmaking/stats, plus the /stats page. Aggregate counts only, never per-row data — but they do reveal how busy the server is. |
 | `GAMEND_FEATURES_PUBLIC_USER_METADATA_KEYS` | list | - | Top-level `user.metadata` keys GET /api/v1/users and /users/:id may return. Empty means none. Those endpoints are unauthenticated, so anything named here is world-readable and findable by name prefix — never list a key holding position, routing or contact data. |
 | `GAMEND_FEATURES_USER_IMAGE_UPLOADS` | boolean | `true` | Player-supplied images: avatars (POST /api/v1/me/avatar*) and group icons (POST /api/v1/groups/:id/icon*). Objects land in public storage and are served without authentication, so on a service children can reach this is an unscreened image surface — turn it off unless the game actually uses it and you have a way to screen what arrives. |
@@ -387,6 +393,7 @@ Live values, and where each one came from, are on the
 | `GAMEND_RETENTION_PAYMENT_EVENTS_DAYS` | integer | `0` | Delete payment provider webhook events older than N days. Purchases are never pruned. |
 | `GAMEND_RETENTION_PUSH_TOKENS_DAYS` | integer | `270` | Delete push tokens untouched for N days. Defaults to Google's stale-token guidance. |
 | `GAMEND_RETENTION_TOURNAMENTS_DAYS` | integer | `0` | Delete finished tournaments older than N days. 0 keeps forever. |
+| `GAMEND_RETENTION_UNCONFIRMED_USERS_DAYS` | integer | `30` | Delete email accounts that never confirmed their address and have been inactive for N days. 0 keeps forever. Accounts that also have a provider login are kept. |
 
 
 ## Secrets

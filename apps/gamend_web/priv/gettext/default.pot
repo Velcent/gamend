@@ -93,6 +93,11 @@ msgstr ""
 msgid "All"
 msgstr ""
 
+#: lib/gamend_web/live/quests_live.ex:667
+#, elixir-autogen, elixir-format
+msgid "Quest group"
+msgstr ""
+
 #: lib/gamend_web/live/user_live/settings/data_tab.ex:52
 #, elixir-autogen, elixir-format
 msgid "Apply"

@@ -21,6 +21,7 @@ defmodule GamendWeb.AuthControllerTest do
     put_provider_setting(:discord_client_id, "test-discord-id")
     put_provider_setting(:google_client_id, "test-google-id")
     put_provider_setting(:facebook_client_id, "test-facebook-id")
+    put_provider_setting(:github_client_id, "test-github-id")
     put_provider_setting(:steam_api_key, "test-steam-key")
     :ok
   end
@@ -48,6 +49,16 @@ defmodule GamendWeb.AuthControllerTest do
     conn = get(conn, "/auth/facebook")
     assert redirected_to(conn) =~ "facebook.com"
     assert redirected_to(conn) =~ "client_id=fb-123"
+  end
+
+  # No scope: a GitHub App ignores it, its permissions live on the App.
+  test "request redirects to provider (github)", %{conn: conn} do
+    put_provider_setting(:github_client_id, "gh-123")
+
+    conn = get(conn, "/auth/github")
+    assert redirected_to(conn) =~ "github.com/login/oauth/authorize"
+    assert redirected_to(conn) =~ "client_id=gh-123"
+    refute redirected_to(conn) =~ "scope="
   end
 
   test "request redirects to provider (apple)", %{conn: conn} do
@@ -254,6 +265,75 @@ defmodule GamendWeb.AuthControllerTest do
 
     ExUnit.CaptureLog.capture_log(fn ->
       _conn = get(conn, "/auth/facebook/callback?code=yyy&state=#{session_id}")
+    end)
+
+    session = OAuthSessions.get_session(session_id)
+    assert session.status == "error"
+  end
+
+  test "callback (github) success browser and api flows", %{conn: conn} do
+    orig = Application.get_env(:gamend_web, :oauth_exchanger)
+
+    defmodule TestExchanger.SuccessGithub do
+      def exchange_github_code(_code, _client_id, _secret, _redirect) do
+        {:ok,
+         %{
+           "id" => 583_231,
+           "login" => "octocat",
+           "name" => "The Octocat",
+           "avatar_url" => "https://avatars.githubusercontent.com/u/583231",
+           "email" => "octocat@example.com",
+           "email_verified" => true
+         }}
+      end
+    end
+
+    Application.put_env(:gamend_web, :oauth_exchanger, TestExchanger.SuccessGithub)
+
+    on_exit(fn -> Application.put_env(:gamend_web, :oauth_exchanger, orig) end)
+
+    # browser flow, with the state /auth/github issued
+    auth_conn = get(conn, "/auth/github")
+    state = oauth_state_from_redirect(auth_conn)
+
+    conn1 = get(build_conn(), "/auth/github/callback?code=yyy&state=#{state}")
+    assert redirected_to(conn1) == "/"
+    assert Phoenix.Flash.get(conn1.assigns.flash, :error) == nil
+
+    # GitHub's integer id is stored as a string
+    user = Accounts.get_user_by_github_id("583231")
+    assert user.email == "octocat@example.com"
+    assert user.display_name == "The Octocat"
+    assert user.profile_url == "https://avatars.githubusercontent.com/u/583231"
+
+    # api flow with state
+    session_id = "sid-#{System.unique_integer([:positive])}"
+
+    OAuthSessions.create_session(session_id, %{provider: "github", status: "pending"})
+
+    _conn2 = get(conn, "/auth/github/callback?code=yyy&state=#{session_id}")
+
+    session = OAuthSessions.get_session(session_id)
+    assert session.status == "completed"
+  end
+
+  test "callback (github) error creates session with error status", %{conn: conn} do
+    orig = Application.get_env(:gamend_web, :oauth_exchanger)
+
+    defmodule TestExchanger.ErrorGithub do
+      def exchange_github_code(_code, _client_id, _secret, _redirect), do: {:error, :failed}
+    end
+
+    Application.put_env(:gamend_web, :oauth_exchanger, TestExchanger.ErrorGithub)
+
+    on_exit(fn -> Application.put_env(:gamend_web, :oauth_exchanger, orig) end)
+
+    session_id = "sid-#{System.unique_integer([:positive])}"
+
+    OAuthSessions.create_session(session_id, %{provider: "github", status: "pending"})
+
+    ExUnit.CaptureLog.capture_log(fn ->
+      _conn = get(conn, "/auth/github/callback?code=yyy&state=#{session_id}")
     end)
 
     session = OAuthSessions.get_session(session_id)

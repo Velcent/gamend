@@ -25,9 +25,14 @@ defmodule GamendWeb.PlayLive do
 
   alias Gamend.Accounts.Scope
   alias GamendWeb.Auth.Guardian
+  alias GamendWeb.Plugs.FeatureGate
 
   @impl true
   def mount(_params, _session, socket) do
+    unless FeatureGate.enabled?(:play) do
+      raise GamendWeb.NotFoundError
+    end
+
     {:ok, assign(socket, token_data: build_token_data(Scope.user(socket.assigns.current_scope)))}
   end
 

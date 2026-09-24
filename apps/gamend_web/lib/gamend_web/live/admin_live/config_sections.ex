@@ -477,6 +477,24 @@ defmodule GamendWeb.AdminLive.ConfigSections do
       </td>
     </tr>
     <tr>
+      <td class="font-semibold">GitHub OAuth</td>
+      <td>
+        <%= if @config.github_client_id && @config.github_client_secret do %>
+          <span class="badge badge-success">Configured</span>
+        <% else %>
+          <span class="badge badge-error">Disabled</span>
+        <% end %>
+      </td>
+      <td class="font-mono text-sm break-all whitespace-normal">
+        <%= if @config.github_client_id do %>
+          GAMEND_OAUTH_GITHUB_CLIENT_ID: {mask_secret(@config.github_client_id)}<br />
+          GAMEND_OAUTH_GITHUB_CLIENT_SECRET: {mask_secret(@config.github_client_secret)}
+        <% else %>
+          <span class="text-error">Client ID missing</span>
+        <% end %>
+      </td>
+    </tr>
+    <tr>
       <td class="font-semibold">Steam OpenID</td>
       <td>
         <%= if @config.steam_api_key do %>

@@ -53,10 +53,10 @@ defmodule GamendWeb.UserLive.Registration do
     {:ok, Phoenix.LiveView.redirect(socket, external: ~p"/users/settings")}
   end
 
-  def mount(_params, _session, socket) do
+  def mount(_params, session, socket) do
     changeset = Accounts.change_user_email(%User{}, %{}, validate_unique: false)
 
-    client_ip = GamendWeb.LiveHelpers.client_ip(socket)
+    client_ip = GamendWeb.LiveHelpers.client_ip(socket, session)
 
     {:ok,
      socket

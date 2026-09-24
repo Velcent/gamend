@@ -602,6 +602,7 @@ defmodule Gamend.QuestsTest do
       assert length(entries) == 2
       group = Enum.find(entries, &(&1.quest.group_key == "exploration"))
       assert group.group_size == 3
+      assert group.collapsed
 
       # The representative is the one worth acting on, not whatever sorted first.
       {:ok, _} = Quests.report_event(user.id, "city_visited", 3, %{"country" => "pl"})
@@ -708,12 +709,74 @@ defmodule Gamend.QuestsTest do
       create_quest(%{key: "a2", group_key: "a", objectives: [%{event: "e", target: 1}]})
       create_quest(%{key: "b1", group_key: "b", objectives: [%{event: "f", target: 1}]})
       create_quest(%{key: "b2", group_key: "b", objectives: [%{event: "f", target: 1}]})
+      create_quest(%{key: "solo", objectives: [%{event: "g", target: 1}]})
 
       user = user_fixture()
       opened = Quests.list_user_quests(user.id, group: "a")
 
-      assert Enum.count(opened, &(&1.quest.group_key == "a")) == 2
-      assert Enum.count(opened, &(&1.quest.group_key == "b")) == 1
+      # "a" in full, "b" still one entry, the ungrouped quest along. Only the
+      # entry standing for "b" is collapsed: a listed member is itself, at the
+      # same group size.
+      assert Enum.map(opened, & &1.quest.key) == ["a1", "a2", "b1", "solo"]
+      assert Enum.map(opened, &Map.get(&1, :group_size)) == [2, 2, 2, nil]
+      assert Enum.map(opened, &Map.get(&1, :collapsed, false)) == [false, false, true, false]
+    end
+
+    test "dropped groups are off the list, collapsed or opened" do
+      create_quest(%{key: "a1", group_key: "a", objectives: [%{event: "e", target: 1}]})
+      create_quest(%{key: "a2", group_key: "a", objectives: [%{event: "e", target: 1}]})
+      create_quest(%{key: "b1", group_key: "b", objectives: [%{event: "f", target: 1}]})
+      create_quest(%{key: "c1", group_key: "c", objectives: [%{event: "f", target: 1}]})
+      create_quest(%{key: "solo", objectives: [%{event: "g", target: 1}]})
+
+      user = user_fixture()
+
+      # What a page with a selector over "a" and "b" lists once "a" is picked:
+      # "a" in full, "b" gone, "c" (not the selector's) still its card.
+      picked = Quests.list_user_quests(user.id, group: "a", drop_groups: ["b"])
+      assert Enum.map(picked, & &1.quest.key) == ["a1", "a2", "c1", "solo"]
+      assert Quests.count_user_quests(user.id, group: "a", drop_groups: ["b"]) == 4
+
+      # Nothing picked behind that selector: both its groups gone.
+      none = Quests.list_user_quests(user.id, drop_groups: ["a", "b"])
+      assert Enum.map(none, & &1.quest.key) == ["c1", "solo"]
+      assert Quests.count_user_quests(user.id, drop_groups: ["a", "b"]) == 2
+    end
+
+    test "groups/2 offers each group once, in list order, under its title" do
+      create_quest(%{
+        key: "b1",
+        group_key: "b",
+        group_title: "Bravo",
+        sort_order: 2,
+        objectives: [%{event: "f", target: 1}]
+      })
+
+      create_quest(%{
+        key: "a1",
+        group_key: "a",
+        group_title: "Alpha",
+        sort_order: 1,
+        category: "learn",
+        objectives: [%{event: "e", target: 1}]
+      })
+
+      create_quest(%{
+        key: "a2",
+        group_key: "a",
+        group_title: "Alpha",
+        sort_order: 3,
+        category: "learn",
+        objectives: [%{event: "e", target: 1}]
+      })
+
+      create_quest(%{key: "solo", objectives: [%{event: "g", target: 1}]})
+      user = user_fixture()
+
+      assert Quests.groups(user.id) == [%{key: "a", title: "Alpha"}, %{key: "b", title: "Bravo"}]
+      assert Quests.groups(user.id, "learn") == [%{key: "a", title: "Alpha"}]
+      assert Quests.groups(nil) == [%{key: "a", title: "Alpha"}, %{key: "b", title: "Bravo"}]
+      assert Quests.groups(user.id, "daily") == []
     end
 
     test "a chain longer than 20 tiers is still ONE chain, in order" do

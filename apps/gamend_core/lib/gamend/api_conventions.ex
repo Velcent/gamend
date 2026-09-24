@@ -381,7 +381,13 @@ defmodule Gamend.ApiConventions do
   """
   @spec declared_route_paths() :: [String.t()]
   def declared_route_paths do
-    [GamendHost.Router, GamendWeb.Router]
+    # The router the endpoint dispatches to, first: a host names its own in
+    # `config :gamend_web, :router`, and reading only the two known module
+    # names here reported every host-declared route as undocumented — the
+    # same drift `GamendWeb.ApiSpec` had before it resolved the router the way
+    # `dispatch_router/2` does.
+    [Application.get_env(:gamend_web, :router), GamendHost.Router, GamendWeb.Router]
+    |> Enum.reject(&is_nil/1)
     |> Enum.find(&Code.ensure_loaded?/1)
     |> case do
       nil ->

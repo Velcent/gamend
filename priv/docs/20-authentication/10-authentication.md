@@ -12,7 +12,7 @@ The platform supports multiple authentication methods. All API authentication us
   or from a game client with `POST /api/v1/register`
 - **Magic link** — passwordless login via email link
 - **Device token** — anonymous / guest authentication via unique device IDs
-- **OAuth** — Discord, Google, Apple, Facebook, Steam
+- **OAuth** — Discord, Google, Apple, Facebook, GitHub, Steam
 
 A provider goes live once its credentials are set (see its setup page in this
 section); its sign-in buttons, `/auth/<provider>` routes, and the
@@ -101,11 +101,33 @@ Steam, `code` is the hex ticket from `ISteamUser::GetAuthTicketForWebApi`.
 Every one of these signs in, finding or creating the account. A bearer token
 on the request changes nothing; linking is its own endpoint.
 
+## Usernames
+
+Every account has a unique `username` handle: chosen at sign-up (`username` on
+`POST /api/v1/register`) or generated from the display name, and changed with
+`PATCH /api/v1/me/username`. It is 3-32 letters or digits of any language,
+joined by single `.` `_` `-` separators. It is stored NFKC-normalized
+([UAX #15](https://www.unicode.org/reports/tr15/)) and lowercased, so `Wang`,
+`ＷＡＮＧ` and `wang` are one name.
+
+Mixing scripts follows the rules browsers use to display international domain
+names, so one name cannot pass for another:
+
+| Rule | Allowed | Refused | Source |
+| --- | --- | --- | --- |
+| One script, or Latin with Chinese, Japanese or Korean | `дмитрий`, `王wang`, `小明abc`, `yamada太郎`, `김민준kim` | `pаypal` (Cyrillic `а`), `ivanиван` | [UTS #39](https://www.unicode.org/reports/tr39/#Restriction_Level_Detection) "Highly Restrictive" |
+| CJK characters that look like Latin letters or punctuation (`一` `丨` `十` `工` `ー` `ン` …) only among Chinese or Japanese | `一刀tom`, `ラーメン` | `tom一号`, `paypa丨`, `abーcd` | [Chromium's IDN spoof checks](https://chromium.googlesource.com/chromium/src/+/main/docs/idn.md) |
+| Hangul as whole syllables | `이민` | `goㅇgle` | [UTS #39](https://www.unicode.org/reports/tr39/#Identifier_Status_and_Type): lone jamo are Obsolete |
+| Accents never doubled, at most four stacked | `nguyễn`, `tiệp` | `café` with the accent typed twice | [UTS #39](https://www.unicode.org/reports/tr39/#Optional_Detection) section 5.4 |
+
+A refused handle answers `422 validation_failed` with the rule it broke in
+`errors.username`. Display names have none of these rules.
+
 ## Provider linking
 
 A signed-in player can add providers to their account, and unlink them later.
 The user table stores provider IDs as nullable fields (discord_id, google_id,
-apple_id, facebook_id, steam_id, device_id). Linking mirrors signing in, under
+apple_id, facebook_id, github_id, steam_id, device_id). Linking mirrors signing in, under
 `/api/v1/me` and with the player's bearer token:
 
 | Sign in (`/api/v1/auth`) | Link (`/api/v1/me/providers`) |
@@ -139,9 +161,13 @@ proof. Both forms already carry a per-IP rate limit; the captcha adds cover
 against distributed abuse, where a botnet stays under the per-IP limit by
 spreading itself across thousands of addresses.
 
-**Game clients are unaffected.** The captcha guards the browser forms only;
-`POST /api/v1/register` and device login take none, so turning it on cannot
-break a shipped Godot or JS client. The API sign-up has the auth rate limit.
+**Game clients are unaffected by default.** The captcha guards the browser
+forms only; `POST /api/v1/register` and device login take none, so turning it
+on cannot break a shipped Godot or JS client. The API sign-up has the auth rate
+limit. To guard it too, set `GAMEND_CAPTCHA_API_REGISTER=true`: the client
+then sends a Turnstile token as `captcha_token` (from a web export or a
+webview), and is answered `403 captcha_required` / `captcha_invalid` without
+one. A client that cannot render the widget can then no longer register.
 
 ### Setup
 

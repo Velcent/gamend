@@ -931,6 +931,37 @@ defmodule Gamend.Accounts do
   end
 
   @doc ~S"""
+    Finds a user by GitHub ID or creates a new user from OAuth data.
+    
+    ## Examples
+    
+        iex> find_or_create_from_github(%{github_id: "123", email: "user@example.com"})
+        {:ok, %User{}}
+    
+    
+  """
+  @spec find_or_create_from_github(map()) ::
+          {:ok, Gamend.Accounts.User.t()} | {:error, Ecto.Changeset.t() | term()}
+  def find_or_create_from_github(_attrs) do
+    case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        {:ok,
+         %Gamend.Accounts.User{
+           id: 0,
+           email: "",
+           display_name: nil,
+           metadata: %{},
+           is_admin: false,
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
+
+      _ ->
+        raise "Gamend.Accounts.find_or_create_from_github/1 is a stub - only available at runtime on Gamend"
+    end
+  end
+
+  @doc ~S"""
     Finds a user by Google ID or creates a new user from OAuth data.
     
     ## Examples
@@ -1016,6 +1047,7 @@ defmodule Gamend.Accounts do
   @spec get_linked_providers(Gamend.Accounts.User.t()) :: %{
           google: boolean(),
           facebook: boolean(),
+          github: boolean(),
           discord: boolean(),
           apple: boolean(),
           steam: boolean(),
@@ -1239,6 +1271,33 @@ defmodule Gamend.Accounts do
 
       _ ->
         raise "Gamend.Accounts.get_user_by_facebook_id/1 is a stub - only available at runtime on Gamend"
+    end
+  end
+
+  @doc ~S"""
+    Get a user by their GitHub ID.
+    
+    Returns `%User{}` or `nil`.
+    
+  """
+  @spec get_user_by_github_id(String.t()) :: Gamend.Accounts.User.t() | nil
+  def get_user_by_github_id(_github_id) do
+    case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        if :erlang.phash2(make_ref(), 2) == 0,
+          do: nil,
+          else: %Gamend.Accounts.User{
+            id: 0,
+            email: "",
+            display_name: nil,
+            metadata: %{},
+            is_admin: false,
+            inserted_at: ~U[1970-01-01 00:00:00Z],
+            updated_at: ~U[1970-01-01 00:00:00Z]
+          }
+
+      _ ->
+        raise "Gamend.Accounts.get_user_by_github_id/1 is a stub - only available at runtime on Gamend"
     end
   end
 
@@ -1483,7 +1542,8 @@ defmodule Gamend.Accounts do
     sensitive fields a player cannot, so it is admin-only.
     
     `filters` keys (string or atom): `:search` (term or full id), `:facets` (list
-    of `"online"`, `"unactivated"`, and provider names). `opts`: `:page`,
+    of `"online"`, `"unactivated"`, `"unverified"` — an email never confirmed —
+    and provider names). `opts`: `:page`,
     `:page_size`, `:sort_field`, `:sort_dir`.
     
   """
@@ -2109,7 +2169,7 @@ defmodule Gamend.Accounts do
   @doc ~S"""
     Unlink an OAuth provider from a user's account.
     
-    provider should be one of :discord, :apple, :google, :facebook.
+    provider should be one of :discord, :apple, :google, :facebook, :github, :steam.
     This will return {:ok, user} when successful or {:error, reason}.
     
     Guard: we only allow unlinking when the user will still have at least
@@ -2119,7 +2179,7 @@ defmodule Gamend.Accounts do
   """
   @spec unlink_provider(
           Gamend.Accounts.User.t(),
-          :discord | :apple | :google | :facebook | :steam
+          :discord | :apple | :google | :facebook | :github | :steam
         ) ::
           {:ok, Gamend.Accounts.User.t()} | {:error, :last_provider | Ecto.Changeset.t() | term()}
   def unlink_provider(_user, _provider) do

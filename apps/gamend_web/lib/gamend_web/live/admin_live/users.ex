@@ -148,6 +148,16 @@ defmodule GamendWeb.AdminLive.Users do
                   <input
                     type="checkbox"
                     phx-click="toggle_provider"
+                    phx-value-provider="github"
+                    checked={"github" in @filters}
+                    class="checkbox"
+                  />
+                  <span class="label-text ml-2">GitHub</span>
+                </label>
+                <label class="label cursor-pointer">
+                  <input
+                    type="checkbox"
+                    phx-click="toggle_provider"
                     phx-value-provider="device"
                     checked={"device" in @filters}
                     class="checkbox"
@@ -195,6 +205,16 @@ defmodule GamendWeb.AdminLive.Users do
                   />
                   <span class="label-text ml-2">Unactivated</span>
                 </label>
+                <label class="label cursor-pointer">
+                  <input
+                    type="checkbox"
+                    phx-click="toggle_provider"
+                    phx-value-provider="unverified"
+                    checked={"unverified" in @filters}
+                    class="checkbox"
+                  />
+                  <span class="label-text ml-2">Unverified email</span>
+                </label>
               </div>
             </div>
             <div class="overflow-x-auto">
@@ -224,6 +244,7 @@ defmodule GamendWeb.AdminLive.Users do
                     <th>Apple ID</th>
                     <th>Google ID</th>
                     <th>Facebook ID</th>
+                    <th>GitHub ID</th>
                     <th>Admin</th>
                     <th>Activated</th>
                     <th>Metadata</th>
@@ -323,6 +344,13 @@ defmodule GamendWeb.AdminLive.Users do
                     <td class="font-mono text-sm">
                       <%= if user.facebook_id do %>
                         {user.facebook_id}
+                      <% else %>
+                        <span class="text-gray-500">-</span>
+                      <% end %>
+                    </td>
+                    <td class="font-mono text-sm">
+                      <%= if user.github_id do %>
+                        {user.github_id}
                       <% else %>
                         <span class="text-gray-500">-</span>
                       <% end %>
@@ -579,10 +607,11 @@ defmodule GamendWeb.AdminLive.Users do
     sort_field = "inserted_at"
     sort_dir = "desc"
 
-    # Support ?filter=unactivated from dashboard link
+    # Support ?filter=unactivated (dashboard link) and ?filter=unverified
     initial_filters =
       case params["filter"] do
         "unactivated" -> ["unactivated"]
+        "unverified" -> ["unverified"]
         _ -> []
       end
 

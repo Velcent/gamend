@@ -18,6 +18,7 @@ defmodule Gamend.Accounts.UserToken do
   # since someone with access to the email may take over the account.
   @magic_link_validity_in_minutes 15
   @change_email_validity_in_days 7
+  @confirm_validity_in_days 7
   @session_validity_in_days 14
 
   schema "users_tokens" do
@@ -45,7 +46,7 @@ defmodule Gamend.Accounts.UserToken do
   Query selecting token rows that are past their own context's validity window.
 
   Each context expires on a different clock (session 14d, magic link 15min,
-  email change 7d), and those windows live here — so retention inverts the
+  email change and confirmation 7d), and those windows live here — so retention inverts the
   same predicate the verify queries use instead of guessing a single age.
   Contexts this module does not know are never selected.
   """
@@ -57,8 +58,13 @@ defmodule Gamend.Accounts.UserToken do
           (t.context == "login" and
              t.inserted_at < ago(@magic_link_validity_in_minutes, "minute")) or
           (like(t.context, "change:%") and
-             t.inserted_at < ago(@change_email_validity_in_days, "day"))
+             t.inserted_at < ago(@change_email_validity_in_days, "day")) or
+          (t.context == "confirm" and t.inserted_at < ago(@confirm_validity_in_days, "day"))
   end
+
+  @doc "How long an email confirmation link stays valid, in days."
+  @spec confirm_validity_in_days() :: pos_integer()
+  def confirm_validity_in_days, do: @confirm_validity_in_days
 
   @doc """
   Generates a token that will be stored in a signed place,

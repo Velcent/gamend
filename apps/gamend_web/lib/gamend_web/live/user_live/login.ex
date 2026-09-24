@@ -133,7 +133,7 @@ defmodule GamendWeb.UserLive.Login do
   end
 
   @impl true
-  def mount(_params, _session, socket) do
+  def mount(_params, session, socket) do
     current_user = Scope.user(socket.assigns[:current_scope])
 
     email =
@@ -142,7 +142,7 @@ defmodule GamendWeb.UserLive.Login do
 
     form = to_form(%{"email" => email}, as: "user")
 
-    client_ip = GamendWeb.LiveHelpers.client_ip(socket)
+    client_ip = GamendWeb.LiveHelpers.client_ip(socket, session)
 
     {:ok,
      assign(socket,

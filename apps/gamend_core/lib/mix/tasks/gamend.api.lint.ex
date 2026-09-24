@@ -40,6 +40,11 @@ defmodule Mix.Tasks.Gamend.Api.Lint do
       Mix.shell().info("API convention rules:\n")
       for {id, desc} <- @rules, do: Mix.shell().info("  #{id}  #{desc}")
     else
+      # Compiled and configured first, like the other tasks that read the
+      # running app: R9 reads the router named in `config :gamend_web,
+      # :router`, and without `app.config` that key is unset and the routes
+      # come from core's router — every host route then reads as missing.
+      Mix.Task.run("app.config")
       report(ApiConventions.violations())
     end
   end

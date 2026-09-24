@@ -340,7 +340,7 @@ defmodule Gamend.Accounts.Registration do
     query =
       from t in UserToken,
         where: t.token == ^hashed and t.context == "confirm",
-        where: t.inserted_at > ago(7, "day"),
+        where: t.inserted_at > ago(^UserToken.confirm_validity_in_days(), "day"),
         join: u in assoc(t, :user),
         select: {u, t}
 

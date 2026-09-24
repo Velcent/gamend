@@ -88,7 +88,7 @@ defmodule Gamend.Accounts.UsernameGenerator do
         ascii
 
       String.length(unicode) >= min and String.match?(unicode, Username.format()) and
-          Username.single_script?(unicode) ->
+          Username.check_scripts(unicode) == :ok ->
         unicode
 
       true ->

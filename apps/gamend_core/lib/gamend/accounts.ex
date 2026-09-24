@@ -139,6 +139,9 @@ defmodule Gamend.Accounts do
   @doc delegate_to: {Identities, :find_or_create_from_facebook, 1}
   defdelegate find_or_create_from_facebook(attrs), to: Identities
 
+  @doc delegate_to: {Identities, :find_or_create_from_github, 1}
+  defdelegate find_or_create_from_github(attrs), to: Identities
+
   @doc delegate_to: {Identities, :find_or_create_from_steam, 1}
   defdelegate find_or_create_from_steam(attrs), to: Identities
 
@@ -559,7 +562,8 @@ defmodule Gamend.Accounts do
     :google_id,
     :apple_id,
     :discord_id,
-    :facebook_id
+    :facebook_id,
+    :github_id
   ]
 
   defp user_index_keys(%User{} = user) do
@@ -654,6 +658,16 @@ defmodule Gamend.Accounts do
   @spec get_user_by_facebook_id(String.t()) :: User.t() | nil
   def get_user_by_facebook_id(facebook_id) when is_binary(facebook_id) do
     get_user_by_field(:facebook_id, facebook_id)
+  end
+
+  @doc """
+  Get a user by their GitHub ID.
+
+  Returns `%User{}` or `nil`.
+  """
+  @spec get_user_by_github_id(String.t()) :: User.t() | nil
+  def get_user_by_github_id(github_id) when is_binary(github_id) do
+    get_user_by_field(:github_id, github_id)
   end
 
   @doc """
@@ -994,6 +1008,7 @@ defmodule Gamend.Accounts do
   @spec get_linked_providers(User.t()) :: %{
           google: boolean(),
           facebook: boolean(),
+          github: boolean(),
           discord: boolean(),
           apple: boolean(),
           steam: boolean(),
@@ -1003,6 +1018,7 @@ defmodule Gamend.Accounts do
     %{
       google: user.google_id != nil,
       facebook: user.facebook_id != nil,
+      github: user.github_id != nil,
       discord: user.discord_id != nil,
       apple: user.apple_id != nil,
       steam: user.steam_id != nil,

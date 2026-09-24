@@ -120,6 +120,8 @@ defmodule GamendWeb.AdminLive.Config do
       facebook_client_id: Gamend.Settings.get(Gamend.OAuth.Providers, :facebook_client_id),
       facebook_client_secret:
         Gamend.Settings.get(Gamend.OAuth.Providers, :facebook_client_secret),
+      github_client_id: Gamend.Settings.get(Gamend.OAuth.Providers, :github_client_id),
+      github_client_secret: Gamend.Settings.get(Gamend.OAuth.Providers, :github_client_secret),
       steam_api_key: Gamend.Settings.get(Gamend.OAuth.Providers, :steam_api_key),
       payment_provider_configs: ConfigDiagnostics.payment_provider_configs(),
       payment_provider_configured_count: ConfigDiagnostics.payment_provider_configured_count(),

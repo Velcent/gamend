@@ -990,7 +990,8 @@ defmodule GamendWeb.Router.Shared do
         pipe_through [:browser | unquote(extra_pipelines)]
 
         live_session :current_user,
-          on_mount: unquote(on_mount) do
+          on_mount: unquote(on_mount),
+          session: {GamendWeb.LiveHelpers, :client_ip_session, []} do
           unquote(host_routes)
 
           live "/users/register", UserLive.Registration, :new

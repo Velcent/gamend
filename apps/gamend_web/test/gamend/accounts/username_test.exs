@@ -3,6 +3,7 @@ defmodule Gamend.Accounts.UsernameTest do
 
   alias Gamend.Accounts
   alias Gamend.Accounts.User
+  alias Gamend.Accounts.Username
   alias Gamend.Accounts.UsernameGenerator
   alias Gamend.AccountsFixtures
 
@@ -100,10 +101,29 @@ defmodule Gamend.Accounts.UsernameTest do
       assert updated.username == String.downcase(handle)
     end
 
-    test "accepts one script of any alphabet, and Han with kana or Hangul" do
+    test "accepts one script of any alphabet, and Latin with Chinese, Japanese or Korean" do
       user = AccountsFixtures.user_fixture()
 
-      for good <- ["nicö", "дмитрий", "山田太郎", "やまだ太郎", "김민준", "δημήτρης", "tiệp", "مريم"] do
+      for good <- [
+            "nicö",
+            "дмитрий",
+            "山田太郎",
+            "やまだ太郎",
+            "ラーメン",
+            "김민준",
+            "δημήτρης",
+            "tiệp",
+            "مريم",
+            "王wang",
+            "小明abc",
+            "yamada太郎",
+            "taroやまだ",
+            "김민준kim",
+            "ㄅㄆㄇ王",
+            # a CJK lookalike of a Latin letter is fine among CJK
+            "一刀tom",
+            "이민"
+          ] do
         n = System.unique_integer([:positive])
         handle = good <> "-#{n}"
         assert {:ok, updated} = Accounts.update_username(user, %{"username" => handle})
@@ -145,6 +165,23 @@ defmodule Gamend.Accounts.UsernameTest do
             "spaced name",
             # Cyrillic а inside Latin: renders as "paypal"
             "pаypal",
+            "ivanиван",
+            "王иван",
+            "abcمريم",
+            "김민준やまだ",
+            # Chromium's CJK lookalikes of l, - and / beside non-CJK
+            "paypa丨",
+            "ab一cd",
+            "tom一号",
+            "abーcd",
+            "aンb",
+            # a Hiragana ぺ inside Katakana
+            "ヘルぺー",
+            # lone Hangul jamo ㅇ as o
+            "goㅇgle",
+            # a dot above i, and a doubled accent
+            "admi\u0307n",
+            "cafe\u0301\u0301",
             "zero\u200Bwidth",
             "za\u0301\u0301\u0301\u0301\u0301lgo",
             "emoji😀"
@@ -155,6 +192,25 @@ defmodule Gamend.Accounts.UsernameTest do
       end
     end
   end
+
+  describe "Username.check_scripts/1" do
+    test "names the rule a handle breaks" do
+      assert Username.check_scripts("王wang") == :ok
+      assert {:error, "can only mix" <> _} = Username.check_scripts("pаypal")
+      assert {:error, "has a lone Hangul" <> _} = check("goㅇgle")
+      assert {:error, "repeats or stacks" <> _} = check("cafe\u0301\u0301")
+      assert {:error, "has a character that can be mistaken" <> _} = check("paypa丨")
+    end
+
+    test "catches lookalikes in their normalized form" do
+      # Kangxi ⼁ ⼀ and halfwidth ｰ fold onto the checked ideographs and kana.
+      for raw <- ["paypa⼁", "ab⼀cd", "abｰcd", "paypaㅣ", "abㅡcd"] do
+        assert {:error, _} = check(raw), "expected #{inspect(raw)} refused"
+      end
+    end
+  end
+
+  defp check(raw), do: raw |> Username.normalize() |> Username.check_scripts()
 
   test "get_user_by_username/1 is case-insensitive" do
     user = AccountsFixtures.user_fixture()

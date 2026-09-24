@@ -50,7 +50,7 @@ Denied requests are counted in the `gamend_rate_limit_denies_total` metric, tagg
 
 ## Captcha
 
-The register and magic-link forms can require a [Cloudflare Turnstile](https://developers.cloudflare.com/turnstile/) challenge. These are the two paths that mail an address the submitter chose, where the abuse is not request volume (the rate limiter answers that) but a botnet spending your mail reputation an address at a time. Password login is deliberately not guarded, and the game SDKs never see the captcha: registration is browser-only and device login is untouched, so enabling it cannot break a shipped client.
+The register and magic-link forms can require a [Cloudflare Turnstile](https://developers.cloudflare.com/turnstile/) challenge. These are the two paths that mail an address the submitter chose, where the abuse is not request volume (the rate limiter answers that) but a botnet spending your mail reputation an address at a time. Password login is deliberately not guarded, and the game SDKs never see the captcha unless you ask: `POST /api/v1/register` is guarded only with `GAMEND_CAPTCHA_API_REGISTER=true`, and device login never is, so enabling it cannot break a shipped client.
 
 ```bash
 GAMEND_CAPTCHA_ENABLED=true

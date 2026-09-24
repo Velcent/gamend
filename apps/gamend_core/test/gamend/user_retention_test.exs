@@ -112,6 +112,65 @@ defmodule Gamend.UserRetentionTest do
     end
   end
 
+  describe "unconfirmed accounts" do
+    # `confirmed_at` forced off too: the first account is confirmed on sign-up.
+    defp unconfirmed_user(last_seen_days_ago) do
+      AccountsFixtures.unconfirmed_user_fixture()
+      |> Ecto.Changeset.change(confirmed_at: nil)
+      |> Repo.update!()
+      |> backdate(last_seen_days_ago)
+    end
+
+    test "an unconfirmed account inactive past the window is deleted" do
+      configure(unconfirmed_users_days: 30)
+      user = unconfirmed_user(45)
+
+      Retention.prune_all()
+
+      refute exists?(user)
+    end
+
+    test "an unconfirmed account still playing is kept" do
+      configure(unconfirmed_users_days: 30)
+      user = unconfirmed_user(5)
+
+      Retention.prune_all()
+
+      assert exists?(user)
+    end
+
+    test "a confirmed account is not touched by the unconfirmed sweep" do
+      configure(unconfirmed_users_days: 30, inactive_users_days: 0)
+      user = registered_user(9999)
+
+      Retention.prune_all()
+
+      assert exists?(user)
+    end
+
+    test "an unconfirmed account with a provider login is kept" do
+      configure(unconfirmed_users_days: 30)
+
+      user =
+        unconfirmed_user(9999)
+        |> Ecto.Changeset.change(discord_id: "d-#{System.unique_integer([:positive])}")
+        |> Repo.update!()
+
+      Retention.prune_all()
+
+      assert exists?(user)
+    end
+
+    test "0 disables the sweep" do
+      configure(unconfirmed_users_days: 0)
+      user = unconfirmed_user(9999)
+
+      Retention.prune_all()
+
+      assert exists?(user)
+    end
+  end
+
   describe "exclusions" do
     test "an admin is never deleted" do
       configure(anonymous_users_days: 90)

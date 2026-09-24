@@ -276,7 +276,7 @@ config :mime, :types, %{
 }
 
 # Ueberauth drives Steam only: its OpenID 2.0 callback verification has no
-# OAuth-shaped equivalent. Discord, Google, Facebook and Apple run through
+# OAuth-shaped equivalent. Discord, Google, Facebook, GitHub and Apple run through
 # GamendWeb.AuthController and Gamend.OAuth.Exchanger directly, so that one
 # code path can serve the browser redirect flow, the SDK session-polling flow
 # and the native-token endpoints alike. ueberauth_apple stays a dependency for

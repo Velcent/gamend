@@ -37,7 +37,7 @@ Full per-size tables, the operations breakdown, and how to reproduce any of it:
 
 ## Features
 
-- **Auth** — Email/password, magic link, OAuth (Discord, Google, Apple, Facebook, Steam), JWT API tokens
+- **Auth** — Email/password, magic link, OAuth (Discord, Google, Apple, Facebook, GitHub, Steam), JWT API tokens
 - **Users** — Profiles, metadata, device tokens, account lifecycle
 - **Lobbies** — Host-managed, max users, hidden/locked, passwords, real-time updates
 - **Groups** — Public / private / hidden communities, roles, join requests, invites

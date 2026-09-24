@@ -52,6 +52,7 @@ defmodule Gamend.Accounts.User do
     field :steam_id, :string
     field :google_id, :string
     field :facebook_id, :string
+    field :github_id, :string
     field :is_admin, :boolean, default: false
     field :is_activated, :boolean, default: true
     field :metadata, :map, default: %{}
@@ -82,7 +83,15 @@ defmodule Gamend.Accounts.User do
   # Every identity column a user can be reached or recovered by. A device id is
   # not one of them: it is a string the client made up, so an account holding
   # only that is disposable by construction.
-  @identity_fields [:email, :discord_id, :apple_id, :steam_id, :google_id, :facebook_id]
+  @identity_fields [
+    :email,
+    :discord_id,
+    :apple_id,
+    :steam_id,
+    :google_id,
+    :facebook_id,
+    :github_id
+  ]
 
   @doc """
   True when nothing but a device id backs this account.
@@ -427,6 +436,36 @@ defmodule Gamend.Accounts.User do
   end
 
   @doc """
+  A user changeset for GitHub OAuth registration.
+
+  It accepts email and GitHub ID. The email may be absent: a GitHub App
+  without the email permission only sees the public profile.
+  """
+  def github_oauth_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:email, :github_id, :profile_url, :display_name])
+    |> update_change(:email, fn
+      nil -> nil
+      email -> String.downcase(email)
+    end)
+    |> validate_required([:github_id])
+    |> validate_format(:email, ~r/^[^@,;\s]+@[^@,;\s]+$/,
+      message: "must have the @ sign and no spaces"
+    )
+    |> validate_length(:email, max: Gamend.Limits.get(:max_email))
+    |> unsafe_validate_unique(:email, Gamend.Repo)
+    |> unsafe_validate_unique(:github_id, Gamend.Repo)
+    |> unique_constraint(:email)
+    |> unique_constraint(:github_id)
+    |> validate_length(:display_name,
+      max: Gamend.Limits.get(:max_display_name),
+      count: :codepoints
+    )
+    |> discard_oversized_profile_url()
+    |> put_change(:confirmed_at, DateTime.utc_now(:second))
+  end
+
+  @doc """
   A user changeset used for device-based logins where there is no email.
 
   Device users are created with optional display_name and metadata and are
@@ -476,9 +515,9 @@ defmodule Gamend.Accounts.User do
 
   Input is NFKC-normalized and lowercased on cast. Valid usernames are 3–32
   characters (`Gamend.Limits` `:min_username`/`:max_username`) of letters and
-  digits in any ONE script, joined by non-consecutive `.` `_` `-` separators
-  and starting and ending on a letter or digit — `Gamend.Accounts.Username`
-  has the rules and why. Uniqueness is enforced by the DB unique index.
+  digits in one script, or Latin mixed with Chinese, Japanese or Korean,
+  joined by non-consecutive `.` `_` `-` separators and starting and ending on
+  a letter or digit — `Gamend.Accounts.Username` has the rules and why. Uniqueness is enforced by the DB unique index.
   """
   def username_changeset(user_or_changeset, attrs) do
     user_or_changeset
@@ -497,9 +536,10 @@ defmodule Gamend.Accounts.User do
         "only letters, digits and non-consecutive . _ - separators; must start and end with a letter or digit"
     )
     |> validate_change(:username, fn :username, username ->
-      if Username.single_script?(username),
-        do: [],
-        else: [username: "must not mix alphabets"]
+      case Username.check_scripts(username) do
+        :ok -> []
+        {:error, message} -> [username: message]
+      end
     end)
     |> unique_constraint(:username)
   end

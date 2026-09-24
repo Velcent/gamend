@@ -22,6 +22,7 @@ A supervised sweeper (`Gamend.Retention`) prunes unbounded tables on a schedule:
 | `GAMEND_RETENTION_LEDGER_DAYS` | `0` | Wallet and inventory ledger entries — the audit trail behind every balance, so opt-in only. |
 | `GAMEND_RETENTION_ACTIVITY_DAYS` | `0` | Per-user daily activity rows (the DAU / D1-D7-D30 source). Below 60, the admin analytics cohorts go blank. |
 | `GAMEND_RETENTION_ANONYMOUS_USERS_DAYS` | `90` | Device-only accounts inactive for N days. |
+| `GAMEND_RETENTION_UNCONFIRMED_USERS_DAYS` | `30` | Accounts whose only identity is an email never confirmed, inactive for N days. One with a provider login is kept. Find them on the admin Users page with the "Unverified email" filter. |
 | `GAMEND_RETENTION_INACTIVE_USERS_DAYS` | `0` | Accounts with a real identity, after N days of inactivity — see the warning flow below. |
 
 Client log *sessions* are pruned on the client-logs module's own settings (`retention_days` 14, `retention_flagged_days` 90, keyed off `last_seen_at`). That prunes the searchable index over sessions, not the log lines, which live in the host's log store on its own retention. And some cleanups have no variable at all: expired IP bans, OAuth sessions older than a day, user tokens past their context's validity, and stored avatars whose owner no longer exists are always removed. The full variable list, with types and defaults, is in [Settings](/docs/settings).

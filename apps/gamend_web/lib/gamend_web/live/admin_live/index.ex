@@ -147,6 +147,7 @@ defmodule GamendWeb.AdminLive.Index do
                   <div>With password: {@users_password}</div>
                   <div>Google: {@users_google}</div>
                   <div>Facebook: {@users_facebook}</div>
+                  <div>GitHub: {@users_github}</div>
                   <div>Discord: {@users_discord}</div>
                   <div>Apple: {@users_apple}</div>
                   <div>Steam: {@users_steam}</div>
@@ -753,6 +754,7 @@ defmodule GamendWeb.AdminLive.Index do
       kv_global: Task.async(fn -> KV.count_entries(global_only: true) end),
       users_google: Task.async(fn -> Accounts.count_users_with_provider(:google_id) end),
       users_facebook: Task.async(fn -> Accounts.count_users_with_provider(:facebook_id) end),
+      users_github: Task.async(fn -> Accounts.count_users_with_provider(:github_id) end),
       users_discord: Task.async(fn -> Accounts.count_users_with_provider(:discord_id) end),
       users_apple: Task.async(fn -> Accounts.count_users_with_provider(:apple_id) end),
       users_steam: Task.async(fn -> Accounts.count_users_with_provider(:steam_id) end),
@@ -816,6 +818,7 @@ defmodule GamendWeb.AdminLive.Index do
        kv_user: r.kv_count - r.kv_global,
        users_google: r.users_google,
        users_facebook: r.users_facebook,
+       users_github: r.users_github,
        users_discord: r.users_discord,
        users_apple: r.users_apple,
        users_steam: r.users_steam,

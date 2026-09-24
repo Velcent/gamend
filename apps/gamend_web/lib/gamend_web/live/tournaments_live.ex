@@ -21,12 +21,17 @@ defmodule GamendWeb.TournamentsLive do
   alias GamendWeb.ContentText
   alias GamendWeb.LiveHelpers
   alias GamendWeb.OnMount.SeoTitle
+  alias GamendWeb.Plugs.FeatureGate
 
   @page_size 25
   @brackets_page_size 12
 
   @impl true
   def mount(_params, _session, socket) do
+    unless FeatureGate.enabled?(:list_tournaments) do
+      raise GamendWeb.NotFoundError
+    end
+
     {:ok,
      socket
      |> assign(:page_title, gettext("Tournaments"))

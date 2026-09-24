@@ -3,6 +3,7 @@ defmodule GamendWeb.Api.V1.SessionController do
   use OpenApiSpex.ControllerSpecs
 
   alias Gamend.Accounts
+  alias Gamend.Captcha
   alias GamendWeb.Auth.Guardian
   alias GamendWeb.Auth.Tokens
   alias GamendWeb.Schemas
@@ -63,7 +64,8 @@ defmodule GamendWeb.Api.V1.SessionController do
       "Create an account with an email and a password, send its confirmation email " <>
         "as browser sign-up does, and sign it in: the tokens come back as from login. " <>
         "The first account becomes the admin and is confirmed without an email; account " <>
-        "activation applies as for every sign-up.",
+        "activation applies as for every sign-up. When the server requires it " <>
+        "(`GAMEND_CAPTCHA_API_REGISTER`), a Cloudflare Turnstile token goes in `captcha_token`.",
     request_body: {
       "Registration",
       "application/json",
@@ -75,6 +77,10 @@ defmodule GamendWeb.Api.V1.SessionController do
           username: %Schema{
             type: :string,
             description: "Optional; one is generated when it is left out"
+          },
+          captcha_token: %Schema{
+            type: :string,
+            description: "Turnstile token, when the server requires a captcha"
           }
         },
         required: [:email, :password],
@@ -87,10 +93,12 @@ defmodule GamendWeb.Api.V1.SessionController do
     responses: [
       created: {"Account created and signed in", "application/json", SessionResponse},
       bad_request: Schemas.error("Email or password missing (missing_param)"),
-      forbidden: Schemas.error("The account awaits activation by an admin"),
+      forbidden:
+        Schemas.error("The account awaits activation by an admin, or the captcha failed"),
       conflict: Schemas.error("Email or username already taken"),
       unprocessable_entity: Schemas.error("Invalid email, username or password"),
-      service_unavailable: Schemas.error("The confirmation email could not be sent")
+      service_unavailable:
+        Schemas.error("The confirmation email could not be sent, or the captcha check could not")
     ]
   )
 
@@ -98,14 +106,32 @@ defmodule GamendWeb.Api.V1.SessionController do
       when is_binary(email) and is_binary(password) do
     # The notifier the browser sign-up reads, so both paths send one email.
     notifier = Application.get_env(:gamend_web, :user_notifier, Gamend.Accounts.UserNotifier)
+    ip = conn.remote_ip |> :inet.ntoa() |> to_string()
 
-    params
-    |> Map.take(["email", "password", "username"])
-    |> Accounts.register_user_with_password_and_deliver(
-      fn token -> url(~p"/users/confirm/#{token}") end,
-      notifier
-    )
-    |> registered(conn)
+    case Captcha.verify_api_register(params["captcha_token"], ip) do
+      :ok ->
+        params
+        |> Map.take(["email", "password", "username"])
+        |> Accounts.register_user_with_password_and_deliver(
+          fn token -> url(~p"/users/confirm/#{token}") end,
+          notifier
+        )
+        |> registered(conn)
+
+      {:error, :unavailable} ->
+        reply_error(
+          conn,
+          :service_unavailable,
+          "captcha_unavailable",
+          "The captcha could not be verified, try again"
+        )
+
+      {:error, :missing} ->
+        reply_error(conn, :forbidden, "captcha_required", "A captcha_token is required")
+
+      {:error, :invalid} ->
+        reply_error(conn, :forbidden, "captcha_invalid", "Captcha verification failed")
+    end
   end
 
   def register(conn, _params) do
