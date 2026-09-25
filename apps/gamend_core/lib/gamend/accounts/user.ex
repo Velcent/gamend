@@ -517,7 +517,9 @@ defmodule Gamend.Accounts.User do
   characters (`Gamend.Limits` `:min_username`/`:max_username`) of letters and
   digits in one script, or Latin mixed with Chinese, Japanese or Korean,
   joined by non-consecutive `.` `_` `-` separators and starting and ending on
-  a letter or digit — `Gamend.Accounts.Username` has the rules and why. Uniqueness is enforced by the DB unique index.
+  a letter or digit — `Gamend.Accounts.Username` has the rules and why, and a
+  plugin replaces them with the `validate_username/1` hook. Length and the DB
+  unique index stay.
   """
   def username_changeset(user_or_changeset, attrs) do
     user_or_changeset
@@ -531,12 +533,8 @@ defmodule Gamend.Accounts.User do
       min: Gamend.Limits.get(:min_username),
       max: Gamend.Limits.get(:max_username)
     )
-    |> validate_format(:username, Username.format(),
-      message:
-        "only letters, digits and non-consecutive . _ - separators; must start and end with a letter or digit"
-    )
     |> validate_change(:username, fn :username, username ->
-      case Username.check_scripts(username) do
+      case Username.validate(username) do
         :ok -> []
         {:error, message} -> [username: message]
       end

@@ -73,8 +73,9 @@ defmodule Gamend.Hooks do
   `"username"`. Return `{:ok, attrs}` — possibly with a different username
   or other changes — or `{:error, reason}` to abort the registration.
 
-  Core re-validates after all hooks ran: format and uniqueness are not
-  overridable. A hook-supplied username that is invalid or already taken is
+  Core re-validates after all hooks ran, against `c:validate_username/1` or
+  its own rules and for uniqueness; this hook cannot skip that. A
+  hook-supplied username that is invalid or already taken is
   replaced with a generated one (a plugin bug must never lock a player out
   of login). For strict policy on player-initiated changes — profanity or
   reserved names — use `c:before_user_update/2`, where errors are returned
@@ -97,6 +98,22 @@ defmodule Gamend.Hooks do
 
   @callback before_user_update(User.t(), map()) :: hook_result(map())
   @callback after_user_updated(User.t()) :: any()
+
+  @doc """
+  Replaces the built-in username rules for one handle.
+
+  Receives the handle as it will be stored (NFKC-normalized, lowercased) and
+  answers `:ok`, `{:error, message}` (shown to the player), or `:default` to
+  keep core's rules: letters and digits of one script or Latin with Chinese,
+  Japanese or Korean, joined by `.` `_` `-` (`Gamend.Accounts.Username`).
+  Core still enforces length, uniqueness and the absence of invisible
+  characters. The generator asks the same question, so a policy that refuses
+  every `word-1234` must hand out handles in `c:before_user_register/2`.
+  Modules are tried in order and the first real answer wins. A hook that
+  raises or times out counts as `:default`, so a plugin bug never locks a
+  player out.
+  """
+  @callback validate_username(String.t()) :: :ok | {:error, String.t() | atom()} | :default
 
   @callback after_user_online(User.t()) :: any()
   @callback after_user_offline(User.t()) :: any()
@@ -548,6 +565,7 @@ defmodule Gamend.Hooks do
                       before_stop: 0,
                       before_user_register: 2,
                       before_user_update: 2,
+                      validate_username: 1,
                       on_custom_hook: 2
 
   @doc "Returns the set of internal lifecycle hook names that are not callable\n  through the public RPC interface."
@@ -566,6 +584,7 @@ defmodule Gamend.Hooks do
       :after_wallet_changed,
       :after_inventory_changed,
       :before_user_update,
+      :validate_username,
       :before_lobby_create,
       :after_lobby_create,
       :before_group_create,
@@ -993,6 +1012,9 @@ defmodule Gamend.Hooks do
       _ when name == :matchmaking_form_matches and arity == 2 ->
         run_matchmaking_form_matches(exporting_mods, args, opts, timeout)
 
+      _ when name == :validate_username and arity == 1 ->
+        run_validate_username(exporting_mods, args, opts, timeout)
+
       [first_mod | rest] ->
         first_res = safe_apply_raw(first_mod, name, args, opts, timeout)
 
@@ -1031,6 +1053,28 @@ defmodule Gamend.Hooks do
             "Hooks.matchmaking_form_matches ignored mod=#{inspect(mod)}: #{inspect(other)}"
           )
 
+          {:cont, acc}
+      end
+    end)
+  end
+
+  # `validate_username` answers for one handle; `:default` means "I abstain".
+  # A hook that fails is logged and abstains: a plugin bug must never lock a
+  # player out of registration.
+  defp run_validate_username(mods, args, opts, timeout) do
+    Enum.reduce_while(mods, {:ok, :default}, fn mod, acc ->
+      case safe_apply_raw(mod, :validate_username, args, opts, timeout) do
+        {:ok, :ok} ->
+          {:halt, {:ok, :ok}}
+
+        {:ok, {:error, message}} when is_binary(message) or is_atom(message) ->
+          {:halt, {:ok, {:error, message}}}
+
+        {:ok, :default} ->
+          {:cont, acc}
+
+        other ->
+          Logger.warning("Hooks.validate_username ignored mod=#{inspect(mod)}: #{inspect(other)}")
           {:cont, acc}
       end
     end)
@@ -1508,6 +1552,9 @@ defmodule Gamend.Hooks.Default do
 
   @impl true
   def before_user_update(_user, attrs), do: {:ok, attrs}
+
+  @impl true
+  def validate_username(_username), do: :default
 
   @impl true
   def before_lobby_create(attrs), do: {:ok, attrs}

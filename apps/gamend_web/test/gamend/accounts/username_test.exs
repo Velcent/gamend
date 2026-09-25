@@ -36,6 +36,31 @@ defmodule Gamend.Accounts.UsernameTest do
     def before_user_register(_user, _attrs), do: {:error, :registration_vetoed}
   end
 
+  defmodule PolicyHooks do
+    use Gamend.TestSupport.NoopHooks
+
+    # Letters of any mix, digits and `_`: looser than core on scripts, stricter
+    # on separators. Generated `word-1234` handles fail it, so sign-up hands
+    # out its own, as the hook's doc asks.
+    @impl true
+    def validate_username(handle) do
+      if String.match?(handle, ~r/^[\p{L}\p{Nd}_]+$/u),
+        do: :ok,
+        else: {:error, "letters, digits and _ only"}
+    end
+
+    @impl true
+    def before_user_register(_user, attrs),
+      do: {:ok, Map.put(attrs, "username", "policy_#{System.unique_integer([:positive])}")}
+  end
+
+  defmodule DeferringHooks do
+    use Gamend.TestSupport.NoopHooks
+
+    @impl true
+    def validate_username(_handle), do: :default
+  end
+
   defp unique_device_id, do: "device-#{System.unique_integer([:positive])}"
 
   describe "generated usernames" do
@@ -181,11 +206,55 @@ defmodule Gamend.Accounts.UsernameTest do
     end
   end
 
-  describe "Username.check_scripts/1" do
+  describe "Username.default_rules/1" do
     test "names the rule a handle breaks" do
-      assert Username.check_scripts("王wang") == :ok
-      assert {:error, "can only mix" <> _} = Username.check_scripts("pаypal")
-      assert {:error, "repeats or stacks" <> _} = Username.check_scripts("cafe\u0301\u0301")
+      assert Username.default_rules("王wang") == :ok
+      assert {:error, "can only mix" <> _} = Username.default_rules("pаypal")
+      assert {:error, "repeats or stacks" <> _} = Username.default_rules("cafe\u0301\u0301")
+    end
+  end
+
+  describe "validate_username hook" do
+    test "replaces core's rules; length, uniqueness and invisible characters stay" do
+      Application.put_env(:gamend_core, :hooks_module, PolicyHooks)
+      user = AccountsFixtures.user_fixture()
+      n = System.unique_integer([:positive])
+
+      # Latin with Cyrillic, which core refuses
+      assert {:ok, updated} = Accounts.update_username(user, %{"username" => "ivanиван_#{n}"})
+      assert updated.username == "ivanиван_#{n}"
+
+      # a separator core allows
+      assert {:error, changeset} =
+               Accounts.update_username(user, %{"username" => "ivan.ivan#{n}"})
+
+      assert {"letters, digits and _ only", _} = changeset.errors[:username]
+
+      assert {:error, changeset} =
+               Accounts.update_username(user, %{"username" => "zero\u200Bwidth"})
+
+      assert {"has an invisible character", _} = changeset.errors[:username]
+
+      assert {:error, changeset} = Accounts.update_username(user, %{"username" => "ab"})
+      assert Keyword.has_key?(changeset.errors, :username)
+    end
+
+    test "the generator asks it, and sign-up uses the hook-supplied handle" do
+      Application.put_env(:gamend_core, :hooks_module, PolicyHooks)
+
+      assert UsernameGenerator.slug("Ivan Иван") == "ivan"
+      assert UsernameGenerator.slug("Drágoș Țest") == nil
+
+      {:ok, user} = Accounts.find_or_create_from_device(unique_device_id())
+      assert user.username =~ ~r/^policy_\d+$/
+    end
+
+    test ":default keeps core's rules" do
+      Application.put_env(:gamend_core, :hooks_module, DeferringHooks)
+      user = AccountsFixtures.user_fixture()
+
+      assert {:error, changeset} = Accounts.update_username(user, %{"username" => "pаypal"})
+      assert {"can only mix" <> _, _} = changeset.errors[:username]
     end
   end
 

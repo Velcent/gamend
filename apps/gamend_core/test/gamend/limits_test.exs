@@ -16,12 +16,19 @@ defmodule Gamend.LimitsTest do
       assert Map.has_key?(defaults, :max_kv_value_size)
     end
 
-    test "all default values are integers" do
-      for {_key, val} <- Limits.defaults() do
-        assert is_integer(val), "Expected integer value, got: #{inspect(val)}"
+    # A limit is a number, with the odd switch beside it (`username_ascii_only`);
+    # whichever it is, its default has to be a value of its declared type, or
+    # `get/1` hands callers something no parser would ever produce.
+    test "every default is a value of its declared type" do
+      for %{key: key, type: type, default: default} <- Limits.__settings__() do
+        assert typed?(type, default),
+               "#{key}: expected a #{type} default, got #{inspect(default)}"
       end
     end
   end
+
+  defp typed?(:integer, value), do: is_integer(value)
+  defp typed?(:boolean, value), do: is_boolean(value)
 
   describe "get/1" do
     test "returns default value for known key" do

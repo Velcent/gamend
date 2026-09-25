@@ -35,6 +35,22 @@ defmodule Gamend.LobbySnapshotsTest do
     :ok = Writer.flush()
   end
 
+  # Flushes the writer and lists until `count` snapshots exist for the lobby,
+  # or gives up after two seconds and returns whatever is there for the
+  # assertion to report.
+  defp flushed_snapshots(lobby_id, count, deadline \\ nil) do
+    deadline = deadline || System.monotonic_time(:millisecond) + 2_000
+    :ok = Writer.flush()
+    snapshots = LobbySnapshots.list_snapshots(lobby_id)
+
+    if length(snapshots) >= count or System.monotonic_time(:millisecond) > deadline do
+      snapshots
+    else
+      Process.sleep(20)
+      flushed_snapshots(lobby_id, count, deadline)
+    end
+  end
+
   describe "capture" do
     test "records snapshots in order with their trigger", %{lobby: lobby} do
       capture(lobby.id, "test:first")
@@ -365,11 +381,11 @@ defmodule Gamend.LobbySnapshotsTest do
 
       :ok = LobbySnapshots.capture_hook(:finish_boat_game, user, {:ok, :done})
       :ok = LobbySnapshots.capture_hook(:broken_hook, user, {:error, :boom})
-      # capture_hook gathers off the caller's process, so give the task a moment.
-      Process.sleep(50)
-      :ok = Writer.flush()
-
-      snapshots = LobbySnapshots.list_snapshots(lobby.id)
+      # capture_hook gathers off the caller's process — a real task here, since
+      # core tests leave `Gamend.Async` asynchronous (see config/test.exs) — so
+      # wait for both captures to land rather than a fixed pause the loaded
+      # suite overran.
+      snapshots = flushed_snapshots(lobby.id, 2)
 
       assert Enum.any?(snapshots, &(&1.trigger == "hook:finish_boat_game" and not &1.flagged))
       assert Enum.any?(snapshots, &(&1.trigger == "hook:broken_hook" and &1.flagged))

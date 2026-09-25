@@ -84,11 +84,10 @@ defmodule Gamend.Accounts.UsernameGenerator do
     min = Gamend.Limits.get(:min_username)
 
     cond do
-      String.length(ascii) >= min ->
+      String.length(ascii) >= min and Username.validate(ascii) == :ok ->
         ascii
 
-      String.length(unicode) >= min and String.match?(unicode, Username.format()) and
-          Username.check_scripts(unicode) == :ok ->
+      String.length(unicode) >= min and Username.validate(unicode) == :ok ->
         unicode
 
       true ->

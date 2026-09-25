@@ -151,6 +151,7 @@ defmodule Gamend.Hooks do
   - `after_user_register/1` - Called after a new user registers
   - `after_user_logged_in/1` - Called after a user logs in
   - `after_user_updated/1` - Called after a user is updated (fire-and-forget)
+  - `validate_username/1` - Replaces the username rules for one handle (`:default` keeps core's)
   - `after_user_online/1` - Called after a user comes online (fire-and-forget)
   - `after_user_offline/1` - Called after a user goes offline (fire-and-forget)
 
@@ -319,6 +320,20 @@ defmodule Gamend.Hooks do
   @callback before_user_register(user(), attrs :: map()) :: hook_result(map())
 
   @callback before_user_update(user(), attrs :: map()) :: hook_result(map())
+
+  @doc """
+  Replaces the built-in username rules for one handle.
+
+  Receives the handle as it will be stored (NFKC-normalized, lowercased) and
+  answers `:ok`, `{:error, message}` shown to the player, or `:default` to keep
+  core's rules. Core still enforces length, uniqueness and the absence of
+  invisible characters. The generator asks the same question, so a policy
+  that refuses every `word-1234` must hand out handles in
+  `c:before_user_register/2`. A hook that raises or times out counts as
+  `:default`.
+  """
+  @callback validate_username(username :: String.t()) ::
+              :ok | {:error, String.t() | atom()} | :default
   @callback after_user_register(user()) :: any()
   @callback after_user_logged_in(user()) :: any()
   @callback after_user_updated(user()) :: any()
@@ -514,6 +529,7 @@ defmodule Gamend.Hooks do
                       before_group_update: 2,
                       after_group_updated: 1,
                       before_user_update: 2,
+                      validate_username: 1,
                       after_group_join: 2,
                       after_group_leave: 2,
                       after_group_deleted: 1,
@@ -619,6 +635,9 @@ defmodule Gamend.Hooks do
 
       @impl true
       def before_user_update(_user, attrs), do: {:ok, attrs}
+
+      @impl true
+      def validate_username(_username), do: :default
 
       @impl true
       def before_lobby_create(attrs), do: {:ok, attrs}
@@ -840,6 +859,7 @@ defmodule Gamend.Hooks do
                      after_wallet_changed: 1,
                      after_inventory_changed: 1,
                      before_user_update: 2,
+                     validate_username: 1,
                      on_custom_hook: 2,
                      before_lobby_create: 1,
                      after_lobby_create: 1,

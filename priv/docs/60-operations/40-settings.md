@@ -7,7 +7,7 @@ generated: by `mix gamend.settings.guide` - do not edit by hand; edit the
 # Settings
 
 Every setting the server has, with the environment variable that sets it.
-260 settings across 23 groups.
+261 settings across 23 groups.
 
 A setting is declared in the module that owns it, so this page and
 `.env.example` are generated from the same source the server reads. The
@@ -227,6 +227,7 @@ Live values, and where each one came from, are on the
 | `GAMEND_LIMITS_MAX_USERNAME` | integer | `32` |  |
 | `GAMEND_LIMITS_MIN_USERNAME` | integer | `3` |  |
 | `GAMEND_LIMITS_READY_CHECK_TIMEOUT_MS` | integer | `15000` | Default answering window. Overridable per check by the caller. |
+| `GAMEND_LIMITS_USERNAME_ASCII_ONLY` | boolean | `false` | Keep username handles to a-z, 0-9 and . _ - (the GitHub and Discord model). Input is still normalized first, so WANG in fullwidth becomes wang; display names stay Unicode. |
 
 
 ## Lobby snapshots

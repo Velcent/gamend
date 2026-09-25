@@ -123,4 +123,57 @@ defmodule Gamend.Hooks.PluginManagerTest do
     _ = PluginManager.reload()
     assert_received {:before_stop, :test_plugin_mgr}
   end
+
+  # A release's code server is embedded for the life of the VM, so the mode is
+  # passed in rather than switched: what matters is that a beam sitting on a
+  # plugin's path, unloaded, is loaded in embedded mode and left alone in
+  # interactive mode, where the first call would load it anyway.
+  describe "load_beams/2" do
+    setup do
+      ebin =
+        Path.join(System.tmp_dir!(), "gs-plugin-beams-#{System.unique_integer([:positive])}")
+
+      File.mkdir_p!(ebin)
+
+      mod = Module.concat([Gamend, "EmbeddedPluginBeam#{System.unique_integer([:positive])}"])
+      {:module, ^mod, beam, _} = Module.create(mod, quote(do: def(hi, do: :hi)), __ENV__)
+      File.write!(Path.join(ebin, "#{mod}.beam"), beam)
+
+      # Unloaded, as it would be on a fresh release boot.
+      :code.purge(mod)
+      :code.delete(mod)
+      :code.purge(mod)
+
+      on_exit(fn ->
+        :code.purge(mod)
+        :code.delete(mod)
+        File.rm_rf!(ebin)
+      end)
+
+      %{ebin: ebin, mod: mod}
+    end
+
+    test "embedded mode loads every beam on the plugin's paths", %{ebin: ebin, mod: mod} do
+      assert :code.is_loaded(mod) == false
+
+      assert :ok = PluginManager.load_beams([ebin], :embedded)
+
+      assert {:file, _} = :code.is_loaded(mod)
+      assert mod.hi() == :hi
+      # Idempotent: a reload over loaded modules is not an error.
+      assert :ok = PluginManager.load_beams([ebin], :embedded)
+    end
+
+    test "interactive mode leaves loading to the first call", %{ebin: ebin, mod: mod} do
+      assert :ok = PluginManager.load_beams([ebin], :interactive)
+      assert :code.is_loaded(mod) == false
+    end
+
+    test "a beam that will not load fails the plugin", %{ebin: ebin} do
+      File.write!(Path.join(ebin, "Elixir.Gamend.NotABeam.beam"), "garbage")
+
+      assert {:error, {:module_load_failed, Gamend.NotABeam, _}} =
+               PluginManager.load_beams([ebin], :embedded)
+    end
+  end
 end

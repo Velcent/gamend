@@ -499,7 +499,8 @@ defmodule Gamend.Hooks.PluginManager do
 
     plugin = %Plugin{name: plugin_name, app: app, ebin_paths: ebin_paths, loaded_at: now}
 
-    with :ok <- safe_load_app(app),
+    with :ok <- load_beams(ebin_paths, :code.get_mode()),
+         :ok <- safe_load_app(app),
          {:ok, vsn} <- app_vsn(app),
          {:ok, modules} <- app_modules(app),
          {:ok, hooks_mod} <- app_hooks_module(app),
@@ -518,6 +519,37 @@ defmodule Gamend.Hooks.PluginManager do
   defp load_plugin(_root, plugin_name) do
     Logger.warning("plugin=#{plugin_name} skipped: name exceeds #{@max_plugin_name_length} chars")
     nil
+  end
+
+  @doc false
+  # A release runs the code server in embedded mode: nothing loads on first
+  # call, and `Code.ensure_loaded/1` answers `{:error, :embedded}` for any
+  # module the boot script did not load. A plugin is never in the boot
+  # script, so without this every one of its modules — the hooks module, its
+  # application callback, its deps — is unreachable, and the plugin fails
+  # with `failed to load module=… {:error, :embedded}` in a release while
+  # working under `mix phx.server`. Explicit loading is allowed in embedded
+  # mode, so each beam on the plugin's own paths is loaded here. Interactive
+  # mode loads on demand and needs none of it.
+  def load_beams(_ebin_paths, :interactive), do: :ok
+
+  def load_beams(ebin_paths, :embedded) do
+    ebin_paths
+    |> Enum.flat_map(&Path.wildcard(Path.join(&1, "*.beam")))
+    |> Enum.reduce_while(:ok, fn beam, :ok ->
+      mod = beam |> Path.basename(".beam") |> String.to_atom()
+
+      case :code.is_loaded(mod) do
+        {:file, _} ->
+          {:cont, :ok}
+
+        false ->
+          case :code.load_abs(String.to_charlist(Path.rootname(beam))) do
+            {:module, ^mod} -> {:cont, :ok}
+            {:error, reason} -> {:halt, {:error, {:module_load_failed, mod, reason}}}
+          end
+      end
+    end)
   end
 
   # True when the app's code is already reachable on the code path from

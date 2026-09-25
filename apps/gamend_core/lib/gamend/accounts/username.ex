@@ -28,8 +28,13 @@ defmodule Gamend.Accounts.Username do
 
   Nothing else: a CJK letter that resembles a Latin one (`丨` for `l`, `ㅇ`
   for `o`) is no more confusable than `1` and `0`, which any ASCII handle
-  holds. Format-control characters (zero-width joiners, direction overrides)
-  are not letters, so the format refuses them.
+  holds.
+
+  A host with other ideas implements the `validate_username/1` hook
+  (`Gamend.Hooks`), which answers for the normalized handle and replaces
+  `default_rules/1` wholesale. Only the floor stays: length, uniqueness, and
+  no invisible characters (Unicode's `C` categories: controls, zero-width
+  joiners, direction overrides).
 
   `GAMEND_LIMITS_USERNAME_ASCII_ONLY=true` keeps handles to `a-z`, `0-9` and
   the separators, the GitHub and Discord model, after the same normalization
@@ -60,6 +65,8 @@ defmodule Gamend.Accounts.Username do
 
   @ascii ~r/^[a-z0-9._-]+$/
 
+  @invisible ~r/\p{C}/u
+
   @doc "The spelling a handle is stored and looked up under."
   @spec normalize(String.t()) :: String.t()
   def normalize(username) when is_binary(username) do
@@ -74,12 +81,32 @@ defmodule Gamend.Accounts.Username do
   def format, do: @format
 
   @doc """
-  The ASCII-only, script and mark rules (see moduledoc) for a NORMALIZED
-  handle: `:ok`, or `{:error, message}` for the changeset.
+  The rules for a NORMALIZED handle: `:ok`, or `{:error, message}` for the
+  changeset. Invisible characters are refused first; then the
+  `validate_username` hook answers, or `default_rules/1` when no plugin does.
   """
-  @spec check_scripts(String.t()) :: :ok | {:error, String.t()}
-  def check_scripts(username) when is_binary(username) do
+  @spec validate(String.t()) :: :ok | {:error, String.t()}
+  def validate(username) when is_binary(username) do
+    if String.match?(username, @invisible) do
+      {:error, "has an invisible character"}
+    else
+      case Gamend.Hooks.internal_call(:validate_username, [username]) do
+        {:ok, :ok} -> :ok
+        {:ok, {:error, message}} -> {:error, to_string(message)}
+        _ -> default_rules(username)
+      end
+    end
+  end
+
+  @doc "Core's own rules (see moduledoc), for a NORMALIZED handle."
+  @spec default_rules(String.t()) :: :ok | {:error, String.t()}
+  def default_rules(username) when is_binary(username) do
     cond do
+      not String.match?(username, @format) ->
+        {:error,
+         "only letters, digits and non-consecutive . _ - separators; " <>
+           "must start and end with a letter or digit"}
+
       Gamend.Limits.get(:username_ascii_only) and not String.match?(username, @ascii) ->
         {:error, "only a-z, 0-9 and . _ - separators"}
 
@@ -94,13 +121,13 @@ defmodule Gamend.Accounts.Username do
     end
   end
 
-  @doc "Format, length and script rules together, for a normalized handle."
+  @doc "Length and `validate/1` together, for a normalized handle."
   @spec valid?(String.t()) :: boolean()
   def valid?(username) when is_binary(username) do
     length = String.length(username)
 
     length >= Gamend.Limits.get(:min_username) and length <= Gamend.Limits.get(:max_username) and
-      String.match?(username, @format) and check_scripts(username) == :ok
+      validate(username) == :ok
   end
 
   def valid?(_), do: false

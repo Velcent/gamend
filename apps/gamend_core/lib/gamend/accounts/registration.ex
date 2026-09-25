@@ -156,8 +156,8 @@ defmodule Gamend.Accounts.Registration do
       |> maybe_deactivate_new_user(is_first_user)
     end
 
-    transaction_fun = fn attrs ->
-      case Repo.insert(changeset_fun.(attrs)) do
+    transaction_fun = fn changeset ->
+      case Repo.insert(changeset) do
         {:ok, %User{} = user} ->
           case maybe_send_confirmation(user, is_first_user, notifier, confirmation_url_fun) do
             :ok -> user
@@ -170,7 +170,8 @@ defmodule Gamend.Accounts.Registration do
     end
 
     with {:ok, attrs} <- run_before_user_register(changeset_fun, attrs),
-         {:ok, %User{} = user} <- transact_with_username_retry(transaction_fun, attrs) do
+         {:ok, %User{} = user} <-
+           transact_with_username_retry(changeset_fun, transaction_fun, attrs) do
       Accounts.invalidate_users_count_cache()
 
       Gamend.Async.run(fn ->
@@ -244,12 +245,19 @@ defmodule Gamend.Accounts.Registration do
   # A unique violation aborts the surrounding Postgres transaction, so the
   # retry must restart the whole transaction rather than re-insert inside
   # the aborted one.
-  defp transact_with_username_retry(transaction_fun, attrs, attempt \\ 1) do
-    case Repo.transaction(fn -> transaction_fun.(attrs) end) do
+  # The changeset runs the `validate_username` hook, so it is built before the
+  # transaction opens: a hook never runs inside one.
+  defp transact_with_username_retry(changeset_fun, transaction_fun, attrs, attempt \\ 1) do
+    changeset = changeset_fun.(attrs)
+
+    case Repo.transaction(fn -> transaction_fun.(changeset) end) do
       {:error, %Ecto.Changeset{} = changeset} = err ->
         case regenerate_username_attrs(attrs, changeset, attempt) do
-          {:retry, attrs} -> transact_with_username_retry(transaction_fun, attrs, attempt + 1)
-          :no_retry -> err
+          {:retry, attrs} ->
+            transact_with_username_retry(changeset_fun, transaction_fun, attrs, attempt + 1)
+
+          :no_retry ->
+            err
         end
 
       other ->

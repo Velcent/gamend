@@ -133,12 +133,15 @@ and the separators, input is still normalized first (`ＷＡＮＧ` is `wang`),
 and a generated handle transliterates the name (`Drágoș` is `dragos`) or
 picks a random word.
 
-A plugin can tighten the rules but not loosen them: `before_user_update`
-refuses a player's change with its own message (banned words, reserved
-names, a stricter character set), and `before_user_register` swaps the
-generated handle at sign-up. Core re-validates after both, and a sign-up
-always ends with a valid handle, so a plugin bug never locks a player out.
-Details in the [server scripting guide](/docs/server-scripting).
+A plugin replaces these rules with the `validate_username/1` hook: it
+receives the normalized handle and answers `:ok`, `{:error, message}` (shown
+to the player) or `:default` for core's rules. Core keeps only length,
+uniqueness and the absence of invisible characters. For a policy on top of
+core's — banned words, reserved names — `before_user_update` refuses a
+player's change with its own message and `before_user_register` swaps the
+generated handle at sign-up; a sign-up always ends with a valid handle, so a
+plugin bug never locks a player out. Details in the
+[server scripting guide](/docs/server-scripting).
 
 ## Provider linking
 
