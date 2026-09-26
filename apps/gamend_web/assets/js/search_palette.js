@@ -32,8 +32,9 @@ export const normalizeQuery = (value) =>
 // Ranking before truncating is what keeps "goal" above "goalpost": taking the
 // first N in index order buries the thing you typed under everything that
 // merely contains it.
-export const fieldRank = (value, needle) => {
-  const normalized = normalizeQuery(value)
+export const fieldRank = (value, needle) => normalizedRank(normalizeQuery(value), needle)
+
+const normalizedRank = (normalized, needle) => {
   if (normalized === "") return 4
   if (normalized === needle) return 0
   if (normalized.startsWith(needle)) return 1
@@ -42,21 +43,69 @@ export const fieldRank = (value, needle) => {
   return 4
 }
 
+// Below every title and keyword hit, above a miss: the subtitle is a guide's
+// summary or a section's first sentence, so it is where the words a reader
+// half-remembers live, and also where a lot of words live.
+const SUBTITLE_RANK = 3.5
+const SUBTITLE_MIN_LENGTH = 3
+
+// Normalizing is the costly part of matching, and the index does not change
+// between keystrokes, so each row is normalized once, the first time it is
+// ranked, and remembered for as long as the row itself lives.
+const prepared = new WeakMap()
+
+const prepare = (entry) => {
+  let fields = prepared.get(entry)
+
+  if (!fields) {
+    const keywords = (Array.isArray(entry.keywords) ? entry.keywords : []).map(normalizeQuery)
+
+    fields = {
+      title: normalizeQuery(entry.title),
+      keywords,
+      keywordWords: keywords.flatMap((keyword) => keyword.split(WORD_SPLIT)).filter(Boolean),
+      subtitle: normalizeQuery(entry.subtitle),
+      subtitleWords: normalizeQuery(entry.subtitle).split(WORD_SPLIT).filter(Boolean),
+    }
+
+    prepared.set(entry, fields)
+  }
+
+  return fields
+}
+
+// A needle with a separator in it ("utf-8") is a phrase, and the words it
+// spans are matched in order; one without is matched against the start of
+// each word.
+const SEPARATOR = /[^\p{L}\p{N}]/u
+
+const subtitleMatches = (fields, needle) =>
+  SEPARATOR.test(needle)
+    ? fields.subtitle.includes(needle)
+    : fields.subtitleWords.some((word) => word.startsWith(needle))
+
 // The title carries the rank; a keyword can only match, never outrank a title
 // match, so "Spanish" stays above a row that merely lists "spanish" as an
-// alias.
+// alias. A subtitle word ranks below both, and only whole words and their
+// starts count there, so "id" does not find every sentence with "hidden".
 export const rankEntry = (entry, needle) => {
-  const title = fieldRank(entry.title, needle)
+  const fields = prepare(entry)
+  const title = normalizedRank(fields.title, needle)
   if (title < 4) return title
 
-  const keywords = Array.isArray(entry.keywords) ? entry.keywords : []
   let best = 4
-  for (const keyword of keywords) {
-    const rank = fieldRank(keyword, needle)
+  for (const keyword of fields.keywords) {
+    const rank = normalizedRank(keyword, needle)
     if (rank < best) best = rank
   }
   // A keyword hit never beats a title hit of the same tier.
-  return best === 4 ? 4 : Math.min(best + 1, 4)
+  if (best < 4) return Math.min(best + 1, 4)
+
+  if (needle.length >= SUBTITLE_MIN_LENGTH && subtitleMatches(fields, needle)) {
+    return SUBTITLE_RANK
+  }
+
+  return 4
 }
 
 // Edit distance, given up on as soon as it passes `max`. A reader who
@@ -113,8 +162,8 @@ const typoBudget = (length) => (length >= 7 ? 2 : 1)
 // Null when they could not reasonably have meant it.
 const typoDistance = (entry, needle) => {
   const budget = typoBudget(needle.length)
-  const title = normalizeQuery(entry.title)
-  const candidates = [title, ...title.split(WORD_SPLIT), ...keywordWords(entry)]
+  const {title, keywordWords: words} = prepare(entry)
+  const candidates = [title, ...title.split(WORD_SPLIT), ...words]
 
   let best = null
   for (const candidate of candidates) {

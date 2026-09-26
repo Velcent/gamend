@@ -491,6 +491,31 @@ defmodule Gamend.Content do
   @spec doc_toc(atom(), String.t()) :: [%{id: String.t(), text: String.t(), level: 2 | 3}]
   def doc_toc(collection \\ :docs, slug), do: collection |> doc_html(slug) |> Markdown.toc()
 
+  @doc """
+  A guide's `h2` and `h3` sections: the heading's id and text, as
+  `doc_toc/2` gives them, plus `:lede`, the first sentence of the section's
+  first paragraph (nil when it opens with a list, a table or code).
+
+  For search: a section is a place to go as much as a guide is. Cached until
+  `reload/0`, like the HTML it is read from.
+  """
+  @spec doc_sections(atom(), String.t()) :: [
+          %{id: String.t(), text: String.t(), level: 2 | 3, lede: String.t() | nil}
+        ]
+  def doc_sections(collection \\ :docs, slug) do
+    cached({:doc_sections, collection, slug}, fn ->
+      collection |> doc_html(slug) |> Markdown.sections()
+    end)
+  end
+
+  @doc """
+  Caches `fun`'s result under `key` until the next `reload/0`, for data a host
+  derives from content (its search entries, say) so it is built once rather
+  than on every request. An empty result is not cached.
+  """
+  @spec memoize(term(), (-> value)) :: value when value: term()
+  def memoize(key, fun) when is_function(fun, 0), do: cached({:memoize, key}, fun)
+
   defp post_render(html, collection) do
     case Map.get(registered_paths(), normalize_registered_name(collection)) do
       %{post_render: {module, function}} -> apply(module, function, [html])

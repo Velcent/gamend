@@ -132,6 +132,7 @@ on the request changes nothing; linking is its own endpoint.
 
 ## Usernames
 
+Usernames and display names are UTF-8 (`utf8`) Unicode, in any language.
 Every account has a unique `username` handle: chosen at sign-up (`username` on
 `POST /api/v1/register`) or generated from the display name, and changed with
 `PATCH /api/v1/me/username`. It is 3-32 letters or digits of any language,

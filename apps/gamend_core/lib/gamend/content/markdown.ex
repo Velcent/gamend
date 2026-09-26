@@ -133,6 +133,57 @@ defmodule Gamend.Content.Markdown do
   end
 
   @doc """
+  The `h2` and `h3` sections of rendered HTML: each heading as `toc/1` gives
+  it, plus `:lede`, the first sentence of the paragraph that opens the
+  section, or nil when the section opens with a list, a table or code.
+  """
+  @spec sections(String.t() | nil) :: [
+          %{id: String.t(), text: String.t(), level: 2 | 3, lede: String.t() | nil}
+        ]
+  def sections(nil), do: []
+
+  def sections(html) do
+    headings = Regex.scan(~r/<h([23]) id="([^"]+)">(.*?)<\/h\1>/s, html, return: :index)
+    starts = Enum.map(headings, fn [{start, _length} | _groups] -> start end)
+    ends = Enum.drop(starts, 1) ++ [byte_size(html)]
+
+    headings
+    |> Enum.zip(ends)
+    |> Enum.map(fn {[{start, length}, level, id, inner], stop} ->
+      body = binary_part(html, start + length, stop - start - length)
+
+      %{
+        id: slice(html, id),
+        text: html |> slice(inner) |> plain_text() |> decode_entities(),
+        level: html |> slice(level) |> String.to_integer(),
+        lede: lede(body)
+      }
+    end)
+  end
+
+  defp slice(html, {start, length}), do: binary_part(html, start, length)
+
+  # The opening paragraph only: a section that starts with a list or a code
+  # block has no sentence to offer.
+  defp lede(body) do
+    with [_all, inner] <- Regex.run(~r/\A\s*<p>(.*?)<\/p>/s, body),
+         text when text != "" <- inner |> plain_text() |> decode_entities() do
+      text |> String.split(~r/(?<=[.!?])\s+/, parts: 2) |> hd()
+    else
+      _ -> nil
+    end
+  end
+
+  defp decode_entities(text) do
+    text
+    |> String.replace("&lt;", "<")
+    |> String.replace("&gt;", ">")
+    |> String.replace("&quot;", "\"")
+    |> String.replace("&#39;", "'")
+    |> String.replace("&amp;", "&")
+  end
+
+  @doc """
   Drop a leading `<h1>`: the page renders the title itself, so leaving it in
   prints it twice. Attribute-tolerant, because headings carry ids now.
   """

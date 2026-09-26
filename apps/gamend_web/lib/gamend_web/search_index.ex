@@ -16,6 +16,19 @@ defmodule GamendWeb.SearchIndex do
 
   require Logger
 
+  use Gamend.Settings.Provider,
+    app: :gamend_web,
+    group: :search,
+    label: "Search"
+
+  setting(:index_max_age_seconds, :integer,
+    default: 600,
+    doc:
+      "How long a browser keeps the search index before it asks again. Asking again " <>
+        "costs a body-less 304 when nothing changed, so this bounds how soon new " <>
+        "content shows up, not how often the index is downloaded."
+  )
+
   alias GamendWeb.HostLayoutNavigation
   alias GamendWeb.HostLayouts
   alias GamendWeb.SearchIndex.Default

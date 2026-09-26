@@ -27,6 +27,29 @@ defmodule Gamend.Content.MarkdownTest do
              ]
     end
 
+    test "sections carry the first sentence of the paragraph that opens them" do
+      html =
+        render!("""
+        ## Usernames
+
+        Handles are UTF-8 (`utf8`) Unicode. They are unique.
+
+        ### Rules
+
+        - one script
+
+        ## Q &amp; A
+
+        Ask <em>anything</em>.
+        """)
+
+      assert Markdown.sections(html) == [
+               %{id: "usernames", text: "Usernames", level: 2, lede: "Handles are UTF-8 (utf8) Unicode."},
+               %{id: "rules", text: "Rules", level: 3, lede: nil},
+               %{id: "q--a", text: "Q & A", level: 2, lede: "Ask anything."}
+             ]
+    end
+
     test "strip_first_h1 tolerates the id the heading now carries" do
       assert Markdown.strip_first_h1(
                ~s(<h1 id="t">T<a href="#t" class="anchor"></a></h1>\n<p>x</p>)
