@@ -82,6 +82,11 @@ config :gamend_core, Gamend.Accounts.PresenceWriter, flush_ms: 0
 # connection, and on SQLite they collide with the test's open write transaction
 # ("database is locked"). Tests drive tick/0 and sweep/0 directly.
 config :gamend_core, Gamend.Tournaments.Ticker, enabled: false
+
+# Retention sweeps outside any sandbox: the live cycle every minute, the full
+# one five minutes after boot, which a long suite reaches. Tests call
+# `Gamend.Retention.prune_all/0` and `prune_live/0` themselves.
+config :gamend_core, Gamend.Retention, enabled: false
 config :gamend_core, Gamend.Matchmaking.Worker, enabled: false
 
 # NOTE: deliberately NOT setting `async_inline: true` here, unlike the root
