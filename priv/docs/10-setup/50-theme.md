@@ -308,11 +308,25 @@ end
 | `title` | yes | What the row says |
 | `href` | yes | A clean path (`/guides/intro`) or a full URL. Core adds the locale prefix |
 | `group` | no | The heading the row sits under. Rows keep the order you return them in |
-| `subtitle` | no | Shown greyed at the end of the row |
+| `subtitle` | no | Shown greyed at the end of the row. Its words are matched too, below titles and keywords |
 | `keywords` | no | Also matched, never shown — alternate names, codes, spellings |
 | `scope` | no | See below |
 
 Titles, subtitles and group labels are the reader's words: translate them in the provider.
+
+A match on the title ranks first, then a keyword, then a whole word (or the start of one) in the subtitle. A query with a separator in it, `utf-8`, is matched as a phrase.
+
+This site's own provider (`GamendHost.Search`) offers every guide, every blog post, and every `##` and `###` section of every guide, linked to its heading. A section's subtitle is its guide's title and the first sentence of the section, which is how a word that appears only in a guide's body can still be found: put it in the section's opening sentence. A guide or post can also list `keywords:` in its frontmatter, and they are matched like any keyword:
+
+```markdown
+---
+keywords: [utf8, unicode]
+---
+```
+
+### Cost
+
+The palette fetches the index once and filters it in the browser, so typing sends no request (unless the provider answers live queries, below). On the server, the index is built from memory: `GamendHost.Search` keeps its content rows until the content reloads (`Gamend.Content.memoize/2`), so opening the palette costs a cache read and the navigation for whoever is reading. The browser keeps the index for `GAMEND_SEARCH_INDEX_MAX_AGE_SECONDS` (default 600) and then asks again with its ETag; an index that has not changed answers `304` with no body. The cache is private because the navigation and the scopes depend on who is reading.
 
 An entry whose `href` contains `{q}` is a search rather than a destination: the palette substitutes what was typed and offers it under the page hits. That is how a query the palette cannot answer itself reaches a page that can.
 
