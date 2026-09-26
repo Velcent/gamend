@@ -7,7 +7,7 @@ generated: by `mix gamend.settings.guide` - do not edit by hand; edit the
 # Settings
 
 Every setting the server has, with the environment variable that sets it.
-312 settings across 28 groups.
+313 settings across 29 groups.
 
 A setting is declared in the module that owns it, so this page and
 `.env.example` are generated from the same source the server reads. The
@@ -453,6 +453,13 @@ Live values, and where each one came from, are on the
 | `GAMEND_RETENTION_PUSH_TOKENS_DAYS` | integer | `270` | Delete push tokens untouched for N days. Defaults to Google's stale-token guidance. |
 | `GAMEND_RETENTION_TOURNAMENTS_DAYS` | integer | `0` | Delete finished tournaments older than N days. 0 keeps forever. |
 | `GAMEND_RETENTION_UNCONFIRMED_USERS_DAYS` | integer | `30` | Delete email accounts that never confirmed their address and have been inactive for N days. 0 keeps forever. Accounts that also have a provider login are kept. |
+
+
+## Search
+
+| Variable | Type | Default | Notes |
+|---|---|---|---|
+| `GAMEND_SEARCH_INDEX_MAX_AGE_SECONDS` | integer | `600` | How long a browser keeps the search index before it asks again. Asking again costs a body-less 304 when nothing changed, so this bounds how soon new content shows up, not how often the index is downloaded. |
 
 
 ## Secrets

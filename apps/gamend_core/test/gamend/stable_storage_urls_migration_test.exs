@@ -13,10 +13,12 @@ defmodule Gamend.StableStorageUrlsMigrationTest do
       Code.require_file("priv/repo/migrations/20260925130200_stable_storage_urls.exs")
     end
 
-    :ok
+    # Handed to the test rather than called as `@migration.rewrite/1`: the
+    # module is loaded from its file at runtime, so the compiler cannot see it.
+    %{migration: @migration}
   end
 
-  test "signed S3 links become /storage/<key>, and nothing else changes" do
+  test "signed S3 links become /storage/<key>, and nothing else changes", %{migration: migration} do
     signed = AccountsFixtures.user_fixture()
     external = AccountsFixtures.user_fixture()
 
@@ -33,7 +35,7 @@ defmodule Gamend.StableStorageUrlsMigrationTest do
       set: [profile_url: "https://cdn.discordapp.com/avatars/1/2.png"]
     )
 
-    Ecto.Migrator.up(Repo, 99_999_999_999_990, @migration, log: false)
+    migration.rewrite(Repo)
 
     assert Repo.get!(User, signed.id).profile_url == "/storage/" <> key
 

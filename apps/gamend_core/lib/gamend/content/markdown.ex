@@ -145,7 +145,8 @@ defmodule Gamend.Content.Markdown do
   def sections(html) do
     headings = Regex.scan(~r/<h([23]) id="([^"]+)">(.*?)<\/h\1>/s, html, return: :index)
     starts = Enum.map(headings, fn [{start, _length} | _groups] -> start end)
-    ends = Enum.drop(starts, 1) ++ [byte_size(html)]
+    # Each section runs to the next heading, the last to the end of the page.
+    ends = starts |> Enum.drop(1) |> Enum.concat([byte_size(html)])
 
     headings
     |> Enum.zip(ends)

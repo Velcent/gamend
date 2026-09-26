@@ -44,7 +44,12 @@ defmodule Gamend.Content.MarkdownTest do
         """)
 
       assert Markdown.sections(html) == [
-               %{id: "usernames", text: "Usernames", level: 2, lede: "Handles are UTF-8 (utf8) Unicode."},
+               %{
+                 id: "usernames",
+                 text: "Usernames",
+                 level: 2,
+                 lede: "Handles are UTF-8 (utf8) Unicode."
+               },
                %{id: "rules", text: "Rules", level: 3, lede: nil},
                %{id: "q--a", text: "Q & A", level: 2, lede: "Ask anything."}
              ]

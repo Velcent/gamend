@@ -24,10 +24,19 @@ defmodule Gamend.Repo.Migrations.StableStorageUrls do
     {"tournaments", :icon_url, "icons/tournaments"}
   ]
 
-  def up do
+  def up, do: rewrite(repo())
+
+  def down, do: :ok
+
+  @doc false
+  # Public so its test can run it inside the SQL sandbox. Through
+  # `Ecto.Migrator` it cannot: on Postgres the migrator locks
+  # `schema_migrations` on the connection the test holds, then runs the
+  # migration in another process that waits for that connection.
+  def rewrite(repo) do
     for {table, column, prefix} <- @columns do
       rows =
-        repo().all(
+        repo.all(
           from(r in table,
             where: like(field(r, ^column), "%X-Amz-Signature=%"),
             select: {type(r.id, :binary_id), field(r, ^column)}
@@ -36,7 +45,7 @@ defmodule Gamend.Repo.Migrations.StableStorageUrls do
         )
 
       for {id, url} <- rows, key = storage_key(url, "#{prefix}/#{id}/") do
-        repo().update_all(
+        repo.update_all(
           from(r in table, where: r.id == type(^id, :binary_id)),
           [set: [{column, "/storage/" <> key}]],
           log: false
@@ -44,8 +53,6 @@ defmodule Gamend.Repo.Migrations.StableStorageUrls do
       end
     end
   end
-
-  def down, do: :ok
 
   defp storage_key(url, segment) do
     case :binary.match(url, segment) do
