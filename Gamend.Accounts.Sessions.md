@@ -100,15 +100,18 @@ There are three cases to consider:
 1. The user has already confirmed their email. They are logged in
    and the magic link is expired.
 
-2. The user has not confirmed their email and no password is set.
-   In this case, the user gets confirmed, logged in, and all tokens -
-   including session ones - are expired. In theory, no other tokens
-   exist but we delete all of them for best security practices.
+2. The user has not confirmed their email. Opening the link proves they
+   own the inbox, so the user gets confirmed, logged in, and all tokens -
+   including session ones - are expired.
 
-3. The user has not confirmed their email but a password is set.
-   This cannot happen in the default implementation but may be the
-   source of security pitfalls. See the "Mixing magic link and password registration" section of
-   `mix help phx.gen.auth`.
+3. As 2, with a password set: registered with one (`POST /api/v1/register`)
+   and never confirmed. The password is removed as the email is confirmed.
+   Whoever registered the address chose it before anyone proved they own
+   the inbox, so it may be someone else's, and kept it would sign them into
+   the account its owner has just claimed (the "Mixing magic link and
+   password registration" section of `mix help phx.gen.auth`). The owner
+   sets a new one in settings; the link in the confirmation email confirms
+   the account and keeps the password.
 
 # `revoke_all_user_sessions`
 

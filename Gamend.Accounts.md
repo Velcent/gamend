@@ -16,14 +16,22 @@ The Accounts context.
     users = Gamend.Accounts.search_users("bob", page: 1, page_size: 25)
     count = Gamend.Accounts.count_search_users("bob")
 
+# `password_error`
+
+```elixir
+@type password_error() ::
+  :invalid_credentials | :email_not_confirmed | {:locked, pos_integer()}
+```
+
+Why `authenticate_by_password/2` signed nobody in.
+
 # `attach_device_to_user`
 
 # `authenticate_by_password`
 
 ```elixir
 @spec authenticate_by_password(String.t(), String.t()) ::
-  {:ok, Gamend.Accounts.User.t()}
-  | {:error, :invalid_credentials | {:locked, pos_integer()}}
+  {:ok, Gamend.Accounts.User.t()} | {:error, password_error()}
 ```
 
 Checks an email and password, counting failures per address
@@ -31,6 +39,12 @@ Checks an email and password, counting failures per address
 
 `{:error, {:locked, seconds}}` when the address is locked, before the
 password is looked at, and for the failure that locks it.
+
+`{:error, :email_not_confirmed}` for the right password on an account whose
+email was never confirmed. Anyone can register any address with a password,
+so the password signs nobody in until the inbox's owner has confirmed it.
+It is answered only after the password matched, so it tells nothing to
+someone who does not know it.
 
 # `broadcast_friend_update`
 
@@ -332,8 +346,9 @@ Gets a user by email.
   Gamend.Accounts.User.t() | nil
 ```
 
-Gets a user by email and password. `nil` for a wrong password, and for an
-address locked by too many failures (`authenticate_by_password/2` says which).
+Gets a user by email and password. `nil` for a wrong password, for an
+address locked by too many failures, and for an email not yet confirmed
+(`authenticate_by_password/2` says which).
 
 ## Examples
 

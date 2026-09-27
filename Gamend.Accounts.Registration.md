@@ -104,7 +104,7 @@ Register a user and queue its confirmation email.
 email goes out from the `mailers` queue (`Gamend.Accounts.ConfirmationMailer`),
 enqueued in the transaction that inserts the user: the call returns once
 both are committed, without waiting on SMTP, and a failed send is retried
-there. The first user becomes the admin and gets no email.
+there. The first user becomes the admin and is confirmed, with no email.
 
 # `register_user_with_password_and_deliver`
 
@@ -118,7 +118,8 @@ there. The first user becomes the admin and gets no email.
 
 Register a user with an email and a password and queue the confirmation
 email, as `register_user_and_deliver/3` does for the browser form: how a
-game client signs up (`POST /api/v1/register`).
+game client signs up (`POST /api/v1/register`). The password signs in once
+the email is confirmed (`Gamend.Accounts.authenticate_by_password/2`).
 
 ---
 
