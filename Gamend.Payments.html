@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.4">
-    <meta name="project" content="gamend_core v1.0.1278">
+    <meta name="project" content="gamend_core v1.0.1279">
 
 
-    <title>Gamend.Payments — gamend_core v1.0.1278</title>
+    <title>Gamend.Payments — gamend_core v1.0.1279</title>
 
     <link rel="stylesheet" href="dist/html-elixir-RXHHCTJW.css" />
 
-    <script defer src="dist/sidebar_items-22CDFA23.js"></script>
+    <script defer src="dist/sidebar_items-6F0C5CCC.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-MI33G4N7.js"></script>
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1278
+          v1.0.1279
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr />Payments</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1278)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1279)</small>
 
     </h1>
 
@@ -286,6 +286,17 @@ context remains the source of truth for what a user owns inside the game.</p>
 
     <div class="summary-row">
       <div class="summary-signature">
+        <a href="#entitlement_ever?/2" data-no-tooltip="" translate="no">entitlement_ever?(user_id, key)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Whether the user has EVER held <code class="inline">key</code>, active or not. What a once-per-account
+grant (a trial) checks, since the row outlives its end.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
         <a href="#finalize_steam_purchase/2" data-no-tooltip="" translate="no">finalize_steam_purchase(user, attrs)</a>
 
       </div>
@@ -361,6 +372,27 @@ context remains the source of truth for what a user owns inside the game.</p>
         <a href="#get_purchase_by_provider_transaction/2" data-no-tooltip="" translate="no">get_purchase_by_provider_transaction(provider, transaction_id)</a>
 
       </div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#get_user_entitlement_by_key/2" data-no-tooltip="" translate="no">get_user_entitlement_by_key(user_id, key)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>The user's <code class="inline">key</code> row, active or not, or <code class="inline">nil</code>.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#grant_entitlement/3" data-no-tooltip="" translate="no">grant_entitlement(user_id, key, opts \\ [])</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Grant an entitlement without a purchase: a trial, a contributor's reward,
+a support gesture. Upserts the one <code class="inline">(user, key)</code> row.</p></div>
 
     </div>
 
@@ -623,7 +655,7 @@ event id count as a duplicate.</p></div>
       <h1 class="signature" translate="no">admin_stats()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L554" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L634" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -699,7 +731,7 @@ event id count as a duplicate.</p></div>
       <h1 class="signature" translate="no">count_entitlements(opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L584" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L664" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -723,7 +755,7 @@ event id count as a duplicate.</p></div>
       <h1 class="signature" translate="no">count_products(opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L566" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L646" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -747,7 +779,7 @@ event id count as a duplicate.</p></div>
       <h1 class="signature" translate="no">count_provider_events(opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L590" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L670" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -771,7 +803,7 @@ event id count as a duplicate.</p></div>
       <h1 class="signature" translate="no">count_provider_products(opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L572" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L652" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -795,7 +827,7 @@ event id count as a duplicate.</p></div>
       <h1 class="signature" translate="no">count_purchases(opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L578" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L658" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -819,7 +851,7 @@ event id count as a duplicate.</p></div>
       <h1 class="signature" translate="no">count_reconciliation_cursors(opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L596" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L676" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1031,6 +1063,35 @@ event id count as a duplicate.</p></div>
   <section class="docstring">
 
 <p>See <a href="Gamend.Payments.StripeEvents.html#create_stripe_checkout/2"><code class="inline">Gamend.Payments.StripeEvents.create_stripe_checkout/2</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="entitlement_ever?/2">
+
+  <div class="detail-header">
+    <a href="#entitlement_ever?/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">entitlement_ever?(user_id, key)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L614" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> entitlement_ever?(<a href="https://ecto.hexdocs.pm/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>(), <a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>()) :: <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">boolean</a>()</pre>
+
+      </div>
+
+<p>Whether the user has EVER held <code class="inline">key</code>, active or not. What a once-per-account
+grant (a trial) checks, since the row outlives its end.</p>
   </section>
 </section>
 <section class="detail" id="finalize_steam_purchase/2">
@@ -1320,6 +1381,71 @@ event id count as a duplicate.</p></div>
 
   </section>
 </section>
+<section class="detail" id="get_user_entitlement_by_key/2">
+
+  <div class="detail-header">
+    <a href="#get_user_entitlement_by_key/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">get_user_entitlement_by_key(user_id, key)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L620" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> get_user_entitlement_by_key(<a href="https://ecto.hexdocs.pm/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>(), <a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>()) ::
+  <a href="Gamend.Payments.Entitlement.html#t:t/0">Gamend.Payments.Entitlement.t</a>() | nil</pre>
+
+      </div>
+
+<p>The user's <code class="inline">key</code> row, active or not, or <code class="inline">nil</code>.</p>
+  </section>
+</section>
+<section class="detail" id="grant_entitlement/3">
+
+    <span id="grant_entitlement/2"></span>
+
+  <div class="detail-header">
+    <a href="#grant_entitlement/3" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">grant_entitlement(user_id, key, opts \\ [])</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L557" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> grant_entitlement(<a href="https://ecto.hexdocs.pm/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>(), <a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>(), <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">keyword</a>()) ::
+  {:ok, <a href="Gamend.Payments.Entitlement.html#t:t/0">Gamend.Payments.Entitlement.t</a>()} | {:error, <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">term</a>()}</pre>
+
+      </div>
+
+<p>Grant an entitlement without a purchase: a trial, a contributor's reward,
+a support gesture. Upserts the one <code class="inline">(user, key)</code> row.</p><p>Never shortens what the user already has: an active row with no end (a
+lifetime purchase) keeps no end, and an active row ending later than
+<code class="inline">:expires_at</code> keeps its later end. A row a purchase created keeps its
+<code class="inline">source_purchase_id</code>, so its provider sync still finds it.</p><p>Options: <code class="inline">:expires_at</code> (a <a href="https://elixir.hexdocs.pm/DateTime.html"><code class="inline">DateTime</code></a>, <code class="inline">nil</code> for no end), <code class="inline">:metadata</code> (a map
+merged into the row's, e.g. <code class="inline">%{&quot;source&quot; =&gt; &quot;trial&quot;, &quot;granted_by&quot; =&gt; id}</code>).</p>
+  </section>
+</section>
 <section class="detail" id="handle_apple_webhook/1">
 
   <div class="detail-header">
@@ -1426,7 +1552,7 @@ event id count as a duplicate.</p></div>
       <h1 class="signature" translate="no">list_admin_entitlements(opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L581" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L661" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1450,7 +1576,7 @@ event id count as a duplicate.</p></div>
       <h1 class="signature" translate="no">list_admin_products(opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L563" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L643" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1474,7 +1600,7 @@ event id count as a duplicate.</p></div>
       <h1 class="signature" translate="no">list_admin_provider_products(opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L569" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L649" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1498,7 +1624,7 @@ event id count as a duplicate.</p></div>
       <h1 class="signature" translate="no">list_admin_purchases(opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L575" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L655" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1587,7 +1713,7 @@ event id count as a duplicate.</p></div>
       <h1 class="signature" translate="no">list_provider_events(opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L587" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L667" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1611,7 +1737,7 @@ event id count as a duplicate.</p></div>
       <h1 class="signature" translate="no">list_reconciliation_cursors(opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L593" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L673" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1696,7 +1822,7 @@ event id count as a duplicate.</p></div>
       <h1 class="signature" translate="no">mark_event_processed(event)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L638" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L718" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1726,7 +1852,7 @@ event id count as a duplicate.</p>
       <h1 class="signature" translate="no">product_entitlement_key(product)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L544" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L624" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1754,7 +1880,7 @@ event id count as a duplicate.</p>
       <h1 class="signature" translate="no">provider_adapter_statuses()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L560" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L640" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1800,7 +1926,7 @@ event id count as a duplicate.</p>
       <h1 class="signature" translate="no">record_provider_event(provider, event_id, event_type, payload, metadata \\ %{})</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L600" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L680" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1861,7 +1987,7 @@ event id count as a duplicate.</p>
       <h1 class="signature" translate="no">stripe_config_status()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L557" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L637" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1992,9 +2118,9 @@ event id count as a duplicate.</p>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1278">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1279">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1278">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1279">Hex Preview</a>
 
             </span>
 

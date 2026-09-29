@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.4">
-    <meta name="project" content="gamend_core v1.0.1278">
+    <meta name="project" content="gamend_core v1.0.1279">
 
 
-    <title>Gamend.Content — gamend_core v1.0.1278</title>
+    <title>Gamend.Content — gamend_core v1.0.1279</title>
 
     <link rel="stylesheet" href="dist/html-elixir-RXHHCTJW.css" />
 
-    <script defer src="dist/sidebar_items-22CDFA23.js"></script>
+    <script defer src="dist/sidebar_items-6F0C5CCC.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-MI33G4N7.js"></script>
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1278
+          v1.0.1279
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr />Content</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1278)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1279)</small>
 
     </h1>
 
@@ -324,6 +324,18 @@ an <code class="inline">index.md</code> has no guide of its own, and this is how
 
     <div class="summary-row">
       <div class="summary-signature">
+        <a href="#image_url/3" data-no-tooltip="" translate="no">image_url(collection, url, use)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>The URL to serve an image of a collection at, through the collection's
+registered <code class="inline">:image_url</code> (see <a href="#register_path/2"><code class="inline">register_path/2</code></a>): <code class="inline">use</code> is <code class="inline">:page</code> or
+<code class="inline">:card</code>. Without one, or for an <code class="inline">http</code>/<code class="inline">data:</code> URL, <code class="inline">url</code> itself.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
         <a href="#list_blog_posts/0" data-no-tooltip="" translate="no">list_blog_posts()</a>
 
       </div>
@@ -449,7 +461,7 @@ not configured or the file doesn't exist.</p></div>
       <h1 class="signature" translate="no">apply_changelog_pills(html)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L1088" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L1156" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -483,7 +495,7 @@ A host that wants translated pills re-labels them per request — see <a href="#
       <h1 class="signature" translate="no">asset_path(name, relative)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L107" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L113" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -512,7 +524,7 @@ source. Returns <code class="inline">nil</code> when not found or path traversal
       <h1 class="signature" translate="no">blog_neighbours(slug)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L673" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L724" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -541,7 +553,7 @@ Either may be <code class="inline">nil</code>.</p>
       <h1 class="signature" translate="no">blog_post_html(slug)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L690" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L741" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -569,7 +581,7 @@ Either may be <code class="inline">nil</code>.</p>
       <h1 class="signature" translate="no">blog_posts_grouped()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L724" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L771" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -598,7 +610,7 @@ Returns a list of <code class="inline">{year, [{month, [posts]}]}</code>.</p>
       <h1 class="signature" translate="no">changelog_html()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L162" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L197" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -629,7 +641,7 @@ not configured or the file doesn't exist.</p>
       <h1 class="signature" translate="no">doc_breadcrumbs(collection \\ :docs, slug)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L413" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L448" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -661,7 +673,7 @@ shows.</p>
       <h1 class="signature" translate="no">doc_category(collection \\ :docs, slug)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L378" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L413" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -696,7 +708,7 @@ how the two drifted apart.</p><p>In a tree collection this is the guide's neares
       <h1 class="signature" translate="no">doc_html(collection \\ :docs, slug)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L460" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L496" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -716,7 +728,8 @@ leaving it in would print it twice.</p><p>A collection registered with <code cla
 over the finished HTML — the hook Polyglot Pirates' guide uses to turn
 <code class="inline">[coins:250]</code> into a badge. It runs <em>after</em> markdown rendering because the
 sanitiser strips raw HTML out of the markdown, and inside the cache because
-the result is as static as the markdown it came from.</p>
+the result is as static as the markdown it came from. One registered with
+<code class="inline">:image_url</code> has its pictures swapped the same way, inside the cache.</p>
   </section>
 </section>
 <section class="detail" id="doc_neighbours/2">
@@ -731,7 +744,7 @@ the result is as static as the markdown it came from.</p>
       <h1 class="signature" translate="no">doc_neighbours(collection \\ :docs, slug)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L433" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L468" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -764,7 +777,7 @@ the last page of each section.</p>
       <h1 class="signature" translate="no">doc_sections(collection \\ :docs, slug)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L505" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L542" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -799,7 +812,7 @@ first paragraph (nil when it opens with a list, a table or code).</p><p>For sear
       <h1 class="signature" translate="no">doc_toc(collection \\ :docs, slug)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L492" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L529" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -831,7 +844,7 @@ first paragraph (nil when it opens with a list, a table or code).</p><p>For sear
       <h1 class="signature" translate="no">doc_tree(collection \\ :docs)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L289" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L324" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -862,7 +875,7 @@ works on either.</p>
       <h1 class="signature" translate="no">frontmatter(content)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L582" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L619" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -892,7 +905,7 @@ lists as lists.</p>
       <h1 class="signature" translate="no">get_blog_post(slug)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L664" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L715" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -922,7 +935,7 @@ lists as lists.</p>
       <h1 class="signature" translate="no">get_doc(collection \\ :docs, slug)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L344" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L379" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -952,7 +965,7 @@ lists as lists.</p>
       <h1 class="signature" translate="no">get_doc_category(collection \\ :docs, slug)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L357" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L392" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -971,6 +984,38 @@ lists as lists.</p>
 an <code class="inline">index.md</code> has no guide of its own, and this is how its page is found.</p>
   </section>
 </section>
+<section class="detail" id="image_url/3">
+
+  <div class="detail-header">
+    <a href="#image_url/3" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">image_url(collection, url, use)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L141" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> image_url(<a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">atom</a>() | <a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>(), <a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>() | nil, :page | :card) ::
+  <a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>() | nil</pre>
+
+      </div>
+
+<p>The URL to serve an image of a collection at, through the collection's
+registered <code class="inline">:image_url</code> (see <a href="#register_path/2"><code class="inline">register_path/2</code></a>): <code class="inline">use</code> is <code class="inline">:page</code> or
+<code class="inline">:card</code>. Without one, or for an <code class="inline">http</code>/<code class="inline">data:</code> URL, <code class="inline">url</code> itself.</p><p>The rendered HTML and <a href="#list_blog_posts/0"><code class="inline">list_blog_posts/0</code></a> already went through it; this is
+for a picture a page places itself, such as a post's cover.</p>
+  </section>
+</section>
 <section class="detail" id="list_blog_posts/0">
 
   <div class="detail-header">
@@ -981,7 +1026,7 @@ an <code class="inline">index.md</code> has no guide of its own, and this is how
       <h1 class="signature" translate="no">list_blog_posts()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L613" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L656" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1002,7 +1047,11 @@ else today</li><li><code class="inline">:path</code>  – absolute path to the <
 <code class="inline">description</code>, else the text above a <code class="inline">&lt;!-- truncate --&gt;</code> marker, else
 the first paragraph cut to 200 characters</li><li><code class="inline">:lede</code> – the first paragraph in full, which is what a post opens
 with when it has no description of its own; <code class="inline">:lede_in_body?</code> says
-whether that paragraph is also the body's first, so the page drops one</li><li><code class="inline">:description</code>, <code class="inline">:image</code>, <code class="inline">:keywords</code>, <code class="inline">:tags</code> – frontmatter</li><li><code class="inline">:authors</code> – resolved from <code class="inline">_authors/&lt;key&gt;.md</code> beside the posts:
+whether that paragraph is also the body's first, so the page drops one</li><li><code class="inline">:image</code> – the post's picture, for its card, its feed entry and a link
+to it: the frontmatter <code class="inline">image</code>, else the first picture in the body, at
+the URL the body serves it from (<a href="Gamend.Content.Markdown.html#image_src/2"><code class="inline">Gamend.Content.Markdown.image_src/2</code></a>,
+so a relative path is a <code class="inline">/content/blog/…</code> one); nil when it has none</li><li><code class="inline">:card_image</code> – <code class="inline">:image</code> as the index card shows it: through the
+blog's registered <code class="inline">:image_url</code> with <code class="inline">:card</code>, else the same</li><li><code class="inline">:description</code>, <code class="inline">:keywords</code>, <code class="inline">:tags</code> – frontmatter</li><li><code class="inline">:authors</code> – resolved from <code class="inline">_authors/&lt;key&gt;.md</code> beside the posts:
 <code class="inline">%{key, name, title, url, image}</code>, with a key that has no file
 answering its key as its name</li><li><code class="inline">:reading_minutes</code> – at two hundred words a minute, never under one</li></ul>
   </section>
@@ -1019,7 +1068,7 @@ answering its key as its name</li><li><code class="inline">:reading_minutes</cod
       <h1 class="signature" translate="no">list_doc_categories(collection \\ :docs)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L233" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L268" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1061,7 +1110,7 @@ full tree is <a href="#doc_tree/1"><code class="inline">doc_tree/1</code></a>.</
       <h1 class="signature" translate="no">list_docs(collection \\ :docs)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L335" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L370" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1092,7 +1141,7 @@ the grouped view, with the root guides pulled to the front, does not.</p>
       <h1 class="signature" translate="no">memoize(key, fun)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L517" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L554" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1122,7 +1171,7 @@ than on every request. An empty result is not cached.</p>
       <h1 class="signature" translate="no">path(name)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L94" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L100" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1150,7 +1199,7 @@ than on every request. An empty result is not cached.</p>
       <h1 class="signature" translate="no">pill(class_suffix, label)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L1112" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L1180" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1181,7 +1230,7 @@ the day the stylesheet changed underneath it.</p>
       <h1 class="signature" translate="no">register_path(name, opts)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L66" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L72" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1196,12 +1245,17 @@ the day the stylesheet changed underneath it.</p>
 
       </div>
 
-<p>Registers a named content source.</p><p>Supported options:</p><ul><li><code class="inline">:kind</code> - <code class="inline">:file</code> or <code class="inline">:dir</code></li><li><code class="inline">:path</code> - single candidate path</li><li><code class="inline">:candidates</code> - ordered candidate paths</li><li><code class="inline">:asset_root</code> - <code class="inline">:self</code> or <code class="inline">:dirname</code> when serving assets</li><li><code class="inline">:post_render</code> - <code class="inline">{module, function}</code> applied to rendered guide HTML</li><li><code class="inline">:nesting</code> - <code class="inline">:flat</code> (the default: one folder level, slugs are file
+<p>Registers a named content source.</p><p>Supported options:</p><ul><li><code class="inline">:kind</code> - <code class="inline">:file</code> or <code class="inline">:dir</code></li><li><code class="inline">:path</code> - single candidate path</li><li><code class="inline">:candidates</code> - ordered candidate paths</li><li><code class="inline">:asset_root</code> - <code class="inline">:self</code> or <code class="inline">:dirname</code> when serving assets</li><li><code class="inline">:post_render</code> - <code class="inline">{module, function}</code> applied to a guide's or a blog
+post's rendered HTML</li><li><code class="inline">:nesting</code> - <code class="inline">:flat</code> (the default: one folder level, slugs are file
 names) or <code class="inline">:tree</code> (any depth, slugs are paths; see <a href="Gamend.Content.Tree.html"><code class="inline">Gamend.Content.Tree</code></a>)</li><li><code class="inline">:base_path</code> - the route prefix guides are served under, such as
 <code class="inline">&quot;/docs&quot;</code>. With it set, a link written to a neighbouring <code class="inline">.md</code> file is
 rewritten to that guide's route</li><li><code class="inline">:assets</code> - <code class="inline">:content</code> (the default) serves images through the
 <code class="inline">/content/&lt;name&gt;/</code> asset route; <code class="inline">:static</code> leaves root-absolute image
-paths alone, for a site whose images live in <code class="inline">priv/static</code></li></ul>
+paths alone, for a site whose images live in <code class="inline">priv/static</code></li><li><code class="inline">:image_url</code> - <code class="inline">{module, function}</code> called as <code class="inline">function(url, use)</code> for
+each image the collection serves itself, answering the URL to serve
+instead: a smaller copy the host has built, say. <code class="inline">use</code> is <code class="inline">:page</code> for
+a picture on the page itself (in the body, or a post's cover) and
+<code class="inline">:card</code> for a post's picture on the blog index. See <a href="#image_url/3"><code class="inline">image_url/3</code></a></li></ul>
   </section>
 </section>
 <section class="detail" id="relabel_pills/2">
@@ -1214,7 +1268,7 @@ paths alone, for a site whose images live in <code class="inline">priv/static</c
       <h1 class="signature" translate="no">relabel_pills(html, tags)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L1130" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L1198" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1279,7 +1333,7 @@ verbatim in the middle of a heading.</p>
       <h1 class="signature" translate="no">roadmap_html()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L186" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content.ex#L221" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1307,9 +1361,9 @@ not configured or the file doesn't exist.</p>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1278">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1279">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1278">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1279">Hex Preview</a>
 
             </span>
 

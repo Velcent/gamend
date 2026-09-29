@@ -80,6 +80,15 @@ Counts `list_user_entitlements/2`'s entitlements; takes `:include_inactive`.
 
 # `create_stripe_checkout`
 
+# `entitlement_ever?`
+
+```elixir
+@spec entitlement_ever?(Ecto.UUID.t(), String.t()) :: boolean()
+```
+
+Whether the user has EVER held `key`, active or not. What a once-per-account
+grant (a trial) checks, since the row outlives its end.
+
 # `finalize_steam_purchase`
 
 ```elixir
@@ -144,6 +153,33 @@ Counts `list_user_entitlements/2`'s entitlements; takes `:include_inactive`.
 @spec get_purchase_by_provider_transaction(String.t(), String.t()) ::
   Gamend.Payments.Purchase.t() | nil
 ```
+
+# `get_user_entitlement_by_key`
+
+```elixir
+@spec get_user_entitlement_by_key(Ecto.UUID.t(), String.t()) ::
+  Gamend.Payments.Entitlement.t() | nil
+```
+
+The user's `key` row, active or not, or `nil`.
+
+# `grant_entitlement`
+
+```elixir
+@spec grant_entitlement(Ecto.UUID.t(), String.t(), keyword()) ::
+  {:ok, Gamend.Payments.Entitlement.t()} | {:error, term()}
+```
+
+Grant an entitlement without a purchase: a trial, a contributor's reward,
+a support gesture. Upserts the one `(user, key)` row.
+
+Never shortens what the user already has: an active row with no end (a
+lifetime purchase) keeps no end, and an active row ending later than
+`:expires_at` keeps its later end. A row a purchase created keeps its
+`source_purchase_id`, so its provider sync still finds it.
+
+Options: `:expires_at` (a `DateTime`, `nil` for no end), `:metadata` (a map
+merged into the row's, e.g. `%{"source" => "trial", "granted_by" => id}`).
 
 # `handle_apple_webhook`
 

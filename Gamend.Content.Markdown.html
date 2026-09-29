@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.4">
-    <meta name="project" content="gamend_core v1.0.1278">
+    <meta name="project" content="gamend_core v1.0.1279">
 
 
-    <title>Gamend.Content.Markdown — gamend_core v1.0.1278</title>
+    <title>Gamend.Content.Markdown — gamend_core v1.0.1279</title>
 
     <link rel="stylesheet" href="dist/html-elixir-RXHHCTJW.css" />
 
-    <script defer src="dist/sidebar_items-22CDFA23.js"></script>
+    <script defer src="dist/sidebar_items-6F0C5CCC.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-MI33G4N7.js"></script>
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1278
+          v1.0.1279
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr />Content.<wbr />Markdown</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1278)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1279)</small>
 
     </h1>
 
@@ -168,6 +168,27 @@ HTML, not a directive, and stays as written.</p>
   <h3>
     <a href="#functions">Functions</a>
   </h3>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#first_image/2" data-no-tooltip="" translate="no">first_image(body, opts \\ [])</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>The first picture in a markdown body, at the URL the rendered page serves it
+from (<a href="#image_src/2"><code class="inline">image_src/2</code></a>, before any <code class="inline">:image_url</code>), or nil.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#image_src/2" data-no-tooltip="" translate="no">image_src(src, opts \\ [])</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>The URL an image written in a collection's markdown is served from.</p></div>
+
+    </div>
 
     <div class="summary-row">
       <div class="summary-signature">
@@ -257,7 +278,7 @@ with their ids and plain text.</p></div>
       <h1 class="signature" translate="no">opt()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content/markdown.ex#L57" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content/markdown.ex#L61" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -275,7 +296,8 @@ with their ids and plain text.</p></div>
   | {:base_path, <a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>() | nil}
   | {:slug, <a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>() | nil}
   | {:index, <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">boolean</a>()}
-  | {:id, <a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>()}</pre>
+  | {:id, <a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>()}
+  | {:image_url, (<a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>() -&gt; <a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>()) | nil}</pre>
 
       </div>
 
@@ -285,7 +307,10 @@ a site whose images are served from <code class="inline">priv/static</code></li>
 image paths</li><li><code class="inline">:base_path</code> — the route prefix a <code class="inline">.md</code> link rewrites to; <code class="inline">nil</code> leaves
 such links untouched</li><li><code class="inline">:slug</code> — the document's slug, which relative links resolve against</li><li><code class="inline">:index</code> — the document is a folder's <code class="inline">index.md</code>, whose slug <em>is</em> its
 folder, so its links resolve against the slug rather than its parent.
-<a href="#render_file/2"><code class="inline">render_file/2</code></a> sets it from the file name.</li><li><code class="inline">:id</code> — a stable prefix for element ids (mermaid diagrams need one)</li></ul>
+<a href="#render_file/2"><code class="inline">render_file/2</code></a> sets it from the file name.</li><li><code class="inline">:id</code> — a stable prefix for element ids (mermaid diagrams need one)</li><li><code class="inline">:image_url</code> — given each image's URL once it is resolved (never an
+<code class="inline">http</code> or <code class="inline">data:</code> one), answers the URL to serve instead: a smaller copy
+the host has built, say. <a href="Gamend.Content.html"><code class="inline">Gamend.Content</code></a> passes the collection's
+registered <code class="inline">:image_url</code> here</li></ul>
   </section>
 </section>
 
@@ -301,6 +326,74 @@ folder, so its links resolve against the slug rather than its parent.
     </h2>
 
     <div class="functions-list">
+<section class="detail" id="first_image/2">
+
+    <span id="first_image/1"></span>
+
+  <div class="detail-header">
+    <a href="#first_image/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">first_image(body, opts \\ [])</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content/markdown.ex#L202" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> first_image(<a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>(), [<a href="#t:opt/0">opt</a>()]) :: <a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>() | nil</pre>
+
+      </div>
+
+<p>The first picture in a markdown body, at the URL the rendered page serves it
+from (<a href="#image_src/2"><code class="inline">image_src/2</code></a>, before any <code class="inline">:image_url</code>), or nil.</p><p>A markdown image or an <code class="inline">&lt;img&gt;</code> written in raw HTML, whichever comes first;
+one inside a code block is code, not a picture. For a card that has only
+the post itself to take a picture from. Give it the body, after the
+frontmatter.</p>
+  </section>
+</section>
+<section class="detail" id="image_src/2">
+
+    <span id="image_src/1"></span>
+
+  <div class="detail-header">
+    <a href="#image_src/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">image_src(src, opts \\ [])</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content/markdown.ex#L538" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> image_src(<a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>(), [<a href="#t:opt/0">opt</a>()]) :: <a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>()</pre>
+
+      </div>
+
+<p>The URL an image written in a collection's markdown is served from.</p><p>Points it at <code class="inline">/content/&lt;collection&gt;/…</code>, the host content asset route, in
+the three ways authors write it:</p><ol><li>Relative:      <code class="inline">gamend/auth.png</code>       → <code class="inline">/content/blog/gamend/auth.png</code></li><li>Absolute:      <code class="inline">/gamend/auth.png</code>      → <code class="inline">/content/blog/gamend/auth.png</code></li><li>Type-prefixed: <code class="inline">/blog/gamend/auth.png</code> → <code class="inline">/content/blog/gamend/auth.png</code></li></ol><p>With <code class="inline">assets: :static</code>, an absolute path is a URL the host serves and is
+left alone; only relative ones are resolved, against the file's folder
+(<code class="inline">:dir</code>). External URLs (<code class="inline">http…</code>, <code class="inline">data:</code>) and paths already under
+<code class="inline">/content/</code> come back as they are.</p>
+  </section>
+</section>
 <section class="detail" id="plain_text/1">
 
   <div class="detail-header">
@@ -311,7 +404,7 @@ folder, so its links resolve against the slug rather than its parent.
       <h1 class="signature" translate="no">plain_text(html)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content/markdown.ex#L198" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content/markdown.ex#L237" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -341,7 +434,7 @@ folder, so its links resolve against the slug rather than its parent.
       <h1 class="signature" translate="no">render(content, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content/markdown.ex#L97" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content/markdown.ex#L102" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -371,7 +464,7 @@ folder, so its links resolve against the slug rather than its parent.
       <h1 class="signature" translate="no">render_file(path, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content/markdown.ex#L80" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content/markdown.ex#L85" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -399,7 +492,7 @@ folder, so its links resolve against the slug rather than its parent.
       <h1 class="signature" translate="no">sections(html)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content/markdown.ex#L143" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content/markdown.ex#L148" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -431,7 +524,7 @@ section, or nil when the section opens with a list, a table or code.</p>
       <h1 class="signature" translate="no">strip_first_h1(html)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content/markdown.ex#L192" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content/markdown.ex#L231" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -460,7 +553,7 @@ prints it twice. Attribute-tolerant, because headings carry ids now.</p>
       <h1 class="signature" translate="no">toc(html)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content/markdown.ex#L125" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content/markdown.ex#L130" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -489,9 +582,9 @@ puts the id first on the heading tag, so the pattern is stable.</p>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1278">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1279">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1278">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1279">Hex Preview</a>
 
             </span>
 

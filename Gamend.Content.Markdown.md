@@ -48,6 +48,7 @@ HTML, not a directive, and stays as written.
   | {:slug, String.t() | nil}
   | {:index, boolean()}
   | {:id, String.t()}
+  | {:image_url, (String.t() -&gt; String.t()) | nil}
 ```
 
 * `:collection` — the registered name, for `/content/<collection>/` asset paths
@@ -63,6 +64,44 @@ HTML, not a directive, and stays as written.
   folder, so its links resolve against the slug rather than its parent.
   `render_file/2` sets it from the file name.
 * `:id` — a stable prefix for element ids (mermaid diagrams need one)
+* `:image_url` — given each image's URL once it is resolved (never an
+  `http` or `data:` one), answers the URL to serve instead: a smaller copy
+  the host has built, say. `Gamend.Content` passes the collection's
+  registered `:image_url` here
+
+# `first_image`
+
+```elixir
+@spec first_image(String.t(), [opt()]) :: String.t() | nil
+```
+
+The first picture in a markdown body, at the URL the rendered page serves it
+from (`image_src/2`, before any `:image_url`), or nil.
+
+A markdown image or an `<img>` written in raw HTML, whichever comes first;
+one inside a code block is code, not a picture. For a card that has only
+the post itself to take a picture from. Give it the body, after the
+frontmatter.
+
+# `image_src`
+
+```elixir
+@spec image_src(String.t(), [opt()]) :: String.t()
+```
+
+The URL an image written in a collection's markdown is served from.
+
+Points it at `/content/<collection>/…`, the host content asset route, in
+the three ways authors write it:
+
+  1. Relative:      `gamend/auth.png`       → `/content/blog/gamend/auth.png`
+  2. Absolute:      `/gamend/auth.png`      → `/content/blog/gamend/auth.png`
+  3. Type-prefixed: `/blog/gamend/auth.png` → `/content/blog/gamend/auth.png`
+
+With `assets: :static`, an absolute path is a URL the host serves and is
+left alone; only relative ones are resolved, against the file's folder
+(`:dir`). External URLs (`http…`, `data:`) and paths already under
+`/content/` come back as they are.
 
 # `plain_text`
 

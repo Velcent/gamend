@@ -120,7 +120,8 @@ A collection registered with `:post_render` runs that `{module, function}`
 over the finished HTML — the hook Polyglot Pirates' guide uses to turn
 `[coins:250]` into a badge. It runs *after* markdown rendering because the
 sanitiser strips raw HTML out of the markdown, and inside the cache because
-the result is as static as the markdown it came from.
+the result is as static as the markdown it came from. One registered with
+`:image_url` has its pictures swapped the same way, inside the cache.
 
 # `doc_neighbours`
 
@@ -208,6 +209,20 @@ Returns a single guide map by slug, or `nil`.
 A category of a tree collection by its slug, or `nil`. A category without
 an `index.md` has no guide of its own, and this is how its page is found.
 
+# `image_url`
+
+```elixir
+@spec image_url(atom() | String.t(), String.t() | nil, :page | :card) ::
+  String.t() | nil
+```
+
+The URL to serve an image of a collection at, through the collection's
+registered `:image_url` (see `register_path/2`): `use` is `:page` or
+`:card`. Without one, or for an `http`/`data:` URL, `url` itself.
+
+The rendered HTML and `list_blog_posts/0` already went through it; this is
+for a picture a page places itself, such as a post's cover.
+
 # `list_blog_posts`
 
 ```elixir
@@ -229,7 +244,13 @@ Each post is a map with keys:
   * `:lede` – the first paragraph in full, which is what a post opens
     with when it has no description of its own; `:lede_in_body?` says
     whether that paragraph is also the body's first, so the page drops one
-  * `:description`, `:image`, `:keywords`, `:tags` – frontmatter
+  * `:image` – the post's picture, for its card, its feed entry and a link
+    to it: the frontmatter `image`, else the first picture in the body, at
+    the URL the body serves it from (`Gamend.Content.Markdown.image_src/2`,
+    so a relative path is a `/content/blog/…` one); nil when it has none
+  * `:card_image` – `:image` as the index card shows it: through the
+    blog's registered `:image_url` with `:card`, else the same
+  * `:description`, `:keywords`, `:tags` – frontmatter
   * `:authors` – resolved from `_authors/<key>.md` beside the posts:
     `%{key, name, title, url, image}`, with a key that has no file
     answering its key as its name
@@ -324,7 +345,8 @@ Supported options:
   * `:path` - single candidate path
   * `:candidates` - ordered candidate paths
   * `:asset_root` - `:self` or `:dirname` when serving assets
-  * `:post_render` - `{module, function}` applied to rendered guide HTML
+  * `:post_render` - `{module, function}` applied to a guide's or a blog
+    post's rendered HTML
   * `:nesting` - `:flat` (the default: one folder level, slugs are file
     names) or `:tree` (any depth, slugs are paths; see `Gamend.Content.Tree`)
   * `:base_path` - the route prefix guides are served under, such as
@@ -333,6 +355,11 @@ Supported options:
   * `:assets` - `:content` (the default) serves images through the
     `/content/<name>/` asset route; `:static` leaves root-absolute image
     paths alone, for a site whose images live in `priv/static`
+  * `:image_url` - `{module, function}` called as `function(url, use)` for
+    each image the collection serves itself, answering the URL to serve
+    instead: a smaller copy the host has built, say. `use` is `:page` for
+    a picture on the page itself (in the body, or a post's cover) and
+    `:card` for a post's picture on the blog index. See `image_url/3`
 
 # `relabel_pills`
 
