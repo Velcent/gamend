@@ -67,6 +67,7 @@ Gamend.Content.Tree.html
 Gamend.Content.html
 Gamend.ContentSettings.html
 Gamend.Database.html
+Gamend.DemoSeed.html
 Gamend.Economy.LedgerEntry.html
 Gamend.Economy.Wallet.html
 Gamend.Economy.html
@@ -86,6 +87,8 @@ Gamend.Hooks.DynamicRpcs.html
 Gamend.Hooks.HookSchemas.html
 Gamend.Hooks.KvSchemas.html
 Gamend.Hooks.MetadataSchemas.html
+Gamend.Hooks.PluginBuilder.InProcess.html
+Gamend.Hooks.PluginBuilder.Project.html
 Gamend.Hooks.PluginBuilder.html
 Gamend.Hooks.PluginManager.Plugin.html
 Gamend.Hooks.PluginManager.html
@@ -228,8 +231,8 @@ dist/lato-latin-700-normal-2XVSBPG4.woff2
 dist/lato-latin-ext-400-normal-N27NCBWW.woff2
 dist/lato-latin-ext-700-normal-Q2L5DVMW.woff2
 dist/remixicon-ZWU5GQ4X.woff2
-dist/search_data-3897B76C.js
-dist/sidebar_items-6F0C5CCC.js
+dist/search_data-42F9E280.js
+dist/sidebar_items-7A2D0DAE.js
 index.html
 readme.html
 search.html

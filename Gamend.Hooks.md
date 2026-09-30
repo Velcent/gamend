@@ -755,6 +755,28 @@ Hooks may accept either a map or keyword list for convenience.
 A veto-only hook: `{:error, reason}` rejects, anything else allows. The
 return never rewrites the args, so a bare `:ok` is the usual "allow".
 
+# `__using__`
+*macro* 
+
+Use this macro to get default implementations for all callbacks.
+
+This allows you to only implement the callbacks you need. It injects the
+same defaults as the SDK's `use Gamend.Hooks`, so a plugin compiles the same
+against the SDK (a Mix build) and against the engine (an in-process build,
+`Gamend.Hooks.PluginBuilder`).
+
+## Example
+
+    defmodule MyGame.Hooks do
+      use Gamend.Hooks
+
+      @impl true
+      def after_user_register(user) do
+        # Only implement what you need
+        :ok
+      end
+    end
+
 # `call`
 
 Call an arbitrary function exported by the configured hooks module.

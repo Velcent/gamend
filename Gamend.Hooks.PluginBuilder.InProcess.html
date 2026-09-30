@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.40.4">
+    <meta name="project" content="gamend_core v1.0.1280">
+
+
+    <title>Gamend.Hooks.PluginBuilder.InProcess — gamend_core v1.0.1280</title>
+
+    <link rel="stylesheet" href="dist/html-elixir-RXHHCTJW.css" />
+
+    <script defer src="dist/sidebar_items-7A2D0DAE.js"></script>
+    <script defer src="docs_config.js"></script>
+    <script defer src="dist/html-MI33G4N7.js"></script>
+
+  </head>
+  <body>
+    <script>(()=>{var t="ex_doc:settings",e="dark";var o="dark",s="light";var E="sidebar_state",n="closed";var r="sidebar_width";var a="sidebar-open";var i=new URLSearchParams(window.location.search),S=i.get("theme")||JSON.parse(localStorage.getItem(t)||"{}").theme;(S===o||S!==s&&window.matchMedia("(prefers-color-scheme: dark)").matches)&&document.body.classList.add(e);var d=sessionStorage.getItem(E),A=d!==n&&!window.matchMedia(`screen and (max-width: ${768}px)`).matches;document.body.classList.toggle(a,A);var c=sessionStorage.getItem(r);c&&document.body.style.setProperty("--sidebarWidth",`${c}px`);var p=/(Macintosh|iPhone|iPad|iPod)/.test(window.navigator.userAgent);document.documentElement.classList.toggle("apple-os",p);})();
+</script>
+
+<div class="body-wrapper">
+
+<button id="sidebar-menu" class="sidebar-button sidebar-toggle" aria-label="toggle sidebar" aria-controls="sidebar">
+  <i class="ri-menu-line ri-lg" title="Collapse/expand sidebar"></i>
+</button>
+
+<nav id="sidebar" class="sidebar">
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectInfo">
+
+      <div>
+        <a href="readme.html" class="sidebar-projectName" translate="no">
+gamend_core
+        </a>
+        <div class="sidebar-projectVersion" translate="no">
+          v1.0.1280
+        </div>
+      </div>
+    </div>
+    <ul id="sidebar-list-nav" class="sidebar-list-nav" role="tablist" data-extras="Pages"></ul>
+  </div>
+</nav>
+
+<output role="status" id="toast"></output>
+
+<main class="content page-module" id="main" data-type="modules">
+  <div id="content" class="content-inner">
+    <div class="top-search">
+      <div class="search-settings">
+        <form class="search-bar" action="search.html">
+          <label class="search-label">
+            <span class="sr-only">Search documentation of gamend_core</span>
+            <div class="search-input-wrapper">
+              <input name="q" type="text" class="search-input" placeholder="Press / to search" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+              <button type="button" tabindex="-1" class="search-close-button" aria-hidden="true">
+                <i class="ri-close-line ri-lg" title="Cancel search"></i>
+              </button>
+            </div>
+          </label>
+        </form>
+        <div class="autocomplete">
+        </div>
+        <div class="engine-selector" data-multiple="false">
+          <button type="button" class="engine-button" aria-label="Select search engine" aria-haspopup="true" aria-expanded="false">
+            <i class="ri-search-2-line" aria-hidden="true"></i>
+            <span class="engine-name">Default</span>
+            <i class="ri-arrow-down-s-line" aria-hidden="true"></i>
+          </button>
+          <div class="engine-dropdown" hidden role="menu">
+
+              <button type="button"
+                      class="engine-option"
+                      data-engine-url="search.html?q="
+                      role="menuitemradio"
+                      aria-checked="true">
+                <span class="name">Default</span>
+                <span class="help">In-browser search</span>
+              </button>
+
+          </div>
+        </div>
+        <button class="icon-settings display-settings">
+          <i class="ri-settings-3-line"></i>
+          <span class="sr-only">Settings</span>
+        </button>
+      </div>
+    </div>
+
+<div id="top-content">
+  <div class="heading-with-actions top-heading">
+    <h1>
+      <span translate="no">Gamend.<wbr />Hooks.<wbr />PluginBuilder.<wbr />InProcess</span> 
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1280)</small>
+
+    </h1>
+
+<a href="Gamend.Hooks.PluginBuilder.InProcess.md" title="Copy Markdown (hold Ctrl/Cmd and click it to open as Markdown)" class="copy-markdown icon-action" rel="help">
+  <i class="ri-markdown-line" aria-hidden="true"></i>
+  <span class="sr-only">Copy Markdown</span>
+</a>
+
+
+
+      <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/hooks/plugin_builder/in_process.ex#L1" title="View Source" class="icon-action" rel="help nofollow">
+        <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        <span class="sr-only">View Source</span>
+      </a>
+
+  </div>
+
+
+    <section id="moduledoc">
+<p>Builds a plugin bundle inside the running VM, without Mix.</p><p>A release (the downloadable engine, the Dockerfile's <code class="inline">release</code> image) ships
+the Elixir compiler but no <code class="inline">mix</code> executable, so <a href="Gamend.Hooks.PluginBuilder.html"><code class="inline">Gamend.Hooks.PluginBuilder</code></a>
+falls back to this. It produces what <code class="inline">mix plugin.bundle</code> does for the
+plugin's own code: <code class="inline">ebin/*.beam</code> plus <code class="inline">ebin/&lt;app&gt;.app</code>, loadable by
+<a href="Gamend.Hooks.PluginManager.html"><code class="inline">Gamend.Hooks.PluginManager</code></a> unchanged.</p><p>Steps, each reported as a <a href="Gamend.Hooks.PluginBuilder.html#t:step_result/0"><code class="inline">Gamend.Hooks.PluginBuilder.step_result/0</code></a>:</p><ol><li>Read <code class="inline">mix.exs</code> without evaluating it (<a href="Gamend.Hooks.PluginBuilder.Project.html"><code class="inline">Gamend.Hooks.PluginBuilder.Project</code></a>).</li><li>GDScript plugins (<code class="inline">scripts/*.gd</code>): transpile into <code class="inline">gen/</code> with
+<code class="inline">Gamend.GDScript</code>, as <code class="inline">mix gamend.gdscript.compile</code> does.</li><li>Check dependencies. One the engine ships (phoenix, jason, req, ecto…)
+or that sits prebuilt in <code class="inline">deps/&lt;dep&gt;/ebin</code> is fine; <code class="inline">gamend_sdk</code> and
+<code class="inline">gamend_plugin_tools</code> are compile-time only and ignored. Anything else
+fails the build naming it: there is no Hex here to fetch it.</li><li>Compile <code class="inline">elixirc_paths/**/*.ex</code> with <a href="https://elixir.hexdocs.pm/Kernel.ParallelCompiler.html"><code class="inline">Kernel.ParallelCompiler</code></a> into a
+temporary directory, then write the <code class="inline">.app</code> and swap it in as <code class="inline">ebin/</code>.
+A failed build leaves the previous <code class="inline">ebin/</code> untouched.</li></ol><p>The compiler runs in this VM, so a plugin that is loaded is stopped for the
+build (<code class="inline">PluginManager.suspend/1</code>) and started again afterwards
+(<code class="inline">PluginManager.resume/1</code>), on the new bundle when the build succeeded and on
+the old one when it failed. Unloading first matters: the compiler takes a
+module that is already loaded as the one to compile against, so a sibling's
+old macros and structs would end up in the new build.</p><p>Limits: no Hex dependencies beyond what the engine ships or the plugin
+carries prebuilt, no Erlang sources (<code class="inline">src/*.erl</code>), no Gleam, no
+<code class="inline">config/config.exs</code>, and the engine's protocols are consolidated, so a
+<code class="inline">defimpl</code> of an engine protocol (<a href="https://jason.hexdocs.pm/1.4.5/Jason.Encoder.html"><code class="inline">Jason.Encoder</code></a>, <a href="https://elixir.hexdocs.pm/String.Chars.html"><code class="inline">String.Chars</code></a>…) has no
+effect; the compiler's warning saying so is in the compile step's output.
+The compiler also prints its diagnostics to the server's stderr.</p>
+    </section>
+
+</div>
+
+  <section id="summary" class="details-list">
+    <h2 class="section-heading">
+      <a class="hover-link" href="#summary">
+        <i class="ri-link-m" aria-hidden="true"></i>
+      </a>
+      <span class="text">Summary</span>
+    </h2>
+<div class="summary-functions summary">
+  <h3>
+    <a href="#functions">Functions</a>
+  </h3>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#available?/0" data-no-tooltip="" translate="no">available?()</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Whether this VM can compile Elixir: the <code class="inline">elixir</code> and <code class="inline">compiler</code> applications
+are loadable. True in any release, since <code class="inline">elixir</code> depends on <code class="inline">compiler</code>.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#run/2" data-no-tooltip="" translate="no">run(plugin_name, plugin_dir)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Builds the plugin in <code class="inline">plugin_dir</code> (named <code class="inline">plugin_name</code> by the loader).
+Returns the steps it ran; the build succeeded when every status is <code class="inline">0</code>.</p></div>
+
+    </div>
+
+</div>
+
+  </section>
+
+
+  <section id="functions" class="details-list">
+    <h2 class="section-heading">
+      <a class="hover-link" href="#functions">
+        <i class="ri-link-m" aria-hidden="true"></i>
+      </a>
+      <span class="text">Functions</span>
+    </h2>
+
+    <div class="functions-list">
+<section class="detail" id="available?/0">
+
+  <div class="detail-header">
+    <a href="#available?/0" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">available?()</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/hooks/plugin_builder/in_process.ex#L51" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> available?() :: <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">boolean</a>()</pre>
+
+      </div>
+
+<p>Whether this VM can compile Elixir: the <code class="inline">elixir</code> and <code class="inline">compiler</code> applications
+are loadable. True in any release, since <code class="inline">elixir</code> depends on <code class="inline">compiler</code>.</p>
+  </section>
+</section>
+<section class="detail" id="run/2">
+
+  <div class="detail-header">
+    <a href="#run/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">run(plugin_name, plugin_dir)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/hooks/plugin_builder/in_process.ex#L62" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> run(<a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>(), <a href="https://elixir.hexdocs.pm/Path.html#t:t/0">Path.t</a>()) :: [<a href="Gamend.Hooks.PluginBuilder.html#t:step_result/0">Gamend.Hooks.PluginBuilder.step_result</a>()]</pre>
+
+      </div>
+
+<p>Builds the plugin in <code class="inline">plugin_dir</code> (named <code class="inline">plugin_name</code> by the loader).
+Returns the steps it ran; the build succeeded when every status is <code class="inline">0</code>.</p><p>Builds of one plugin directory run one at a time on this node.</p>
+  </section>
+</section>
+
+    </div>
+  </section>
+
+    <footer class="footer">
+
+        <p>
+
+            <span class="line">
+              <a href="https://hex.pm/packages/gamend_core/1.0.1280">Hex Package</a>
+
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1280">Hex Preview</a>
+
+            </span>
+
+          <span class="line">
+            <button class="a-main footer-button display-quick-switch" title="Go to package docs">
+              Go to package docs
+            </button>
+
+              <a href="llms.txt" target="_blank">
+                View llms.txt
+              </a>
+
+
+              <a href="gamend_core.epub">
+                Download ePub version
+              </a>
+
+          </span>
+        </p>
+
+        <p class="built-using">
+          Built using
+          <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener" translate="no">ExDoc</a> (v0.40.4) for the
+
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank" translate="no">Elixir programming language</a>
+
+        </p>
+
+
+    </footer>
+  </div>
+</main>
+</div>
+
+  </body>
+</html>

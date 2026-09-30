@@ -90,6 +90,14 @@ Note: this registry is in-memory and is rebuilt on plugin reload.
 @spec reset_all() :: :ok
 ```
 
+# `reset_plugin`
+
+```elixir
+@spec reset_plugin(plugin_name()) :: :ok
+```
+
+Forget one plugin's exports, leaving every other plugin's in place.
+
 ---
 
 *Consult [api-reference.md](api-reference.md) for complete listing*

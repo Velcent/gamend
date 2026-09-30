@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.4">
-    <meta name="project" content="gamend_core v1.0.1279">
+    <meta name="project" content="gamend_core v1.0.1280">
 
 
-    <title>Gamend.Hooks.DynamicRpcs — gamend_core v1.0.1279</title>
+    <title>Gamend.Hooks.DynamicRpcs — gamend_core v1.0.1280</title>
 
     <link rel="stylesheet" href="dist/html-elixir-RXHHCTJW.css" />
 
-    <script defer src="dist/sidebar_items-6F0C5CCC.js"></script>
+    <script defer src="dist/sidebar_items-7A2D0DAE.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-MI33G4N7.js"></script>
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1279
+          v1.0.1280
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr />Hooks.<wbr />DynamicRpcs</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1279)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1280)</small>
 
     </h1>
 
@@ -212,6 +212,16 @@ the requested function is not exported.</li></ul><h2 id="module-export-format" c
         <a href="#reset_all/0" data-no-tooltip="" translate="no">reset_all()</a>
 
       </div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#reset_plugin/1" data-no-tooltip="" translate="no">reset_plugin(plugin_name)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Forget one plugin's exports, leaving every other plugin's in place.</p></div>
 
     </div>
 
@@ -336,7 +346,7 @@ the requested function is not exported.</li></ul><h2 id="module-export-format" c
       <h1 class="signature" translate="no">allowed?(plugin_name, hook_name)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/hooks/dynamic_rpcs.ex#L98" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/hooks/dynamic_rpcs.ex#L106" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -392,7 +402,7 @@ the requested function is not exported.</li></ul><h2 id="module-export-format" c
       <h1 class="signature" translate="no">list_all()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/hooks/dynamic_rpcs.ex#L115" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/hooks/dynamic_rpcs.ex#L123" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -420,7 +430,7 @@ the requested function is not exported.</li></ul><h2 id="module-export-format" c
       <h1 class="signature" translate="no">lookup(plugin_name, hook_name)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/hooks/dynamic_rpcs.ex#L105" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/hooks/dynamic_rpcs.ex#L113" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -448,7 +458,7 @@ the requested function is not exported.</li></ul><h2 id="module-export-format" c
       <h1 class="signature" translate="no">register_exports(plugin_name, raw)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/hooks/dynamic_rpcs.ex#L78" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/hooks/dynamic_rpcs.ex#L86" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -495,6 +505,34 @@ the requested function is not exported.</li></ul><h2 id="module-export-format" c
 
   </section>
 </section>
+<section class="detail" id="reset_plugin/1">
+
+  <div class="detail-header">
+    <a href="#reset_plugin/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">reset_plugin(plugin_name)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/hooks/dynamic_rpcs.ex#L79" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> reset_plugin(<a href="#t:plugin_name/0">plugin_name</a>()) :: :ok</pre>
+
+      </div>
+
+<p>Forget one plugin's exports, leaving every other plugin's in place.</p>
+  </section>
+</section>
 
     </div>
   </section>
@@ -504,9 +542,9 @@ the requested function is not exported.</li></ul><h2 id="module-export-format" c
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1279">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1280">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1279">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1280">Hex Preview</a>
 
             </span>
 

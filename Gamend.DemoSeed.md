@@ -1,0 +1,67 @@
+# `Gamend.DemoSeed`
+[🔗](https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/demo_seed.ex#L1)
+
+Fills the database with enough demo data to exercise pagination and the
+list/detail pages at realistic sizes.
+
+Everything is namespaced with a `demo-seed` prefix so `--clean` can remove it
+again without touching real data.
+
+## Usage
+
+`mix demo.seed` in a checkout, `gamend demo.seed` from a release, with the
+same arguments:
+
+    mix demo.seed                       # all sets, 1000 rows each
+    mix demo.seed --count 250           # smaller run
+    mix demo.seed --only leaderboard    # one set (comma-separated)
+    mix demo.seed --only group,tournament
+    mix demo.seed --clean               # remove everything this task created
+
+## Sets
+
+  * `leaderboard` — a leaderboard with N scored records
+  * `group`       — a public group with N members
+  * `tournament`  — a tournament with N registered entries, still open
+  * `lobby_snapshot` — recorded runs for `/admin/lobby_snapshots`, capped at 12
+    regardless of `--count` (this set is about having something to read, not
+    volume)
+  * `quest` — a daily, an auto-claim achievement, a chained follow-up and a
+    twelve-member group that lists as one card, with per-user progress in
+    every state (including claimable rows)
+  * `ready_check` — one check per seeded lobby in every outcome (open,
+    passed, timed out, declined), also capped at 12
+  * `chat_moderation` — a blocklist across every severity and match mode, a
+    report queue deep enough to page through (every status, some filter-filed,
+    some resolved) and mutes in every scope, including expired ones
+
+The `lobby_snapshot` set goes through the real `capture_lobby/3` path rather
+than inserting rows, so what you see is shaped exactly like production data —
+including content-addressed section dedup. One of its runs reproduces the July
+2026 rubber-banding bug (a distance that reverts between snapshots), which is
+the case the section diff exists to make obvious.
+
+Seeded runs keep their lobby row so `--clean` can find them again. Real
+completed runs outlive theirs, since a lobby is deleted when its last member
+leaves.
+
+All sets share one pool of N anonymous device accounts, so the same players
+appear across them (as they would in a real deployment).
+
+Rows are inserted in bulk rather than through the contexts: this is about
+volume, not about exercising business rules, and 1000 individual writes on
+SQLite is slow. The cache is flushed afterwards so pages read the new rows.
+
+# `run`
+
+```elixir
+@spec run([String.t()]) :: :ok
+```
+
+Seeds (or with `--clean` removes) the demo data. Takes the same arguments as
+`mix demo.seed`; the application must already be running. Raises
+`ArgumentError` on an unknown set.
+
+---
+
+*Consult [api-reference.md](api-reference.md) for complete listing*

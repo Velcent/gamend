@@ -93,11 +93,38 @@ See `Supervisor`.
 }
 ```
 
+# `resume`
+
+```elixir
+@spec resume(plugin_name()) :: Gamend.Hooks.PluginManager.Plugin.t() | nil
+```
+
+Loads one plugin from disk again and runs its `after_startup/0`, the
+counterpart of `suspend/1`. Returns the plugin (its `status` says whether it
+started), or `nil` when the manager is not running or skips the name.
+
 # `start_link`
 
 ```elixir
 @spec start_link(keyword()) :: GenServer.on_start()
 ```
+
+# `suspend`
+
+```elixir
+@spec suspend(plugin_name()) :: boolean()
+```
+
+Stops and unloads one plugin, leaving the others running. Returns `true`
+when the manager had it (loaded or failed), `false` when it did not or the
+manager is not running.
+
+The in-process build (`Gamend.Hooks.PluginBuilder`) calls this before it
+compiles the plugin in this VM. The compiler treats a module that is already
+loaded as available, so a module compiled against a sibling that is still
+loaded would take that sibling's *old* macros and structs; unloading the
+plugin first makes the build see only its own new code. `resume/1` loads it
+back.
 
 ---
 

@@ -1,4 +1,4 @@
-# gamend_core v1.0.1279 - API Reference
+# gamend_core v1.0.1280 - API Reference
 
 ## Modules
 
@@ -24,6 +24,8 @@ stores and sums them. Written by `Gamend.Analytics.count/3`.
 L2 cache.
 - [Gamend.Codegen](Gamend.Codegen.md): Support for the `mix` tasks that write generated files into the repo.
 - [Gamend.Database](Gamend.Database.md): Connection and tuning settings for `Gamend.Repo`.
+- [Gamend.DemoSeed](Gamend.DemoSeed.md): Fills the database with enough demo data to exercise pagination and the
+list/detail pages at realistic sizes.
 - [Gamend.HTTP](Gamend.HTTP.md): `Req` with the declared timeout and retries, for the calls core makes to other
 services while a player waits: payment receipt checks (Apple, Google Play,
 Steam), OAuth code exchanges, Google ID-token checks and avatar mirroring.
@@ -235,7 +237,7 @@ missed, and cancelling a subscription at the end of its period.
   - [Gamend.Content.Markdown](Gamend.Content.Markdown.md): Markdown to HTML, the way every collection renders it.
   - [Gamend.Content.Tree](Gamend.Content.Tree.md): A guide collection read as a tree: folders are categories, at any depth.
   - [Gamend.ContentSettings](Gamend.ContentSettings.md): Where the server finds host-supplied content: the theme config, hook plugins,
-and the GeoIP database.
+project static files, and the GeoIP database.
 
   - [Gamend.KV](Gamend.KV.md): Generic key/value storage.
   - [Gamend.Settings](Gamend.Settings.md): The declared configuration surface: every setting core, the host and its
@@ -310,7 +312,10 @@ argument/result conversion that makes typed hooks callable from every
 transport and payload format.
   - [Gamend.Hooks.KvSchemas](Gamend.Hooks.KvSchemas.md): Registry of game-defined protobuf schemas for KV entry data.
   - [Gamend.Hooks.MetadataSchemas](Gamend.Hooks.MetadataSchemas.md): Registry of game-defined protobuf schemas for entity metadata.
-  - [Gamend.Hooks.PluginBuilder](Gamend.Hooks.PluginBuilder.md): Builds an OTP plugin bundle from plugin source code on disk.
+  - [Gamend.Hooks.PluginBuilder](Gamend.Hooks.PluginBuilder.md): Builds an OTP plugin bundle (`ebin/*.beam` + `ebin/<app>.app`) from plugin
+source code on disk, for the admin Config page and the command line.
+  - [Gamend.Hooks.PluginBuilder.InProcess](Gamend.Hooks.PluginBuilder.InProcess.md): Builds a plugin bundle inside the running VM, without Mix.
+  - [Gamend.Hooks.PluginBuilder.Project](Gamend.Hooks.PluginBuilder.Project.md): What a plugin's `mix.exs` declares, read without evaluating it.
   - [Gamend.Hooks.PluginManager](Gamend.Hooks.PluginManager.md): Loads and manages hook plugins shipped as OTP applications under `modules/plugins/*`.
   - [Gamend.Hooks.PluginManager.Plugin](Gamend.Hooks.PluginManager.Plugin.md): A loaded plugin descriptor.
 
@@ -356,8 +361,8 @@ and booleans keep `null`, where absence is semantic.
 
 ## Mix Tasks
 
-- [mix demo.seed](Mix.Tasks.Demo.Seed.md): Fills the database with enough demo data to exercise pagination and the
-list/detail pages at realistic sizes.
+- [mix demo.seed](Mix.Tasks.Demo.Seed.md): Fills the database with demo data. See `Gamend.DemoSeed` for the sets and
+options; a release runs the same code as `gamend demo.seed`.
 - [mix gamend.api.lint](Mix.Tasks.Gamend.Api.Lint.md): Enforces the naming and serialization conventions mechanically.
 - [mix gamend.content.extract](Mix.Tasks.Gamend.Content.Extract.md): Writes `content.pot` from the titles and descriptions stored on quests,
 leaderboards and tournaments.

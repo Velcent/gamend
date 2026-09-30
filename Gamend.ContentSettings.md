@@ -2,7 +2,7 @@
 [🔗](https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/content_settings.ex#L1)
 
 Where the server finds host-supplied content: the theme config, hook plugins,
-and the GeoIP database.
+project static files, and the GeoIP database.
 
 ---
 

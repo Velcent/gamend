@@ -6,7 +6,8 @@ Release-time equivalents of the `host.*` mix tasks.
 A release ships compiled `.beam` files and nothing else — no Mix, no project
 tree, no `mix` binary — so `mix db.migrate` cannot run inside an image built
 from `Dockerfile.release`. These functions are what the release's own
-entrypoint calls instead:
+entrypoint calls instead, usually through `bin/gamend db.migrate` and its
+siblings (`GamendWeb.CLI`):
 
     bin/gamend_host eval "Gamend.Release.createdb()"
     bin/gamend_host eval "Gamend.Release.migrate()"
@@ -31,6 +32,15 @@ Creates the database when it does not exist yet, mirroring `mix ecto.create`.
 Idempotent: an existing database is left alone. Postgres deployments where
 the server provisions the database already can skip this entirely.
 
+# `dropdb`
+
+```elixir
+@spec dropdb() :: :ok
+```
+
+Drops the database, mirroring `mix ecto.drop`. A database that does not
+exist is not an error.
+
 # `migrate`
 
 ```elixir
@@ -39,6 +49,27 @@ the server provisions the database already can skip this entirely.
 
 Runs every pending migration — core's and the host's — on each repo.
 
+# `prepare`
+
+```elixir
+@spec prepare() :: :ok
+```
+
+What a release runs before it starts serving: create the database when it
+can, then migrate. Creating may fail (a provisioned Postgres already has the
+database, and its role may not be allowed to create one), which is reported
+and passed over; a failed migration raises. `bin/gamend start` and the Docker
+image's command both run this.
+
+# `rollback`
+
+```elixir
+@spec rollback(keyword()) :: :ok
+```
+
+Rolls every repo back, the way `mix db.rollback` does: `step: n` (the last
+`n` migrations, 1 when no option is given), `to: version` or `all: true`.
+
 # `rollback`
 
 ```elixir
@@ -46,6 +77,15 @@ Runs every pending migration — core's and the host's — on each repo.
 ```
 
 Rolls `repo` back down to `version`.
+
+# `seeds_file`
+
+```elixir
+@spec seeds_file() :: String.t() | nil
+```
+
+The project's seeds script, `priv/repo/seeds.exs` in the working directory,
+or `nil` when there is none. `mix host.seed` and `gamend db.seed` both run it.
 
 ---
 

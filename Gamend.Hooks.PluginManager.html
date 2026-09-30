@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.4">
-    <meta name="project" content="gamend_core v1.0.1279">
+    <meta name="project" content="gamend_core v1.0.1280">
 
 
-    <title>Gamend.Hooks.PluginManager — gamend_core v1.0.1279</title>
+    <title>Gamend.Hooks.PluginManager — gamend_core v1.0.1280</title>
 
     <link rel="stylesheet" href="dist/html-elixir-RXHHCTJW.css" />
 
-    <script defer src="dist/sidebar_items-6F0C5CCC.js"></script>
+    <script defer src="dist/sidebar_items-7A2D0DAE.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-MI33G4N7.js"></script>
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1279
+          v1.0.1280
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr />Hooks.<wbr />PluginManager</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1279)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1280)</small>
 
     </h1>
 
@@ -240,9 +240,33 @@ path and uses <a href="https://elixir.hexdocs.pm/Application.html#load/1"><code 
 
     <div class="summary-row">
       <div class="summary-signature">
+        <a href="#resume/1" data-no-tooltip="" translate="no">resume(name)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Loads one plugin from disk again and runs its <code class="inline">after_startup/0</code>, the
+counterpart of <a href="#suspend/1"><code class="inline">suspend/1</code></a>. Returns the plugin (its <code class="inline">status</code> says whether it
+started), or <code class="inline">nil</code> when the manager is not running or skips the name.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
         <a href="#start_link/1" data-no-tooltip="" translate="no">start_link(opts \\ [])</a>
 
       </div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#suspend/1" data-no-tooltip="" translate="no">suspend(name)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Stops and unloads one plugin, leaving the others running. Returns <code class="inline">true</code>
+when the manager had it (loaded or failed), <code class="inline">false</code> when it did not or the
+manager is not running.</p></div>
 
     </div>
 
@@ -341,7 +365,7 @@ path and uses <a href="https://elixir.hexdocs.pm/Application.html#load/1"><code 
       <h1 class="signature" translate="no">call_rpc(plugin, fn_name, args, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/hooks/plugin_manager.ex#L147" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/hooks/plugin_manager.ex#L177" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -506,7 +530,7 @@ path and uses <a href="https://elixir.hexdocs.pm/Application.html#load/1"><code 
       <h1 class="signature" translate="no">plugins_dir()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/hooks/plugin_manager.ex#L260" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/hooks/plugin_manager.ex#L290" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -583,6 +607,36 @@ path and uses <a href="https://elixir.hexdocs.pm/Application.html#load/1"><code 
 
   </section>
 </section>
+<section class="detail" id="resume/1">
+
+  <div class="detail-header">
+    <a href="#resume/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">resume(name)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/hooks/plugin_manager.ex#L171" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> resume(<a href="#t:plugin_name/0">plugin_name</a>()) :: <a href="Gamend.Hooks.PluginManager.Plugin.html#t:t/0">Gamend.Hooks.PluginManager.Plugin.t</a>() | nil</pre>
+
+      </div>
+
+<p>Loads one plugin from disk again and runs its <code class="inline">after_startup/0</code>, the
+counterpart of <a href="#suspend/1"><code class="inline">suspend/1</code></a>. Returns the plugin (its <code class="inline">status</code> says whether it
+started), or <code class="inline">nil</code> when the manager is not running or skips the name.</p>
+  </section>
+</section>
 <section class="detail" id="start_link/1">
 
     <span id="start_link/0"></span>
@@ -613,6 +667,41 @@ path and uses <a href="https://elixir.hexdocs.pm/Application.html#load/1"><code 
 
   </section>
 </section>
+<section class="detail" id="suspend/1">
+
+  <div class="detail-header">
+    <a href="#suspend/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">suspend(name)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/hooks/plugin_manager.ex#L159" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> suspend(<a href="#t:plugin_name/0">plugin_name</a>()) :: <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">boolean</a>()</pre>
+
+      </div>
+
+<p>Stops and unloads one plugin, leaving the others running. Returns <code class="inline">true</code>
+when the manager had it (loaded or failed), <code class="inline">false</code> when it did not or the
+manager is not running.</p><p>The in-process build (<a href="Gamend.Hooks.PluginBuilder.html"><code class="inline">Gamend.Hooks.PluginBuilder</code></a>) calls this before it
+compiles the plugin in this VM. The compiler treats a module that is already
+loaded as available, so a module compiled against a sibling that is still
+loaded would take that sibling's <em>old</em> macros and structs; unloading the
+plugin first makes the build see only its own new code. <a href="#resume/1"><code class="inline">resume/1</code></a> loads it
+back.</p>
+  </section>
+</section>
 
     </div>
   </section>
@@ -622,9 +711,9 @@ path and uses <a href="https://elixir.hexdocs.pm/Application.html#load/1"><code 
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1279">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1280">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1279">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1280">Hex Preview</a>
 
             </span>
 

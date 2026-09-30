@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.4">
-    <meta name="project" content="gamend_core v1.0.1279">
+    <meta name="project" content="gamend_core v1.0.1280">
 
 
-    <title>mix demo.seed — gamend_core v1.0.1279</title>
+    <title>mix demo.seed — gamend_core v1.0.1280</title>
 
     <link rel="stylesheet" href="dist/html-elixir-RXHHCTJW.css" />
 
-    <script defer src="dist/sidebar_items-6F0C5CCC.js"></script>
+    <script defer src="dist/sidebar_items-7A2D0DAE.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-MI33G4N7.js"></script>
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1279
+          v1.0.1280
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">mix demo.<wbr />seed</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1279)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1280)</small>
 
     </h1>
 
@@ -114,29 +114,9 @@ gamend_core
 
 
     <section id="moduledoc">
-<p>Fills the database with enough demo data to exercise pagination and the
-list/detail pages at realistic sizes.</p><p>Everything is namespaced with a <code class="inline">demo-seed</code> prefix so <code class="inline">--clean</code> can remove it
-again without touching real data.</p><h2 id="module-usage" class="section-heading"><a href="#module-usage" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Usage</span></h2><pre><code class="makeup elixir" translate="no"><span class="n">mix</span><span class="w"> </span><span class="n">demo</span><span class="o">.</span><span class="n">seed</span><span class="w">                       </span><span class="c1"># all sets, 1000 rows each</span><span class="w">
-</span><span class="n">mix</span><span class="w"> </span><span class="n">demo</span><span class="o">.</span><span class="n">seed</span><span class="w"> </span><span class="o">--</span><span class="n">count</span><span class="w"> </span><span class="mi">250</span><span class="w">           </span><span class="c1"># smaller run</span><span class="w">
-</span><span class="n">mix</span><span class="w"> </span><span class="n">demo</span><span class="o">.</span><span class="n">seed</span><span class="w"> </span><span class="o">--</span><span class="n">only</span><span class="w"> </span><span class="n">leaderboard</span><span class="w">    </span><span class="c1"># one set (comma-separated)</span><span class="w">
-</span><span class="n">mix</span><span class="w"> </span><span class="n">demo</span><span class="o">.</span><span class="n">seed</span><span class="w"> </span><span class="o">--</span><span class="n">only</span><span class="w"> </span><span class="n">group</span><span class="p">,</span><span class="n">tournament</span><span class="w">
-</span><span class="n">mix</span><span class="w"> </span><span class="n">demo</span><span class="o">.</span><span class="n">seed</span><span class="w"> </span><span class="o">--</span><span class="n">clean</span><span class="w">               </span><span class="c1"># remove everything this task created</span></code></pre><h2 id="module-sets" class="section-heading"><a href="#module-sets" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Sets</span></h2><ul><li><code class="inline">leaderboard</code> — a leaderboard with N scored records</li><li><code class="inline">group</code>       — a public group with N members</li><li><code class="inline">tournament</code>  — a tournament with N registered entries, still open</li><li><code class="inline">lobby_snapshot</code> — recorded runs for <code class="inline">/admin/lobby_snapshots</code>, capped at 12
-regardless of <code class="inline">--count</code> (this set is about having something to read, not
-volume)</li><li><code class="inline">quest</code> — a daily, an auto-claim achievement, a chained follow-up and a
-twelve-member group that lists as one card, with per-user progress in
-every state (including claimable rows)</li><li><code class="inline">ready_check</code> — one check per seeded lobby in every outcome (open,
-passed, timed out, declined), also capped at 12</li><li><code class="inline">chat_moderation</code> — a blocklist across every severity and match mode, a
-report queue deep enough to page through (every status, some filter-filed,
-some resolved) and mutes in every scope, including expired ones</li></ul><p>The <code class="inline">lobby_snapshot</code> set goes through the real <code class="inline">capture_lobby/3</code> path rather
-than inserting rows, so what you see is shaped exactly like production data —
-including content-addressed section dedup. One of its runs reproduces the July
-2026 rubber-banding bug (a distance that reverts between snapshots), which is
-the case the section diff exists to make obvious.</p><p>Seeded runs keep their lobby row so <code class="inline">--clean</code> can find them again. Real
-completed runs outlive theirs, since a lobby is deleted when its last member
-leaves.</p><p>All sets share one pool of N anonymous device accounts, so the same players
-appear across them (as they would in a real deployment).</p><p>Rows are inserted in bulk rather than through the contexts: this is about
-volume, not about exercising business rules, and 1000 individual writes on
-SQLite is slow. The cache is flushed afterwards so pages read the new rows.</p>
+<p>Fills the database with demo data. See <a href="Gamend.DemoSeed.html"><code class="inline">Gamend.DemoSeed</code></a> for the sets and
+options; a release runs the same code as <code class="inline">gamend demo.seed</code>.</p><pre><code class="makeup elixir" translate="no"><span class="n">mix</span><span class="w"> </span><span class="n">demo</span><span class="o">.</span><span class="n">seed</span><span class="w"> </span><span class="o">--</span><span class="n">count</span><span class="w"> </span><span class="mi">250</span><span class="w"> </span><span class="o">--</span><span class="n">only</span><span class="w"> </span><span class="n">leaderboard</span><span class="p">,</span><span class="n">group</span><span class="w">
+</span><span class="n">mix</span><span class="w"> </span><span class="n">demo</span><span class="o">.</span><span class="n">seed</span><span class="w"> </span><span class="o">--</span><span class="n">clean</span></code></pre>
     </section>
 
 </div>
@@ -147,9 +127,9 @@ SQLite is slow. The cache is flushed afterwards so pages read the new rows.</p>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1279">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1280">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1279">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1280">Hex Preview</a>
 
             </span>
 

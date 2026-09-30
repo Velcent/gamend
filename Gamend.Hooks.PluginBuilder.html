@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.4">
-    <meta name="project" content="gamend_core v1.0.1279">
+    <meta name="project" content="gamend_core v1.0.1280">
 
 
-    <title>Gamend.Hooks.PluginBuilder — gamend_core v1.0.1279</title>
+    <title>Gamend.Hooks.PluginBuilder — gamend_core v1.0.1280</title>
 
     <link rel="stylesheet" href="dist/html-elixir-RXHHCTJW.css" />
 
-    <script defer src="dist/sidebar_items-6F0C5CCC.js"></script>
+    <script defer src="dist/sidebar_items-7A2D0DAE.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-MI33G4N7.js"></script>
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1279
+          v1.0.1280
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr />Hooks.<wbr />PluginBuilder</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1279)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1280)</small>
 
     </h1>
 
@@ -114,8 +114,18 @@ gamend_core
 
 
     <section id="moduledoc">
-<p>Builds an OTP plugin bundle from plugin source code on disk.</p><p>This is intended for admin-only workflows in development/self-hosted setups.
-It runs <code class="inline">mix</code> commands on the server host/container.</p>
+<p>Builds an OTP plugin bundle (<code class="inline">ebin/*.beam</code> + <code class="inline">ebin/&lt;app&gt;.app</code>) from plugin
+source code on disk, for the admin Config page and the command line.</p><p>Two ways, picked per build:</p><ul><li><strong>Mix</strong>, when a <code class="inline">mix</code> executable is on the PATH (development, the
+Dockerfile's <code class="inline">full</code> image): <a href="https://mix.hexdocs.pm/Mix.Tasks.Deps.Get.html"><code class="inline">mix deps.get</code></a>, <code class="inline">mix gamend.gdscript.compile</code>
+for a GDScript plugin, <a href="https://mix.hexdocs.pm/Mix.Tasks.Compile.html"><code class="inline">mix compile</code></a>, <code class="inline">mix plugin.bundle</code>, each in the
+plugin's directory.</li><li><strong>In-process</strong>, when it is not (a release: the downloadable engine, the
+<code class="inline">release</code> image): <a href="Gamend.Hooks.PluginBuilder.InProcess.html"><code class="inline">Gamend.Hooks.PluginBuilder.InProcess</code></a> compiles the
+plugin inside the running VM with the Elixir compiler the release ships.
+It handles Elixir and GDScript plugins whose dependencies the engine
+already ships or the plugin carries prebuilt under <code class="inline">deps/&lt;dep&gt;/ebin</code>.</li></ul><p>Either way the result loads through <a href="Gamend.Hooks.PluginManager.html"><code class="inline">Gamend.Hooks.PluginManager</code></a> exactly as
+a hand-built bundle does. Building runs the plugin's code (its <code class="inline">mix.exs</code>
+under Mix, its module bodies in both), so this is for admins and the
+operator's shell only.</p>
     </section>
 
 </div>
@@ -142,6 +152,14 @@ It runs <code class="inline">mix</code> commands on the server host/container.</
 
     <div class="summary-row">
       <div class="summary-signature">
+        <a href="#t:mode/0" data-no-tooltip="" translate="no">mode()</a>
+
+      </div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
         <a href="#t:step_result/0" data-no-tooltip="" translate="no">step_result()</a>
 
       </div>
@@ -160,15 +178,30 @@ It runs <code class="inline">mix</code> commands on the server host/container.</
 
       </div>
 
-        <div class="summary-synopsis"><p>Whether this image can build plugin bundles at all.</p></div>
+        <div class="summary-synopsis"><p>Whether this image can build plugin bundles at all: with <code class="inline">mix</code>, or in-process
+with the Elixir compiler.</p></div>
 
     </div>
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#build/1" data-no-tooltip="" translate="no">build(plugin_name)</a>
+        <a href="#build/2" data-no-tooltip="" translate="no">build(plugin_name, opts \\ [])</a>
 
       </div>
+
+        <div class="summary-synopsis"><p>Builds one plugin from <a href="#sources_dir/0"><code class="inline">sources_dir/0</code></a>.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#build_all/1" data-no-tooltip="" translate="no">build_all(opts \\ [])</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Builds every plugin <a href="#list_buildable_plugins/0"><code class="inline">list_buildable_plugins/0</code></a> offers, one after another,
+and returns <code class="inline">[{name, build_result}]</code> in that order. Takes the options of
+<a href="#build/2"><code class="inline">build/2</code></a>.</p></div>
 
     </div>
 
@@ -177,6 +210,18 @@ It runs <code class="inline">mix</code> commands on the server host/container.</
         <a href="#list_buildable_plugins/0" data-no-tooltip="" translate="no">list_buildable_plugins()</a>
 
       </div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#mode/0" data-no-tooltip="" translate="no">mode()</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>How <a href="#build/1"><code class="inline">build/1</code></a> would build here: <code class="inline">:mix</code> when this server itself runs under
+Mix and a <code class="inline">mix</code> executable is on the PATH, else <code class="inline">:in_process</code> when the
+compiler is loadable, else <code class="inline">nil</code>.</p></div>
 
     </div>
 
@@ -212,7 +257,7 @@ It runs <code class="inline">mix</code> commands on the server host/container.</
       <h1 class="signature" translate="no">build_result()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/hooks/plugin_builder.ex#L15" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/hooks/plugin_builder.ex#L34" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -227,10 +272,39 @@ It runs <code class="inline">mix</code> commands on the server host/container.</
   ok?: <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">boolean</a>(),
   plugin: <a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>(),
   source_dir: <a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>(),
+  mode: <a href="#t:mode/0">mode</a>(),
   started_at: <a href="https://elixir.hexdocs.pm/DateTime.html#t:t/0">DateTime.t</a>(),
   finished_at: <a href="https://elixir.hexdocs.pm/DateTime.html#t:t/0">DateTime.t</a>(),
   steps: [<a href="#t:step_result/0">step_result</a>()]
 }</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="t:mode/0">
+
+  <div class="detail-header">
+    <a href="#t:mode/0" class="detail-link" data-no-tooltip="" aria-label="Link to this type">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">mode()</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/hooks/plugin_builder.ex#L32" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@type</span> mode() :: :mix | :in_process</pre>
 
       </div>
 
@@ -247,7 +321,7 @@ It runs <code class="inline">mix</code> commands on the server host/container.</
       <h1 class="signature" translate="no">step_result()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/hooks/plugin_builder.ex#L9" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/hooks/plugin_builder.ex#L26" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -292,7 +366,7 @@ It runs <code class="inline">mix</code> commands on the server host/container.</
       <h1 class="signature" translate="no">available?()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/hooks/plugin_builder.ex#L34" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/hooks/plugin_builder.ex#L54" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -307,24 +381,26 @@ It runs <code class="inline">mix</code> commands on the server host/container.</
 
       </div>
 
-<p>Whether this image can build plugin bundles at all.</p><p>The build shells out to <code class="inline">mix</code>, which a release image (the Dockerfile's
-<code class="inline">release</code> target) does not ship: it carries compiled <code class="inline">.beam</code> files and no
-build toolchain. Callers check this so an image without Mix presents a
-disabled control with a reason, instead of three <a href="https://elixir.hexdocs.pm/System.html#cmd/3"><code class="inline">System.cmd/3</code></a> calls that
-fail on :enoent and surface as a build error.</p>
+<p>Whether this image can build plugin bundles at all: with <code class="inline">mix</code>, or in-process
+with the Elixir compiler.</p><p>The in-process build needs only the <code class="inline">elixir</code> and <code class="inline">compiler</code> applications,
+which every release carries (<code class="inline">elixir</code> depends on <code class="inline">compiler</code>), so this is
+true in a release too. Callers still check it so an image without either
+presents a disabled control with a reason rather than a failed build.</p>
   </section>
 </section>
-<section class="detail" id="build/1">
+<section class="detail" id="build/2">
+
+    <span id="build/1"></span>
 
   <div class="detail-header">
-    <a href="#build/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+    <a href="#build/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
       <i class="ri-link-m" aria-hidden="true"></i>
     </a>
     <div class="heading-with-actions">
-      <h1 class="signature" translate="no">build(plugin_name)</h1>
+      <h1 class="signature" translate="no">build(plugin_name, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/hooks/plugin_builder.ex#L64" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/hooks/plugin_builder.ex#L123" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -335,11 +411,49 @@ fail on :enoent and surface as a build error.</p>
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> build(<a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>()) :: {:ok, <a href="#t:build_result/0">build_result</a>()} | {:error, <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">term</a>()}</pre>
+          <pre translate="no"><span class="attribute">@spec</span> build(<a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>(), <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">keyword</a>()) :: {:ok, <a href="#t:build_result/0">build_result</a>()} | {:error, <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">term</a>()}</pre>
 
       </div>
 
+<p>Builds one plugin from <a href="#sources_dir/0"><code class="inline">sources_dir/0</code></a>.</p><p>Returns <code class="inline">{:ok, result}</code> for every build that ran, successful or not
+(<code class="inline">result.ok?</code> tells, and <code class="inline">result.steps</code> carries each step's output: compiler
+errors, missing dependencies), and <code class="inline">{:error, reason}</code> when none could run:
+<code class="inline">{:unknown_plugin, name}</code>, <code class="inline">:mix_unavailable</code>, <code class="inline">:build_unavailable</code>.</p><p>Options:</p><ul><li><code class="inline">:mode</code> - <code class="inline">:auto</code> (default: Mix when on the PATH, else in-process),
+<code class="inline">:mix</code> or <code class="inline">:in_process</code>.</li></ul><p>A plugin the manager has loaded is stopped for an in-process build and
+started again when it ends (see <a href="Gamend.Hooks.PluginBuilder.InProcess.html"><code class="inline">Gamend.Hooks.PluginBuilder.InProcess</code></a>). A
+Mix build leaves it running; <code class="inline">PluginManager.reload/0</code> picks the new bundle up.</p>
+  </section>
+</section>
+<section class="detail" id="build_all/1">
 
+    <span id="build_all/0"></span>
+
+  <div class="detail-header">
+    <a href="#build_all/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">build_all(opts \\ [])</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/hooks/plugin_builder.ex#L165" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> build_all(<a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">keyword</a>()) :: [{<a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>(), {:ok, <a href="#t:build_result/0">build_result</a>()} | {:error, <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">term</a>()}}]</pre>
+
+      </div>
+
+<p>Builds every plugin <a href="#list_buildable_plugins/0"><code class="inline">list_buildable_plugins/0</code></a> offers, one after another,
+and returns <code class="inline">[{name, build_result}]</code> in that order. Takes the options of
+<a href="#build/2"><code class="inline">build/2</code></a>.</p>
   </section>
 </section>
 <section class="detail" id="list_buildable_plugins/0">
@@ -352,7 +466,7 @@ fail on :enoent and surface as a build error.</p>
       <h1 class="signature" translate="no">list_buildable_plugins()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/hooks/plugin_builder.ex#L46" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/hooks/plugin_builder.ex#L88" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -370,6 +484,38 @@ fail on :enoent and surface as a build error.</p>
 
   </section>
 </section>
+<section class="detail" id="mode/0">
+
+  <div class="detail-header">
+    <a href="#mode/0" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">mode()</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/hooks/plugin_builder.ex#L66" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> mode() :: <a href="#t:mode/0">mode</a>() | nil</pre>
+
+      </div>
+
+<p>How <a href="#build/1"><code class="inline">build/1</code></a> would build here: <code class="inline">:mix</code> when this server itself runs under
+Mix and a <code class="inline">mix</code> executable is on the PATH, else <code class="inline">:in_process</code> when the
+compiler is loadable, else <code class="inline">nil</code>.</p><p>A release builds in-process even with a <code class="inline">mix</code> on the PATH: that one belongs
+to some other Elixir install, and started from a release it inherits the
+release's ERTS environment (<code class="inline">ROOTDIR</code>, <code class="inline">BINDIR</code>) and fails to boot.</p>
+  </section>
+</section>
 <section class="detail" id="sources_dir/0">
 
   <div class="detail-header">
@@ -380,7 +526,7 @@ fail on :enoent and surface as a build error.</p>
       <h1 class="signature" translate="no">sources_dir()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/hooks/plugin_builder.ex#L37" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/hooks/plugin_builder.ex#L79" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -407,9 +553,9 @@ fail on :enoent and surface as a build error.</p>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1279">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1280">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1279">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1280">Hex Preview</a>
 
             </span>
 

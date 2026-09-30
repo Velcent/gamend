@@ -66,6 +66,7 @@ Gamend.Content.Tree.md
 Gamend.Content.md
 Gamend.ContentSettings.md
 Gamend.Database.md
+Gamend.DemoSeed.md
 Gamend.Economy.LedgerEntry.md
 Gamend.Economy.Wallet.md
 Gamend.Economy.md
@@ -85,6 +86,8 @@ Gamend.Hooks.DynamicRpcs.md
 Gamend.Hooks.HookSchemas.md
 Gamend.Hooks.KvSchemas.md
 Gamend.Hooks.MetadataSchemas.md
+Gamend.Hooks.PluginBuilder.InProcess.md
+Gamend.Hooks.PluginBuilder.Project.md
 Gamend.Hooks.PluginBuilder.md
 Gamend.Hooks.PluginManager.Plugin.md
 Gamend.Hooks.PluginManager.md
