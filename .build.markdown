@@ -9,6 +9,7 @@ Gamend.Accounts.InactivityNotifier.md
 Gamend.Accounts.LoginLockout.md
 Gamend.Accounts.LoginLockouts.md
 Gamend.Accounts.PasswordHash.md
+Gamend.Accounts.Preferences.md
 Gamend.Accounts.Presence.md
 Gamend.Accounts.PresenceStatus.md
 Gamend.Accounts.PresenceWriter.md
@@ -19,6 +20,7 @@ Gamend.Accounts.Search.md
 Gamend.Accounts.Sessions.md
 Gamend.Accounts.StalePresenceSweeper.md
 Gamend.Accounts.Stats.md
+Gamend.Accounts.TimeZone.md
 Gamend.Accounts.User.md
 Gamend.Accounts.UserNotifier.md
 Gamend.Accounts.UserToken.md
@@ -125,6 +127,7 @@ Gamend.Matchmaking.Ticket.md
 Gamend.Matchmaking.Worker.md
 Gamend.Matchmaking.md
 Gamend.Notifications.Notification.md
+Gamend.Notifications.Preferences.md
 Gamend.Notifications.Types.md
 Gamend.Notifications.md
 Gamend.OAuth.Exchanger.md

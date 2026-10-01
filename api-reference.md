@@ -1,4 +1,4 @@
-# gamend_core v1.0.1283 - API Reference
+# gamend_core v1.0.1284 - API Reference
 
 ## Modules
 
@@ -66,6 +66,10 @@ removing them from one.
   - [Gamend.Accounts.LoginLockout](Gamend.Accounts.LoginLockout.md): Failed password sign-ins for one email address, and the lock they set.
   - [Gamend.Accounts.LoginLockouts](Gamend.Accounts.LoginLockouts.md): Per-account lockout after repeated failed password sign-ins.
   - [Gamend.Accounts.PasswordHash](Gamend.Accounts.PasswordHash.md): Password hashing: Argon2id for new hashes, bcrypt still accepted for old ones.
+  - [Gamend.Accounts.Preferences](Gamend.Accounts.Preferences.md): A user's private settings (`users.preferences`): what only they see and
+change — notification choices (`Gamend.Notifications.Preferences`), their
+time zone (`Gamend.Accounts.TimeZone`) and the site language they last used
+(`locale/1`, for email written to them).
   - [Gamend.Accounts.Presence](Gamend.Accounts.Presence.md): Whether a user is online, and when they were last seen.
   - [Gamend.Accounts.PresenceStatus](Gamend.Accounts.PresenceStatus.md): How recently a user was seen, as the three states the UI actually draws.
   - [Gamend.Accounts.PresenceWriter](Gamend.Accounts.PresenceWriter.md): Coalesces `users.is_online` transitions into one write per flush window.
@@ -80,6 +84,11 @@ that carry them, and listing or revoking a user's sessions.
   - [Gamend.Accounts.StalePresenceSweeper](Gamend.Accounts.StalePresenceSweeper.md): Periodically sweeps users whose `is_online` flag is `true` but whose
 `last_seen_at` timestamp is older than a configurable threshold.
   - [Gamend.Accounts.Stats](Gamend.Accounts.Stats.md): Counts over the user table for the admin dashboard and the public stats page.
+  - [Gamend.Accounts.TimeZone](Gamend.Accounts.TimeZone.md): A user's time zone, for "their day" and "their evening": an IANA name
+(`"Europe/Bucharest"`) kept in their private preferences
+(`Gamend.Accounts.Preferences`), taken from the browser
+(`Intl.DateTimeFormat().resolvedOptions().timeZone`, sent on connect) or
+chosen in settings. Unknown or unset, everything falls back to UTC.
   - [Gamend.Accounts.User](Gamend.Accounts.User.md): The User schema and associated changeset functions used across the
 application (registration, OAuth, and admin changes).
   - [Gamend.Accounts.UserNotifier](Gamend.Accounts.UserNotifier.md): Small helpers used to deliver transactional emails for the Accounts flow
@@ -258,6 +267,10 @@ translates its text through gettext at read time.
   - [Gamend.Notifications](Gamend.Notifications.md): Notifications context – create, list, and delete persisted user-to-user
 notifications.
   - [Gamend.Notifications.Notification](Gamend.Notifications.Notification.md): Ecto schema representing a notification sent from one user to another.
+  - [Gamend.Notifications.Preferences](Gamend.Notifications.Preferences.md): Which notifications a user wants, and how: per GROUP (a row on the
+settings page: "Friends and groups", a host's "Streak about to end") and
+per CHANNEL (`in_app`, `email`, `push`), plus three switches that win over
+everything: all email off, all push off, everything off.
   - [Gamend.Notifications.Types](Gamend.Notifications.Types.md): The `metadata["type"]` codes a notification may carry.
   - [Gamend.Push](Gamend.Push.md): Push context – device push-token registry and (see `send_to_user/3`)
 server-authoritative delivery of push notifications.

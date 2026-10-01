@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.40.4">
+    <meta name="project" content="gamend_core v1.0.1284">
+
+
+    <title>Gamend.Notifications.Preferences — gamend_core v1.0.1284</title>
+
+    <link rel="stylesheet" href="dist/html-elixir-RXHHCTJW.css" />
+
+    <script defer src="dist/sidebar_items-5BAC0E05.js"></script>
+    <script defer src="docs_config.js"></script>
+    <script defer src="dist/html-MI33G4N7.js"></script>
+
+  </head>
+  <body>
+    <script>(()=>{var t="ex_doc:settings",e="dark";var o="dark",s="light";var E="sidebar_state",n="closed";var r="sidebar_width";var a="sidebar-open";var i=new URLSearchParams(window.location.search),S=i.get("theme")||JSON.parse(localStorage.getItem(t)||"{}").theme;(S===o||S!==s&&window.matchMedia("(prefers-color-scheme: dark)").matches)&&document.body.classList.add(e);var d=sessionStorage.getItem(E),A=d!==n&&!window.matchMedia(`screen and (max-width: ${768}px)`).matches;document.body.classList.toggle(a,A);var c=sessionStorage.getItem(r);c&&document.body.style.setProperty("--sidebarWidth",`${c}px`);var p=/(Macintosh|iPhone|iPad|iPod)/.test(window.navigator.userAgent);document.documentElement.classList.toggle("apple-os",p);})();
+</script>
+
+<div class="body-wrapper">
+
+<button id="sidebar-menu" class="sidebar-button sidebar-toggle" aria-label="toggle sidebar" aria-controls="sidebar">
+  <i class="ri-menu-line ri-lg" title="Collapse/expand sidebar"></i>
+</button>
+
+<nav id="sidebar" class="sidebar">
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectInfo">
+
+      <div>
+        <a href="readme.html" class="sidebar-projectName" translate="no">
+gamend_core
+        </a>
+        <div class="sidebar-projectVersion" translate="no">
+          v1.0.1284
+        </div>
+      </div>
+    </div>
+    <ul id="sidebar-list-nav" class="sidebar-list-nav" role="tablist" data-extras="Pages"></ul>
+  </div>
+</nav>
+
+<output role="status" id="toast"></output>
+
+<main class="content page-module" id="main" data-type="modules">
+  <div id="content" class="content-inner">
+    <div class="top-search">
+      <div class="search-settings">
+        <form class="search-bar" action="search.html">
+          <label class="search-label">
+            <span class="sr-only">Search documentation of gamend_core</span>
+            <div class="search-input-wrapper">
+              <input name="q" type="text" class="search-input" placeholder="Press / to search" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+              <button type="button" tabindex="-1" class="search-close-button" aria-hidden="true">
+                <i class="ri-close-line ri-lg" title="Cancel search"></i>
+              </button>
+            </div>
+          </label>
+        </form>
+        <div class="autocomplete">
+        </div>
+        <div class="engine-selector" data-multiple="false">
+          <button type="button" class="engine-button" aria-label="Select search engine" aria-haspopup="true" aria-expanded="false">
+            <i class="ri-search-2-line" aria-hidden="true"></i>
+            <span class="engine-name">Default</span>
+            <i class="ri-arrow-down-s-line" aria-hidden="true"></i>
+          </button>
+          <div class="engine-dropdown" hidden role="menu">
+
+              <button type="button"
+                      class="engine-option"
+                      data-engine-url="search.html?q="
+                      role="menuitemradio"
+                      aria-checked="true">
+                <span class="name">Default</span>
+                <span class="help">In-browser search</span>
+              </button>
+
+          </div>
+        </div>
+        <button class="icon-settings display-settings">
+          <i class="ri-settings-3-line"></i>
+          <span class="sr-only">Settings</span>
+        </button>
+      </div>
+    </div>
+
+<div id="top-content">
+  <div class="heading-with-actions top-heading">
+    <h1>
+      <span translate="no">Gamend.<wbr />Notifications.<wbr />Preferences</span> 
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1284)</small>
+
+    </h1>
+
+<a href="Gamend.Notifications.Preferences.md" title="Copy Markdown (hold Ctrl/Cmd and click it to open as Markdown)" class="copy-markdown icon-action" rel="help">
+  <i class="ri-markdown-line" aria-hidden="true"></i>
+  <span class="sr-only">Copy Markdown</span>
+</a>
+
+
+
+      <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/notifications/preferences.ex#L1" title="View Source" class="icon-action" rel="help nofollow">
+        <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        <span class="sr-only">View Source</span>
+      </a>
+
+  </div>
+
+
+    <section id="moduledoc">
+<p>Which notifications a user wants, and how: per GROUP (a row on the
+settings page: &quot;Friends and groups&quot;, a host's &quot;Streak about to end&quot;) and
+per CHANNEL (<code class="inline">in_app</code>, <code class="inline">email</code>, <code class="inline">push</code>), plus three switches that win over
+everything: all email off, all push off, everything off.</p><h2 id="module-groups" class="section-heading"><a href="#module-groups" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Groups</span></h2><p>Core declares its own; a host adds its own in config:</p><pre><code class="makeup elixir" translate="no"><span class="n">config</span><span class="w"> </span><span class="ss">:gamend_core</span><span class="p">,</span><span class="w"> </span><span class="ss">:notification_groups</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="group-1">[</span><span class="w">
+  </span><span class="p" data-group-id="group-2">%{</span><span class="ss">key</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;streak&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">label</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Streak about to end&quot;</span><span class="p">,</span><span class="w">
+    </span><span class="ss">defaults</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="group-3">%{</span><span class="s">&quot;in_app&quot;</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="no">true</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;email&quot;</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="no">false</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;push&quot;</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="no">false</span><span class="p" data-group-id="group-3">}</span><span class="p">,</span><span class="w">
+    </span><span class="ss">types</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="group-4">[</span><span class="s">&quot;streak_ending&quot;</span><span class="p" data-group-id="group-4">]</span><span class="p">,</span><span class="w"> </span><span class="ss">signup</span><span class="p">:</span><span class="w"> </span><span class="no">true</span><span class="p" data-group-id="group-2">}</span><span class="w">
+</span><span class="p" data-group-id="group-1">]</span></code></pre><p>A group's <code class="inline">defaults</code> apply until the user chooses. <code class="inline">configurable</code> is the
+channels the user may change (default: all three); a channel they may not
+change always uses its default. <code class="inline">types</code> are the notification types
+(<a href="Gamend.Notifications.Types.html"><code class="inline">Gamend.Notifications.Types</code></a>) that belong to the group. <code class="inline">signup: true</code>
+offers its email on the registration form, unticked: an email nobody asked
+for is spam, so the user opts in. The &quot;account&quot; group — sign-in links, email
+changes — is email that cannot be turned off: it is how the account works.</p><p>Stored in the user's private preferences (<a href="Gamend.Accounts.Preferences.html"><code class="inline">Gamend.Accounts.Preferences</code></a>)
+under <code class="inline">&quot;notifications&quot;</code>:</p><pre><code class="makeup elixir" translate="no"><span class="p" data-group-id="group-1">%{</span><span class="s">&quot;off_all&quot;</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="n">bool</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;off_email&quot;</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="n">bool</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;off_push&quot;</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="n">bool</span><span class="p">,</span><span class="w">
+  </span><span class="s">&quot;groups&quot;</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p" data-group-id="group-2">%{</span><span class="n">group</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p" data-group-id="group-3">%{</span><span class="n">channel</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="n">bool</span><span class="p" data-group-id="group-3">}</span><span class="p" data-group-id="group-2">}</span><span class="p" data-group-id="group-1">}</span></code></pre>
+    </section>
+
+</div>
+
+  <section id="summary" class="details-list">
+    <h2 class="section-heading">
+      <a class="hover-link" href="#summary">
+        <i class="ri-link-m" aria-hidden="true"></i>
+      </a>
+      <span class="text">Summary</span>
+    </h2>
+<div class="summary-functions summary">
+  <h3>
+    <a href="#functions">Functions</a>
+  </h3>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#channels/0" data-no-tooltip="" translate="no">channels()</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>The channels, in the order the settings page shows them.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#enabled?/3" data-no-tooltip="" translate="no">enabled?(user, group_key, channel)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Whether <code class="inline">user</code> gets <code class="inline">group</code> through <code class="inline">channel</code>. A channel the group does not
+let the user change is its default; otherwise the switches win (everything
+off, then all email / all push off), then the user's own choice, then the
+default. An unknown group is off.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#group/1" data-no-tooltip="" translate="no">group(key)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>One group, or nil.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#group_for_type/1" data-no-tooltip="" translate="no">group_for_type(type)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>The group a notification TYPE (<a href="Gamend.Notifications.Types.html"><code class="inline">Gamend.Notifications.Types</code></a>) belongs to, so
+a friend request or a chat message follows the user's choices for its row.
+nil for a type in no group (a moderator's notice), which is always sent.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#groups/0" data-no-tooltip="" translate="no">groups()</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Every group, core's first then the host's: <code class="inline">%{key, label, defaults, configurable, types}</code>, <code class="inline">configurable</code> a list of channels.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#off?/2" data-no-tooltip="" translate="no">off?(user, switch)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Whether a switch is on: <code class="inline">&quot;off_all&quot;</code>, <code class="inline">&quot;off_email&quot;</code>, <code class="inline">&quot;off_push&quot;</code>.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#put/4" data-no-tooltip="" translate="no">put(user, group_key, channel, on?)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Set one group's channel. A channel the group does not let users change is refused.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#signup_groups/0" data-no-tooltip="" translate="no">signup_groups()</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>The groups whose email the registration form offers (<code class="inline">signup: true</code>).</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#stored/1" data-no-tooltip="" translate="no">stored(user)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>A user's stored choices (see the moduledoc's shape).</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#turn_off/2" data-no-tooltip="" translate="no">turn_off(user, atom)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Turn off all email, all push, or everything (<code class="inline">:email | :push | :all</code>).</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#turn_on/2" data-no-tooltip="" translate="no">turn_on(user, atom)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Undo <a href="#turn_off/2"><code class="inline">turn_off/2</code></a>: each group's own choices apply again.</p></div>
+
+    </div>
+
+</div>
+
+  </section>
+
+
+  <section id="functions" class="details-list">
+    <h2 class="section-heading">
+      <a class="hover-link" href="#functions">
+        <i class="ri-link-m" aria-hidden="true"></i>
+      </a>
+      <span class="text">Functions</span>
+    </h2>
+
+    <div class="functions-list">
+<section class="detail" id="channels/0">
+
+  <div class="detail-header">
+    <a href="#channels/0" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">channels()</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/notifications/preferences.ex#L76" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> channels() :: [<a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>()]</pre>
+
+      </div>
+
+<p>The channels, in the order the settings page shows them.</p>
+  </section>
+</section>
+<section class="detail" id="enabled?/3">
+
+  <div class="detail-header">
+    <a href="#enabled?/3" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">enabled?(user, group_key, channel)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/notifications/preferences.ex#L152" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> enabled?(<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>() | nil, <a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>(), <a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>()) :: <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">boolean</a>()</pre>
+
+      </div>
+
+<p>Whether <code class="inline">user</code> gets <code class="inline">group</code> through <code class="inline">channel</code>. A channel the group does not
+let the user change is its default; otherwise the switches win (everything
+off, then all email / all push off), then the user's own choice, then the
+default. An unknown group is off.</p>
+  </section>
+</section>
+<section class="detail" id="group/1">
+
+  <div class="detail-header">
+    <a href="#group/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">group(key)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/notifications/preferences.ex#L98" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> group(<a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>()) :: <a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">map</a>() | nil</pre>
+
+      </div>
+
+<p>One group, or nil.</p>
+  </section>
+</section>
+<section class="detail" id="group_for_type/1">
+
+  <div class="detail-header">
+    <a href="#group_for_type/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">group_for_type(type)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/notifications/preferences.ex#L106" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> group_for_type(<a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">term</a>()) :: <a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>() | nil</pre>
+
+      </div>
+
+<p>The group a notification TYPE (<a href="Gamend.Notifications.Types.html"><code class="inline">Gamend.Notifications.Types</code></a>) belongs to, so
+a friend request or a chat message follows the user's choices for its row.
+nil for a type in no group (a moderator's notice), which is always sent.</p>
+  </section>
+</section>
+<section class="detail" id="groups/0">
+
+  <div class="detail-header">
+    <a href="#groups/0" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">groups()</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/notifications/preferences.ex#L83" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> groups() :: [<a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">map</a>()]</pre>
+
+      </div>
+
+<p>Every group, core's first then the host's: <code class="inline">%{key, label, defaults, configurable, types}</code>, <code class="inline">configurable</code> a list of channels.</p>
+  </section>
+</section>
+<section class="detail" id="off?/2">
+
+  <div class="detail-header">
+    <a href="#off?/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">off?(user, switch)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/notifications/preferences.ex#L221" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> off?(<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>() | nil, <a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>()) :: <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">boolean</a>()</pre>
+
+      </div>
+
+<p>Whether a switch is on: <code class="inline">&quot;off_all&quot;</code>, <code class="inline">&quot;off_email&quot;</code>, <code class="inline">&quot;off_push&quot;</code>.</p>
+  </section>
+</section>
+<section class="detail" id="put/4">
+
+  <div class="detail-header">
+    <a href="#put/4" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">put(user, group_key, channel, on?)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/notifications/preferences.ex#L187" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> put(<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>(), <a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>(), <a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>(), <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">boolean</a>()) ::
+  {:ok, <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()} | {:error, <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">term</a>()}</pre>
+
+      </div>
+
+<p>Set one group's channel. A channel the group does not let users change is refused.</p>
+  </section>
+</section>
+<section class="detail" id="signup_groups/0">
+
+  <div class="detail-header">
+    <a href="#signup_groups/0" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">signup_groups()</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/notifications/preferences.ex#L94" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> signup_groups() :: [<a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">map</a>()]</pre>
+
+      </div>
+
+<p>The groups whose email the registration form offers (<code class="inline">signup: true</code>).</p>
+  </section>
+</section>
+<section class="detail" id="stored/1">
+
+  <div class="detail-header">
+    <a href="#stored/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">stored(user)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/notifications/preferences.ex#L143" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> stored(<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>() | nil) :: <a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">map</a>()</pre>
+
+      </div>
+
+<p>A user's stored choices (see the moduledoc's shape).</p>
+  </section>
+</section>
+<section class="detail" id="turn_off/2">
+
+  <div class="detail-header">
+    <a href="#turn_off/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">turn_off(user, atom)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/notifications/preferences.ex#L209" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> turn_off(<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>(), :email | :push | :all) ::
+  {:ok, <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()} | {:error, <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">term</a>()}</pre>
+
+      </div>
+
+<p>Turn off all email, all push, or everything (<code class="inline">:email | :push | :all</code>).</p>
+  </section>
+</section>
+<section class="detail" id="turn_on/2">
+
+  <div class="detail-header">
+    <a href="#turn_on/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">turn_on(user, atom)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/notifications/preferences.ex#L215" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> turn_on(<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>(), :email | :push | :all) ::
+  {:ok, <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()} | {:error, <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">term</a>()}</pre>
+
+      </div>
+
+<p>Undo <a href="#turn_off/2"><code class="inline">turn_off/2</code></a>: each group's own choices apply again.</p>
+  </section>
+</section>
+
+    </div>
+  </section>
+
+    <footer class="footer">
+
+        <p>
+
+            <span class="line">
+              <a href="https://hex.pm/packages/gamend_core/1.0.1284">Hex Package</a>
+
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1284">Hex Preview</a>
+
+            </span>
+
+          <span class="line">
+            <button class="a-main footer-button display-quick-switch" title="Go to package docs">
+              Go to package docs
+            </button>
+
+              <a href="llms.txt" target="_blank">
+                View llms.txt
+              </a>
+
+
+              <a href="gamend_core.epub">
+                Download ePub version
+              </a>
+
+          </span>
+        </p>
+
+        <p class="built-using">
+          Built using
+          <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener" translate="no">ExDoc</a> (v0.40.4) for the
+
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank" translate="no">Elixir programming language</a>
+
+        </p>
+
+
+    </footer>
+  </div>
+</main>
+</div>
+
+  </body>
+</html>

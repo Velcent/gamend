@@ -225,6 +225,27 @@ Mark all notifications as read for a user.
 
 Mark a single notification as read. Only the recipient can mark it.
 
+# `notify`
+
+```elixir
+@spec notify(user_id(), String.t(), map()) ::
+  {:ok, [String.t()]} | {:error, :not_found}
+```
+
+Tell a user something the SERVER has to say (a streak about to end, a class
+result), through the channels they chose for `group`
+(`Gamend.Notifications.Preferences`): the in-app row, a push to their
+devices, an email. A channel they turned off is skipped.
+
+`attrs`: `"title"` (required), `"content"`, `"type"` (a declared code,
+`Gamend.Notifications.Types`), `"url"` (a path on this site the
+notification leads to), and for the email `"subject"` and `"text"`
+(default: the title and the content).
+
+The in-app row is the user's own (sender = recipient), so repeating a title
+refreshes the one row rather than stacking. Returns the channels it went
+out on.
+
 # `send_notification`
 
 ```elixir

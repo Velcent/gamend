@@ -10,6 +10,7 @@ Gamend.Accounts.InactivityNotifier.html
 Gamend.Accounts.LoginLockout.html
 Gamend.Accounts.LoginLockouts.html
 Gamend.Accounts.PasswordHash.html
+Gamend.Accounts.Preferences.html
 Gamend.Accounts.Presence.html
 Gamend.Accounts.PresenceStatus.html
 Gamend.Accounts.PresenceWriter.html
@@ -20,6 +21,7 @@ Gamend.Accounts.Search.html
 Gamend.Accounts.Sessions.html
 Gamend.Accounts.StalePresenceSweeper.html
 Gamend.Accounts.Stats.html
+Gamend.Accounts.TimeZone.html
 Gamend.Accounts.User.html
 Gamend.Accounts.UserNotifier.html
 Gamend.Accounts.UserToken.html
@@ -126,6 +128,7 @@ Gamend.Matchmaking.Ticket.html
 Gamend.Matchmaking.Worker.html
 Gamend.Matchmaking.html
 Gamend.Notifications.Notification.html
+Gamend.Notifications.Preferences.html
 Gamend.Notifications.Types.html
 Gamend.Notifications.html
 Gamend.OAuth.Exchanger.html
@@ -231,8 +234,8 @@ dist/lato-latin-700-normal-2XVSBPG4.woff2
 dist/lato-latin-ext-400-normal-N27NCBWW.woff2
 dist/lato-latin-ext-700-normal-Q2L5DVMW.woff2
 dist/remixicon-ZWU5GQ4X.woff2
-dist/search_data-940A4902.js
-dist/sidebar_items-7A2D0DAE.js
+dist/search_data-51B0CF33.js
+dist/sidebar_items-5BAC0E05.js
 index.html
 readme.html
 search.html

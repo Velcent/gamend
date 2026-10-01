@@ -43,6 +43,7 @@ validations so other domains can reuse them safely.
   party: term(),
   party_id: Ecto.UUID.t() | nil,
   password: term(),
+  preferences: term(),
   profile_url: term(),
   steam_id: term(),
   token_version: term(),

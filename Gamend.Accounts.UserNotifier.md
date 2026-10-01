@@ -25,6 +25,13 @@ sweep; signing in resets the clock, so the action the mail asks for is just
 
 Deliver instructions to log in with a magic link.
 
+# `deliver_notification`
+
+A notification the user chose to get by email
+(`Gamend.Notifications.notify/3`). `unsubscribe_url` ends the body and goes
+in the `List-Unsubscribe` headers too (RFC 8058 one-click), so a mail
+client's own "Unsubscribe" button works without opening the site.
+
 # `deliver_test_email`
 
 Send a simple test email to the given recipient address. Used by admin tools
