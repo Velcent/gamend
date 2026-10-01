@@ -169,7 +169,8 @@ See `t:Gamend.Types.lobby_create_attrs/0` for available fields.
 
 ```elixir
 @spec delete_lobby(Gamend.Lobbies.Lobby.t()) ::
-  {:ok, Gamend.Lobbies.Lobby.t()} | {:error, Ecto.Changeset.t() | term()}
+  {:ok, Gamend.Lobbies.Lobby.t()}
+  | {:error, :not_found | {:hook_rejected, term()}}
 ```
 
 # `delete_membership`
@@ -505,7 +506,7 @@ Ids of lobbies with WebRTC enabled — the signaling rooms that can exist.
 
 ```elixir
 @spec write_webrtc_config(Gamend.Lobbies.Lobby.t(), map()) ::
-  {:ok, Gamend.Lobbies.Lobby.t()} | {:error, Ecto.Changeset.t()}
+  {:ok, Gamend.Lobbies.Lobby.t()} | {:error, Ecto.Changeset.t() | :not_found}
 ```
 
 Writes the server-owned `webrtc_*` columns.

@@ -1,4 +1,4 @@
-# gamend_core v1.0.1284 - API Reference
+# gamend_core v1.0.1285 - API Reference
 
 ## Modules
 
@@ -88,7 +88,9 @@ that carry them, and listing or revoking a user's sessions.
 (`"Europe/Bucharest"`) kept in their private preferences
 (`Gamend.Accounts.Preferences`), taken from the browser
 (`Intl.DateTimeFormat().resolvedOptions().timeZone`, sent on connect) or
-chosen in settings. Unknown or unset, everything falls back to UTC.
+chosen in settings. A zone chosen by hand (`choose/2`) stays until the user
+goes back to automatic: the browser no longer overwrites it
+(`manual?/1`). Unknown or unset, everything falls back to UTC.
   - [Gamend.Accounts.User](Gamend.Accounts.User.md): The User schema and associated changeset functions used across the
 application (registration, OAuth, and admin changes).
   - [Gamend.Accounts.UserNotifier](Gamend.Accounts.UserNotifier.md): Small helpers used to deliver transactional emails for the Accounts flow

@@ -189,6 +189,16 @@ Gets a leaderboard by its ID. Raises if not found.
 # `get_record`
 
 ```elixir
+@spec get_record(Ecto.UUID.t()) :: Gamend.Leaderboards.Record.t() | nil
+```
+
+Gets a record by its ID, or `nil` when there is none (or `id` is not a UUID).
+
+Intended for internal/admin usage.
+
+# `get_record`
+
+```elixir
 @spec get_record(Ecto.UUID.t(), Ecto.UUID.t()) :: Gamend.Leaderboards.Record.t() | nil
 ```
 
@@ -200,9 +210,7 @@ Gets a single record by leaderboard ID and user ID.
 @spec get_record!(Ecto.UUID.t()) :: Gamend.Leaderboards.Record.t()
 ```
 
-Gets a record by its ID. Raises if not found.
-
-Intended for internal/admin usage.
+Like `get_record/1`, but raises `Ecto.NoResultsError` when there is none.
 
 # `get_user_record`
 

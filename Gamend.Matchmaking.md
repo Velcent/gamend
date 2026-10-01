@@ -26,7 +26,8 @@ into a lobby. Two things keep the queue honest:
 # `assign_lobby`
 
 ```elixir
-@spec assign_lobby([Gamend.Matchmaking.Ticket.t()], Ecto.UUID.t()) :: :ok
+@spec assign_lobby([Gamend.Matchmaking.Ticket.t()], Ecto.UUID.t()) ::
+  :ok | {:error, :not_found}
 ```
 
 Associates already-claimed tickets with their created lobby.

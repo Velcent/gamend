@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.4">
-    <meta name="project" content="gamend_core v1.0.1284">
+    <meta name="project" content="gamend_core v1.0.1285">
 
 
-    <title>Gamend.Leaderboards — gamend_core v1.0.1284</title>
+    <title>Gamend.Leaderboards — gamend_core v1.0.1285</title>
 
     <link rel="stylesheet" href="dist/html-elixir-RXHHCTJW.css" />
 
-    <script defer src="dist/sidebar_items-5BAC0E05.js"></script>
+    <script defer src="dist/sidebar_items-0B5CEA63.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-MI33G4N7.js"></script>
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1284
+          v1.0.1285
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr />Leaderboards</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1284)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1285)</small>
 
     </h1>
 
@@ -302,6 +302,16 @@ Returns <code class="inline">nil</code> if no active leaderboard exists.</p></di
 
     <div class="summary-row">
       <div class="summary-signature">
+        <a href="#get_record/1" data-no-tooltip="" translate="no">get_record(id)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Gets a record by its ID, or <code class="inline">nil</code> when there is none (or <code class="inline">id</code> is not a UUID).</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
         <a href="#get_record/2" data-no-tooltip="" translate="no">get_record(leaderboard_id, user_id)</a>
 
       </div>
@@ -316,7 +326,7 @@ Returns <code class="inline">nil</code> if no active leaderboard exists.</p></di
 
       </div>
 
-        <div class="summary-synopsis"><p>Gets a record by its ID. Raises if not found.</p></div>
+        <div class="summary-synopsis"><p>Like <a href="#get_record/1"><code class="inline">get_record/1</code></a>, but raises <a href="https://ecto.hexdocs.pm/3.14.2/Ecto.NoResultsError.html"><code class="inline">Ecto.NoResultsError</code></a> when there is none.</p></div>
 
     </div>
 
@@ -498,7 +508,7 @@ Returns <code class="inline">{:ok, record_with_rank}</code> or <code class="inli
       <h1 class="signature" translate="no">change_record(record, attrs \\ %{})</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L1277" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L1285" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -526,7 +536,7 @@ Returns <code class="inline">{:ok, record_with_rank}</code> or <code class="inli
       <h1 class="signature" translate="no">count_all_records()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L1117" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L1125" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -614,7 +624,7 @@ Returns <code class="inline">{:ok, record_with_rank}</code> or <code class="inli
       <h1 class="signature" translate="no">count_records(leaderboard_id, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L1075" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L1083" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -704,7 +714,7 @@ Returns <code class="inline">{:ok, record_with_rank}</code> or <code class="inli
       <h1 class="signature" translate="no">delete_record(record)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L1227" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L1235" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -733,7 +743,7 @@ Returns <code class="inline">{:ok, record_with_rank}</code> or <code class="inli
       <h1 class="signature" translate="no">delete_user_record(id_or_slug, user_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L1246" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L1254" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -903,6 +913,34 @@ returns the most recently created one.</p>
 <p>Gets a leaderboard by its ID. Raises if not found.</p>
   </section>
 </section>
+<section class="detail" id="get_record/1">
+
+  <div class="detail-header">
+    <a href="#get_record/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">get_record(id)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L1" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> get_record(<a href="https://ecto.hexdocs.pm/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) :: <a href="Gamend.Leaderboards.Record.html#t:t/0">Gamend.Leaderboards.Record.t</a>() | nil</pre>
+
+      </div>
+
+<p>Gets a record by its ID, or <code class="inline">nil</code> when there is none (or <code class="inline">id</code> is not a UUID).</p><p>Intended for internal/admin usage.</p>
+  </section>
+</section>
 <section class="detail" id="get_record/2">
 
   <div class="detail-header">
@@ -913,7 +951,7 @@ returns the most recently created one.</p>
       <h1 class="signature" translate="no">get_record(leaderboard_id, user_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L855" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L863" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -941,7 +979,7 @@ returns the most recently created one.</p>
       <h1 class="signature" translate="no">get_record!(id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L1" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L831" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -956,7 +994,7 @@ returns the most recently created one.</p>
 
       </div>
 
-<p>Gets a record by its ID. Raises if not found.</p><p>Intended for internal/admin usage.</p>
+<p>Like <a href="#get_record/1"><code class="inline">get_record/1</code></a>, but raises <a href="https://ecto.hexdocs.pm/3.14.2/Ecto.NoResultsError.html"><code class="inline">Ecto.NoResultsError</code></a> when there is none.</p>
   </section>
 </section>
 <section class="detail" id="get_user_record/2">
@@ -969,7 +1007,7 @@ returns the most recently created one.</p>
       <h1 class="signature" translate="no">get_user_record(leaderboard_id, user_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L869" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L877" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1133,7 +1171,7 @@ the TTL.</p>
       <h1 class="signature" translate="no">list_records(leaderboard_id, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L941" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L949" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1167,7 +1205,7 @@ player's real position is what shows.</li></ul>
       <h1 class="signature" translate="no">list_records_around_user(leaderboard_id, user_id, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L1133" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L1141" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1334,7 +1372,7 @@ The score is processed according to the leaderboard's operator:</p><ul><li><code
       <h1 class="signature" translate="no">update_record(record, attrs)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L836" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/leaderboards.ex#L844" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1362,9 +1400,9 @@ The score is processed according to the leaderboard's operator:</p><ul><li><code
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1284">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1285">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1284">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1285">Hex Preview</a>
 
             </span>
 

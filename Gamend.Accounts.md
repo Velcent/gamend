@@ -151,12 +151,13 @@ See `Gamend.Accounts.User.password_changeset/3` for a list of supported options.
 
 ```elixir
 @spec delete_user(Gamend.Accounts.User.t()) ::
-  {:ok, Gamend.Accounts.User.t()} | {:error, Ecto.Changeset.t()}
+  {:ok, Gamend.Accounts.User.t()} | {:error, :not_found | Ecto.Changeset.t()}
 ```
 
 Deletes a user and associated resources.
 
-Returns `{:ok, user}` on success or `{:error, changeset}` on failure.
+Returns `{:ok, user}` on success, `{:error, :not_found}` when the user was
+deleted first, or `{:error, changeset}` on failure.
 
 # `delete_user_session_token`
 

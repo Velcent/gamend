@@ -215,6 +215,20 @@ external input surface as 404s rather than 400s.
 
 # `load`
 
+# `lock_rows`
+
+```elixir
+@spec lock_rows(Ecto.Queryable.t(), :update | :share) :: Ecto.Queryable.t()
+```
+
+Locks the rows `query` reads until the transaction ends: `:update` against
+every other locker and writer, `:share` against writers only, so holders of
+`:share` run side by side.
+
+Postgres only. SQLite has no row locks (`FOR UPDATE` raises there), and its
+single writer under `default_transaction_mode: :immediate` already runs every
+write transaction alone, so there the query comes back unchanged.
+
 # `one`
 
 # `one!`
@@ -344,6 +358,22 @@ handled here:
 Handling only the first answered `:user_not_found` on SQLite and a
 validation changeset on Postgres for the same race. Any other constraint
 error is re-raised, and any other error result is returned as it was.
+
+# `rescue_stale`
+
+```elixir
+@spec rescue_stale(term(), (-&gt; result)) :: result | {:error, term()}
+when result: term()
+```
+
+Runs `fun`, answering `{:error, reason}` when the row it updates or deletes
+was deleted first.
+
+A struct read before a concurrent delete still names its row, and
+`Repo.update/2` or `Repo.delete/2` on it raises `Ecto.StaleEntryError`. This
+is the companion to `rescue_foreign_key/2` for that window: the race answers
+as a read after the delete would have, instead of a 500. Both adapters raise
+the same error, so there is one form to handle.
 
 # `rollback`
 

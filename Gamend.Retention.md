@@ -47,8 +47,9 @@ Expired IP bans, OAuth sessions older than a day, user tokens past their own
 context's validity, personal API tokens that can no longer authenticate
 (expired, or older than their owner's last credential change), login
 lockouts whose window and lock have run out, accounts past the deletion date
-their owner's request set (`GAMEND_AUTH_DELETION_GRACE_DAYS`), and stored
-avatars whose owner no longer exists are always
+their owner's request set (`GAMEND_AUTH_DELETION_GRACE_DAYS`), stored
+avatars whose owner no longer exists, and the chat of a lobby, group or party
+that no longer exists are always
 removed (independent of the env vars above). Deletes are idempotent, so
 running on several instances at once is harmless; each class is batched and
 failure-isolated, and emits `[:gamend, :retention, :pruned]` telemetry with

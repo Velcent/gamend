@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.4">
-    <meta name="project" content="gamend_core v1.0.1284">
+    <meta name="project" content="gamend_core v1.0.1285">
 
 
-    <title>Gamend.Repo — gamend_core v1.0.1284</title>
+    <title>Gamend.Repo — gamend_core v1.0.1285</title>
 
     <link rel="stylesheet" href="dist/html-elixir-RXHHCTJW.css" />
 
-    <script defer src="dist/sidebar_items-5BAC0E05.js"></script>
+    <script defer src="dist/sidebar_items-0B5CEA63.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-MI33G4N7.js"></script>
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1284
+          v1.0.1285
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr />Repo</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1284)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1285)</small>
 
     </h1>
 
@@ -443,6 +443,18 @@ external input surface as 404s rather than 400s.</p></div>
 
     <div class="summary-row">
       <div class="summary-signature">
+        <a href="#lock_rows/2" data-no-tooltip="" translate="no">lock_rows(query, atom)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Locks the rows <code class="inline">query</code> reads until the transaction ends: <code class="inline">:update</code> against
+every other locker and writer, <code class="inline">:share</code> against writers only, so holders of
+<code class="inline">:share</code> run side by side.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
         <a href="#one/2" data-no-tooltip="" translate="no">one(queryable, opts \\ [])</a>
 
       </div>
@@ -571,6 +583,17 @@ and raises on invalid queries</p></div>
 
         <div class="summary-synopsis"><p>Runs <code class="inline">fun</code>, answering <code class="inline">{:error, reason}</code> when it violates a foreign key --
 however the adapter reports it.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#rescue_stale/2" data-no-tooltip="" translate="no">rescue_stale(reason, fun)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Runs <code class="inline">fun</code>, answering <code class="inline">{:error, reason}</code> when the row it updates or deletes
+was deleted first.</p></div>
 
     </div>
 
@@ -1029,7 +1052,7 @@ option in your repository configuration instead.</p>
       <h1 class="signature" translate="no">durable_transaction(fun, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/repo.ex#L52" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/repo.ex#L54" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1066,7 +1089,7 @@ connection-wide pragma with no per-transaction override.</p>
       <h1 class="signature" translate="no">escape_like(str)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/repo.ex#L131" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/repo.ex#L168" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1304,7 +1327,7 @@ consult their documentation for more details.</p><p>For version compatibility, p
       <h1 class="signature" translate="no">get_uuid(queryable, id, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/repo.ex#L162" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/repo.ex#L199" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1336,7 +1359,7 @@ input (URL params, channel payloads, hook args).</p>
       <h1 class="signature" translate="no">get_uuid!(queryable, id, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/repo.ex#L175" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/repo.ex#L212" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1518,6 +1541,38 @@ external input surface as 404s rather than 400s.</p>
   <section class="docstring">
 
 <p>Callback implementation for <a href="https://ecto.hexdocs.pm/3.14.2/Ecto.Repo.html#c:load/2"><code class="inline">Ecto.Repo.load/2</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="lock_rows/2">
+
+  <div class="detail-header">
+    <a href="#lock_rows/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">lock_rows(query, atom)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/repo.ex#L150" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> lock_rows(<a href="https://ecto.hexdocs.pm/3.14.2/Ecto.Queryable.html#t:t/0">Ecto.Queryable.t</a>(), :update | :share) :: <a href="https://ecto.hexdocs.pm/3.14.2/Ecto.Queryable.html#t:t/0">Ecto.Queryable.t</a>()</pre>
+
+      </div>
+
+<p>Locks the rows <code class="inline">query</code> reads until the transaction ends: <code class="inline">:update</code> against
+every other locker and writer, <code class="inline">:share</code> against writers only, so holders of
+<code class="inline">:share</code> run side by side.</p><p>Postgres only. SQLite has no row locks (<code class="inline">FOR UPDATE</code> raises there), and its
+single writer under <code class="inline">default_transaction_mode: :immediate</code> already runs every
+write transaction alone, so there the query comes back unchanged.</p>
   </section>
 </section>
 <section class="detail" id="one/2">
@@ -1867,7 +1922,7 @@ and raises on invalid queries</p>
       <h1 class="signature" translate="no">rescue_foreign_key(reason, fun)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/repo.ex#L97" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/repo.ex#L99" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1896,6 +1951,40 @@ from a context that tags its failures -- with a <code class="inline">constraint:
 error on the key.</li></ul><p>Handling only the first answered <code class="inline">:user_not_found</code> on SQLite and a
 validation changeset on Postgres for the same race. Any other constraint
 error is re-raised, and any other error result is returned as it was.</p>
+  </section>
+</section>
+<section class="detail" id="rescue_stale/2">
+
+  <div class="detail-header">
+    <a href="#rescue_stale/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">rescue_stale(reason, fun)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/repo.ex#L134" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> rescue_stale(<a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">term</a>(), (-&gt; result)) :: result | {:error, <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">term</a>()}
+when result: <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">term</a>()</pre>
+
+      </div>
+
+<p>Runs <code class="inline">fun</code>, answering <code class="inline">{:error, reason}</code> when the row it updates or deletes
+was deleted first.</p><p>A struct read before a concurrent delete still names its row, and
+<code class="inline">Repo.update/2</code> or <code class="inline">Repo.delete/2</code> on it raises <a href="https://ecto.hexdocs.pm/3.14.2/Ecto.StaleEntryError.html"><code class="inline">Ecto.StaleEntryError</code></a>. This
+is the companion to <a href="#rescue_foreign_key/2"><code class="inline">rescue_foreign_key/2</code></a> for that window: the race answers
+as a read after the delete would have, instead of a 500. Both adapters raise
+the same error, so there is one form to handle.</p>
   </section>
 </section>
 <section class="detail" id="rollback/1">
@@ -1936,7 +2025,7 @@ error is re-raised, and any other error result is returned as it was.</p>
       <h1 class="signature" translate="no">search_pattern(term)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/repo.ex#L147" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/repo.ex#L184" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -2196,9 +2285,9 @@ return a different result:</p><pre><code class="makeup elixir" translate="no"><s
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1284">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1285">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1284">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1285">Hex Preview</a>
 
             </span>
 

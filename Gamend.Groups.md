@@ -249,11 +249,11 @@ Decline a pending group invite by invite id (recipient only).
 
 ```elixir
 @spec delete_group(Ecto.UUID.t(), Ecto.UUID.t()) ::
-  {:ok, Gamend.Groups.Group.t()} | {:error, atom()}
+  {:ok, Gamend.Groups.Group.t()} | {:error, term()}
 ```
 
-Delete a group. Admin-only. Refuses if the group still has members — groups
-are auto-deleted when the last member leaves.
+Delete a group. Any of its admins can, members or not: everyone in it is
+removed with it and told, as a kick tells one member.
 
 # `demote_member`
 
