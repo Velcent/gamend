@@ -3,9 +3,9 @@ defmodule Gamend.Repo.SlowLog do
   Names what is slow in the database, in the log.
 
     * **A slow query**: one that ran, or waited for a pool connection, longer
-      than `GAMEND_DATABASE_SLOW_QUERY_MS` (default 1000).
+      than `GAMEND_DB_SLOW_QUERY_MS` (default 1000).
     * **A long transaction**: one that held its connection, from `begin` to
-      `commit` or `rollback`, longer than `GAMEND_DATABASE_SLOW_TRANSACTION_MS`
+      `commit` or `rollback`, longer than `GAMEND_DB_SLOW_TRANSACTION_MS`
       (default 2000). On SQLite that connection holds the one write lock
       (transactions are `IMMEDIATE`), so this is the line that explains a
       "database is locked": those errors name the process that waited, never

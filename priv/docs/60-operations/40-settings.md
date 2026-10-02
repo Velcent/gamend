@@ -7,7 +7,7 @@ generated: by `mix gamend.settings.guide` - do not edit by hand; edit the
 # Settings
 
 Every setting the server has, with the environment variable that sets it.
-314 settings across 29 groups.
+316 settings across 29 groups.
 
 A setting is declared in the module that owns it, so this page and
 `.env.example` are generated from the same source the server reads. The
@@ -151,6 +151,8 @@ Live values, and where each one came from, are on the
 | `GAMEND_DB_QUERY_TIMEOUT_MS` | integer | `15000` |  |
 | `GAMEND_DB_QUEUE_INTERVAL_MS` | integer | `1000` |  |
 | `GAMEND_DB_QUEUE_TARGET` | integer | `10000` |  |
+| `GAMEND_DB_SLOW_QUERY_MS` | integer | `1000` | Log a query that runs, or waits for a connection, longer than N ms, with where in the code it came from (`Gamend.Repo.SlowLog`). 0 turns it off. |
+| `GAMEND_DB_SLOW_TRANSACTION_MS` | integer | `2000` | Log a transaction that holds its connection longer than N ms. On SQLite that is the write lock others wait on, so this names what a "database is locked" waited for. 0 turns it off. |
 | `GAMEND_DB_SQLITE_BUSY_TIMEOUT_MS` | integer | `15000` | Wait this long for a lock instead of failing with "database is locked". |
 | `GAMEND_DB_SQLITE_CACHE_SIZE_KB` | integer | `200000` |  |
 | `GAMEND_DB_SQLITE_PATH` | string | - | Where the SQLite file lives. Point at a mounted volume in production. |
