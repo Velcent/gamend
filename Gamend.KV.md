@@ -182,6 +182,22 @@ and `:key` (substring filter).
 See `t:list_opts/0` for the expected option types.
 Returns a list of `Entry` structs ordered by most recently updated.
 
+# `prune_prefix`
+
+```elixir
+@spec prune_prefix(String.t(), pos_integer(), keyword()) :: non_neg_integer()
+```
+
+Delete every entry whose key starts with `prefix` and that has not been
+written for `days` days, in batches of `batch` (default 500), and answer
+how many went. For a key family that is history — one row per day, say —
+which nothing else ever trims. Hand it to the retention sweep with
+`Gamend.Retention.register_kv_prefix/3` rather than calling it directly.
+
+The prefix is matched literally (`%` and `_` in it are not wildcards). An
+empty prefix or a window of `0` deletes nothing. Each deleted row's
+cache and its scope's listing are invalidated, as `delete/2` does.
+
 # `put`
 
 ```elixir

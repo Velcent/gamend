@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.4">
-    <meta name="project" content="gamend_core v1.0.1287">
+    <meta name="project" content="gamend_core v1.0.1288">
 
 
-    <title>Gamend.KV — gamend_core v1.0.1287</title>
+    <title>Gamend.KV — gamend_core v1.0.1288</title>
 
     <link rel="stylesheet" href="dist/html-elixir-RXHHCTJW.css" />
 
-    <script defer src="dist/sidebar_items-0B5CEA63.js"></script>
+    <script defer src="dist/sidebar_items-FD628939.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-MI33G4N7.js"></script>
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1287
+          v1.0.1288
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr />KV</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1287)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1288)</small>
 
     </h1>
 
@@ -281,6 +281,20 @@ Returns the <code class="inline">Entry</code> struct or <code class="inline">nil
       </div>
 
         <div class="summary-synopsis"><p>List key/value entries with optional pagination and filtering.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#prune_prefix/3" data-no-tooltip="" translate="no">prune_prefix(prefix, days, opts \\ [])</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Delete every entry whose key starts with <code class="inline">prefix</code> and that has not been
+written for <code class="inline">days</code> days, in batches of <code class="inline">batch</code> (default 500), and answer
+how many went. For a key family that is history — one row per day, say —
+which nothing else ever trims. Hand it to the retention sweep with
+<a href="Gamend.Retention.html#register_kv_prefix/3"><code class="inline">Gamend.Retention.register_kv_prefix/3</code></a> rather than calling it directly.</p></div>
 
     </div>
 
@@ -786,6 +800,42 @@ See <a href="#t:list_opts/0"><code class="inline">list_opts/0</code></a> for the
 Returns a list of <code class="inline">Entry</code> structs ordered by most recently updated.</p>
   </section>
 </section>
+<section class="detail" id="prune_prefix/3">
+
+    <span id="prune_prefix/2"></span>
+
+  <div class="detail-header">
+    <a href="#prune_prefix/3" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">prune_prefix(prefix, days, opts \\ [])</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/kv.ex#L621" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> prune_prefix(<a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>(), <a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">pos_integer</a>(), <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">keyword</a>()) :: <a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">non_neg_integer</a>()</pre>
+
+      </div>
+
+<p>Delete every entry whose key starts with <code class="inline">prefix</code> and that has not been
+written for <code class="inline">days</code> days, in batches of <code class="inline">batch</code> (default 500), and answer
+how many went. For a key family that is history — one row per day, say —
+which nothing else ever trims. Hand it to the retention sweep with
+<a href="Gamend.Retention.html#register_kv_prefix/3"><code class="inline">Gamend.Retention.register_kv_prefix/3</code></a> rather than calling it directly.</p><p>The prefix is matched literally (<code class="inline">%</code> and <code class="inline">_</code> in it are not wildcards). An
+empty prefix or a window of <code class="inline">0</code> deletes nothing. Each deleted row's
+cache and its scope's listing are invalidated, as <a href="#delete/2"><code class="inline">delete/2</code></a> does.</p>
+  </section>
+</section>
 <section class="detail" id="put/3">
 
     <span id="put/2"></span>
@@ -949,9 +999,9 @@ Returns <code class="inline">{:ok, entry}</code>, <code class="inline">{:error, 
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1287">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1288">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1287">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1288">Hex Preview</a>
 
             </span>
 

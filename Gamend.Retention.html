@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.4">
-    <meta name="project" content="gamend_core v1.0.1287">
+    <meta name="project" content="gamend_core v1.0.1288">
 
 
-    <title>Gamend.Retention — gamend_core v1.0.1287</title>
+    <title>Gamend.Retention — gamend_core v1.0.1288</title>
 
     <link rel="stylesheet" href="dist/html-elixir-RXHHCTJW.css" />
 
-    <script defer src="dist/sidebar_items-0B5CEA63.js"></script>
+    <script defer src="dist/sidebar_items-FD628939.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-MI33G4N7.js"></script>
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1287
+          v1.0.1288
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr />Retention</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1287)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1288)</small>
 
     </h1>
 
@@ -153,7 +153,11 @@ its count.</p><h2 id="module-classes-a-host-or-plugin-adds" class="section-headi
 an unbounded table needs a retention class applies to them too. Register one
 and it runs, is failure-isolated, and emits telemetry exactly like core's:</p><pre><code class="makeup elixir" translate="no"><span class="nc">Gamend.Retention</span><span class="o">.</span><span class="n">register_class</span><span class="p" data-group-id="group-1">(</span><span class="ss">:forge_builds</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nc">Forge.Builds</span><span class="o">.</span><span class="n">prune</span><span class="o">/</span><span class="mi">0</span><span class="p" data-group-id="group-1">)</span></code></pre><p>The function takes no arguments and answers how many rows it deleted.
 Registering the same name twice replaces the first, so a module can call this
-at every boot without accumulating duplicates.</p>
+at every boot without accumulating duplicates.</p><p>A key family in <a href="Gamend.KV.html"><code class="inline">Gamend.KV</code></a> that is history (one row per day, per game…)
+has its own one-liner, <a href="#register_kv_prefix/3"><code class="inline">register_kv_prefix/3</code></a>, whose window can be a fixed
+number or a setting the host declares:</p><pre><code class="makeup elixir" translate="no"><span class="nc">Gamend.Retention</span><span class="o">.</span><span class="n">register_kv_prefix</span><span class="p" data-group-id="group-1">(</span><span class="ss">:daily_results</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;daily:&quot;</span><span class="p">,</span><span class="w"> </span><span class="k" data-group-id="group-2">fn</span><span class="w"> </span><span class="o">-&gt;</span><span class="w">
+  </span><span class="nc">Gamend.Settings</span><span class="o">.</span><span class="n">get</span><span class="p" data-group-id="group-3">(</span><span class="nc">MyGame.Daily</span><span class="p">,</span><span class="w"> </span><span class="ss">:history_days</span><span class="p" data-group-id="group-3">)</span><span class="w">
+</span><span class="k" data-group-id="group-2">end</span><span class="p" data-group-id="group-1">)</span></code></pre>
     </section>
 
 </div>
@@ -210,6 +214,19 @@ seats, abandoned parties, abandoned lobbies. What the short cycle
       </div>
 
         <div class="summary-synopsis"><p>Register a pruning class owned by a host application or a plugin.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#register_kv_prefix/3" data-no-tooltip="" translate="no">register_kv_prefix(class, prefix, days)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Register a <a href="Gamend.KV.html"><code class="inline">Gamend.KV</code></a> key family as history: every entry whose key starts
+with <code class="inline">prefix</code> is deleted once it has not been written for <code class="inline">days</code> days
+(<a href="Gamend.KV.html#prune_prefix/2"><code class="inline">Gamend.KV.prune_prefix/2</code></a>). The class runs, is isolated and reports
+exactly like any other.</p></div>
 
     </div>
 
@@ -288,7 +305,7 @@ the sweeper is not supervised (tests, or an instance with it disabled).</p></div
       <h1 class="signature" translate="no">child_spec(init_arg)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/retention.ex#L70" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/retention.ex#L78" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -310,7 +327,7 @@ the sweeper is not supervised (tests, or an instance with it disabled).</p></div
       <h1 class="signature" translate="no">prune_all()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/retention.ex#L278" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/retention.ex#L312" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -339,7 +356,7 @@ counts per table.</p>
       <h1 class="signature" translate="no">prune_live()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/retention.ex#L302" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/retention.ex#L336" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -369,7 +386,7 @@ seats, abandoned parties, abandoned lobbies. What the short cycle
       <h1 class="signature" translate="no">register_class(class, fun)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/retention.ex#L245" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/retention.ex#L253" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -392,6 +409,47 @@ this on every boot — the second registration replaces the first instead of
 pruning twice.</p>
   </section>
 </section>
+<section class="detail" id="register_kv_prefix/3">
+
+  <div class="detail-header">
+    <a href="#register_kv_prefix/3" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">register_kv_prefix(class, prefix, days)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/retention.ex#L274" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> register_kv_prefix(
+  <a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">atom</a>(),
+  <a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>(),
+  <a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">non_neg_integer</a>() | (-&gt; <a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">non_neg_integer</a>())
+) :: :ok</pre>
+
+      </div>
+
+<p>Register a <a href="Gamend.KV.html"><code class="inline">Gamend.KV</code></a> key family as history: every entry whose key starts
+with <code class="inline">prefix</code> is deleted once it has not been written for <code class="inline">days</code> days
+(<a href="Gamend.KV.html#prune_prefix/2"><code class="inline">Gamend.KV.prune_prefix/2</code></a>). The class runs, is isolated and reports
+exactly like any other.</p><p><code class="inline">days</code> is a number, or a function answering one, called at every sweep. A
+function is how the window becomes a setting an operator can change
+without a deploy: declare it with <a href="Gamend.Settings.Provider.html"><code class="inline">Gamend.Settings.Provider</code></a> (which gives
+it an env var, a config key and a row on the admin Settings page) and read
+it here. <code class="inline">0</code> keeps everything, as for core's own classes.</p><pre><code class="makeup elixir" translate="no"><span class="nc">Gamend.Retention</span><span class="o">.</span><span class="n">register_kv_prefix</span><span class="p" data-group-id="group-1">(</span><span class="ss">:daily_results</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;daily:&quot;</span><span class="p">,</span><span class="w"> </span><span class="k" data-group-id="group-2">fn</span><span class="w"> </span><span class="o">-&gt;</span><span class="w">
+  </span><span class="nc">Gamend.Settings</span><span class="o">.</span><span class="n">get</span><span class="p" data-group-id="group-3">(</span><span class="nc">MyGame.Daily</span><span class="p">,</span><span class="w"> </span><span class="ss">:history_days</span><span class="p" data-group-id="group-3">)</span><span class="w">
+</span><span class="k" data-group-id="group-2">end</span><span class="p" data-group-id="group-1">)</span></code></pre>
+  </section>
+</section>
 <section class="detail" id="registered_classes/0">
 
   <div class="detail-header">
@@ -402,7 +460,7 @@ pruning twice.</p>
       <h1 class="signature" translate="no">registered_classes()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/retention.ex#L257" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/retention.ex#L291" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -430,7 +488,7 @@ pruning twice.</p>
       <h1 class="signature" translate="no">run_now()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/retention.ex#L180" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/retention.ex#L188" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -460,7 +518,7 @@ never overlap.</p>
       <h1 class="signature" translate="no">start_link(opts)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/retention.ex#L141" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/retention.ex#L149" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -482,7 +540,7 @@ never overlap.</p>
       <h1 class="signature" translate="no">status()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/retention.ex#L168" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/retention.ex#L176" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -515,7 +573,7 @@ the sweeper is not supervised (tests, or an instance with it disabled).</p>
       <h1 class="signature" translate="no">unregister_class(class)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/retention.ex#L251" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/retention.ex#L285" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -542,9 +600,9 @@ the sweeper is not supervised (tests, or an instance with it disabled).</p>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1287">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1288">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1287">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1288">Hex Preview</a>
 
             </span>
 
