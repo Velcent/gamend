@@ -33,6 +33,7 @@ defmodule GamendWeb.HostSupervision do
   """
 
   alias Gamend.Chat.Moderation.Cache, as: ModerationCache
+  alias Gamend.Repo.SlowLog
   alias GamendWeb.Plugs.GeoCountry
   alias GamendWeb.Plugs.IpBan
 
@@ -72,6 +73,11 @@ defmodule GamendWeb.HostSupervision do
     refuse_published_secret!(env)
 
     Application.start(:os_mon)
+
+    # Every host gets the slow query and long transaction lines in its log:
+    # without them a "database is locked" names the waiter and never the
+    # holder.
+    SlowLog.attach()
 
     # ETS owner for the Schedule registry + protected-callback set — must exist
     # before the Oban Cron tick fires.

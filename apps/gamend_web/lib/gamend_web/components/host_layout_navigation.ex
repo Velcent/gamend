@@ -1111,7 +1111,7 @@ defmodule GamendWeb.HostLayoutNavigation do
 
       case Map.get(link, "match", "prefix") do
         "exact" -> current_path == href
-        _ -> String.starts_with?(current_path, href)
+        _ -> path_prefix?(current_path, href)
       end
     end
   end
@@ -1129,10 +1129,19 @@ defmodule GamendWeb.HostLayoutNavigation do
   defp here?(current_path, prefix) when is_binary(current_path) do
     current_path
     |> GamendWeb.HostLayouts.strip_locale_prefix(GamendWeb.GettextSync.known_locales())
-    |> String.starts_with?(prefix)
+    |> path_prefix?(prefix)
   end
 
   defp here?(_current_path, _prefix), do: false
+
+  # A prefix match stops at a path segment: `/game` covers `/game/web`, not
+  # `/games`, a different page that shares the letters. A prefix ending in
+  # `/` (`/`, `/docs/`) already marks the boundary.
+  defp path_prefix?(path, prefix) do
+    path == prefix or
+      (String.ends_with?(prefix, "/") and String.starts_with?(path, prefix)) or
+      String.starts_with?(path, prefix <> "/")
+  end
 
   defp external_href?(href) do
     String.starts_with?(href, "http://") or String.starts_with?(href, "https://")

@@ -137,6 +137,25 @@ defmodule GamendWeb.HostLayoutNavigationTest do
              ~r{href="/docs"\s+class="menu-active"}
   end
 
+  # `/games` starts with the letters of `/game`; they are different pages, in
+  # different groups, so the sibling rule above cannot settle it.
+  test "a prefix match stops at a path segment" do
+    nav = [
+      %{"label" => "Learn", "items" => [%{"label" => "Word games", "href" => "/games"}]},
+      %{"label" => "News", "items" => [%{"label" => "The Game", "href" => "/game"}]}
+    ]
+
+    games = %{base_assigns(nav) | current_path: "/games"}
+    html = render_component(&HostLayoutNavigation.desktop_nav/1, games)
+    assert html =~ ~r{href="/games"\s+class="menu-active"}
+    refute html =~ ~r{href="/game"\s+class="menu-active"}
+
+    nested = %{games | current_path: "/game/web"}
+    html = render_component(&HostLayoutNavigation.desktop_nav/1, nested)
+    assert html =~ ~r{href="/game"\s+class="menu-active"}
+    refute html =~ ~r{href="/games"\s+class="menu-active"}
+  end
+
   test "mobile hamburger is a <details> toggle (native open/close, focus-independent)" do
     html =
       render_component(
