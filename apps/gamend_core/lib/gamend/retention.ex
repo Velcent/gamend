@@ -65,6 +65,14 @@ defmodule Gamend.Retention do
   The function takes no arguments and answers how many rows it deleted.
   Registering the same name twice replaces the first, so a module can call this
   at every boot without accumulating duplicates.
+
+  A key family in `Gamend.KV` that is history (one row per day, per game…)
+  has its own one-liner, `register_kv_prefix/3`, whose window can be a fixed
+  number or a setting the host declares:
+
+      Gamend.Retention.register_kv_prefix(:daily_results, "daily:", fn ->
+        Gamend.Settings.get(MyGame.Daily, :history_days)
+      end)
   """
 
   use GenServer
@@ -245,6 +253,32 @@ defmodule Gamend.Retention do
   def register_class(class, fun) when is_atom(class) and is_function(fun, 0) do
     Application.put_env(:gamend_core, __MODULE__, put_class(class, fun))
   end
+
+  @doc """
+  Register a `Gamend.KV` key family as history: every entry whose key starts
+  with `prefix` is deleted once it has not been written for `days` days
+  (`Gamend.KV.prune_prefix/2`). The class runs, is isolated and reports
+  exactly like any other.
+
+  `days` is a number, or a function answering one, called at every sweep. A
+  function is how the window becomes a setting an operator can change
+  without a deploy: declare it with `Gamend.Settings.Provider` (which gives
+  it an env var, a config key and a row on the admin Settings page) and read
+  it here. `0` keeps everything, as for core's own classes.
+
+      Gamend.Retention.register_kv_prefix(:daily_results, "daily:", fn ->
+        Gamend.Settings.get(MyGame.Daily, :history_days)
+      end)
+  """
+  @spec register_kv_prefix(atom(), String.t(), non_neg_integer() | (-> non_neg_integer())) :: :ok
+  def register_kv_prefix(class, prefix, days)
+      when is_atom(class) and is_binary(prefix) and prefix != "" and
+             ((is_integer(days) and days >= 0) or is_function(days, 0)) do
+    register_class(class, fn -> Gamend.KV.prune_prefix(prefix, window(days)) end)
+  end
+
+  defp window(days) when is_function(days, 0), do: days.()
+  defp window(days), do: days
 
   @doc "Undoes `register_class/2`."
   @spec unregister_class(atom()) :: :ok

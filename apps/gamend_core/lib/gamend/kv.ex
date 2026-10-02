@@ -606,6 +606,62 @@ defmodule Gamend.KV do
     end
   end
 
+  @doc """
+  Delete every entry whose key starts with `prefix` and that has not been
+  written for `days` days, in batches of `batch` (default 500), and answer
+  how many went. For a key family that is history — one row per day, say —
+  which nothing else ever trims. Hand it to the retention sweep with
+  `Gamend.Retention.register_kv_prefix/3` rather than calling it directly.
+
+  The prefix is matched literally (`%` and `_` in it are not wildcards). An
+  empty prefix or a window of `0` deletes nothing. Each deleted row's
+  cache and its scope's listing are invalidated, as `delete/2` does.
+  """
+  @spec prune_prefix(String.t(), pos_integer(), keyword()) :: non_neg_integer()
+  def prune_prefix(prefix, days, opts \\ [])
+
+  def prune_prefix(prefix, days, opts)
+      when is_binary(prefix) and prefix != "" and is_integer(days) and days > 0 do
+    cutoff = DateTime.add(DateTime.utc_now(), -days * 86_400, :second)
+    pattern = Repo.escape_like(prefix) <> "%"
+    prune_batches(pattern, cutoff, Keyword.get(opts, :batch, 500), 0)
+  end
+
+  def prune_prefix(_prefix, _days, _opts), do: 0
+
+  defp prune_batches(pattern, cutoff, batch, deleted) do
+    rows =
+      Repo.all(
+        from(e in Entry,
+          where: fragment("? LIKE ? ESCAPE '\\'", e.key, ^pattern) and e.updated_at < ^cutoff,
+          select: {e.id, e.key, e.user_id, e.lobby_id},
+          limit: ^batch
+        )
+      )
+
+    case rows do
+      [] ->
+        deleted
+
+      rows ->
+        ids = Enum.map(rows, &elem(&1, 0))
+        {count, _} = Repo.delete_all(from(e in Entry, where: e.id in ^ids))
+
+        for {_id, key, user_id, lobby_id} <- rows do
+          _ = Gamend.Cache.invalidate(cache_key(key, user_id, lobby_id))
+        end
+
+        rows
+        |> Enum.map(fn {_id, _key, user_id, lobby_id} -> {user_id, lobby_id} end)
+        |> Enum.uniq()
+        |> Enum.each(fn {user_id, lobby_id} -> invalidate_entries_cache(user_id, lobby_id) end)
+
+        if length(rows) < batch,
+          do: deleted + count,
+          else: prune_batches(pattern, cutoff, batch, deleted + count)
+    end
+  end
+
   defp broadcast_kv_updated(%Entry{} = entry) do
     broadcast_kv_updated(entry.key, entry.user_id, entry.lobby_id, entry.value, entry.metadata)
   end
