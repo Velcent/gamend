@@ -5,10 +5,10 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.4">
-    <meta name="project" content="gamend_core v1.0.1289">
+    <meta name="project" content="gamend_core v1.0.1290">
 
 
-    <title>Gamend.Repo.SlowLog — gamend_core v1.0.1289</title>
+    <title>Gamend.Repo.SlowLog — gamend_core v1.0.1290</title>
 
     <link rel="stylesheet" href="dist/html-elixir-RXHHCTJW.css" />
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1289
+          v1.0.1290
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr />Repo.<wbr />SlowLog</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1289)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1290)</small>
 
     </h1>
 
@@ -115,8 +115,8 @@ gamend_core
 
     <section id="moduledoc">
 <p>Names what is slow in the database, in the log.</p><ul><li><strong>A slow query</strong>: one that ran, or waited for a pool connection, longer
-than <code class="inline">GAMEND_DATABASE_SLOW_QUERY_MS</code> (default 1000).</li><li><strong>A long transaction</strong>: one that held its connection, from <code class="inline">begin</code> to
-<code class="inline">commit</code> or <code class="inline">rollback</code>, longer than <code class="inline">GAMEND_DATABASE_SLOW_TRANSACTION_MS</code>
+than <code class="inline">GAMEND_DB_SLOW_QUERY_MS</code> (default 1000).</li><li><strong>A long transaction</strong>: one that held its connection, from <code class="inline">begin</code> to
+<code class="inline">commit</code> or <code class="inline">rollback</code>, longer than <code class="inline">GAMEND_DB_SLOW_TRANSACTION_MS</code>
 (default 2000). On SQLite that connection holds the one write lock
 (transactions are <code class="inline">IMMEDIATE</code>), so this is the line that explains a
 &quot;database is locked&quot;: those errors name the process that waited, never
@@ -240,9 +240,9 @@ compares two integers unless something was slow.</p>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1289">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1290">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1289">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1290">Hex Preview</a>
 
             </span>
 
