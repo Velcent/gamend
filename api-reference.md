@@ -1,4 +1,4 @@
-# gamend_core v1.0.1288 - API Reference
+# gamend_core v1.0.1289 - API Reference
 
 ## Modules
 
@@ -361,6 +361,7 @@ aggregated from telemetry events
   - [Gamend.Repo](Gamend.Repo.md)
   - [Gamend.Repo.AdvisoryLock](Gamend.Repo.AdvisoryLock.md): Advisory locking for protecting TOCTOU (Time-of-Check-Time-of-Use) patterns.
   - [Gamend.Repo.MigrationPaths](Gamend.Repo.MigrationPaths.md): Resolves every migration directory that belongs to a gamend deployment.
+  - [Gamend.Repo.SlowLog](Gamend.Repo.SlowLog.md): Names what is slow in the database, in the log.
   - [Gamend.Retention](Gamend.Retention.md): Periodically prunes old rows from unbounded tables.
   - [Gamend.Schedule](Gamend.Schedule.md): Dynamic cron-like job scheduling for hooks.
 

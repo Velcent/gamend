@@ -8,7 +8,7 @@
     <meta name="project" content="gamend_core v1.0.1289">
 
 
-    <title>Gamend.Chat.Moderation.Sync — gamend_core v1.0.1289</title>
+    <title>Gamend.Repo.SlowLog — gamend_core v1.0.1289</title>
 
     <link rel="stylesheet" href="dist/html-elixir-RXHHCTJW.css" />
 
@@ -93,19 +93,19 @@ gamend_core
 <div id="top-content">
   <div class="heading-with-actions top-heading">
     <h1>
-      <span translate="no">Gamend.<wbr />Chat.<wbr />Moderation.<wbr />Sync</span> 
+      <span translate="no">Gamend.<wbr />Repo.<wbr />SlowLog</span> 
       <small class="app-vsn" translate="no">(gamend_core v1.0.1289)</small>
 
     </h1>
 
-<a href="Gamend.Chat.Moderation.Sync.md" title="Copy Markdown (hold Ctrl/Cmd and click it to open as Markdown)" class="copy-markdown icon-action" rel="help">
+<a href="Gamend.Repo.SlowLog.md" title="Copy Markdown (hold Ctrl/Cmd and click it to open as Markdown)" class="copy-markdown icon-action" rel="help">
   <i class="ri-markdown-line" aria-hidden="true"></i>
   <span class="sr-only">Copy Markdown</span>
 </a>
 
 
 
-      <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat/moderation/sync.ex#L1" title="View Source" class="icon-action" rel="help nofollow">
+      <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/repo/slow_log.ex#L1" title="View Source" class="icon-action" rel="help nofollow">
         <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         <span class="sr-only">View Source</span>
       </a>
@@ -114,14 +114,17 @@ gamend_core
 
 
     <section id="moduledoc">
-<p>Keeps the node-local chat-moderation ETS tables in sync with the database and
-the other app instances, and sweeps expired mutes.</p><p>After init it loads the blocklist and active mutes into ETS; afterwards it
-applies changes broadcast by other instances on
-<a href="Gamend.Chat.Moderation.Cache.html#topic/0"><code class="inline">Gamend.Chat.Moderation.Cache.topic/0</code></a>. Events originating on this node are
-skipped — the writer already applied them locally.</p><p>The initial load runs in <code class="inline">handle_continue</code> and retries rather than failing the
-boot: <code class="inline">init/1</code> must not couple application startup to the database being
-reachable (e.g. during a rolling restart on an unmigrated table).</p><p>The mute sweep is hygiene only. <code class="inline">Cache.muted?/3</code> ignores an expired entry as
-it reads it, so a mute never outlives its expiry even if this never runs.</p>
+<p>Names what is slow in the database, in the log.</p><ul><li><strong>A slow query</strong>: one that ran, or waited for a pool connection, longer
+than <code class="inline">GAMEND_DATABASE_SLOW_QUERY_MS</code> (default 1000).</li><li><strong>A long transaction</strong>: one that held its connection, from <code class="inline">begin</code> to
+<code class="inline">commit</code> or <code class="inline">rollback</code>, longer than <code class="inline">GAMEND_DATABASE_SLOW_TRANSACTION_MS</code>
+(default 2000). On SQLite that connection holds the one write lock
+(transactions are <code class="inline">IMMEDIATE</code>), so this is the line that explains a
+&quot;database is locked&quot;: those errors name the process that waited, never
+the one it waited for.</li></ul><p>Each line has the time, the table, the SQL (trimmed) and where in the code
+it came from: the first frames outside Ecto and DBConnection. <code class="inline">0</code> turns
+either off. The settings are read when the handler attaches, at boot
+(<code class="inline">GamendWeb.HostSupervision.init_runtime/1</code>); a change takes a restart.</p><p>The handler runs inside every query, in the caller's process, so it only
+compares two integers unless something was slow.</p>
     </section>
 
 </div>
@@ -140,19 +143,21 @@ it reads it, so a mute never outlives its expiry even if this never runs.</p>
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#child_spec/1" data-no-tooltip="" translate="no">child_spec(init_arg)</a>
+        <a href="#attach/0" data-no-tooltip="" translate="no">attach()</a>
 
       </div>
 
-        <div class="summary-synopsis"><p>Returns a specification to start this module under a supervisor.</p></div>
+        <div class="summary-synopsis"><p>Attach the handler with the current settings (detaching any earlier one).</p></div>
 
     </div>
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#start_link/1" data-no-tooltip="" translate="no">start_link(opts \\ [])</a>
+        <a href="#detach/0" data-no-tooltip="" translate="no">detach()</a>
 
       </div>
+
+        <div class="summary-synopsis"><p>Detach the handler.</p></div>
 
     </div>
 
@@ -170,17 +175,17 @@ it reads it, so a mute never outlives its expiry even if this never runs.</p>
     </h2>
 
     <div class="functions-list">
-<section class="detail" id="child_spec/1">
+<section class="detail" id="attach/0">
 
   <div class="detail-header">
-    <a href="#child_spec/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+    <a href="#attach/0" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
       <i class="ri-link-m" aria-hidden="true"></i>
     </a>
     <div class="heading-with-actions">
-      <h1 class="signature" translate="no">child_spec(init_arg)</h1>
+      <h1 class="signature" translate="no">attach()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat/moderation/sync.ex#L19" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/repo/slow_log.ex#L36" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -189,22 +194,26 @@ it reads it, so a mute never outlives its expiry even if this never runs.</p>
 
   <section class="docstring">
 
-<p>Returns a specification to start this module under a supervisor.</p><p>See <a href="https://elixir.hexdocs.pm/Supervisor.html"><code class="inline">Supervisor</code></a>.</p>
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> attach() :: :ok</pre>
+
+      </div>
+
+<p>Attach the handler with the current settings (detaching any earlier one).</p>
   </section>
 </section>
-<section class="detail" id="start_link/1">
-
-    <span id="start_link/0"></span>
+<section class="detail" id="detach/0">
 
   <div class="detail-header">
-    <a href="#start_link/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+    <a href="#detach/0" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
       <i class="ri-link-m" aria-hidden="true"></i>
     </a>
     <div class="heading-with-actions">
-      <h1 class="signature" translate="no">start_link(opts \\ [])</h1>
+      <h1 class="signature" translate="no">detach()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/chat/moderation/sync.ex#L29" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/repo/slow_log.ex#L60" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -213,7 +222,13 @@ it reads it, so a mute never outlives its expiry even if this never runs.</p>
 
   <section class="docstring">
 
+      <div class="specs">
 
+          <pre translate="no"><span class="attribute">@spec</span> detach() :: :ok</pre>
+
+      </div>
+
+<p>Detach the handler.</p>
   </section>
 </section>
 

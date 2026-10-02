@@ -186,6 +186,7 @@ Gamend.Realtime.md
 Gamend.Release.md
 Gamend.Repo.AdvisoryLock.md
 Gamend.Repo.MigrationPaths.md
+Gamend.Repo.SlowLog.md
 Gamend.Repo.md
 Gamend.Retention.md
 Gamend.Schedule.md
