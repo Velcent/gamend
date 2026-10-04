@@ -399,6 +399,14 @@ defmodule GamendWeb.PresentationPage do
 
   attr :buttons, :list, default: []
 
+  @doc """
+  A row of call-to-action buttons from config.
+
+  Per button: `label`, `href`, optional `icon`, `style` and `external`, plus
+  `badge` (a short tag after the label, translated like the label: "Pro",
+  "Coming soon") and `disabled` (drawn as the button but not a link, for
+  something announced and not yet there; `href` may then be left out).
+  """
   def buttons(assigns) do
     buttons = if is_list(assigns.buttons), do: assigns.buttons, else: []
     assigns = assign(assigns, buttons: Enum.filter(buttons, &valid_button?/1))
@@ -408,21 +416,44 @@ defmodule GamendWeb.PresentationPage do
       :if={@buttons != []}
       class="flex w-full flex-col items-center justify-center gap-3 sm:flex-row sm:flex-wrap"
     >
-      <a
-        :for={button <- @buttons}
-        href={button["href"]}
-        target={if button["external"], do: "_blank"}
-        rel={if button["external"], do: "noopener noreferrer"}
-        class={button_class(button)}
-      >
-        <.dynamic_icon
-          :if={button["icon"]}
-          name={button["icon"]}
-          class="size-5 shrink-0 text-current"
-        />
-        <span class="truncate">{Map.get(button, "label", "")}</span>
-      </a>
+      <%= for button <- @buttons do %>
+        <span
+          :if={button["disabled"] == true}
+          aria-disabled="true"
+          class={[button_class(button), "cursor-default opacity-70 hover:scale-100"]}
+        >
+          <.button_content button={button} />
+        </span>
+        <a
+          :if={button["disabled"] != true}
+          href={button["href"]}
+          target={if button["external"], do: "_blank"}
+          rel={if button["external"], do: "noopener noreferrer"}
+          class={button_class(button)}
+        >
+          <.button_content button={button} />
+        </a>
+      <% end %>
     </div>
+    """
+  end
+
+  attr :button, :map, required: true
+
+  defp button_content(assigns) do
+    ~H"""
+    <.dynamic_icon
+      :if={@button["icon"]}
+      name={@button["icon"]}
+      class="size-5 shrink-0 text-current"
+    />
+    <span class="truncate">{Map.get(@button, "label", "")}</span>
+    <span
+      :if={non_empty_string(@button["badge"])}
+      class={["badge badge-sm shrink-0 whitespace-nowrap", badge_class(@button)]}
+    >
+      {@button["badge"]}
+    </span>
     """
   end
 
@@ -1334,6 +1365,22 @@ defmodule GamendWeb.PresentationPage do
       end
 
     [base, style]
+  end
+
+  # On a coloured button the badge takes the button's content colour, or it
+  # vanishes into the fill.
+  defp badge_class(button) do
+    case Map.get(button, "style", "default") do
+      style when style in ["primary", "secondary", "accent"] ->
+        "border-current/40 bg-current/15 text-current"
+
+      _ ->
+        "badge-primary"
+    end
+  end
+
+  defp valid_button?(%{"disabled" => true, "label" => label}) do
+    is_binary(label) and label != ""
   end
 
   defp valid_button?(%{"href" => href, "label" => label}) do

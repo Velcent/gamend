@@ -113,7 +113,8 @@ defmodule GamendWeb.UserAuth do
 
   Returns `{:ok, socket}` with `current_scope` set, or `{:error, reason}`:
   `:disabled` when device accounts are off, `:not_connected` on the static render
-  (there is no browser to hand the session to yet).
+  (there is no browser to hand the session to yet), `:rate_limited` past the
+  per-IP limit on new accounts (the `auth` bucket, as registering).
   """
   @spec ensure_user(Phoenix.LiveView.Socket.t()) ::
           {:ok, Phoenix.LiveView.Socket.t()} | {:error, term()}
@@ -126,7 +127,8 @@ defmodule GamendWeb.UserAuth do
         {:error, :not_connected}
 
       true ->
-        with {:ok, user} <- Accounts.find_or_create_from_device(web_device_id()) do
+        with :ok <- guest_rate_limit(socket.assigns[:client_ip]),
+             {:ok, user} <- Accounts.find_or_create_from_device(web_device_id()) do
           token = Accounts.generate_user_session_token(user)
 
           {:ok,
@@ -148,7 +150,8 @@ defmodule GamendWeb.UserAuth do
     if Scope.user(conn.assigns[:current_scope]) do
       {:ok, conn}
     else
-      with {:ok, user} <- Accounts.find_or_create_from_device(web_device_id()) do
+      with :ok <- guest_rate_limit(conn.remote_ip |> :inet.ntoa() |> to_string()),
+           {:ok, user} <- Accounts.find_or_create_from_device(web_device_id()) do
         token = Accounts.generate_user_session_token(user)
 
         {:ok,
@@ -191,6 +194,18 @@ defmodule GamendWeb.UserAuth do
   end
 
   def put_anonymous_session(_conn, _encrypted), do: :error
+
+  # A new guest account is a registration, so it counts in the same per-IP
+  # bucket as the LiveView login and register forms (`auth_limit` per
+  # `auth_window_ms`, 10 a minute by default). It runs over the socket, where
+  # the HTTP rate limiter never looks: without this one page's session could
+  # mount and save, and make an account, as fast as a script can send.
+  defp guest_rate_limit(ip) do
+    case GamendWeb.LiveHelpers.check_rate_limit(ip || "unknown", :auth) do
+      :ok -> :ok
+      {:error, _retry_after} -> {:error, :rate_limited}
+    end
+  end
 
   # A browser has no device id to send, so the server makes one up. `web:`
   # marks where the account came from.
@@ -462,6 +477,7 @@ defmodule GamendWeb.UserAuth do
 
         Scope.for_user(user)
       end)
+      |> assign_guest_ip(session)
 
     remember_reader(socket)
 
@@ -475,6 +491,21 @@ defmodule GamendWeb.UserAuth do
       end)
     rescue
       RuntimeError -> socket
+    end
+  end
+
+  # Where `ensure_user/1` counts a signed-out visitor's new accounts. Read at
+  # mount, the only time a LiveView has its session and connect info: the IP
+  # the page was rendered for (`LiveHelpers.client_ip_session/1`, after
+  # `RealIp`), else the socket's peer. Connected only: `ensure_user/1` never
+  # makes an account on the static render.
+  defp assign_guest_ip(socket, session) do
+    if Scope.user(socket.assigns.current_scope) || not Phoenix.LiveView.connected?(socket) do
+      socket
+    else
+      Phoenix.Component.assign_new(socket, :client_ip, fn ->
+        GamendWeb.LiveHelpers.client_ip(socket, session)
+      end)
     end
   end
 
