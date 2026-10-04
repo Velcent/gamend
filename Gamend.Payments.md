@@ -193,6 +193,12 @@ merged into the row's, e.g. `%{"source" => "trial", "granted_by" => id}`).
 @spec has_entitlement?(Ecto.UUID.t(), String.t()) :: boolean()
 ```
 
+Whether the user holds `key` right now: an active row with no end, or an end
+still ahead.
+
+Answered from `entitlement_rows/1`, so a page asking about several keys (a
+paid plan and its trial, on every render) costs one query between changes.
+
 # `list_admin_entitlements`
 
 # `list_admin_products`

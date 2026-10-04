@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.4">
-    <meta name="project" content="gamend_core v1.0.1290">
+    <meta name="project" content="gamend_core v1.0.1291">
 
 
-    <title>Gamend.Accounts.Registration — gamend_core v1.0.1290</title>
+    <title>Gamend.Accounts.Registration — gamend_core v1.0.1291</title>
 
     <link rel="stylesheet" href="dist/html-elixir-RXHHCTJW.css" />
 
-    <script defer src="dist/sidebar_items-3F7E0B5F.js"></script>
+    <script defer src="dist/sidebar_items-2EF847D9.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-MI33G4N7.js"></script>
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1290
+          v1.0.1291
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr />Accounts.<wbr />Registration</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1290)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1291)</small>
 
     </h1>
 
@@ -213,6 +213,19 @@ the email is confirmed (<a href="Gamend.Accounts.html#authenticate_by_password/2
 
     </div>
 
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#upgrade_anonymous_user_and_deliver/4" data-no-tooltip="" translate="no">upgrade_anonymous_user_and_deliver(user, attrs, confirmation_url_fun, notifier \\ Gamend.Accounts.UserNotifier)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Sign-up for a visitor who is already playing on an anonymous account: the
+email goes on THAT account, and the confirmation email is queued exactly as
+for a new one. Same account id, so everything it holds stays; the link in the
+email signs in to it on any device and confirms the address.</p></div>
+
+    </div>
+
 </div>
 
   </section>
@@ -239,7 +252,7 @@ the email is confirmed (<a href="Gamend.Accounts.html#authenticate_by_password/2
       <h1 class="signature" translate="no">change_user_registration(user, attrs \\ %{})</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/registration.ex#L390" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/registration.ex#L435" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -267,7 +280,7 @@ the email is confirmed (<a href="Gamend.Accounts.html#authenticate_by_password/2
       <h1 class="signature" translate="no">change_user_registration_for_validation(user, attrs)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/registration.ex#L409" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/registration.ex#L454" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -303,7 +316,7 @@ a stub for a function carrying two default arguments.</p>
       <h1 class="signature" translate="no">confirm_user(user)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/registration.ex#L323" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/registration.ex#L368" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -333,7 +346,7 @@ a stub for a function carrying two default arguments.</p>
       <h1 class="signature" translate="no">confirm_user_by_token(token)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/registration.ex#L344" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/registration.ex#L389" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -363,7 +376,7 @@ Returns {:error, :not_found} or {:error, :expired} when token is invalid/expired
       <h1 class="signature" translate="no">deliver_user_confirmation_instructions(user, confirmation_url_fun)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/registration.ex#L415" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/registration.ex#L460" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -491,6 +504,44 @@ game client signs up (<code class="inline">POST /api/v1/register</code>). The pa
 the email is confirmed (<a href="Gamend.Accounts.html#authenticate_by_password/2"><code class="inline">Gamend.Accounts.authenticate_by_password/2</code></a>).</p>
   </section>
 </section>
+<section class="detail" id="upgrade_anonymous_user_and_deliver/4">
+
+    <span id="upgrade_anonymous_user_and_deliver/3"></span>
+
+  <div class="detail-header">
+    <a href="#upgrade_anonymous_user_and_deliver/4" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">upgrade_anonymous_user_and_deliver(user, attrs, confirmation_url_fun, notifier \\ Gamend.Accounts.UserNotifier)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/registration.ex#L169" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> upgrade_anonymous_user_and_deliver(
+  <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>(),
+  <a href="Gamend.Types.html#t:user_registration_attrs/0">Gamend.Types.user_registration_attrs</a>(),
+  (<a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>() -&gt; <a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>()),
+  <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">module</a>()
+) :: {:ok, <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()} | {:error, <a href="https://ecto.hexdocs.pm/3.14.2/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>() | <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">term</a>()}</pre>
+
+      </div>
+
+<p>Sign-up for a visitor who is already playing on an anonymous account: the
+email goes on THAT account, and the confirmation email is queued exactly as
+for a new one. Same account id, so everything it holds stays; the link in the
+email signs in to it on any device and confirms the address.</p><p><code class="inline">{:error, :not_anonymous}</code> for an account that already has an identity.</p>
+  </section>
+</section>
 
     </div>
   </section>
@@ -500,9 +551,9 @@ the email is confirmed (<a href="Gamend.Accounts.html#authenticate_by_password/2
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1290">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1291">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1290">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1291">Hex Preview</a>
 
             </span>
 

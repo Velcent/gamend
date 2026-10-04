@@ -121,6 +121,24 @@ email, as `register_user_and_deliver/3` does for the browser form: how a
 game client signs up (`POST /api/v1/register`). The password signs in once
 the email is confirmed (`Gamend.Accounts.authenticate_by_password/2`).
 
+# `upgrade_anonymous_user_and_deliver`
+
+```elixir
+@spec upgrade_anonymous_user_and_deliver(
+  Gamend.Accounts.User.t(),
+  Gamend.Types.user_registration_attrs(),
+  (String.t() -&gt; String.t()),
+  module()
+) :: {:ok, Gamend.Accounts.User.t()} | {:error, Ecto.Changeset.t() | term()}
+```
+
+Sign-up for a visitor who is already playing on an anonymous account: the
+email goes on THAT account, and the confirmation email is queued exactly as
+for a new one. Same account id, so everything it holds stays; the link in the
+email signs in to it on any device and confirms the address.
+
+`{:error, :not_anonymous}` for an account that already has an identity.
+
 ---
 
 *Consult [api-reference.md](api-reference.md) for complete listing*

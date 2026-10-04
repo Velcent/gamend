@@ -607,6 +607,8 @@ Returns a tuple with the updated user, as well as a list of expired tokens.
 
 # `update_username`
 
+# `upgrade_anonymous_user_and_deliver`
+
 # `user_activated?`
 
 ```elixir

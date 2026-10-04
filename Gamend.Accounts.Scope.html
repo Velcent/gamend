@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.4">
-    <meta name="project" content="gamend_core v1.0.1290">
+    <meta name="project" content="gamend_core v1.0.1291">
 
 
-    <title>Gamend.Accounts.Scope — gamend_core v1.0.1290</title>
+    <title>Gamend.Accounts.Scope — gamend_core v1.0.1291</title>
 
     <link rel="stylesheet" href="dist/html-elixir-RXHHCTJW.css" />
 
-    <script defer src="dist/sidebar_items-3F7E0B5F.js"></script>
+    <script defer src="dist/sidebar_items-2EF847D9.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-MI33G4N7.js"></script>
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1290
+          v1.0.1291
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr />Accounts.<wbr />Scope</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1290)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1291)</small>
 
     </h1>
 
@@ -118,8 +118,11 @@ gamend_core
 snapshot: a scope can outlive the request that built it (a socket stays open
 for hours), so the user is always resolved fresh via <a href="#user/1"><code class="inline">user/1</code></a>, which reads
 through <a href="Gamend.Accounts.html#get_user/1"><code class="inline">Gamend.Accounts.get_user/1</code></a>'s cache. This keeps mutable state
-(lobby_id, online, is_admin) current instead of frozen at connect time.</p><p>A <code class="inline">%Scope{}</code> always represents an authenticated caller — <a href="#for_user/1"><code class="inline">for_user/1</code></a> returns
-<code class="inline">nil</code> for an anonymous one — so a <code class="inline">%Scope{}</code> match implies a present user_id.</p><p><code class="inline">authenticated_at</code> is a session fact (from the session token, virtual on
+(lobby_id, online, is_admin) current instead of frozen at connect time.</p><p>A <code class="inline">%Scope{}</code> always represents a signed-in caller — <a href="#for_user/1"><code class="inline">for_user/1</code></a> returns
+<code class="inline">nil</code> for a signed-out one — so a <code class="inline">%Scope{}</code> match implies a present user_id.
+That caller may still be an anonymous account (a device id and nothing else,
+<code class="inline">User.anonymous?/1</code>): a game client's, or the one the website gives a visitor
+(<code class="inline">GamendWeb.UserAuth.ensure_user/1</code>). <a href="#anonymous?/1"><code class="inline">anonymous?/1</code></a> tells them apart.</p><p><code class="inline">authenticated_at</code> is a session fact (from the session token, virtual on
 <code class="inline">User</code>) that cannot be re-derived from the DB row, so it is carried on the
 scope and merged back onto the freshly-resolved user by <a href="#user/1"><code class="inline">user/1</code></a> — this is
 what <code class="inline">sudo_mode?</code> checks.</p>
@@ -141,11 +144,22 @@ what <code class="inline">sudo_mode?</code> checks.</p>
 
     <div class="summary-row">
       <div class="summary-signature">
+        <a href="#anonymous?/1" data-no-tooltip="" translate="no">anonymous?(scope)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>True when the caller is signed in with an anonymous account: no email and no
+sign-in provider, only a device id. False for a signed-out (nil) scope.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
         <a href="#for_user/1" data-no-tooltip="" translate="no">for_user(user)</a>
 
       </div>
 
-        <div class="summary-synopsis"><p>Creates a scope for the given user, or nil when anonymous.</p></div>
+        <div class="summary-synopsis"><p>Creates a scope for the given user, or nil when signed out.</p></div>
 
     </div>
 
@@ -184,6 +198,29 @@ what <code class="inline">sudo_mode?</code> checks.</p>
     </h2>
 
     <div class="functions-list">
+<section class="detail" id="anonymous?/1">
+
+  <div class="detail-header">
+    <a href="#anonymous?/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">anonymous?(scope)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/scope.ex#L54" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+<p>True when the caller is signed in with an anonymous account: no email and no
+sign-in provider, only a device id. False for a signed-out (nil) scope.</p>
+  </section>
+</section>
 <section class="detail" id="for_user/1">
 
   <div class="detail-header">
@@ -194,7 +231,7 @@ what <code class="inline">sudo_mode?</code> checks.</p>
       <h1 class="signature" translate="no">for_user(user)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/scope.ex#L25" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/scope.ex#L28" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -203,7 +240,7 @@ what <code class="inline">sudo_mode?</code> checks.</p>
 
   <section class="docstring">
 
-<p>Creates a scope for the given user, or nil when anonymous.</p>
+<p>Creates a scope for the given user, or nil when signed out.</p>
   </section>
 </section>
 <section class="detail" id="user/1">
@@ -216,7 +253,7 @@ what <code class="inline">sudo_mode?</code> checks.</p>
       <h1 class="signature" translate="no">user(arg1)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/scope.ex#L38" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/scope.ex#L41" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -239,7 +276,7 @@ what <code class="inline">sudo_mode?</code> checks.</p>
       <h1 class="signature" translate="no">user_id(arg1)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/scope.ex#L31" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/scope.ex#L34" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -260,9 +297,9 @@ what <code class="inline">sudo_mode?</code> checks.</p>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1290">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1291">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1290">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1291">Hex Preview</a>
 
             </span>
 

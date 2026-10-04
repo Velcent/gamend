@@ -554,6 +554,28 @@ Subscribe to global quest events (definition changes, completions).
 
 Updates a quest definition.
 
+# `user_quest_page`
+
+```elixir
+@spec user_quest_page(user_id(), keyword()) :: %{
+  entries: [
+    %{
+      quest: Gamend.Quests.Quest.t(),
+      progress: Gamend.Quests.QuestProgress.t() | nil,
+      claimable: boolean()
+    }
+  ],
+  total: non_neg_integer(),
+  categories: [String.t()]
+}
+```
+
+What a quest page draws, from one read of the user's progress: `:entries`,
+the page `list_user_quests/2` returns for these `opts`; `:total`, what
+`count_user_quests/2` counts for them; `:categories`, what
+`visible_categories/1` lists (the tabs, so every filter but none). The three
+separately read the same rows three times.
+
 # `visible_categories`
 
 ```elixir

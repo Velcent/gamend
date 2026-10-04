@@ -58,7 +58,7 @@ Current balance of one currency (0 when the user has no wallet for it).
 @spec balances(user_id()) :: %{required(currency()) =&gt; non_neg_integer()}
 ```
 
-All non-zero balances for a user, as a `%{currency => balance}` map.
+All of a user's balances, as a `%{currency => balance}` map.
 
 # `grant`
 

@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.4">
-    <meta name="project" content="gamend_core v1.0.1290">
+    <meta name="project" content="gamend_core v1.0.1291">
 
 
-    <title>Gamend.Economy — gamend_core v1.0.1290</title>
+    <title>Gamend.Economy — gamend_core v1.0.1291</title>
 
     <link rel="stylesheet" href="dist/html-elixir-RXHHCTJW.css" />
 
-    <script defer src="dist/sidebar_items-3F7E0B5F.js"></script>
+    <script defer src="dist/sidebar_items-2EF847D9.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-MI33G4N7.js"></script>
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1290
+          v1.0.1291
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr />Economy</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1290)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1291)</small>
 
     </h1>
 
@@ -182,7 +182,7 @@ never as a raw client &quot;add currency&quot; endpoint. Clients only read their
 
       </div>
 
-        <div class="summary-synopsis"><p>All non-zero balances for a user, as a <code class="inline">%{currency =&gt; balance}</code> map.</p></div>
+        <div class="summary-synopsis"><p>All of a user's balances, as a <code class="inline">%{currency =&gt; balance}</code> map.</p></div>
 
     </div>
 
@@ -319,7 +319,7 @@ never as a raw client &quot;add currency&quot; endpoint. Clients only read their
       <h1 class="signature" translate="no">balance(user_id, currency)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/economy.ex#L48" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/economy.ex#L58" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -347,7 +347,7 @@ never as a raw client &quot;add currency&quot; endpoint. Clients only read their
       <h1 class="signature" translate="no">balances(user_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/economy.ex#L58" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/economy.ex#L64" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -362,7 +362,7 @@ never as a raw client &quot;add currency&quot; endpoint. Clients only read their
 
       </div>
 
-<p>All non-zero balances for a user, as a <code class="inline">%{currency =&gt; balance}</code> map.</p>
+<p>All of a user's balances, as a <code class="inline">%{currency =&gt; balance}</code> map.</p>
   </section>
 </section>
 <section class="detail" id="grant/4">
@@ -377,7 +377,7 @@ never as a raw client &quot;add currency&quot; endpoint. Clients only read their
       <h1 class="signature" translate="no">grant(user_id, currency, amount, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/economy.ex#L74" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/economy.ex#L92" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -409,7 +409,7 @@ Returns <code class="inline">{:ok, new_balance}</code>.</p>
       <h1 class="signature" translate="no">spend(user_id, currency, amount, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/economy.ex#L95" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/economy.ex#L113" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -439,7 +439,7 @@ is never left negative.</p>
       <h1 class="signature" translate="no">subscribe(user_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/economy.ex#L157" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/economy.ex#L178" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -467,7 +467,7 @@ is never left negative.</p>
       <h1 class="signature" translate="no">unsubscribe(user_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/economy.ex#L161" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/economy.ex#L182" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -494,9 +494,9 @@ is never left negative.</p>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1290">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1291">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1290">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1291">Hex Preview</a>
 
             </span>
 
