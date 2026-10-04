@@ -314,7 +314,7 @@ defmodule GamendWeb.DocsLive do
     <Layouts.app flash={@flash} current_scope={@current_scope} current_path={@current_path}>
       <div class="space-y-6">
         <.header>
-          <h1 class="text-3xl font-bold">{@title}</h1>
+          {@title}
           <:subtitle :if={@subtitle}>{@subtitle}</:subtitle>
         </.header>
 
@@ -423,7 +423,7 @@ defmodule GamendWeb.DocsLive do
     <Layouts.app flash={@flash} current_scope={@current_scope} current_path={@current_path} wide>
       <.sidebar_frame tree={@tree} item_path={@item_path} index_path={@index_path} title={@title}>
         <.header>
-          <h1 class="text-3xl font-bold">{@title}</h1>
+          {@title}
           <:subtitle :if={@subtitle}>{@subtitle}</:subtitle>
         </.header>
 
@@ -468,14 +468,12 @@ defmodule GamendWeb.DocsLive do
           title={@title}
         />
 
-        <.header>
-          <h1 class="flex items-center gap-3 text-3xl font-bold">
-            <.icon
-              name={@category_page.icon}
-              class={"size-8 shrink-0 opacity-80 #{@category_page.color}"}
-            />
-            {@category_page.title}
-          </h1>
+        <.header class="flex items-center gap-3">
+          <.icon
+            name={@category_page.icon}
+            class={"size-8 shrink-0 opacity-80 #{@category_page.color}"}
+          />
+          {@category_page.title}
           <:subtitle :if={@category_page.description}>{@category_page.description}</:subtitle>
         </.header>
 
@@ -528,7 +526,7 @@ defmodule GamendWeb.DocsLive do
         />
 
         <.header>
-          <h1 class="text-3xl font-bold lg:text-4xl">{@guide.title}</h1>
+          {@guide.title}
           <:subtitle :if={@guide[:description]}>{@guide.description}</:subtitle>
         </.header>
 

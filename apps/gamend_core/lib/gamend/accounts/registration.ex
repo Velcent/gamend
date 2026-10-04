@@ -152,6 +152,51 @@ defmodule Gamend.Accounts.Registration do
     register_and_deliver(attrs, &User.registration_changeset/3, confirmation_url_fun, notifier)
   end
 
+  @doc """
+  Sign-up for a visitor who is already playing on an anonymous account: the
+  email goes on THAT account, and the confirmation email is queued exactly as
+  for a new one. Same account id, so everything it holds stays; the link in the
+  email signs in to it on any device and confirms the address.
+
+  `{:error, :not_anonymous}` for an account that already has an identity.
+  """
+  @spec upgrade_anonymous_user_and_deliver(
+          User.t(),
+          Types.user_registration_attrs(),
+          (String.t() -> String.t()),
+          module()
+        ) :: {:ok, User.t()} | {:error, Ecto.Changeset.t() | term()}
+  def upgrade_anonymous_user_and_deliver(
+        %User{} = user,
+        attrs,
+        confirmation_url_fun,
+        notifier \\ Gamend.Accounts.UserNotifier
+      )
+      when is_function(confirmation_url_fun, 1) do
+    if User.anonymous?(user) do
+      attrs = Map.new(attrs, fn {k, v} -> {to_string(k), v} end)
+
+      Repo.transaction(fn ->
+        with {:ok, %User{} = updated} <- user |> User.email_changeset(attrs) |> Repo.update(),
+             :ok <- queue_confirmation(updated, false, confirmation_url_fun, notifier) do
+          updated
+        else
+          {:error, reason} -> Repo.rollback(reason)
+        end
+      end)
+      |> case do
+        {:ok, updated} ->
+          Accounts.invalidate_user_cache(updated)
+          {:ok, updated}
+
+        other ->
+          other
+      end
+    else
+      {:error, :not_anonymous}
+    end
+  end
+
   defp register_and_deliver(attrs, base_changeset, confirmation_url_fun, notifier) do
     # Normalize keys to strings to match form submissions
     attrs = Map.new(attrs, fn {k, v} -> {to_string(k), v} end)

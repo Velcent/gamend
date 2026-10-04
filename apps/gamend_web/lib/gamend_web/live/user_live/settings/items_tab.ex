@@ -19,7 +19,6 @@ defmodule GamendWeb.UserLive.Settings.ItemsTab do
     |> assign(:items_page_size, @page_size)
     |> assign(:items_count, 0)
     |> assign(:items_total_pages, 0)
-    |> reload_items()
   end
 
   def tab(assigns) do

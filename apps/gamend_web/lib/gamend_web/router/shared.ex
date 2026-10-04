@@ -1041,6 +1041,9 @@ defmodule GamendWeb.Router.Shared do
 
         post "/users/log_in", UserSessionController, :create
         delete "/users/log_out", UserSessionController, :delete
+        # The anonymous account a page made (`UserAuth.ensure_user/1`), written
+        # into the session by `app.js`; a LiveView cannot write the cookie.
+        post "/users/anonymous_session", AnonymousSessionController, :create
       end
     end
   end

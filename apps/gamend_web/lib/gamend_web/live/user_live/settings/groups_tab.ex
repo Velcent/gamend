@@ -45,7 +45,6 @@ defmodule GamendWeb.UserLive.Settings.GroupsTab do
     |> assign(:group_editing, false)
     |> assign(:group_edit_form, nil)
     |> assign(:group_join_requests, [])
-    |> reload_groups()
   end
 
   def tab(assigns) do

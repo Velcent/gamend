@@ -106,6 +106,8 @@ custom classes must fully style the input
 
 This application uses both session-based authentication (for browser flows) and JWT authentication (for API flows).
 
+**Where identity travels, and nowhere else.** The website's identity is the session cookie (`UserAuth`, the remember-me cookie); the SDK's is the JWT flow it already uses. A URL carries a path and settings, never an auth token, a signed or encrypted user id, or anything else that says who the caller is: URLs end up in logs, history, `Referer` headers and copied links. A request that needs the caller reads the cookie or the token. When the identity changes mid-page (a guest account made by `UserAuth.ensure_user/1`), the cookie is written by a POST and the socket reconnects; a page that fetched something before then fetches it again on `reconnected()`, it does not carry the identity some other way.
+
 ### Browser Authentication
 
 - **Always** handle authentication flow at the router level with proper redirects
@@ -244,6 +246,11 @@ Web-side features with no context: the site search palette (`GamendWeb.SearchInd
 - App cache is `Gamend.Cache` (Nebulex 3, multilevel: local L1 + optional Redis/partitioned L2). **Nebulex 3 returns `{:ok, value}` tuples** — use `Gamend.Cache.get!/1` (raw value, `nil` on miss), `fetch/1` or `cached/3`, never bare `get/1` compared against raw values.
 - Read caching uses **version keys**: cache keys embed a `*_cache_version(...)` counter read via `get!(...) || 1`; invalidate with `Gamend.Cache.bump_version/1`, which also bumps the counter on other nodes. Data entries must carry a TTL, normally `Gamend.Cache.ttl/0` (`GAMEND_CACHE_TTL_MS`, default 60s) — that TTL is the cross-instance staleness bound.
 - When a stale read would be *incorrect* (not merely briefly outdated) — cached users gating auth, sessions, tokens, KV values — invalidate with `Gamend.Cache.invalidate/1` (delete + PubSub broadcast; `Gamend.Cache.Sync` evicts the key from other instances' L1) instead of `delete/1`.
+- Per-user reads a page repeats are cached whole, filled by one query and evicted at the write's single choke point: `Economy.balances/1` (every currency; `change_balance/4` evicts), `Payments` entitlement rows (`{key, status, expires_at}`, active-ness decided against the clock at read time; `after_entitlement_changed/1` evicts), and a KV key with no row (`get/2`, guarded by the scope's entries version). All three skip the cache inside a transaction, both reading and writing: a read there can see a write a rollback undoes. A writer evicts its own node's copy synchronously, so it reads back what it wrote. A new read of this kind follows the same three rules. `Gamend.UserReadCacheTest` runs them on a real cache. The session-token lookup is deliberately not cached: tokens are deleted from too many places for an eviction to be trusted with a revocation.
+
+### Moving between LiveView pages
+
+- A page that ever needs a socket is a LiveView and has it from its first load; a page that never does is a controller page. A plain `<a href>` from a connected LiveView page to another LiveView of the same `live_session` (and the same locale prefix) moves over the open socket: `live_nav.js` reads `GamendWeb.LiveNav`'s route table and marks the link at click time. Nothing to do in a template; `data-no-live-nav` opts a link out, and `<.link navigate>` still works. Because pages now swap without a reload, a hook must remove in `destroyed/0` every window/document listener, interval and observer it adds, and a starter that binds to page content must run again on `phx:page-loading-stop`.
 
 ### Locks
 

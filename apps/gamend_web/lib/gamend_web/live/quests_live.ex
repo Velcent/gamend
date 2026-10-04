@@ -193,19 +193,22 @@ defmodule GamendWeb.QuestsLive do
     {selected, drop} = group_opts(socket.assigns.group_key, selectable)
     group_opts = [group: selected, drop_groups: drop]
 
-    {entries, total_count, claimable} =
+    # One read of the user's progress for the page, its count and the
+    # category tabs (`Quests.user_quest_page/2`); it was three.
+    {entries, total_count, claimable, categories} =
       if user do
         opts =
           [page: page, page_size: page_size, category: category, status: status] ++ group_opts
 
-        {Quests.list_user_quests(user.id, opts),
-         Quests.count_user_quests(user.id, [category: category, status: status] ++ group_opts),
-         Quests.claimable_count(user.id)}
+        %{entries: entries, total: total, categories: categories} =
+          Quests.user_quest_page(user.id, opts)
+
+        {entries, total, Quests.claimable_count(user.id), categories}
       else
         {catalog_entries, total} =
           anonymous_catalog(active, category, selected, drop, page, page_size)
 
-        {catalog_entries, total, 0}
+        {catalog_entries, total, 0, Quests.visible_categories(nil)}
       end
 
     entries = entries |> ContentText.translate() |> lock_labels(user)
@@ -213,7 +216,7 @@ defmodule GamendWeb.QuestsLive do
     socket
     |> assign(:groups, selectable)
     |> assign(:selected_group, selected)
-    |> assign(:categories, [nil | Quests.visible_categories(user && user.id)])
+    |> assign(:categories, [nil | categories])
     # Titles and descriptions are stored in the source language; translate on
     # the way to the page. Admin pages deliberately show the stored string.
     |> assign(:entries, entries)
@@ -320,26 +323,68 @@ defmodule GamendWeb.QuestsLive do
   # cannot tell a malformed cycle from a genuinely long chain: at 20 hops the
   # 52-unit course reported every unit as "1 of 21", silently, because the walk
   # bottomed out rather than reaching the end.
+  #
+  # Each line is walked once (`chain_index/1`). Walking it from every quest,
+  # and twice for the root, was quadratic in the line's length: a 107-unit
+  # course chain made ~12,000 walk steps and 20 ms of every render.
   defp chain_positions(quests) do
     prereq_by_key = Map.new(quests, &{&1.key, &1.prerequisite_quest_key})
+    index = chain_index(prereq_by_key)
 
-    depths =
+    walks =
       Map.new(prereq_by_key, fn {key, _} ->
-        {key, chain_depth(key, prereq_by_key, %{})}
+        {key,
+         Map.get_lazy(index, key, fn ->
+           {chain_depth(key, prereq_by_key, %{}), chain_root(key, prereq_by_key, %{})}
+         end)}
       end)
 
     totals =
-      Enum.reduce(depths, %{}, fn {key, depth}, acc ->
-        root = chain_root(key, prereq_by_key, %{})
+      Enum.reduce(walks, %{}, fn {_key, {depth, root}}, acc ->
         Map.update(acc, root, depth + 1, &max(&1, depth + 1))
       end)
 
-    depths
-    |> Enum.map(fn {key, depth} ->
-      {key, {depth + 1, Map.get(totals, chain_root(key, prereq_by_key, %{}), depth + 1)}}
+    walks
+    |> Enum.map(fn {key, {depth, root}} ->
+      {key, {depth + 1, Map.get(totals, root, depth + 1)}}
     end)
     |> Enum.filter(fn {_key, {_pos, total}} -> total > 1 end)
     |> Map.new()
+  end
+
+  # `{depth, root}` for every key whose line is free of cycles, memoised as it
+  # goes, so each quest costs one step past the first walk through its line. A
+  # walk that closes a cycle is not kept: its answer depends on where it
+  # entered, so those keys fall back to `chain_depth/3` and `chain_root/3`,
+  # which give the same answer they always did.
+  defp chain_index(prereq_by_key) do
+    Enum.reduce(prereq_by_key, %{}, fn {key, _}, memo ->
+      {_walk, _clean?, memo} = chain_walk(key, prereq_by_key, memo, %{})
+      memo
+    end)
+  end
+
+  defp chain_walk(key, prereq_by_key, memo, seen) do
+    cond do
+      Map.has_key?(memo, key) ->
+        {Map.fetch!(memo, key), true, memo}
+
+      Map.has_key?(seen, key) ->
+        {{0, key}, false, memo}
+
+      true ->
+        case Map.get(prereq_by_key, key) do
+          nil ->
+            {{0, key}, true, Map.put(memo, key, {0, key})}
+
+          prereq ->
+            {{depth, root}, clean?, memo} =
+              chain_walk(prereq, prereq_by_key, memo, Map.put(seen, key, true))
+
+            walk = {depth + 1, root}
+            {walk, clean?, if(clean?, do: Map.put(memo, key, walk), else: memo)}
+        end
+    end
   end
 
   # `seen` is a plain map, not a MapSet: dialyzer strips the opacity off a
@@ -474,6 +519,11 @@ defmodule GamendWeb.QuestsLive do
   defp status_label("claimable"), do: gettext("Claimable")
   defp status_label("done"), do: gettext("Completed")
 
+  defp status_icon(nil), do: "hero-squares-2x2"
+  defp status_icon("in_progress"), do: "hero-clock"
+  defp status_icon("claimable"), do: "hero-gift"
+  defp status_icon("done"), do: "hero-check-circle"
+
   # Whichever comes first: the window closing, or the next reset — tagged, so
   # the card says "Resets in" when the reset is what it is counting down to.
   # It used to say "Ends in" whenever the quest had a window at all.
@@ -562,6 +612,7 @@ defmodule GamendWeb.QuestsLive do
                   if(@status == status, do: "btn-primary", else: "btn-surface")
                 ]}
               >
+                <.icon name={status_icon(status)} class="size-4" />
                 {status_label(status)}
                 <span :if={status == "claimable" and @claimable_count > 0} class="badge badge-sm">
                   {@claimable_count}

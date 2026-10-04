@@ -180,8 +180,20 @@ defmodule GamendWeb.HostLayouts do
     end
   end
 
+  # The common "overlay" is no overlay at all: `OnMount.Theme` assigns the
+  # resolved theme itself, and LiveView hands that assign back to the root
+  # layout and to `prepare_app_assigns/1`, which used to rebuild it — every
+  # string of the config translated again, ~400 gettext calls per LiveView
+  # page. The pinned match is cheap when it holds: both sides are the same
+  # `:persistent_term` literal, and term comparison checks identity first.
   def resolve_theme(locale, assigned_theme) do
-    build_theme(fetch_theme(locale), host_theme_settings(), assigned_theme, locale)
+    case resolve_theme(locale, %{}) do
+      ^assigned_theme = theme ->
+        theme
+
+      _ ->
+        build_theme(fetch_theme(locale), host_theme_settings(), assigned_theme, locale)
+    end
   end
 
   # `translate_theme/2` falls back to the process locale when it is not handed

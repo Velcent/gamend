@@ -21,7 +21,6 @@ defmodule GamendWeb.UserLive.Settings.ApiTokensTab do
     |> assign(:api_tokens_page, 1)
     |> assign(:api_token_created, nil)
     |> assign(:api_token_form, blank_form())
-    |> reload_api_tokens()
   end
 
   def tab(assigns) do

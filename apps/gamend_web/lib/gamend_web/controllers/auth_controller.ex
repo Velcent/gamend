@@ -267,11 +267,28 @@ defmodule GamendWeb.AuthController do
     |> redirect(to: ~p"/users/log_in")
   end
 
+  defp sign_in_guest_to_existing(conn, existing, config) do
+    if Accounts.user_activated?(existing) do
+      conn
+      |> put_flash(:info, gettext("Success."))
+      |> UserAuth.log_in_user(existing)
+    else
+      require Logger
+      Logger.warning("#{config.label} already linked to another user id=#{existing.id}")
+
+      conn
+      |> put_flash(:error, gettext("Failed"))
+      |> redirect(to: ~p"/users/settings")
+    end
+  end
+
   defp handle_browser_oauth_callback(conn, provider, user_params) do
     config = OAuthExchange.provider!(provider)
 
     case Scope.user(conn.assigns[:current_scope]) do
       %User{} = current_user ->
+        guest? = User.anonymous?(current_user)
+
         case Accounts.link_account(
                current_user,
                user_params,
@@ -282,6 +299,12 @@ defmodule GamendWeb.AuthController do
             conn
             |> put_flash(:info, gettext("Success."))
             |> redirect(to: ~p"/users/settings")
+
+          # A guest (anonymous account) whose provider identity already has an
+          # account is signing in to it, not linking: that account stays as it
+          # is and `log_in_user/3` deletes the guest one.
+          {:error, {:conflict, other_user}} when guest? ->
+            sign_in_guest_to_existing(conn, other_user, config)
 
           {:error, {:conflict, other_user}} ->
             require Logger

@@ -127,7 +127,8 @@ defmodule GamendWeb.HostLayoutNavigation do
   def user_menu(assigns) do
     assigns =
       assign(assigns,
-        custom_link_active?: any_entry_active?(assigns.account_links, assigns.current_path)
+        custom_link_active?: any_entry_active?(assigns.account_links, assigns.current_path),
+        anonymous?: Scope.anonymous?(assigns.current_scope)
       )
 
     ~H"""
@@ -165,6 +166,9 @@ defmodule GamendWeb.HostLayoutNavigation do
               class="max-w-full font-semibold"
             />
             <.user_title user={Scope.user(@current_scope)} />
+            <span :if={@anonymous?} class="text-xs font-normal text-base-content/60">
+              {GamendWeb.HostLayouts.translate("Guest")}
+            </span>
           </span>
         </li>
         <li>
@@ -206,12 +210,30 @@ defmodule GamendWeb.HostLayoutNavigation do
             {GamendWeb.HostLayouts.translate("Chat")}
           </.link>
         </li>
-        <li class="border-t border-base-300 mt-1 pt-1">
-          <.link href={~p"/users/log_out"} method="delete">
-            <.icon name="hero-arrow-left-on-rectangle-solid" class="w-4 h-4" />
-            {GamendWeb.HostLayouts.translate("Log out")}
-          </.link>
-        </li>
+        <%!-- A guest account has no way back in once its session is gone, so
+              it is never offered Log out: Register keeps everything on it,
+              Log in moves it onto an account they already have. --%>
+        <%= if @anonymous? do %>
+          <li class="border-t border-base-300 mt-1 pt-1">
+            <.link href={lp(~p"/users/register")}>
+              <.icon name="hero-user-plus-solid" class="w-4 h-4" />
+              {GamendWeb.HostLayouts.translate("Register")}
+            </.link>
+          </li>
+          <li>
+            <.link href={lp(~p"/users/log_in")}>
+              <.icon name="hero-arrow-right-on-rectangle-solid" class="w-4 h-4" />
+              {GamendWeb.HostLayouts.translate("Log in")}
+            </.link>
+          </li>
+        <% else %>
+          <li class="border-t border-base-300 mt-1 pt-1">
+            <.link href={~p"/users/log_out"} method="delete">
+              <.icon name="hero-arrow-left-on-rectangle-solid" class="w-4 h-4" />
+              {GamendWeb.HostLayouts.translate("Log out")}
+            </.link>
+          </li>
+        <% end %>
       </ul>
     </details>
     """
@@ -494,9 +516,14 @@ defmodule GamendWeb.HostLayoutNavigation do
   defp locale_option(assigns) do
     ~H"""
     <li class="min-w-0 list-none">
+      <%!-- `data-no-live-nav`: a language switch is the HTTP request that
+            `LocalePath` reads (`?setlang=`, a new prefix). Moved over the
+            socket, `/x?setlang=en` from an unprefixed page in another
+            language would mount in the language being left. --%>
       <a
         href={@link.href}
         rel={@link[:rel]}
+        data-no-live-nav
         aria-current={if(@link.locale == @locale, do: "true")}
         class={[
           "flex min-w-0 items-center gap-2 rounded px-2 py-2 text-sm transition-colors",
@@ -609,7 +636,8 @@ defmodule GamendWeb.HostLayoutNavigation do
         account_path_active?(assigns.current_path, "/chat") or
         any_entry_active?(assigns.account_links, assigns.current_path)
 
-    assigns = assign(assigns, active?: active?)
+    assigns =
+      assign(assigns, active?: active?, anonymous?: Scope.anonymous?(assigns.current_scope))
 
     ~H"""
     <li class="w-full">
@@ -669,12 +697,27 @@ defmodule GamendWeb.HostLayoutNavigation do
             current_path={@current_path}
             inactive_class="btn-ghost"
           />
-          <li class="border-t border-base-300 mt-1 pt-1 w-full">
-            <.link href={~p"/users/log_out"} method="delete" class="btn btn-ghost w-full">
-              <.icon name="hero-arrow-left-on-rectangle-solid" class="w-4 h-4" />
-              {GamendWeb.HostLayouts.translate("Log out")}
-            </.link>
-          </li>
+          <%= if @anonymous? do %>
+            <li class="border-t border-base-300 mt-1 pt-1 w-full">
+              <a href={lp(~p"/users/register")} class="btn btn-ghost w-full">
+                <.icon name="hero-user-plus-solid" class="w-4 h-4" />
+                {GamendWeb.HostLayouts.translate("Register")}
+              </a>
+            </li>
+            <li class="w-full">
+              <a href={lp(~p"/users/log_in")} class="btn btn-ghost w-full">
+                <.icon name="hero-arrow-right-on-rectangle-solid" class="w-4 h-4" />
+                {GamendWeb.HostLayouts.translate("Log in")}
+              </a>
+            </li>
+          <% else %>
+            <li class="border-t border-base-300 mt-1 pt-1 w-full">
+              <.link href={~p"/users/log_out"} method="delete" class="btn btn-ghost w-full">
+                <.icon name="hero-arrow-left-on-rectangle-solid" class="w-4 h-4" />
+                {GamendWeb.HostLayouts.translate("Log out")}
+              </.link>
+            </li>
+          <% end %>
         </ul>
       </details>
     </li>

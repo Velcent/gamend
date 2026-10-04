@@ -94,6 +94,17 @@ defmodule GamendWeb.LocaleSwitchTest do
       refute html =~ ~s(setlang=de)
     end
 
+    test "a language switch is a page load, never a move over the socket", %{conn: conn} do
+      # `live_nav.js` moves a plain link to a LiveView page over the open
+      # socket, where `LocalePath` never runs: `/x?setlang=en` from an
+      # unprefixed page in another language would mount in that language.
+      html = conn |> get("/es/privacy") |> html_response(200)
+      links = Regex.scan(~r/<a\b[^>]*setlang=[^>]*>|<a\b[^>]*href="\/de\/privacy"[^>]*>/, html)
+
+      assert length(links) >= 2
+      assert Enum.all?(links, fn [a] -> a =~ "data-no-live-nav" end)
+    end
+
     test "unprefixed pages canonicalize to themselves without alternates", %{conn: conn} do
       html = conn |> get("/leaderboards") |> html_response(200)
 

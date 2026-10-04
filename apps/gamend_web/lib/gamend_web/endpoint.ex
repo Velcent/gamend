@@ -50,6 +50,8 @@ defmodule GamendWeb.Endpoint do
   plug GamendWeb.Plugs.IndexNowKey
   plug GamendWeb.Plugs.SecurityHeaders
   plug GamendWeb.Plugs.WellKnown
+  # The LiveView route table `live_nav.js` reads (`GamendWeb.LiveNav`).
+  plug GamendWeb.Plugs.LiveNavTable
   plug GamendWeb.Plugs.GameHeaders
   # First of the static plugs: a project's own files (`GamendWeb.ProjectStatic`)
   # replace the engine's under the same name.

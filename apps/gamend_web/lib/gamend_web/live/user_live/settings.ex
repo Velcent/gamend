@@ -167,16 +167,18 @@ defmodule GamendWeb.UserLive.Settings do
       |> assign(:user, user)
       |> assign(:conflict_user, conflict_user)
       |> assign(:conflict_provider, conflict_provider)
+      # Empty defaults only: a tab's data is read when it is opened
+      # (`load_tab/2`, from `handle_params/3`). Reading all ten on every
+      # mount was ~30 queries a render for the one tab on screen.
       |> AccountTab.assign_defaults(user)
       |> NotificationsTab.assign_defaults()
-      |> FriendsTab.assign_defaults(user)
+      |> FriendsTab.assign_defaults()
       |> DataTab.assign_defaults()
       |> DevicesTab.assign_defaults()
       |> ApiTokensTab.assign_defaults()
       |> WalletTab.assign_defaults()
       |> ItemsTab.assign_defaults()
       |> GroupsTab.assign_defaults()
-      |> PaymentsTab.assign_payment_data()
 
     if connected?(socket) do
       Friends.subscribe_user(user.id)
@@ -237,13 +239,13 @@ defmodule GamendWeb.UserLive.Settings do
              :friend_removed,
              :friend_unblocked
            ] do
-    {:noreply, FriendsTab.refresh_friend_lists(socket, Shared.current_user(socket))}
+    {:noreply, reload_if_open(socket, "friends")}
   end
 
   # Online status change broadcast from UserChannel (via PubSub on "user:<id>")
   def handle_info(%Phoenix.Socket.Broadcast{event: event}, socket)
       when event in ["friend_online", "friend_offline"] do
-    {:noreply, FriendsTab.refresh_friend_lists(socket, Shared.current_user(socket))}
+    {:noreply, reload_if_open(socket, "friends")}
   end
 
   # Ignore other broadcasts on the user topic (e.g. "updated" events from channel)
@@ -270,7 +272,7 @@ defmodule GamendWeb.UserLive.Settings do
              :join_request_approved,
              :join_request_rejected
            ] do
-    {:noreply, GroupsTab.reload_groups(socket)}
+    {:noreply, reload_if_open(socket, "groups")}
   end
 
   # Catch-all: ignore unhandled PubSub messages (e.g. :chat_message_created,
@@ -296,20 +298,29 @@ defmodule GamendWeb.UserLive.Settings do
        conflict_provider: conflict_provider,
        settings_tab: tab
      )
-     |> PaymentsTab.assign_payment_data()
      |> GroupsTab.apply_params(params)
-     |> refresh_streams_for_tab(tab)}
+     |> load_tab(tab)}
   end
 
-  # Stream inserts are consumed on the next render even when the tab's
-  # container is hidden behind a false `:if`, so re-stream the collections of
-  # the tab that just became active.
-  defp refresh_streams_for_tab(socket, "friends"),
+  # The open tab's data, read when it opens (and again on a patch within it):
+  # every tab's template is behind `:if={@settings_tab == ...}`, so nothing
+  # else is drawn. Streams are re-sent here too, since an insert is consumed
+  # on the next render even while its container is hidden.
+  defp load_tab(socket, "friends"),
     do: FriendsTab.refresh_friend_lists(socket, Shared.current_user(socket))
 
-  defp refresh_streams_for_tab(socket, "data"), do: DataTab.reload_kv_entries(socket)
-  defp refresh_streams_for_tab(socket, "wallet"), do: WalletTab.load_wallet(socket)
-  defp refresh_streams_for_tab(socket, "items"), do: ItemsTab.reload_items(socket)
-  defp refresh_streams_for_tab(socket, "groups"), do: GroupsTab.reload_groups(socket)
-  defp refresh_streams_for_tab(socket, _tab), do: socket
+  defp load_tab(socket, "data"), do: DataTab.reload_kv_entries(socket)
+  defp load_tab(socket, "wallet"), do: WalletTab.load_wallet(socket)
+  defp load_tab(socket, "items"), do: ItemsTab.reload_items(socket)
+  defp load_tab(socket, "groups"), do: GroupsTab.reload_groups(socket)
+  defp load_tab(socket, "payments"), do: PaymentsTab.assign_payment_data(socket)
+  defp load_tab(socket, "devices"), do: DevicesTab.reload_devices(socket)
+  defp load_tab(socket, "api_tokens"), do: ApiTokensTab.reload_api_tokens(socket)
+  defp load_tab(socket, _tab), do: socket
+
+  # A friend or group event reloads its tab only while it is open; opening it
+  # reads it fresh anyway. Every friend's online/offline was eight queries.
+  defp reload_if_open(socket, tab) do
+    if socket.assigns.settings_tab == tab, do: load_tab(socket, tab), else: socket
+  end
 end

@@ -32,6 +32,8 @@ import {startAvatarFallback} from "./avatar_fallback"
 import {startVideoClickToPlay} from "./video_click_to_play"
 import {startConnectionState} from "./connection_state"
 import {startSearchPalette} from "./search_palette"
+import {startAnonymousSession} from "./anonymous_session"
+import {startLiveNav} from "./live_nav"
 import topbar from "../vendor/topbar"
 
 // Custom hooks
@@ -460,6 +462,9 @@ startAvatarFallback()
 // Before the poster can be shown: the overlay button is in the server-rendered
 // markup, so the listener must exist by the time the first click can land.
 startVideoClickToPlay()
+// Before the socket: a page can push the anonymous account it made on the
+// first event it handles.
+startAnonymousSession({getLiveSocket: () => window.liveSocket})
 
 window.addEventListener("phx:page-loading-start", _info => topbar.show(300))
 window.addEventListener("phx:page-loading-stop", _info => topbar.hide())
@@ -546,6 +551,10 @@ loadExtraHooks().then((extraHooks) => {
 
   // connect if there are any LiveViews on the page
   liveSocket.connect()
+
+  // A plain link to another LiveView page of this `live_session` moves over
+  // the open socket rather than loading the page (`GamendWeb.LiveNav`).
+  startLiveNav(liveSocket)
 
   // expose liveSocket on window for web console debug logs and latency simulation:
   // >> liveSocket.enableDebug()

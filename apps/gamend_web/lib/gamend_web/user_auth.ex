@@ -21,6 +21,11 @@ defmodule GamendWeb.UserAuth do
   # both come from `auth.session_days` (`UserToken.session_validity_in_days/0`).
   @remember_me_cookie "_gamend_web_user_remember_me"
 
+  # The anonymous account a LiveView makes travels to the browser as this,
+  # encrypted, and comes back to `put_anonymous_session/2` within the age.
+  @anonymous_session_salt "anonymous session"
+  @anonymous_session_max_age 300
+
   @doc """
   Logs the user in.
 
@@ -33,9 +38,16 @@ defmodule GamendWeb.UserAuth do
   """
   def log_in_user(conn, user, params \\ %{}) do
     user_return_to = get_session(conn, :user_return_to)
+    replaced_guest = replaced_anonymous_user(conn, user)
     {conn, user} = keep_scheduled_account(conn, user)
 
     conn = create_or_extend_session(conn, user, params)
+
+    # A guest who signs in to an account they already have keeps that
+    # account as it is: nothing is copied over, and the guest account, which
+    # nothing can reach again once this session is replaced, is deleted
+    # (through `Accounts.delete_user/1`, so plugins clean up after it).
+    if replaced_guest, do: Gamend.Async.run(fn -> Accounts.delete_user(replaced_guest) end)
 
     # Fire-and-forget login hook for non-token logins (magic-link tokens are
     # handled specially in Accounts.login_user_by_magic_link so they already
@@ -55,6 +67,16 @@ defmodule GamendWeb.UserAuth do
     conn |> redirect(to: user_return_to || signed_in_path(conn))
   end
 
+  defp replaced_anonymous_user(conn, %Accounts.User{id: id}) do
+    case Scope.user(conn.assigns[:current_scope]) do
+      %Accounts.User{id: previous_id} = previous when previous_id != id ->
+        if Accounts.User.anonymous?(previous), do: previous
+
+      _ ->
+        nil
+    end
+  end
+
   defp keep_scheduled_account(conn, user) do
     if Accounts.deletion_scheduled?(user) do
       case Accounts.cancel_deletion(user) do
@@ -69,6 +91,115 @@ defmodule GamendWeb.UserAuth do
       {conn, user}
     end
   end
+
+  @doc """
+  The caller's account, made for them when they have none.
+
+  A signed-out visitor stays signed out until a page needs to save something
+  for them — tapping a route, finishing a test — and the page calls this
+  first. It creates an anonymous account the way a game client gets one: a
+  device account (`Accounts.find_or_create_from_device/2`), on a device id the
+  server makes up since a browser has none to send, so only while
+  `device_auth_enabled` is on. It assigns its scope so the action
+  goes through on this socket, and pushes `gamend:anonymous_session` to the
+  browser with the session token, encrypted. A LiveView cannot write the session
+  cookie itself, so `app.js` posts that token to `/users/anonymous_session`
+  (`put_anonymous_session/2`) and reconnects the socket, which then mounts every
+  page with the account.
+
+  Creating on demand rather than on every visit is deliberate: a crawler or a
+  reader who only looks never gets an account row. When to call it is the
+  page's decision.
+
+  Returns `{:ok, socket}` with `current_scope` set, or `{:error, reason}`:
+  `:disabled` when device accounts are off, `:not_connected` on the static render
+  (there is no browser to hand the session to yet).
+  """
+  @spec ensure_user(Phoenix.LiveView.Socket.t()) ::
+          {:ok, Phoenix.LiveView.Socket.t()} | {:error, term()}
+  def ensure_user(%Phoenix.LiveView.Socket{} = socket) do
+    cond do
+      Scope.user(socket.assigns[:current_scope]) ->
+        {:ok, socket}
+
+      not Phoenix.LiveView.connected?(socket) ->
+        {:error, :not_connected}
+
+      true ->
+        with {:ok, user} <- Accounts.find_or_create_from_device(web_device_id()) do
+          token = Accounts.generate_user_session_token(user)
+
+          {:ok,
+           socket
+           |> Phoenix.Component.assign(:current_scope, Scope.for_user(user))
+           |> Phoenix.LiveView.push_event("gamend:anonymous_session", %{
+             token: encrypt_anonymous_session(token)
+           })}
+        end
+    end
+  end
+
+  @doc """
+  `ensure_user/1` for a controller: the same anonymous account, written to the
+  session and the remember-me cookie straight away, since a plain request can.
+  """
+  @spec ensure_user_conn(Plug.Conn.t()) :: {:ok, Plug.Conn.t()} | {:error, term()}
+  def ensure_user_conn(%Plug.Conn{} = conn) do
+    if Scope.user(conn.assigns[:current_scope]) do
+      {:ok, conn}
+    else
+      with {:ok, user} <- Accounts.find_or_create_from_device(web_device_id()) do
+        token = Accounts.generate_user_session_token(user)
+
+        {:ok,
+         conn
+         |> put_token_in_session(token)
+         |> write_remember_me_cookie(token)
+         |> assign(:current_scope, Scope.for_user(user))}
+      end
+    end
+  end
+
+  @doc """
+  Writes the anonymous account `ensure_user/1` made into this browser's session.
+
+  The token must decrypt, be recent, and name a live session of an anonymous
+  account. A browser already signed in with a real account keeps it: an
+  anonymous session never replaces one. The rest of the session (locale,
+  visitor id, the CSRF token the socket reconnects with) is kept, so there is
+  no `renew_session/2` here.
+  """
+  @spec put_anonymous_session(Plug.Conn.t(), String.t()) :: {:ok, Plug.Conn.t()} | :error
+  def put_anonymous_session(%Plug.Conn{} = conn, encrypted) when is_binary(encrypted) do
+    with {:ok, token} <-
+           Phoenix.Token.decrypt(GamendWeb.endpoint(), @anonymous_session_salt, encrypted,
+             max_age: @anonymous_session_max_age
+           ),
+         true <- is_binary(token),
+         {%Accounts.User{} = user, _inserted_at} <- Accounts.get_user_by_session_token(token),
+         true <- Accounts.User.anonymous?(user) do
+      current = Scope.user(conn.assigns[:current_scope])
+
+      if current && not Accounts.User.anonymous?(current) do
+        {:ok, conn}
+      else
+        {:ok, conn |> put_token_in_session(token) |> write_remember_me_cookie(token)}
+      end
+    else
+      _ -> :error
+    end
+  end
+
+  def put_anonymous_session(_conn, _encrypted), do: :error
+
+  # A browser has no device id to send, so the server makes one up. `web:`
+  # marks where the account came from.
+  defp web_device_id,
+    do: "web:" <> Base.url_encode64(:crypto.strong_rand_bytes(24), padding: false)
+
+  @doc false
+  def encrypt_anonymous_session(token),
+    do: Phoenix.Token.encrypt(GamendWeb.endpoint(), @anonymous_session_salt, token)
 
   @doc """
   Logs the user out.
@@ -325,7 +456,7 @@ defmodule GamendWeb.UserAuth do
     socket =
       Phoenix.Component.assign_new(socket, :current_scope, fn ->
         {user, _} =
-          if user_token = session["user_token"] do
+          if user_token = session["user_token"] || connect_session_token(socket) do
             Accounts.get_user_by_session_token(user_token)
           end || {nil, nil}
 
@@ -345,6 +476,24 @@ defmodule GamendWeb.UserAuth do
     rescue
       RuntimeError -> socket
     end
+  end
+
+  # A page mounts with the session it was rendered with, which predates a guest
+  # account made on it (`ensure_user/1`). That account is in the cookie the
+  # socket reconnected with (`anonymous_session.js`), so a signed-out page
+  # session falls back to the socket's: without it the reconnect, and every
+  # page navigated to after it, would mount the visitor signed out again.
+  defp connect_session_token(socket) do
+    if Phoenix.LiveView.connected?(socket) do
+      case Phoenix.LiveView.get_connect_info(socket, :session) do
+        %{"user_token" => token} when is_binary(token) -> token
+        _ -> nil
+      end
+    end
+  rescue
+    # get_connect_info outside mount (a nested live_render) raises, and
+    # `Phoenix.LiveViewTest` has no connect-time session to give.
+    _error in [RuntimeError, FunctionClauseError] -> nil
   end
 
   # The reader's time zone (sent on the LiveView connect, `app.js`) and site
@@ -401,6 +550,31 @@ defmodule GamendWeb.UserAuth do
       |> maybe_store_return_to()
       |> redirect(to: ~p"/users/log_in")
       |> halt()
+    end
+  end
+
+  @doc """
+  Plug for routes a guest (an anonymous account, `Scope.anonymous?/1`) may not
+  use either: a signed-out visitor goes to log in, a guest to register, which
+  keeps what they did (`Accounts.upgrade_anonymous_user_and_deliver/4`). For a
+  feature a host keeps for real accounts, where `require_authenticated_user`
+  would let any guest through.
+  """
+  def require_registered_user(conn, _opts) do
+    scope = conn.assigns.current_scope
+
+    cond do
+      Scope.user(scope) && not Scope.anonymous?(scope) ->
+        conn
+
+      Scope.user(scope) ->
+        conn
+        |> maybe_store_return_to()
+        |> redirect(to: ~p"/users/register")
+        |> halt()
+
+      true ->
+        require_authenticated_user(conn, [])
     end
   end
 

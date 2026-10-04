@@ -18,7 +18,6 @@ defmodule GamendWeb.UserLive.Settings.DevicesTab do
     |> assign(:devices_page, 1)
     |> assign(:devices_count, 0)
     |> assign(:devices_total_pages, 0)
-    |> reload_devices()
   end
 
   def tab(assigns) do

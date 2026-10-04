@@ -65,14 +65,23 @@ defmodule GamendWeb.UserLive.Registration do
   end
 
   @impl true
-  def mount(_params, _session, %{assigns: %{current_scope: %{user_id: user_id}}} = socket)
+  # A guest (an anonymous account, `Scope.anonymous?/1`) registers like anyone
+  # else; the email then goes on the account they are already using, so it
+  # keeps everything (`Accounts.upgrade_anonymous_user_and_deliver/4`).
+  def mount(params, session, %{assigns: %{current_scope: %{user_id: user_id} = scope}} = socket)
       when is_binary(user_id) do
-    require Logger
-    Logger.info("[Registration] User already logged in, redirecting to signed_in_path")
-    {:ok, Phoenix.LiveView.redirect(socket, external: ~p"/users/settings")}
+    if Gamend.Accounts.Scope.anonymous?(scope) do
+      mount_form(params, session, socket)
+    else
+      require Logger
+      Logger.info("[Registration] User already logged in, redirecting to signed_in_path")
+      {:ok, Phoenix.LiveView.redirect(socket, external: ~p"/users/settings")}
+    end
   end
 
-  def mount(_params, session, socket) do
+  def mount(params, session, socket), do: mount_form(params, session, socket)
+
+  defp mount_form(_params, session, socket) do
     changeset = Accounts.change_user_email(%User{}, %{}, validate_unique: false)
 
     client_ip = GamendWeb.LiveHelpers.client_ip(socket, session)
@@ -121,15 +130,25 @@ defmodule GamendWeb.UserLive.Registration do
   defp notify_params(%{"notify" => %{} = notify}), do: notify
   defp notify_params(_params), do: %{}
 
+  # A guest's email goes on the account they already have, which keeps what
+  # they did; anyone else gets a new account.
+  defp register(socket, user_params, notifier) do
+    url_fun = fn t -> url(~p"/users/confirm/#{t}") end
+
+    case Gamend.Accounts.Scope.user(socket.assigns[:current_scope]) do
+      %User{} = user ->
+        Accounts.upgrade_anonymous_user_and_deliver(user, user_params, url_fun, notifier)
+
+      nil ->
+        Accounts.register_user_and_deliver(user_params, url_fun, notifier)
+    end
+  end
+
   defp do_save(user_params, notify, socket) do
     notifier =
       Application.get_env(:gamend_web, :user_notifier, Gamend.Accounts.UserNotifier)
 
-    case Accounts.register_user_and_deliver(
-           user_params,
-           fn t -> url(~p"/users/confirm/#{t}") end,
-           notifier
-         ) do
+    case register(socket, user_params, notifier) do
       {:ok, user} ->
         opt_in(user, notify, socket.assigns.signup_groups)
 

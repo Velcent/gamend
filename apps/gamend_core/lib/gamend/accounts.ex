@@ -300,6 +300,15 @@ defmodule Gamend.Accounts do
     :ok
   end
 
+  @doc delegate_to: {Registration, :upgrade_anonymous_user_and_deliver, 4}
+  defdelegate upgrade_anonymous_user_and_deliver(
+                user,
+                attrs,
+                confirmation_url_fun,
+                notifier \\ Gamend.Accounts.UserNotifier
+              ),
+              to: Registration
+
   @doc delegate_to: {Registration, :register_user_and_deliver, 3}
   defdelegate register_user_and_deliver(
                 attrs,
@@ -740,7 +749,9 @@ defmodule Gamend.Accounts do
   setting(:device_auth_enabled, :boolean,
     default: true,
     doc:
-      "Allow POST /api/v1/login/device. When on, any unknown device_id creates an anonymous account."
+      "Allow POST /api/v1/login/device. When on, any unknown device_id creates an anonymous " <>
+        "account, and the website may give a signed-out visitor one the same way " <>
+        "(`GamendWeb.UserAuth.ensure_user/1`)."
   )
 
   setting(:anonymous_can_upload_avatar, :boolean,

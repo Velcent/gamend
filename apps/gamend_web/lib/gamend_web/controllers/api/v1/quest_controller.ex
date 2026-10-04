@@ -44,8 +44,7 @@ defmodule GamendWeb.Api.V1.QuestController do
         group = blank_filter(params, "group")
         opts = [page: page, page_size: page_size, category: category, group: group]
 
-        entries = Quests.list_user_quests(user_id, opts)
-        total_count = Quests.count_user_quests(user_id, category: category, group: group)
+        %{entries: entries, total: total_count} = Quests.user_quest_page(user_id, opts)
 
         reply_page(conn, Enum.map(entries, &serialize_entry/1), page, page_size, total_count)
 

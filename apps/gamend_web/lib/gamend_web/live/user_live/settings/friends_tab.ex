@@ -14,7 +14,7 @@ defmodule GamendWeb.UserLive.Settings.FriendsTab do
 
   @page_size 25
 
-  def assign_defaults(socket, user) do
+  def assign_defaults(socket) do
     socket
     |> assign(:incoming_page, 1)
     |> assign(:incoming_page_size, @page_size)
@@ -32,7 +32,6 @@ defmodule GamendWeb.UserLive.Settings.FriendsTab do
     |> assign(:search_page_size, @page_size)
     |> assign(:search_total, 0)
     |> assign(:search_total_pages, 0)
-    |> refresh_friend_lists(user)
   end
 
   def tab(assigns) do

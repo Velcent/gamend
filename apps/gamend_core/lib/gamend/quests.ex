@@ -1270,19 +1270,11 @@ defmodule Gamend.Quests do
   @spec list_user_quests(user_id(), keyword()) ::
           [%{quest: Quest.t(), progress: QuestProgress.t() | nil, claimable: boolean()}]
   def list_user_quests(user_id, opts \\ []) when is_binary(user_id) do
-    _ = recover_pending_rewards(user_id: user_id)
-    _ = rearm_repeat_quests(user_id: user_id)
+    heal(user_id)
 
-    now = DateTime.utc_now(:second)
-
-    visible = visible_quests(user_id, now, opts)
-
-    page = max(Keyword.get(opts, :page, 1), 1)
-    page_size = min(max(Keyword.get(opts, :page_size, 25), 1), 200)
-
-    visible
-    |> Enum.drop((page - 1) * page_size)
-    |> Enum.take(page_size)
+    user_id
+    |> visible_quests(DateTime.utc_now(:second), opts)
+    |> page_slice(opts)
   end
 
   @doc "Count of quests visible to the user (same filters as `list_user_quests/2`)."
@@ -1290,6 +1282,48 @@ defmodule Gamend.Quests do
   def count_user_quests(user_id, opts \\ []) when is_binary(user_id) do
     now = DateTime.utc_now(:second)
     length(visible_quests(user_id, now, opts))
+  end
+
+  @doc """
+  What a quest page draws, from one read of the user's progress: `:entries`,
+  the page `list_user_quests/2` returns for these `opts`; `:total`, what
+  `count_user_quests/2` counts for them; `:categories`, what
+  `visible_categories/1` lists (the tabs, so every filter but none). The three
+  separately read the same rows three times.
+  """
+  @spec user_quest_page(user_id(), keyword()) :: %{
+          entries: [%{quest: Quest.t(), progress: QuestProgress.t() | nil, claimable: boolean()}],
+          total: non_neg_integer(),
+          categories: [String.t()]
+        }
+  def user_quest_page(user_id, opts \\ []) when is_binary(user_id) do
+    heal(user_id)
+
+    state = user_state(user_id, DateTime.utc_now(:second))
+    entries = visible_entries(state, opts)
+
+    %{
+      entries: page_slice(entries, opts),
+      total: length(entries),
+      categories: state |> visible_entries([]) |> Enum.map(& &1.quest) |> category_names()
+    }
+  end
+
+  # Healing on read (see `recover_pending_rewards/1`, `rearm_repeat_quests/1`):
+  # done where a player lists their quests.
+  defp heal(user_id) do
+    _ = recover_pending_rewards(user_id: user_id)
+    _ = rearm_repeat_quests(user_id: user_id)
+    :ok
+  end
+
+  defp page_slice(entries, opts) do
+    page = max(Keyword.get(opts, :page, 1), 1)
+    page_size = min(max(Keyword.get(opts, :page_size, 25), 1), 200)
+
+    entries
+    |> Enum.drop((page - 1) * page_size)
+    |> Enum.take(page_size)
   end
 
   @doc """
@@ -1403,29 +1437,62 @@ defmodule Gamend.Quests do
   # Definitions are few (capped by max_quests) and cached, so visibility and
   # pagination are resolved in memory; the user's rows come from one query.
   defp visible_quests(user_id, now, opts) do
-    category = Keyword.get(opts, :category)
-    drop = Keyword.get(opts, :drop_groups, [])
+    user_id |> user_state(now) |> visible_entries(opts)
+  end
 
+  # Every definition this viewer may see now, and their rows from ONE query:
+  # this period's row of each, and the done rows of any prerequisite (of any
+  # period, and whether or not the prerequisite itself is still listed).
+  # `visible_entries/2` filters it in memory, so one read serves a page, its
+  # count and its category tabs. The host filter is per quest
+  # (`host_visible/2`), so applying it before the category filter is the same.
+  defp user_state(user_id, now) do
     quests =
       active_quests()
-      |> Enum.filter(fn q ->
-        within_window?(q, now) and category in [nil, q.category] and q.group_key not in drop
-      end)
+      |> Enum.filter(&within_window?(&1, now))
       |> host_visible(user_id)
 
     keys = Enum.map(quests, & &1.key)
     periods = current_period_keys(now)
 
+    prereq_keys =
+      quests |> Enum.map(& &1.prerequisite_quest_key) |> Enum.reject(&is_nil/1) |> Enum.uniq()
+
     rows =
       from(p in QuestProgress,
-        where: p.user_id == ^user_id and p.quest_key in ^keys and p.period_key in ^periods
+        where:
+          p.user_id == ^user_id and
+            ((p.quest_key in ^keys and p.period_key in ^periods) or
+               (p.quest_key in ^prereq_keys and p.status in ^@statuses_done))
       )
       |> Repo.all()
-      |> Map.new(fn p -> {{p.quest_key, p.period_key}, p} end)
 
-    done_prereqs = done_prerequisites(user_id, Enum.map(quests, & &1.prerequisite_quest_key))
+    %{
+      quests: quests,
+      now: now,
+      rows:
+        for(
+          p <- rows,
+          p.quest_key in keys and p.period_key in periods,
+          into: %{},
+          do: {{p.quest_key, p.period_key}, p}
+        ),
+      done_prereqs:
+        for(
+          p <- rows,
+          p.quest_key in prereq_keys and p.status in @statuses_done,
+          into: MapSet.new(),
+          do: p.quest_key
+        )
+    }
+  end
+
+  defp visible_entries(%{quests: quests, now: now, rows: rows, done_prereqs: done}, opts) do
+    category = Keyword.get(opts, :category)
+    drop = Keyword.get(opts, :drop_groups, [])
     status = Keyword.get(opts, :status)
 
+    quests = Enum.filter(quests, &(category in [nil, &1.category] and &1.group_key not in drop))
     prereq_by_key = Map.new(quests, &{&1.key, &1.prerequisite_quest_key})
 
     quests
@@ -1439,7 +1506,7 @@ defmodule Gamend.Quests do
       }
     end)
     |> Enum.filter(fn %{quest: quest, progress: progress} ->
-      visible_to_user?(quest, progress, done_prereqs)
+      visible_to_user?(quest, progress, done)
     end)
     |> collapse_chains(prereq_by_key)
     |> collapse_groups(Keyword.get(opts, :group))

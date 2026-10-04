@@ -131,7 +131,7 @@ defmodule GamendWeb.CoreComponents do
     ~H"""
     <img
       :if={@code}
-      src={"/flags/#{@code}.svg"}
+      src={flag_src(@code)}
       alt=""
       aria-hidden="true"
       loading={if(@eager or @priority, do: "eager", else: "lazy")}
@@ -152,10 +152,42 @@ defmodule GamendWeb.CoreComponents do
   # dashed subdivision ("sh-ac", "es-ga"), so anything else simply renders
   # nothing rather than a URL built from it.
   defp flag_url(code) when is_binary(code) do
-    if code =~ ~r/\A[a-z0-9-]{2,6}\z/, do: "/flags/#{code}.svg"
+    if code =~ ~r/\A[a-z0-9-]{2,6}\z/, do: flag_src(code)
   end
 
   defp flag_url(_code), do: nil
+
+  # The WebP a host wrote beside a flag's SVG where it is the smaller file
+  # (the reference host's `mix host.flag_rasters`: a flag with a coat of arms
+  # is ~50 KB of SVG and 6 ms to draw, ~1.5 KB and 0.1 ms as a 120x90 WebP),
+  # else the SVG. Which codes have one is read from the host's
+  # `priv/static/flags` once and kept, like the rest of the static files.
+  defp flag_src(code) do
+    if MapSet.member?(raster_flags(), code),
+      do: "/flags/#{code}.webp",
+      else: "/flags/#{code}.svg"
+  end
+
+  defp raster_flags do
+    case :persistent_term.get({__MODULE__, :raster_flags}, nil) do
+      nil ->
+        flags = load_raster_flags()
+        :persistent_term.put({__MODULE__, :raster_flags}, flags)
+        flags
+
+      flags ->
+        flags
+    end
+  end
+
+  defp load_raster_flags do
+    GamendWeb.host_app()
+    |> Application.app_dir("priv/static/flags")
+    |> Path.join("*.webp")
+    |> Path.wildcard()
+    |> Enum.reject(&Regex.match?(~r/-[0-9a-f]{32}\.webp$/, &1))
+    |> MapSet.new(&Path.basename(&1, ".webp"))
+  end
 
   @doc """
   Renders flash notices.

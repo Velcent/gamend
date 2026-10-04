@@ -20,7 +20,6 @@ defmodule GamendWeb.UserLive.Settings.WalletTab do
     |> assign(:ledger_page_size, @page_size)
     |> assign(:ledger_count, 0)
     |> assign(:ledger_total_pages, 0)
-    |> load_wallet()
   end
 
   def tab(assigns) do

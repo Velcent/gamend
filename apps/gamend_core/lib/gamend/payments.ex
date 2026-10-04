@@ -527,19 +527,51 @@ defmodule Gamend.Payments do
     end
   end
 
+  @doc """
+  Whether the user holds `key` right now: an active row with no end, or an end
+  still ahead.
+
+  Answered from `entitlement_rows/1`, so a page asking about several keys (a
+  paid plan and its trial, on every render) costs one query between changes.
+  """
   @spec has_entitlement?(Ecto.UUID.t(), String.t()) :: boolean()
   def has_entitlement?(user_id, key) when is_binary(user_id) and is_binary(key) do
     now = DateTime.utc_now(:second)
 
-    from(e in Entitlement,
-      where:
-        e.user_id == ^user_id and e.key == ^key and e.status == "active" and
-          (is_nil(e.expires_at) or e.expires_at > ^now),
-      select: count(e.id)
-    )
-    |> Repo.one()
-    |> Kernel.>(0)
+    user_id
+    |> entitlement_rows()
+    |> Enum.any?(fn {row_key, status, expires_at} ->
+      row_key == key and status == "active" and
+        (is_nil(expires_at) or DateTime.compare(expires_at, now) == :gt)
+    end)
   end
+
+  # Every one of the user's entitlement rows as `{key, status, expires_at}` —
+  # a handful at most — cached in `Gamend.Cache` and evicted by
+  # `after_entitlement_changed/1`, which every write calls (grants, purchases,
+  # revocations, Stripe renewals). Whether a row is active is decided at read
+  # time against the clock, so one that expires while cached stops counting on
+  # the second it ends. Inside a transaction the cache is skipped both ways: a
+  # read there may see a write a rollback would undo.
+  defp entitlement_rows(user_id) do
+    if Repo.in_transaction?() do
+      read_entitlement_rows(user_id)
+    else
+      Gamend.Cache.cached(entitlements_key(user_id), [ttl: Gamend.Cache.ttl()], fn ->
+        read_entitlement_rows(user_id)
+      end)
+    end
+  end
+
+  defp read_entitlement_rows(user_id) do
+    Repo.all(
+      from e in Entitlement,
+        where: e.user_id == ^user_id,
+        select: {e.key, e.status, e.expires_at}
+    )
+  end
+
+  defp entitlements_key(user_id), do: {:payments, :entitlements, user_id}
 
   @doc """
   Grant an entitlement without a purchase: a trial, a contributor's reward,
@@ -613,7 +645,7 @@ defmodule Gamend.Payments do
   """
   @spec entitlement_ever?(Ecto.UUID.t(), String.t()) :: boolean()
   def entitlement_ever?(user_id, key) when is_binary(user_id) and is_binary(key) do
-    Repo.exists?(from e in Entitlement, where: e.user_id == ^user_id and e.key == ^key)
+    user_id |> entitlement_rows() |> Enum.any?(fn {row_key, _, _} -> row_key == key end)
   end
 
   @doc "The user's `key` row, active or not, or `nil`."
@@ -1291,6 +1323,10 @@ defmodule Gamend.Payments do
 
   @doc false
   def after_entitlement_changed(%Entitlement{} = entitlement) do
+    # The one eviction point for `entitlement_rows/1`: every entitlement write
+    # ends here. Inside a transaction `invalidate/1` evicts again on commit.
+    _ = Gamend.Cache.invalidate(entitlements_key(entitlement.user_id))
+
     Gamend.Broadcast.publish(
       "user:#{entitlement.user_id}",
       {:entitlement_changed, entitlement}
