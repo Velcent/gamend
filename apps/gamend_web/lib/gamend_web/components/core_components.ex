@@ -151,11 +151,19 @@ defmodule GamendWeb.CoreComponents do
   # url and start a rule of its own. Every real code is an ISO alpha-2 or a
   # dashed subdivision ("sh-ac", "es-ga"), so anything else simply renders
   # nothing rather than a URL built from it.
-  defp flag_url(code) when is_binary(code) do
-    if code =~ ~r/\A[a-z0-9-]{2,6}\z/, do: flag_src(code)
+  defp flag_url(code) when is_binary(code) and byte_size(code) in 2..6 do
+    if flag_code?(code), do: flag_src(code)
   end
 
   defp flag_url(_code), do: nil
+
+  # `[a-z0-9-]+`, byte by byte: a regex here ran for every flag on every
+  # page (the language menus draw ~160), about 2.5 times the cost.
+  defp flag_code?(<<c, rest::binary>>) when c in ?a..?z or c in ?0..?9 or c == ?-,
+    do: flag_code?(rest)
+
+  defp flag_code?(<<>>), do: true
+  defp flag_code?(_), do: false
 
   # The WebP a host wrote beside a flag's SVG where it is the smaller file
   # (the reference host's `mix host.flag_rasters`: a flag with a coat of arms

@@ -597,21 +597,27 @@ defmodule GamendWeb.HostLayoutNavigation do
     ~H"""
     <a
       :for={link <- @links}
-      href={if(readonly?(link), do: nil, else: link["href"])}
-      aria-disabled={if(readonly?(link), do: "true")}
+      href={if(inert?(link), do: nil, else: link["href"])}
+      aria-disabled={if(inert?(link), do: "true")}
       class={
-        if readonly?(link) do
-          "inline-flex items-center gap-1 px-2 pointer-events-none cursor-default"
-        else
-          [
-            "btn btn-ghost btn-sm gap-1 px-2",
-            if(entry_active?(link, @current_path), do: "btn-active")
-          ]
+        cond do
+          readonly?(link) ->
+            "inline-flex items-center gap-1 px-2 pointer-events-none cursor-default"
+
+          disabled?(link) ->
+            "btn btn-ghost btn-sm gap-1 px-2 pointer-events-none cursor-default opacity-70"
+
+          true ->
+            [
+              "btn btn-ghost btn-sm gap-1 px-2",
+              if(entry_active?(link, @current_path), do: "btn-active")
+            ]
         end
       }
     >
       <.icon :if={link["icon"]} name={link["icon"]} class={icon_class(link["color"])} />
       <span class="text-sm font-semibold">{translate_label(link["label"])}</span>
+      <.nav_badge entry={link} />
     </a>
     """
   end
@@ -757,20 +763,26 @@ defmodule GamendWeb.HostLayoutNavigation do
       </details>
     <% else %>
       <a
-        href={if(readonly?(@link), do: nil, else: @link["href"])}
+        href={if(inert?(@link), do: nil, else: @link["href"])}
         target={if(@link["external"], do: "_blank", else: nil)}
         rel={if(@link["external"], do: "noopener noreferrer", else: nil)}
-        aria-disabled={if(readonly?(@link), do: "true")}
+        aria-disabled={if(inert?(@link), do: "true")}
         class={
-          if readonly?(@link) do
-            "inline-flex items-center gap-2 px-2 pointer-events-none cursor-default"
-          else
-            ["btn", if(@active?, do: "btn-primary", else: @inactive_class)]
+          cond do
+            readonly?(@link) ->
+              "inline-flex items-center gap-2 px-2 pointer-events-none cursor-default"
+
+            disabled?(@link) ->
+              ["btn pointer-events-none cursor-default opacity-70", @inactive_class]
+
+            true ->
+              ["btn", if(@active?, do: "btn-primary", else: @inactive_class)]
           end
         }
       >
         <.icon :if={@link["icon"]} name={@link["icon"]} class={icon_class(@link["color"])} />
         {translate_label(@link["label"])}
+        <.nav_badge entry={@link} />
       </a>
     <% end %>
     """
@@ -812,20 +824,26 @@ defmodule GamendWeb.HostLayoutNavigation do
       </details>
     <% else %>
       <a
-        href={if(readonly?(@link), do: nil, else: @link["href"])}
+        href={if(inert?(@link), do: nil, else: @link["href"])}
         target={if(@link["external"], do: "_blank", else: nil)}
         rel={if(@link["external"], do: "noopener noreferrer", else: nil)}
-        aria-disabled={if(readonly?(@link), do: "true")}
+        aria-disabled={if(inert?(@link), do: "true")}
         class={
-          if readonly?(@link) do
-            "inline-flex items-center gap-2 px-2 w-full pointer-events-none cursor-default"
-          else
-            ["btn w-full", if(@active?, do: "btn-primary", else: @inactive_class)]
+          cond do
+            readonly?(@link) ->
+              "inline-flex items-center gap-2 px-2 w-full pointer-events-none cursor-default"
+
+            disabled?(@link) ->
+              ["btn w-full pointer-events-none cursor-default opacity-70", @inactive_class]
+
+            true ->
+              ["btn w-full", if(@active?, do: "btn-primary", else: @inactive_class)]
           end
         }
       >
         <.icon :if={@link["icon"]} name={@link["icon"]} class={icon_class(@link["color"])} />
         {translate_label(@link["label"])}
+        <.nav_badge entry={@link} />
       </a>
     <% end %>
     """
@@ -869,17 +887,19 @@ defmodule GamendWeb.HostLayoutNavigation do
     <% else %>
       <li>
         <a
-          href={if(readonly?(@entry), do: nil, else: @entry["href"])}
+          href={if(inert?(@entry), do: nil, else: @entry["href"])}
           target={if(@entry["external"], do: "_blank", else: nil)}
           rel={if(@entry["external"], do: "noopener noreferrer", else: nil)}
-          aria-disabled={if(readonly?(@entry), do: "true")}
+          aria-disabled={if(inert?(@entry), do: "true")}
           class={[
             if(@active?, do: "menu-active", else: ""),
-            if(readonly?(@entry), do: "pointer-events-none cursor-default")
+            if(inert?(@entry), do: "pointer-events-none cursor-default"),
+            if(disabled?(@entry), do: "opacity-70")
           ]}
         >
           <.icon :if={@entry["icon"]} name={@entry["icon"]} class={icon_class(@entry["color"])} />
           {translate_label(@entry["label"])}
+          <.nav_badge entry={@entry} />
         </a>
       </li>
     <% end %>
@@ -987,7 +1007,7 @@ defmodule GamendWeb.HostLayoutNavigation do
 
   defp valid_link?(%{"label" => label} = entry) do
     is_binary(label) and label != "" and
-      (readonly?(entry) or (is_binary(entry["href"]) and entry["href"] != ""))
+      (inert?(entry) or (is_binary(entry["href"]) and entry["href"] != ""))
   end
 
   defp valid_link?(_link), do: false
@@ -995,6 +1015,30 @@ defmodule GamendWeb.HostLayoutNavigation do
   # A display-only item ("readonly": true) renders as a non-interactive badge
   # (icon + label, no href/click) — e.g. a live status/value indicator.
   defp readonly?(entry), do: Map.get(entry, "readonly") == true
+
+  # A link to something announced and not there yet ("disabled": true): drawn
+  # as the link, never followed, usually with a `"badge"` ("Coming soon").
+  @doc false
+  def disabled?(entry), do: Map.get(entry, "disabled") == true
+
+  defp inert?(entry), do: readonly?(entry) or disabled?(entry)
+
+  attr :entry, :map, required: true
+
+  @doc """
+  An entry's `"badge"`: a short tag after its label ("Pro", "Coming soon").
+  Shared by the nav and the footer.
+  """
+  def nav_badge(assigns) do
+    ~H"""
+    <span
+      :if={is_binary(@entry["badge"]) and @entry["badge"] != ""}
+      class="badge badge-xs badge-primary whitespace-nowrap"
+    >
+      {translate_label(@entry["badge"])}
+    </span>
+    """
+  end
 
   @doc """
   Whether `entry` should be shown to a viewer with this `current_scope`.
@@ -1022,8 +1066,8 @@ defmodule GamendWeb.HostLayoutNavigation do
   with the public "any" default would offer admin pages to a stranger.
 
   Dynamic `{Module.fn}` labels resolve the way the nav resolves them; one that
-  resolves to nothing is dropped, as is a `readonly` badge. Neither is a place
-  you can go.
+  resolves to nothing is dropped, as is a `readonly` badge or a `disabled`
+  ("coming soon") link. None of them is a place you can go.
   """
   @spec flat_links(map(), map() | nil) :: [
           %{title: String.t(), href: String.t(), group: String.t() | nil}
@@ -1056,7 +1100,7 @@ defmodule GamendWeb.HostLayoutNavigation do
     href = Map.get(entry, "href")
     title = label_presence(entry)
 
-    if readonly?(entry) or is_nil(title) or not (is_binary(href) and href != "") do
+    if inert?(entry) or is_nil(title) or not (is_binary(href) and href != "") do
       []
     else
       [%{title: title, href: href, group: group}]

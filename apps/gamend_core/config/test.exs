@@ -113,9 +113,3 @@ config :gamend_core, Gamend.Storage.Local,
 # sandbox receipt buying real goods on a production server — so the test suite
 # has to declare that it is not a production payment environment.
 config :gamend_core, Gamend.Payments.Settings, environment: :sandbox
-
-# The server's deployment environment is the host's `:gamend_web` key, and a
-# few core readers — the Google RTDN webhook's fail-closed check among them —
-# default it to `:prod` when unset. The web app sets it from `config_env()`;
-# the core suite runs without the web app, so it says `:test` itself.
-config :gamend_web, environment: :test

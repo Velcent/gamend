@@ -127,6 +127,11 @@ config :gamend_web, GamendWeb.Auth.Guardian,
 # Disable rate limiting in tests
 config :gamend_web, GamendWeb.Plugs.RateLimiter, enabled: false
 
+# A cold test request (first render, first query) routinely passes the 200ms
+# slow-request threshold, and each one would print a warning into the run.
+# Tests that assert on the log lower it themselves.
+config :gamend_web, :slow_request_threshold_ms, 60_000.0
+
 # Background presence sweeping fights with sandbox ownership in tests and can
 # keep logging after the test task itself is done.
 config :gamend_core, Gamend.Accounts.StalePresenceSweeper, enabled: false

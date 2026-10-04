@@ -54,7 +54,7 @@ defmodule Gamend.Economy do
   end
 
   @doc ~S"""
-    All non-zero balances for a user, as a `%{currency => balance}` map.
+    All of a user's balances, as a `%{currency => balance}` map.
   """
   @spec balances(user_id()) :: %{required(currency()) => non_neg_integer()}
   def balances(_user_id) do

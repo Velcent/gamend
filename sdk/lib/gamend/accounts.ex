@@ -2528,6 +2528,45 @@ defmodule Gamend.Accounts do
   end
 
   @doc ~S"""
+    Sign-up for a visitor who is already playing on an anonymous account: the
+    email goes on THAT account, and the confirmation email is queued exactly as
+    for a new one. Same account id, so everything it holds stays; the link in the
+    email signs in to it on any device and confirms the address.
+    
+    `{:error, :not_anonymous}` for an account that already has an identity.
+    
+  """
+  @spec upgrade_anonymous_user_and_deliver(
+          Gamend.Accounts.User.t(),
+          Gamend.Types.user_registration_attrs(),
+          (String.t() -> String.t()),
+          module()
+        ) :: {:ok, Gamend.Accounts.User.t()} | {:error, Ecto.Changeset.t() | term()}
+  def upgrade_anonymous_user_and_deliver(
+        _user,
+        _attrs,
+        _confirmation_url_fun,
+        _notifier \\ Gamend.Accounts.UserNotifier
+      ) do
+    case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        {:ok,
+         %Gamend.Accounts.User{
+           id: 0,
+           email: "",
+           display_name: nil,
+           metadata: %{},
+           is_admin: false,
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
+
+      _ ->
+        raise "Gamend.Accounts.upgrade_anonymous_user_and_deliver/4 is a stub - only available at runtime on Gamend"
+    end
+  end
+
+  @doc ~S"""
     Returns true when the given user is activated or when account activation
     is not required. Returns false only when activation is required **and**
     the user's `is_activated` flag is `false`.

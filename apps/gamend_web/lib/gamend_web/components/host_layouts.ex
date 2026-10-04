@@ -76,17 +76,28 @@ defmodule GamendWeb.HostLayouts do
 
   @theme_translatable_top_keys ~w(title tagline description)
 
+  # `badge` is a link's short tag ("Pro", "Coming soon"), translated like its
+  # label.
   @theme_translatable_array_fields [
     {["footer", "sections"], "title"},
     {["footer", "sections", "links"], "label"},
+    {["footer", "sections", "links"], "badge"},
     {["navigation", "primary_links"], "label"},
+    {["navigation", "primary_links"], "badge"},
     {["navigation", "primary_links", "items"], "label"},
+    {["navigation", "primary_links", "items"], "badge"},
     {["navigation", "guest_links"], "label"},
+    {["navigation", "guest_links"], "badge"},
     {["navigation", "guest_links", "items"], "label"},
+    {["navigation", "guest_links", "items"], "badge"},
     {["navigation", "authenticated_links"], "label"},
+    {["navigation", "authenticated_links"], "badge"},
     {["navigation", "authenticated_links", "items"], "label"},
+    {["navigation", "authenticated_links", "items"], "badge"},
     {["navigation", "account_links"], "label"},
-    {["navigation", "account_links", "items"], "label"}
+    {["navigation", "account_links"], "badge"},
+    {["navigation", "account_links", "items"], "label"},
+    {["navigation", "account_links", "items"], "badge"}
   ]
 
   @doc false

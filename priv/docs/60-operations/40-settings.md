@@ -53,7 +53,7 @@ Live values, and where each one came from, are on the
 | `GAMEND_AUTH_CHANGE_EMAIL_DAYS` | integer | `7` | How long the link confirming a new email address stays valid, in days. |
 | `GAMEND_AUTH_CONFIRM_EMAIL_DAYS` | integer | `7` | How long an email confirmation link stays valid, in days. |
 | `GAMEND_AUTH_DELETION_GRACE_DAYS` | integer | `0` | Days between a player deleting their own account and it being deleted. Signing in on the website within that time keeps the account. 0 deletes at once. |
-| `GAMEND_AUTH_DEVICE_AUTH_ENABLED` | boolean | `true` | Allow POST /api/v1/login/device. When on, any unknown device_id creates an anonymous account. |
+| `GAMEND_AUTH_DEVICE_AUTH_ENABLED` | boolean | `true` | Allow POST /api/v1/login/device. When on, any unknown device_id creates an anonymous account, and the website may give a signed-out visitor one the same way (`GamendWeb.UserAuth.ensure_user/1`). |
 | `GAMEND_AUTH_GUARDIAN_SECRET_KEY` | string | - | JWT signing key. Defaults to secret_key_base when unset. Secret - never log or commit it. |
 | `GAMEND_AUTH_LOCKOUT_ATTEMPTS` | integer | `10` | Failed passwords for one email address that lock its password sign-in. Counted per address across every IP. 0 disables the lockout. |
 | `GAMEND_AUTH_LOCKOUT_MINUTES` | integer | `15` | How long a lock lasts. Emailed login links and provider sign-in still work meanwhile, so the owner is never shut out. |

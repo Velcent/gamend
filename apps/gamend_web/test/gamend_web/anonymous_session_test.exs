@@ -11,6 +11,8 @@ defmodule GamendWeb.AnonymousSessionTest do
   alias Gamend.Accounts.User
   alias GamendWeb.UserAuth
 
+  import Phoenix.LiveViewTest
+
   setup do
     previous = Application.get_env(:gamend_core, Gamend.Accounts, [])
 
@@ -38,30 +40,51 @@ defmodule GamendWeb.AnonymousSessionTest do
   end
 
   describe "ensure_user/1 on a live page" do
-    test "counts new accounts per IP, in the bucket registering uses" do
-      # It runs over the socket, which the HTTP rate limiter never sees.
-      limit = Gamend.Settings.get(GamendWeb.Plugs.RateLimiter, :auth_limit)
+    test "counts new accounts per IP, in the normal bucket, not the login form's" do
+      # It runs over the socket, which the HTTP rate limiter never sees. The
+      # general limit, lowered here so the test makes a few accounts, not 240.
+      previous = Application.get_env(:gamend_web, GamendWeb.Plugs.RateLimiter, [])
+
+      Application.put_env(
+        :gamend_web,
+        GamendWeb.Plugs.RateLimiter,
+        Keyword.put(previous, :general_limit, 3)
+      )
+
+      on_exit(fn -> Application.put_env(:gamend_web, GamendWeb.Plugs.RateLimiter, previous) end)
 
       from = fn ip ->
         %{connected_socket() | assigns: Map.put(connected_socket().assigns, :client_ip, ip)}
       end
 
-      for _ <- 1..limit, do: assert({:ok, _} = UserAuth.ensure_user(from.("198.51.100.7")))
+      # Async tests elsewhere reset the shared counters (`ConnCase`), so count
+      # the accounts made before the first refusal rather than expect it at
+      # exactly limit + 1.
+      made =
+        Enum.reduce_while(1..15, 0, fn _, made ->
+          case UserAuth.ensure_user(from.("198.51.100.7")) do
+            {:ok, _} -> {:cont, made + 1}
+            {:error, :rate_limited} -> {:halt, made}
+          end
+        end)
 
-      assert {:error, :rate_limited} = UserAuth.ensure_user(from.("198.51.100.7"))
+      assert made >= 3 and made < 15
+
+      # The login form's bucket is untouched by guests.
+      assert :ok = GamendWeb.LiveHelpers.check_rate_limit("198.51.100.7", :auth)
       assert {:ok, _} = UserAuth.ensure_user(from.("198.51.100.8"))
     end
 
     test "a signed-out page records the IP its new accounts count against", %{conn: conn} do
       # Read at mount (the page's signed session), since a LiveView's connect
       # info is gone by the time an event asks for an account.
-      {:ok, view, _html} = Phoenix.LiveViewTest.live(conn, ~p"/leaderboards")
+      {:ok, view, _html} = live(conn, ~p"/leaderboards")
       assert %{socket: %{assigns: %{client_ip: "127.0.0.1"}}} = :sys.get_state(view.pid)
 
       user = Gamend.AccountsFixtures.user_fixture()
 
       {:ok, view, _html} =
-        conn |> log_in_user(user) |> Phoenix.LiveViewTest.live(~p"/leaderboards")
+        conn |> log_in_user(user) |> live(~p"/leaderboards")
 
       refute Map.has_key?(:sys.get_state(view.pid).socket.assigns, :client_ip)
     end

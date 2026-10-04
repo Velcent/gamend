@@ -978,6 +978,38 @@ defmodule Gamend.Quests do
   end
 
   @doc ~S"""
+    What a quest page draws, from one read of the user's progress: `:entries`,
+    the page `list_user_quests/2` returns for these `opts`; `:total`, what
+    `count_user_quests/2` counts for them; `:categories`, what
+    `visible_categories/1` lists (the tabs, so every filter but none). The three
+    separately read the same rows three times.
+    
+  """
+  @spec user_quest_page(
+          user_id(),
+          keyword()
+        ) :: %{
+          entries: [
+            %{
+              quest: Gamend.Quests.Quest.t(),
+              progress: Gamend.Quests.QuestProgress.t() | nil,
+              claimable: boolean()
+            }
+          ],
+          total: non_neg_integer(),
+          categories: [String.t()]
+        }
+  def user_quest_page(_user_id, _opts \\ []) do
+    case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        nil
+
+      _ ->
+        raise "Gamend.Quests.user_quest_page/2 is a stub - only available at runtime on Gamend"
+    end
+  end
+
+  @doc ~S"""
     The categories that actually have something behind them for this viewer.
     
     Derived from the same visibility rule as `list_user_quests/2` rather than

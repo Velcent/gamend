@@ -480,7 +480,14 @@ defmodule Gamend.Payments do
     end
   end
 
-  @doc false
+  @doc ~S"""
+    Whether the user holds `key` right now: an active row with no end, or an end
+    still ahead.
+    
+    Answered from `entitlement_rows/1`, so a page asking about several keys (a
+    paid plan and its trial, on every render) costs one query between changes.
+    
+  """
   @spec has_entitlement?(Ecto.UUID.t(), String.t()) :: boolean()
   def has_entitlement?(_user_id, _key) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do

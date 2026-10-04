@@ -231,15 +231,26 @@ defmodule GamendWeb.HostLayoutShell do
                 {section["title"]}
               </p>
               <nav aria-label={section["title"]} class="flex flex-col gap-1.5">
-                <a
-                  :for={link <- visible_footer_links(section, @current_scope)}
-                  href={link["href"]}
-                  target={if(link["external"], do: "_blank", else: nil)}
-                  rel={if(link["external"], do: "noopener noreferrer", else: nil)}
-                  class="w-fit hover:text-base-content hover:underline"
-                >
-                  {link["label"]}
-                </a>
+                <%= for link <- visible_footer_links(section, @current_scope) do %>
+                  <span
+                    :if={GamendWeb.HostLayoutNavigation.disabled?(link)}
+                    aria-disabled="true"
+                    class="inline-flex w-fit items-center gap-1.5 opacity-70"
+                  >
+                    {link["label"]}
+                    <GamendWeb.HostLayoutNavigation.nav_badge entry={link} />
+                  </span>
+                  <a
+                    :if={!GamendWeb.HostLayoutNavigation.disabled?(link)}
+                    href={link["href"]}
+                    target={if(link["external"], do: "_blank", else: nil)}
+                    rel={if(link["external"], do: "noopener noreferrer", else: nil)}
+                    class="inline-flex w-fit items-center gap-1.5 hover:text-base-content hover:underline"
+                  >
+                    {link["label"]}
+                    <GamendWeb.HostLayoutNavigation.nav_badge entry={link} />
+                  </a>
+                <% end %>
               </nav>
             </div>
           </div>

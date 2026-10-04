@@ -90,6 +90,55 @@ defmodule GamendWeb.HostLayoutNavigationTest do
     assert html =~ ~s(aria-disabled="true")
   end
 
+  test "a disabled link keeps its button look, has no href and shows its badge" do
+    link = %{
+      "label" => "Play",
+      "href" => "/play",
+      "icon" => "hero-play-solid",
+      "badge" => "Coming soon",
+      "disabled" => true
+    }
+
+    for render <- [&HostLayoutNavigation.desktop_nav/1, &HostLayoutNavigation.mobile_nav/1] do
+      html = render_component(render, base_assigns([link]))
+
+      refute html =~ ~s(href="/play")
+      assert html =~ ~s(aria-disabled="true")
+      assert html =~ "btn"
+      assert html =~ ~r/Play.*badge.*Coming soon/s
+    end
+  end
+
+  test "a disabled link inside a dropdown has no href and shows its badge" do
+    nav = [
+      %{
+        "label" => "Learn",
+        "items" => [
+          %{"label" => "Tests", "href" => "/tests"},
+          %{"label" => "Play", "href" => "/play", "badge" => "Coming soon", "disabled" => true}
+        ]
+      }
+    ]
+
+    html = render_component(&HostLayoutNavigation.desktop_nav/1, base_assigns(nav))
+
+    assert html =~ ~s(href="/tests")
+    refute html =~ ~s(href="/play")
+    assert html =~ "Coming soon"
+  end
+
+  test "a badge on a working link keeps the link" do
+    html =
+      render_component(
+        &HostLayoutNavigation.desktop_nav/1,
+        base_assigns([%{"label" => "Classes", "href" => "/classes", "badge" => "Pro"}])
+      )
+
+    assert html =~ ~s(href="/classes")
+    assert html =~ ~r/Classes.*badge.*Pro/s
+    refute html =~ "aria-disabled"
+  end
+
   test "desktop dropdown highlights the active sub-item with daisyUI menu-active" do
     nav = [
       %{

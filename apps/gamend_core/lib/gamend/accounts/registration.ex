@@ -176,7 +176,7 @@ defmodule Gamend.Accounts.Registration do
     if User.anonymous?(user) do
       attrs = Map.new(attrs, fn {k, v} -> {to_string(k), v} end)
 
-      Repo.transaction(fn ->
+      Gamend.AfterCommit.transaction(fn ->
         with {:ok, %User{} = updated} <- user |> User.email_changeset(attrs) |> Repo.update(),
              :ok <- queue_confirmation(updated, false, confirmation_url_fun, notifier) do
           updated

@@ -114,7 +114,7 @@ defmodule GamendWeb.UserAuth do
   Returns `{:ok, socket}` with `current_scope` set, or `{:error, reason}`:
   `:disabled` when device accounts are off, `:not_connected` on the static render
   (there is no browser to hand the session to yet), `:rate_limited` past the
-  per-IP limit on new accounts (the `auth` bucket, as registering).
+  per-IP limit on new accounts (the general bucket page loads use).
   """
   @spec ensure_user(Phoenix.LiveView.Socket.t()) ::
           {:ok, Phoenix.LiveView.Socket.t()} | {:error, term()}
@@ -195,13 +195,14 @@ defmodule GamendWeb.UserAuth do
 
   def put_anonymous_session(_conn, _encrypted), do: :error
 
-  # A new guest account is a registration, so it counts in the same per-IP
-  # bucket as the LiveView login and register forms (`auth_limit` per
-  # `auth_window_ms`, 10 a minute by default). It runs over the socket, where
-  # the HTTP rate limiter never looks: without this one page's session could
-  # mount and save, and make an account, as fast as a script can send.
+  # A new guest account counts in the normal per-IP bucket (`general_limit`
+  # per `general_window_ms`, 240 a minute by default), the one page loads get.
+  # It runs over the socket, where the HTTP rate limiter never looks, so
+  # without this one page's session could make accounts as fast as a script
+  # sends. Not the registration bucket (10 a minute): a class or a mobile
+  # carrier shares one address, and that one also gates the login form.
   defp guest_rate_limit(ip) do
-    case GamendWeb.LiveHelpers.check_rate_limit(ip || "unknown", :auth) do
+    case GamendWeb.LiveHelpers.check_rate_limit(ip || "unknown", :general) do
       :ok -> :ok
       {:error, _retry_after} -> {:error, :rate_limited}
     end

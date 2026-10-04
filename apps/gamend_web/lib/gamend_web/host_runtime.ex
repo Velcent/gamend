@@ -563,6 +563,14 @@ defmodule GamendWeb.HostRuntime do
   # this covers only what never became a request.
   @bandit_http_options [log_protocol_errors: false]
 
+  # Per-message deflate on the websockets that ask for it (the LiveView socket,
+  # `compress: true`). zlib's default level 6 was ~9% of a visit's server CPU;
+  # level 4 is ~40% cheaper for ~9% more bytes. A recorded visit (a hub, two
+  # games, a flashcard deck, the course page, a test: 63 frames, 779 KB) sent
+  # 88 KB for 16.9 ms of deflate at 6 and 96 KB for 9.9 ms at 4 (2026-10-04).
+  # Levels 1-3 save a little more CPU and send 17-28% more.
+  @bandit_websocket_options [deflate_options: [level: 4]]
+
   defp cors_and_endpoint_entries(setting, host, scheme) do
     secret_key_base = setting.(Gamend.Accounts, :secret_key_base)
     port = setting.(GamendWeb.Http, :port)
@@ -598,6 +606,7 @@ defmodule GamendWeb.HostRuntime do
           ip: {0, 0, 0, 0, 0, 0, 0, 0},
           port: port,
           http_options: @bandit_http_options,
+          websocket_options: @bandit_websocket_options,
           thousand_island_options: [
             transport_options: socket_buffer_options(setting)
           ]
@@ -669,6 +678,7 @@ defmodule GamendWeb.HostRuntime do
         certfile: setting.(GamendWeb.Tls, :certfile),
         keyfile: setting.(GamendWeb.Tls, :keyfile),
         http_options: @bandit_http_options,
+        websocket_options: @bandit_websocket_options,
         thousand_island_options: [
           # A public listener spends its day being probed. Both of these are
           # about connections that never became a request, and neither says
