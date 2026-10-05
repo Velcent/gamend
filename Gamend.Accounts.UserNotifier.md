@@ -13,6 +13,10 @@ Silently returns `{:ok, :no_email}` if the user has no email address.
 
 # `deliver_confirmation_instructions`
 
+Deliver the email that confirms an account: a link, and with `code` the
+same confirmation as six digits to type into the game. A magic link sent to
+an account not yet confirmed comes here too, with no code.
+
 # `deliver_inactivity_warning`
 
 Warn a user that their account will be deleted after `days` of inactivity.

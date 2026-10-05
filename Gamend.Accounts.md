@@ -41,9 +41,10 @@ Checks an email and password, counting failures per address
 password is looked at, and for the failure that locks it.
 
 `{:error, :email_not_confirmed}` for the right password on an account whose
-email was never confirmed. Anyone can register any address with a password,
-so the password signs nobody in until the inbox's owner has confirmed it.
-It is answered only after the password matched, so it tells nothing to
+email was never confirmed: registering takes no password, so only a guest
+account given an email, or one registered when the API still took one, can
+have it. The password signs nobody in until the inbox's owner has confirmed
+it. It is answered only after the password matched, so it tells nothing to
 someone who does not know it.
 
 # `broadcast_friend_update`
@@ -122,6 +123,8 @@ See `Gamend.Accounts.User.password_changeset/3` for a list of supported options.
 # `change_username`
 
 # `confirm_user`
+
+# `confirm_user_by_code`
 
 # `confirm_user_by_token`
 
@@ -314,6 +317,8 @@ Get a user by their Apple ID.
 
 Returns `%User{}` or `nil`.
 
+# `get_user_by_confirm_token`
+
 # `get_user_by_discord_id`
 
 ```elixir
@@ -449,11 +454,11 @@ Accepts a user ID and clears both the primary and all index caches.
 
 # `refresh_account_class`
 
+# `register_unconfirmed_user_and_deliver`
+
 # `register_user`
 
 # `register_user_and_deliver`
-
-# `register_user_with_password_and_deliver`
 
 # `request_deletion`
 
@@ -484,6 +489,8 @@ Admin deletions and the retention sweeps call `delete_user/1` and never wait.
 ```
 
 Whether new accounts require manual admin activation before they can log in.
+
+# `resend_confirmation`
 
 # `revoke_all_tokens`
 

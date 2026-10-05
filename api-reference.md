@@ -1,4 +1,4 @@
-# gamend_core v1.0.1294 - API Reference
+# gamend_core v1.0.1295 - API Reference
 
 ## Modules
 
@@ -96,7 +96,7 @@ application (registration, OAuth, and admin changes).
   - [Gamend.Accounts.UserNotifier](Gamend.Accounts.UserNotifier.md): Small helpers used to deliver transactional emails for the Accounts flow
 (confirmation, magic link, and email change instructions).
   - [Gamend.Accounts.UserToken](Gamend.Accounts.UserToken.md): Functions and schema for persistent user tokens used by sessions, magic links,
-and email-change workflows.
+email confirmation (a link and a code) and email-change workflows.
   - [Gamend.Accounts.Username](Gamend.Accounts.Username.md): The username handle's rules, in one place for the changeset and the
 generator.
   - [Gamend.Accounts.UsernameGenerator](Gamend.Accounts.UsernameGenerator.md): Generates default usernames for new users.

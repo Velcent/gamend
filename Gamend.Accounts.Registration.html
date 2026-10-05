@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.4">
-    <meta name="project" content="gamend_core v1.0.1294">
+    <meta name="project" content="gamend_core v1.0.1295">
 
 
-    <title>Gamend.Accounts.Registration — gamend_core v1.0.1294</title>
+    <title>Gamend.Accounts.Registration — gamend_core v1.0.1295</title>
 
     <link rel="stylesheet" href="dist/html-elixir-RXHHCTJW.css" />
 
-    <script defer src="dist/sidebar_items-2EF847D9.js"></script>
+    <script defer src="dist/sidebar_items-D8F6813C.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-MI33G4N7.js"></script>
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1294
+          v1.0.1295
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr />Accounts.<wbr />Registration</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1294)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1295)</small>
 
     </h1>
 
@@ -164,11 +164,23 @@ skipped.</p></div>
 
     <div class="summary-row">
       <div class="summary-signature">
+        <a href="#confirm_user_by_code/3" data-no-tooltip="" translate="no">confirm_user_by_code(email, code, password)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Confirms the unconfirmed account registered to <code class="inline">email</code> with the code from
+its confirmation email, sets its password, and returns it signed in by the
+caller (<code class="inline">POST /api/v1/register/confirm</code>).</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
         <a href="#confirm_user_by_token/1" data-no-tooltip="" translate="no">confirm_user_by_token(token)</a>
 
       </div>
 
-        <div class="summary-synopsis"><p>Confirm a user by an email confirmation token (context: &quot;confirm&quot;).</p></div>
+        <div class="summary-synopsis"><p>Confirm a user by the token in the emailed link (context: &quot;confirm&quot;).</p></div>
 
     </div>
 
@@ -177,6 +189,34 @@ skipped.</p></div>
         <a href="#deliver_user_confirmation_instructions/2" data-no-tooltip="" translate="no">deliver_user_confirmation_instructions(user, confirmation_url_fun)</a>
 
       </div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#get_user_by_confirm_token/1" data-no-tooltip="" translate="no">get_user_by_confirm_token(token)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>The account an emailed confirmation link belongs to, or <code class="inline">nil</code> for a link
+that is malformed, spent or expired. It only reads: the page the link opens
+shows the account, and confirming waits for its button
+(<a href="#confirm_user_by_token/1"><code class="inline">confirm_user_by_token/1</code></a>), so a mail scanner that opens every link in an
+email confirms nothing and spends nothing.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#register_unconfirmed_user_and_deliver/3" data-no-tooltip="" translate="no">register_unconfirmed_user_and_deliver(attrs, confirmation_url_fun, notifier \\ Gamend.Accounts.UserNotifier)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p><a href="#register_user_and_deliver/3"><code class="inline">register_user_and_deliver/3</code></a> for a game client (<code class="inline">POST /api/v1/register</code>):
+every account it makes starts unconfirmed and is sent the email, the first
+one too. A client has no page to sign the first account in, and with no
+password it could not sign in any other way, so it confirms with the code
+like everyone else (<a href="#confirm_user_by_code/3"><code class="inline">confirm_user_by_code/3</code></a>). It still becomes the admin.</p></div>
 
     </div>
 
@@ -202,14 +242,13 @@ skipped.</p></div>
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#register_user_with_password_and_deliver/3" data-no-tooltip="" translate="no">register_user_with_password_and_deliver(attrs, confirmation_url_fun, notifier \\ Gamend.Accounts.UserNotifier)</a>
+        <a href="#resend_confirmation/3" data-no-tooltip="" translate="no">resend_confirmation(email, confirmation_url_fun, notifier \\ Gamend.Accounts.UserNotifier)</a>
 
       </div>
 
-        <div class="summary-synopsis"><p>Register a user with an email and a password and queue the confirmation
-email, as <a href="#register_user_and_deliver/3"><code class="inline">register_user_and_deliver/3</code></a> does for the browser form: how a
-game client signs up (<code class="inline">POST /api/v1/register</code>). The password signs in once
-the email is confirmed (<a href="Gamend.Accounts.html#authenticate_by_password/2"><code class="inline">Gamend.Accounts.authenticate_by_password/2</code></a>).</p></div>
+        <div class="summary-synopsis"><p>Sends the confirmation email again, with a new code, to the unconfirmed
+account registered to <code class="inline">email</code> (<code class="inline">POST /api/v1/register/resend</code>). Only the
+newest code works; links already sent keep working until they expire.</p></div>
 
     </div>
 
@@ -252,7 +291,7 @@ email signs in to it on any device and confirms the address.</p></div>
       <h1 class="signature" translate="no">change_user_registration(user, attrs \\ %{})</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/registration.ex#L435" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/registration.ex#L599" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -280,7 +319,7 @@ email signs in to it on any device and confirms the address.</p></div>
       <h1 class="signature" translate="no">change_user_registration_for_validation(user, attrs)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/registration.ex#L454" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/registration.ex#L618" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -316,7 +355,7 @@ a stub for a function carrying two default arguments.</p>
       <h1 class="signature" translate="no">confirm_user(user)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/registration.ex#L368" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/registration.ex#L379" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -336,6 +375,47 @@ a stub for a function carrying two default arguments.</p>
 </span><span class="p" data-group-id="group-2">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="group-3">%</span><span class="nc" data-group-id="group-3">User</span><span class="p" data-group-id="group-3">{</span><span class="p" data-group-id="group-3">}</span><span class="p" data-group-id="group-2">}</span></code></pre>
   </section>
 </section>
+<section class="detail" id="confirm_user_by_code/3">
+
+  <div class="detail-header">
+    <a href="#confirm_user_by_code/3" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">confirm_user_by_code(email, code, password)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/registration.ex#L501" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> confirm_user_by_code(<a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>(), <a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>(), <a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>()) ::
+  {:ok, {<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>(), [<a href="Gamend.Accounts.UserToken.html#t:t/0">Gamend.Accounts.UserToken.t</a>()]}}
+  | {:error, :invalid_code | {:locked, <a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">pos_integer</a>()} | <a href="https://ecto.hexdocs.pm/3.14.2/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>()}</pre>
+
+      </div>
+
+<p>Confirms the unconfirmed account registered to <code class="inline">email</code> with the code from
+its confirmation email, sets its password, and returns it signed in by the
+caller (<code class="inline">POST /api/v1/register/confirm</code>).</p><p>The code is the proof that the caller reads the inbox, which is why the
+password is set here and never at registration.</p><ul><li><code class="inline">{:error, %Ecto.Changeset{}}</code> for a password the account would refuse.
+It is checked before the code, so it costs no attempt and says nothing
+about the code.</li><li><code class="inline">{:error, :invalid_code}</code> for a wrong, spent or expired code, an address
+with no unconfirmed account, or one already confirmed: the same answer,
+so it tells no one which addresses are registered.</li><li><code class="inline">{:error, {:locked, seconds}}</code>: a wrong code counts toward the address's
+sign-in lockout (<a href="Gamend.Accounts.LoginLockouts.html"><code class="inline">Gamend.Accounts.LoginLockouts</code></a>), shared with passwords.
+The failure that locks it also voids the code, so guessing needs a fresh
+email for every few tries; the link keeps working.</li></ul><p>Success revokes every earlier token of the account, as a password change
+does, and returns them so the caller can disconnect the sessions.</p>
+  </section>
+</section>
 <section class="detail" id="confirm_user_by_token/1">
 
   <div class="detail-header">
@@ -346,7 +426,7 @@ a stub for a function carrying two default arguments.</p>
       <h1 class="signature" translate="no">confirm_user_by_token(token)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/registration.ex#L389" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/registration.ex#L422" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -362,8 +442,13 @@ a stub for a function carrying two default arguments.</p>
 
       </div>
 
-<p>Confirm a user by an email confirmation token (context: &quot;confirm&quot;).</p><p>Returns {:ok, user} when the token is valid and user was confirmed.
-Returns {:error, :not_found} or {:error, :expired} when token is invalid/expired.</p>
+<p>Confirm a user by the token in the emailed link (context: &quot;confirm&quot;).</p><p>Returns {:ok, user} when the token is valid and user was confirmed.
+Returns {:error, :not_found} or {:error, :invalid} when token is invalid/expired.</p><p>Confirming spends the link and the code sent with it. An account confirmed
+this way has no password: registration takes none, and one set before the
+address was proved is removed, since whoever set it may not own the inbox
+(an account registered when the API still took one, or a guest account
+that was given an email). Its owner sets one in settings, where the link's
+page signs them in, or confirms with the code instead.</p>
   </section>
 </section>
 <section class="detail" id="deliver_user_confirmation_instructions/2">
@@ -376,7 +461,7 @@ Returns {:error, :not_found} or {:error, :expired} when token is invalid/expired
       <h1 class="signature" translate="no">deliver_user_confirmation_instructions(user, confirmation_url_fun)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/registration.ex#L460" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/registration.ex#L624" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -396,6 +481,76 @@ Returns {:error, :not_found} or {:error, :expired} when token is invalid/expired
 
   </section>
 </section>
+<section class="detail" id="get_user_by_confirm_token/1">
+
+  <div class="detail-header">
+    <a href="#get_user_by_confirm_token/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">get_user_by_confirm_token(token)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/registration.ex#L401" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> get_user_by_confirm_token(<a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>()) :: <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>() | nil</pre>
+
+      </div>
+
+<p>The account an emailed confirmation link belongs to, or <code class="inline">nil</code> for a link
+that is malformed, spent or expired. It only reads: the page the link opens
+shows the account, and confirming waits for its button
+(<a href="#confirm_user_by_token/1"><code class="inline">confirm_user_by_token/1</code></a>), so a mail scanner that opens every link in an
+email confirms nothing and spends nothing.</p>
+  </section>
+</section>
+<section class="detail" id="register_unconfirmed_user_and_deliver/3">
+
+    <span id="register_unconfirmed_user_and_deliver/2"></span>
+
+  <div class="detail-header">
+    <a href="#register_unconfirmed_user_and_deliver/3" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">register_unconfirmed_user_and_deliver(attrs, confirmation_url_fun, notifier \\ Gamend.Accounts.UserNotifier)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/registration.ex#L157" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> register_unconfirmed_user_and_deliver(
+  <a href="Gamend.Types.html#t:user_registration_attrs/0">Gamend.Types.user_registration_attrs</a>(),
+  (<a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>() -&gt; <a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>()),
+  <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">module</a>()
+) :: {:ok, <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()} | {:error, <a href="https://ecto.hexdocs.pm/3.14.2/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>() | <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">term</a>()}</pre>
+
+      </div>
+
+<p><a href="#register_user_and_deliver/3"><code class="inline">register_user_and_deliver/3</code></a> for a game client (<code class="inline">POST /api/v1/register</code>):
+every account it makes starts unconfirmed and is sent the email, the first
+one too. A client has no page to sign the first account in, and with no
+password it could not sign in any other way, so it confirms with the code
+like everyone else (<a href="#confirm_user_by_code/3"><code class="inline">confirm_user_by_code/3</code></a>). It still becomes the admin.</p>
+  </section>
+</section>
 <section class="detail" id="register_user/1">
 
   <div class="detail-header">
@@ -406,7 +561,7 @@ Returns {:error, :not_found} or {:error, :expired} when token is invalid/expired
       <h1 class="signature" translate="no">register_user(attrs)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/registration.ex#L83" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/registration.ex#L84" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -441,7 +596,7 @@ Returns {:error, :not_found} or {:error, :expired} when token is invalid/expired
       <h1 class="signature" translate="no">register_user_and_deliver(attrs, confirmation_url_fun, notifier \\ Gamend.Accounts.UserNotifier)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/registration.ex#L126" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/registration.ex#L136" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -464,22 +619,27 @@ Returns {:error, :not_found} or {:error, :expired} when token is invalid/expired
 email goes out from the <code class="inline">mailers</code> queue (<a href="Gamend.Accounts.ConfirmationMailer.html"><code class="inline">Gamend.Accounts.ConfirmationMailer</code></a>),
 enqueued in the transaction that inserts the user: the call returns once
 both are committed, without waiting on SMTP, and a failed send is retried
-there. The first user becomes the admin and is confirmed, with no email.</p>
+there. The email carries a link and a code (<a href="#confirm_user_by_code/3"><code class="inline">confirm_user_by_code/3</code></a>).</p><p>The first user becomes the admin and is confirmed, with no email: the
+browser form signs it in itself. A caller that cannot uses
+<a href="#register_unconfirmed_user_and_deliver/3"><code class="inline">register_unconfirmed_user_and_deliver/3</code></a>.</p><p>No password is taken. Whoever registers an address has not shown they own
+it, so a password chosen now could be someone else's, and it would sign them
+into the account once the address's owner confirmed it. The password is set
+after the inbox is proved: with the code, or in the settings the link opens.</p>
   </section>
 </section>
-<section class="detail" id="register_user_with_password_and_deliver/3">
+<section class="detail" id="resend_confirmation/3">
 
-    <span id="register_user_with_password_and_deliver/2"></span>
+    <span id="resend_confirmation/2"></span>
 
   <div class="detail-header">
-    <a href="#register_user_with_password_and_deliver/3" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+    <a href="#resend_confirmation/3" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
       <i class="ri-link-m" aria-hidden="true"></i>
     </a>
     <div class="heading-with-actions">
-      <h1 class="signature" translate="no">register_user_with_password_and_deliver(attrs, confirmation_url_fun, notifier \\ Gamend.Accounts.UserNotifier)</h1>
+      <h1 class="signature" translate="no">resend_confirmation(email, confirmation_url_fun, notifier \\ Gamend.Accounts.UserNotifier)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/registration.ex#L146" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/registration.ex#L566" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -490,18 +650,15 @@ there. The first user becomes the admin and is confirmed, with no email.</p>
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> register_user_with_password_and_deliver(
-  <a href="Gamend.Types.html#t:user_registration_attrs/0">Gamend.Types.user_registration_attrs</a>(),
-  (<a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>() -&gt; <a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>()),
-  <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">module</a>()
-) :: {:ok, <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()} | {:error, <a href="https://ecto.hexdocs.pm/3.14.2/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>() | <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">term</a>()}</pre>
+          <pre translate="no"><span class="attribute">@spec</span> resend_confirmation(<a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>(), (<a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>() -&gt; <a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>()), <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">module</a>()) :: :ok</pre>
 
       </div>
 
-<p>Register a user with an email and a password and queue the confirmation
-email, as <a href="#register_user_and_deliver/3"><code class="inline">register_user_and_deliver/3</code></a> does for the browser form: how a
-game client signs up (<code class="inline">POST /api/v1/register</code>). The password signs in once
-the email is confirmed (<a href="Gamend.Accounts.html#authenticate_by_password/2"><code class="inline">Gamend.Accounts.authenticate_by_password/2</code></a>).</p>
+<p>Sends the confirmation email again, with a new code, to the unconfirmed
+account registered to <code class="inline">email</code> (<code class="inline">POST /api/v1/register/resend</code>). Only the
+newest code works; links already sent keep working until they expire.</p><p>Always <code class="inline">:ok</code>, whether or not such an account exists, so it tells no one
+which addresses are registered. At most one email per account per minute
+is queued; the rest are dropped.</p>
   </section>
 </section>
 <section class="detail" id="upgrade_anonymous_user_and_deliver/4">
@@ -516,7 +673,7 @@ the email is confirmed (<a href="Gamend.Accounts.html#authenticate_by_password/2
       <h1 class="signature" translate="no">upgrade_anonymous_user_and_deliver(user, attrs, confirmation_url_fun, notifier \\ Gamend.Accounts.UserNotifier)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/registration.ex#L169" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/registration.ex#L180" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -551,9 +708,9 @@ email signs in to it on any device and confirms the address.</p><p><code class="
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1294">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1295">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1294">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1295">Hex Preview</a>
 
             </span>
 

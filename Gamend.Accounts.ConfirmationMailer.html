@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.4">
-    <meta name="project" content="gamend_core v1.0.1294">
+    <meta name="project" content="gamend_core v1.0.1295">
 
 
-    <title>Gamend.Accounts.ConfirmationMailer — gamend_core v1.0.1294</title>
+    <title>Gamend.Accounts.ConfirmationMailer — gamend_core v1.0.1295</title>
 
     <link rel="stylesheet" href="dist/html-elixir-RXHHCTJW.css" />
 
-    <script defer src="dist/sidebar_items-2EF847D9.js"></script>
+    <script defer src="dist/sidebar_items-D8F6813C.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-MI33G4N7.js"></script>
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1294
+          v1.0.1295
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr />Accounts.<wbr />ConfirmationMailer</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1294)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1295)</small>
 
     </h1>
 
@@ -118,9 +118,10 @@ gamend_core
 committed account always has its email queued and the transaction holds the
 database for two inserts rather than an SMTP conversation. On SQLite the
 repo has a single connection, and a registration that sent its mail inline
-stalled every other query in the server for the length of the SMTP session.</p><p>The job mints the token itself: a token in the job's args would sit in the
-jobs table in the clear. A failed send is retried with backoff, minting a new
-token each attempt (the unused ones expire). A job that outlives <code class="inline">timeout/1</code>
+stalled every other query in the server for the length of the SMTP session.</p><p>The job mints the link token and the code itself: either in the job's args
+would sit in the jobs table in the clear. A failed send is retried with
+backoff, minting new ones each attempt (unused links expire; a new code
+replaces the last). A job that outlives <code class="inline">timeout/1</code>
 is killed, so a hung relay costs one <code class="inline">mailers</code> slot, never the database.</p>
     </section>
 
@@ -140,12 +141,13 @@ is killed, so a hung relay costs one <code class="inline">mailers</code> slot, n
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#new_for/3" data-no-tooltip="" translate="no">new_for(user, confirmation_url_fun, notifier \\ UserNotifier)</a>
+        <a href="#new_for/4" data-no-tooltip="" translate="no">new_for(user, confirmation_url_fun, notifier \\ UserNotifier, opts \\ [])</a>
 
       </div>
 
         <div class="summary-synopsis"><p>The job for <code class="inline">user</code>. <code class="inline">confirmation_url_fun</code> maps an encoded token to its URL
-and runs now, with a placeholder; <code class="inline">notifier</code> delivers.</p></div>
+and runs now, with a placeholder; <code class="inline">notifier</code> delivers. <code class="inline">opts</code> go to
+<code class="inline">Oban.Worker.new/2</code> (a resend passes <code class="inline">:unique</code>).</p></div>
 
     </div>
 
@@ -163,19 +165,21 @@ and runs now, with a placeholder; <code class="inline">notifier</code> delivers.
     </h2>
 
     <div class="functions-list">
-<section class="detail" id="new_for/3">
+<section class="detail" id="new_for/4">
 
     <span id="new_for/2"></span>
 
+    <span id="new_for/3"></span>
+
   <div class="detail-header">
-    <a href="#new_for/3" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+    <a href="#new_for/4" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
       <i class="ri-link-m" aria-hidden="true"></i>
     </a>
     <div class="heading-with-actions">
-      <h1 class="signature" translate="no">new_for(user, confirmation_url_fun, notifier \\ UserNotifier)</h1>
+      <h1 class="signature" translate="no">new_for(user, confirmation_url_fun, notifier \\ UserNotifier, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/confirmation_mailer.ex#L32" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/confirmation_mailer.ex#L34" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -186,13 +190,19 @@ and runs now, with a placeholder; <code class="inline">notifier</code> delivers.
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> new_for(<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>(), (<a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>() -&gt; <a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>()), <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">module</a>()) ::
+          <pre translate="no"><span class="attribute">@spec</span> new_for(
+  <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>(),
+  (<a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>() -&gt; <a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>()),
+  <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">module</a>(),
+  <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">keyword</a>()
+) ::
   <a href="https://ecto.hexdocs.pm/3.14.2/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>()</pre>
 
       </div>
 
 <p>The job for <code class="inline">user</code>. <code class="inline">confirmation_url_fun</code> maps an encoded token to its URL
-and runs now, with a placeholder; <code class="inline">notifier</code> delivers.</p>
+and runs now, with a placeholder; <code class="inline">notifier</code> delivers. <code class="inline">opts</code> go to
+<code class="inline">Oban.Worker.new/2</code> (a resend passes <code class="inline">:unique</code>).</p>
   </section>
 </section>
 
@@ -204,9 +214,9 @@ and runs now, with a placeholder; <code class="inline">notifier</code> delivers.
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1294">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1295">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1294">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1295">Hex Preview</a>
 
             </span>
 
