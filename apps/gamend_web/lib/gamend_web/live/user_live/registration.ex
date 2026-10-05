@@ -2,7 +2,7 @@ defmodule GamendWeb.UserLive.Registration do
   use GamendWeb, :live_view
 
   alias Gamend.Accounts
-  alias Gamend.Accounts.{User, UserToken}
+  alias Gamend.Accounts.{Scope, User, UserToken}
   alias Gamend.Notifications.Preferences
   alias Gamend.Repo
 
@@ -70,7 +70,7 @@ defmodule GamendWeb.UserLive.Registration do
   # keeps everything (`Accounts.upgrade_anonymous_user_and_deliver/4`).
   def mount(params, session, %{assigns: %{current_scope: %{user_id: user_id} = scope}} = socket)
       when is_binary(user_id) do
-    if Gamend.Accounts.Scope.anonymous?(scope) do
+    if Scope.anonymous?(scope) do
       mount_form(params, session, socket)
     else
       require Logger
@@ -135,7 +135,7 @@ defmodule GamendWeb.UserLive.Registration do
   defp register(socket, user_params, notifier) do
     url_fun = fn t -> url(~p"/users/confirm/#{t}") end
 
-    case Gamend.Accounts.Scope.user(socket.assigns[:current_scope]) do
+    case Scope.user(socket.assigns[:current_scope]) do
       %User{} = user ->
         Accounts.upgrade_anonymous_user_and_deliver(user, user_params, url_fun, notifier)
 

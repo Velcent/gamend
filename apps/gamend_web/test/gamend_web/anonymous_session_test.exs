@@ -10,6 +10,7 @@ defmodule GamendWeb.AnonymousSessionTest do
   alias Gamend.Accounts.Scope
   alias Gamend.Accounts.User
   alias GamendWeb.UserAuth
+  alias Phoenix.LiveView.Utils
 
   import Phoenix.LiveViewTest
 
@@ -34,7 +35,7 @@ defmodule GamendWeb.AnonymousSessionTest do
   end
 
   defp pushed_token(socket) do
-    [[event, %{token: token}]] = Phoenix.LiveView.Utils.get_push_events(socket)
+    [[event, %{token: token}]] = Utils.get_push_events(socket)
     assert event == "gamend:anonymous_session"
     token
   end

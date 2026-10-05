@@ -471,10 +471,8 @@ defmodule GamendWeb.UserAuth do
   defp mount_current_scope(socket, session) do
     socket =
       Phoenix.Component.assign_new(socket, :current_scope, fn ->
-        {user, _} =
-          if user_token = session["user_token"] || connect_session_token(socket) do
-            Accounts.get_user_by_session_token(user_token)
-          end || {nil, nil}
+        user_token = session["user_token"] || connect_session_token(socket)
+        {user, _} = (user_token && Accounts.get_user_by_session_token(user_token)) || {nil, nil}
 
         Scope.for_user(user)
       end)

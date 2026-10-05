@@ -1,5 +1,7 @@
 # October 2026
 
+- [removed] **Three admin events no page sends.** `AdminLive.Config`'s `prefill_args` and `show_docs` and `AdminLive.Index`'s `set_tab`: no template or script pushed them any more. A `handle_event` clause is part of a public callback, so the compiler never reports one as unused.
+
 - [changed] **Websockets deflate at level 4.** `HostRuntime` gives both Bandit listeners `websocket_options: [deflate_options: [level: 4]]`; zlib's default (6) was ~9% of a visit's server CPU on a LiveView site. A recorded visit (six page joins, ~50 game and flashcard events, 779 KB) sent 88 KB for 16.9 ms of deflate at 6 and 96 KB for 9.9 ms at 4; levels 1-3 save a little more and send 17-28% more. Measured on the wire: a 76 KB join goes out as 11.3 KB (10.6 at 6). Production config only, like the rest of the listener options.
 
 - [changed] **Flag codes and icon names are checked byte by byte, not by regex.** `flag/1`'s code check and `DynamicIcon`'s name whitelist ran a regex for every flag and icon on every render (a page with language menus draws ~160 flags); a regex literal costs ~1.4 µs a call on OTP 28, the byte walk ~0.5. Same rules: `[a-z0-9-]{2,6}` and `[a-zA-Z0-9_-]+`.

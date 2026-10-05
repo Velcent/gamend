@@ -875,11 +875,6 @@ defmodule GamendWeb.AdminLive.Index do
   end
 
   @impl true
-  def handle_event("set_tab", %{"tab" => tab}, socket) do
-    {:noreply, assign(socket, :tab, tab)}
-  end
-
-  @impl true
   def handle_info(:refresh_live_stats, socket) do
     schedule_live_refresh()
 
