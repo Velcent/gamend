@@ -81,7 +81,8 @@ Attributes for updating an existing group.
   optional(:operator) =&gt; :set | :best | :incr | :decr,
   optional(:starts_at) =&gt; DateTime.t(),
   optional(:ends_at) =&gt; DateTime.t(),
-  optional(:metadata) =&gt; map()
+  optional(:metadata) =&gt; map(),
+  optional(:hidden) =&gt; boolean()
 }
 ```
 
@@ -101,6 +102,7 @@ Attributes for creating a new leaderboard.
   * `:starts_at` - Optional start time (UTC)
   * `:ends_at` - Optional end time (UTC)
   * `:metadata` - Arbitrary key-value data
+  * `:hidden` - Left out of every public listing (default false)
 
 ## Example
 
@@ -123,7 +125,8 @@ When querying by slug, the active leaderboard is returned.
   optional(:description) =&gt; String.t(),
   optional(:starts_at) =&gt; DateTime.t(),
   optional(:ends_at) =&gt; DateTime.t(),
-  optional(:metadata) =&gt; map()
+  optional(:metadata) =&gt; map(),
+  optional(:hidden) =&gt; boolean()
 }
 ```
 
@@ -138,6 +141,7 @@ Note: `slug`, `sort_order`, and `operator` cannot be changed after creation.
   * `:starts_at` - Start time (UTC)
   * `:ends_at` - End time (UTC)
   * `:metadata` - Arbitrary key-value data
+  * `:hidden` - Left out of every public listing (default false)
 
 ## Example
 

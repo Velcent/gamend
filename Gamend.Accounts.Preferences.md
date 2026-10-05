@@ -14,6 +14,21 @@ and this one is in none of them.
 Writes are serialized per user (`Gamend.Lock`) and re-read the row, so two
 settings changed at once cannot lose each other.
 
+Some are set by the page itself (`put_client/3`, `PUT /preferences`): the
+site's theme, and whatever a host adds to
+`config :gamend_core, :client_preferences` (a map of key to allowed
+values, e.g. `%{"game_sounds" => ~w(on off)}`). Only those keys, with only
+those values, can be written that way.
+
+# `client_keys`
+
+```elixir
+@spec client_keys() :: %{required(String.t()) =&gt; [String.t()]}
+```
+
+The preferences a page may set (`put_client/3`): core's `theme` and the
+host's `:client_preferences`, each with its allowed values.
+
 # `get`
 
 ```elixir
@@ -29,6 +44,25 @@ A user's preferences map (string keys), empty when none are set.
 ```
 
 The site language the user last read in (a locale code), or nil.
+
+# `put_client`
+
+```elixir
+@spec put_client(Gamend.Accounts.User.t(), String.t(), String.t()) ::
+  {:ok, Gamend.Accounts.User.t()} | {:error, term()}
+```
+
+Save a preference a page set: `{:ok, user}`, or `{:error, :invalid}` for a
+key or value not in `client_keys/0`. The theme's `"system"` removes the
+saved theme, so the device decides again.
+
+# `theme`
+
+```elixir
+@spec theme(Gamend.Accounts.User.t() | nil) :: String.t() | nil
+```
+
+The theme the user saved, `"dark"` or `"light"`, or nil.
 
 # `update`
 

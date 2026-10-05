@@ -23,6 +23,21 @@ submitted via server-side code — there is no public API for score submission.
     # List records with rank (use leaderboard id)
     records = Leaderboards.list_records(leaderboard.id, page: 1, limit: 25)
 
+## Keys
+
+A board can hold several rankings: a record is unique per user (or label)
+and `key`, and every read ranks within one key. `""` is the default, a
+board with one ranking. A host keeping, say, a best per game and language
+on one board submits with `key: "match|60|es_es"` and metadata naming the
+parts; `list_records/2` with `key: :all` and `meta:` reads across keys
+(`best_per_user: true` keeps each player's best of them).
+
+## Hidden boards
+
+`hidden: true` keeps a board out of `list_leaderboards/1`,
+`list_leaderboard_groups/1` and their counts unless `include_hidden: true`
+is passed. Everything else reads it like any board.
+
     # Get user's record (use leaderboard id)
     {:ok, record} = Leaderboards.get_user_record(leaderboard.id, user_id)
 
@@ -54,7 +69,7 @@ Count all leaderboard records across all leaderboards.
 # `count_leaderboard_groups`
 
 ```elixir
-@spec count_leaderboard_groups() :: non_neg_integer()
+@spec count_leaderboard_groups(keyword()) :: non_neg_integer()
 ```
 
 Counts unique leaderboard slugs.
@@ -75,7 +90,8 @@ Accepts the same filter options as `list_leaderboards/1`.
 @spec count_records(Ecto.UUID.t(), keyword()) :: non_neg_integer()
 ```
 
-Counts records for a leaderboard.
+Counts records for a leaderboard: the same `:key`, `:meta`,
+`:best_per_user` and `:search` as `list_records/2`.
 
 # `create_leaderboard`
 
@@ -119,11 +135,11 @@ Deletes a record.
 # `delete_user_record`
 
 ```elixir
-@spec delete_user_record(String.t(), Ecto.UUID.t()) ::
+@spec delete_user_record(String.t(), Ecto.UUID.t(), keyword()) ::
   {:ok, Gamend.Leaderboards.Record.t()} | {:error, :not_found}
 ```
 
-Deletes a user's record from a leaderboard.
+Deletes a user's record from a leaderboard (in `key:`, default `""`).
 Accepts either leaderboard ID or slug (both strings).
 
 # `end_leaderboard`
@@ -156,11 +172,11 @@ returns the most recently created one.
 # `get_label_record`
 
 ```elixir
-@spec get_label_record(Ecto.UUID.t(), String.t()) ::
+@spec get_label_record(Ecto.UUID.t(), String.t(), String.t()) ::
   Gamend.Leaderboards.Record.t() | nil
 ```
 
-Gets a single record by leaderboard ID and label.
+Gets a single record by leaderboard ID, label and key (default `""`).
 
 # `get_leaderboard`
 
@@ -199,10 +215,11 @@ Intended for internal/admin usage.
 # `get_record`
 
 ```elixir
-@spec get_record(Ecto.UUID.t(), Ecto.UUID.t()) :: Gamend.Leaderboards.Record.t() | nil
+@spec get_record(Ecto.UUID.t(), Ecto.UUID.t(), String.t()) ::
+  Gamend.Leaderboards.Record.t() | nil
 ```
 
-Gets a single record by leaderboard ID and user ID.
+Gets a single record by leaderboard ID, user ID and key (default `""`).
 
 # `get_record!`
 
@@ -215,11 +232,11 @@ Like `get_record/1`, but raises `Ecto.NoResultsError` when there is none.
 # `get_user_record`
 
 ```elixir
-@spec get_user_record(Ecto.UUID.t(), Ecto.UUID.t()) ::
+@spec get_user_record(Ecto.UUID.t(), Ecto.UUID.t(), keyword()) ::
   {:ok, Gamend.Leaderboards.Record.t()} | {:error, :not_found}
 ```
 
-Gets a user's record with their rank.
+Gets a user's record with their rank (within its key: `key:`, default `""`).
 Returns `{:ok, record_with_rank}` or `{:error, :not_found}`.
 
 # `invalidate_cache`
@@ -270,6 +287,7 @@ Lists leaderboards with optional filters.
   * `:starts_before` - Only leaderboards that started before this DateTime
   * `:ends_after` - Only leaderboards that end after this DateTime
   * `:ends_before` - Only leaderboards that end before this DateTime
+  * `:include_hidden` - Also hidden boards (default false)
   * `:page` - Page number (default 1)
   * `:page_size` - Page size (default 25)
 
@@ -306,11 +324,16 @@ Lists records for a leaderboard, ordered by rank.
 
 See `t:Gamend.Types.pagination_opts/0` for available options, plus:
 
-  * `:meta` — `{key, value}`, keeping only records whose `metadata[key]`
-    equals `value`. Ranks are computed **within** the filtered set, because
-    "the Spanish board" means first among Spanish, not 57th overall. That is
-    the opposite of `:search`, which ranks over the whole board so a found
-    player's real position is what shows.
+  * `:key` — the ranking to read (default `""`), or `:all` for every key's
+    rows ranked together.
+  * `:meta` — a map, keeping only records whose `metadata[field]` equals
+    each value (`%{"game" => "match", "lang" => "es_es"}`). Ranks are
+    computed **within** the filtered set, because "the Spanish board" means
+    first among Spanish, not 57th overall. That is the opposite of
+    `:search`, which ranks over the whole key so a found player's real
+    position is what shows.
+  * `:best_per_user` — with `key: :all`, each player's (or label's) best
+    row only: one board read across keys, a player once.
 
 # `list_records_around_user`
 
@@ -327,6 +350,7 @@ Returns records above and below the user's rank.
 ## Options
 
   * `:limit` - Total number of records to return (default 11, centered on user)
+  * `:key` - The ranking (default `""`)
 
 # `resolve_slugs`
 
@@ -352,7 +376,7 @@ leaderboard. Slugs with no active leaderboard are omitted from the result.
 # `submit_label_score`
 
 ```elixir
-@spec submit_label_score(String.t(), String.t(), integer(), map()) ::
+@spec submit_label_score(String.t(), String.t(), integer(), map(), keyword()) ::
   {:ok, Gamend.Leaderboards.Record.t()} | {:error, term()}
 ```
 
@@ -369,7 +393,7 @@ This is useful for statistics, rankings by category, etc.
 # `submit_score`
 
 ```elixir
-@spec submit_score(String.t(), Ecto.UUID.t(), integer(), map()) ::
+@spec submit_score(String.t(), Ecto.UUID.t(), integer(), map(), keyword()) ::
   {:ok, Gamend.Leaderboards.Record.t()} | {:error, term()}
 ```
 
@@ -395,6 +419,12 @@ To submit to a leaderboard by slug, first get the active leaderboard ID:
 
     iex> submit_score(123, user_id, 5, %{weapon: "sword"})
     {:ok, %Record{score: 15, metadata: %{weapon: "sword"}}}
+
+`key:` (default `""`) is the ranking within the board the score goes to;
+the operator applies per key.
+
+    iex> submit_score(123, user_id, 23, %{"game" => "match"}, key: "match|60")
+    {:ok, %Record{key: "match|60", score: 23}}
 
 # `update_leaderboard`
 

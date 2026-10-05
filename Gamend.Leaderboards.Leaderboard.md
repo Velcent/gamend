@@ -11,6 +11,11 @@ The `slug` is a human-readable identifier (e.g., "weekly_kills") that can be reu
 across multiple leaderboard instances (seasons). Use the slug to always target the
 currently active leaderboard, or use the integer `id` for a specific instance.
 
+## Hidden
+A hidden board is ranked and read like any other — by id, by slug, its
+records — but no public listing shows it (the leaderboards page, the API
+index). A host that shows a board on its own pages hides it.
+
 ## Icon
 `icon_url` is optional; when nil, clients show their default leaderboard
 icon (the web UI uses `GamendWeb.Icons.default(:leaderboard)`).
@@ -44,6 +49,7 @@ icon (the web UI uses `GamendWeb.Icons.default(:leaderboard)`).
   __meta__: term(),
   description: term(),
   ends_at: term(),
+  hidden: term(),
   icon_url: term(),
   id: term(),
   inserted_at: term(),

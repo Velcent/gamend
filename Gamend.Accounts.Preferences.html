@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.4">
-    <meta name="project" content="gamend_core v1.0.1295">
+    <meta name="project" content="gamend_core v1.0.1296">
 
 
-    <title>Gamend.Accounts.Preferences — gamend_core v1.0.1295</title>
+    <title>Gamend.Accounts.Preferences — gamend_core v1.0.1296</title>
 
     <link rel="stylesheet" href="dist/html-elixir-RXHHCTJW.css" />
 
-    <script defer src="dist/sidebar_items-D8F6813C.js"></script>
+    <script defer src="dist/sidebar_items-F10EE02B.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-MI33G4N7.js"></script>
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1295
+          v1.0.1296
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr />Accounts.<wbr />Preferences</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1295)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1296)</small>
 
     </h1>
 
@@ -121,7 +121,11 @@ time zone (<a href="Gamend.Accounts.TimeZone.html"><code class="inline">Gamend.A
 party members (<code class="inline">User.serialize_brief/1</code>), and a user's time zone or email
 choices are nobody else's business. Every user serializer lists its fields,
 and this one is in none of them.</p><p>Writes are serialized per user (<a href="Gamend.Lock.html"><code class="inline">Gamend.Lock</code></a>) and re-read the row, so two
-settings changed at once cannot lose each other.</p>
+settings changed at once cannot lose each other.</p><p>Some are set by the page itself (<a href="#put_client/3"><code class="inline">put_client/3</code></a>, <code class="inline">PUT /preferences</code>): the
+site's theme, and whatever a host adds to
+<code class="inline">config :gamend_core, :client_preferences</code> (a map of key to allowed
+values, e.g. <code class="inline">%{&quot;game_sounds&quot; =&gt; ~w(on off)}</code>). Only those keys, with only
+those values, can be written that way.</p>
     </section>
 
 </div>
@@ -140,6 +144,17 @@ settings changed at once cannot lose each other.</p>
 
     <div class="summary-row">
       <div class="summary-signature">
+        <a href="#client_keys/0" data-no-tooltip="" translate="no">client_keys()</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>The preferences a page may set (<a href="#put_client/3"><code class="inline">put_client/3</code></a>): core's <code class="inline">theme</code> and the
+host's <code class="inline">:client_preferences</code>, each with its allowed values.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
         <a href="#get/1" data-no-tooltip="" translate="no">get(user)</a>
 
       </div>
@@ -155,6 +170,28 @@ settings changed at once cannot lose each other.</p>
       </div>
 
         <div class="summary-synopsis"><p>The site language the user last read in (a locale code), or nil.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#put_client/3" data-no-tooltip="" translate="no">put_client(user, key, value)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Save a preference a page set: <code class="inline">{:ok, user}</code>, or <code class="inline">{:error, :invalid}</code> for a
+key or value not in <a href="#client_keys/0"><code class="inline">client_keys/0</code></a>. The theme's <code class="inline">&quot;system&quot;</code> removes the
+saved theme, so the device decides again.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#theme/1" data-no-tooltip="" translate="no">theme(user)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>The theme the user saved, <code class="inline">&quot;dark&quot;</code> or <code class="inline">&quot;light&quot;</code>, or nil.</p></div>
 
     </div>
 
@@ -183,6 +220,35 @@ new one. <code class="inline">{:ok, user}</code> with the saved user.</p></div>
     </h2>
 
     <div class="functions-list">
+<section class="detail" id="client_keys/0">
+
+  <div class="detail-header">
+    <a href="#client_keys/0" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">client_keys()</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/preferences.ex#L48" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> client_keys() :: %{required(<a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>()) =&gt; [<a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>()]}</pre>
+
+      </div>
+
+<p>The preferences a page may set (<a href="#put_client/3"><code class="inline">put_client/3</code></a>): core's <code class="inline">theme</code> and the
+host's <code class="inline">:client_preferences</code>, each with its allowed values.</p>
+  </section>
+</section>
 <section class="detail" id="get/1">
 
   <div class="detail-header">
@@ -193,7 +259,7 @@ new one. <code class="inline">{:ok, user}</code> with the saved user.</p></div>
       <h1 class="signature" translate="no">get(user)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/preferences.ex#L23" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/preferences.ex#L29" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -221,7 +287,7 @@ new one. <code class="inline">{:ok, user}</code> with the saved user.</p></div>
       <h1 class="signature" translate="no">locale(user)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/preferences.ex#L28" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/preferences.ex#L34" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -239,6 +305,65 @@ new one. <code class="inline">{:ok, user}</code> with the saved user.</p></div>
 <p>The site language the user last read in (a locale code), or nil.</p>
   </section>
 </section>
+<section class="detail" id="put_client/3">
+
+  <div class="detail-header">
+    <a href="#put_client/3" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">put_client(user, key, value)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/preferences.ex#L57" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> put_client(<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>(), <a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>(), <a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>()) ::
+  {:ok, <a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>()} | {:error, <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">term</a>()}</pre>
+
+      </div>
+
+<p>Save a preference a page set: <code class="inline">{:ok, user}</code>, or <code class="inline">{:error, :invalid}</code> for a
+key or value not in <a href="#client_keys/0"><code class="inline">client_keys/0</code></a>. The theme's <code class="inline">&quot;system&quot;</code> removes the
+saved theme, so the device decides again.</p>
+  </section>
+</section>
+<section class="detail" id="theme/1">
+
+  <div class="detail-header">
+    <a href="#theme/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">theme(user)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/preferences.ex#L69" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> theme(<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>() | nil) :: <a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>() | nil</pre>
+
+      </div>
+
+<p>The theme the user saved, <code class="inline">&quot;dark&quot;</code> or <code class="inline">&quot;light&quot;</code>, or nil.</p>
+  </section>
+</section>
 <section class="detail" id="update/2">
 
   <div class="detail-header">
@@ -249,7 +374,7 @@ new one. <code class="inline">{:ok, user}</code> with the saved user.</p></div>
       <h1 class="signature" translate="no">update(user, fun)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/preferences.ex#L40" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/preferences.ex#L81" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -278,9 +403,9 @@ new one. <code class="inline">{:ok, user}</code> with the saved user.</p>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1295">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1296">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1295">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1296">Hex Preview</a>
 
             </span>
 
