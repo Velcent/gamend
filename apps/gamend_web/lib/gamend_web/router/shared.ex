@@ -96,9 +96,9 @@ defmodule GamendWeb.Router.Shared do
         plug :protect_from_forgery
         plug :put_secure_browser_headers, RouterShared.browser_headers()
         plug GamendWeb.Plugs.CaptchaCsp
-        plug GamendWeb.Plugs.ColorMode
         plug GamendWeb.Plugs.PageMeta
         plug :fetch_current_scope_for_user
+        plug GamendWeb.Plugs.ColorMode
       end
 
       pipeline :api do
@@ -113,8 +113,8 @@ defmodule GamendWeb.Router.Shared do
         plug :put_root_layout, html: {GamendWeb.Layouts, :root}
         plug :put_secure_browser_headers, RouterShared.browser_headers()
         plug GamendWeb.Plugs.CaptchaCsp
-        plug GamendWeb.Plugs.ColorMode
         plug :fetch_current_scope_for_user
+        plug GamendWeb.Plugs.ColorMode
       end
 
       pipeline :api_auth do
@@ -1049,6 +1049,9 @@ defmodule GamendWeb.Router.Shared do
         # The anonymous account a page made (`UserAuth.ensure_user/1`), written
         # into the session by `app.js`; a LiveView cannot write the cookie.
         post "/users/anonymous_session", AnonymousSessionController, :create
+        # A preference the page sets (the theme, the host's own), saved to
+        # the account (`Gamend.Accounts.Preferences.put_client/3`).
+        put "/preferences", PreferenceController, :update
       end
     end
   end

@@ -39,9 +39,10 @@ defmodule GamendWeb.LeaderboardsLive do
   end
 
   @impl true
+  # A hidden board is shown by the host's own pages, never here.
   def handle_params(%{"slug" => slug, "id" => id}, _uri, socket) do
     case Leaderboards.get_leaderboard(id) do
-      nil ->
+      board when is_nil(board) or board.hidden ->
         {:noreply,
          socket
          |> put_flash(:error, gettext("Not found"))
@@ -67,8 +68,8 @@ defmodule GamendWeb.LeaderboardsLive do
   def handle_params(%{"slug" => slug}, _uri, socket) do
     # Slug-only URL: load the active leaderboard directly
     case Leaderboards.get_active_leaderboard_by_slug(slug) do
-      nil ->
-        # No active one, redirect to the latest with ID
+      board when is_nil(board) or board.hidden ->
+        # No active one, redirect to the latest with ID (never a hidden one)
         case Leaderboards.list_leaderboards_by_slug(slug) do
           [latest | _] ->
             {:noreply, push_navigate(socket, to: ~p"/leaderboards/#{slug}/#{latest.id}")}
