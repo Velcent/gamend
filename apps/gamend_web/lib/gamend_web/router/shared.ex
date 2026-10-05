@@ -330,6 +330,8 @@ defmodule GamendWeb.Router.Shared do
         get "/time", TimeController, :show
         post "/login", SessionController, :create
         post "/register", SessionController, :register
+        post "/register/confirm", SessionController, :confirm_registration
+        post "/register/resend", SessionController, :resend_confirmation
         post "/login/device", SessionController, :create_device
         post "/refresh", SessionController, :refresh
         delete "/logout", SessionController, :delete
@@ -1030,7 +1032,9 @@ defmodule GamendWeb.Router.Shared do
           live "/leaderboards/:slug", LeaderboardsLive, :show_active
           live "/users/log_in", UserLive.Login, :new
           live "/users/log_in/:token", UserLive.Confirmation, :new
-          get "/users/confirm/:token", UserSessionController, :confirm
+          # Shows the account and confirms on its button, a POST below: a mail
+          # scanner that opens every link in an email confirms nothing.
+          live "/users/confirm/:token", UserLive.Confirmation, :confirm_email
           unquote(docs_route)
           unquote(changelog_route)
           unquote(roadmap_route)
@@ -1040,6 +1044,7 @@ defmodule GamendWeb.Router.Shared do
         end
 
         post "/users/log_in", UserSessionController, :create
+        post "/users/confirm", UserSessionController, :confirm
         delete "/users/log_out", UserSessionController, :delete
         # The anonymous account a page made (`UserAuth.ensure_user/1`), written
         # into the session by `app.js`; a LiveView cannot write the cookie.

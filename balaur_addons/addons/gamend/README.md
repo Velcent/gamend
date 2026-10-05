@@ -13,7 +13,7 @@ let reply = task::wait(gamend::lobbies::quick_join(this.node, #{
 if e["kind"] == gamend::events::lobby::MEMBER_JOINED { }
 ```
 
-260 operations in 40 modules, and 90 realtime events.
+262 operations in 40 modules, and 90 realtime events.
 
 Beside the generated modules and `events.rn`, written by hand:
 
@@ -248,6 +248,7 @@ Authentication.
 
 | Function | Call | What it does |
 | --- | --- | --- |
+| `confirm_registration(node, params)` | `POST /api/v1/register/confirm` | Confirm a registration with its code |
 | `device_login(node, params)` | `POST /api/v1/login/device` | Device login |
 | `link_apple_ios(node, params)` | `POST /api/v1/me/providers/apple/ios` | Link Apple (native iOS) |
 | `link_device(node, params)` | `POST /api/v1/me/device` | Link device ID |
@@ -265,6 +266,7 @@ Authentication.
 | `oauth_session_status(node, session_id)` | `GET /api/v1/auth/session/{session_id}` | Poll a provider sign-in |
 | `refresh_token(node, params)` | `POST /api/v1/refresh` | Refresh access token |
 | `register(node, params)` | `POST /api/v1/register` | Register |
+| `resend_confirmation(node, params)` | `POST /api/v1/register/resend` | Send the confirmation email again |
 | `unlink_device(node)` | `DELETE /api/v1/me/device` | Unlink device ID |
 | `unlink_provider(node, provider)` | `DELETE /api/v1/me/providers/{provider}` | Unlink OAuth provider |
 

@@ -118,6 +118,20 @@ defmodule Gamend.Accounts do
   @doc delegate_to: {Registration, :confirm_user_by_token, 1}
   defdelegate confirm_user_by_token(token), to: Registration
 
+  @doc delegate_to: {Registration, :get_user_by_confirm_token, 1}
+  defdelegate get_user_by_confirm_token(token), to: Registration
+
+  @doc delegate_to: {Registration, :confirm_user_by_code, 3}
+  defdelegate confirm_user_by_code(email, code, password), to: Registration
+
+  @doc delegate_to: {Registration, :resend_confirmation, 3}
+  defdelegate resend_confirmation(
+                email,
+                confirmation_url_fun,
+                notifier \\ Gamend.Accounts.UserNotifier
+              ),
+              to: Registration
+
   @doc delegate_to: {Registration, :change_user_registration, 2}
   defdelegate change_user_registration(user, attrs \\ %{}), to: Registration
 
@@ -317,8 +331,8 @@ defmodule Gamend.Accounts do
               ),
               to: Registration
 
-  @doc delegate_to: {Registration, :register_user_with_password_and_deliver, 3}
-  defdelegate register_user_with_password_and_deliver(
+  @doc delegate_to: {Registration, :register_unconfirmed_user_and_deliver, 3}
+  defdelegate register_unconfirmed_user_and_deliver(
                 attrs,
                 confirmation_url_fun,
                 notifier \\ Gamend.Accounts.UserNotifier
@@ -360,9 +374,10 @@ defmodule Gamend.Accounts do
   password is looked at, and for the failure that locks it.
 
   `{:error, :email_not_confirmed}` for the right password on an account whose
-  email was never confirmed. Anyone can register any address with a password,
-  so the password signs nobody in until the inbox's owner has confirmed it.
-  It is answered only after the password matched, so it tells nothing to
+  email was never confirmed: registering takes no password, so only a guest
+  account given an email, or one registered when the API still took one, can
+  have it. The password signs nobody in until the inbox's owner has confirmed
+  it. It is answered only after the password matched, so it tells nothing to
   someone who does not know it.
   """
   @spec authenticate_by_password(String.t(), String.t()) ::
@@ -836,8 +851,9 @@ defmodule Gamend.Accounts do
   setting(:lockout_attempts, :integer,
     default: 10,
     doc:
-      "Failed passwords for one email address that lock its password sign-in. Counted per " <>
-        "address across every IP. 0 disables the lockout."
+      "Failed passwords and email confirmation codes for one email address that lock its " <>
+        "password sign-in and its code. Counted per address across every IP. 0 disables " <>
+        "the lockout, which leaves the six-digit codes to the per-IP auth rate limit alone."
   )
 
   setting(:lockout_window_minutes, :integer,

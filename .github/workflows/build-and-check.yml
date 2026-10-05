@@ -1015,12 +1015,30 @@ jobs:
           exit 1
 
       # The first account on a fresh database is the admin; step 6 writes KV
-      # as one.
+      # as one. Registering takes no password: the code in the confirmation
+      # email sets it, read here from the dev server's mailbox.
       - name: Sign up the admin
         run: |
           curl -sf -X POST http://127.0.0.1:4000/api/v1/register \
             -H 'content-type: application/json' \
-            -d '{"email":"admin@example.com","password":"conformance-password-1"}' > /dev/null
+            -d '{"email":"admin@example.com"}' > /dev/null
+          code=""
+          for i in $(seq 1 30); do
+            code=$(curl -sf http://127.0.0.1:4000/dev/mailbox/json | python3 -c '
+          import json, re, sys
+          for email in json.load(sys.stdin)["data"]:
+              found = re.search(r"^\s*(\d{6})\s*$", email.get("text_body") or "", re.M)
+              if found:
+                  print(found.group(1))
+                  break
+          ' || true)
+            if [ -n "$code" ]; then break; fi
+            sleep 1
+          done
+          if [ -z "$code" ]; then tail -100 server.log; exit 1; fi
+          curl -sf -X POST http://127.0.0.1:4000/api/v1/register/confirm \
+            -H 'content-type: application/json' \
+            -d "{\"email\":\"admin@example.com\",\"code\":\"$code\",\"password\":\"conformance-password-1\"}" > /dev/null
 
       - name: Download the C++ SDK
         uses: actions/download-artifact@v8
