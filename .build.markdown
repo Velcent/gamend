@@ -116,6 +116,7 @@ Gamend.LobbySnapshots.Snapshot.md
 Gamend.LobbySnapshots.Writer.md
 Gamend.LobbySnapshots.md
 Gamend.Lock.Local.md
+Gamend.Lock.Queue.md
 Gamend.Lock.md
 Gamend.Mail.md
 Gamend.Mailer.md

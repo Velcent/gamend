@@ -1,4 +1,4 @@
-# gamend_core v1.0.1296 - API Reference
+# gamend_core v1.0.1297 - API Reference
 
 ## Modules
 
@@ -355,8 +355,11 @@ aggregated from telemetry events
   - [Gamend.Jobs](Gamend.Jobs.md): Durable background jobs, backed by Oban.
   - [Gamend.Limits](Gamend.Limits.md): Central module for configurable validation limits.
   - [Gamend.Lock](Gamend.Lock.md): Serialized execution using database-level advisory locks.
-  - [Gamend.Lock.Local](Gamend.Lock.Local.md): Reentrant, cluster-wide keyed mutex — the non-Postgres half of
-`Gamend.Lock.serialize/3`.
+  - [Gamend.Lock.Local](Gamend.Lock.Local.md): Reentrant keyed mutex, first come first served: the non-Postgres half of
+`Gamend.Lock.serialize/3`, and the node-local line in front of the Postgres
+advisory lock.
+  - [Gamend.Lock.Queue](Gamend.Lock.Queue.md): The waiting line behind `Gamend.Lock.Local`: per key, one holder and the
+callers after it, served in the order they asked.
   - [Gamend.Mailer](Gamend.Mailer.md)
   - [Gamend.Repo](Gamend.Repo.md)
   - [Gamend.Repo.AdvisoryLock](Gamend.Repo.AdvisoryLock.md): Advisory locking for protecting TOCTOU (Time-of-Check-Time-of-Use) patterns.

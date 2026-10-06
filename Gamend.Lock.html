@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.4">
-    <meta name="project" content="gamend_core v1.0.1296">
+    <meta name="project" content="gamend_core v1.0.1297">
 
 
-    <title>Gamend.Lock — gamend_core v1.0.1296</title>
+    <title>Gamend.Lock — gamend_core v1.0.1297</title>
 
     <link rel="stylesheet" href="dist/html-elixir-RXHHCTJW.css" />
 
-    <script defer src="dist/sidebar_items-F10EE02B.js"></script>
+    <script defer src="dist/sidebar_items-24B5AC24.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-MI33G4N7.js"></script>
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1296
+          v1.0.1297
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr />Lock</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1296)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1297)</small>
 
     </h1>
 
@@ -120,7 +120,7 @@ only one process at a time can execute the critical section for a given
 operation concurrently (e.g. guessing a word, claiming a reward) and the
 logic involves read-modify-write on KV entries or lobby metadata.</p><h2 id="module-how-it-works" class="section-heading"><a href="#module-how-it-works" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">How it works</span></h2><p>Serialized on <strong>both</strong> adapters, per key, by different mechanisms:</p><ul><li><strong>PostgreSQL</strong> — <code class="inline">pg_advisory_xact_lock</code> inside the transaction, taken
 after a node-local mutex so a node's own waiters queue in the BEAM rather
-than each holding a pooled connection while blocked.</li><li><strong>SQLite</strong> — <a href="Gamend.Lock.Local.html"><code class="inline">Gamend.Lock.Local</code></a>, a <code class="inline">:global</code> mutex taken <em>around</em> the
+than each holding a pooled connection while blocked.</li><li><strong>SQLite</strong> — <a href="Gamend.Lock.Local.html"><code class="inline">Gamend.Lock.Local</code></a>, a keyed mutex taken <em>around</em> the
 transaction, since SQLite has no advisory locks and its single-writer rule
 covers neither a read-modify-write across statements nor a critical
 section that never touches the database.</li></ul><p><code class="inline">default_transaction_mode: :immediate</code> is a backstop for callers who forget
@@ -281,9 +281,9 @@ callers block until the lock is released (on transaction commit/rollback).</p><p
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1296">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1297">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1296">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1297">Hex Preview</a>
 
             </span>
 

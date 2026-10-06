@@ -20,6 +20,15 @@ That caller may still be an anonymous account (a device id and nothing else,
 scope and merged back onto the freshly-resolved user by `user/1` — this is
 what `sudo_mode?` checks.
 
+# `t`
+
+```elixir
+@type t() :: %Gamend.Accounts.Scope{
+  authenticated_at: DateTime.t() | nil,
+  user_id: Ecto.UUID.t() | nil
+}
+```
+
 # `anonymous?`
 
 True when the caller is signed in with an anonymous account: no email and no

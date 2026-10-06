@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.4">
-    <meta name="project" content="gamend_core v1.0.1296">
+    <meta name="project" content="gamend_core v1.0.1297">
 
 
-    <title>Gamend.Cache — gamend_core v1.0.1296</title>
+    <title>Gamend.Cache — gamend_core v1.0.1297</title>
 
     <link rel="stylesheet" href="dist/html-elixir-RXHHCTJW.css" />
 
-    <script defer src="dist/sidebar_items-F10EE02B.js"></script>
+    <script defer src="dist/sidebar_items-24B5AC24.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-MI33G4N7.js"></script>
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1296
+          v1.0.1297
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr />Cache</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1296)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1297)</small>
 
     </h1>
 
@@ -432,6 +432,29 @@ caches the result of <code class="inline">fun</code>.</p></div>
       </div>
 
         <div class="summary-synopsis"><p>Callback implementation for <a href="https://nebulex.hexdocs.pm/3.0.4/Nebulex.Cache.html#c:fetch_or_store!/4"><code class="inline">Nebulex.Cache.fetch_or_store!/4</code></a>.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#fill/4" data-no-tooltip="" translate="no">fill(key, generation, value, opts \\ [])</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Caches <code class="inline">value</code> at <code class="inline">key</code> unless <code class="inline">key</code> was invalidated since <code class="inline">generation</code>
+was read. Put first, then compare, so an invalidation that lands between the
+two still removes the value.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#generation/1" data-no-tooltip="" translate="no">generation(key)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>How many times <code class="inline">key</code> has been invalidated, as far as this node knows; read
+it before the query whose result <a href="#fill/4"><code class="inline">fill/4</code></a> caches.</p></div>
 
     </div>
 
@@ -1283,7 +1306,7 @@ entity cache uses it; the few entries with a deliberate lifetime of their own
       <h1 class="signature" translate="no">bump_version(key)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/cache.ex#L96" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/cache.ex#L150" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1318,7 +1341,7 @@ while a bump is monotonic per node.</p>
       <h1 class="signature" translate="no">cached(key, opts \\ [], fun)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/cache.ex#L36" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/cache.ex#L48" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1334,7 +1357,12 @@ while a bump is monotonic per node.</p>
       </div>
 
 <p>Cache-through helper: returns the cached value for <code class="inline">key</code>, or computes and
-caches the result of <code class="inline">fun</code>.</p><p>Cached <code class="inline">nil</code> results are honored — <code class="inline">fun</code> only runs on a real cache miss.</p><h2 id="cached/3-options" class="section-heading"><a href="#cached/3-options" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Options</span></h2><ul><li><code class="inline">:ttl</code> — time-to-live in milliseconds</li></ul>
+caches the result of <code class="inline">fun</code>.</p><p>Cached <code class="inline">nil</code> results are honored — <code class="inline">fun</code> only runs on a real cache miss.</p><p>A fill is kept only if <code class="inline">key</code> was not invalidated while <code class="inline">fun</code> ran. A read
+that queries a row, then loses the CPU to a write that commits and evicts
+<code class="inline">key</code>, would otherwise cache the row as it was before the write, until the
+TTL: a revoked user, a spent balance. <a href="#invalidate/1"><code class="inline">invalidate/1</code></a> moves the key's
+generation (<a href="#generation/1"><code class="inline">generation/1</code></a>); the fill compares it before and after its put.</p><p>Inside a transaction nothing is cached: the read may see a write a rollback
+undoes.</p><h2 id="cached/3-options" class="section-heading"><a href="#cached/3-options" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Options</span></h2><ul><li><code class="inline">:ttl</code> — time-to-live in milliseconds</li><li><code class="inline">:match</code> — <code class="inline">(result -&gt; boolean)</code>, whether to cache a result (default: all)</li></ul>
   </section>
 </section>
 <section class="detail" id="count_all/2">
@@ -1991,6 +2019,67 @@ caches the result of <code class="inline">fun</code>.</p><p>Cached <code class="
   <section class="docstring">
 
 <p>Callback implementation for <a href="https://nebulex.hexdocs.pm/3.0.4/Nebulex.Cache.html#c:fetch_or_store!/4"><code class="inline">Nebulex.Cache.fetch_or_store!/4</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="fill/4">
+
+    <span id="fill/3"></span>
+
+  <div class="detail-header">
+    <a href="#fill/4" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">fill(key, generation, value, opts \\ [])</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/cache.ex#L79" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> fill(<a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">term</a>(), <a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">non_neg_integer</a>(), <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">term</a>(), <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">keyword</a>()) :: :ok</pre>
+
+      </div>
+
+<p>Caches <code class="inline">value</code> at <code class="inline">key</code> unless <code class="inline">key</code> was invalidated since <code class="inline">generation</code>
+was read. Put first, then compare, so an invalidation that lands between the
+two still removes the value.</p>
+  </section>
+</section>
+<section class="detail" id="generation/1">
+
+  <div class="detail-header">
+    <a href="#generation/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">generation(key)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/cache.ex#L71" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> generation(<a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">term</a>()) :: <a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">non_neg_integer</a>()</pre>
+
+      </div>
+
+<p>How many times <code class="inline">key</code> has been invalidated, as far as this node knows; read
+it before the query whose result <a href="#fill/4"><code class="inline">fill/4</code></a> caches.</p>
   </section>
 </section>
 <section class="detail" id="get/3">
@@ -2687,7 +2776,7 @@ caches the result of <code class="inline">fun</code>.</p><p>Cached <code class="
       <h1 class="signature" translate="no">invalidate(key)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/cache.ex#L60" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/cache.ex#L112" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -2719,7 +2808,7 @@ authentication (<code class="inline">token_version</code>) or account state (<co
       <h1 class="signature" translate="no">invalidation_topic()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/cache.ex#L114" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/cache.ex#L168" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -3625,7 +3714,7 @@ authentication (<code class="inline">token_version</code>) or account state (<co
       <h1 class="signature" translate="no">ttl()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/cache.ex#L23" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/cache.ex#L25" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -3930,9 +4019,9 @@ entity cache uses it; the few entries with a deliberate lifetime of their own
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1296">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1297">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1296">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1297">Hex Preview</a>
 
             </span>
 

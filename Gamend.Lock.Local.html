@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.4">
-    <meta name="project" content="gamend_core v1.0.1296">
+    <meta name="project" content="gamend_core v1.0.1297">
 
 
-    <title>Gamend.Lock.Local — gamend_core v1.0.1296</title>
+    <title>Gamend.Lock.Local — gamend_core v1.0.1297</title>
 
     <link rel="stylesheet" href="dist/html-elixir-RXHHCTJW.css" />
 
-    <script defer src="dist/sidebar_items-F10EE02B.js"></script>
+    <script defer src="dist/sidebar_items-24B5AC24.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-MI33G4N7.js"></script>
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1296
+          v1.0.1297
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr />Lock.<wbr />Local</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1296)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1297)</small>
 
     </h1>
 
@@ -114,13 +114,19 @@ gamend_core
 
 
     <section id="moduledoc">
-<p>Reentrant, cluster-wide keyed mutex — the non-Postgres half of
-<a href="Gamend.Lock.html#serialize/3"><code class="inline">Gamend.Lock.serialize/3</code></a>.</p><p><code class="inline">:global</code> shares a lock between holders with the same <em>requester</em>, so the
-resource goes in the resource slot and <code class="inline">self()</code> in the requester slot. Putting
-the protected id in the requester slot lets two concurrent requests for it
-both acquire — the exact case the lock exists to prevent.</p><p><code class="inline">self()</code> also makes it reentrant, which core needs: the matchmaking sweep
-takes a lock and then creates a match, which takes one again. <code class="inline">:global</code>
-releases on process death.</p>
+<p>Reentrant keyed mutex, first come first served: the non-Postgres half of
+<a href="Gamend.Lock.html#serialize/3"><code class="inline">Gamend.Lock.serialize/3</code></a>, and the node-local line in front of the Postgres
+advisory lock.</p><p>Callers wait in <a href="Gamend.Lock.Queue.html"><code class="inline">Gamend.Lock.Queue</code></a>, in the order they asked, and the key
+passes to the next one when the holder finishes or dies. It was a bare
+<code class="inline">:global.trans</code>, whose waiters retry after a random sleep that doubles up to
+8 s: with fifty callers on one key the lock sat free while they slept, and
+the last of them waited seconds for a section that takes milliseconds.</p><p><a href="#trans/2"><code class="inline">trans/2</code></a> also takes the <code class="inline">:global</code> lock, so the section stays exclusive across
+connected nodes; only the head of each node's line asks for it, so on a single
+node it never waits there. <code class="inline">:global</code> shares a lock between holders with the
+same <em>requester</em>, so the resource goes in the resource slot and <code class="inline">self()</code> in
+the requester slot.</p><p>Reentrant within a process: the matchmaking sweep takes a lock and then
+creates a match, which takes one again. Before <a href="Gamend.Lock.Queue.html"><code class="inline">Gamend.Lock.Queue</code></a> is running
+(it starts with the host's supervision tree) both fall back to <code class="inline">:global</code>.</p>
     </section>
 
 </div>
@@ -136,6 +142,22 @@ releases on process death.</p>
   <h3>
     <a href="#functions">Functions</a>
   </h3>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#in_turn/2" data-no-tooltip="" translate="no">in_turn(key, fun)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Runs <code class="inline">fun</code> after this node's earlier callers of <code class="inline">key</code>, holding no database
+lock: for an optimistic read-modify-write (read, ask a <code class="inline">before_*</code> hook with
+no lock held, then write under <a href="Gamend.Lock.html#serialize/3"><code class="inline">Gamend.Lock.serialize/3</code></a> only if the row is
+unchanged). Without it, concurrent callers read together, and each round
+only one write lands while the rest find the row changed and read again in
+lockstep, so a burst of ten exhausts a few attempts. In line, each reads what
+the one before it wrote; the compare still catches other writers and nodes.</p></div>
+
+    </div>
 
     <div class="summary-row">
       <div class="summary-signature">
@@ -173,6 +195,42 @@ is free, instead of each holding a pooled connection blocked on the database.</p
     </h2>
 
     <div class="functions-list">
+<section class="detail" id="in_turn/2">
+
+  <div class="detail-header">
+    <a href="#in_turn/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">in_turn(key, fun)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/lock/local.ex#L58" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> in_turn(<a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">term</a>(), (-&gt; result)) :: result when result: <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">term</a>()</pre>
+
+      </div>
+
+<p>Runs <code class="inline">fun</code> after this node's earlier callers of <code class="inline">key</code>, holding no database
+lock: for an optimistic read-modify-write (read, ask a <code class="inline">before_*</code> hook with
+no lock held, then write under <a href="Gamend.Lock.html#serialize/3"><code class="inline">Gamend.Lock.serialize/3</code></a> only if the row is
+unchanged). Without it, concurrent callers read together, and each round
+only one write lands while the rest find the row changed and read again in
+lockstep, so a burst of ten exhausts a few attempts. In line, each reads what
+the one before it wrote; the compare still catches other writers and nodes.</p><p>Inside a transaction it runs <code class="inline">fun</code> at once: waiting in a line while holding
+the write lock can deadlock against whoever is first in it (see
+<a href="Gamend.Lock.html#serialize/3"><code class="inline">Gamend.Lock.serialize/3</code></a>).</p>
+  </section>
+</section>
 <section class="detail" id="trans/2">
 
   <div class="detail-header">
@@ -183,7 +241,7 @@ is free, instead of each holding a pooled connection blocked on the database.</p
       <h1 class="signature" translate="no">trans(key, fun)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/lock/local.ex#L18" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/lock/local.ex#L28" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -211,7 +269,7 @@ is free, instead of each holding a pooled connection blocked on the database.</p
       <h1 class="signature" translate="no">trans_on_node(key, fun)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/lock/local.ex#L28" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/lock/local.ex#L40" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -240,9 +298,9 @@ is free, instead of each holding a pooled connection blocked on the database.</p
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1296">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1297">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1296">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1297">Hex Preview</a>
 
             </span>
 

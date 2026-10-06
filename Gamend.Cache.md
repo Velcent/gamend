@@ -36,9 +36,19 @@ caches the result of `fun`.
 
 Cached `nil` results are honored — `fun` only runs on a real cache miss.
 
+A fill is kept only if `key` was not invalidated while `fun` ran. A read
+that queries a row, then loses the CPU to a write that commits and evicts
+`key`, would otherwise cache the row as it was before the write, until the
+TTL: a revoked user, a spent balance. `invalidate/1` moves the key's
+generation (`generation/1`); the fill compares it before and after its put.
+
+Inside a transaction nothing is cached: the read may see a write a rollback
+undoes.
+
 ## Options
 
 - `:ttl` — time-to-live in milliseconds
+- `:match` — `(result -> boolean)`, whether to cache a result (default: all)
 
 # `count_all`
 
@@ -95,6 +105,25 @@ Cached `nil` results are honored — `fun` only runs on a real cache miss.
 # `fetch_or_store!`
 
 # `fetch_or_store!`
+
+# `fill`
+
+```elixir
+@spec fill(term(), non_neg_integer(), term(), keyword()) :: :ok
+```
+
+Caches `value` at `key` unless `key` was invalidated since `generation`
+was read. Put first, then compare, so an invalidation that lands between the
+two still removes the value.
+
+# `generation`
+
+```elixir
+@spec generation(term()) :: non_neg_integer()
+```
+
+How many times `key` has been invalidated, as far as this node knows; read
+it before the query whose result `fill/4` caches.
 
 # `get`
 
