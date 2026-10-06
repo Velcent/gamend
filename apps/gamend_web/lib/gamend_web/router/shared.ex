@@ -299,6 +299,7 @@ defmodule GamendWeb.Router.Shared do
       gamend_hook_leaderboard_party_api_routes()
       gamend_tournament_api_routes()
       gamend_matchmaking_api_routes()
+      gamend_report_api_routes()
       gamend_chat_api_routes(update: unquote(chat_update))
       gamend_admin_api_routes()
       gamend_api_auth_routes()
@@ -414,6 +415,22 @@ defmodule GamendWeb.Router.Shared do
         post "/tournaments/:id/join", TournamentController, :join
         delete "/tournaments/:id/join", TournamentController, :leave
         get "/tournaments/:id/my_match", TournamentController, :my_match
+      end
+    end
+  end
+
+  @doc """
+  Content reports (`Gamend.Reports`) from a game client. Signed in, unlike
+  the website's `/report`: a client always holds at least a device token, and
+  an account is what the per-account daily cap counts against.
+  """
+  defmacro gamend_report_api_routes do
+    quote do
+      scope "/api/v1", GamendWeb.Api.V1, as: :api_v1 do
+        pipe_through [:api, :api_auth]
+
+        get "/reports/kinds", ReportController, :kinds
+        post "/reports", ReportController, :create
       end
     end
   end
@@ -822,6 +839,11 @@ defmodule GamendWeb.Router.Shared do
         pipe_through [:browser, :require_admin_user]
 
         live_dashboard "/admin/dashboard", metrics: GamendWeb.Telemetry
+
+        # A report's images are never public (`Gamend.Reports`): only an admin
+        # reads them, through here.
+        get "/admin/reports/:id/attachments/:index", GamendWeb.AdminReportController, :attachment
+        get "/admin/reports/export/:kind", GamendWeb.AdminReportController, :export
       end
 
       scope "/" do
@@ -888,6 +910,7 @@ defmodule GamendWeb.Router.Shared do
           live "/admin/chat/reports", AdminLive.ChatReports, :index
           live "/admin/chat/mutes", AdminLive.ChatMutes, :index
           live "/admin/chat/filter", AdminLive.ChatFilter, :index
+          live "/admin/reports", AdminLive.Reports, :index
           live "/admin/quests", AdminLive.Quests, :index
           live "/admin/payments", AdminLive.Payments, :index
           live "/admin/translations", AdminLive.Translations, :index
@@ -1019,6 +1042,7 @@ defmodule GamendWeb.Router.Shared do
           live "/groups", GroupsLive, :index
           live "/groups/:id", GroupsLive, :show
           live "/quests", QuestsLive, :index
+          live "/report", ReportLive, :index
           live "/stats", StatsLive, :index
           live "/tournaments", TournamentsLive, :index
           # Slug-first for SEO; older editions get a stable 1-based number.

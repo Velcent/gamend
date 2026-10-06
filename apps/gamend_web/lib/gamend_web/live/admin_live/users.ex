@@ -322,7 +322,9 @@ defmodule GamendWeb.AdminLive.Users do
                     <td>
                       <%= if user.profile_url do %>
                         <div class="flex items-center gap-2">
-                          <img src={user.profile_url} alt="avatar" class="w-8 h-8 rounded-full" />
+                          <%!-- Our copy only: a provider's URL is never hotlinked,
+                                not even here (`User.public_avatar_url/1`). --%>
+                          <.user_avatar user={user} class="w-8 h-8" />
                           <a href={user.profile_url} target="_blank" class="text-sm link">Profile</a>
                         </div>
                       <% else %>

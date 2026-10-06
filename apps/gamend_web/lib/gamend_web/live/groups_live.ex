@@ -15,7 +15,7 @@ defmodule GamendWeb.GroupsLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    unless FeatureGate.enabled?(:list_groups) do
+    unless FeatureGate.enabled?(:list_groups) and FeatureGate.enabled?(:web_groups) do
       raise GamendWeb.NotFoundError
     end
 

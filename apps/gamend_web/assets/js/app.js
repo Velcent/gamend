@@ -34,12 +34,15 @@ import {startConnectionState} from "./connection_state"
 import {startSearchPalette} from "./search_palette"
 import {startAnonymousSession} from "./anonymous_session"
 import {startLiveNav} from "./live_nav"
+import {ReportForm, ReportPagePath, startLastPage} from "./report_form"
 import topbar from "../vendor/topbar"
 
 // Custom hooks
 const Hooks = {
   Captcha,
   LocalDatetimeInput,
+  ReportForm,
+  ReportPagePath,
 
 
 
@@ -477,6 +480,7 @@ startLocalTime()
 // re-rendered by any `push_patch`, which would drop a listener bound to an
 // element. Started here so it works on pages with no LiveView at all.
 startSearchPalette()
+startLastPage()
 
 // Smooth scrolling for in-page anchors — armed on the reader's first input,
 // not in the markup. `scroll-behavior: smooth` on <html> also governs scrolls

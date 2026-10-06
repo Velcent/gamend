@@ -27,6 +27,10 @@ defmodule GamendWeb.UserLive.Settings do
   @valid_tabs ~w(account notifications friends groups wallet items payments data devices
                  api_tokens)
 
+  # Tabs a feature flag can close. A closed tab is not drawn, not opened from
+  # `?tab=` and refuses its events, so it reads as absent rather than broken.
+  @feature_tabs %{"groups" => :web_groups}
+
   @account_events ~w(validate_email update_email validate_display_name update_display_name
                      validate_username update_username validate_avatar save_avatar cancel_avatar
                      validate_password update_password unlink_provider delete_user
@@ -93,18 +97,22 @@ defmodule GamendWeb.UserLive.Settings do
       <div class="mt-6 flex gap-1 border-b border-base-300 pb-0 overflow-x-auto">
         <button
           :for={
-            {tab, label} <- [
-              {"account", gettext("Account")},
-              {"notifications", gettext("Notifications")},
-              {"friends", gettext("Friends")},
-              {"groups", gettext("Groups")},
-              {"wallet", gettext("Wallet")},
-              {"items", gettext("Items")},
-              {"payments", gettext("Payments")},
-              {"data", gettext("Data")},
-              {"devices", gettext("Devices")},
-              {"api_tokens", gettext("API tokens")}
-            ]
+            {tab, label} <-
+              Enum.filter(
+                [
+                  {"account", gettext("Account")},
+                  {"notifications", gettext("Notifications")},
+                  {"friends", gettext("Friends")},
+                  {"groups", gettext("Groups")},
+                  {"wallet", gettext("Wallet")},
+                  {"items", gettext("Items")},
+                  {"payments", gettext("Payments")},
+                  {"data", gettext("Data")},
+                  {"devices", gettext("Devices")},
+                  {"api_tokens", gettext("API tokens")}
+                ],
+                fn {tab, _label} -> tab_enabled?(tab) end
+              )
           }
           phx-click="settings_tab"
           phx-value-tab={tab}
@@ -133,7 +141,7 @@ defmodule GamendWeb.UserLive.Settings do
       <DataTab.tab {tab_assigns(assigns)} />
       <DevicesTab.tab {tab_assigns(assigns)} />
       <ApiTokensTab.tab {tab_assigns(assigns)} />
-      <GroupsTab.tab {tab_assigns(assigns)} />
+      <GroupsTab.tab :if={tab_enabled?("groups")} {tab_assigns(assigns)} />
     </Layouts.app>
     """
   end
@@ -191,7 +199,9 @@ defmodule GamendWeb.UserLive.Settings do
 
   @impl true
   def handle_event("settings_tab", %{"tab" => tab}, socket) when tab in @valid_tabs do
-    {:noreply, push_patch(socket, to: ~p"/users/settings?tab=#{tab}")}
+    if tab_enabled?(tab),
+      do: {:noreply, push_patch(socket, to: ~p"/users/settings?tab=#{tab}")},
+      else: {:noreply, socket}
   end
 
   def handle_event(event, params, socket) when event in @account_events,
@@ -221,8 +231,11 @@ defmodule GamendWeb.UserLive.Settings do
   def handle_event(event, params, socket) when event in @api_tokens_events,
     do: ApiTokensTab.handle_event(event, params, socket)
 
-  def handle_event(event, params, socket) when event in @groups_events,
-    do: GroupsTab.handle_event(event, params, socket)
+  def handle_event(event, params, socket) when event in @groups_events do
+    if tab_enabled?("groups"),
+      do: GroupsTab.handle_event(event, params, socket),
+      else: {:noreply, socket}
+  end
 
   def handle_event(_event, _params, socket), do: {:noreply, socket}
 
@@ -287,7 +300,7 @@ defmodule GamendWeb.UserLive.Settings do
     conflict_provider = socket.assigns[:conflict_provider]
 
     tab =
-      if Map.get(params, "tab") in @valid_tabs,
+      if Map.get(params, "tab") in @valid_tabs and tab_enabled?(params["tab"]),
         do: params["tab"],
         else: socket.assigns[:settings_tab] || "account"
 
@@ -298,8 +311,19 @@ defmodule GamendWeb.UserLive.Settings do
        conflict_provider: conflict_provider,
        settings_tab: tab
      )
-     |> GroupsTab.apply_params(params)
+     |> apply_group_params(params)
      |> load_tab(tab)}
+  end
+
+  defp apply_group_params(socket, params) do
+    if tab_enabled?("groups"), do: GroupsTab.apply_params(socket, params), else: socket
+  end
+
+  defp tab_enabled?(tab) do
+    case Map.fetch(@feature_tabs, tab) do
+      {:ok, feature} -> GamendWeb.Features.enabled?(feature)
+      :error -> true
+    end
   end
 
   # The open tab's data, read when it opens (and again on a patch within it):

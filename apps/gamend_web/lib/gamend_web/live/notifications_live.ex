@@ -191,8 +191,34 @@ defmodule GamendWeb.NotificationsLive do
   def handle_info(_msg, socket), do: {:noreply, socket}
 
   defp notification_action(n) do
-    action_for_type(n.metadata["type"], n) || action_for_metadata(n.metadata)
+    case action_for_type(n.metadata["type"], n) || action_for_metadata(n.metadata) do
+      {_label, path} = action -> if page_open?(path), do: action
+      nil -> nil
+    end
   end
+
+  # A notification still arrives when its page is switched off on the site
+  # (the game sends chat, group and cup traffic regardless), so its button
+  # goes.
+  defp page_open?(path) do
+    cond do
+      under?(path, "/chat") ->
+        GamendWeb.Features.enabled?(:web_chat)
+
+      under?(path, "/groups") ->
+        GamendWeb.Features.enabled?(:web_groups) and GamendWeb.Features.enabled?(:list_groups)
+
+      under?(path, "/tournaments") ->
+        GamendWeb.Features.enabled?(:web_tournaments) and
+          GamendWeb.Features.enabled?(:list_tournaments)
+
+      true ->
+        true
+    end
+  end
+
+  defp under?(path, root),
+    do: path == root or String.starts_with?(path, [root <> "/", root <> "?"])
 
   defp action_for_type("group_invite", n) do
     group_id = n.metadata["group_id"]

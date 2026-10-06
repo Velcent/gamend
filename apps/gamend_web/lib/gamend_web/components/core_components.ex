@@ -29,6 +29,7 @@ defmodule GamendWeb.CoreComponents do
   use Phoenix.Component
   use Gettext, backend: GamendWeb.Gettext
 
+  alias Gamend.Accounts.User
   alias Gamend.Captcha
   alias Gamend.OAuth.Providers
   alias Phoenix.Component
@@ -1415,34 +1416,34 @@ defmodule GamendWeb.CoreComponents do
   defp user_metadata(_), do: nil
 
   @doc """
-  A user's avatar as a round image when they have one (`profile_url`), falling
-  back to the generic person icon. Pass `class` for sizing, e.g. `"w-5 h-5"`.
-  If the image URL fails to load (provider not ready yet, expired CDN link,
-  rate-limited avatar CDN), `assets/js/avatar_fallback.js` hides the broken
-  image and reveals the same icon. That lives in a real script rather than an
-  `onerror` attribute because the CSP here has no `script-src 'unsafe-inline'`,
-  so an inline handler is refused and the fallback would never fire.
+  A user's avatar as a round image when they have one we host
+  (`User.public_avatar_url/1`), falling back to the generic person icon. A
+  provider's URL is never drawn: it would send the viewer's IP to that provider,
+  so an avatar not yet mirrored shows the icon. Pass `class` for sizing, e.g.
+  `"w-5 h-5"`. If the image fails to load (an object gone from storage),
+  `assets/js/avatar_fallback.js` hides the broken image and reveals the same
+  icon. That lives in a real script rather than an `onerror` attribute because
+  the CSP here has no `script-src 'unsafe-inline'`, so an inline handler is
+  refused and the fallback would never fire.
 
   `crossorigin="anonymous"` is load-bearing, not decoration: `/play` and
   `/game/*` are served cross-origin isolated for Godot's `SharedArrayBuffer`
   (see `GamendWeb.Plugs.GameHeaders`), and under
   `Cross-Origin-Embedder-Policy: require-corp` a cross-origin subresource is
   blocked unless it either sends `Cross-Origin-Resource-Policy` or is fetched in
-  CORS mode. OAuth avatar CDNs (Google, Discord, Steam, Gravatar) send no CORP
-  header but do send `Access-Control-Allow-Origin: *`, so asking for CORS mode
-  is what makes them load on those pages. Same-origin and object-storage avatars
-  are unaffected — buckets already need CORS for the presigned upload flow.
+  CORS mode. A bucket or CDN on another origin (`storage.public_url`) is that
+  case; it already sends CORS for the presigned upload flow. Same-origin
+  avatars are unaffected.
   """
   attr :user, :any, default: nil
   attr :class, :string, default: "w-6 h-6"
 
   def user_avatar(assigns) do
-    assigns = assign(assigns, :avatar_url, avatar_url(assigns.user))
+    assigns = assign(assigns, :avatar_url, User.public_avatar_url(assigns.user))
 
     ~H"""
-    <%!-- no-referrer: Google's avatar CDN (lh3) rate-limits requests carrying
-          an unrecognized Referer far more aggressively — localhost dev hits
-          429s within a few reloads. Without the header it serves normally. --%>
+    <%!-- no-referrer: a storage CDN on another origin has no need to learn
+          which page showed the avatar. --%>
     <img
       :if={@avatar_url}
       src={@avatar_url}
@@ -1456,7 +1457,4 @@ defmodule GamendWeb.CoreComponents do
     <.icon :if={!@avatar_url} name="hero-user-circle-solid" class={@class} />
     """
   end
-
-  defp avatar_url(%{profile_url: url}) when is_binary(url) and url != "", do: url
-  defp avatar_url(_), do: nil
 end

@@ -14,6 +14,9 @@ defmodule Gamend.Retention do
     forever": snapshots hold user metadata, and the window is what bounds that
     exposure. Runs flagged anomalous keep
     `GAMEND_RETENTION_LOBBY_SNAPSHOTS_FLAGGED_DAYS` instead (default 90).
+  - Closed reports (`Gamend.Reports`) and their images, on that module's own
+    `retention_days` (180), counted from when they were closed. Open reports
+    are never pruned.
   - Client log sessions (`Gamend.ClientLogs`), on their own settings rather
     than a `GAMEND_RETENTION_*` var: `retention_days` (14) and
     `retention_flagged_days` (90), keyed off `last_seen_at`. This prunes the
@@ -387,7 +390,8 @@ defmodule Gamend.Retention do
       inactive_user_warnings: &warn_inactive_users/0,
       inactive_users: &prune_inactive_users/0,
       orphaned_avatars: &prune_orphaned_avatars/0,
-      orphaned_chat: &prune_orphaned_chat/0
+      orphaned_chat: &prune_orphaned_chat/0,
+      reports: &Gamend.Reports.prune/0
     }
   end
 

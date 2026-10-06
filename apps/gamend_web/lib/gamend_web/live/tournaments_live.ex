@@ -28,7 +28,7 @@ defmodule GamendWeb.TournamentsLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    unless FeatureGate.enabled?(:list_tournaments) do
+    unless FeatureGate.enabled?(:list_tournaments) and FeatureGate.enabled?(:web_tournaments) do
       raise GamendWeb.NotFoundError
     end
 

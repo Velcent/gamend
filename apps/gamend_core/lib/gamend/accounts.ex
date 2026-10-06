@@ -1128,6 +1128,10 @@ defmodule Gamend.Accounts do
     # before the DB cascade silently removes the membership rows.
     best_effort(user, "group cleanup", fn -> Gamend.Groups.handle_user_deletion(user.id) end)
 
+    # A report can carry an email address and a screenshot. Before the delete:
+    # the FK nils the user id, after which nothing says whose they were.
+    best_effort(user, "report cleanup", fn -> Gamend.Reports.forget_user(user.id) end)
+
     # Mark the user offline and notify friends before deleting the row.
     # Re-fetch to get current is_online state (the passed struct may be stale).
     fresh_user = Repo.get(User, user.id)

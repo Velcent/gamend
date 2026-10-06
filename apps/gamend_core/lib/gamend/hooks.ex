@@ -278,6 +278,17 @@ defmodule Gamend.Hooks do
   @callback after_chat_message_reported(Report.t()) :: any()
   @callback after_user_muted(Mute.t()) :: any()
 
+  # Content reports (`Gamend.Reports`): a page, a word, anything a report kind
+  # describes. `before_report_create/1` is a pipeline over the attrs about to
+  # be inserted (string keys: kind, topic, subject_ref, subject, data,
+  # description, email, user_id…): `{:ok, attrs}` files it, `{:error, reason}`
+  # refuses it. The two `after_*` hooks are fire-and-forget.
+  # `after_report_resolved/1` runs each time an open report is closed, so a
+  # reward paid from it needs an idempotency key on the report id.
+  @callback before_report_create(map()) :: hook_result(map())
+  @callback after_report_created(Gamend.Reports.Report.t()) :: any()
+  @callback after_report_resolved(Gamend.Reports.Report.t()) :: any()
+
   # Push delivery hooks. `before_push_send/2` runs once per recipient before
   # any delivery job is enqueued: return `{:ok, message}` (possibly rewritten)
   # or `{:error, reason}` to drop the push for that user (per-user opt-out,
@@ -540,6 +551,9 @@ defmodule Gamend.Hooks do
   # Gamend.Hooks` still injects no-op defaults for anyone who wants them.
   @optional_callbacks after_chat_message: 1,
                       after_chat_message_reported: 1,
+                      after_report_created: 1,
+                      after_report_resolved: 1,
+                      before_report_create: 1,
                       after_group_create: 1,
                       after_group_deleted: 1,
                       after_group_join: 2,
@@ -636,6 +650,9 @@ defmodule Gamend.Hooks do
       :after_chat_message,
       :after_chat_message_reported,
       :after_user_muted,
+      :before_report_create,
+      :after_report_created,
+      :after_report_resolved,
       :before_push_send,
       :after_push_sent,
       :before_lobby_leave,
@@ -769,6 +786,7 @@ defmodule Gamend.Hooks do
       :before_party_create,
       :before_party_update,
       :before_chat_message,
+      :before_report_create,
       :before_push_send,
       :before_lobby_update,
       :before_lobby_delete,
@@ -1688,6 +1706,15 @@ defmodule Gamend.Hooks.Default do
 
   @impl true
   def after_chat_message_reported(_report), do: :ok
+
+  @impl true
+  def before_report_create(attrs), do: {:ok, attrs}
+
+  @impl true
+  def after_report_created(_report), do: :ok
+
+  @impl true
+  def after_report_resolved(_report), do: :ok
 
   @impl true
   def after_user_muted(_mute), do: :ok

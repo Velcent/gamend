@@ -860,11 +860,20 @@ defmodule Gamend.Quests do
 
   Non-repeat quests and titles without the placeholder pass through untouched,
   so this is invisible to everything that does not opt in.
+
+  ## Counting from somewhere else
+
+  `metadata["counter_start"]` and `metadata["counter_step"]` (both default 1)
+  turn the run into a number: run `r` reads `start + step * (r - 1)`. A
+  ladder that pays every 50 wins after 100 says "Wins × 150", "Wins × 200"
+  with `start: 150, step: 50`. A non-repeat quest has one run, so its `%{n}`
+  is its `counter_start` (`counter/1`): every step of a chain can share one
+  title, "Wins × %{n}", and one msgid with it.
   """
   @spec resolve_counter(Quest.t(), QuestProgress.t() | nil) :: Quest.t()
   def resolve_counter(%Quest{reset: "repeat"} = quest, progress) do
     if counter?(quest.title) or counter?(quest.description) do
-      %{quest | counter: repetition(progress)}
+      %{quest | counter: counter_number(quest, repetition(progress))}
     else
       quest
     end
@@ -873,16 +882,25 @@ defmodule Gamend.Quests do
   def resolve_counter(%Quest{} = quest, _progress), do: quest
 
   @doc """
+  The number `%{n}` stands for: the resolved counter, else the first run's
+  (`counter_start`, or 1). An unresolved counter is the anonymous catalog,
+  which pairs no row: the run a visitor would start.
+  """
+  @spec counter(Quest.t()) :: integer()
+  def counter(%Quest{counter: counter}) when is_integer(counter), do: counter
+  def counter(%Quest{} = quest), do: counter_number(quest, 1)
+
+  @doc """
   The quest with `%{n}` replaced by its resolved counter, untranslated.
 
   For consumers that emit the stored string as-is. Anything that translates
   interpolates through Gettext instead, so the placeholder survives long
-  enough to be looked up. An unresolved counter reads as run 1 — an anonymous
-  visitor browsing the catalog is looking at the run they would start.
+  enough to be looked up. An unresolved counter reads as the first run
+  (`counter/1`).
   """
   @spec render_counter(Quest.t()) :: Quest.t()
   def render_counter(%Quest{} = quest) do
-    n = quest.counter || 1
+    n = counter(quest)
 
     %{
       quest
@@ -890,6 +908,22 @@ defmodule Gamend.Quests do
         description: fill_counter(quest.description, n)
     }
   end
+
+  # Run `run` (1-based) as the number the card shows.
+  defp counter_number(%Quest{metadata: metadata}, run) do
+    start = counter_setting(metadata, "counter_start")
+    step = counter_setting(metadata, "counter_step")
+    start + step * (run - 1)
+  end
+
+  defp counter_setting(%{} = metadata, key) do
+    case Map.get(metadata, key) do
+      value when is_integer(value) and value >= 0 -> value
+      _ -> 1
+    end
+  end
+
+  defp counter_setting(_metadata, _key), do: 1
 
   # The run the player is on, 1-based: a row that has never been claimed is
   # run 1. A claimed row that has not re-armed yet still reads as the run just

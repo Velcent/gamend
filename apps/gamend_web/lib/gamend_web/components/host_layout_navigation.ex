@@ -201,7 +201,7 @@ defmodule GamendWeb.HostLayoutNavigation do
             </span>
           </.link>
         </li>
-        <li>
+        <li :if={GamendWeb.Features.enabled?(:web_chat)}>
           <.link
             href={lp(~p"/chat")}
             class={[if(here?(@current_path, "/chat"), do: "menu-active", else: "")]}
@@ -633,8 +633,9 @@ defmodule GamendWeb.HostLayoutNavigation do
   attr :account_links, :list, default: []
 
   # Mobile account section: collapsible group headed by the user's name (like
-  # the desktop user menu). Holds Account, Notifications, Chat, then the
-  # config account_links (admin items) last, then Log out.
+  # the desktop user menu). Holds Account, Notifications, Chat (unless
+  # `web_chat` is off), then the config account_links (admin items) last,
+  # then Log out.
   defp mobile_account_menu(assigns) do
     active? =
       account_path_active?(assigns.current_path, "/users/settings") or
@@ -692,7 +693,7 @@ defmodule GamendWeb.HostLayoutNavigation do
               </span>
             </a>
           </li>
-          <li class="w-full">
+          <li :if={GamendWeb.Features.enabled?(:web_chat)} class="w-full">
             <a href={lp(~p"/chat")} class={["btn w-full", account_item_class(@current_path, "/chat")]}>
               <.icon name="hero-chat-bubble-left-right-solid" class="w-4 h-4" />
               {GamendWeb.HostLayouts.translate("Chat")}

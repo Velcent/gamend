@@ -177,7 +177,9 @@ defmodule GamendWeb.HostLayouts do
   def resolve_theme(locale, assigned_theme) when map_size(assigned_theme) == 0 do
     base = fetch_theme(locale)
     settings = host_theme_settings()
-    fingerprint = :erlang.phash2({base, settings})
+    # The flags are in the fingerprint because `build_theme/4` drops the
+    # links they close: flipping one must not keep serving the old nav.
+    fingerprint = :erlang.phash2({base, settings, GamendWeb.Features.configured()})
     key = {__MODULE__, :resolved_theme, resolved_theme_locale(locale)}
 
     case :persistent_term.get(key, :miss) do
@@ -227,6 +229,7 @@ defmodule GamendWeb.HostLayouts do
         if(missing?, do: "Add host theme config or set GAMEND_CONTENT_THEME_CONFIG")
     )
     |> then(&Map.merge(host_theme_settings, &1))
+    |> GamendWeb.Features.drop_disabled()
     |> translate_theme(locale)
   end
 
@@ -764,16 +767,19 @@ defmodule GamendWeb.HostLayouts do
           %{
             "label" => translate("Tournaments"),
             "href" => "/tournaments",
-            "icon" => "hero-bolt-solid"
+            "icon" => "hero-bolt-solid",
+            "feature" => "web_tournaments"
           },
           %{
             "label" => translate("Groups"),
             "href" => "/groups",
-            "icon" => "hero-user-group-solid"
+            "icon" => "hero-user-group-solid",
+            "feature" => "web_groups"
           }
         ]
       }
     ]
+    |> GamendWeb.Features.drop_disabled()
   end
 
   defp default_account_nav_links do

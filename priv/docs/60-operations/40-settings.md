@@ -7,7 +7,7 @@ generated: by `mix gamend.settings.guide` - do not edit by hand; edit the
 # Settings
 
 Every setting the server has, with the environment variable that sets it.
-316 settings across 29 groups.
+325 settings across 30 groups.
 
 A setting is declared in the module that owns it, so this page and
 `.env.example` are generated from the same source the server reads. The
@@ -378,6 +378,9 @@ Live values, and where each one came from, are on the
 | `GAMEND_FEATURES_PUBLIC_STATS` | boolean | `true` | The unauthenticated stats endpoints: GET /api/v1/stats, /api/v1/users/stats, /api/v1/lobbies/stats, /api/v1/parties/stats, /api/v1/quests/stats, /api/v1/signaling/stats and /api/v1/matchmaking/stats, plus the /stats page. Aggregate counts only, never per-row data — but they do reveal how busy the server is. |
 | `GAMEND_FEATURES_PUBLIC_USER_METADATA_KEYS` | list | - | Top-level `user.metadata` keys GET /api/v1/users and /users/:id may return. Empty means none. Those endpoints are unauthenticated, so anything named here is world-readable and findable by name prefix — never list a key holding position, routing or contact data. |
 | `GAMEND_FEATURES_USER_IMAGE_UPLOADS` | boolean | `true` | Player-supplied images: avatars (POST /api/v1/me/avatar*) and group icons (POST /api/v1/groups/:id/icon*). Objects land in public storage and are served without authentication, so on a service children can reach this is an unscreened image surface — turn it off unless the game actually uses it and you have a way to screen what arrives. |
+| `GAMEND_FEATURES_WEB_CHAT` | boolean | `true` | Chat on the website: the /chat page, its link in the account menu, the Open links on chat notifications, and every link marked `"feature": "web_chat"`. The chat API and the game client are untouched. |
+| `GAMEND_FEATURES_WEB_GROUPS` | boolean | `true` | Groups on the website: the /groups pages, the Groups tab in account settings, and every nav, footer or page link marked `"feature": "web_groups"`. The groups API and the game client are untouched — `list_groups` gates the public listing. |
+| `GAMEND_FEATURES_WEB_TOURNAMENTS` | boolean | `true` | Tournaments on the website: the /tournaments pages and every nav, footer or page link marked `"feature": "web_tournaments"`. The tournaments API and the game client are untouched — `list_tournaments` gates the public listing. |
 
 
 ## Push notifications
@@ -430,6 +433,18 @@ Live values, and where each one came from, are on the
 | `GAMEND_REALTIME_SOCKET_BUFFER_KB` | integer | `0` | Cap the per-connection socket read buffer, in KB. 0 leaves the OS default. Only lowers memory on platforms that honour it; does not change the TCP window. |
 | `GAMEND_REALTIME_SOCKET_MAX_FRAME_BYTES` | integer | `131072` | Largest single WebSocket frame a game client may send, in bytes. |
 | `GAMEND_REALTIME_SOCKET_TIMEOUT_MS` | integer | `300000` | How long a game socket may stay silent before it is closed, in ms. Longer keeps alt-tabbed players; shorter frees half-open sockets (and their seats) sooner. |
+
+
+## Reports
+
+| Variable | Type | Default | Notes |
+|---|---|---|---|
+| `GAMEND_REPORTS_DAILY_LIMIT` | integer | `500` | Most reports accepted in 24 hours across everyone. 0 means no cap. |
+| `GAMEND_REPORTS_ENABLED` | boolean | `true` | Accept reports from /report and POST /api/v1/reports. |
+| `GAMEND_REPORTS_IP_HOURLY_LIMIT` | integer | `10` | Most reports one IP address may file in an hour (counted in memory). 0 means no cap. |
+| `GAMEND_REPORTS_MAX_ATTACHMENT_BYTES` | integer | `2000000` | Largest image a report may carry, in bytes. |
+| `GAMEND_REPORTS_RETENTION_DAYS` | integer | `180` | Delete a closed report, and its images, N days after it was closed. Open reports are kept. 0 keeps everything. |
+| `GAMEND_REPORTS_USER_DAILY_LIMIT` | integer | `20` | Most reports one account may file in 24 hours. 0 means no cap. |
 
 
 ## Retention

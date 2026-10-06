@@ -17,6 +17,8 @@ defmodule GamendWeb.UserAuth do
   alias Gamend.Accounts.Scope
   alias Gamend.Accounts.UserToken
 
+  require Logger
+
   # The remember-me cookie lives exactly as long as the session token it holds:
   # both come from `auth.session_days` (`UserToken.session_validity_in_days/0`).
   @remember_me_cookie "_gamend_web_user_remember_me"
@@ -114,7 +116,9 @@ defmodule GamendWeb.UserAuth do
   Returns `{:ok, socket}` with `current_scope` set, or `{:error, reason}`:
   `:disabled` when device accounts are off, `:not_connected` on the static render
   (there is no browser to hand the session to yet), `:rate_limited` past the
-  per-IP limit on new accounts (the general bucket page loads use).
+  per-IP limit on new accounts (the general bucket page loads use). Every
+  refusal is logged with the page's view: a page carries on signed out, so
+  the log (admin Logs) is the only place it shows.
   """
   @spec ensure_user(Phoenix.LiveView.Socket.t()) ::
           {:ok, Phoenix.LiveView.Socket.t()} | {:error, term()}
@@ -124,7 +128,7 @@ defmodule GamendWeb.UserAuth do
         {:ok, socket}
 
       not Phoenix.LiveView.connected?(socket) ->
-        {:error, :not_connected}
+        log_guest_refused({:error, :not_connected}, inspect(socket.view))
 
       true ->
         with :ok <- guest_rate_limit(socket.assigns[:client_ip]),
@@ -137,6 +141,8 @@ defmodule GamendWeb.UserAuth do
            |> Phoenix.LiveView.push_event("gamend:anonymous_session", %{
              token: encrypt_anonymous_session(token)
            })}
+        else
+          error -> log_guest_refused(error, inspect(socket.view))
         end
     end
   end
@@ -159,6 +165,8 @@ defmodule GamendWeb.UserAuth do
          |> put_token_in_session(token)
          |> write_remember_me_cookie(token)
          |> assign(:current_scope, Scope.for_user(user))}
+      else
+        error -> log_guest_refused(error, conn.request_path)
       end
     end
   end
@@ -206,6 +214,25 @@ defmodule GamendWeb.UserAuth do
       :ok -> :ok
       {:error, _retry_after} -> {:error, :rate_limited}
     end
+  end
+
+  # A refused guest account, to the log, and the refusal back to the caller.
+  # Callers carry on signed out (the visitor's save is not kept), so this line
+  # is the only trace it leaves. The static render is expected and only
+  # debug; a refusal the server meant (device accounts off, the per-IP limit)
+  # is a warning; anything else (a hook refused it, the insert failed) an error.
+  defp log_guest_refused(error, where) do
+    reason = with {:error, reason} <- error, do: reason
+
+    level =
+      case reason do
+        :not_connected -> :debug
+        reason when reason in [:disabled, :rate_limited] -> :warning
+        _other -> :error
+      end
+
+    Logger.log(level, "guest account not made on #{where}: #{inspect(reason)}")
+    error
   end
 
   # A browser has no device id to send, so the server makes one up. `web:`

@@ -12,6 +12,7 @@ defmodule GamendWeb.AnonymousSessionTest do
   alias GamendWeb.UserAuth
   alias Phoenix.LiveView.Utils
 
+  import ExUnit.CaptureLog
   import Phoenix.LiveViewTest
 
   setup do
@@ -116,7 +117,14 @@ defmodule GamendWeb.AnonymousSessionTest do
       Application.put_env(:gamend_core, Gamend.Accounts, device_auth_enabled: false)
       count = Gamend.Repo.aggregate(User, :count, :id)
 
-      assert {:error, :disabled} = UserAuth.ensure_user(connected_socket())
+      # The page carries on signed out, so the log is where it shows.
+      log =
+        capture_log(fn ->
+          assert {:error, :disabled} = UserAuth.ensure_user(connected_socket())
+        end)
+
+      assert log =~ "guest account not made"
+      assert log =~ ":disabled"
       assert Gamend.Repo.aggregate(User, :count, :id) == count
     end
   end
@@ -135,9 +143,15 @@ defmodule GamendWeb.AnonymousSessionTest do
     end
 
     test "refuses a token it did not make", %{conn: conn} do
-      conn = post(conn, ~p"/users/anonymous_session", %{token: "nope"})
-      assert response(conn, 422)
-      assert post(build_conn(), ~p"/users/anonymous_session", %{}) |> response(422)
+      # The account it named stays with no browser to hold it: logged.
+      log =
+        capture_log(fn ->
+          conn = post(conn, ~p"/users/anonymous_session", %{token: "nope"})
+          assert response(conn, 422)
+          assert post(build_conn(), ~p"/users/anonymous_session", %{}) |> response(422)
+        end)
+
+      assert log =~ "guest session not written"
     end
 
     test "never replaces a real account the browser is signed in with", %{conn: conn} do

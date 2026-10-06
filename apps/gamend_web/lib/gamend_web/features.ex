@@ -8,6 +8,11 @@ defmodule GamendWeb.Features do
   want third parties browsing or scraping its data turns off what it does not
   need.
 
+  `web_groups`, `web_chat` and `web_tournaments` are website-only: they close
+  a page and every link to it (`drop_disabled/1`) and leave the API to the
+  game client, so a host can park a feature on the site without breaking the
+  game.
+
   Read through `GamendWeb.Plugs.FeatureGate`, which 404s a disabled route.
   """
 
@@ -41,6 +46,24 @@ defmodule GamendWeb.Features do
   setting(:list_groups, :boolean,
     default: true,
     doc: "GET /api/v1/groups*, the \"groups\" channel and the /groups pages."
+  )
+
+  setting(:web_groups, :boolean,
+    default: true,
+    doc:
+      "Groups on the website: the /groups pages, the Groups tab in account settings, and every nav, footer or page link marked `\"feature\": \"web_groups\"`. The groups API and the game client are untouched — `list_groups` gates the public listing."
+  )
+
+  setting(:web_chat, :boolean,
+    default: true,
+    doc:
+      "Chat on the website: the /chat page, its link in the account menu, the Open links on chat notifications, and every link marked `\"feature\": \"web_chat\"`. The chat API and the game client are untouched."
+  )
+
+  setting(:web_tournaments, :boolean,
+    default: true,
+    doc:
+      "Tournaments on the website: the /tournaments pages and every nav, footer or page link marked `\"feature\": \"web_tournaments\"`. The tournaments API and the game client are untouched — `list_tournaments` gates the public listing."
   )
 
   setting(:list_leaderboards, :boolean,
@@ -90,6 +113,37 @@ defmodule GamendWeb.Features do
   def enabled?(feature) when is_atom(feature) do
     Gamend.Settings.get(__MODULE__, feature) != false
   end
+
+  @doc """
+  Drops every map whose `"feature"` names a switched-off flag, at any depth.
+
+  Theme config (navigation, footer, page buttons) is host-authored, so a link
+  to a page a flag closes carries `"feature": "web_groups"` and disappears with
+  the page. An unknown name keeps the entry: hiding on a typo would be silent.
+  """
+  @spec drop_disabled(term()) :: term()
+  def drop_disabled(list) when is_list(list) do
+    for item <- list, not disabled_entry?(item), do: drop_disabled(item)
+  end
+
+  def drop_disabled(map) when is_map(map) and not is_struct(map) do
+    Map.new(map, fn {key, value} -> {key, drop_disabled(value)} end)
+  end
+
+  def drop_disabled(other), do: other
+
+  @doc "The flags as configured, for cache keys that depend on them."
+  @spec configured() :: keyword()
+  def configured, do: Application.get_env(:gamend_web, __MODULE__, [])
+
+  defp disabled_entry?(%{"feature" => name}) when is_binary(name) do
+    case Enum.find(__settings__(), &(Atom.to_string(&1.key) == name)) do
+      %{key: key, type: :boolean} -> not enabled?(key)
+      _ -> false
+    end
+  end
+
+  defp disabled_entry?(_item), do: false
 
   @doc """
   Top-level `user.metadata` keys the public user endpoints may return.
