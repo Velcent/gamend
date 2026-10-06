@@ -24,6 +24,8 @@ defmodule Gamend.Accounts.Scope do
 
   defstruct user_id: nil, authenticated_at: nil
 
+  @type t :: %__MODULE__{user_id: Ecto.UUID.t() | nil, authenticated_at: DateTime.t() | nil}
+
   @doc "Creates a scope for the given user, or nil when signed out."
   def for_user(%User{} = user),
     do: %__MODULE__{user_id: user.id, authenticated_at: user.authenticated_at}

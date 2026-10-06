@@ -2588,6 +2588,48 @@ defmodule Gamend.Accounts do
   end
 
   @doc ~S"""
+    Changes a user's `metadata` from the row as it is stored now.
+    
+    `fun` gets the stored map (`%{}` for none) and answers the new one,
+    `:unchanged` to write nothing, or `{:error, reason}` to refuse. It can run
+    more than once, so it must only compute.
+    
+    `metadata` is one map that core (payments), plugins and the host all write
+    their own keys into, and a write replaces all of it: a writer that builds the
+    map from a user it read earlier puts every other writer's keys back as they
+    were then. This reads the row, asks `fun`, runs the `before_user_update` hook
+    with no database lock held, and writes under the user's lock only if the
+    stored map is still the one `fun` started from. When it is not, it starts
+    over, up to 5 times, then answers `{:error, :conflict}`.
+    Calls for one user on one node take turns (`Gamend.Lock.Local.in_turn/2`),
+    so they do not all read at once and retry in lockstep.
+    
+    Answers `{:ok, user}` (the stored user when nothing was written),
+    `{:error, :not_found}`, the refusal, or the hook's or changeset's error.
+    
+  """
+  @spec update_user_metadata(Ecto.UUID.t(), (map() -> map() | :unchanged | {:error, term()})) ::
+          {:ok, Gamend.Accounts.User.t()} | {:error, term()}
+  def update_user_metadata(_user_id, _fun) do
+    case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        {:ok,
+         %Gamend.Accounts.User{
+           id: 0,
+           email: "",
+           display_name: nil,
+           metadata: %{},
+           is_admin: false,
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
+
+      _ ->
+        raise "Gamend.Accounts.update_user_metadata/2 is a stub - only available at runtime on Gamend"
+    end
+  end
+
+  @doc ~S"""
     Updates the user password.
     
     Returns a tuple with the updated user, as well as a list of expired tokens.

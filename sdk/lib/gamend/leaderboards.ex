@@ -22,6 +22,21 @@ defmodule Gamend.Leaderboards do
       # List records with rank (use leaderboard id)
       records = Leaderboards.list_records(leaderboard.id, page: 1, limit: 25)
 
+  ## Keys
+
+  A board can hold several rankings: a record is unique per user (or label)
+  and `key`, and every read ranks within one key. `""` is the default, a
+  board with one ranking. A host keeping, say, a best per game and language
+  on one board submits with `key: "match|60|es_es"` and metadata naming the
+  parts; `list_records/2` with `key: :all` and `meta:` reads across keys
+  (`best_per_user: true` keeps each player's best of them).
+
+  ## Hidden boards
+
+  `hidden: true` keeps a board out of `list_leaderboards/1`,
+  `list_leaderboard_groups/1` and their counts unless `include_hidden: true`
+  is passed. Everything else reads it like any board.
+
       # Get user's record (use leaderboard id)
       {:ok, record} = Leaderboards.get_user_record(leaderboard.id, user_id)
 
@@ -121,6 +136,21 @@ defmodule Gamend.Leaderboards do
   end
 
   @doc ~S"""
+    Counts unique leaderboard slugs.
+    
+  """
+  @spec count_leaderboard_groups(keyword()) :: non_neg_integer()
+  def count_leaderboard_groups(_opts) do
+    case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        0
+
+      _ ->
+        raise "Gamend.Leaderboards.count_leaderboard_groups/1 is a stub - only available at runtime on Gamend"
+    end
+  end
+
+  @doc ~S"""
     Counts leaderboards matching the given filters.
     
     Accepts the same filter options as `list_leaderboards/1`.
@@ -155,7 +185,8 @@ defmodule Gamend.Leaderboards do
   end
 
   @doc ~S"""
-    Counts records for a leaderboard.
+    Counts records for a leaderboard: the same `:key`, `:meta`,
+    `:best_per_user` and `:search` as `list_records/2`.
     
   """
   @spec count_records(Ecto.UUID.t()) :: non_neg_integer()
@@ -170,7 +201,8 @@ defmodule Gamend.Leaderboards do
   end
 
   @doc ~S"""
-    Counts records for a leaderboard.
+    Counts records for a leaderboard: the same `:key`, `:meta`,
+    `:best_per_user` and `:search` as `list_records/2`.
     
   """
   @spec count_records(
@@ -285,13 +317,13 @@ defmodule Gamend.Leaderboards do
   end
 
   @doc ~S"""
-    Deletes a user's record from a leaderboard.
+    Deletes a user's record from a leaderboard (in `key:`, default `""`).
     Accepts either leaderboard ID or slug (both strings).
     
   """
-  @spec delete_user_record(String.t(), Ecto.UUID.t()) ::
+  @spec delete_user_record(String.t(), Ecto.UUID.t(), keyword()) ::
           {:ok, Gamend.Leaderboards.Record.t()} | {:error, :not_found}
-  def delete_user_record(_id_or_slug, _user_id) do
+  def delete_user_record(_id_or_slug, _user_id, _opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         {:ok,
@@ -308,7 +340,7 @@ defmodule Gamend.Leaderboards do
          }}
 
       _ ->
-        raise "Gamend.Leaderboards.delete_user_record/2 is a stub - only available at runtime on Gamend"
+        raise "Gamend.Leaderboards.delete_user_record/3 is a stub - only available at runtime on Gamend"
     end
   end
 
@@ -379,11 +411,12 @@ defmodule Gamend.Leaderboards do
   end
 
   @doc ~S"""
-    Gets a single record by leaderboard ID and label.
+    Gets a single record by leaderboard ID, label and key (default `""`).
     
   """
-  @spec get_label_record(Ecto.UUID.t(), String.t()) :: Gamend.Leaderboards.Record.t() | nil
-  def get_label_record(_leaderboard_id, _label) do
+  @spec get_label_record(Ecto.UUID.t(), String.t(), String.t()) ::
+          Gamend.Leaderboards.Record.t() | nil
+  def get_label_record(_leaderboard_id, _label, _key \\ "") do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         if :erlang.phash2(make_ref(), 2) == 0,
@@ -401,7 +434,7 @@ defmodule Gamend.Leaderboards do
           }
 
       _ ->
-        raise "Gamend.Leaderboards.get_label_record/2 is a stub - only available at runtime on Gamend"
+        raise "Gamend.Leaderboards.get_label_record/3 is a stub - only available at runtime on Gamend"
     end
   end
 
@@ -487,11 +520,12 @@ defmodule Gamend.Leaderboards do
   end
 
   @doc ~S"""
-    Gets a single record by leaderboard ID and user ID.
+    Gets a single record by leaderboard ID, user ID and key (default `""`).
     
   """
-  @spec get_record(Ecto.UUID.t(), Ecto.UUID.t()) :: Gamend.Leaderboards.Record.t() | nil
-  def get_record(_leaderboard_id, _user_id) do
+  @spec get_record(Ecto.UUID.t(), Ecto.UUID.t(), String.t()) ::
+          Gamend.Leaderboards.Record.t() | nil
+  def get_record(_leaderboard_id, _user_id, _key \\ "") do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         if :erlang.phash2(make_ref(), 2) == 0,
@@ -509,7 +543,7 @@ defmodule Gamend.Leaderboards do
           }
 
       _ ->
-        raise "Gamend.Leaderboards.get_record/2 is a stub - only available at runtime on Gamend"
+        raise "Gamend.Leaderboards.get_record/3 is a stub - only available at runtime on Gamend"
     end
   end
 
@@ -528,7 +562,7 @@ defmodule Gamend.Leaderboards do
   end
 
   @doc ~S"""
-    Gets a user's record with their rank.
+    Gets a user's record with their rank (within its key: `key:`, default `""`).
     Returns `{:ok, record_with_rank}` or `{:error, :not_found}`.
     
   """
@@ -552,6 +586,34 @@ defmodule Gamend.Leaderboards do
 
       _ ->
         raise "Gamend.Leaderboards.get_user_record/2 is a stub - only available at runtime on Gamend"
+    end
+  end
+
+  @doc ~S"""
+    Gets a user's record with their rank (within its key: `key:`, default `""`).
+    Returns `{:ok, record_with_rank}` or `{:error, :not_found}`.
+    
+  """
+  @spec get_user_record(Ecto.UUID.t(), Ecto.UUID.t(), keyword()) ::
+          {:ok, Gamend.Leaderboards.Record.t()} | {:error, :not_found}
+  def get_user_record(_leaderboard_id, _user_id, _opts) do
+    case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        {:ok,
+         %Gamend.Leaderboards.Record{
+           id: 0,
+           leaderboard_id: 0,
+           user_id: 0,
+           label: nil,
+           score: 0,
+           rank: nil,
+           metadata: %{},
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
+
+      _ ->
+        raise "Gamend.Leaderboards.get_user_record/3 is a stub - only available at runtime on Gamend"
     end
   end
 
@@ -635,6 +697,7 @@ defmodule Gamend.Leaderboards do
       * `:starts_before` - Only leaderboards that started before this DateTime
       * `:ends_after` - Only leaderboards that end after this DateTime
       * `:ends_before` - Only leaderboards that end before this DateTime
+      * `:include_hidden` - Also hidden boards (default false)
       * `:page` - Page number (default 1)
       * `:page_size` - Page size (default 25)
     
@@ -673,6 +736,7 @@ defmodule Gamend.Leaderboards do
       * `:starts_before` - Only leaderboards that started before this DateTime
       * `:ends_after` - Only leaderboards that end after this DateTime
       * `:ends_before` - Only leaderboards that end before this DateTime
+      * `:include_hidden` - Also hidden boards (default false)
       * `:page` - Page number (default 1)
       * `:page_size` - Page size (default 25)
     
@@ -739,11 +803,16 @@ defmodule Gamend.Leaderboards do
     
     See `t:Gamend.Types.pagination_opts/0` for available options, plus:
     
-      * `:meta` — `{key, value}`, keeping only records whose `metadata[key]`
-        equals `value`. Ranks are computed **within** the filtered set, because
-        "the Spanish board" means first among Spanish, not 57th overall. That is
-        the opposite of `:search`, which ranks over the whole board so a found
-        player's real position is what shows.
+      * `:key` — the ranking to read (default `""`), or `:all` for every key's
+        rows ranked together.
+      * `:meta` — a map, keeping only records whose `metadata[field]` equals
+        each value (`%{"game" => "match", "lang" => "es_es"}`). Ranks are
+        computed **within** the filtered set, because "the Spanish board" means
+        first among Spanish, not 57th overall. That is the opposite of
+        `:search`, which ranks over the whole key so a found player's real
+        position is what shows.
+      * `:best_per_user` — with `key: :all`, each player's (or label's) best
+        row only: one board read across keys, a player once.
     
   """
   @spec list_records(String.t()) :: [Gamend.Leaderboards.Record.t()]
@@ -764,11 +833,16 @@ defmodule Gamend.Leaderboards do
     
     See `t:Gamend.Types.pagination_opts/0` for available options, plus:
     
-      * `:meta` — `{key, value}`, keeping only records whose `metadata[key]`
-        equals `value`. Ranks are computed **within** the filtered set, because
-        "the Spanish board" means first among Spanish, not 57th overall. That is
-        the opposite of `:search`, which ranks over the whole board so a found
-        player's real position is what shows.
+      * `:key` — the ranking to read (default `""`), or `:all` for every key's
+        rows ranked together.
+      * `:meta` — a map, keeping only records whose `metadata[field]` equals
+        each value (`%{"game" => "match", "lang" => "es_es"}`). Ranks are
+        computed **within** the filtered set, because "the Spanish board" means
+        first among Spanish, not 57th overall. That is the opposite of
+        `:search`, which ranks over the whole key so a found player's real
+        position is what shows.
+      * `:best_per_user` — with `key: :all`, each player's (or label's) best
+        row only: one board read across keys, a player once.
     
   """
   @spec list_records(
@@ -793,6 +867,7 @@ defmodule Gamend.Leaderboards do
     ## Options
     
       * `:limit` - Total number of records to return (default 11, centered on user)
+      * `:key` - The ranking (default `""`)
     
   """
   @spec list_records_around_user(String.t(), Ecto.UUID.t()) :: [Gamend.Leaderboards.Record.t()]
@@ -814,6 +889,7 @@ defmodule Gamend.Leaderboards do
     ## Options
     
       * `:limit` - Total number of records to return (default 11, centered on user)
+      * `:key` - The ranking (default `""`)
     
   """
   @spec list_records_around_user(String.t(), Ecto.UUID.t(), keyword()) :: [
@@ -869,9 +945,9 @@ defmodule Gamend.Leaderboards do
         {:ok, %Record{label: "English", score: 42}}
     
   """
-  @spec submit_label_score(String.t(), String.t(), integer(), map()) ::
+  @spec submit_label_score(String.t(), String.t(), integer(), map(), keyword()) ::
           {:ok, Gamend.Leaderboards.Record.t()} | {:error, term()}
-  def submit_label_score(_leaderboard_id, _label, _score, _metadata \\ %{}) do
+  def submit_label_score(_leaderboard_id, _label, _score, _metadata \\ %{}, _opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         {:ok,
@@ -888,7 +964,7 @@ defmodule Gamend.Leaderboards do
          }}
 
       _ ->
-        raise "Gamend.Leaderboards.submit_label_score/4 is a stub - only available at runtime on Gamend"
+        raise "Gamend.Leaderboards.submit_label_score/5 is a stub - only available at runtime on Gamend"
     end
   end
 
@@ -915,6 +991,12 @@ defmodule Gamend.Leaderboards do
     
         iex> submit_score(123, user_id, 5, %{weapon: "sword"})
         {:ok, %Record{score: 15, metadata: %{weapon: "sword"}}}
+    
+    `key:` (default `""`) is the ranking within the board the score goes to;
+    the operator applies per key.
+    
+        iex> submit_score(123, user_id, 23, %{"game" => "match"}, key: "match|60")
+        {:ok, %Record{key: "match|60", score: 23}}
     
   """
   @spec submit_score(String.t(), Ecto.UUID.t(), integer()) ::
@@ -964,6 +1046,12 @@ defmodule Gamend.Leaderboards do
         iex> submit_score(123, user_id, 5, %{weapon: "sword"})
         {:ok, %Record{score: 15, metadata: %{weapon: "sword"}}}
     
+    `key:` (default `""`) is the ranking within the board the score goes to;
+    the operator applies per key.
+    
+        iex> submit_score(123, user_id, 23, %{"game" => "match"}, key: "match|60")
+        {:ok, %Record{key: "match|60", score: 23}}
+    
   """
   @spec submit_score(String.t(), Ecto.UUID.t(), integer(), map()) ::
           {:ok, Gamend.Leaderboards.Record.t()} | {:error, term()}
@@ -985,6 +1073,60 @@ defmodule Gamend.Leaderboards do
 
       _ ->
         raise "Gamend.Leaderboards.submit_score/4 is a stub - only available at runtime on Gamend"
+    end
+  end
+
+  @doc ~S"""
+    Submits a score for a user on a leaderboard.
+    
+    This is a server-only function — there is no public API for score submission.
+    The score is processed according to the leaderboard's operator:
+    
+      * `:set` — Always replace with new score
+      * `:best` — Only update if new score is better (respects sort_order)
+      * `:incr` — Add to existing score
+      * `:decr` — Subtract from existing score
+    
+    To submit to a leaderboard by slug, first get the active leaderboard ID:
+    
+        leaderboard = Leaderboards.get_active_leaderboard_by_slug("weekly_kills")
+        Leaderboards.submit_score(leaderboard.id, user_id, 10)
+    
+    ## Examples
+    
+        iex> submit_score(123, user_id, 10)
+        {:ok, %Record{score: 10}}
+    
+        iex> submit_score(123, user_id, 5, %{weapon: "sword"})
+        {:ok, %Record{score: 15, metadata: %{weapon: "sword"}}}
+    
+    `key:` (default `""`) is the ranking within the board the score goes to;
+    the operator applies per key.
+    
+        iex> submit_score(123, user_id, 23, %{"game" => "match"}, key: "match|60")
+        {:ok, %Record{key: "match|60", score: 23}}
+    
+  """
+  @spec submit_score(String.t(), Ecto.UUID.t(), integer(), map(), keyword()) ::
+          {:ok, Gamend.Leaderboards.Record.t()} | {:error, term()}
+  def submit_score(_leaderboard_id, _user_id, _score, _metadata, _opts) do
+    case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        {:ok,
+         %Gamend.Leaderboards.Record{
+           id: 0,
+           leaderboard_id: 0,
+           user_id: 0,
+           label: nil,
+           score: 0,
+           rank: nil,
+           metadata: %{},
+           inserted_at: ~U[1970-01-01 00:00:00Z],
+           updated_at: ~U[1970-01-01 00:00:00Z]
+         }}
+
+      _ ->
+        raise "Gamend.Leaderboards.submit_score/5 is a stub - only available at runtime on Gamend"
     end
   end
 

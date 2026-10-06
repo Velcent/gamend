@@ -73,7 +73,7 @@ defmodule Gamend.KV do
 
   @pubsub Gamend.PubSub
 
-  # What `get/2` caches for a key with no row (see `get_uncached/3`).
+  # What `get/2` caches for a key with no row.
   @missing :kv_missing
 
   @doc """
@@ -171,54 +171,21 @@ defmodule Gamend.KV do
     user_id = Keyword.get(opts, :user_id)
     lobby_id = Keyword.get(opts, :lobby_id)
 
-    cached = Gamend.Cache.get!(cache_key(key, user_id, lobby_id))
-
-    cond do
-      is_map(cached) and Map.has_key?(cached, :value) and Map.has_key?(cached, :metadata) ->
-        {:ok, cached}
-
-      cached == @missing ->
-        :error
-
-      true ->
-        get_uncached(key, user_id, lobby_id)
-    end
-  end
-
-  # A key that is not there is read as often as one that is — a player with no
-  # saved curriculum, no quota row yet today — and every such read was a query.
-  # The absence is cached too (`@missing`), but only when nothing in the scope
-  # was written while the read ran (its entries version did not move) and never
-  # inside a transaction, whose row may yet be written or rolled back. Every
-  # write that creates a row goes through `cache_put/4`, which evicts the key.
-  defp get_uncached(key, user_id, lobby_id) do
-    scope = scope_for_cache(user_id, lobby_id)
-    version = entries_cache_version(scope)
-
-    case fetch_entry(key, user_id, lobby_id) do
-      nil ->
-        if not Repo.in_transaction?() and entries_cache_version(scope) == version do
-          _ =
-            Gamend.Cache.put(cache_key(key, user_id, lobby_id), @missing, ttl: Gamend.Cache.ttl())
-        end
-
-        :error
-
-      %Entry{value: value, metadata: metadata} ->
-        payload = %{value: value, metadata: metadata}
-
-        Gamend.Async.run(fn ->
-          _ =
-            Gamend.Cache.put(
-              cache_key(key, user_id, lobby_id),
-              payload,
-              ttl: Gamend.Cache.ttl()
-            )
-
-          :ok
-        end)
-
-        {:ok, payload}
+    # A key that is not there is read as often as one that is — a player with
+    # no saved curriculum, no quota row yet today — so the absence is cached
+    # too. `Gamend.Cache.cached/3` keeps neither when a write evicted the key
+    # while the query ran, and caches nothing inside a transaction, whose row
+    # may yet be written or rolled back.
+    cache_key(key, user_id, lobby_id)
+    |> Gamend.Cache.cached([ttl: Gamend.Cache.ttl()], fn ->
+      case fetch_entry(key, user_id, lobby_id) do
+        nil -> @missing
+        %Entry{value: value, metadata: metadata} -> %{value: value, metadata: metadata}
+      end
+    end)
+    |> case do
+      %{value: _, metadata: _} = payload -> {:ok, payload}
+      _missing -> :error
     end
   end
 
@@ -259,10 +226,8 @@ defmodule Gamend.KV do
              conflict_target: kv_conflict_target(user_id, lobby_id)
            ) do
         {:ok, entry} ->
-          # Version first: a concurrent `get/2` that found no row checks it
-          # before caching the absence (`get_uncached/3`).
           _ = invalidate_entries_cache(user_id, lobby_id)
-          _ = cache_put(key, user_id, lobby_id, entry)
+          _ = evict(key, user_id, lobby_id)
           _ = broadcast_kv_updated(key, user_id, lobby_id, value, metadata)
           {:ok, entry}
 
@@ -525,7 +490,7 @@ defmodule Gamend.KV do
       case Repo.insert(changeset) do
         {:ok, entry} ->
           _ = invalidate_entries_cache(entry.user_id, entry.lobby_id)
-          _ = cache_put(entry.key, entry.user_id, entry.lobby_id, entry)
+          _ = evict(entry.key, entry.user_id, entry.lobby_id)
           _ = broadcast_kv_updated(entry)
           {:ok, entry}
 
@@ -572,15 +537,12 @@ defmodule Gamend.KV do
           case Repo.update(changeset) do
             {:ok, updated} ->
               if cache_key(updated.key, updated.user_id, updated.lobby_id) != old_cache_key do
-                Gamend.Async.run(fn ->
-                  _ = Gamend.Cache.invalidate(old_cache_key)
-                  :ok
-                end)
+                _ = Gamend.Cache.invalidate(old_cache_key)
               end
 
               _ = invalidate_entries_cache(entry.user_id, entry.lobby_id)
               _ = invalidate_entries_cache(updated.user_id, updated.lobby_id)
-              _ = cache_put(updated.key, updated.user_id, updated.lobby_id, updated)
+              _ = evict(updated.key, updated.user_id, updated.lobby_id)
 
               if cache_key(updated.key, updated.user_id, updated.lobby_id) != old_cache_key do
                 _ = broadcast_kv_deleted(entry.key, entry.user_id, entry.lobby_id)
@@ -720,28 +682,13 @@ defmodule Gamend.KV do
   defp cache_key(key, nil, lobby_id), do: {:kv, :lobby, lobby_id, key}
   defp cache_key(key, user_id, lobby_id), do: {:kv, :user_lobby, user_id, lobby_id, key}
 
-  defp cache_put(key, user_id, lobby_id, %Entry{} = entry) do
-    # This node's copy goes now, not in the task: the writer's own next
-    # `get/2` — a read-modify-write reading back what it wrote, or a key it
-    # had just found missing — must see the new row, not what was cached
-    # before the write.
-    _ = Gamend.Cache.delete(cache_key(key, user_id, lobby_id))
-
-    Gamend.Async.run(fn ->
-      # Evict the key on all other instances first so their L1 refetches the
-      # fresh value (from L2 or the DB) instead of serving the old one until
-      # the TTL expires. The put below re-warms this node and L2.
-      _ = Gamend.Cache.invalidate(cache_key(key, user_id, lobby_id))
-
-      _ =
-        Gamend.Cache.put(
-          cache_key(key, user_id, lobby_id),
-          %{value: entry.value, metadata: entry.metadata},
-          ttl: Gamend.Cache.ttl()
-        )
-
-      :ok
-    end)
+  # Evicts the key everywhere, now and again once an open transaction commits.
+  # The writer does not cache what it wrote: two writes can reach the cache in
+  # the opposite order to the database, leaving the older value cached until
+  # the TTL. The next read caches the row as it is (`get/2`).
+  defp evict(key, user_id, lobby_id) do
+    _ = Gamend.Cache.invalidate(cache_key(key, user_id, lobby_id))
+    :ok
   end
 
   defp fetch_entry(key, user_id, lobby_id) do

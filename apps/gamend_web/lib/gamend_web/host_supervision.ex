@@ -171,6 +171,8 @@ defmodule GamendWeb.HostSupervision do
       GamendWeb.Telemetry,
       GamendWeb.PromEx,
       Gamend.Repo,
+      # The line callers wait in for `Gamend.Lock` (`Gamend.Lock.Local`)
+      Gamend.Lock.Queue,
       {Gamend.Cache, []},
       # Aggregates cache hit/miss + overload counters for the admin dashboard
       Gamend.Cache.Stats,

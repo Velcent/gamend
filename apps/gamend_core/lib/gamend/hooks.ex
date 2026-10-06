@@ -1871,51 +1871,19 @@ defmodule Gamend.Hooks.Default do
   @impl true
   def on_custom_hook(_hook, _args), do: {:error, :not_implemented}
 
-  # Optimistic, so the plugins' `before_user_update` hook (up to its timeout)
-  # runs outside the lock: read, merge and ask the hook unlocked, then write
-  # under the lock only if the metadata is still what the merge started from.
-  # A concurrent change starts it over; the lock guards only the write.
-  @payment_metadata_attempts 3
-
+  # `Accounts.update_user_metadata/2`: the plugins' `before_user_update` hook
+  # runs with no lock held, and a write that landed in between (a plugin's own
+  # metadata key) starts it over instead of being overwritten.
   defp update_user_payment_metadata(user_id, fun)
        when is_binary(user_id) and is_function(fun, 1) do
-    update_user_payment_metadata(user_id, fun, @payment_metadata_attempts)
+    case Gamend.Accounts.update_user_metadata(user_id, fun) do
+      {:ok, _user} -> :ok
+      {:error, :not_found} -> {:error, :user_not_found}
+      {:error, reason} -> {:error, reason}
+    end
   end
 
   defp update_user_payment_metadata(_user_id, _fun), do: :ok
-
-  defp update_user_payment_metadata(user_id, fun, attempts) do
-    with %User{} = user <- Gamend.Repo.get(User, user_id) || {:error, :user_not_found},
-         {:ok, attrs} <-
-           Gamend.Accounts.run_before_user_update(user, %{metadata: fun.(user.metadata)}) do
-      "user_payment_metadata"
-      |> Gamend.Lock.serialize(user_id, fn -> write_payment_metadata(user, attrs) end)
-      |> case do
-        {:ok, :stale} when attempts > 1 ->
-          update_user_payment_metadata(user_id, fun, attempts - 1)
-
-        {:ok, :stale} ->
-          {:error, :conflict}
-
-        {:ok, {:ok, _user}} ->
-          :ok
-
-        {:ok, {:error, reason}} ->
-          {:error, reason}
-
-        {:error, reason} ->
-          {:error, reason}
-      end
-    end
-  end
-
-  defp write_payment_metadata(%User{id: id, metadata: read}, attrs) do
-    case Gamend.Repo.get(User, id) do
-      %User{metadata: ^read} = current -> Gamend.Accounts.apply_user_update(current, attrs)
-      %User{} -> :stale
-      nil -> {:error, :user_not_found}
-    end
-  end
 
   defp put_payment_child(metadata, child_key, item_key, value) do
     payments = metadata |> Map.get("payments") |> map_or_empty()

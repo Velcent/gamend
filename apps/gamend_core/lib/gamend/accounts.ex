@@ -18,7 +18,7 @@ defmodule Gamend.Accounts do
   """
 
   import Ecto.Query, warn: false
-  use Nebulex.Caching, cache: Gamend.Cache
+  alias Gamend.Lock.Local
   alias Gamend.Repo
   alias Gamend.Types
 
@@ -479,12 +479,17 @@ defmodule Gamend.Accounts do
 
   """
   @spec get_user(Ecto.UUID.t()) :: User.t() | nil
-  @decorate cacheable(
-              key: {:accounts, :user, id},
-              match: &cache_match/1,
-              opts: [ttl: Gamend.Cache.ttl()]
-            )
-  def get_user(id), do: Repo.get_uuid(User, id)
+  def get_user(id) do
+    # Through `Gamend.Cache.cached/3`, whose fill is dropped when the user was
+    # written while it queried: a request in flight during a logout would
+    # otherwise cache the old `token_version` and keep the revoked JWT valid
+    # until the TTL.
+    Gamend.Cache.cached(
+      {:accounts, :user, id},
+      [ttl: Gamend.Cache.ttl(), match: &cache_match/1],
+      fn -> Repo.get_uuid(User, id) end
+    )
+  end
 
   @doc """
   How to name a user in text a PLAYER reads: `"Ana (drift-2378)"`, or just the
@@ -592,14 +597,26 @@ defmodule Gamend.Accounts do
   end
 
   @doc false
-  @decorate cacheable(
-              key: {:accounts, :user_by, field, value},
-              references: &(&1 && keyref({:accounts, :user, &1.id})),
-              match: &cache_match/1,
-              opts: [ttl: Gamend.Cache.ttl()]
-            )
+  # The index caches only the id; the user itself comes from `get_user/1`, so
+  # a user is cached in one place and both fills are guarded the same way. An
+  # index entry left behind when the field changed (an email or username given
+  # up) is caught by comparing the field, and the database answers instead.
   def get_user_by_field(field, value) when is_atom(field) do
-    Repo.get_by(User, [{field, value}])
+    {:accounts, :user_by, field, value}
+    |> Gamend.Cache.cached([ttl: Gamend.Cache.ttl(), match: &is_binary/1], fn ->
+      Repo.one(from(u in User, where: field(u, ^field) == ^value, select: u.id))
+    end)
+    |> case do
+      nil ->
+        nil
+
+      id ->
+        user = get_user(id)
+
+        if user && Map.get(user, field) == value,
+          do: user,
+          else: Repo.get_by(User, [{field, value}])
+    end
   end
 
   @doc """
@@ -1260,6 +1277,60 @@ defmodule Gamend.Accounts do
     user.hashed_password != nil
   end
 
+  @metadata_attempts 5
+
+  @doc """
+  Changes a user's `metadata` from the row as it is stored now.
+
+  `fun` gets the stored map (`%{}` for none) and answers the new one,
+  `:unchanged` to write nothing, or `{:error, reason}` to refuse. It can run
+  more than once, so it must only compute.
+
+  `metadata` is one map that core (payments), plugins and the host all write
+  their own keys into, and a write replaces all of it: a writer that builds the
+  map from a user it read earlier puts every other writer's keys back as they
+  were then. This reads the row, asks `fun`, runs the `before_user_update` hook
+  with no database lock held, and writes under the user's lock only if the
+  stored map is still the one `fun` started from. When it is not, it starts
+  over, up to #{@metadata_attempts} times, then answers `{:error, :conflict}`.
+  Calls for one user on one node take turns (`Gamend.Lock.Local.in_turn/2`),
+  so they do not all read at once and retry in lockstep.
+
+  Answers `{:ok, user}` (the stored user when nothing was written),
+  `{:error, :not_found}`, the refusal, or the hook's or changeset's error.
+  """
+  @spec update_user_metadata(Ecto.UUID.t(), (map() -> map() | :unchanged | {:error, term()})) ::
+          {:ok, User.t()} | {:error, term()}
+  def update_user_metadata(user_id, fun) when is_binary(user_id) and is_function(fun, 1) do
+    Local.in_turn({:user_metadata_update, user_id}, fn ->
+      update_user_metadata(user_id, fun, @metadata_attempts)
+    end)
+  end
+
+  defp update_user_metadata(user_id, fun, attempts) do
+    with %User{metadata: read} = user <- Repo.get_uuid(User, user_id) || {:error, :not_found},
+         metadata when is_map(metadata) <- fun.(read || %{}),
+         {:ok, attrs} <- run_before_user_update(user, %{metadata: metadata}) do
+      "user_metadata"
+      |> Gamend.Lock.serialize(user_id, fn ->
+        case Repo.get(User, user_id) do
+          %User{metadata: ^read} = current -> apply_user_update(current, attrs)
+          %User{} -> :stale
+          nil -> {:error, :not_found}
+        end
+      end)
+      |> case do
+        {:ok, :stale} when attempts > 1 -> update_user_metadata(user_id, fun, attempts - 1)
+        {:ok, :stale} -> {:error, :conflict}
+        {:ok, result} -> result
+        {:error, reason} -> {:error, reason}
+      end
+    else
+      :unchanged -> {:ok, Repo.get_uuid(User, user_id)}
+      {:error, reason} -> {:error, reason}
+    end
+  end
+
   @doc """
   Updates a user with the given attributes.
 
@@ -1290,7 +1361,7 @@ defmodule Gamend.Accounts do
 
   # `update_user/2` in two halves, for a read-modify-write that must not hold
   # its lock across the plugin's hook: ask the hook first, then write under the
-  # lock (`Gamend.Hooks.Default`'s payment metadata).
+  # lock (`update_user_metadata/2`).
   @doc false
   @spec run_before_user_update(User.t(), map()) :: {:ok, map()} | {:error, term()}
   def run_before_user_update(%User{} = user, attrs) when is_map(attrs) do
