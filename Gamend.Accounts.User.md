@@ -152,6 +152,14 @@ A user changeset for Google OAuth registration.
 
 It accepts email and Google ID.
 
+# `hosted_avatar_url?`
+
+```elixir
+@spec hosted_avatar_url?(term(), term()) :: boolean()
+```
+
+Whether `url` is an avatar we store for user `id`: its key is `avatars/<id>/…`.
+
 # `last_seen_at_or_fallback`
 
 ```elixir
@@ -183,6 +191,23 @@ be very expensive to hash for certain algorithms.
     password field is not desired (like when using this changeset for
     validations on a LiveView form), this option can be set to `false`.
     Defaults to `true`.
+
+# `public_avatar_url`
+
+```elixir
+@spec public_avatar_url(t() | map() | nil) :: String.t() | nil
+```
+
+The avatar URL anyone outside the server may see: `profile_url` when it is
+one we host (key `avatars/<id>/…`, an upload or an `AvatarMirror` copy),
+else nil.
+
+A sign-in stores the provider's URL (Discord, Google, GitHub, Facebook,
+Steam) until `Gamend.Accounts.AvatarMirror` replaces it with our copy, and
+keeps it when the mirror fails. Shown, it would send every viewer's IP to the
+provider, and a Discord URL carries the player's Discord id. So every page,
+payload and API answer reads the avatar through here, and an avatar not yet
+mirrored is no avatar.
 
 # `registration_changeset`
 

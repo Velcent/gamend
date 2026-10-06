@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.4">
-    <meta name="project" content="gamend_core v1.0.1297">
+    <meta name="project" content="gamend_core v1.0.1298">
 
 
-    <title>Gamend.Quests — gamend_core v1.0.1297</title>
+    <title>Gamend.Quests — gamend_core v1.0.1298</title>
 
     <link rel="stylesheet" href="dist/html-elixir-RXHHCTJW.css" />
 
-    <script defer src="dist/sidebar_items-24B5AC24.js"></script>
+    <script defer src="dist/sidebar_items-429EA1EF.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-MI33G4N7.js"></script>
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1297
+          v1.0.1298
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr />Quests</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1297)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1298)</small>
 
     </h1>
 
@@ -304,6 +304,18 @@ user's current-period progress.</p></div>
       </div>
 
         <div class="summary-synopsis"><p>Count of quests visible to the user (same filters as <a href="#list_user_quests/2"><code class="inline">list_user_quests/2</code></a>).</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#counter/1" data-no-tooltip="" translate="no">counter(quest)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>The number <code class="inline">%{n}</code> stands for: the resolved counter, else the first run's
+(<code class="inline">counter_start</code>, or 1). An unresolved counter is the anonymous catalog,
+which pairs no row: the run a visitor would start.</p></div>
 
     </div>
 
@@ -739,7 +751,7 @@ definition drops these along with <a href="#active_quests/0"><code class="inline
       <h1 class="signature" translate="no">admin_claim(user_id, quest_key)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1836" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1870" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -769,7 +781,7 @@ definition drops these along with <a href="#active_quests/0"><code class="inline
       <h1 class="signature" translate="no">admin_complete(user_id, quest_key)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1719" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1753" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -799,7 +811,7 @@ its target and the normal completion side effects fire (hooks, auto-claim).</p>
       <h1 class="signature" translate="no">admin_reset(user_id, quest_key)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1818" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1852" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -828,7 +840,7 @@ its target and the normal completion side effects fire (hooks, auto-claim).</p>
       <h1 class="signature" translate="no">chain(user_id, quest_key)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1127" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1161" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -934,7 +946,7 @@ returns just its own entry.</p>
       <h1 class="signature" translate="no">claimable_count(user_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1650" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1684" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -964,7 +976,7 @@ returns just its own entry.</p>
       <h1 class="signature" translate="no">count_progress(opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1696" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1730" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1024,7 +1036,7 @@ returns just its own entry.</p>
       <h1 class="signature" translate="no">count_user_completions(user_id, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1631" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1665" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1054,7 +1066,7 @@ returns just its own entry.</p>
       <h1 class="signature" translate="no">count_user_quests(user_id, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1282" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1316" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1070,6 +1082,36 @@ returns just its own entry.</p>
       </div>
 
 <p>Count of quests visible to the user (same filters as <a href="#list_user_quests/2"><code class="inline">list_user_quests/2</code></a>).</p>
+  </section>
+</section>
+<section class="detail" id="counter/1">
+
+  <div class="detail-header">
+    <a href="#counter/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">counter(quest)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L890" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> counter(<a href="Gamend.Quests.Quest.html#t:t/0">Gamend.Quests.Quest.t</a>()) :: <a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">integer</a>()</pre>
+
+      </div>
+
+<p>The number <code class="inline">%{n}</code> stands for: the resolved counter, else the first run's
+(<code class="inline">counter_start</code>, or 1). An unresolved counter is the anonymous catalog,
+which pairs no row: the run a visitor would start.</p>
   </section>
 </section>
 <section class="detail" id="create_quest/1">
@@ -1110,7 +1152,7 @@ returns just its own entry.</p>
       <h1 class="signature" translate="no">dashboard_stats()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1864" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1898" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1167,7 +1209,7 @@ returns just its own entry.</p>
       <h1 class="signature" translate="no">funnel(quest_key)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1890" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1924" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1195,7 +1237,7 @@ returns just its own entry.</p>
       <h1 class="signature" translate="no">get_progress(user_id, quest_key)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1661" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1695" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1279,7 +1321,7 @@ returns just its own entry.</p>
       <h1 class="signature" translate="no">group(user_id, group_key)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1180" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1214" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1319,7 +1361,7 @@ out too, so the count on the collapsed entry matches what opening it reveals.</p
       <h1 class="signature" translate="no">groups(user_id, category \\ nil)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1368" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1402" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1353,7 +1395,7 @@ filter does; <code class="inline">nil</code> is the signed-out catalog.</p>
       <h1 class="signature" translate="no">host_lock_label(quest, user_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1416" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1450" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1389,7 +1431,7 @@ the page lie. Return the reason from the same condition the veto tests.</p>
       <h1 class="signature" translate="no">host_visible(quests, user_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1392" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1426" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1429,7 +1471,7 @@ left it; veto the claim in <code class="inline">before_quest_claim</code> if tha
       <h1 class="signature" translate="no">list_progress(opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1686" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1720" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1489,7 +1531,7 @@ left it; veto the claim in <code class="inline">before_quest_claim</code> if tha
       <h1 class="signature" translate="no">list_user_completions(user_id, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1618" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1652" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1522,7 +1564,7 @@ left it; veto the claim in <code class="inline">before_quest_claim</code> if tha
       <h1 class="signature" translate="no">list_user_quests(user_id, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1272" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1306" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1563,7 +1605,7 @@ a page with a selector over some groups does with the ones not picked</li><li><c
       <h1 class="signature" translate="no">period_key(quest_or_reset, now)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1913" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1947" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1622,7 +1664,7 @@ from the clock, so a reset needs nothing to fire at midnight.</p>
       <h1 class="signature" translate="no">prune_old_periods()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1849" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1883" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1653,7 +1695,7 @@ from the clock, so a reset needs nothing to fire at midnight.</p>
       <h1 class="signature" translate="no">rearm_repeat_quests(opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L921" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L955" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1685,7 +1727,7 @@ back, without a job that has to be running for the feature to work.</p>
       <h1 class="signature" translate="no">recover_pending_rewards(opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1074" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1108" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1716,7 +1758,7 @@ lazily when they list their quests). Returns the number of rows retried.</p>
       <h1 class="signature" translate="no">render_counter(quest)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L884" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L902" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1733,8 +1775,8 @@ lazily when they list their quests). Returns the number of rows retried.</p>
 
 <p>The quest with <code class="inline">%{n}</code> replaced by its resolved counter, untranslated.</p><p>For consumers that emit the stored string as-is. Anything that translates
 interpolates through Gettext instead, so the placeholder survives long
-enough to be looked up. An unresolved counter reads as run 1 — an anonymous
-visitor browsing the catalog is looking at the run they would start.</p>
+enough to be looked up. An unresolved counter reads as the first run
+(<a href="#counter/1"><code class="inline">counter/1</code></a>).</p>
   </section>
 </section>
 <section class="detail" id="report_event/4">
@@ -1781,7 +1823,7 @@ when every param key/value is present in <code class="inline">meta</code>.</p><p
       <h1 class="signature" translate="no">resolve_counter(quest, progress)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L865" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L874" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1809,7 +1851,12 @@ card reads &quot;Schätze x 3&quot; instead of falling back to English. Filling 
 here would leave &quot;Treasures x 3&quot;, which matches no msgid in any locale.
 Callers that render the title without translating it — the JSON API — call
 <a href="#render_counter/1"><code class="inline">render_counter/1</code></a> to collapse the placeholder.</p><p>Non-repeat quests and titles without the placeholder pass through untouched,
-so this is invisible to everything that does not opt in.</p>
+so this is invisible to everything that does not opt in.</p><h2 id="resolve_counter/2-counting-from-somewhere-else" class="section-heading"><a href="#resolve_counter/2-counting-from-somewhere-else" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Counting from somewhere else</span></h2><p><code class="inline">metadata[&quot;counter_start&quot;]</code> and <code class="inline">metadata[&quot;counter_step&quot;]</code> (both default 1)
+turn the run into a number: run <code class="inline">r</code> reads <code class="inline">start + step * (r - 1)</code>. A
+ladder that pays every 50 wins after 100 says &quot;Wins × 150&quot;, &quot;Wins × 200&quot;
+with <code class="inline">start: 150, step: 50</code>. A non-repeat quest has one run, so its <code class="inline">%{n}</code>
+is its <code class="inline">counter_start</code> (<a href="#counter/1"><code class="inline">counter/1</code></a>): every step of a chain can share one
+title, &quot;Wins × %{n}&quot;, and one msgid with it.</p>
   </section>
 </section>
 <section class="detail" id="stats/0">
@@ -1914,7 +1961,7 @@ completed rows, and the group-by reads the same rows the listing already does.</
       <h1 class="signature" translate="no">user_quest_page(user_id, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1299" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1333" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1958,7 +2005,7 @@ separately read the same rows three times.</p>
       <h1 class="signature" translate="no">visible_categories(user_id \\ nil)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1338" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/quests.ex#L1372" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1988,9 +2035,9 @@ the signed-out catalog.</p>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1297">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1298">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1297">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1298">Hex Preview</a>
 
             </span>
 

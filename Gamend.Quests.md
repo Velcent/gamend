@@ -209,6 +209,16 @@ Count of a user's completed quests (same filters as `list_user_completions/2`).
 
 Count of quests visible to the user (same filters as `list_user_quests/2`).
 
+# `counter`
+
+```elixir
+@spec counter(Gamend.Quests.Quest.t()) :: integer()
+```
+
+The number `%{n}` stands for: the resolved counter, else the first run's
+(`counter_start`, or 1). An unresolved counter is the anonymous catalog,
+which pairs no row: the run a visitor would start.
+
 # `create_quest`
 
 ```elixir
@@ -476,8 +486,8 @@ The quest with `%{n}` replaced by its resolved counter, untranslated.
 
 For consumers that emit the stored string as-is. Anything that translates
 interpolates through Gettext instead, so the placeholder survives long
-enough to be looked up. An unresolved counter reads as run 1 — an anonymous
-visitor browsing the catalog is looking at the run they would start.
+enough to be looked up. An unresolved counter reads as the first run
+(`counter/1`).
 
 # `report_event`
 
@@ -521,6 +531,15 @@ Callers that render the title without translating it — the JSON API — call
 
 Non-repeat quests and titles without the placeholder pass through untouched,
 so this is invisible to everything that does not opt in.
+
+## Counting from somewhere else
+
+`metadata["counter_start"]` and `metadata["counter_step"]` (both default 1)
+turn the run into a number: run `r` reads `start + step * (r - 1)`. A
+ladder that pays every 50 wins after 100 says "Wins × 150", "Wins × 200"
+with `start: 150, step: 50`. A non-repeat quest has one run, so its `%{n}`
+is its `counter_start` (`counter/1`): every step of a chain can share one
+title, "Wins × %{n}", and one msgid with it.
 
 # `stats`
 

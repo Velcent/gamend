@@ -755,6 +755,27 @@ Hooks may accept either a map or keyword list for convenience.
 A veto-only hook: `{:error, reason}` rejects, anything else allows. The
 return never rewrites the args, so a bare `:ok` is the usual "allow".
 
+# `after_report_created`
+*optional* 
+
+```elixir
+@callback after_report_created(Gamend.Reports.Report.t()) :: any()
+```
+
+# `after_report_resolved`
+*optional* 
+
+```elixir
+@callback after_report_resolved(Gamend.Reports.Report.t()) :: any()
+```
+
+# `before_report_create`
+*optional* 
+
+```elixir
+@callback before_report_create(map()) :: hook_result(map())
+```
+
 # `__using__`
 *macro* 
 

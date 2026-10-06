@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.4">
-    <meta name="project" content="gamend_core v1.0.1297">
+    <meta name="project" content="gamend_core v1.0.1298">
 
 
-    <title>Gamend.Accounts.User — gamend_core v1.0.1297</title>
+    <title>Gamend.Accounts.User — gamend_core v1.0.1298</title>
 
     <link rel="stylesheet" href="dist/html-elixir-RXHHCTJW.css" />
 
-    <script defer src="dist/sidebar_items-24B5AC24.js"></script>
+    <script defer src="dist/sidebar_items-429EA1EF.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-MI33G4N7.js"></script>
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1297
+          v1.0.1298
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr />Accounts.<wbr />User</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1297)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1298)</small>
 
     </h1>
 
@@ -293,6 +293,16 @@ constraint.</p></div>
 
     <div class="summary-row">
       <div class="summary-signature">
+        <a href="#hosted_avatar_url?/2" data-no-tooltip="" translate="no">hosted_avatar_url?(id, url)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Whether <code class="inline">url</code> is an avatar we store for user <code class="inline">id</code>: its key is <code class="inline">avatars/&lt;id&gt;/…</code>.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
         <a href="#last_seen_at_or_fallback/1" data-no-tooltip="" translate="no">last_seen_at_or_fallback(user)</a>
 
       </div>
@@ -318,6 +328,18 @@ constraint.</p></div>
       </div>
 
         <div class="summary-synopsis"><p>A user changeset for changing the password.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#public_avatar_url/1" data-no-tooltip="" translate="no">public_avatar_url(arg1)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>The avatar URL anyone outside the server may see: <code class="inline">profile_url</code> when it is
+one we host (key <code class="inline">avatars/&lt;id&gt;/…</code>, an upload or an <code class="inline">AvatarMirror</code> copy),
+else nil.</p></div>
 
     </div>
 
@@ -794,6 +816,34 @@ without the email permission only sees the public profile.</p>
 <p>A user changeset for Google OAuth registration.</p><p>It accepts email and Google ID.</p>
   </section>
 </section>
+<section class="detail" id="hosted_avatar_url?/2">
+
+  <div class="detail-header">
+    <a href="#hosted_avatar_url?/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">hosted_avatar_url?(id, url)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/user.ex#L620" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> hosted_avatar_url?(<a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">term</a>(), <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">term</a>()) :: <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">boolean</a>()</pre>
+
+      </div>
+
+<p>Whether <code class="inline">url</code> is an avatar we store for user <code class="inline">id</code>: its key is <code class="inline">avatars/&lt;id&gt;/…</code>.</p>
+  </section>
+</section>
 <section class="detail" id="last_seen_at_or_fallback/1">
 
   <div class="detail-header">
@@ -880,6 +930,41 @@ validations on a LiveView form), this option can be set to <code class="inline">
 Defaults to <code class="inline">true</code>.</li></ul>
   </section>
 </section>
+<section class="detail" id="public_avatar_url/1">
+
+  <div class="detail-header">
+    <a href="#public_avatar_url/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">public_avatar_url(arg1)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/user.ex#L612" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> public_avatar_url(<a href="#t:t/0">t</a>() | <a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">map</a>() | nil) :: <a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>() | nil</pre>
+
+      </div>
+
+<p>The avatar URL anyone outside the server may see: <code class="inline">profile_url</code> when it is
+one we host (key <code class="inline">avatars/&lt;id&gt;/…</code>, an upload or an <code class="inline">AvatarMirror</code> copy),
+else nil.</p><p>A sign-in stores the provider's URL (Discord, Google, GitHub, Facebook,
+Steam) until <a href="Gamend.Accounts.AvatarMirror.html"><code class="inline">Gamend.Accounts.AvatarMirror</code></a> replaces it with our copy, and
+keeps it when the mirror fails. Shown, it would send every viewer's IP to the
+provider, and a Discord URL carries the player's Discord id. So every page,
+payload and API answer reads the avatar through here, and an avatar not yet
+mirrored is no avatar.</p>
+  </section>
+</section>
 <section class="detail" id="registration_changeset/3">
 
     <span id="registration_changeset/2"></span>
@@ -914,7 +999,7 @@ Defaults to <code class="inline">true</code>.</li></ul>
       <h1 class="signature" translate="no">serialize_brief(user)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/user.ex#L604" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/accounts/user.ex#L630" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1015,9 +1100,9 @@ time a real verification would to avoid timing attacks.</p>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1297">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1298">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1297">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1298">Hex Preview</a>
 
             </span>
 

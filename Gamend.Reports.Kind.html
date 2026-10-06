@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.40.4">
+    <meta name="project" content="gamend_core v1.0.1298">
+
+
+    <title>Gamend.Reports.Kind — gamend_core v1.0.1298</title>
+
+    <link rel="stylesheet" href="dist/html-elixir-RXHHCTJW.css" />
+
+    <script defer src="dist/sidebar_items-429EA1EF.js"></script>
+    <script defer src="docs_config.js"></script>
+    <script defer src="dist/html-MI33G4N7.js"></script>
+
+  </head>
+  <body>
+    <script>(()=>{var t="ex_doc:settings",e="dark";var o="dark",s="light";var E="sidebar_state",n="closed";var r="sidebar_width";var a="sidebar-open";var i=new URLSearchParams(window.location.search),S=i.get("theme")||JSON.parse(localStorage.getItem(t)||"{}").theme;(S===o||S!==s&&window.matchMedia("(prefers-color-scheme: dark)").matches)&&document.body.classList.add(e);var d=sessionStorage.getItem(E),A=d!==n&&!window.matchMedia(`screen and (max-width: ${768}px)`).matches;document.body.classList.toggle(a,A);var c=sessionStorage.getItem(r);c&&document.body.style.setProperty("--sidebarWidth",`${c}px`);var p=/(Macintosh|iPhone|iPad|iPod)/.test(window.navigator.userAgent);document.documentElement.classList.toggle("apple-os",p);})();
+</script>
+
+<div class="body-wrapper">
+
+<button id="sidebar-menu" class="sidebar-button sidebar-toggle" aria-label="toggle sidebar" aria-controls="sidebar">
+  <i class="ri-menu-line ri-lg" title="Collapse/expand sidebar"></i>
+</button>
+
+<nav id="sidebar" class="sidebar">
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectInfo">
+
+      <div>
+        <a href="readme.html" class="sidebar-projectName" translate="no">
+gamend_core
+        </a>
+        <div class="sidebar-projectVersion" translate="no">
+          v1.0.1298
+        </div>
+      </div>
+    </div>
+    <ul id="sidebar-list-nav" class="sidebar-list-nav" role="tablist" data-extras="Pages"></ul>
+  </div>
+</nav>
+
+<output role="status" id="toast"></output>
+
+<main class="content page-behaviour" id="main" data-type="modules">
+  <div id="content" class="content-inner">
+    <div class="top-search">
+      <div class="search-settings">
+        <form class="search-bar" action="search.html">
+          <label class="search-label">
+            <span class="sr-only">Search documentation of gamend_core</span>
+            <div class="search-input-wrapper">
+              <input name="q" type="text" class="search-input" placeholder="Press / to search" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+              <button type="button" tabindex="-1" class="search-close-button" aria-hidden="true">
+                <i class="ri-close-line ri-lg" title="Cancel search"></i>
+              </button>
+            </div>
+          </label>
+        </form>
+        <div class="autocomplete">
+        </div>
+        <div class="engine-selector" data-multiple="false">
+          <button type="button" class="engine-button" aria-label="Select search engine" aria-haspopup="true" aria-expanded="false">
+            <i class="ri-search-2-line" aria-hidden="true"></i>
+            <span class="engine-name">Default</span>
+            <i class="ri-arrow-down-s-line" aria-hidden="true"></i>
+          </button>
+          <div class="engine-dropdown" hidden role="menu">
+
+              <button type="button"
+                      class="engine-option"
+                      data-engine-url="search.html?q="
+                      role="menuitemradio"
+                      aria-checked="true">
+                <span class="name">Default</span>
+                <span class="help">In-browser search</span>
+              </button>
+
+          </div>
+        </div>
+        <button class="icon-settings display-settings">
+          <i class="ri-settings-3-line"></i>
+          <span class="sr-only">Settings</span>
+        </button>
+      </div>
+    </div>
+
+<div id="top-content">
+  <div class="heading-with-actions top-heading">
+    <h1>
+      <span translate="no">Gamend.<wbr />Reports.<wbr />Kind</span> <small>behaviour</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1298)</small>
+
+    </h1>
+
+<a href="Gamend.Reports.Kind.md" title="Copy Markdown (hold Ctrl/Cmd and click it to open as Markdown)" class="copy-markdown icon-action" rel="help">
+  <i class="ri-markdown-line" aria-hidden="true"></i>
+  <span class="sr-only">Copy Markdown</span>
+</a>
+
+
+
+      <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/reports/kind.ex#L1" title="View Source" class="icon-action" rel="help nofollow">
+        <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        <span class="sr-only">View Source</span>
+      </a>
+
+  </div>
+
+
+    <section id="moduledoc">
+<p>What a report can be about.</p><p>Core ships one kind, <code class="inline">&quot;page&quot;</code> (<a href="Gamend.Reports.Kinds.Page.html"><code class="inline">Gamend.Reports.Kinds.Page</code></a>): something on a
+page is broken or wrong. A host adds its own by implementing this behaviour
+and listing the module:</p><pre><code class="makeup elixir" translate="no"><span class="n">config</span><span class="w"> </span><span class="ss">:gamend_core</span><span class="p">,</span><span class="w"> </span><span class="ss">:report_kinds</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="group-1">[</span><span class="nc">MyGame.Reports.Word</span><span class="p" data-group-id="group-1">]</span></code></pre><p>A kind owns two things: which <strong>topics</strong> a report on it may pick (&quot;the
+translation is wrong&quot;, &quot;the audio is wrong&quot;), and how a submitted subject is
+<strong>checked and snapshotted</strong> (<a href="#c:cast/2"><code class="inline">cast/2</code></a>). Everything else — storage, limits,
+the admin queue, attachments, the API — is core's and the same for every
+kind.</p><h2 id="module-cast-2" class="section-heading"><a href="#module-cast-2" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text"><code class="inline">cast/2</code></span></h2><p>Gets the kind-specific params as sent (<code class="inline">&quot;subject&quot;</code> and <code class="inline">&quot;data&quot;</code> maps, plus
+<code class="inline">&quot;topic&quot;</code>) and the context (<code class="inline">:user_id</code>, <code class="inline">:locale</code>, <code class="inline">:source</code>). Answers:</p><pre><code class="makeup elixir" translate="no"><span class="p" data-group-id="group-1">{</span><span class="ss">:ok</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="group-2">%{</span><span class="ss">subject_ref</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ro/1234&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">subject</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="group-3">%{</span><span class="n">...</span><span class="p" data-group-id="group-3">}</span><span class="p">,</span><span class="w"> </span><span class="ss">data</span><span class="p">:</span><span class="w"> </span><span class="p" data-group-id="group-4">%{</span><span class="n">...</span><span class="p" data-group-id="group-4">}</span><span class="p" data-group-id="group-2">}</span><span class="p" data-group-id="group-1">}</span></code></pre><p><code class="inline">subject_ref</code> is the short key duplicates group on, nil when nothing groups
+them. <code class="inline">subject</code> is the snapshot shown in the queue — take it now, because
+what was reported may be renamed or removed by the time anyone reads it.
+<code class="inline">data</code> is the kind's extra fields, already trimmed and capped. An
+<code class="inline">{:error, reason}</code> is shown to the reporter as &quot;check what you entered&quot;.</p><h2 id="module-the-web-side" class="section-heading"><a href="#module-the-web-side" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">The web side</span></h2><p><a href="#c:ui/0"><code class="inline">ui/0</code></a> names the module that draws the kind on <code class="inline">/report</code> and in the admin
+queue (<code class="inline">GamendWeb.Reports.KindUI</code>). A kind with no UI is API-only: a game
+client can file it, and nobody can from the website.</p>
+    </section>
+
+</div>
+
+  <section id="summary" class="details-list">
+    <h2 class="section-heading">
+      <a class="hover-link" href="#summary">
+        <i class="ri-link-m" aria-hidden="true"></i>
+      </a>
+      <span class="text">Summary</span>
+    </h2>
+<div class="summary-types summary">
+  <h3>
+    <a href="#types">Types</a>
+  </h3>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#t:cast_result/0" data-no-tooltip="" translate="no">cast_result()</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>What <code class="inline">cast/2</code> answers on success.</p></div>
+
+    </div>
+
+</div>
+<div class="summary-callbacks summary">
+  <h3>
+    <a href="#callbacks">Callbacks</a>
+  </h3>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#c:cast/2" data-no-tooltip="" translate="no">cast(params, context)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Check and snapshot a submitted subject. See the module doc.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#c:description_required?/1" data-no-tooltip="" translate="no">description_required?(topic)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Whether a report must say something in its description.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#c:key/0" data-no-tooltip="" translate="no">key()</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>The kind's key, stored on every report (<code class="inline">&quot;word&quot;</code>). Lowercase, no spaces.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#c:max_attachments/0" data-no-tooltip="" translate="no">max_attachments()</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>How many images a report may carry (0 = none).</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#c:topics/0" data-no-tooltip="" translate="no">topics()</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>The topics a report may pick, in display order. <code class="inline">[]</code> for none.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#c:ui/0" data-no-tooltip="" translate="no">ui()</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>The module that draws this kind (<code class="inline">GamendWeb.Reports.KindUI</code>), nil for API-only.</p></div>
+
+    </div>
+
+</div>
+
+  </section>
+
+
+  <section id="types" class="details-list">
+    <h2 class="section-heading">
+      <a class="hover-link" href="#types">
+        <i class="ri-link-m" aria-hidden="true"></i>
+      </a>
+      <span class="text">Types</span>
+    </h2>
+
+    <div class="types-list">
+<section class="detail" id="t:cast_result/0">
+
+  <div class="detail-header">
+    <a href="#t:cast_result/0" class="detail-link" data-no-tooltip="" aria-label="Link to this type">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">cast_result()</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/reports/kind.ex#L38" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@type</span> cast_result() :: %{subject_ref: <a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>() | nil, subject: <a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">map</a>(), data: <a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">map</a>()}</pre>
+
+      </div>
+
+<p>What <code class="inline">cast/2</code> answers on success.</p>
+  </section>
+</section>
+
+    </div>
+  </section>
+
+  <section id="callbacks" class="details-list">
+    <h2 class="section-heading">
+      <a class="hover-link" href="#callbacks">
+        <i class="ri-link-m" aria-hidden="true"></i>
+      </a>
+      <span class="text">Callbacks</span>
+    </h2>
+
+    <div class="callbacks-list">
+<section class="detail" id="c:cast/2">
+
+  <div class="detail-header">
+    <a href="#c:cast/2" class="detail-link" data-no-tooltip="" aria-label="Link to this callback">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">cast(params, context)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/reports/kind.ex#L57" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@callback</span> cast(params :: <a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">map</a>(), context :: <a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">map</a>()) ::
+  {:ok, <a href="#t:cast_result/0">cast_result</a>()} | {:error, <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">term</a>()}</pre>
+
+      </div>
+
+<p>Check and snapshot a submitted subject. See the module doc.</p>
+  </section>
+</section>
+<section class="detail" id="c:description_required?/1">
+
+  <div class="detail-header">
+    <a href="#c:description_required?/1" class="detail-link" data-no-tooltip="" aria-label="Link to this callback">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">description_required?(topic)</h1>
+
+        <span class="note">(optional)</span>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/reports/kind.ex#L54" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@callback</span> description_required?(topic :: <a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>() | nil) :: <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">boolean</a>()</pre>
+
+      </div>
+
+<p>Whether a report must say something in its description.</p>
+  </section>
+</section>
+<section class="detail" id="c:key/0">
+
+  <div class="detail-header">
+    <a href="#c:key/0" class="detail-link" data-no-tooltip="" aria-label="Link to this callback">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">key()</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/reports/kind.ex#L45" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@callback</span> key() :: <a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>()</pre>
+
+      </div>
+
+<p>The kind's key, stored on every report (<code class="inline">&quot;word&quot;</code>). Lowercase, no spaces.</p>
+  </section>
+</section>
+<section class="detail" id="c:max_attachments/0">
+
+  <div class="detail-header">
+    <a href="#c:max_attachments/0" class="detail-link" data-no-tooltip="" aria-label="Link to this callback">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">max_attachments()</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/reports/kind.ex#L51" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@callback</span> max_attachments() :: <a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">non_neg_integer</a>()</pre>
+
+      </div>
+
+<p>How many images a report may carry (0 = none).</p>
+  </section>
+</section>
+<section class="detail" id="c:topics/0">
+
+  <div class="detail-header">
+    <a href="#c:topics/0" class="detail-link" data-no-tooltip="" aria-label="Link to this callback">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">topics()</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/reports/kind.ex#L48" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@callback</span> topics() :: [<a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>()]</pre>
+
+      </div>
+
+<p>The topics a report may pick, in display order. <code class="inline">[]</code> for none.</p>
+  </section>
+</section>
+<section class="detail" id="c:ui/0">
+
+  <div class="detail-header">
+    <a href="#c:ui/0" class="detail-link" data-no-tooltip="" aria-label="Link to this callback">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">ui()</h1>
+
+        <span class="note">(optional)</span>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/reports/kind.ex#L60" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@callback</span> ui() :: <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">module</a>() | nil</pre>
+
+      </div>
+
+<p>The module that draws this kind (<code class="inline">GamendWeb.Reports.KindUI</code>), nil for API-only.</p>
+  </section>
+</section>
+
+    </div>
+  </section>
+
+    <footer class="footer">
+
+        <p>
+
+            <span class="line">
+              <a href="https://hex.pm/packages/gamend_core/1.0.1298">Hex Package</a>
+
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1298">Hex Preview</a>
+
+            </span>
+
+          <span class="line">
+            <button class="a-main footer-button display-quick-switch" title="Go to package docs">
+              Go to package docs
+            </button>
+
+              <a href="llms.txt" target="_blank">
+                View llms.txt
+              </a>
+
+
+              <a href="gamend_core.epub">
+                Download ePub version
+              </a>
+
+          </span>
+        </p>
+
+        <p class="built-using">
+          Built using
+          <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener" translate="no">ExDoc</a> (v0.40.4) for the
+
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank" translate="no">Elixir programming language</a>
+
+        </p>
+
+
+    </footer>
+  </div>
+</main>
+</div>
+
+  </body>
+</html>

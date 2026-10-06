@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.4">
-    <meta name="project" content="gamend_core v1.0.1297">
+    <meta name="project" content="gamend_core v1.0.1298">
 
 
-    <title>API Reference — gamend_core v1.0.1297</title>
+    <title>API Reference — gamend_core v1.0.1298</title>
 
     <link rel="stylesheet" href="dist/html-elixir-RXHHCTJW.css" />
 
-    <script defer src="dist/sidebar_items-24B5AC24.js"></script>
+    <script defer src="dist/sidebar_items-429EA1EF.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-MI33G4N7.js"></script>
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1297
+          v1.0.1298
         </div>
       </div>
     </div>
@@ -92,7 +92,7 @@ gamend_core
 
 <div id="top-content">
   <div class="heading-with-actions top-heading">
-    <h1>API Reference <small class="app-vsn">gamend_core v#1.0.1297</small></h1>
+    <h1>API Reference <small class="app-vsn">gamend_core v#1.0.1298</small></h1>
 <a href="api-reference.md" title="Copy Markdown (hold Ctrl/Cmd and click it to open as Markdown)" class="copy-markdown icon-action" rel="help">
   <i class="ri-markdown-line" aria-hidden="true"></i>
   <span class="sr-only">Copy Markdown</span>
@@ -1931,6 +1931,55 @@ each answer before something proceeds.</p></div>
 </div>
 <div class="summary-row">
   <div class="summary-signature">
+    <a href="Gamend.Reports.html" translate="no">Gamend.<wbr />Reports</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Reports about the game itself: a page that broke, a word that is wrong, an
+image that does not match. Filed from <code class="inline">/report</code> or <code class="inline">POST /api/v1/reports</code>,
+with or without an account, and worked from <code class="inline">/admin/reports</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="Gamend.Reports.Kind.html" translate="no">Gamend.<wbr />Reports.<wbr />Kind</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>What a report can be about.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="Gamend.Reports.Kinds.Page.html" translate="no">Gamend.<wbr />Reports.<wbr />Kinds.<wbr />Page</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>The built-in report kind: something on a page is broken or looks wrong.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="Gamend.Reports.Notices.html" translate="no">Gamend.<wbr />Reports.<wbr />Notices</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>The notifications reports send: one standing &quot;N reports waiting&quot; alert per
+admin, and a reply to a reporter who had an account.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="Gamend.Reports.Report.html" translate="no">Gamend.<wbr />Reports.<wbr />Report</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Ecto schema for the <code class="inline">reports</code> table: one report a player filed about the
+game — a page, a word, anything a <a href="Gamend.Reports.Kind.html"><code class="inline">Gamend.Reports.Kind</code></a> describes.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
     <a href="Gamend.Retention.html" translate="no">Gamend.<wbr />Retention</a>
 
   </div>
@@ -2288,9 +2337,9 @@ commented from each setting's declaration.</p></div>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1297">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1298">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1297">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1298">Hex Preview</a>
 
             </span>
 

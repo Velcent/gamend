@@ -1,4 +1,4 @@
-# gamend_core v1.0.1297 - Table of Contents
+# gamend_core v1.0.1298 - Table of Contents
 
 > Core functionality for Gamend, including user management, authentication, friends, matchmaking, and more.
 
@@ -372,6 +372,15 @@ callers after it, served in the order they asked.
   - [Gamend.Repo.AdvisoryLock](Gamend.Repo.AdvisoryLock.md): Advisory locking for protecting TOCTOU (Time-of-Check-Time-of-Use) patterns.
   - [Gamend.Repo.MigrationPaths](Gamend.Repo.MigrationPaths.md): Resolves every migration directory that belongs to a gamend deployment.
   - [Gamend.Repo.SlowLog](Gamend.Repo.SlowLog.md): Names what is slow in the database, in the log.
+  - [Gamend.Reports](Gamend.Reports.md): Reports about the game itself: a page that broke, a word that is wrong, an
+image that does not match. Filed from `/report` or `POST /api/v1/reports`,
+with or without an account, and worked from `/admin/reports`.
+  - [Gamend.Reports.Kind](Gamend.Reports.Kind.md): What a report can be about.
+  - [Gamend.Reports.Kinds.Page](Gamend.Reports.Kinds.Page.md): The built-in report kind: something on a page is broken or looks wrong.
+  - [Gamend.Reports.Notices](Gamend.Reports.Notices.md): The notifications reports send: one standing "N reports waiting" alert per
+admin, and a reply to a reporter who had an account.
+  - [Gamend.Reports.Report](Gamend.Reports.Report.md): Ecto schema for the `reports` table: one report a player filed about the
+game — a page, a word, anything a `Gamend.Reports.Kind` describes.
   - [Gamend.Retention](Gamend.Retention.md): Periodically prunes old rows from unbounded tables.
   - [Gamend.Schedule](Gamend.Schedule.md): Dynamic cron-like job scheduling for hooks.
 

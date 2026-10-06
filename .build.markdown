@@ -189,6 +189,11 @@ Gamend.Repo.AdvisoryLock.md
 Gamend.Repo.MigrationPaths.md
 Gamend.Repo.SlowLog.md
 Gamend.Repo.md
+Gamend.Reports.Kind.md
+Gamend.Reports.Kinds.Page.md
+Gamend.Reports.Notices.md
+Gamend.Reports.Report.md
+Gamend.Reports.md
 Gamend.Retention.md
 Gamend.Schedule.md
 Gamend.Schema.md
