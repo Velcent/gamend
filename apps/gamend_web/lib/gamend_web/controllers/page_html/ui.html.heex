@@ -20,6 +20,7 @@
           {"forms", "Forms"},
           {"alerts", "Alerts"},
           {"surfaces", "Surfaces"},
+          {"widths", "Widths"},
           {"colours", "Colours"},
           {"type", "Type"},
           {"feedback", "Feedback"}
@@ -306,6 +307,21 @@
           </div>
         </.specimen>
       </div>
+    </.ui_section>
+
+    <.ui_section id="widths" title="Widths">
+      <:intro>
+        A page is the layout's column: the default, or <code>&lt;Layouts.app wide&gt;</code>
+        for a page with its own side columns. Anything narrower (a form, a game board, an article, a whole login page) is <code>max-w-narrow</code>, centred with <code>mx-auto</code>. There is no other width.
+      </:intro>
+
+      <.specimen code="mx-auto max-w-narrow">
+        <div class="w-full max-w-narrow rounded-lg bg-base-200 p-3 text-sm">
+          48rem: the column's own width at <code>md</code>, so it narrows a page only from
+          <code>lg</code>
+          up.
+        </div>
+      </.specimen>
     </.ui_section>
 
     <.ui_section id="colours" title="Colours">

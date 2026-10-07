@@ -286,12 +286,18 @@ defmodule GamendWeb.HostLayoutNavigation do
               not cut it off) and scroll inside. `overscroll-contain` keeps the
               scroll from continuing into the page behind it.
 
-              `flex-nowrap` is what makes the cap scroll instead of reflow:
+              `grid` is also what makes the cap scroll instead of reflow:
               daisyUI's `.menu` is `flex-flow: column wrap`, so a max-height on
               its own wrapped the items into a SECOND COLUMN off to the side —
               vertically unscrollable and horizontally clipped, which is worse
-              than the overflow it was meant to fix. --%>
-        <ul class="menu menu-sm dropdown-content mt-3 z-[1] max-h-[calc(100dvh-5rem)] flex-nowrap overflow-y-auto overflow-x-hidden overscroll-contain p-2 shadow bg-base-100 rounded-box w-80 text-lg">
+              than the overflow it was meant to fix.
+
+              The rows are left-aligned in ONE centred column: the track is as
+              wide as the widest row (`fit-content`, never past the panel), and
+              at least 12.5rem (the widest row in any locale: Russian, 197px), so
+              opening a group with a longer label does not shift the column
+              sideways. --%>
+        <ul class="menu menu-sm dropdown-content mt-3 z-[1] max-h-[calc(100dvh-5rem)] grid grid-cols-[fit-content(100%)] justify-center content-start *:min-w-50 overflow-y-auto overflow-x-hidden overscroll-contain px-5 py-4 shadow bg-base-100 rounded-box w-72 text-lg">
           <%= if @current_scope do %>
             <.mobile_account_menu
               current_scope={@current_scope}
@@ -304,19 +310,21 @@ defmodule GamendWeb.HostLayoutNavigation do
               links={@primary_links ++ @authenticated_links}
               current_path={@current_path}
               inactive_class="btn-ghost"
+              group="mobile-nav"
             />
           <% else %>
             <.mobile_nav_links
               links={@guest_links}
               current_path={@current_path}
               inactive_class="btn-ghost"
+              group="mobile-nav"
             />
 
             <li>
               <a
                 href={lp(~p"/users/log_in")}
                 class={[
-                  "btn w-full",
+                  "btn w-full justify-start",
                   if(here?(@current_path, "/users/log_in"),
                     do: "btn-primary",
                     else: "btn-ghost"
@@ -331,7 +339,7 @@ defmodule GamendWeb.HostLayoutNavigation do
               <a
                 href={lp(~p"/users/register")}
                 class={[
-                  "btn w-full",
+                  "btn w-full justify-start",
                   if(here?(@current_path, "/users/register"),
                     do: "btn-primary",
                     else: "btn-ghost"
@@ -347,13 +355,14 @@ defmodule GamendWeb.HostLayoutNavigation do
               links={@primary_links}
               current_path={@current_path}
               inactive_class="btn-ghost"
+              group="mobile-nav"
             />
           <% end %>
 
           <%!-- The language picker lives in the header bar beside this menu,
                 rendered once for both layouts — see `desktop_nav/1`. --%>
           <li class="mt-2">
-            <div class="flex justify-center">
+            <div class="flex justify-start">
               <GamendWeb.HostLayouts.theme_toggle />
             </div>
           </li>
@@ -570,6 +579,7 @@ defmodule GamendWeb.HostLayoutNavigation do
   attr :links, :list, default: []
   attr :current_path, :string, default: nil
   attr :inactive_class, :string, required: true
+  attr :group, :string, default: nil
 
   defp mobile_nav_links(assigns) do
     assigns = assign(assigns, :best_href, best_href(assigns.links, assigns.current_path))
@@ -582,6 +592,7 @@ defmodule GamendWeb.HostLayoutNavigation do
           current_path={@current_path}
           best_href={@best_href}
           inactive_class={@inactive_class}
+          group={@group}
         />
       </li>
     <% end %>
@@ -648,9 +659,9 @@ defmodule GamendWeb.HostLayoutNavigation do
 
     ~H"""
     <li class="w-full">
-      <details open={@active?} class="group w-full">
+      <details open={@active?} name="mobile-nav" class="group w-full">
         <summary class={[
-          "btn w-full relative cursor-pointer list-none summary-no-marker",
+          "btn w-full justify-start pe-10 relative cursor-pointer list-none summary-no-marker",
           if(@active?, do: "btn-primary", else: "btn-ghost")
         ]}>
           <span class="flex items-center gap-2">
@@ -665,14 +676,17 @@ defmodule GamendWeb.HostLayoutNavigation do
           </span>
           <.icon
             name="hero-chevron-down-solid"
-            class="w-3 h-3 absolute end-3 transition-transform group-open:rotate-180"
+            class="w-3 h-3 absolute end-4 transition-transform group-open:rotate-180"
           />
         </summary>
-        <ul class="ps-4 mt-1 w-full">
+        <ul class="mt-1">
           <li class="w-full">
             <a
               href={lp(~p"/users/settings")}
-              class={["btn w-full", account_item_class(@current_path, "/users/settings")]}
+              class={[
+                "btn w-full justify-start",
+                account_item_class(@current_path, "/users/settings")
+              ]}
             >
               <.icon name="hero-user-circle-solid" class="w-4 h-4" />
               {GamendWeb.HostLayouts.translate("Account")}
@@ -681,7 +695,7 @@ defmodule GamendWeb.HostLayoutNavigation do
           <li class="w-full">
             <a
               href={lp(~p"/notifications")}
-              class={["btn w-full", account_item_class(@current_path, "/notifications")]}
+              class={["btn w-full justify-start", account_item_class(@current_path, "/notifications")]}
             >
               <.icon name="hero-bell-solid" class="w-4 h-4" />
               {GamendWeb.HostLayouts.translate("Notifications")}
@@ -694,7 +708,10 @@ defmodule GamendWeb.HostLayoutNavigation do
             </a>
           </li>
           <li :if={GamendWeb.Features.enabled?(:web_chat)} class="w-full">
-            <a href={lp(~p"/chat")} class={["btn w-full", account_item_class(@current_path, "/chat")]}>
+            <a
+              href={lp(~p"/chat")}
+              class={["btn w-full justify-start", account_item_class(@current_path, "/chat")]}
+            >
               <.icon name="hero-chat-bubble-left-right-solid" class="w-4 h-4" />
               {GamendWeb.HostLayouts.translate("Chat")}
             </a>
@@ -706,20 +723,24 @@ defmodule GamendWeb.HostLayoutNavigation do
           />
           <%= if @anonymous? do %>
             <li class="border-t border-base-300 mt-1 pt-1 w-full">
-              <a href={lp(~p"/users/register")} class="btn btn-ghost w-full">
+              <a href={lp(~p"/users/register")} class="btn btn-ghost w-full justify-start">
                 <.icon name="hero-user-plus-solid" class="w-4 h-4" />
                 {GamendWeb.HostLayouts.translate("Register")}
               </a>
             </li>
             <li class="w-full">
-              <a href={lp(~p"/users/log_in")} class="btn btn-ghost w-full">
+              <a href={lp(~p"/users/log_in")} class="btn btn-ghost w-full justify-start">
                 <.icon name="hero-arrow-right-on-rectangle-solid" class="w-4 h-4" />
                 {GamendWeb.HostLayouts.translate("Log in")}
               </a>
             </li>
           <% else %>
             <li class="border-t border-base-300 mt-1 pt-1 w-full">
-              <.link href={~p"/users/log_out"} method="delete" class="btn btn-ghost w-full">
+              <.link
+                href={~p"/users/log_out"}
+                method="delete"
+                class="btn btn-ghost w-full justify-start"
+              >
                 <.icon name="hero-arrow-left-on-rectangle-solid" class="w-4 h-4" />
                 {GamendWeb.HostLayouts.translate("Log out")}
               </.link>
@@ -794,6 +815,12 @@ defmodule GamendWeb.HostLayoutNavigation do
   attr :inactive_class, :string, required: true
   attr :best_href, :string, default: nil
 
+  # `group` is the top-level groups' shared `<details name>`: the browser keeps
+  # one of them open, so opening Social closes Learn and the rest stay on a
+  # phone's screen. Nested groups get none — one sharing its parent's name
+  # would close the parent it sits in.
+  attr :group, :string, default: nil
+
   defp mobile_nav_link_item(assigns) do
     active? = sibling_active?(assigns.link, assigns.current_path, assigns[:best_href])
 
@@ -801,9 +828,9 @@ defmodule GamendWeb.HostLayoutNavigation do
 
     ~H"""
     <%= if dropdown_entry?(@link) do %>
-      <details open={@active?} class="group w-full">
+      <details open={@active?} name={@group} class="group w-full">
         <summary class={[
-          "btn w-full relative cursor-pointer list-none summary-no-marker",
+          "btn w-full justify-start pe-10 relative cursor-pointer list-none summary-no-marker",
           if(@active?, do: "btn-primary", else: @inactive_class)
         ]}>
           <span class="flex items-center gap-2">
@@ -812,10 +839,10 @@ defmodule GamendWeb.HostLayoutNavigation do
           </span>
           <.icon
             name="hero-chevron-down-solid"
-            class="w-3 h-3 absolute end-3 transition-transform group-open:rotate-180"
+            class="w-3 h-3 absolute end-4 transition-transform group-open:rotate-180"
           />
         </summary>
-        <ul class="ps-4 mt-1 w-full">
+        <ul class="mt-1">
           <.mobile_nav_links
             links={@link["items"]}
             current_path={@current_path}
@@ -835,10 +862,13 @@ defmodule GamendWeb.HostLayoutNavigation do
               "inline-flex items-center gap-2 px-2 w-full pointer-events-none cursor-default"
 
             disabled?(@link) ->
-              ["btn w-full pointer-events-none cursor-default opacity-70", @inactive_class]
+              [
+                "btn w-full justify-start pointer-events-none cursor-default opacity-70",
+                @inactive_class
+              ]
 
             true ->
-              ["btn w-full", if(@active?, do: "btn-primary", else: @inactive_class)]
+              ["btn w-full justify-start", if(@active?, do: "btn-primary", else: @inactive_class)]
           end
         }
       >

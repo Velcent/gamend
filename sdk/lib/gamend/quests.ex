@@ -344,6 +344,23 @@ defmodule Gamend.Quests do
   end
 
   @doc ~S"""
+    The number `%{n}` stands for: the resolved counter, else the first run's
+    (`counter_start`, or 1). An unresolved counter is the anonymous catalog,
+    which pairs no row: the run a visitor would start.
+    
+  """
+  @spec counter(Gamend.Quests.Quest.t()) :: integer()
+  def counter(_quest) do
+    case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        0
+
+      _ ->
+        raise "Gamend.Quests.counter/1 is a stub - only available at runtime on Gamend"
+    end
+  end
+
+  @doc ~S"""
     Creates a quest definition. Capped by the `max_quests` limit.
   """
   @spec create_quest(map()) :: {:ok, Gamend.Quests.Quest.t()} | {:error, term()}
@@ -834,8 +851,8 @@ defmodule Gamend.Quests do
     
     For consumers that emit the stored string as-is. Anything that translates
     interpolates through Gettext instead, so the placeholder survives long
-    enough to be looked up. An unresolved counter reads as run 1 — an anonymous
-    visitor browsing the catalog is looking at the run they would start.
+    enough to be looked up. An unresolved counter reads as the first run
+    (`counter/1`).
     
   """
   @spec render_counter(Gamend.Quests.Quest.t()) :: Gamend.Quests.Quest.t()
@@ -892,6 +909,15 @@ defmodule Gamend.Quests do
     
     Non-repeat quests and titles without the placeholder pass through untouched,
     so this is invisible to everything that does not opt in.
+    
+    ## Counting from somewhere else
+    
+    `metadata["counter_start"]` and `metadata["counter_step"]` (both default 1)
+    turn the run into a number: run `r` reads `start + step * (r - 1)`. A
+    ladder that pays every 50 wins after 100 says "Wins × 150", "Wins × 200"
+    with `start: 150, step: 50`. A non-repeat quest has one run, so its `%{n}`
+    is its `counter_start` (`counter/1`): every step of a chain can share one
+    title, "Wins × %{n}", and one msgid with it.
     
   """
   @spec resolve_counter(Gamend.Quests.Quest.t(), Gamend.Quests.QuestProgress.t() | nil) ::

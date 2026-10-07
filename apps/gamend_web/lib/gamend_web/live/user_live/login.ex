@@ -9,7 +9,7 @@ defmodule GamendWeb.UserLive.Login do
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash} current_scope={@current_scope} current_path={assigns[:current_path]}>
-      <div class="mx-auto max-w-sm lg:max-w-4xl space-y-4">
+      <div class="mx-auto max-w-narrow space-y-4">
         <div class="text-center">
           <h1 class="text-4xl font-black text-base-content/95">{gettext("Log in")}</h1>
           <p class="text-sm text-base-content/70 mt-2">
@@ -35,7 +35,7 @@ defmodule GamendWeb.UserLive.Login do
           </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <.form
             :let={f}
             for={@form}
@@ -60,7 +60,7 @@ defmodule GamendWeb.UserLive.Login do
             </.button>
           </.form>
 
-          <div class="divider lg:hidden">{gettext("or")}</div>
+          <div class="divider md:hidden">{gettext("or")}</div>
 
           <%!-- `phx-change` on the email input, not the form: a form-level
                 change event serializes every field, and the password has no

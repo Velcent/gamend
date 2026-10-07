@@ -149,7 +149,7 @@ defmodule GamendWeb.ContentPages do
 
     ~H"""
     <Layouts.app flash={@flash} current_scope={@current_scope} current_path={@current_path}>
-      <div class="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+      <div class="py-8">
         <.empty_state
           :if={!@blog_available?}
           icon="hero-newspaper"
@@ -276,7 +276,7 @@ defmodule GamendWeb.ContentPages do
 
     ~H"""
     <Layouts.app flash={@flash} current_scope={@current_scope} current_path={@current_path}>
-      <div class="mx-auto max-w-4xl px-4 py-8 sm:px-6">
+      <div class="mx-auto max-w-narrow py-8">
         <article class="space-y-10">
           <div class="space-y-4">
             <div class="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.2em] text-base-content/70">

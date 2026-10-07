@@ -87,6 +87,7 @@ custom classes must fully style the input
 - **Always use and maintain this import syntax** in the app.css file
 - **Never** use `@apply` when writing raw css
 - daisyUI 5 is loaded as a Tailwind plugin (`assets/vendor/daisyui.js`) and the UI is built on its tokens and component classes. Follow existing pages; radii and colours come from daisyUI tokens ([RULES.md](RULES.md))
+- **Three widths.** A page is the layout's column: the default, or `<Layouts.app wide>` for a page with its own side columns. Anything narrower (a form, an article, a whole login page) is `max-w-narrow` (`--container-narrow`, 48rem, declared in every host stylesheet). Never another `max-w-*` on a page or a centred block; `page_width_test.exs` fails on one, and `/ui` shows it
 - The esbuild bundles are fixed in `config/host_config.exs`: `app.js`, `theme-init.js`, `mermaid.js` from `apps/gamend_web/assets/js`, plus the host's `assets/js/host_hooks.js`
   - You cannot reference an external vendor'd script `src` or link `href` in the layouts
   - You must import the vendor deps into app.js and app.css to use them

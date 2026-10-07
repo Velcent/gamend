@@ -6,7 +6,7 @@ defmodule GamendWeb.NotificationUnsubscribeHTML do
   def show(assigns) do
     ~H"""
     <Layouts.app flash={@flash} current_scope={@current_scope}>
-      <div class="mx-auto max-w-lg space-y-6 py-8">
+      <div class="mx-auto max-w-narrow space-y-6 py-8">
         <h1 class="text-3xl font-black">{gettext("Email settings")}</h1>
 
         <p :if={@done == "group"} id="unsubscribe-done" class="alert alert-success">
@@ -60,7 +60,7 @@ defmodule GamendWeb.NotificationUnsubscribeHTML do
   def invalid(assigns) do
     ~H"""
     <Layouts.app flash={@flash} current_scope={@current_scope}>
-      <div class="mx-auto max-w-lg space-y-4 py-8">
+      <div class="mx-auto max-w-narrow space-y-4 py-8">
         <h1 class="text-3xl font-black">{gettext("Email settings")}</h1>
         <p>{gettext("This link does not work. Sign in to choose what we send you.")}</p>
         <.link navigate={~p"/users/settings?tab=notifications"} class="btn btn-primary">

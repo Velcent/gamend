@@ -176,8 +176,8 @@ defmodule GamendWeb.HostLayoutNavigationTest do
     assert desktop =~ ~r{href="/docs/reference"\s+class="menu-active"}
 
     mobile = render_component(&HostLayoutNavigation.mobile_nav/1, assigns)
-    refute mobile =~ ~r{href="/docs"\s+class="btn w-full btn-primary"}
-    assert mobile =~ ~r{href="/docs/reference"\s+class="btn w-full btn-primary"}
+    refute mobile =~ ~r{href="/docs"\s+class="btn w-full justify-start btn-primary"}
+    assert mobile =~ ~r{href="/docs/reference"\s+class="btn w-full justify-start btn-primary"}
 
     # A page only the broad link matches still lights it.
     guide = %{assigns | current_path: "/docs/manual/scenes"}
@@ -220,6 +220,28 @@ defmodule GamendWeb.HostLayoutNavigationTest do
     assert html =~ ~r/<summary[^>]*aria-label/
     refute html =~ ~s(<button\n)
     refute html =~ ~s(tabindex="0")
+  end
+
+  test "mobile: one top-level group open at a time, nested groups left alone" do
+    html =
+      render_component(
+        &HostLayoutNavigation.mobile_nav/1,
+        base_assigns([
+          %{
+            "label" => "Learn",
+            "items" => [
+              %{"label" => "Words", "href" => "/words"},
+              %{"label" => "More", "items" => [%{"label" => "Tests", "href" => "/tests"}]}
+            ]
+          },
+          %{"label" => "Social", "items" => [%{"label" => "Friends", "href" => "/friends"}]}
+        ])
+      )
+
+    # A shared `<details name>` is the browser's own accordion. The nested
+    # "More" must not share it, or opening it would close "Learn" around it.
+    assert length(Regex.scan(~r/<details[^>]*name="mobile-nav"/, html)) == 2
+    assert length(Regex.scan(~r/<details(?![^>]*data-navbar-dropdown)[^>]*>/, html)) == 3
   end
 
   test "mobile: pinned items render inline (outside the dropdown menu)" do

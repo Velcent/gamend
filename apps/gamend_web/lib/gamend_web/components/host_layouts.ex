@@ -142,6 +142,11 @@ defmodule GamendWeb.HostLayouts do
     doc:
       "pass `false` when the page paints its own decorative icon layer, as `GamendWeb.PresentationPage` does — otherwise the shell adds a second one on top"
 
+  attr :nav_key, :any,
+    default: nil,
+    doc:
+      "a value the navbar shows that the page itself changes, such as a coin balance a `{Module.fun}` nav label reads: the navbar re-renders when it moves. Without it the navbar keeps what it showed at the first render"
+
   slot :inner_block, required: true
 
   def app(assigns) do
@@ -447,13 +452,16 @@ defmodule GamendWeb.HostLayouts do
   # the life of one render: the locale belongs to the process, the theme config
   # is global and only re-read on deploy, and `:current_path` is kept in step
   # by the `:set_current_path` hook in `GamendWeb.UserAuth`, so a `push_patch`
-  # to another URL does change the nav highlight.
+  # to another URL does change the nav highlight. The one thing that can is
+  # what a `{Module.fun}` nav label reads (a coin balance a hint spends): the
+  # page passes it as `:nav_key`.
   @shell_assign_inputs [
     :background_icons,
     :conn,
     :current_path,
     :current_scope,
     :flush,
+    :nav_key,
     :theme,
     :wide
   ]

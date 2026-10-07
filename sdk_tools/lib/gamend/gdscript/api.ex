@@ -639,6 +639,7 @@ defmodule Gamend.GDScript.API do
       "count_user_quests" => [1, 2],
       "count_quests" => [0, 1],
       "user_quest_page" => [1, 2],
+      "counter" => [1],
       "create_quest" => [1],
       "claimable_count" => [1],
       "update_quest" => [2],

@@ -37,7 +37,6 @@ defmodule GamendWeb.BlogLayoutTest do
       html = render_index()
 
       assert html =~ "grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
-      assert html =~ "mx-auto max-w-6xl px-4 py-8 sm:px-6"
 
       # The picture is the card link's first child, the text after it.
       assert html =~ ~r/<a[^>]*class="flex h-full flex-col"[^>]*>\s*<img/

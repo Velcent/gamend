@@ -183,6 +183,15 @@
   }
 }
 
+/* `max-w-narrow`: the one width a page narrows a block to (a form, a game
+   board, a card, an article). A page itself is the layout's column, default
+   or `wide`; a centred block inside it is this or nothing. 48rem is the
+   column's own `md` width, so it only narrows from `lg` up. Core's templates
+   use it, so every host stylesheet declares it. */
+@theme {
+  --container-narrow: 48rem;
+}
+
 [data-phx-session], [data-phx-teleported-src] { display: contents }
 
 .card.collapsed .card-body > :not(.card-title):not(.card-actions) {
