@@ -17,6 +17,11 @@ defmodule Gamend.Payments.ProviderAdaptersTest do
       {:ok, %{id: "cs_test_sdk", url: "https://checkout.stripe.test/session"}}
     end
 
+    def expire_checkout_session(session_id, params, opts) do
+      send(self(), {:stripe_expire_checkout_session, session_id, params, opts})
+      {:ok, %{id: session_id, object: "checkout.session", status: "expired"}}
+    end
+
     def retrieve_checkout_session(session_id, params, opts) do
       send(self(), {:stripe_retrieve_checkout_session, session_id, params, opts})
 
@@ -308,6 +313,30 @@ defmodule Gamend.Payments.ProviderAdaptersTest do
     assert opts[:api_key] == "sk_test_sdk_123"
     assert opts[:api_version] == "2024-06-20"
     assert opts[:idempotency_key] == "order_42"
+
+    # Payable for half an hour (Stripe's floor, plus a minute of clock margin),
+    # not Stripe's default 24 hours.
+    now = System.os_time(:second)
+    assert params.expires_at in (now + 30 * 60)..(now + 32 * 60)
+  end
+
+  test "Stripe expires a checkout session through SDK client at the checkout API version" do
+    Application.put_env(:gamend_core, :stripe_client, StripeClient)
+    put_setting(:environment, :sandbox)
+    put_setting(:stripe_sandbox_secret_key, "sk_test_sdk_123")
+
+    assert {:ok, session} = Stripe.expire_checkout_session("cs_test_open")
+    assert session["status"] == "expired"
+
+    assert_received {:stripe_expire_checkout_session, "cs_test_open", %{}, opts}
+    assert opts[:api_key] == "sk_test_sdk_123"
+    assert opts[:api_version] == "2022-11-15"
+    refute Keyword.has_key?(opts, :idempotency_key)
+
+    put_setting(:stripe_managed_payments, true)
+    assert {:ok, _session} = Stripe.expire_checkout_session("cs_test_open")
+    assert_received {:stripe_expire_checkout_session, "cs_test_open", %{}, opts}
+    assert opts[:api_version] == "2025-03-31.basil"
   end
 
   test "Stripe checkout: a one-off payment creates a customer, a known one is reused" do
@@ -394,6 +423,7 @@ defmodule Gamend.Payments.ProviderAdaptersTest do
     assert {:ok, _} = Stripe.create_checkout_session(purchase, provider_product, urls)
     assert_received {:stripe_create_checkout_session, params, opts}
     assert params.managed_payments == %{enabled: true}
+    assert is_integer(params.expires_at)
     refute Map.has_key?(params, :automatic_tax)
     refute Map.has_key?(params, :payment_method_types)
     assert opts[:api_version] == "2025-03-31.basil"

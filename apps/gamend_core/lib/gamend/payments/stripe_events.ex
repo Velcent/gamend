@@ -35,7 +35,7 @@ defmodule Gamend.Payments.StripeEvents do
       |> Map.put("stripe_customer_id", stripe_customer_id(user))
 
     with {:ok, provider_product} <- Payments.resolve_provider_product("stripe", attrs),
-         :ok <- Payments.ensure_checkout_allowed(user, provider_product, attrs),
+         :ok <- ensure_stripe_checkout_allowed(user, provider_product, attrs),
          {:ok, purchase} <- Payments.create_purchase(user, provider_product, attrs) do
       case Payments.stripe_adapter().create_checkout_session(purchase, provider_product, attrs) do
         {:ok, session} ->
@@ -56,6 +56,66 @@ defmodule Gamend.Payments.StripeEvents do
     else
       {:error, reason} -> {:error, reason}
     end
+  end
+
+  # An entitlement has one open checkout at a time, and an abandoned Stripe one
+  # (Back from the payment page, a closed tab) stayed open until Stripe expired
+  # it, 24 hours by default: the buyer who left the yearly plan for lifetime got
+  # `:purchase_already_in_progress`. A new request is the buyer's intent now, so
+  # each open Stripe session for that entitlement is expired at Stripe and its
+  # purchase cancelled, and the checks run again. Stripe expires only an open
+  # session, so one paid (or being paid) meanwhile stays and still refuses, or
+  # answers `:already_owned` once fulfilled. Another provider's open purchase
+  # is left as it is, and refuses as before.
+  defp ensure_stripe_checkout_allowed(%User{} = user, provider_product, attrs) do
+    case Payments.ensure_checkout_allowed(user, provider_product, attrs) do
+      {:error, :purchase_already_in_progress} ->
+        key = Payments.product_entitlement_key(provider_product.product)
+
+        user.id
+        |> Payments.purchases_in_progress(key)
+        |> Enum.each(&release_stripe_checkout/1)
+
+        Payments.ensure_checkout_allowed(user, provider_product, attrs)
+
+      result ->
+        result
+    end
+  end
+
+  defp release_stripe_checkout(
+         %Purchase{provider: "stripe", provider_transaction_id: "cs_" <> _rest = session_id} =
+           purchase
+       ) do
+    with {:ok, session} <- Payments.stripe_adapter().expire_checkout_session(session_id),
+         %{"status" => "expired"} = session <- Params.normalize(session) do
+      mark_stripe_checkout_expired(purchase, session)
+    else
+      _not_open ->
+        # Read it back and let the purchase follow Stripe: cancelled if it had
+        # expired, fulfilled if it was paid, left open while a payment clears.
+        with {:error, reason} <- reconcile_stripe_purchase(purchase) do
+          Logger.warning(
+            "Stripe checkout could not be released",
+            purchase_id: purchase.id,
+            order_id: purchase.order_id,
+            reason: inspect(reason)
+          )
+        end
+    end
+  end
+
+  defp release_stripe_checkout(%Purchase{}), do: :ok
+
+  defp mark_stripe_checkout_expired(%Purchase{} = purchase, session) do
+    purchase
+    |> Purchase.changeset(%{
+      status: "cancelled",
+      raw_provider_payload:
+        Params.merge_payload(purchase.raw_provider_payload, %{"stripe_session" => session})
+    })
+    |> Repo.update()
+    |> Payments.tap_bump({:payments, :purchase_version})
   end
 
   @doc """
@@ -244,18 +304,7 @@ defmodule Gamend.Payments.StripeEvents do
        })
        when is_map(object) do
     with {:ok, purchase} <- Payments.purchase_from_provider_object(object) do
-      _ =
-        purchase
-        |> Purchase.changeset(%{
-          status: "cancelled",
-          raw_provider_payload:
-            Params.merge_payload(purchase.raw_provider_payload, %{
-              "stripe_session" => object
-            })
-        })
-        |> Repo.update()
-        |> Payments.tap_bump({:payments, :purchase_version})
-
+      _ = mark_stripe_checkout_expired(purchase, object)
       {:ok, :processed}
     end
   end

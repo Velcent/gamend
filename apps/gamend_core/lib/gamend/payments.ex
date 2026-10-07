@@ -894,13 +894,17 @@ defmodule Gamend.Payments do
 
   defp ensure_single_ownership_available(_user, _product), do: :ok
 
-  defp purchase_in_progress?(user_id, entitlement_key) do
+  defp purchase_in_progress?(user_id, entitlement_key),
+    do: purchases_in_progress(user_id, entitlement_key) != []
+
+  @doc false
+  def purchases_in_progress(user_id, entitlement_key) do
     from(p in Purchase,
       where: p.user_id == ^user_id and p.status == "requires_action",
       preload: [:product]
     )
     |> Repo.all()
-    |> Enum.any?(fn %Purchase{product: product} ->
+    |> Enum.filter(fn %Purchase{product: product} ->
       product_entitlement_key(product) == entitlement_key
     end)
   end

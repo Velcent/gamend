@@ -67,7 +67,8 @@ jobs:
           git config --global --add safe.directory $GITHUB_WORKSPACE || true
           git fetch --prune --unshallow || true
           COMMIT_COUNT=$(git rev-list --count HEAD)
-          VERSION="1.0.${COMMIT_COUNT}"
+          # <major.minor from the VERSION file>.<commit count>, e.g. 1.1.1302
+          VERSION="$(tr -d '[:space:]' < VERSION).${COMMIT_COUNT}"
           echo "Generated version=${VERSION}"
           echo "APP_VERSION=${VERSION}" >> $GITHUB_ENV
           echo "GAMEND_CONTENT_APP_VERSION=${VERSION}" >> $GITHUB_ENV
@@ -627,8 +628,8 @@ jobs:
           git config --global --add safe.directory $GITHUB_WORKSPACE || true
           git fetch --prune --unshallow || true
           COMMIT_COUNT=$(git rev-list --count HEAD)
-          # Build a simple semver style version used on CI: 1.0.<commit_count>
-          VERSION="1.0.${COMMIT_COUNT}"
+          # <major.minor from the VERSION file>.<commit count>, e.g. 1.1.1302
+          VERSION="$(tr -d '[:space:]' < VERSION).${COMMIT_COUNT}"
           echo "Generated version=${VERSION}"
 
           # Export for remaining steps in this job
@@ -798,8 +799,8 @@ jobs:
           git config --global --add safe.directory $GITHUB_WORKSPACE || true
           git fetch --prune --unshallow || true
           COMMIT_COUNT=$(git rev-list --count HEAD)
-          # Build a simple semver style version used on CI: 1.0.<commit_count>
-          VERSION="1.0.${COMMIT_COUNT}"
+          # <major.minor from the VERSION file>.<commit count>, e.g. 1.1.1302
+          VERSION="$(tr -d '[:space:]' < VERSION).${COMMIT_COUNT}"
           echo "Generated version=${VERSION}"
 
           # Export for remaining steps in this job
@@ -1113,7 +1114,8 @@ jobs:
           git config --global --add safe.directory $GITHUB_WORKSPACE || true
           git fetch --prune --unshallow || true
           COMMIT_COUNT=$(git rev-list --count HEAD)
-          VERSION="1.0.${COMMIT_COUNT}"
+          # <major.minor from the VERSION file>.<commit count>, e.g. 1.1.1302
+          VERSION="$(tr -d '[:space:]' < VERSION).${COMMIT_COUNT}"
           echo "Generated version=${VERSION}"
           echo "APP_VERSION=${VERSION}" >> $GITHUB_ENV
           echo "GAMEND_CONTENT_APP_VERSION=${VERSION}" >> $GITHUB_ENV
@@ -1189,9 +1191,10 @@ jobs:
           # This matched `in_umbrella: true` for months, which the file never
           # said — so the substitution silently did nothing and every
           # gamend_web publish failed.
-          sed -i "s|{:gamend_core, path: \"../gamend_core\"}|{:gamend_core, \"~> 1.0\"}|g" \
+          MINOR=$(tr -d '[:space:]' < VERSION)
+          sed -i "s|{:gamend_core, path: \"../gamend_core\"}|{:gamend_core, \"~> ${MINOR}\"}|g" \
             apps/gamend_web/mix.exs
-          grep -q '{:gamend_core, "~> 1.0"}' apps/gamend_web/mix.exs ||
+          grep -q "{:gamend_core, \"~> ${MINOR}\"}" apps/gamend_web/mix.exs ||
             { echo "::error::gamend_core path dep rewrite failed - gamend_web would publish broken"; exit 1; }
 
       # Before gamend_web, which resolves gamend_core from the release this
@@ -1244,8 +1247,8 @@ jobs:
           git config --global --add safe.directory $GITHUB_WORKSPACE || true
           git fetch --prune --unshallow || true
           COMMIT_COUNT=$(git rev-list --count HEAD)
-          # Build a simple semver style version used on CI: 1.0.<commit_count>
-          VERSION="1.0.${COMMIT_COUNT}"
+          # <major.minor from the VERSION file>.<commit count>, e.g. 1.1.1302
+          VERSION="$(tr -d '[:space:]' < VERSION).${COMMIT_COUNT}"
           echo "Generated version=${VERSION}"
 
           # Export for remaining steps in this job
@@ -1348,7 +1351,7 @@ jobs:
       - name: Version
         run: |
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          echo "GAMEND_CONTENT_APP_VERSION=1.0.$(git rev-list --count HEAD)" >> "$GITHUB_ENV"
+          echo "GAMEND_CONTENT_APP_VERSION=$(tr -d '[:space:]' < VERSION).$(git rev-list --count HEAD)" >> "$GITHUB_ENV"
 
       - name: Cache static OpenSSL, libsrtp and OTP
         uses: actions/cache@v6
@@ -1397,7 +1400,7 @@ jobs:
           fetch-depth: 0
 
       - name: Version
-        run: echo "GAMEND_CONTENT_APP_VERSION=1.0.$(git rev-list --count HEAD)" >> "$GITHUB_ENV"
+        run: echo "GAMEND_CONTENT_APP_VERSION=$(tr -d '[:space:]' < VERSION).$(git rev-list --count HEAD)" >> "$GITHUB_ENV"
 
       # `mix assets.deploy` cuts the theme's responsive images with ImageMagick
       # and optimizes PNGs, as the Docker build does.
@@ -1527,7 +1530,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          version="1.0.$(git rev-list --count HEAD)"
+          version="$(tr -d '[:space:]' < VERSION).$(git rev-list --count HEAD)"
           notes="Gamend server $version, built from ${GITHUB_SHA::12}.
 
           Install: \`curl -fsSL https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/main/rel/install.sh | sh\`

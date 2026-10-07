@@ -94,6 +94,8 @@ Stripe docs: [API keys](https://docs.stripe.com/keys),
 
 Entitlement and subscription products are buy-once while active: checkout quantity must be 1, and users with an active grant or in-progress checkout cannot start another checkout for that product. Consumables can be bought repeatedly.
 
+A Stripe checkout the player left open (Back from the payment page, a closed tab, a switch from the yearly plan to lifetime) does not hold the next one: a new Stripe checkout for the same entitlement expires the open session at Stripe, cancels its purchase and goes ahead. A session paid meanwhile is never cancelled; it is fulfilled and the new checkout answers `already_owned`, and one whose payment is still clearing answers `purchase_already_in_progress`. An open purchase from another provider (Steam) still refuses. Every Checkout Session expires 31 minutes after it is created, not Stripe's default 24 hours.
+
 Checkout answers `{"data": {"purchase": ..., "checkout_url": ..., "provider_session_id": ...}}`. A refusal is a code: `quantity_not_allowed` (400); `already_owned` or `purchase_already_in_progress` (409); a `*_not_found` product (404); `stripe_not_configured` and every other `*_not_configured` (503), because the server is missing something, not the request. The catalog (`GET /api/v1/payments/catalog`) and the player's entitlements (`GET /api/v1/payments/entitlements`) are pages.
 
 Apple, Google, Steam, and Stripe products that unlock the same thing must point to the same internal product, or their internal products must share the same grant_config.entitlement_key. Ownership checks use that entitlement key across providers.

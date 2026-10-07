@@ -7,6 +7,13 @@ defmodule Gamend.Payments.Providers.Stripe do
 
   @webhook_tolerance_seconds 300
 
+  # How long a new Checkout Session can be paid. Stripe's default is 24 hours,
+  # and until it sends `checkout.session.expired` the purchase stays
+  # `requires_action`, which holds the entitlement's one open checkout. Stripe's
+  # floor is 30 minutes from creation, on its own clock: the extra minute keeps
+  # a slow request or a server clock running a little behind from being refused.
+  @checkout_session_ttl_seconds 31 * 60
+
   def create_checkout_session(purchase, provider_product, attrs) do
     with {:ok, secret_key} <- secret_key(),
          {:ok, success_url} <- required_attr(attrs, "success_url"),
@@ -24,6 +31,30 @@ defmodule Gamend.Payments.Providers.Stripe do
              params,
              secret_key
              |> stripe_request_opts(purchase)
+             |> Keyword.put(:api_version, ProviderConfig.stripe_checkout_api_version())
+           ) do
+        {:ok, session} ->
+          {:ok, normalize_stripe_payload(session)}
+
+        {:error, reason} ->
+          {:error, {:stripe_error, normalize_stripe_payload(reason)}}
+      end
+    end
+  end
+
+  @doc """
+  Expires an open Checkout Session, so it can no longer be paid, and returns
+  it. Stripe answers an error when the session is not open any more: paid,
+  being paid, or expired already. Sent at the checkout API version, like the
+  call that created the session.
+  """
+  def expire_checkout_session(session_id) when is_binary(session_id) do
+    with {:ok, secret_key} <- secret_key() do
+      case expire_checkout_session_with_sdk(
+             session_id,
+             %{},
+             secret_key
+             |> stripe_request_opts()
              |> Keyword.put(:api_version, ProviderConfig.stripe_checkout_api_version())
            ) do
         {:ok, session} ->
@@ -145,6 +176,7 @@ defmodule Gamend.Payments.Providers.Stripe do
       ],
       success_url: success_url,
       cancel_url: cancel_url,
+      expires_at: System.os_time(:second) + @checkout_session_ttl_seconds,
       metadata: metadata
     }
     |> put_checkout_payment_metadata(mode, metadata)
@@ -228,6 +260,12 @@ defmodule Gamend.Payments.Providers.Stripe do
     exception -> {:error, exception}
   end
 
+  defp expire_checkout_session_with_sdk(session_id, params, opts) do
+    stripe_client().expire_checkout_session(session_id, params, opts)
+  rescue
+    exception -> {:error, exception}
+  end
+
   defp retrieve_checkout_session_with_sdk(session_id, params, opts) do
     stripe_client().retrieve_checkout_session(session_id, params, opts)
   rescue
@@ -289,6 +327,10 @@ defmodule Gamend.Payments.Providers.Stripe do
 
     def create_checkout_session(params, opts) do
       Session.create(params, opts)
+    end
+
+    def expire_checkout_session(session_id, params, opts) do
+      Session.expire(session_id, params, opts)
     end
 
     def retrieve_checkout_session(session_id, params, opts) do
