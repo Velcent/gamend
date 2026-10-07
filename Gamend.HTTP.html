@@ -5,10 +5,10 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.4">
-    <meta name="project" content="gamend_core v1.0.1298">
+    <meta name="project" content="gamend_core v1.0.1299">
 
 
-    <title>Gamend.HTTP — gamend_core v1.0.1298</title>
+    <title>Gamend.HTTP — gamend_core v1.0.1299</title>
 
     <link rel="stylesheet" href="dist/html-elixir-RXHHCTJW.css" />
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.0.1298
+          v1.0.1299
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr />HTTP</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.0.1298)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.0.1299)</small>
 
     </h1>
 
@@ -114,13 +114,13 @@ gamend_core
 
 
     <section id="moduledoc">
-<p><a href="https://req.hexdocs.pm/0.7.4/Req.html"><code class="inline">Req</code></a> with the declared timeout and retries, for the calls core makes to other
+<p><a href="https://req.hexdocs.pm/0.7.5/Req.html"><code class="inline">Req</code></a> with the declared timeout and retries, for the calls core makes to other
 services while a player waits: payment receipt checks (Apple, Google Play,
 Steam), OAuth code exchanges, Google ID-token checks and avatar mirroring.</p><p>Req's own defaults suit a script, not a request handler: 15 seconds a try
 and, for a GET, three retries with backoff, so one slow provider held a login
 or a purchase check open for about a minute. Here each try waits
 <code class="inline">client_timeout_ms</code> and a failed GET is retried <code class="inline">client_retries</code> times. A POST
-is not retried, as in Req.</p><p><a href="#get/2"><code class="inline">get/2</code></a> and <a href="#post/2"><code class="inline">post/2</code></a> take what <a href="https://req.hexdocs.pm/0.7.4/Req.html#get/2"><code class="inline">Req.get/2</code></a> and <a href="https://req.hexdocs.pm/0.7.4/Req.html#post/2"><code class="inline">Req.post/2</code></a> take, so this
+is not retried, as in Req.</p><p><a href="#get/2"><code class="inline">get/2</code></a> and <a href="#post/2"><code class="inline">post/2</code></a> take what <a href="https://req.hexdocs.pm/0.7.5/Req.html#get/2"><code class="inline">Req.get/2</code></a> and <a href="https://req.hexdocs.pm/0.7.5/Req.html#post/2"><code class="inline">Req.post/2</code></a> take, so this
 module drops in wherever a module takes an injectable HTTP client. Options a
 caller passes win over the declared ones.</p>
     </section>
@@ -145,7 +145,7 @@ caller passes win over the declared ones.</p>
 
       </div>
 
-        <div class="summary-synopsis"><p><a href="https://req.hexdocs.pm/0.7.4/Req.html#get/2"><code class="inline">Req.get/2</code></a> with the declared timeout and retries.</p></div>
+        <div class="summary-synopsis"><p><a href="https://req.hexdocs.pm/0.7.5/Req.html#get/2"><code class="inline">Req.get/2</code></a> with the declared timeout and retries.</p></div>
 
     </div>
 
@@ -165,7 +165,7 @@ caller passes win over the declared ones.</p>
 
       </div>
 
-        <div class="summary-synopsis"><p><a href="https://req.hexdocs.pm/0.7.4/Req.html#post/2"><code class="inline">Req.post/2</code></a> with the declared timeout and retries.</p></div>
+        <div class="summary-synopsis"><p><a href="https://req.hexdocs.pm/0.7.5/Req.html#post/2"><code class="inline">Req.post/2</code></a> with the declared timeout and retries.</p></div>
 
     </div>
 
@@ -207,11 +207,11 @@ caller passes win over the declared ones.</p>
       <div class="specs">
 
           <pre translate="no"><span class="attribute">@spec</span> get(<a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>() | <a href="https://elixir.hexdocs.pm/URI.html#t:t/0">URI.t</a>(), <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">keyword</a>()) ::
-  {:ok, <a href="https://req.hexdocs.pm/0.7.4/Req.Response.html#t:t/0">Req.Response.t</a>()} | {:error, <a href="https://elixir.hexdocs.pm/Exception.html#t:t/0">Exception.t</a>()}</pre>
+  {:ok, <a href="https://req.hexdocs.pm/0.7.5/Req.Response.html#t:t/0">Req.Response.t</a>()} | {:error, <a href="https://elixir.hexdocs.pm/Exception.html#t:t/0">Exception.t</a>()}</pre>
 
       </div>
 
-<p><a href="https://req.hexdocs.pm/0.7.4/Req.html#get/2"><code class="inline">Req.get/2</code></a> with the declared timeout and retries.</p>
+<p><a href="https://req.hexdocs.pm/0.7.5/Req.html#get/2"><code class="inline">Req.get/2</code></a> with the declared timeout and retries.</p>
   </section>
 </section>
 <section class="detail" id="options/1">
@@ -242,7 +242,7 @@ caller passes win over the declared ones.</p>
       </div>
 
 <p>The declared timeout and retry options, with <code class="inline">opts</code> over them.</p><p><code class="inline">config :gamend_core, Gamend.HTTP, req_options: [...]</code> is merged in too, so
-a test can route every provider call through a <a href="https://req.hexdocs.pm/0.7.4/Req.Test.html"><code class="inline">Req.Test</code></a> stub. Empty in prod.</p>
+a test can route every provider call through a <a href="https://req.hexdocs.pm/0.7.5/Req.Test.html"><code class="inline">Req.Test</code></a> stub. Empty in prod.</p>
   </section>
 </section>
 <section class="detail" id="post/2">
@@ -269,11 +269,11 @@ a test can route every provider call through a <a href="https://req.hexdocs.pm/0
       <div class="specs">
 
           <pre translate="no"><span class="attribute">@spec</span> post(<a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>() | <a href="https://elixir.hexdocs.pm/URI.html#t:t/0">URI.t</a>(), <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">keyword</a>()) ::
-  {:ok, <a href="https://req.hexdocs.pm/0.7.4/Req.Response.html#t:t/0">Req.Response.t</a>()} | {:error, <a href="https://elixir.hexdocs.pm/Exception.html#t:t/0">Exception.t</a>()}</pre>
+  {:ok, <a href="https://req.hexdocs.pm/0.7.5/Req.Response.html#t:t/0">Req.Response.t</a>()} | {:error, <a href="https://elixir.hexdocs.pm/Exception.html#t:t/0">Exception.t</a>()}</pre>
 
       </div>
 
-<p><a href="https://req.hexdocs.pm/0.7.4/Req.html#post/2"><code class="inline">Req.post/2</code></a> with the declared timeout and retries.</p>
+<p><a href="https://req.hexdocs.pm/0.7.5/Req.html#post/2"><code class="inline">Req.post/2</code></a> with the declared timeout and retries.</p>
   </section>
 </section>
 
@@ -285,9 +285,9 @@ a test can route every provider call through a <a href="https://req.hexdocs.pm/0
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.0.1298">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.0.1299">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1298">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.0.1299">Hex Preview</a>
 
             </span>
 
