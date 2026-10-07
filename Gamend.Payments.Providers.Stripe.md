@@ -13,6 +13,13 @@ session; its `"url"` is single-use and short-lived, so open it right away.
 
 # `create_checkout_session`
 
+# `expire_checkout_session`
+
+Expires an open Checkout Session, so it can no longer be paid, and returns
+it. Stripe answers an error when the session is not open any more: paid,
+being paid, or expired already. Sent at the checkout API version, like the
+call that created the session.
+
 # `retrieve_checkout_session`
 
 # `retrieve_subscription`
