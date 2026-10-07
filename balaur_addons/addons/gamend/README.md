@@ -13,7 +13,7 @@ let reply = task::wait(gamend::lobbies::quick_join(this.node, #{
 if e["kind"] == gamend::events::lobby::MEMBER_JOINED { }
 ```
 
-262 operations in 40 modules, and 90 realtime events.
+264 operations in 41 modules, and 90 realtime events.
 
 Beside the generated modules and `events.rn`, written by hand:
 
@@ -512,6 +512,15 @@ Ready checks.
 | `open_lobby_ready_check(node, params)` | `POST /api/v1/lobbies/ready_check` | Open (or reset) the ready board in the caller's lobby (host only) |
 | `open_party_ready_check(node, params)` | `POST /api/v1/parties/ready_check` | Open (or reset) the ready board in the caller's party (leader only) |
 | `respond_ready_check(node, params)` | `POST /api/v1/me/ready_check` | Answer one of the caller's open ready checks |
+
+## gamend::reports
+
+Reports.
+
+| Function | Call | What it does |
+| --- | --- | --- |
+| `create_report(node, params)` | `POST /api/v1/reports` | File a report |
+| `list_report_kinds(node)` | `GET /api/v1/reports/kinds` | Report kinds |
 
 ## gamend::signaling
 

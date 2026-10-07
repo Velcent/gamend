@@ -341,15 +341,26 @@
     </.ui_section>
 
     <.ui_section id="type" title="Type">
+      <:intro>
+        A page has one title, <code>&lt;.page_title&gt;</code>. Every heading under it is an <code>&lt;.eyebrow&gt;</code>: a section of the page (<code>tag="h2"</code>), a panel's title (<code>&lt;.panel title=…&gt;</code>), a group inside either. A subtitle says less than the title, so it is never a size of its own.
+      </:intro>
+
       <div class="space-y-4">
         <.specimen code="<.page_title> (a page's h1)">
           <.page_title tag="p">Explore</.page_title>
         </.specimen>
-        <.specimen code="text-xl font-semibold (a section's h2)">
-          <p class="text-xl font-semibold">Buttons</p>
-        </.specimen>
-        <.specimen code="<.eyebrow> (a group's small heading)">
-          <.eyebrow>A small heading</.eyebrow>
+        <.specimen code={~s|<.eyebrow tag="h2"> (a section's heading: "Level", "Category")|}>
+          <div class="space-y-2">
+            <.eyebrow>Category</.eyebrow>
+            <div class="flex gap-3">
+              <div class="rounded-xl border border-base-300 bg-base-100 px-4 py-3 font-black">
+                Food
+              </div>
+              <div class="rounded-xl border border-base-300 bg-base-100 px-4 py-3 font-black">
+                Home
+              </div>
+            </div>
+          </div>
         </.specimen>
         <.specimen code="(body)">
           <p>Body text reads at the base size.</p>

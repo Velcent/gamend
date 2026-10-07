@@ -351,9 +351,16 @@ defmodule GamendWeb.CoreComponents do
   slot :inner_block, required: true
 
   @doc """
-  The small heading over a group: a panel's title, a list's name, a form
+  Every heading under a page's title: a section of the page (`tag="h2"`:
+  "Level", "Category", "Your tests"), a panel's title, a list's name, a form
   field's label on a dashboard. Small, uppercase, spaced and muted, the one
-  way the site says it.
+  way the site says it: a subtitle says less than the title, so a page never
+  draws one bigger (`text-xl font-black`) of its own.
+
+      <section class="space-y-2">
+        <.eyebrow tag="h2">Category</.eyebrow>
+        …
+      </section>
   """
   def eyebrow(assigns) do
     ~H"""
