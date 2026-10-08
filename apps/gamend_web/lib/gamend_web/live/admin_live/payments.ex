@@ -288,6 +288,16 @@ defmodule GamendWeb.AdminLive.Payments do
                       >
                         Reconcile Stripe
                       </button>
+                      <button
+                        :if={Payments.admin_stripe_refundable?(p)}
+                        type="button"
+                        phx-click="refund_stripe_purchase"
+                        phx-value-id={p.id}
+                        data-confirm="Refund this purchase in full? A subscription is cancelled now. The webhook revokes what it bought."
+                        class="btn btn-xs btn-outline btn-warning"
+                      >
+                        Refund
+                      </button>
                     </td>
                   </tr>
                 </tbody>
@@ -711,6 +721,22 @@ defmodule GamendWeb.AdminLive.Payments do
         {:noreply,
          socket
          |> put_flash(:error, "Stripe reconcile failed: #{admin_error(reason)}")
+         |> reload_all()}
+    end
+  end
+
+  def handle_event("refund_stripe_purchase", %{"id" => id}, socket) do
+    case Payments.admin_refund_stripe_purchase(parse_id(id)) do
+      {:ok, %{refund: refund}} ->
+        {:noreply,
+         socket
+         |> put_flash(:info, "Stripe refund #{refund["id"]} created (#{refund["status"]})")
+         |> reload_all()}
+
+      {:error, reason} ->
+        {:noreply,
+         socket
+         |> put_flash(:error, "Stripe refund failed: #{admin_error(reason)}")
          |> reload_all()}
     end
   end

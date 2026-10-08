@@ -911,6 +911,31 @@ msgstr "구매"
 msgid "Cancel renewal"
 msgstr "갱신 해지"
 
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:121
+#, elixir-autogen, elixir-format
+msgid "Refund"
+msgstr "환불"
+
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:115
+#, elixir-autogen, elixir-format
+msgid "Refund %{product}? It ends now and the payment goes back to you."
+msgstr "%{product}을(를) 환불할까요? 지금 바로 종료되고 결제 금액이 돌아갑니다."
+
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:105
+#, elixir-autogen, elixir-format
+msgid "Refund sent"
+msgstr "환불 전송됨"
+
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:250
+#, elixir-autogen, elixir-format
+msgid "Refund sent. The money is back in 5 to 10 days."
+msgstr "환불을 보냈습니다. 5~10일 안에 돈이 돌아갑니다."
+
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:281
+#, elixir-autogen, elixir-format
+msgid "The time to ask for a refund has passed."
+msgstr "환불을 요청할 수 있는 기간이 지났습니다."
+
 #: lib/gamend_web/live/user_live/settings/payments_tab.ex:47
 #, elixir-autogen, elixir-format
 msgid "Manage billing"
@@ -925,6 +950,16 @@ msgstr "종료일"
 #, elixir-autogen, elixir-format
 msgid "Cancels at period end"
 msgstr "기간 종료 시 해지"
+
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:205
+#, elixir-autogen, elixir-format
+msgid "Resume renewal"
+msgstr "갱신 재개"
+
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:258
+#, elixir-autogen, elixir-format
+msgid "Subscription renews again."
+msgstr "구독이 다시 갱신됩니다."
 
 #: lib/gamend_web/live/store_live/index.ex:85
 #, elixir-autogen, elixir-format

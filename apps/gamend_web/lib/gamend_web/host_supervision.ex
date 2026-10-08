@@ -203,6 +203,9 @@ defmodule GamendWeb.HostSupervision do
         Gamend.Accounts.StalePresenceSweeper,
         # Prune old chat messages / notifications / payment events (RETENTION_* env vars)
         Gamend.Retention,
+        # Hourly: Stripe checkouts still open past their session's life are
+        # reconciled, for a webhook that never arrived
+        Gamend.Payments.StripeSweeper,
         # Tournament lifecycle: transitions, draws, match deadlines, recurrence
         Gamend.Tournaments.Ticker,
         # Push delivery processes (Goth + Pigeon dispatchers); supervises

@@ -90,6 +90,10 @@ config :gamend_core, Gamend.Tournaments.Ticker, enabled: false
 # `Gamend.Retention.prune_all/0` and `prune_live/0` themselves.
 config :gamend_core, Gamend.Retention, enabled: false
 
+# The Stripe sweep reconciles open checkouts outside the sandbox, seven
+# minutes after boot. Tests call `Gamend.Payments.StripeSweeper.sweep/1`.
+config :gamend_core, Gamend.Payments.StripeSweeper, enabled: false
+
 # Same for the matchmaking sweep: no sandbox connection, and on SQLite it
 # collides with the test's open write transaction ("database is locked").
 # Tests drive Gamend.Matchmaking.Worker.sweep/0 directly.

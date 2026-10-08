@@ -7,7 +7,7 @@ generated: by `mix gamend.settings.guide` - do not edit by hand; edit the
 # Settings
 
 Every setting the server has, with the environment variable that sets it.
-325 settings across 30 groups.
+330 settings across 30 groups.
 
 A setting is declared in the module that owns it, so this page and
 `.env.example` are generated from the same source the server reads. The
@@ -342,11 +342,13 @@ Live values, and where each one came from, are on the
 | `GAMEND_PAYMENTS_GOOGLE_PLAY_RTDN_TOKEN` | string | - | Shared bearer token on the Pub/Sub push webhook. Without it the RTDN endpoint fails closed in production. Secret - never log or commit it. |
 | `GAMEND_PAYMENTS_GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` | string | - | Inline service-account JSON. Use the _PATH variant to read it from a file instead. Warns if unset once `GAMEND_PAYMENTS_GOOGLE_PLAY_PACKAGE_NAME` is set. Secret - never log or commit it. |
 | `GAMEND_PAYMENTS_GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_PATH` | string | - |  |
+| `GAMEND_PAYMENTS_REFUND_WINDOW_DAYS` | integer | `14` | Days after paying in which a buyer can refund a Stripe purchase themselves (account settings, Payments): a one-off payment, or a subscription's last payment with the subscription cancelled now. 0 turns it off. Admins can refund any Stripe purchase at any time. |
+| `GAMEND_PAYMENTS_SELF_REFUNDS_PER_ACCOUNT` | integer | `1` | How many refunds a buyer can make themselves (account settings, Payments) over the account's life, so buy, use and refund cannot repeat. 0 for no limit. Admins are not limited. |
 | `GAMEND_PAYMENTS_STEAM_APP_ID` | string | - |  |
 | `GAMEND_PAYMENTS_STEAM_MICROTXN_BASE_URL` | string | - |  |
 | `GAMEND_PAYMENTS_STEAM_WEB_API_KEY` | string | - | Falls back to the OAuth Steam key when unset. Secret - never log or commit it. |
-| `GAMEND_PAYMENTS_STRIPE_API_VERSION` | string | `"2022-11-15"` |  |
 | `GAMEND_PAYMENTS_STRIPE_MANAGED_PAYMENTS` | boolean | `false` | Sell through Stripe Managed Payments (Stripe is merchant of record: it charges and remits the buyer's VAT). Accept the terms and set a tax code on every product in the Stripe Dashboard first. |
+| `GAMEND_PAYMENTS_STRIPE_PAST_DUE_GRACE_DAYS` | integer | `7` | Days a Stripe subscription whose renewal failed (`past_due`) keeps its entitlement past the period it paid for, while Stripe retries the card. An `unpaid`, `incomplete` or `paused` one keeps none: the entitlement ends where the payments did. Set Stripe's failed-payment setting to cancel the subscription when the retries run out. |
 | `GAMEND_PAYMENTS_STRIPE_PRODUCTION_SECRET_KEY` | string | - | sk_live_... key, used when environment is production. Warns if unset when `GAMEND_PAYMENTS_ENVIRONMENT` is `production`. Secret - never log or commit it. |
 | `GAMEND_PAYMENTS_STRIPE_PRODUCTION_WEBHOOK_SECRET` | string | - | Secret - never log or commit it. |
 | `GAMEND_PAYMENTS_STRIPE_SANDBOX_SECRET_KEY` | string | - | sk_test_... key, used when environment is sandbox. Secret - never log or commit it. |
@@ -369,6 +371,7 @@ Live values, and where each one came from, are on the
 | `GAMEND_FEATURES_LIST_LEADERBOARDS` | boolean | `true` | Public GET/resolve /api/v1/leaderboards* and the /leaderboards pages. |
 | `GAMEND_FEATURES_LIST_LOBBIES` | boolean | `true` | GET /api/v1/lobbies and the "lobbies" channel. |
 | `GAMEND_FEATURES_LIST_MATCHMAKING` | boolean | `true` | GET /api/v1/matchmaking/stats. Own-ticket endpoints stay. |
+| `GAMEND_FEATURES_LIST_PAYMENTS_CATALOG` | boolean | `true` | Public GET /api/v1/payments/catalog: every active product with its provider row, id and price. Off for a host that sells through its own page, where the price shown depends on who asks (a country band) — the listing names every row, cheaper ones included. |
 | `GAMEND_FEATURES_LIST_QUESTS` | boolean | `true` | Public GET /api/v1/quests* and the /quests page. |
 | `GAMEND_FEATURES_LIST_TOURNAMENTS` | boolean | `true` | Public GET /api/v1/tournaments* and the /tournaments pages. |
 | `GAMEND_FEATURES_LIST_USERS` | boolean | `true` | GET /api/v1/users and /users/:id. |
@@ -377,9 +380,11 @@ Live values, and where each one came from, are on the
 | `GAMEND_FEATURES_PLAY` | boolean | `true` | The /play page, which hands a signed-in player a token for the game client. |
 | `GAMEND_FEATURES_PUBLIC_STATS` | boolean | `true` | The unauthenticated stats endpoints: GET /api/v1/stats, /api/v1/users/stats, /api/v1/lobbies/stats, /api/v1/parties/stats, /api/v1/quests/stats, /api/v1/signaling/stats and /api/v1/matchmaking/stats, plus the /stats page. Aggregate counts only, never per-row data — but they do reveal how busy the server is. |
 | `GAMEND_FEATURES_PUBLIC_USER_METADATA_KEYS` | list | - | Top-level `user.metadata` keys GET /api/v1/users and /users/:id may return. Empty means none. Those endpoints are unauthenticated, so anything named here is world-readable and findable by name prefix — never list a key holding position, routing or contact data. |
+| `GAMEND_FEATURES_STRIPE_CHECKOUT_API` | boolean | `true` | POST /api/v1/payments/checkout/stripe: a signed-in client opens a Stripe Checkout for any active Stripe row it names. Off for a host that sells only through its own page (which calls `Gamend.Payments.create_stripe_checkout/3` itself and picks the row), so a client cannot pick a row the page would not offer. Webhooks, the store page (`web_store`) and the other providers are untouched. |
 | `GAMEND_FEATURES_USER_IMAGE_UPLOADS` | boolean | `true` | Player-supplied images: avatars (POST /api/v1/me/avatar*) and group icons (POST /api/v1/groups/:id/icon*). Objects land in public storage and are served without authentication, so on a service children can reach this is an unscreened image surface — turn it off unless the game actually uses it and you have a way to screen what arrives. |
 | `GAMEND_FEATURES_WEB_CHAT` | boolean | `true` | Chat on the website: the /chat page, its link in the account menu, the Open links on chat notifications, and every link marked `"feature": "web_chat"`. The chat API and the game client are untouched. |
 | `GAMEND_FEATURES_WEB_GROUPS` | boolean | `true` | Groups on the website: the /groups pages, the Groups tab in account settings, and every nav, footer or page link marked `"feature": "web_groups"`. The groups API and the game client are untouched — `list_groups` gates the public listing. |
+| `GAMEND_FEATURES_WEB_STORE` | boolean | `true` | The store on the website: the /store pages (every active product, any provider row), the Open Store button in account settings, and every link marked `"feature": "web_store"`. Off for a host that sells through its own page instead. The payments API and the game client are untouched. |
 | `GAMEND_FEATURES_WEB_TOURNAMENTS` | boolean | `true` | Tournaments on the website: the /tournaments pages and every nav, footer or page link marked `"feature": "web_tournaments"`. The tournaments API and the game client are untouched — `list_tournaments` gates the public listing. |
 
 

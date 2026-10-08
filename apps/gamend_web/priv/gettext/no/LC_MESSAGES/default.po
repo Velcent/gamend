@@ -911,6 +911,31 @@ msgstr "Kjøp"
 msgid "Cancel renewal"
 msgstr "Avslutt fornyelse"
 
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:121
+#, elixir-autogen, elixir-format
+msgid "Refund"
+msgstr "Refunder"
+
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:115
+#, elixir-autogen, elixir-format
+msgid "Refund %{product}? It ends now and the payment goes back to you."
+msgstr "Refundere %{product}? Det slutter nå, og betalingen går tilbake til deg."
+
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:105
+#, elixir-autogen, elixir-format
+msgid "Refund sent"
+msgstr "Refusjon sendt"
+
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:250
+#, elixir-autogen, elixir-format
+msgid "Refund sent. The money is back in 5 to 10 days."
+msgstr "Refusjon sendt. Pengene er tilbake om 5 til 10 dager."
+
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:281
+#, elixir-autogen, elixir-format
+msgid "The time to ask for a refund has passed."
+msgstr "Fristen for å be om refusjon har gått ut."
+
 #: lib/gamend_web/live/user_live/settings/payments_tab.ex:47
 #, elixir-autogen, elixir-format
 msgid "Manage billing"
@@ -925,6 +950,16 @@ msgstr "Avsluttes"
 #, elixir-autogen, elixir-format
 msgid "Cancels at period end"
 msgstr "Avsluttes ved periodens slutt"
+
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:205
+#, elixir-autogen, elixir-format
+msgid "Resume renewal"
+msgstr "Gjenoppta fornyelse"
+
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:258
+#, elixir-autogen, elixir-format
+msgid "Subscription renews again."
+msgstr "Abonnementet fornyes igjen."
 
 #: lib/gamend_web/live/store_live/index.ex:85
 #, elixir-autogen, elixir-format

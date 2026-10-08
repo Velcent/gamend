@@ -333,9 +333,13 @@ defmodule GamendWeb.DocsLive do
           >
             <div class="card-body flex-row items-center gap-3 py-4">
               <.icon name={guide.icon} class={"size-6 shrink-0 opacity-80 #{category.color}"} />
-              <span class="card-title shrink-0 text-xl">{guide.title}</span>
-              <span class="line-clamp-1 grow text-sm text-base-content/50">{guide.summary}</span>
-              <.icon name="hero-chevron-right" class="size-4 shrink-0" />
+              <%!-- The title wraps rather than push the card off a phone,
+                    where the one-line summary has no room and is left out. --%>
+              <span class="card-title min-w-0 text-xl">{guide.title}</span>
+              <span class="hidden min-w-0 flex-1 basis-0 text-sm text-base-content/50 sm:line-clamp-1">
+                {guide.summary}
+              </span>
+              <.icon name="hero-chevron-right" class="ms-auto size-4 shrink-0" />
             </div>
           </.link>
         </section>

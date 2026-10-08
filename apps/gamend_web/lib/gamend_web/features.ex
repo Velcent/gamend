@@ -8,10 +8,10 @@ defmodule GamendWeb.Features do
   want third parties browsing or scraping its data turns off what it does not
   need.
 
-  `web_groups`, `web_chat` and `web_tournaments` are website-only: they close
-  a page and every link to it (`drop_disabled/1`) and leave the API to the
-  game client, so a host can park a feature on the site without breaking the
-  game.
+  `web_groups`, `web_chat`, `web_tournaments` and `web_store` are
+  website-only: they close a page and every link to it (`drop_disabled/1`)
+  and leave the API to the game client, so a host can park a feature on the
+  site without breaking the game.
 
   Read through `GamendWeb.Plugs.FeatureGate`, which 404s a disabled route.
   """
@@ -64,6 +64,24 @@ defmodule GamendWeb.Features do
     default: true,
     doc:
       "Tournaments on the website: the /tournaments pages and every nav, footer or page link marked `\"feature\": \"web_tournaments\"`. The tournaments API and the game client are untouched — `list_tournaments` gates the public listing."
+  )
+
+  setting(:web_store, :boolean,
+    default: true,
+    doc:
+      "The store on the website: the /store pages (every active product, any provider row), the Open Store button in account settings, and every link marked `\"feature\": \"web_store\"`. Off for a host that sells through its own page instead. The payments API and the game client are untouched."
+  )
+
+  setting(:list_payments_catalog, :boolean,
+    default: true,
+    doc:
+      "Public GET /api/v1/payments/catalog: every active product with its provider row, id and price. Off for a host that sells through its own page, where the price shown depends on who asks (a country band) — the listing names every row, cheaper ones included."
+  )
+
+  setting(:stripe_checkout_api, :boolean,
+    default: true,
+    doc:
+      "POST /api/v1/payments/checkout/stripe: a signed-in client opens a Stripe Checkout for any active Stripe row it names. Off for a host that sells only through its own page (which calls `Gamend.Payments.create_stripe_checkout/3` itself and picks the row), so a client cannot pick a row the page would not offer. Webhooks, the store page (`web_store`) and the other providers are untouched."
   )
 
   setting(:list_leaderboards, :boolean,

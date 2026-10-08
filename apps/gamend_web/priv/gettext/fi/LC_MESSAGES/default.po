@@ -911,6 +911,31 @@ msgstr "Osta"
 msgid "Cancel renewal"
 msgstr "Peruuta uusiminen"
 
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:121
+#, elixir-autogen, elixir-format
+msgid "Refund"
+msgstr "Hyvitä"
+
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:115
+#, elixir-autogen, elixir-format
+msgid "Refund %{product}? It ends now and the payment goes back to you."
+msgstr "Hyvitetäänkö %{product}? Se päättyy heti, ja maksu palautetaan sinulle."
+
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:105
+#, elixir-autogen, elixir-format
+msgid "Refund sent"
+msgstr "Hyvitys lähetetty"
+
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:250
+#, elixir-autogen, elixir-format
+msgid "Refund sent. The money is back in 5 to 10 days."
+msgstr "Hyvitys lähetetty. Rahat ovat takaisin 5–10 päivässä."
+
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:281
+#, elixir-autogen, elixir-format
+msgid "The time to ask for a refund has passed."
+msgstr "Hyvityksen pyytämisen määräaika on umpeutunut."
+
 #: lib/gamend_web/live/user_live/settings/payments_tab.ex:47
 #, elixir-autogen, elixir-format
 msgid "Manage billing"
@@ -925,6 +950,16 @@ msgstr "Päättyy"
 #, elixir-autogen, elixir-format
 msgid "Cancels at period end"
 msgstr "Päättyy kauden lopussa"
+
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:205
+#, elixir-autogen, elixir-format
+msgid "Resume renewal"
+msgstr "Jatka uusimista"
+
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:258
+#, elixir-autogen, elixir-format
+msgid "Subscription renews again."
+msgstr "Tilaus uusiutuu taas."
 
 #: lib/gamend_web/live/store_live/index.ex:85
 #, elixir-autogen, elixir-format

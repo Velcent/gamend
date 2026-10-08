@@ -911,6 +911,31 @@ msgstr "Αγορά"
 msgid "Cancel renewal"
 msgstr "Ακύρωση ανανέωσης"
 
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:121
+#, elixir-autogen, elixir-format
+msgid "Refund"
+msgstr "Επιστροφή χρημάτων"
+
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:115
+#, elixir-autogen, elixir-format
+msgid "Refund %{product}? It ends now and the payment goes back to you."
+msgstr "Επιστροφή χρημάτων για %{product}; Λήγει τώρα και η πληρωμή σάς επιστρέφεται."
+
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:105
+#, elixir-autogen, elixir-format
+msgid "Refund sent"
+msgstr "Η επιστροφή στάλθηκε"
+
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:250
+#, elixir-autogen, elixir-format
+msgid "Refund sent. The money is back in 5 to 10 days."
+msgstr "Η επιστροφή στάλθηκε. Τα χρήματα επιστρέφουν σε 5 έως 10 ημέρες."
+
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:281
+#, elixir-autogen, elixir-format
+msgid "The time to ask for a refund has passed."
+msgstr "Η προθεσμία για επιστροφή χρημάτων έχει λήξει."
+
 #: lib/gamend_web/live/user_live/settings/payments_tab.ex:47
 #, elixir-autogen, elixir-format
 msgid "Manage billing"
@@ -925,6 +950,16 @@ msgstr "Λήγει"
 #, elixir-autogen, elixir-format
 msgid "Cancels at period end"
 msgstr "Λήγει στο τέλος της περιόδου"
+
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:205
+#, elixir-autogen, elixir-format
+msgid "Resume renewal"
+msgstr "Επαναφορά ανανέωσης"
+
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:258
+#, elixir-autogen, elixir-format
+msgid "Subscription renews again."
+msgstr "Η συνδρομή θα ανανεώνεται ξανά."
 
 #: lib/gamend_web/live/store_live/index.ex:85
 #, elixir-autogen, elixir-format

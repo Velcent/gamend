@@ -911,6 +911,31 @@ msgstr "Satın al"
 msgid "Cancel renewal"
 msgstr "Yenilemeyi iptal et"
 
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:121
+#, elixir-autogen, elixir-format
+msgid "Refund"
+msgstr "İade et"
+
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:115
+#, elixir-autogen, elixir-format
+msgid "Refund %{product}? It ends now and the payment goes back to you."
+msgstr "%{product} iade edilsin mi? Hemen sona erer ve ödeme sana geri döner."
+
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:105
+#, elixir-autogen, elixir-format
+msgid "Refund sent"
+msgstr "İade gönderildi"
+
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:250
+#, elixir-autogen, elixir-format
+msgid "Refund sent. The money is back in 5 to 10 days."
+msgstr "İade gönderildi. Para 5 ila 10 gün içinde geri döner."
+
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:281
+#, elixir-autogen, elixir-format
+msgid "The time to ask for a refund has passed."
+msgstr "İade isteme süresi geçti."
+
 #: lib/gamend_web/live/user_live/settings/payments_tab.ex:47
 #, elixir-autogen, elixir-format
 msgid "Manage billing"
@@ -925,6 +950,16 @@ msgstr "Sona erer"
 #, elixir-autogen, elixir-format
 msgid "Cancels at period end"
 msgstr "Dönem sonunda sona erer"
+
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:205
+#, elixir-autogen, elixir-format
+msgid "Resume renewal"
+msgstr "Yenilemeyi sürdür"
+
+#: lib/gamend_web/live/user_live/settings/payments_tab.ex:258
+#, elixir-autogen, elixir-format
+msgid "Subscription renews again."
+msgstr "Abonelik yeniden yenilenecek."
 
 #: lib/gamend_web/live/store_live/index.ex:85
 #, elixir-autogen, elixir-format

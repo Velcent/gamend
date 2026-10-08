@@ -61,7 +61,11 @@ defmodule GamendWeb.HostLayoutShell do
               tracking, so the three of them re-rendered — and re-sent the
               logo's URL — on every diff the page sent, long after the theme
               stopped moving. --%>
-        <div class="flex-1">
+        <%!-- A container as wide as the room the buttons leave: where that
+              is too narrow for the title (a phone, 360 px), the title is
+              screen-reader text and the logo stands alone, rather than the
+              name spilling under the search button. --%>
+        <div class="@container min-w-0 flex-1">
           <a
             href={GamendWeb.HostLayouts.localized_href(~p"/", @locale)}
             class="flex-1 flex w-fit items-center gap-2"
@@ -100,7 +104,7 @@ defmodule GamendWeb.HostLayoutShell do
               decoding="sync"
               class="hidden [[data-theme=dark]_&]:block"
             />
-            <span class="text-lg font-bold">{Map.get(@theme, "title")}</span>
+            <span class="text-lg font-bold @max-[8rem]:sr-only">{Map.get(@theme, "title")}</span>
             <span
               :if={theme_tagline(@theme)}
               class="text-sm opacity-80 ms-1 hidden xl:inline"

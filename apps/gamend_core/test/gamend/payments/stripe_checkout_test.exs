@@ -13,7 +13,9 @@ defmodule Gamend.Payments.StripeCheckoutTest do
   # expired, `cs_paid_` ones were paid, `cs_paying_` ones are complete with the
   # payment still clearing.
   defmodule StripeAdapter do
-    def create_checkout_session(purchase, _provider_product, _attrs) do
+    def create_checkout_session(purchase, _provider_product, attrs) do
+      send(self(), {:stripe_checkout_attrs, attrs})
+
       {:ok,
        %{
          "id" => "cs_open_#{purchase.id}",
@@ -122,6 +124,25 @@ defmodule Gamend.Payments.StripeCheckoutTest do
     assert Repo.get!(Purchase, other_open.id).status == "requires_action"
   end
 
+  test "a trial end comes from the server's options only, never the client's attrs" do
+    user = AccountsFixtures.user_fixture()
+    yearly = create_product(unique_key(), "subscription")
+    trial_end = DateTime.add(DateTime.utc_now(), 10, :day)
+
+    assert {:ok, %{purchase: first}} =
+             checkout(user, yearly, %{"trial_end" => DateTime.to_unix(trial_end)})
+
+    assert_received {:stripe_checkout_attrs, attrs}
+    refute Map.has_key?(attrs, "trial_end")
+
+    # Expire the first so the second may open.
+    _ = Repo.update!(Purchase.changeset(first, %{status: "cancelled"}))
+
+    assert {:ok, _} = checkout(user, yearly, %{}, trial_end: trial_end)
+    assert_received {:stripe_checkout_attrs, attrs}
+    assert attrs["trial_end"] == DateTime.to_unix(trial_end)
+  end
+
   test "a session paid meanwhile is fulfilled, never cancelled, and the new checkout refused" do
     user = AccountsFixtures.user_fixture()
     key = unique_key()
@@ -215,10 +236,11 @@ defmodule Gamend.Payments.StripeCheckoutTest do
     assert cancelled.raw_provider_payload["stripe_session"]["status"] == "expired"
   end
 
-  defp checkout(user, provider_product) do
+  defp checkout(user, provider_product, extra \\ %{}, opts \\ []) do
     Payments.create_stripe_checkout(
       user,
-      Map.put(@urls, "provider_product_id", provider_product.id)
+      @urls |> Map.put("provider_product_id", provider_product.id) |> Map.merge(extra),
+      opts
     )
   end
 

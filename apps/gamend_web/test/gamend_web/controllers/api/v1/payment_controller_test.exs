@@ -417,12 +417,13 @@ defmodule GamendWeb.Api.V1.PaymentControllerTest do
       refund_body =
         Jason.encode!(%{
           "id" => "evt_refund_created",
-          "type" => "refund.created",
+          "type" => "charge.refunded",
           "data" => %{
             "object" => %{
-              "id" => "re_paid",
-              "object" => "refund",
-              "charge" => "ch_paid"
+              "id" => "ch_paid",
+              "object" => "charge",
+              "amount" => 999,
+              "amount_refunded" => 999
             }
           }
         })
@@ -504,7 +505,7 @@ defmodule GamendWeb.Api.V1.PaymentControllerTest do
                 "id" => "sub_webhook",
                 "status" => "active",
                 "cancel_at_period_end" => false,
-                "current_period_end" => 1_900_000_000
+                "items" => %{"data" => [%{"current_period_end" => 1_900_000_000}]}
               },
               "metadata" => %{
                 "purchase_id" => to_string(purchase.id),
@@ -532,7 +533,7 @@ defmodule GamendWeb.Api.V1.PaymentControllerTest do
               "id" => "sub_webhook",
               "status" => "active",
               "cancel_at_period_end" => true,
-              "current_period_end" => 1_901_000_000,
+              "items" => %{"data" => [%{"current_period_end" => 1_901_000_000}]},
               "metadata" => %{"purchase_id" => to_string(purchase.id)}
             }
           }
@@ -557,7 +558,7 @@ defmodule GamendWeb.Api.V1.PaymentControllerTest do
               "id" => "sub_webhook",
               "status" => "canceled",
               "cancel_at_period_end" => true,
-              "current_period_end" => 1_901_000_000,
+              "items" => %{"data" => [%{"current_period_end" => 1_901_000_000}]},
               "metadata" => %{"purchase_id" => to_string(purchase.id)}
             }
           }

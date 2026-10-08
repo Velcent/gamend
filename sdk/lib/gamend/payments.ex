@@ -10,6 +10,20 @@ defmodule Gamend.Payments do
   The actual implementation runs on the Gamend.
   """
 
+  @doc ~S"""
+    Refund any Stripe purchase not refunded yet, with no window: the admin page's.
+  """
+  @spec admin_refund_stripe_purchase(Ecto.UUID.t()) :: result()
+  def admin_refund_stripe_purchase(_purchase_id) do
+    case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        nil
+
+      _ ->
+        raise "Gamend.Payments.admin_refund_stripe_purchase/1 is a stub - only available at runtime on Gamend"
+    end
+  end
+
   @doc false
   @spec admin_stats() :: map()
   def admin_stats() do
@@ -19,6 +33,20 @@ defmodule Gamend.Payments do
 
       _ ->
         raise "Gamend.Payments.admin_stats/0 is a stub - only available at runtime on Gamend"
+    end
+  end
+
+  @doc ~S"""
+    Whether an admin can refund `purchase`: any Stripe purchase not refunded yet, at any time.
+  """
+  @spec admin_stripe_refundable?(Gamend.Payments.Purchase.t()) :: boolean()
+  def admin_stripe_refundable?(_purchase) do
+    case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        :erlang.phash2(make_ref(), 2) == 0
+
+      _ ->
+        raise "Gamend.Payments.admin_stripe_refundable?/1 is a stub - only available at runtime on Gamend"
     end
   end
 
@@ -219,8 +247,18 @@ defmodule Gamend.Payments do
     end
   end
 
-  @doc false
-  @spec create_stripe_checkout(Gamend.Accounts.User.t(), map()) ::
+  @doc ~S"""
+    Open a Stripe Checkout for `attrs` (a client's: product, quantity, return
+    URLs). Options are the server's own and never read from `attrs`:
+    
+      * `:trial_end` — a `DateTime` a subscription's first charge waits for
+        (the card is taken now, the subscription starts `trialing`). Ignored for
+        a one-off product, and when it is under 48 hours or over two years
+        away, where Stripe would refuse it. For a host that grants a free
+        period of its own: buying during it keeps the days already given.
+    
+  """
+  @spec create_stripe_checkout(Gamend.Accounts.User.t(), map(), keyword()) ::
           {:ok,
            %{
              purchase: Gamend.Payments.Purchase.t(),
@@ -228,13 +266,13 @@ defmodule Gamend.Payments do
              provider_session_id: String.t() | nil
            }}
           | {:error, term()}
-  def create_stripe_checkout(_user, _attrs) do
+  def create_stripe_checkout(_user, _attrs, _opts \\ []) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
         {:ok, nil}
 
       _ ->
-        raise "Gamend.Payments.create_stripe_checkout/2 is a stub - only available at runtime on Gamend"
+        raise "Gamend.Payments.create_stripe_checkout/3 is a stub - only available at runtime on Gamend"
     end
   end
 
@@ -704,6 +742,59 @@ defmodule Gamend.Payments do
     end
   end
 
+  @doc ~S"""
+    Refund the buyer's own purchase (`refundable?/2`). Another account's
+    purchase answers `:purchase_not_found`.
+    
+  """
+  @spec refund_stripe_purchase(Gamend.Accounts.User.t(), Ecto.UUID.t()) :: result()
+  def refund_stripe_purchase(_user, _purchase_id) do
+    case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        nil
+
+      _ ->
+        raise "Gamend.Payments.refund_stripe_purchase/2 is a stub - only available at runtime on Gamend"
+    end
+  end
+
+  @doc ~S"""
+    Days after paying in which a buyer can refund; 0 when self-serve refunds are off.
+  """
+  @spec refund_window_days() :: non_neg_integer()
+  def refund_window_days() do
+    case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        0
+
+      _ ->
+        raise "Gamend.Payments.refund_window_days/0 is a stub - only available at runtime on Gamend"
+    end
+  end
+
+  @doc ~S"""
+    Takes back a cancellation scheduled for the period end, so the
+    subscription renews again. Stripe refuses it once the subscription ended.
+    
+  """
+  @spec resume_stripe_subscription(Gamend.Accounts.User.t(), Ecto.UUID.t()) ::
+          {:ok,
+           %{
+             purchase: Gamend.Payments.Purchase.t(),
+             entitlement: Gamend.Payments.Entitlement.t(),
+             stripe_subscription: map()
+           }}
+          | {:error, term()}
+  def resume_stripe_subscription(_user, _entitlement_id) do
+    case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        nil
+
+      _ ->
+        raise "Gamend.Payments.resume_stripe_subscription/2 is a stub - only available at runtime on Gamend"
+    end
+  end
+
   @doc false
   @spec revoke_purchase(Gamend.Payments.Purchase.t(), map()) ::
           {:ok, Gamend.Payments.Purchase.t()} | {:error, term()}
@@ -745,6 +836,25 @@ defmodule Gamend.Payments do
 
       _ ->
         raise "Gamend.Payments.stripe_customer_id/1 is a stub - only available at runtime on Gamend"
+    end
+  end
+
+  @doc ~S"""
+    Whether the buyer can refund `purchase` themselves now: a completed Stripe
+    purchase of an entitlement or a subscription, paid within the window, not
+    refunded yet. A subscription still in a free trial has paid nothing. Reads
+    only the row, so a list can ask it of every purchase; the refund checks the
+    window again against Stripe's own payment date.
+    
+  """
+  @spec stripe_refundable?(Gamend.Payments.Purchase.t(), DateTime.t()) :: boolean()
+  def stripe_refundable?(_purchase, _now \\ DateTime.utc_now(:second)) do
+    case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        :erlang.phash2(make_ref(), 2) == 0
+
+      _ ->
+        raise "Gamend.Payments.stripe_refundable?/2 is a stub - only available at runtime on Gamend"
     end
   end
 

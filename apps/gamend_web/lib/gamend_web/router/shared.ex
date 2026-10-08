@@ -189,6 +189,14 @@ defmodule GamendWeb.Router.Shared do
         plug GamendWeb.Plugs.FeatureGate, feature: :public_stats
       end
 
+      pipeline :list_payments_catalog_gate do
+        plug GamendWeb.Plugs.FeatureGate, feature: :list_payments_catalog
+      end
+
+      pipeline :stripe_checkout_api_gate do
+        plug GamendWeb.Plugs.FeatureGate, feature: :stripe_checkout_api
+      end
+
       pipeline :metrics_auth do
         plug GamendWeb.Plugs.MetricsAuth
       end
@@ -336,10 +344,15 @@ defmodule GamendWeb.Router.Shared do
         post "/login/device", SessionController, :create_device
         post "/refresh", SessionController, :refresh
         delete "/logout", SessionController, :delete
-        get "/payments/catalog", PaymentController, :catalog
         post "/payments/webhooks/stripe", PaymentWebhookController, :stripe
         post "/payments/webhooks/google", PaymentWebhookController, :google
         post "/payments/webhooks/apple", PaymentWebhookController, :apple
+      end
+
+      scope "/api/v1", GamendWeb.Api.V1, as: :api_v1 do
+        pipe_through [:api, :list_payments_catalog_gate]
+
+        get "/payments/catalog", PaymentController, :catalog
       end
 
       # Before the listing scopes: "/users/stats" would otherwise be captured
@@ -505,6 +518,16 @@ defmodule GamendWeb.Router.Shared do
 
   defmacro gamend_account_lobby_api_routes do
     quote do
+      # Its own scope for its own flag: a host that sells through its own
+      # page (and decides the price there) turns the API way in off. The gate
+      # before the auth, so a switched-off route is a 404 to everyone, never a
+      # 401 that says it exists.
+      scope "/api/v1", GamendWeb.Api.V1, as: :api_v1 do
+        pipe_through [:api, :stripe_checkout_api_gate, :api_auth]
+
+        post "/payments/checkout/stripe", PaymentController, :stripe_checkout
+      end
+
       scope "/api/v1", GamendWeb.Api.V1, as: :api_v1 do
         pipe_through [:api, :api_auth]
 
@@ -535,7 +558,6 @@ defmodule GamendWeb.Router.Shared do
         get "/me/wallet/ledger", EconomyController, :ledger
         get "/me/inventory", EconomyController, :inventory
         get "/payments/entitlements", PaymentController, :entitlements
-        post "/payments/checkout/stripe", PaymentController, :stripe_checkout
         post "/payments/checkout/steam", PaymentController, :steam_checkout
         post "/payments/steam/finalize", PaymentController, :steam_finalize
         post "/payments/validate/:provider", PaymentController, :validate

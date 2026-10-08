@@ -46,7 +46,11 @@ defmodule GamendWeb.UserLive.Settings.PaymentsTab do
             >
               {gettext("Manage billing")}
             </button>
-            <.link navigate={~p"/store"} class="btn btn-sm btn-primary">
+            <.link
+              :if={GamendWeb.Features.enabled?(:web_store)}
+              navigate={~p"/store"}
+              class="btn btn-sm btn-primary"
+            >
               {gettext("Open Store")}
             </.link>
           </div>
@@ -92,9 +96,31 @@ defmodule GamendWeb.UserLive.Settings.PaymentsTab do
                   </td>
                   <td>{LiveHelpers.payment_provider_label(purchase.provider)}</td>
                   <td>
-                    <span class={["badge badge-sm", payment_status_badge_class(purchase.status)]}>
-                      {LiveHelpers.payment_status_label(purchase.status)}
-                    </span>
+                    <div class="flex flex-col items-start gap-2">
+                      <span class={["badge badge-sm", payment_status_badge_class(purchase.status)]}>
+                        {LiveHelpers.payment_status_label(purchase.status)}
+                      </span>
+                      <%!-- Until the refund's webhook ends the purchase. --%>
+                      <span :if={payment_refund_sent?(purchase)} class="badge badge-sm badge-warning">
+                        {gettext("Refund sent")}
+                      </span>
+                      <button
+                        :if={Payments.stripe_refundable?(purchase)}
+                        id={"refund-purchase-#{purchase.id}"}
+                        type="button"
+                        phx-click="refund_stripe_purchase"
+                        phx-value-id={purchase.id}
+                        data-confirm={
+                          gettext(
+                            "Refund %{product}? It ends now and the payment goes back to you.",
+                            product: payment_product_title(purchase)
+                          )
+                        }
+                        class="btn btn-xs btn-outline btn-warning"
+                      >
+                        {gettext("Refund")}
+                      </button>
+                    </div>
                   </td>
                   <td>{payment_amount(purchase)}</td>
                   <%!-- Sandbox vs production is setup detail, not the player's. --%>
@@ -168,6 +194,16 @@ defmodule GamendWeb.UserLive.Settings.PaymentsTab do
                 >
                   {gettext("Cancels at period end")}
                 </span>
+                <button
+                  :if={payment_stripe_subscription_resumable?(entitlement)}
+                  id={"resume-subscription-#{entitlement.id}"}
+                  type="button"
+                  phx-click="resume_stripe_subscription"
+                  phx-value-id={entitlement.id}
+                  class="btn btn-sm btn-surface"
+                >
+                  {gettext("Resume renewal")}
+                </button>
                 <.link
                   :if={payment_downloadable?(entitlement)}
                   href={~p"/payments/downloads/#{entitlement.id}"}
@@ -212,6 +248,41 @@ defmodule GamendWeb.UserLive.Settings.PaymentsTab do
     end
   end
 
+  def handle_event("resume_stripe_subscription", %{"id" => id}, socket) do
+    user = Shared.current_user(socket)
+
+    case Payments.resume_stripe_subscription(user, parse_payment_id(id)) do
+      {:ok, _result} ->
+        {:noreply,
+         socket
+         |> put_flash(:info, gettext("Subscription renews again."))
+         |> assign_payment_data()}
+
+      {:error, reason} ->
+        {:noreply, socket |> put_flash(:error, payment_error(reason)) |> assign_payment_data()}
+    end
+  end
+
+  # Refunds and ends the purchase now. Nothing is revoked here: Stripe's
+  # refund and cancellation webhooks do it, as for one made in its Dashboard.
+  def handle_event("refund_stripe_purchase", %{"id" => id}, socket) do
+    user = Shared.current_user(socket)
+
+    case user && Payments.refund_stripe_purchase(user, parse_payment_id(id)) do
+      {:ok, _result} ->
+        {:noreply,
+         socket
+         |> put_flash(:info, gettext("Refund sent. The money is back in 5 to 10 days."))
+         |> assign_payment_data()}
+
+      {:error, reason} ->
+        {:noreply, socket |> put_flash(:error, payment_error(reason)) |> assign_payment_data()}
+
+      nil ->
+        {:noreply, socket}
+    end
+  end
+
   defp parse_payment_id(id) when is_binary(id) do
     case Ecto.UUID.cast(id) do
       {:ok, uuid} -> uuid
@@ -230,6 +301,12 @@ defmodule GamendWeb.UserLive.Settings.PaymentsTab do
   end
 
   defp payment_error_detail(%Ecto.Changeset{}), do: gettext("Invalid payment state")
+
+  defp payment_error_detail(:refund_limit_reached),
+    do: gettext("This account has used its refunds from here. Contact support for another.")
+
+  defp payment_error_detail(:refund_window_closed),
+    do: gettext("The time to ask for a refund has passed.")
 
   defp payment_error_detail({:stripe_error, %{"message" => message}}) when is_binary(message),
     do: message
@@ -290,13 +367,28 @@ defmodule GamendWeb.UserLive.Settings.PaymentsTab do
 
   defp payment_downloadable?(entitlement), do: is_map(payment_download_config(entitlement))
 
+  defp payment_refund_sent?(%{status: "completed", metadata: %{"stripe_refund" => %{} = refund}}),
+    do: is_binary(refund["refund_id"])
+
+  defp payment_refund_sent?(_purchase), do: false
+
   defp payment_stripe_subscription_cancelable?(entitlement) do
+    payment_current_stripe_subscription?(entitlement) and
+      not payment_subscription_cancel_scheduled?(entitlement)
+  end
+
+  # Until the period ends: after it, Stripe has ended the subscription.
+  defp payment_stripe_subscription_resumable?(entitlement) do
+    payment_current_stripe_subscription?(entitlement) and
+      payment_subscription_cancel_scheduled?(entitlement)
+  end
+
+  defp payment_current_stripe_subscription?(entitlement) do
     ((payment_entitlement_kind(entitlement) == "subscription" and
         payment_current_entitlement?(entitlement) and
         entitlement.source_purchase) &&
        entitlement.source_purchase.provider == "stripe") and
-      payment_stripe_subscription_id(entitlement.source_purchase) != nil and
-      not payment_subscription_cancel_scheduled?(entitlement)
+      payment_stripe_subscription_id(entitlement.source_purchase) != nil
   end
 
   defp payment_current_entitlement?(%{status: "active", expires_at: nil}), do: true

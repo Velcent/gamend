@@ -40,7 +40,7 @@ defmodule GamendWeb.UserLive.Settings do
                      incoming_prev incoming_next outgoing_prev outgoing_next friends_prev
                      friends_next blocked_prev blocked_next)
   @notifications_events ~w(notify_toggle notify_switch notify_time_zone)
-  @payments_events ~w(cancel_stripe_subscription open_stripe_portal)
+  @payments_events ~w(cancel_stripe_subscription open_stripe_portal refund_stripe_purchase resume_stripe_subscription)
   @wallet_events ~w(wallet_ledger_prev wallet_ledger_next)
   @items_events ~w(items_prev items_next)
   @data_events ~w(kv_prev kv_next kv_filters_change kv_filters_apply kv_filters_clear)

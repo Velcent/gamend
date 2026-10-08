@@ -1,8 +1,8 @@
 defmodule GamendWeb.WebParkedFeaturesTest do
   @moduledoc """
-  `web_chat`, `web_groups` and `web_tournaments` park a feature on the
-  website: its pages 404, every link to them goes, and the API the game uses
-  stays.
+  `web_chat`, `web_groups`, `web_tournaments` and `web_store` park a feature
+  on the website: its pages 404, every link to them goes, and the API the game
+  uses stays.
   """
   use GamendWeb.ConnCase, async: false
 
@@ -102,8 +102,21 @@ defmodule GamendWeb.WebParkedFeaturesTest do
       refute html =~ "/chat?"
     end
 
+    test "web_store off: the store is not found, and settings lose Open Store", %{conn: conn} do
+      {:ok, _view, before} = live(conn, "/users/settings?tab=payments")
+      assert before =~ ~s(href="/store")
+
+      disable([:web_store])
+
+      assert_raise GamendWeb.NotFoundError, fn -> live(conn, "/store") end
+      assert_raise GamendWeb.NotFoundError, fn -> live(conn, "/store/success") end
+
+      {:ok, _view, html} = live(conn, "/users/settings?tab=payments")
+      refute html =~ ~s(href="/store")
+    end
+
     test "the API the game uses stays open", %{conn: conn} do
-      disable([:web_chat, :web_groups, :web_tournaments])
+      disable([:web_chat, :web_groups, :web_tournaments, :web_store])
 
       assert conn |> get("/api/v1/groups") |> json_response(200)
       assert conn |> get("/api/v1/tournaments") |> json_response(200)
