@@ -13,11 +13,12 @@ defmodule Gamend.Payments do
   @doc ~S"""
     Refund any Stripe purchase not refunded yet, with no window: the admin page's.
   """
-  @spec admin_refund_stripe_purchase(Ecto.UUID.t()) :: result()
+  @spec admin_refund_stripe_purchase(Ecto.UUID.t()) ::
+          {:ok, %{purchase: Gamend.Payments.Purchase.t(), refund: map()}} | {:error, term()}
   def admin_refund_stripe_purchase(_purchase_id) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        nil
+        {:ok, nil}
 
       _ ->
         raise "Gamend.Payments.admin_refund_stripe_purchase/1 is a stub - only available at runtime on Gamend"
@@ -256,6 +257,10 @@ defmodule Gamend.Payments do
         a one-off product, and when it is under 48 hours or over two years
         away, where Stripe would refuse it. For a host that grants a free
         period of its own: buying during it keeps the days already given.
+    
+    A subscription bought to replace a shorter one (`Upgrades`, monthly to
+    yearly) waits for the period already paid for: its `trial_end` is the
+    later of `:trial_end` and that period's end (`Upgrades.trial_end/3`).
     
   """
   @spec create_stripe_checkout(Gamend.Accounts.User.t(), map(), keyword()) ::
@@ -506,7 +511,16 @@ defmodule Gamend.Payments do
     end
   end
 
-  @doc false
+  @doc ~S"""
+    Verify, record and handle one Stripe webhook delivery.
+    
+    Every answer is logged and counted (`payments.webhook`): a refused
+    signature at warning (a wrong signing secret refuses every delivery, and
+    only the logs say so), a handler that failed at error with the event's id
+    and type (Stripe retries it, and it stays unprocessed in `provider_events`
+    until one succeeds), and a processed or ignored one at info.
+    
+  """
   @spec handle_stripe_webhook(binary(), binary() | nil) :: {:ok, atom()} | {:error, term()}
   def handle_stripe_webhook(_raw_body, _signature) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
@@ -715,6 +729,23 @@ defmodule Gamend.Payments do
     end
   end
 
+  @doc ~S"""
+    A short code for a failure, for a counter's dimension: Stripe's own error
+    code when it sent one (`card_declined`, `resource_missing`), the atom for
+    ours, never the message.
+    
+  """
+  @spec provider_error_code(term()) :: String.t()
+  def provider_error_code(_reason) do
+    case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        ""
+
+      _ ->
+        raise "Gamend.Payments.provider_error_code/1 is a stub - only available at runtime on Gamend"
+    end
+  end
+
   @doc false
   @spec reconcile_stripe_purchase(Gamend.Payments.Purchase.t()) ::
           {:ok, %{purchase: Gamend.Payments.Purchase.t(), result: atom(), stripe_session: map()}}
@@ -747,11 +778,12 @@ defmodule Gamend.Payments do
     purchase answers `:purchase_not_found`.
     
   """
-  @spec refund_stripe_purchase(Gamend.Accounts.User.t(), Ecto.UUID.t()) :: result()
+  @spec refund_stripe_purchase(Gamend.Accounts.User.t(), Ecto.UUID.t()) ::
+          {:ok, %{purchase: Gamend.Payments.Purchase.t(), refund: map()}} | {:error, term()}
   def refund_stripe_purchase(_user, _purchase_id) do
     case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
       :placeholder ->
-        nil
+        {:ok, nil}
 
       _ ->
         raise "Gamend.Payments.refund_stripe_purchase/2 is a stub - only available at runtime on Gamend"
@@ -769,6 +801,26 @@ defmodule Gamend.Payments do
 
       _ ->
         raise "Gamend.Payments.refund_window_days/0 is a stub - only available at runtime on Gamend"
+    end
+  end
+
+  @doc ~S"""
+    Hand a purchase back after a dispute the seller won: the purchase completes
+    again and its entitlements are active again, with the end they had. Only a
+    purchase a dispute revoked (`metadata["revocation_reason"]` a
+    `charge.dispute.*` event) — a refund is final. `{:ok, :unchanged}` for any
+    other.
+    
+  """
+  @spec restore_purchase(Gamend.Payments.Purchase.t(), map()) ::
+          {:ok, Gamend.Payments.Purchase.t()} | {:ok, :unchanged} | {:error, term()}
+  def restore_purchase(_purchase, _payload \\ %{}) do
+    case Application.get_env(:gamend_sdk, :stub_mode, :raise) do
+      :placeholder ->
+        {:ok, nil}
+
+      _ ->
+        raise "Gamend.Payments.restore_purchase/2 is a stub - only available at runtime on Gamend"
     end
   end
 
@@ -842,9 +894,11 @@ defmodule Gamend.Payments do
   @doc ~S"""
     Whether the buyer can refund `purchase` themselves now: a completed Stripe
     purchase of an entitlement or a subscription, paid within the window, not
-    refunded yet. A subscription still in a free trial has paid nothing. Reads
-    only the row, so a list can ask it of every purchase; the refund checks the
-    window again against Stripe's own payment date.
+    refunded yet, and the buyer's own refunds not used up
+    (`self_refunds_per_account`). A subscription still in a free trial has paid
+    nothing. Reads the row, and the buyer's other purchases only when the row
+    passes; the refund checks the window again against Stripe's own payment
+    date.
     
   """
   @spec stripe_refundable?(Gamend.Payments.Purchase.t(), DateTime.t()) :: boolean()
