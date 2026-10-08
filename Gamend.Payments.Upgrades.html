@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.40.4">
+    <meta name="project" content="gamend_core v1.1.1303">
+
+
+    <title>Gamend.Payments.Upgrades — gamend_core v1.1.1303</title>
+
+    <link rel="stylesheet" href="dist/html-elixir-RXHHCTJW.css" />
+
+    <script defer src="dist/sidebar_items-B77946B5.js"></script>
+    <script defer src="docs_config.js"></script>
+    <script defer src="dist/html-MI33G4N7.js"></script>
+
+  </head>
+  <body>
+    <script>(()=>{var t="ex_doc:settings",e="dark";var o="dark",s="light";var E="sidebar_state",n="closed";var r="sidebar_width";var a="sidebar-open";var i=new URLSearchParams(window.location.search),S=i.get("theme")||JSON.parse(localStorage.getItem(t)||"{}").theme;(S===o||S!==s&&window.matchMedia("(prefers-color-scheme: dark)").matches)&&document.body.classList.add(e);var d=sessionStorage.getItem(E),A=d!==n&&!window.matchMedia(`screen and (max-width: ${768}px)`).matches;document.body.classList.toggle(a,A);var c=sessionStorage.getItem(r);c&&document.body.style.setProperty("--sidebarWidth",`${c}px`);var p=/(Macintosh|iPhone|iPad|iPod)/.test(window.navigator.userAgent);document.documentElement.classList.toggle("apple-os",p);})();
+</script>
+
+<div class="body-wrapper">
+
+<button id="sidebar-menu" class="sidebar-button sidebar-toggle" aria-label="toggle sidebar" aria-controls="sidebar">
+  <i class="ri-menu-line ri-lg" title="Collapse/expand sidebar"></i>
+</button>
+
+<nav id="sidebar" class="sidebar">
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectInfo">
+
+      <div>
+        <a href="readme.html" class="sidebar-projectName" translate="no">
+gamend_core
+        </a>
+        <div class="sidebar-projectVersion" translate="no">
+          v1.1.1303
+        </div>
+      </div>
+    </div>
+    <ul id="sidebar-list-nav" class="sidebar-list-nav" role="tablist" data-extras="Pages"></ul>
+  </div>
+</nav>
+
+<output role="status" id="toast"></output>
+
+<main class="content page-module" id="main" data-type="modules">
+  <div id="content" class="content-inner">
+    <div class="top-search">
+      <div class="search-settings">
+        <form class="search-bar" action="search.html">
+          <label class="search-label">
+            <span class="sr-only">Search documentation of gamend_core</span>
+            <div class="search-input-wrapper">
+              <input name="q" type="text" class="search-input" placeholder="Press / to search" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+              <button type="button" tabindex="-1" class="search-close-button" aria-hidden="true">
+                <i class="ri-close-line ri-lg" title="Cancel search"></i>
+              </button>
+            </div>
+          </label>
+        </form>
+        <div class="autocomplete">
+        </div>
+        <div class="engine-selector" data-multiple="false">
+          <button type="button" class="engine-button" aria-label="Select search engine" aria-haspopup="true" aria-expanded="false">
+            <i class="ri-search-2-line" aria-hidden="true"></i>
+            <span class="engine-name">Default</span>
+            <i class="ri-arrow-down-s-line" aria-hidden="true"></i>
+          </button>
+          <div class="engine-dropdown" hidden role="menu">
+
+              <button type="button"
+                      class="engine-option"
+                      data-engine-url="search.html?q="
+                      role="menuitemradio"
+                      aria-checked="true">
+                <span class="name">Default</span>
+                <span class="help">In-browser search</span>
+              </button>
+
+          </div>
+        </div>
+        <button class="icon-settings display-settings">
+          <i class="ri-settings-3-line"></i>
+          <span class="sr-only">Settings</span>
+        </button>
+      </div>
+    </div>
+
+<div id="top-content">
+  <div class="heading-with-actions top-heading">
+    <h1>
+      <span translate="no">Gamend.<wbr />Payments.<wbr />Upgrades</span> 
+      <small class="app-vsn" translate="no">(gamend_core v1.1.1303)</small>
+
+    </h1>
+
+<a href="Gamend.Payments.Upgrades.md" title="Copy Markdown (hold Ctrl/Cmd and click it to open as Markdown)" class="copy-markdown icon-action" rel="help">
+  <i class="ri-markdown-line" aria-hidden="true"></i>
+  <span class="sr-only">Copy Markdown</span>
+</a>
+
+
+
+      <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/upgrades.ex#L1" title="View Source" class="icon-action" rel="help nofollow">
+        <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        <span class="sr-only">View Source</span>
+      </a>
+
+  </div>
+
+
+    <section id="moduledoc">
+<p>Moving to a longer plan: a monthly subscription to a yearly one, or any
+subscription to a one-off purchase (lifetime) of the same entitlement.</p><p>An entitlement is one row per user and key, so a second purchase of a key
+the user holds is refused (<code class="inline">:already_owned</code>). An upgrade is the exception
+(<a href="#replaced_purchase/2"><code class="inline">replaced_purchase/2</code></a>): the row comes from a Stripe subscription still
+running, and the new product lasts longer (<a href="#longer?/2"><code class="inline">longer?/2</code></a>: a one-off
+entitlement outlasts any subscription, a subscription outlasts a shorter
+one by <code class="inline">grant_config[&quot;duration_seconds&quot;]</code>).</p><p>The new purchase takes the row when it is fulfilled (<code class="inline">grant_purchase</code>
+upserts by key and moves <code class="inline">source_purchase_id</code>), so the old subscription's
+later webhooks find no row to change. What is left is the old subscription
+itself, which would go on charging. <a href="#supersede/1"><code class="inline">supersede/1</code></a>, run once a purchase is
+fulfilled, ends it the way the App Store ends an upgraded plan:</p><ul><li>a subscription that starts when the old one's paid period ends
+(<a href="#first_charge_at/2"><code class="inline">first_charge_at/2</code></a>, the checkout's <code class="inline">trial_end</code>): the old one is set to
+cancel at its period end. Nothing is paid twice, nothing refunded.</li><li>anything else (a one-off purchase, or a period ending within 48 hours,
+which Stripe charges at once): the old one is cancelled now and the
+unused part of its last payment refunded, pro rata by time from the
+moment the new purchase was paid. The amount is the same on every
+retry, so the refund's idempotency key holds.</li></ul><p>The refund carries <code class="inline">superseded_purchase_id</code>, never <code class="inline">purchase_id</code>: the
+reversal path counts a refund only when it is ours, and this one takes
+nothing back. Progress is kept on the old purchase as
+<code class="inline">metadata[&quot;superseded&quot;]</code> (<code class="inline">by</code>, <code class="inline">mode</code>, <code class="inline">requested_at</code>, then <code class="inline">refund_id</code>,
+<code class="inline">refund_amount</code>, <code class="inline">done_at</code>), written before Stripe is called and after, as
+<code class="inline">StripeRefunds</code> does. <a href="#sweep/1"><code class="inline">sweep/1</code></a> finishes what a failure left.</p>
+    </section>
+
+</div>
+
+  <section id="summary" class="details-list">
+    <h2 class="section-heading">
+      <a class="hover-link" href="#summary">
+        <i class="ri-link-m" aria-hidden="true"></i>
+      </a>
+      <span class="text">Summary</span>
+    </h2>
+<div class="summary-types summary">
+  <h3>
+    <a href="#types">Types</a>
+  </h3>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#t:mode/0" data-no-tooltip="" translate="no">mode()</a>
+
+      </div>
+
+    </div>
+
+</div>
+<div class="summary-functions summary">
+  <h3>
+    <a href="#functions">Functions</a>
+  </h3>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#first_charge_at/3" data-no-tooltip="" translate="no">first_charge_at(user_id, product, now \\ DateTime.utc_now(:second))</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>When a subscription bought now to replace one (<a href="#replaced_purchase/2"><code class="inline">replaced_purchase/2</code></a>) is
+first charged: the end of the period already paid for. nil when <code class="inline">product</code>
+is not a subscription, replaces nothing, or that end is under 48 hours away
+(Stripe would refuse the wait; the plan is charged now and the old one
+refunded pro rata instead).</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#holding_purchase/2" data-no-tooltip="" translate="no">holding_purchase(user_id, key)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>The purchase behind the user's active <code class="inline">key</code> row, with its product, or nil:
+what the user holds that plan by. A grant with no purchase answers nil.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#longer?/2" data-no-tooltip="" translate="no">longer?(new, old)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Whether <code class="inline">new</code> lasts longer than <code class="inline">old</code>: a one-off entitlement has no end, a
+subscription lasts its <code class="inline">grant_config[&quot;duration_seconds&quot;]</code>, and a product
+with no period set lasts nothing (it is never an upgrade, nor upgraded
+from, by length).</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#mode/2" data-no-tooltip="" translate="no">mode(new, old)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>How <code class="inline">new</code> ends <code class="inline">old</code>: at <code class="inline">old</code>'s period end when <code class="inline">new</code> is a Stripe
+subscription whose first charge waits for it (<code class="inline">trial_end</code> at or past that
+end), else now.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#replaced_purchase/2" data-no-tooltip="" translate="no">replaced_purchase(user_id, product)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>The Stripe subscription a purchase of <code class="inline">product</code> would replace for the user,
+or nil: the purchase behind their active row for the product's entitlement,
+when it is a running Stripe subscription and <code class="inline">product</code> lasts longer.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#supersede/1" data-no-tooltip="" translate="no">supersede(purchase)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>End the Stripe subscriptions <code class="inline">purchase</code> replaces: the buyer's other running
+Stripe subscriptions to the same entitlement, once <code class="inline">purchase</code> holds the
+row. Run after a purchase is fulfilled, and by <a href="#sweep/1"><code class="inline">sweep/1</code></a>. Answers each
+ended subscription's purchase id with how it ended, or why it did not.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#sweep/1" data-no-tooltip="" translate="no">sweep(batch \\ 50)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Finish the supersessions a failure left: every running Stripe subscription
+whose entitlement row another purchase now holds. Up to <code class="inline">batch</code> holders a
+run. Answers how many subscriptions ended each way.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#trial_end/3" data-no-tooltip="" translate="no">trial_end(user_id, product, given)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>The checkout's <code class="inline">trial_end</code> for <code class="inline">product</code>: the later of the caller's own
+(a host's free period) and <a href="#first_charge_at/2"><code class="inline">first_charge_at/2</code></a>.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#unused_amount/4" data-no-tooltip="" translate="no">unused_amount(amount_paid, starts_at, ends_at, from)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>The part of <code class="inline">amount_paid</code> for the time left in the period after <code class="inline">from</code>,
+rounded down to the minor unit. 0 when nothing is left or nothing is known.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#upgrade?/2" data-no-tooltip="" translate="no">upgrade?(user_id, product)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Whether buying <code class="inline">product</code> would replace a plan the user holds (<a href="#replaced_purchase/2"><code class="inline">replaced_purchase/2</code></a>).</p></div>
+
+    </div>
+
+</div>
+
+  </section>
+
+
+  <section id="types" class="details-list">
+    <h2 class="section-heading">
+      <a class="hover-link" href="#types">
+        <i class="ri-link-m" aria-hidden="true"></i>
+      </a>
+      <span class="text">Types</span>
+    </h2>
+
+    <div class="types-list">
+<section class="detail" id="t:mode/0">
+
+  <div class="detail-header">
+    <a href="#t:mode/0" class="detail-link" data-no-tooltip="" aria-label="Link to this type">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">mode()</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/upgrades.ex#L63" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@type</span> mode() :: :at_period_end | :now</pre>
+
+      </div>
+
+
+  </section>
+</section>
+
+    </div>
+  </section>
+
+  <section id="functions" class="details-list">
+    <h2 class="section-heading">
+      <a class="hover-link" href="#functions">
+        <i class="ri-link-m" aria-hidden="true"></i>
+      </a>
+      <span class="text">Functions</span>
+    </h2>
+
+    <div class="functions-list">
+<section class="detail" id="first_charge_at/3">
+
+    <span id="first_charge_at/2"></span>
+
+  <div class="detail-header">
+    <a href="#first_charge_at/3" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">first_charge_at(user_id, product, now \\ DateTime.utc_now(:second))</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/upgrades.ex#L134" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> first_charge_at(<a href="https://ecto.hexdocs.pm/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>() | nil, <a href="Gamend.Payments.Product.html#t:t/0">Gamend.Payments.Product.t</a>(), <a href="https://elixir.hexdocs.pm/DateTime.html#t:t/0">DateTime.t</a>()) ::
+  <a href="https://elixir.hexdocs.pm/DateTime.html#t:t/0">DateTime.t</a>() | nil</pre>
+
+      </div>
+
+<p>When a subscription bought now to replace one (<a href="#replaced_purchase/2"><code class="inline">replaced_purchase/2</code></a>) is
+first charged: the end of the period already paid for. nil when <code class="inline">product</code>
+is not a subscription, replaces nothing, or that end is under 48 hours away
+(Stripe would refuse the wait; the plan is charged now and the old one
+refunded pro rata instead).</p>
+  </section>
+</section>
+<section class="detail" id="holding_purchase/2">
+
+  <div class="detail-header">
+    <a href="#holding_purchase/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">holding_purchase(user_id, key)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/upgrades.ex#L70" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> holding_purchase(<a href="https://ecto.hexdocs.pm/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>() | nil, <a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>()) ::
+  <a href="Gamend.Payments.Purchase.html#t:t/0">Gamend.Payments.Purchase.t</a>() | nil</pre>
+
+      </div>
+
+<p>The purchase behind the user's active <code class="inline">key</code> row, with its product, or nil:
+what the user holds that plan by. A grant with no purchase answers nil.</p>
+  </section>
+</section>
+<section class="detail" id="longer?/2">
+
+  <div class="detail-header">
+    <a href="#longer?/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">longer?(new, old)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/upgrades.ex#L110" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> longer?(<a href="Gamend.Payments.Product.html#t:t/0">Gamend.Payments.Product.t</a>(), <a href="Gamend.Payments.Product.html#t:t/0">Gamend.Payments.Product.t</a>()) :: <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">boolean</a>()</pre>
+
+      </div>
+
+<p>Whether <code class="inline">new</code> lasts longer than <code class="inline">old</code>: a one-off entitlement has no end, a
+subscription lasts its <code class="inline">grant_config[&quot;duration_seconds&quot;]</code>, and a product
+with no period set lasts nothing (it is never an upgrade, nor upgraded
+from, by length).</p>
+  </section>
+</section>
+<section class="detail" id="mode/2">
+
+  <div class="detail-header">
+    <a href="#mode/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">mode(new, old)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/upgrades.ex#L323" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> mode(<a href="Gamend.Payments.Purchase.html#t:t/0">Gamend.Payments.Purchase.t</a>(), <a href="Gamend.Payments.Purchase.html#t:t/0">Gamend.Payments.Purchase.t</a>()) :: <a href="#t:mode/0">mode</a>()</pre>
+
+      </div>
+
+<p>How <code class="inline">new</code> ends <code class="inline">old</code>: at <code class="inline">old</code>'s period end when <code class="inline">new</code> is a Stripe
+subscription whose first charge waits for it (<code class="inline">trial_end</code> at or past that
+end), else now.</p>
+  </section>
+</section>
+<section class="detail" id="replaced_purchase/2">
+
+  <div class="detail-header">
+    <a href="#replaced_purchase/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">replaced_purchase(user_id, product)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/upgrades.ex#L85" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> replaced_purchase(<a href="https://ecto.hexdocs.pm/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>() | nil, <a href="Gamend.Payments.Product.html#t:t/0">Gamend.Payments.Product.t</a>()) ::
+  <a href="Gamend.Payments.Purchase.html#t:t/0">Gamend.Payments.Purchase.t</a>() | nil</pre>
+
+      </div>
+
+<p>The Stripe subscription a purchase of <code class="inline">product</code> would replace for the user,
+or nil: the purchase behind their active row for the product's entitlement,
+when it is a running Stripe subscription and <code class="inline">product</code> lasts longer.</p>
+  </section>
+</section>
+<section class="detail" id="supersede/1">
+
+  <div class="detail-header">
+    <a href="#supersede/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">supersede(purchase)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/upgrades.ex#L169" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> supersede(<a href="Gamend.Payments.Purchase.html#t:t/0">Gamend.Payments.Purchase.t</a>()) ::
+  {:ok, [{<a href="https://ecto.hexdocs.pm/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>(), <a href="#t:mode/0">mode</a>() | {:error, <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">term</a>()}}]}</pre>
+
+      </div>
+
+<p>End the Stripe subscriptions <code class="inline">purchase</code> replaces: the buyer's other running
+Stripe subscriptions to the same entitlement, once <code class="inline">purchase</code> holds the
+row. Run after a purchase is fulfilled, and by <a href="#sweep/1"><code class="inline">sweep/1</code></a>. Answers each
+ended subscription's purchase id with how it ended, or why it did not.</p>
+  </section>
+</section>
+<section class="detail" id="sweep/1">
+
+    <span id="sweep/0"></span>
+
+  <div class="detail-header">
+    <a href="#sweep/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">sweep(batch \\ 50)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/upgrades.ex#L195" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> sweep(<a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">pos_integer</a>()) :: %{optional(<a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">atom</a>()) =&gt; <a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">non_neg_integer</a>()}</pre>
+
+      </div>
+
+<p>Finish the supersessions a failure left: every running Stripe subscription
+whose entitlement row another purchase now holds. Up to <code class="inline">batch</code> holders a
+run. Answers how many subscriptions ended each way.</p>
+  </section>
+</section>
+<section class="detail" id="trial_end/3">
+
+  <div class="detail-header">
+    <a href="#trial_end/3" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">trial_end(user_id, product, given)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/upgrades.ex#L154" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> trial_end(<a href="https://ecto.hexdocs.pm/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>() | nil, <a href="Gamend.Payments.Product.html#t:t/0">Gamend.Payments.Product.t</a>(), <a href="https://elixir.hexdocs.pm/DateTime.html#t:t/0">DateTime.t</a>() | nil) ::
+  <a href="https://elixir.hexdocs.pm/DateTime.html#t:t/0">DateTime.t</a>() | nil</pre>
+
+      </div>
+
+<p>The checkout's <code class="inline">trial_end</code> for <code class="inline">product</code>: the later of the caller's own
+(a host's free period) and <a href="#first_charge_at/2"><code class="inline">first_charge_at/2</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="unused_amount/4">
+
+  <div class="detail-header">
+    <a href="#unused_amount/4" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">unused_amount(amount_paid, starts_at, ends_at, from)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/upgrades.ex#L426" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> unused_amount(<a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">term</a>(), <a href="https://elixir.hexdocs.pm/DateTime.html#t:t/0">DateTime.t</a>() | nil, <a href="https://elixir.hexdocs.pm/DateTime.html#t:t/0">DateTime.t</a>() | nil, <a href="https://elixir.hexdocs.pm/DateTime.html#t:t/0">DateTime.t</a>()) ::
+  <a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">non_neg_integer</a>()</pre>
+
+      </div>
+
+<p>The part of <code class="inline">amount_paid</code> for the time left in the period after <code class="inline">from</code>,
+rounded down to the minor unit. 0 when nothing is left or nothing is known.</p>
+  </section>
+</section>
+<section class="detail" id="upgrade?/2">
+
+  <div class="detail-header">
+    <a href="#upgrade?/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">upgrade?(user_id, product)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/upgrades.ex#L101" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> upgrade?(<a href="https://ecto.hexdocs.pm/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>() | nil, <a href="Gamend.Payments.Product.html#t:t/0">Gamend.Payments.Product.t</a>()) :: <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">boolean</a>()</pre>
+
+      </div>
+
+<p>Whether buying <code class="inline">product</code> would replace a plan the user holds (<a href="#replaced_purchase/2"><code class="inline">replaced_purchase/2</code></a>).</p>
+  </section>
+</section>
+
+    </div>
+  </section>
+
+    <footer class="footer">
+
+        <p>
+
+            <span class="line">
+              <a href="https://hex.pm/packages/gamend_core/1.1.1303">Hex Package</a>
+
+              <a href="https://preview.hex.pm/preview/gamend_core/1.1.1303">Hex Preview</a>
+
+            </span>
+
+          <span class="line">
+            <button class="a-main footer-button display-quick-switch" title="Go to package docs">
+              Go to package docs
+            </button>
+
+              <a href="llms.txt" target="_blank">
+                View llms.txt
+              </a>
+
+
+              <a href="gamend_core.epub">
+                Download ePub version
+              </a>
+
+          </span>
+        </p>
+
+        <p class="built-using">
+          Built using
+          <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener" translate="no">ExDoc</a> (v0.40.4) for the
+
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank" translate="no">Elixir programming language</a>
+
+        </p>
+
+
+    </footer>
+  </div>
+</main>
+</div>
+
+  </body>
+</html>

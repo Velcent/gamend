@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.4">
-    <meta name="project" content="gamend_core v1.1.1302">
+    <meta name="project" content="gamend_core v1.1.1303">
 
 
-    <title>Gamend.Payments — gamend_core v1.1.1302</title>
+    <title>Gamend.Payments — gamend_core v1.1.1303</title>
 
     <link rel="stylesheet" href="dist/html-elixir-RXHHCTJW.css" />
 
-    <script defer src="dist/sidebar_items-6C0DC53D.js"></script>
+    <script defer src="dist/sidebar_items-B77946B5.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-MI33G4N7.js"></script>
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.1.1302
+          v1.1.1303
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr />Payments</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.1.1302)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.1.1303)</small>
 
     </h1>
 
@@ -134,11 +134,31 @@ context remains the source of truth for what a user owns inside the game.</p>
 
     <div class="summary-row">
       <div class="summary-signature">
+        <a href="#admin_refund_stripe_purchase/1" data-no-tooltip="" translate="no">admin_refund_stripe_purchase(purchase_id)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>See <a href="Gamend.Payments.StripeRefunds.html#admin_refund_stripe_purchase/1"><code class="inline">Gamend.Payments.StripeRefunds.admin_refund_stripe_purchase/1</code></a>.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
         <a href="#admin_stats/0" data-no-tooltip="" translate="no">admin_stats()</a>
 
       </div>
 
         <div class="summary-synopsis"><p>See <a href="Gamend.Payments.Admin.html#admin_stats/0"><code class="inline">Gamend.Payments.Admin.admin_stats/0</code></a>.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#admin_stripe_refundable?/1" data-no-tooltip="" translate="no">admin_stripe_refundable?(purchase)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>See <a href="Gamend.Payments.StripeRefunds.html#admin_refundable?/1"><code class="inline">Gamend.Payments.StripeRefunds.admin_refundable?/1</code></a>.</p></div>
 
     </div>
 
@@ -276,11 +296,11 @@ context remains the source of truth for what a user owns inside the game.</p>
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#create_stripe_checkout/2" data-no-tooltip="" translate="no">create_stripe_checkout(user, attrs)</a>
+        <a href="#create_stripe_checkout/3" data-no-tooltip="" translate="no">create_stripe_checkout(user, attrs, opts \\ [])</a>
 
       </div>
 
-        <div class="summary-synopsis"><p>See <a href="Gamend.Payments.StripeEvents.html#create_stripe_checkout/2"><code class="inline">Gamend.Payments.StripeEvents.create_stripe_checkout/2</code></a>.</p></div>
+        <div class="summary-synopsis"><p>See <a href="Gamend.Payments.StripeEvents.html#create_stripe_checkout/3"><code class="inline">Gamend.Payments.StripeEvents.create_stripe_checkout/3</code></a>.</p></div>
 
     </div>
 
@@ -566,6 +586,18 @@ event id count as a duplicate.</p></div>
 
     <div class="summary-row">
       <div class="summary-signature">
+        <a href="#provider_error_code/1" data-no-tooltip="" translate="no">provider_error_code(reason)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>A short code for a failure, for a counter's dimension: Stripe's own error
+code when it sent one (<code class="inline">card_declined</code>, <code class="inline">resource_missing</code>), the atom for
+ours, never the message.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
         <a href="#reconcile_stripe_purchase/1" data-no-tooltip="" translate="no">reconcile_stripe_purchase(purchase)</a>
 
       </div>
@@ -579,6 +611,50 @@ event id count as a duplicate.</p></div>
         <a href="#record_provider_event/5" data-no-tooltip="" translate="no">record_provider_event(provider, event_id, event_type, payload, metadata \\ %{})</a>
 
       </div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#refund_stripe_purchase/2" data-no-tooltip="" translate="no">refund_stripe_purchase(user, purchase_id)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>See <a href="Gamend.Payments.StripeRefunds.html#refund_stripe_purchase/2"><code class="inline">Gamend.Payments.StripeRefunds.refund_stripe_purchase/2</code></a>.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#refund_window_days/0" data-no-tooltip="" translate="no">refund_window_days()</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>See <a href="Gamend.Payments.StripeRefunds.html#refund_window_days/0"><code class="inline">Gamend.Payments.StripeRefunds.refund_window_days/0</code></a>.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#restore_purchase/2" data-no-tooltip="" translate="no">restore_purchase(purchase, payload \\ %{})</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Hand a purchase back after a dispute the seller won: the purchase completes
+again and its entitlements are active again, with the end they had. Only a
+purchase a dispute revoked (<code class="inline">metadata[&quot;revocation_reason&quot;]</code> a
+<code class="inline">charge.dispute.*</code> event) — a refund is final. <code class="inline">{:ok, :unchanged}</code> for any
+other.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#resume_stripe_subscription/2" data-no-tooltip="" translate="no">resume_stripe_subscription(user, entitlement_id)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>See <a href="Gamend.Payments.StripeEvents.html#resume_stripe_subscription/2"><code class="inline">Gamend.Payments.StripeEvents.resume_stripe_subscription/2</code></a>.</p></div>
 
     </div>
 
@@ -607,6 +683,16 @@ event id count as a duplicate.</p></div>
       </div>
 
         <div class="summary-synopsis"><p>See <a href="Gamend.Payments.StripeEvents.html#stripe_customer_id/1"><code class="inline">Gamend.Payments.StripeEvents.stripe_customer_id/1</code></a>.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#stripe_refundable?/2" data-no-tooltip="" translate="no">stripe_refundable?(purchase, now \\ DateTime.utc_now(:second))</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>See <a href="Gamend.Payments.StripeRefunds.html#refundable?/2"><code class="inline">Gamend.Payments.StripeRefunds.refundable?/2</code></a>.</p></div>
 
     </div>
 
@@ -648,6 +734,28 @@ event id count as a duplicate.</p></div>
     </h2>
 
     <div class="functions-list">
+<section class="detail" id="admin_refund_stripe_purchase/1">
+
+  <div class="detail-header">
+    <a href="#admin_refund_stripe_purchase/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">admin_refund_stripe_purchase(purchase_id)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L537" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+<p>See <a href="Gamend.Payments.StripeRefunds.html#admin_refund_stripe_purchase/1"><code class="inline">Gamend.Payments.StripeRefunds.admin_refund_stripe_purchase/1</code></a>.</p>
+  </section>
+</section>
 <section class="detail" id="admin_stats/0">
 
   <div class="detail-header">
@@ -658,7 +766,7 @@ event id count as a duplicate.</p></div>
       <h1 class="signature" translate="no">admin_stats()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L667" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L819" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -668,6 +776,28 @@ event id count as a duplicate.</p></div>
   <section class="docstring">
 
 <p>See <a href="Gamend.Payments.Admin.html#admin_stats/0"><code class="inline">Gamend.Payments.Admin.admin_stats/0</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="admin_stripe_refundable?/1">
+
+  <div class="detail-header">
+    <a href="#admin_stripe_refundable?/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">admin_stripe_refundable?(purchase)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L545" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+<p>See <a href="Gamend.Payments.StripeRefunds.html#admin_refundable?/1"><code class="inline">Gamend.Payments.StripeRefunds.admin_refundable?/1</code></a>.</p>
   </section>
 </section>
 <section class="detail" id="cancel_stripe_subscription_at_period_end/2">
@@ -680,7 +810,7 @@ event id count as a duplicate.</p></div>
       <h1 class="signature" translate="no">cancel_stripe_subscription_at_period_end(user, entitlement_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L411" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L522" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -704,7 +834,7 @@ event id count as a duplicate.</p></div>
       <h1 class="signature" translate="no">count_catalog(provider \\ nil)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L145" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L149" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -734,7 +864,7 @@ event id count as a duplicate.</p></div>
       <h1 class="signature" translate="no">count_entitlements(opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L697" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L849" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -758,7 +888,7 @@ event id count as a duplicate.</p></div>
       <h1 class="signature" translate="no">count_products(opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L679" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L831" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -782,7 +912,7 @@ event id count as a duplicate.</p></div>
       <h1 class="signature" translate="no">count_provider_events(opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L703" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L855" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -806,7 +936,7 @@ event id count as a duplicate.</p></div>
       <h1 class="signature" translate="no">count_provider_products(opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L685" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L837" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -830,7 +960,7 @@ event id count as a duplicate.</p></div>
       <h1 class="signature" translate="no">count_purchases(opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L691" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L843" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -854,7 +984,7 @@ event id count as a duplicate.</p></div>
       <h1 class="signature" translate="no">count_reconciliation_cursors(opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L709" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L861" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -878,7 +1008,7 @@ event id count as a duplicate.</p></div>
       <h1 class="signature" translate="no">count_user_entitlements(user_id, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L513" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L665" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -906,7 +1036,7 @@ event id count as a duplicate.</p></div>
       <h1 class="signature" translate="no">create_product(attrs)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L54" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L58" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -935,7 +1065,7 @@ event id count as a duplicate.</p></div>
       <h1 class="signature" translate="no">create_provider_product(attrs)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L92" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L96" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -966,7 +1096,7 @@ event id count as a duplicate.</p></div>
       <h1 class="signature" translate="no">create_purchase(user, provider_product, attrs \\ %{})</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L192" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L196" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -999,7 +1129,7 @@ event id count as a duplicate.</p></div>
       <h1 class="signature" translate="no">create_steam_checkout(user, attrs)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L431" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L562" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1034,7 +1164,7 @@ event id count as a duplicate.</p></div>
       <h1 class="signature" translate="no">create_stripe_billing_portal(user, return_url)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L417" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L531" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1046,17 +1176,19 @@ event id count as a duplicate.</p></div>
 <p>See <a href="Gamend.Payments.StripeEvents.html#create_stripe_billing_portal/2"><code class="inline">Gamend.Payments.StripeEvents.create_stripe_billing_portal/2</code></a>.</p>
   </section>
 </section>
-<section class="detail" id="create_stripe_checkout/2">
+<section class="detail" id="create_stripe_checkout/3">
+
+    <span id="create_stripe_checkout/2"></span>
 
   <div class="detail-header">
-    <a href="#create_stripe_checkout/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+    <a href="#create_stripe_checkout/3" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
       <i class="ri-link-m" aria-hidden="true"></i>
     </a>
     <div class="heading-with-actions">
-      <h1 class="signature" translate="no">create_stripe_checkout(user, attrs)</h1>
+      <h1 class="signature" translate="no">create_stripe_checkout(user, attrs, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L402" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L513" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1065,7 +1197,7 @@ event id count as a duplicate.</p></div>
 
   <section class="docstring">
 
-<p>See <a href="Gamend.Payments.StripeEvents.html#create_stripe_checkout/2"><code class="inline">Gamend.Payments.StripeEvents.create_stripe_checkout/2</code></a>.</p>
+<p>See <a href="Gamend.Payments.StripeEvents.html#create_stripe_checkout/3"><code class="inline">Gamend.Payments.StripeEvents.create_stripe_checkout/3</code></a>.</p>
   </section>
 </section>
 <section class="detail" id="entitlement_ever?/2">
@@ -1078,7 +1210,7 @@ event id count as a duplicate.</p></div>
       <h1 class="signature" translate="no">entitlement_ever?(user_id, key)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L647" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L799" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1107,7 +1239,7 @@ grant (a trial) checks, since the row outlives its end.</p>
       <h1 class="signature" translate="no">finalize_steam_purchase(user, attrs)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L465" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L617" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1138,7 +1270,7 @@ grant (a trial) checks, since the row outlives its end.</p>
       <h1 class="signature" translate="no">fulfill_purchase(purchase, provider_payload \\ %{})</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L271" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L275" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1195,7 +1327,7 @@ grant (a trial) checks, since the row outlives its end.</p>
       <h1 class="signature" translate="no">get_product_by_sku(sku)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L78" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L82" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1251,7 +1383,7 @@ grant (a trial) checks, since the row outlives its end.</p>
       <h1 class="signature" translate="no">get_provider_product(provider, external_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L122" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L126" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1308,7 +1440,7 @@ grant (a trial) checks, since the row outlives its end.</p>
       <h1 class="signature" translate="no">get_purchase_by_order_id(order_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L234" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L238" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1336,7 +1468,7 @@ grant (a trial) checks, since the row outlives its end.</p>
       <h1 class="signature" translate="no">get_purchase_by_provider_original_transaction(provider, transaction_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L250" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L254" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1365,7 +1497,7 @@ grant (a trial) checks, since the row outlives its end.</p>
       <h1 class="signature" translate="no">get_purchase_by_provider_transaction(provider, transaction_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L241" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L245" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1394,7 +1526,7 @@ grant (a trial) checks, since the row outlives its end.</p>
       <h1 class="signature" translate="no">get_user_entitlement_by_key(user_id, key)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L653" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L805" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1425,7 +1557,7 @@ grant (a trial) checks, since the row outlives its end.</p>
       <h1 class="signature" translate="no">grant_entitlement(user_id, key, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L590" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L742" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1459,7 +1591,7 @@ merged into the row's, e.g. <code class="inline">%{&quot;source&quot; =&gt; &quo
       <h1 class="signature" translate="no">handle_apple_webhook(raw_body)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L491" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L643" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1481,7 +1613,7 @@ merged into the row's, e.g. <code class="inline">%{&quot;source&quot; =&gt; &quo
       <h1 class="signature" translate="no">handle_google_webhook(raw_body, authorization_header)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L488" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L640" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1503,7 +1635,7 @@ merged into the row's, e.g. <code class="inline">%{&quot;source&quot; =&gt; &quo
       <h1 class="signature" translate="no">handle_stripe_webhook(raw_body, signature)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L405" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L516" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1525,7 +1657,7 @@ merged into the row's, e.g. <code class="inline">%{&quot;source&quot; =&gt; &quo
       <h1 class="signature" translate="no">has_entitlement?(user_id, key)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L538" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L690" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1557,7 +1689,7 @@ paid plan and its trial, on every render) costs one query between changes.</p>
       <h1 class="signature" translate="no">list_admin_entitlements(opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L694" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L846" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1581,7 +1713,7 @@ paid plan and its trial, on every render) costs one query between changes.</p>
       <h1 class="signature" translate="no">list_admin_products(opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L676" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L828" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1605,7 +1737,7 @@ paid plan and its trial, on every render) costs one query between changes.</p>
       <h1 class="signature" translate="no">list_admin_provider_products(opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L682" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L834" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1629,7 +1761,7 @@ paid plan and its trial, on every render) costs one query between changes.</p>
       <h1 class="signature" translate="no">list_admin_purchases(opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L688" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L840" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1655,7 +1787,7 @@ paid plan and its trial, on every render) costs one query between changes.</p>
       <h1 class="signature" translate="no">list_catalog(provider \\ nil, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L134" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L138" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1688,7 +1820,7 @@ paid plan and its trial, on every render) costs one query between changes.</p>
       <h1 class="signature" translate="no">list_products(opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L81" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L85" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1718,7 +1850,7 @@ paid plan and its trial, on every render) costs one query between changes.</p>
       <h1 class="signature" translate="no">list_provider_events(opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L700" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L852" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1742,7 +1874,7 @@ paid plan and its trial, on every render) costs one query between changes.</p>
       <h1 class="signature" translate="no">list_reconciliation_cursors(opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L706" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L858" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1766,7 +1898,7 @@ paid plan and its trial, on every render) costs one query between changes.</p>
       <h1 class="signature" translate="no">list_user_entitlements(user_id, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L502" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L654" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1799,7 +1931,7 @@ paid plan and its trial, on every render) costs one query between changes.</p>
       <h1 class="signature" translate="no">list_user_purchases(user_id, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L258" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L262" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1827,7 +1959,7 @@ paid plan and its trial, on every render) costs one query between changes.</p>
       <h1 class="signature" translate="no">mark_event_processed(event)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L751" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L903" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1857,7 +1989,7 @@ event id count as a duplicate.</p>
       <h1 class="signature" translate="no">product_entitlement_key(product)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L657" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L809" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1885,7 +2017,7 @@ event id count as a duplicate.</p>
       <h1 class="signature" translate="no">provider_adapter_statuses()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L673" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L825" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1895,6 +2027,36 @@ event id count as a duplicate.</p>
   <section class="docstring">
 
 <p>See <a href="Gamend.Payments.Admin.html#provider_adapter_statuses/0"><code class="inline">Gamend.Payments.Admin.provider_adapter_statuses/0</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="provider_error_code/1">
+
+  <div class="detail-header">
+    <a href="#provider_error_code/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">provider_error_code(reason)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L1110" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> provider_error_code(<a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">term</a>()) :: <a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>()</pre>
+
+      </div>
+
+<p>A short code for a failure, for a counter's dimension: Stripe's own error
+code when it sent one (<code class="inline">card_declined</code>, <code class="inline">resource_missing</code>), the atom for
+ours, never the message.</p>
   </section>
 </section>
 <section class="detail" id="reconcile_stripe_purchase/1">
@@ -1907,7 +2069,7 @@ event id count as a duplicate.</p>
       <h1 class="signature" translate="no">reconcile_stripe_purchase(purchase)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L408" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L519" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1931,7 +2093,7 @@ event id count as a duplicate.</p>
       <h1 class="signature" translate="no">record_provider_event(provider, event_id, event_type, payload, metadata \\ %{})</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L713" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L865" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1951,6 +2113,107 @@ event id count as a duplicate.</p>
 
   </section>
 </section>
+<section class="detail" id="refund_stripe_purchase/2">
+
+  <div class="detail-header">
+    <a href="#refund_stripe_purchase/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">refund_stripe_purchase(user, purchase_id)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L534" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+<p>See <a href="Gamend.Payments.StripeRefunds.html#refund_stripe_purchase/2"><code class="inline">Gamend.Payments.StripeRefunds.refund_stripe_purchase/2</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="refund_window_days/0">
+
+  <div class="detail-header">
+    <a href="#refund_window_days/0" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">refund_window_days()</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L548" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+<p>See <a href="Gamend.Payments.StripeRefunds.html#refund_window_days/0"><code class="inline">Gamend.Payments.StripeRefunds.refund_window_days/0</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="restore_purchase/2">
+
+    <span id="restore_purchase/1"></span>
+
+  <div class="detail-header">
+    <a href="#restore_purchase/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">restore_purchase(purchase, payload \\ %{})</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L397" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> restore_purchase(<a href="Gamend.Payments.Purchase.html#t:t/0">Gamend.Payments.Purchase.t</a>(), <a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">map</a>()) ::
+  {:ok, <a href="Gamend.Payments.Purchase.html#t:t/0">Gamend.Payments.Purchase.t</a>()} | {:ok, :unchanged} | {:error, <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">term</a>()}</pre>
+
+      </div>
+
+<p>Hand a purchase back after a dispute the seller won: the purchase completes
+again and its entitlements are active again, with the end they had. Only a
+purchase a dispute revoked (<code class="inline">metadata[&quot;revocation_reason&quot;]</code> a
+<code class="inline">charge.dispute.*</code> event) — a refund is final. <code class="inline">{:ok, :unchanged}</code> for any
+other.</p>
+  </section>
+</section>
+<section class="detail" id="resume_stripe_subscription/2">
+
+  <div class="detail-header">
+    <a href="#resume_stripe_subscription/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">resume_stripe_subscription(user, entitlement_id)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L525" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+<p>See <a href="Gamend.Payments.StripeEvents.html#resume_stripe_subscription/2"><code class="inline">Gamend.Payments.StripeEvents.resume_stripe_subscription/2</code></a>.</p>
+  </section>
+</section>
 <section class="detail" id="revoke_purchase/2">
 
     <span id="revoke_purchase/1"></span>
@@ -1963,7 +2226,7 @@ event id count as a duplicate.</p>
       <h1 class="signature" translate="no">revoke_purchase(purchase, attrs \\ %{})</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L318" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L322" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -1992,7 +2255,7 @@ event id count as a duplicate.</p>
       <h1 class="signature" translate="no">stripe_config_status()</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L670" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L822" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -2014,7 +2277,7 @@ event id count as a duplicate.</p>
       <h1 class="signature" translate="no">stripe_customer_id(user)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L414" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L528" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -2024,6 +2287,30 @@ event id count as a duplicate.</p>
   <section class="docstring">
 
 <p>See <a href="Gamend.Payments.StripeEvents.html#stripe_customer_id/1"><code class="inline">Gamend.Payments.StripeEvents.stripe_customer_id/1</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="stripe_refundable?/2">
+
+    <span id="stripe_refundable?/1"></span>
+
+  <div class="detail-header">
+    <a href="#stripe_refundable?/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">stripe_refundable?(purchase, now \\ DateTime.utc_now(:second))</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L540" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+<p>See <a href="Gamend.Payments.StripeRefunds.html#refundable?/2"><code class="inline">Gamend.Payments.StripeRefunds.refundable?/2</code></a>.</p>
   </section>
 </section>
 <section class="detail" id="update_product/2">
@@ -2036,7 +2323,7 @@ event id count as a duplicate.</p>
       <h1 class="signature" translate="no">update_product(product, attrs)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L62" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L66" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -2065,7 +2352,7 @@ event id count as a duplicate.</p>
       <h1 class="signature" translate="no">update_provider_product(provider_product, attrs)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L101" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L105" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -2094,7 +2381,7 @@ event id count as a duplicate.</p>
       <h1 class="signature" translate="no">validate_store_purchase(user, provider, attrs)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L363" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments.ex#L474" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -2123,9 +2410,9 @@ event id count as a duplicate.</p>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.1.1302">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.1.1303">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.1.1302">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.1.1303">Hex Preview</a>
 
             </span>
 

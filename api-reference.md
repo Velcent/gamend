@@ -1,4 +1,4 @@
-# gamend_core v1.1.1302 - API Reference
+# gamend_core v1.1.1303 - API Reference
 
 ## Modules
 
@@ -213,6 +213,8 @@ Carries the `idempotency_key` that makes item grants safe to retry.
   - [Gamend.Payments.Admin](Gamend.Payments.Admin.md): What the admin payments pages and API read: the stats, provider configuration
 status, and filtered listings of products, purchases, entitlements, provider
 events and reconciliation cursors.
+  - [Gamend.Payments.Counters](Gamend.Payments.Counters.md): What happened to payments, per day, as `Gamend.Analytics.count/3` counters:
+the admin analytics page lists them under "Counters" with the game's own.
   - [Gamend.Payments.Entitlement](Gamend.Payments.Entitlement.md): User access grant derived from a purchase or admin/server action.
 
   - [Gamend.Payments.Params](Gamend.Payments.Params.md): Shape-wrangling shared by `Gamend.Payments` and its provider adapters.
@@ -241,6 +243,15 @@ them once, and applying what they say to purchases and entitlements.
   - [Gamend.Payments.StripeEvents](Gamend.Payments.StripeEvents.md): Stripe: starting a checkout, and keeping purchases and entitlements in step
 with what Stripe says — webhooks as they arrive, reconciliation when one was
 missed, and cancelling a subscription at the end of its period.
+  - [Gamend.Payments.StripeRefunds](Gamend.Payments.StripeRefunds.md): Refunding a Stripe purchase in full: the buyer's own, within
+`refund_window_days` of paying (account settings, Payments), or any Stripe
+purchase from the admin page.
+  - [Gamend.Payments.StripeSetup](Gamend.Payments.StripeSetup.md): The Stripe account set up the way this code reads it, from a script
+(`mix gamend.stripe.setup`, a host's own task for its prices), never by
+hand-copying a checklist
+  - [Gamend.Payments.StripeSweeper](Gamend.Payments.StripeSweeper.md): The safety net for a Stripe webhook that never arrived.
+  - [Gamend.Payments.Upgrades](Gamend.Payments.Upgrades.md): Moving to a longer plan: a monthly subscription to a yearly one, or any
+subscription to a one-off purchase (lifetime) of the same entitlement.
 
 - Storage &amp; content
   - [Gamend.Content](Gamend.Content.md): Reads and renders Markdown content from project files and directories.
@@ -398,6 +409,10 @@ leaderboards and tournaments.
 - [mix gamend.settings.env_example](Mix.Tasks.Gamend.Settings.EnvExample.md): Writes `.env.example` from `Gamend.Settings.all/0`, grouped and
 commented from each setting's declaration.
 - [mix gamend.settings.guide](Mix.Tasks.Gamend.Settings.Guide.md): Writes the public Settings guide from `Gamend.Settings.all/0`.
+- [mix gamend.stripe.setup](Mix.Tasks.Gamend.Stripe.Setup.md): The Stripe account's webhook endpoint and customer portal, as
+`Gamend.Payments.StripeSetup` wants them, on the account the configured
+secret key belongs to (`GAMEND_PAYMENTS_ENVIRONMENT` picks the sandbox or
+the production key, read from `.env` like the server reads it).
 - [mix gamend.theme.extract](Mix.Tasks.Gamend.Theme.Extract.md): Writes `theme.pot` from the strings in the theme config.
 - [mix gamend.theme.migrate_locales](Mix.Tasks.Gamend.Theme.MigrateLocales.md): One-shot migration off one-JSON-file-per-locale.
 - [mix gen.sdk](Mix.Tasks.Gen.Sdk.md): Generates SDK stub modules from the real Gamend modules.

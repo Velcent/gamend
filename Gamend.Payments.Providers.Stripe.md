@@ -5,6 +5,13 @@ Minimal Stripe Checkout and webhook adapter.
 
 # `cancel_subscription_at_period_end`
 
+# `cancel_subscription_now`
+
+Cancels a subscription now, not at the period end. No proration credit and
+no final invoice (`prorate`/`invoice_now` false, Stripe's defaults, sent so
+a changed default cannot add a credit on top of a refund). Stripe then
+sends `customer.subscription.deleted`.
+
 # `create_billing_portal_session`
 
 A Stripe customer-portal session for `customer_id`: the Stripe-hosted page
@@ -13,16 +20,40 @@ session; its `"url"` is single-use and short-lived, so open it right away.
 
 # `create_checkout_session`
 
+# `create_refund`
+
+Refunds a payment: a PaymentIntent (`pi_`) or a charge (`ch_`, `py_`).
+In full, or `:amount` of it (minor units; a plan given up for a longer
+one, `Upgrades`). Other `opts`: `:idempotency_key`, so a repeat within
+Stripe's 24 hours answers the same refund instead of trying a second, and
+`:metadata`, which the refund's own webhooks carry.
+
 # `expire_checkout_session`
 
 Expires an open Checkout Session, so it can no longer be paid, and returns
 it. Stripe answers an error when the session is not open any more: paid,
-being paid, or expired already. Sent at the checkout API version, like the
-call that created the session.
+being paid, or expired already.
+
+# `list_invoice_payments`
+
+The invoice payments a PaymentIntent paid, each with its invoice expanded:
+what a refund or dispute on a subscription's payment is traced back to its
+subscription through (a charge does not name its invoice). Returns the list
+object; `"data"` holds the payments.
+
+# `resume_subscription`
+
+Takes back a cancellation scheduled for the period end: the subscription
+renews again. Stripe refuses it once the subscription has ended.
 
 # `retrieve_checkout_session`
 
 # `retrieve_subscription`
+
+# `retrieve_subscription_with_latest_invoice`
+
+A subscription with its latest invoice and that invoice's payments
+expanded: what the subscription last charged, and when.
 
 # `verify_webhook`
 

@@ -141,6 +141,7 @@ Gamend.Parties.Party.md
 Gamend.Parties.PartyInvite.md
 Gamend.Parties.md
 Gamend.Payments.Admin.md
+Gamend.Payments.Counters.md
 Gamend.Payments.Entitlement.md
 Gamend.Payments.Params.md
 Gamend.Payments.Product.md
@@ -158,6 +159,10 @@ Gamend.Payments.ReconciliationCursor.md
 Gamend.Payments.Settings.md
 Gamend.Payments.StoreEvents.md
 Gamend.Payments.StripeEvents.md
+Gamend.Payments.StripeRefunds.md
+Gamend.Payments.StripeSetup.md
+Gamend.Payments.StripeSweeper.md
+Gamend.Payments.Upgrades.md
 Gamend.Payments.md
 Gamend.Policy.md
 Gamend.Presence.md
@@ -226,6 +231,7 @@ Mix.Tasks.Gamend.Content.Extract.md
 Mix.Tasks.Gamend.Content.MigrateMetadata.md
 Mix.Tasks.Gamend.Settings.EnvExample.md
 Mix.Tasks.Gamend.Settings.Guide.md
+Mix.Tasks.Gamend.Stripe.Setup.md
 Mix.Tasks.Gamend.Theme.Extract.md
 Mix.Tasks.Gamend.Theme.MigrateLocales.md
 Mix.Tasks.Gen.Sdk.md

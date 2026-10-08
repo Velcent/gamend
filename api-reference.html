@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.4">
-    <meta name="project" content="gamend_core v1.1.1302">
+    <meta name="project" content="gamend_core v1.1.1303">
 
 
-    <title>API Reference — gamend_core v1.1.1302</title>
+    <title>API Reference — gamend_core v1.1.1303</title>
 
     <link rel="stylesheet" href="dist/html-elixir-RXHHCTJW.css" />
 
-    <script defer src="dist/sidebar_items-6C0DC53D.js"></script>
+    <script defer src="dist/sidebar_items-B77946B5.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-MI33G4N7.js"></script>
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.1.1302
+          v1.1.1303
         </div>
       </div>
     </div>
@@ -92,7 +92,7 @@ gamend_core
 
 <div id="top-content">
   <div class="heading-with-actions top-heading">
-    <h1>API Reference <small class="app-vsn">gamend_core v#1.1.1302</small></h1>
+    <h1>API Reference <small class="app-vsn">gamend_core v#1.1.1303</small></h1>
 <a href="api-reference.md" title="Copy Markdown (hold Ctrl/Cmd and click it to open as Markdown)" class="copy-markdown icon-action" rel="help">
   <i class="ri-markdown-line" aria-hidden="true"></i>
   <span class="sr-only">Copy Markdown</span>
@@ -1478,6 +1478,16 @@ events and reconciliation cursors.</p></div>
 </div>
 <div class="summary-row">
   <div class="summary-signature">
+    <a href="Gamend.Payments.Counters.html" translate="no">Gamend.<wbr />Payments.<wbr />Counters</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>What happened to payments, per day, as <a href="Gamend.Analytics.html#count/3"><code class="inline">Gamend.Analytics.count/3</code></a> counters:
+the admin analytics page lists them under &quot;Counters&quot; with the game's own.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
     <a href="Gamend.Payments.Entitlement.html" translate="no">Gamend.<wbr />Payments.<wbr />Entitlement</a>
 
   </div>
@@ -1631,6 +1641,47 @@ them once, and applying what they say to purchases and entitlements.</p></div>
     <div class="summary-synopsis"><p>Stripe: starting a checkout, and keeping purchases and entitlements in step
 with what Stripe says — webhooks as they arrive, reconciliation when one was
 missed, and cancelling a subscription at the end of its period.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="Gamend.Payments.StripeRefunds.html" translate="no">Gamend.<wbr />Payments.<wbr />StripeRefunds</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Refunding a Stripe purchase in full: the buyer's own, within
+<code class="inline">refund_window_days</code> of paying (account settings, Payments), or any Stripe
+purchase from the admin page.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="Gamend.Payments.StripeSetup.html" translate="no">Gamend.<wbr />Payments.<wbr />StripeSetup</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>The Stripe account set up the way this code reads it, from a script
+(<a href="Mix.Tasks.Gamend.Stripe.Setup.html"><code class="inline">mix gamend.stripe.setup</code></a>, a host's own task for its prices), never by
+hand-copying a checklist</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="Gamend.Payments.StripeSweeper.html" translate="no">Gamend.<wbr />Payments.<wbr />StripeSweeper</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>The safety net for a Stripe webhook that never arrived.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="Gamend.Payments.Upgrades.html" translate="no">Gamend.<wbr />Payments.<wbr />Upgrades</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Moving to a longer plan: a monthly subscription to a yearly one, or any
+subscription to a one-off purchase (lifetime) of the same entitlement.</p></div>
 
 </div>
 <div class="summary-row">
@@ -2284,6 +2335,18 @@ commented from each setting's declaration.</p></div>
 </div>
 <div class="summary-row">
   <div class="summary-signature">
+    <a href="Mix.Tasks.Gamend.Stripe.Setup.html" translate="no">mix gamend.<wbr />stripe.<wbr />setup</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>The Stripe account's webhook endpoint and customer portal, as
+<a href="Gamend.Payments.StripeSetup.html"><code class="inline">Gamend.Payments.StripeSetup</code></a> wants them, on the account the configured
+secret key belongs to (<code class="inline">GAMEND_PAYMENTS_ENVIRONMENT</code> picks the sandbox or
+the production key, read from <code class="inline">.env</code> like the server reads it).</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
     <a href="Mix.Tasks.Gamend.Theme.Extract.html" translate="no">mix gamend.<wbr />theme.<wbr />extract</a>
 
   </div>
@@ -2337,9 +2400,9 @@ commented from each setting's declaration.</p></div>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.1.1302">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.1.1303">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.1.1302">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.1.1303">Hex Preview</a>
 
             </span>
 

@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.4">
-    <meta name="project" content="gamend_core v1.1.1302">
+    <meta name="project" content="gamend_core v1.1.1303">
 
 
-    <title>Gamend.Payments.StripeEvents — gamend_core v1.1.1302</title>
+    <title>Gamend.Payments.StripeEvents — gamend_core v1.1.1303</title>
 
     <link rel="stylesheet" href="dist/html-elixir-RXHHCTJW.css" />
 
-    <script defer src="dist/sidebar_items-6C0DC53D.js"></script>
+    <script defer src="dist/sidebar_items-B77946B5.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-MI33G4N7.js"></script>
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.1.1302
+          v1.1.1303
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr />Payments.<wbr />StripeEvents</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.1.1302)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.1.1303)</small>
 
     </h1>
 
@@ -156,9 +156,12 @@ Stripe Checkout.</p></div>
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#create_stripe_checkout/2" data-no-tooltip="" translate="no">create_stripe_checkout(user, attrs)</a>
+        <a href="#create_stripe_checkout/3" data-no-tooltip="" translate="no">create_stripe_checkout(user, attrs, opts \\ [])</a>
 
       </div>
+
+        <div class="summary-synopsis"><p>Open a Stripe Checkout for <code class="inline">attrs</code> (a client's: product, quantity, return
+URLs). Options are the server's own and never read from <code class="inline">attrs</code></p></div>
 
     </div>
 
@@ -168,6 +171,8 @@ Stripe Checkout.</p></div>
 
       </div>
 
+        <div class="summary-synopsis"><p>Verify, record and handle one Stripe webhook delivery.</p></div>
+
     </div>
 
     <div class="summary-row">
@@ -175,6 +180,17 @@ Stripe Checkout.</p></div>
         <a href="#reconcile_stripe_purchase/1" data-no-tooltip="" translate="no">reconcile_stripe_purchase(purchase)</a>
 
       </div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#resume_stripe_subscription/2" data-no-tooltip="" translate="no">resume_stripe_subscription(user, entitlement_id)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Takes back a cancellation scheduled for the period end, so the
+subscription renews again. Stripe refuses it once the subscription ended.</p></div>
 
     </div>
 
@@ -216,7 +232,7 @@ session on the purchase.</p></div>
       <h1 class="signature" translate="no">cancel_stripe_subscription_at_period_end(user, entitlement_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/stripe_events.ex#L211" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/stripe_events.ex#L330" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -254,7 +270,7 @@ session on the purchase.</p></div>
       <h1 class="signature" translate="no">create_stripe_billing_portal(user, return_url)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/stripe_events.ex#L157" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/stripe_events.ex#L200" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -275,17 +291,19 @@ invoices. <code class="inline">{:error, :no_stripe_customer}</code> when the acc
 Stripe Checkout.</p>
   </section>
 </section>
-<section class="detail" id="create_stripe_checkout/2">
+<section class="detail" id="create_stripe_checkout/3">
+
+    <span id="create_stripe_checkout/2"></span>
 
   <div class="detail-header">
-    <a href="#create_stripe_checkout/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+    <a href="#create_stripe_checkout/3" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
       <i class="ri-link-m" aria-hidden="true"></i>
     </a>
     <div class="heading-with-actions">
-      <h1 class="signature" translate="no">create_stripe_checkout(user, attrs)</h1>
+      <h1 class="signature" translate="no">create_stripe_checkout(user, attrs, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/stripe_events.ex#L29" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/stripe_events.ex#L53" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -296,7 +314,7 @@ Stripe Checkout.</p>
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> create_stripe_checkout(<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>(), <a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">map</a>()) ::
+          <pre translate="no"><span class="attribute">@spec</span> create_stripe_checkout(<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>(), <a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">map</a>(), <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">keyword</a>()) ::
   {:ok,
    %{
      purchase: <a href="Gamend.Payments.Purchase.html#t:t/0">Gamend.Payments.Purchase.t</a>(),
@@ -307,7 +325,14 @@ Stripe Checkout.</p>
 
       </div>
 
-
+<p>Open a Stripe Checkout for <code class="inline">attrs</code> (a client's: product, quantity, return
+URLs). Options are the server's own and never read from <code class="inline">attrs</code>:</p><ul><li><code class="inline">:trial_end</code> — a <a href="https://elixir.hexdocs.pm/DateTime.html"><code class="inline">DateTime</code></a> a subscription's first charge waits for
+(the card is taken now, the subscription starts <code class="inline">trialing</code>). Ignored for
+a one-off product, and when it is under 48 hours or over two years
+away, where Stripe would refuse it. For a host that grants a free
+period of its own: buying during it keeps the days already given.</li></ul><p>A subscription bought to replace a shorter one (<code class="inline">Upgrades</code>, monthly to
+yearly) waits for the period already paid for: its <code class="inline">trial_end</code> is the
+later of <code class="inline">:trial_end</code> and that period's end (<code class="inline">Upgrades.trial_end/3</code>).</p>
   </section>
 </section>
 <section class="detail" id="handle_stripe_webhook/2">
@@ -320,7 +345,7 @@ Stripe Checkout.</p>
       <h1 class="signature" translate="no">handle_stripe_webhook(raw_body, signature)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/stripe_events.ex#L170" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/stripe_events.ex#L234" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -336,7 +361,11 @@ Stripe Checkout.</p>
 
       </div>
 
-
+<p>Verify, record and handle one Stripe webhook delivery.</p><p>Every answer is logged and counted (<code class="inline">payments.webhook</code>): a refused
+signature at warning (a wrong signing secret refuses every delivery, and
+only the logs say so), a handler that failed at error with the event's id
+and type (Stripe retries it, and it stays unprocessed in <code class="inline">provider_events</code>
+until one succeeds), and a processed or ignored one at info.</p>
   </section>
 </section>
 <section class="detail" id="reconcile_stripe_purchase/1">
@@ -349,7 +378,7 @@ Stripe Checkout.</p>
       <h1 class="signature" translate="no">reconcile_stripe_purchase(purchase)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/stripe_events.ex#L187" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/stripe_events.ex#L306" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -374,6 +403,42 @@ Stripe Checkout.</p>
 
   </section>
 </section>
+<section class="detail" id="resume_stripe_subscription/2">
+
+  <div class="detail-header">
+    <a href="#resume_stripe_subscription/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">resume_stripe_subscription(user, entitlement_id)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/stripe_events.ex#L341" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> resume_stripe_subscription(<a href="Gamend.Accounts.User.html#t:t/0">Gamend.Accounts.User.t</a>(), <a href="https://ecto.hexdocs.pm/3.14.2/Ecto.UUID.html#t:t/0">Ecto.UUID.t</a>()) ::
+  {:ok,
+   %{
+     purchase: <a href="Gamend.Payments.Purchase.html#t:t/0">Gamend.Payments.Purchase.t</a>(),
+     entitlement: <a href="Gamend.Payments.Entitlement.html#t:t/0">Gamend.Payments.Entitlement.t</a>(),
+     stripe_subscription: <a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">map</a>()
+   }}
+  | {:error, <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">term</a>()}</pre>
+
+      </div>
+
+<p>Takes back a cancellation scheduled for the period end, so the
+subscription renews again. Stripe refuses it once the subscription ended.</p>
+  </section>
+</section>
 <section class="detail" id="stripe_customer_id/1">
 
   <div class="detail-header">
@@ -384,7 +449,7 @@ Stripe Checkout.</p>
       <h1 class="signature" translate="no">stripe_customer_id(user)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/stripe_events.ex#L129" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/stripe_events.ex#L172" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -415,9 +480,9 @@ session on the purchase.</p>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.1.1302">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.1.1303">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.1.1302">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.1.1303">Hex Preview</a>
 
             </span>
 

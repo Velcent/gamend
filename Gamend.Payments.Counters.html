@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.40.4">
+    <meta name="project" content="gamend_core v1.1.1303">
+
+
+    <title>Gamend.Payments.Counters — gamend_core v1.1.1303</title>
+
+    <link rel="stylesheet" href="dist/html-elixir-RXHHCTJW.css" />
+
+    <script defer src="dist/sidebar_items-B77946B5.js"></script>
+    <script defer src="docs_config.js"></script>
+    <script defer src="dist/html-MI33G4N7.js"></script>
+
+  </head>
+  <body>
+    <script>(()=>{var t="ex_doc:settings",e="dark";var o="dark",s="light";var E="sidebar_state",n="closed";var r="sidebar_width";var a="sidebar-open";var i=new URLSearchParams(window.location.search),S=i.get("theme")||JSON.parse(localStorage.getItem(t)||"{}").theme;(S===o||S!==s&&window.matchMedia("(prefers-color-scheme: dark)").matches)&&document.body.classList.add(e);var d=sessionStorage.getItem(E),A=d!==n&&!window.matchMedia(`screen and (max-width: ${768}px)`).matches;document.body.classList.toggle(a,A);var c=sessionStorage.getItem(r);c&&document.body.style.setProperty("--sidebarWidth",`${c}px`);var p=/(Macintosh|iPhone|iPad|iPod)/.test(window.navigator.userAgent);document.documentElement.classList.toggle("apple-os",p);})();
+</script>
+
+<div class="body-wrapper">
+
+<button id="sidebar-menu" class="sidebar-button sidebar-toggle" aria-label="toggle sidebar" aria-controls="sidebar">
+  <i class="ri-menu-line ri-lg" title="Collapse/expand sidebar"></i>
+</button>
+
+<nav id="sidebar" class="sidebar">
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectInfo">
+
+      <div>
+        <a href="readme.html" class="sidebar-projectName" translate="no">
+gamend_core
+        </a>
+        <div class="sidebar-projectVersion" translate="no">
+          v1.1.1303
+        </div>
+      </div>
+    </div>
+    <ul id="sidebar-list-nav" class="sidebar-list-nav" role="tablist" data-extras="Pages"></ul>
+  </div>
+</nav>
+
+<output role="status" id="toast"></output>
+
+<main class="content page-module" id="main" data-type="modules">
+  <div id="content" class="content-inner">
+    <div class="top-search">
+      <div class="search-settings">
+        <form class="search-bar" action="search.html">
+          <label class="search-label">
+            <span class="sr-only">Search documentation of gamend_core</span>
+            <div class="search-input-wrapper">
+              <input name="q" type="text" class="search-input" placeholder="Press / to search" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+              <button type="button" tabindex="-1" class="search-close-button" aria-hidden="true">
+                <i class="ri-close-line ri-lg" title="Cancel search"></i>
+              </button>
+            </div>
+          </label>
+        </form>
+        <div class="autocomplete">
+        </div>
+        <div class="engine-selector" data-multiple="false">
+          <button type="button" class="engine-button" aria-label="Select search engine" aria-haspopup="true" aria-expanded="false">
+            <i class="ri-search-2-line" aria-hidden="true"></i>
+            <span class="engine-name">Default</span>
+            <i class="ri-arrow-down-s-line" aria-hidden="true"></i>
+          </button>
+          <div class="engine-dropdown" hidden role="menu">
+
+              <button type="button"
+                      class="engine-option"
+                      data-engine-url="search.html?q="
+                      role="menuitemradio"
+                      aria-checked="true">
+                <span class="name">Default</span>
+                <span class="help">In-browser search</span>
+              </button>
+
+          </div>
+        </div>
+        <button class="icon-settings display-settings">
+          <i class="ri-settings-3-line"></i>
+          <span class="sr-only">Settings</span>
+        </button>
+      </div>
+    </div>
+
+<div id="top-content">
+  <div class="heading-with-actions top-heading">
+    <h1>
+      <span translate="no">Gamend.<wbr />Payments.<wbr />Counters</span> 
+      <small class="app-vsn" translate="no">(gamend_core v1.1.1303)</small>
+
+    </h1>
+
+<a href="Gamend.Payments.Counters.md" title="Copy Markdown (hold Ctrl/Cmd and click it to open as Markdown)" class="copy-markdown icon-action" rel="help">
+  <i class="ri-markdown-line" aria-hidden="true"></i>
+  <span class="sr-only">Copy Markdown</span>
+</a>
+
+
+
+      <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/counters.ex#L1" title="View Source" class="icon-action" rel="help nofollow">
+        <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        <span class="sr-only">View Source</span>
+      </a>
+
+  </div>
+
+
+    <section id="moduledoc">
+<p>What happened to payments, per day, as <a href="Gamend.Analytics.html#count/3"><code class="inline">Gamend.Analytics.count/3</code></a> counters:
+the admin analytics page lists them under &quot;Counters&quot; with the game's own.</p><p>Every key starts with <code class="inline">payments.</code>. A dimension goes after a colon, one
+counter each, so a family reads back by prefix
+(<code class="inline">Analytics.counts(&quot;payments.purchase.fulfilled.sku:*&quot;)</code>):</p><ul><li><code class="inline">payments.checkout.opened</code> / <code class="inline">.refused</code> / <code class="inline">.failed</code> — a checkout session
+opened, refused before money could move (<code class="inline">reason:</code>), or refused by the
+provider (<code class="inline">reason:</code>). <code class="inline">provider:</code>, <code class="inline">sku:</code>.</li><li><code class="inline">payments.purchase.fulfilled</code> / <code class="inline">.revoked</code> / <code class="inline">.restored</code> — the goods
+handed over, taken back (<code class="inline">reason:</code> the status it ended in), or handed
+back when a dispute was won. <code class="inline">provider:</code>, <code class="inline">sku:</code>.</li><li><code class="inline">payments.subscription.renewed</code> / <code class="inline">.past_due</code> / <code class="inline">.cancel_scheduled</code> /
+<code class="inline">.resumed</code> — read off each subscription write. <code class="inline">sku:</code>.</li><li><code class="inline">payments.subscription.superseded</code> / <code class="inline">.supersede_failed</code> — a plan
+that renews, ended for a longer one (<a href="Gamend.Payments.Upgrades.html"><code class="inline">Gamend.Payments.Upgrades</code></a>), by
+<code class="inline">mode:</code> (now, at_period_end) and <code class="inline">sku:</code>, or the <code class="inline">reason:</code> it was not.</li><li><code class="inline">payments.refund.requested</code> / <code class="inline">.failed</code> — a refund through
+<a href="Gamend.Payments.StripeRefunds.html"><code class="inline">Gamend.Payments.StripeRefunds</code></a> (<code class="inline">by:</code> buyer or admin).</li><li><code class="inline">payments.portal.opened</code> — the Stripe customer portal.</li><li><code class="inline">payments.webhook</code> — every delivery, by <code class="inline">provider:</code>, <code class="inline">type:</code> and
+<code class="inline">result:</code> (processed, ignored, duplicate, failed, refused).</li><li><code class="inline">payments.sweep</code> — <a href="Gamend.Payments.StripeSweeper.html"><code class="inline">Gamend.Payments.StripeSweeper</code></a>, by <code class="inline">result:</code>.</li></ul><p>Counted after the write it describes, outside any transaction. Never
+raises and never fails the caller: a counter is not worth a payment.</p>
+    </section>
+
+</div>
+
+  <section id="summary" class="details-list">
+    <h2 class="section-heading">
+      <a class="hover-link" href="#summary">
+        <i class="ri-link-m" aria-hidden="true"></i>
+      </a>
+      <span class="text">Summary</span>
+    </h2>
+<div class="summary-functions summary">
+  <h3>
+    <a href="#functions">Functions</a>
+  </h3>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#count/2" data-no-tooltip="" translate="no">count(event, dims \\ [])</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Adds one to <code class="inline">payments.&lt;event&gt;</code> and to each <code class="inline">payments.&lt;event&gt;.&lt;dim&gt;:&lt;value&gt;</code>.</p></div>
+
+    </div>
+
+</div>
+
+  </section>
+
+
+  <section id="functions" class="details-list">
+    <h2 class="section-heading">
+      <a class="hover-link" href="#functions">
+        <i class="ri-link-m" aria-hidden="true"></i>
+      </a>
+      <span class="text">Functions</span>
+    </h2>
+
+    <div class="functions-list">
+<section class="detail" id="count/2">
+
+    <span id="count/1"></span>
+
+  <div class="detail-header">
+    <a href="#count/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">count(event, dims \\ [])</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/counters.ex#L36" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> count(<a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>(), <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">keyword</a>()) :: :ok</pre>
+
+      </div>
+
+<p>Adds one to <code class="inline">payments.&lt;event&gt;</code> and to each <code class="inline">payments.&lt;event&gt;.&lt;dim&gt;:&lt;value&gt;</code>.</p>
+  </section>
+</section>
+
+    </div>
+  </section>
+
+    <footer class="footer">
+
+        <p>
+
+            <span class="line">
+              <a href="https://hex.pm/packages/gamend_core/1.1.1303">Hex Package</a>
+
+              <a href="https://preview.hex.pm/preview/gamend_core/1.1.1303">Hex Preview</a>
+
+            </span>
+
+          <span class="line">
+            <button class="a-main footer-button display-quick-switch" title="Go to package docs">
+              Go to package docs
+            </button>
+
+              <a href="llms.txt" target="_blank">
+                View llms.txt
+              </a>
+
+
+              <a href="gamend_core.epub">
+                Download ePub version
+              </a>
+
+          </span>
+        </p>
+
+        <p class="built-using">
+          Built using
+          <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener" translate="no">ExDoc</a> (v0.40.4) for the
+
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank" translate="no">Elixir programming language</a>
+
+        </p>
+
+
+    </footer>
+  </div>
+</main>
+</div>
+
+  </body>
+</html>

@@ -32,34 +32,29 @@ production provider credentials for this host.
 @spec production?() :: boolean()
 ```
 
+# `stripe_api_release`
+
+```elixir
+@spec stripe_api_release(String.t() | nil) :: String.t() | nil
+```
+
+The release a Stripe API version belongs to (`"clover"` for
+`"2025-11-17.clover"`), or nil for a version older than the named releases.
+Inside one release Stripe only adds; a breaking change starts the next.
+
 # `stripe_api_version`
 
 ```elixir
 @spec stripe_api_version() :: String.t()
 ```
 
-# `stripe_api_version_source`
-
-```elixir
-@spec stripe_api_version_source() :: {String.t(), String.t()} | nil
-```
+The Stripe API version every request names, and webhooks are expected in.
 
 # `stripe_candidate_labels`
 
 ```elixir
 @spec stripe_candidate_labels(:secret_key | :webhook_secret) :: [String.t()]
 ```
-
-# `stripe_checkout_api_version`
-
-```elixir
-@spec stripe_checkout_api_version() :: String.t()
-```
-
-The API version for creating a Checkout Session: the configured one, raised
-to 2025-03-31.basil when Managed Payments is on and the
-configured one is older. Only that call is raised, so every other request,
-and the payloads core parses from them, keep the configured version.
 
 # `stripe_managed_payments?`
 

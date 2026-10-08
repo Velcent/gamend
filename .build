@@ -142,6 +142,7 @@ Gamend.Parties.Party.html
 Gamend.Parties.PartyInvite.html
 Gamend.Parties.html
 Gamend.Payments.Admin.html
+Gamend.Payments.Counters.html
 Gamend.Payments.Entitlement.html
 Gamend.Payments.Params.html
 Gamend.Payments.Product.html
@@ -159,6 +160,10 @@ Gamend.Payments.ReconciliationCursor.html
 Gamend.Payments.Settings.html
 Gamend.Payments.StoreEvents.html
 Gamend.Payments.StripeEvents.html
+Gamend.Payments.StripeRefunds.html
+Gamend.Payments.StripeSetup.html
+Gamend.Payments.StripeSweeper.html
+Gamend.Payments.Upgrades.html
 Gamend.Payments.html
 Gamend.Policy.html
 Gamend.Presence.html
@@ -227,6 +232,7 @@ Mix.Tasks.Gamend.Content.Extract.html
 Mix.Tasks.Gamend.Content.MigrateMetadata.html
 Mix.Tasks.Gamend.Settings.EnvExample.html
 Mix.Tasks.Gamend.Settings.Guide.html
+Mix.Tasks.Gamend.Stripe.Setup.html
 Mix.Tasks.Gamend.Theme.Extract.html
 Mix.Tasks.Gamend.Theme.MigrateLocales.html
 Mix.Tasks.Gen.Sdk.html
@@ -241,8 +247,8 @@ dist/lato-latin-700-normal-2XVSBPG4.woff2
 dist/lato-latin-ext-400-normal-N27NCBWW.woff2
 dist/lato-latin-ext-700-normal-Q2L5DVMW.woff2
 dist/remixicon-ZWU5GQ4X.woff2
-dist/search_data-164875E3.js
-dist/sidebar_items-6C0DC53D.js
+dist/search_data-7707F642.js
+dist/sidebar_items-B77946B5.js
 index.html
 readme.html
 search.html

@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.4">
-    <meta name="project" content="gamend_core v1.1.1302">
+    <meta name="project" content="gamend_core v1.1.1303">
 
 
-    <title>Gamend.Payments.Providers.Stripe — gamend_core v1.1.1302</title>
+    <title>Gamend.Payments.Providers.Stripe — gamend_core v1.1.1303</title>
 
     <link rel="stylesheet" href="dist/html-elixir-RXHHCTJW.css" />
 
-    <script defer src="dist/sidebar_items-6C0DC53D.js"></script>
+    <script defer src="dist/sidebar_items-B77946B5.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-MI33G4N7.js"></script>
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.1.1302
+          v1.1.1303
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr />Payments.<wbr />Providers.<wbr />Stripe</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.1.1302)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.1.1303)</small>
 
     </h1>
 
@@ -141,6 +141,19 @@ gamend_core
 
     <div class="summary-row">
       <div class="summary-signature">
+        <a href="#cancel_subscription_now/2" data-no-tooltip="" translate="no">cancel_subscription_now(subscription_id, opts \\ [])</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Cancels a subscription now, not at the period end. No proration credit and
+no final invoice (<code class="inline">prorate</code>/<code class="inline">invoice_now</code> false, Stripe's defaults, sent so
+a changed default cannot add a credit on top of a refund). Stripe then
+sends <code class="inline">customer.subscription.deleted</code>.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
         <a href="#create_billing_portal_session/2" data-no-tooltip="" translate="no">create_billing_portal_session(customer_id, return_url)</a>
 
       </div>
@@ -161,14 +174,51 @@ session; its <code class="inline">&quot;url&quot;</code> is single-use and short
 
     <div class="summary-row">
       <div class="summary-signature">
+        <a href="#create_refund/2" data-no-tooltip="" translate="no">create_refund(payment_id, opts \\ [])</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Refunds a payment: a PaymentIntent (<code class="inline">pi_</code>) or a charge (<code class="inline">ch_</code>, <code class="inline">py_</code>).
+In full, or <code class="inline">:amount</code> of it (minor units; a plan given up for a longer
+one, <code class="inline">Upgrades</code>). Other <code class="inline">opts</code>: <code class="inline">:idempotency_key</code>, so a repeat within
+Stripe's 24 hours answers the same refund instead of trying a second, and
+<code class="inline">:metadata</code>, which the refund's own webhooks carry.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
         <a href="#expire_checkout_session/1" data-no-tooltip="" translate="no">expire_checkout_session(session_id)</a>
 
       </div>
 
         <div class="summary-synopsis"><p>Expires an open Checkout Session, so it can no longer be paid, and returns
 it. Stripe answers an error when the session is not open any more: paid,
-being paid, or expired already. Sent at the checkout API version, like the
-call that created the session.</p></div>
+being paid, or expired already.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#list_invoice_payments/1" data-no-tooltip="" translate="no">list_invoice_payments(payment_intent_id)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>The invoice payments a PaymentIntent paid, each with its invoice expanded:
+what a refund or dispute on a subscription's payment is traced back to its
+subscription through (a charge does not name its invoice). Returns the list
+object; <code class="inline">&quot;data&quot;</code> holds the payments.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#resume_subscription/1" data-no-tooltip="" translate="no">resume_subscription(subscription_id)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Takes back a cancellation scheduled for the period end: the subscription
+renews again. Stripe refuses it once the subscription has ended.</p></div>
 
     </div>
 
@@ -185,6 +235,17 @@ call that created the session.</p></div>
         <a href="#retrieve_subscription/1" data-no-tooltip="" translate="no">retrieve_subscription(subscription_id)</a>
 
       </div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#retrieve_subscription_with_latest_invoice/1" data-no-tooltip="" translate="no">retrieve_subscription_with_latest_invoice(subscription_id)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>A subscription with its latest invoice and that invoice's payments
+expanded: what the subscription last charged, and when.</p></div>
 
     </div>
 
@@ -220,7 +281,7 @@ call that created the session.</p></div>
       <h1 class="signature" translate="no">cancel_subscription_at_period_end(subscription_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/providers/stripe.ex#L97" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/providers/stripe.ex#L86" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -230,6 +291,33 @@ call that created the session.</p></div>
   <section class="docstring">
 
 
+  </section>
+</section>
+<section class="detail" id="cancel_subscription_now/2">
+
+    <span id="cancel_subscription_now/1"></span>
+
+  <div class="detail-header">
+    <a href="#cancel_subscription_now/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">cancel_subscription_now(subscription_id, opts \\ [])</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/providers/stripe.ex#L118" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+<p>Cancels a subscription now, not at the period end. No proration credit and
+no final invoice (<code class="inline">prorate</code>/<code class="inline">invoice_now</code> false, Stripe's defaults, sent so
+a changed default cannot add a credit on top of a refund). Stripe then
+sends <code class="inline">customer.subscription.deleted</code>.</p>
   </section>
 </section>
 <section class="detail" id="create_billing_portal_session/2">
@@ -242,7 +330,7 @@ call that created the session.</p></div>
       <h1 class="signature" translate="no">create_billing_portal_session(customer_id, return_url)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/providers/stripe.ex#L118" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/providers/stripe.ex#L237" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -278,6 +366,34 @@ session; its <code class="inline">&quot;url&quot;</code> is single-use and short
 
   </section>
 </section>
+<section class="detail" id="create_refund/2">
+
+    <span id="create_refund/1"></span>
+
+  <div class="detail-header">
+    <a href="#create_refund/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">create_refund(payment_id, opts \\ [])</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/providers/stripe.ex#L188" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+<p>Refunds a payment: a PaymentIntent (<code class="inline">pi_</code>) or a charge (<code class="inline">ch_</code>, <code class="inline">py_</code>).
+In full, or <code class="inline">:amount</code> of it (minor units; a plan given up for a longer
+one, <code class="inline">Upgrades</code>). Other <code class="inline">opts</code>: <code class="inline">:idempotency_key</code>, so a repeat within
+Stripe's 24 hours answers the same refund instead of trying a second, and
+<code class="inline">:metadata</code>, which the refund's own webhooks carry.</p>
+  </section>
+</section>
 <section class="detail" id="expire_checkout_session/1">
 
   <div class="detail-header">
@@ -288,7 +404,7 @@ session; its <code class="inline">&quot;url&quot;</code> is single-use and short
       <h1 class="signature" translate="no">expire_checkout_session(session_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/providers/stripe.ex#L51" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/providers/stripe.ex#L46" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -299,8 +415,55 @@ session; its <code class="inline">&quot;url&quot;</code> is single-use and short
 
 <p>Expires an open Checkout Session, so it can no longer be paid, and returns
 it. Stripe answers an error when the session is not open any more: paid,
-being paid, or expired already. Sent at the checkout API version, like the
-call that created the session.</p>
+being paid, or expired already.</p>
+  </section>
+</section>
+<section class="detail" id="list_invoice_payments/1">
+
+  <div class="detail-header">
+    <a href="#list_invoice_payments/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">list_invoice_payments(payment_intent_id)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/providers/stripe.ex#L163" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+<p>The invoice payments a PaymentIntent paid, each with its invoice expanded:
+what a refund or dispute on a subscription's payment is traced back to its
+subscription through (a charge does not name its invoice). Returns the list
+object; <code class="inline">&quot;data&quot;</code> holds the payments.</p>
+  </section>
+</section>
+<section class="detail" id="resume_subscription/1">
+
+  <div class="detail-header">
+    <a href="#resume_subscription/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">resume_subscription(subscription_id)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/providers/stripe.ex#L93" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+<p>Takes back a cancellation scheduled for the period end: the subscription
+renews again. Stripe refuses it once the subscription has ended.</p>
   </section>
 </section>
 <section class="detail" id="retrieve_checkout_session/1">
@@ -313,7 +476,7 @@ call that created the session.</p>
       <h1 class="signature" translate="no">retrieve_checkout_session(session_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/providers/stripe.ex#L69" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/providers/stripe.ex#L58" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -335,7 +498,7 @@ call that created the session.</p>
       <h1 class="signature" translate="no">retrieve_subscription(subscription_id)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/providers/stripe.ex#L85" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/providers/stripe.ex#L74" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -345,6 +508,29 @@ call that created the session.</p>
   <section class="docstring">
 
 
+  </section>
+</section>
+<section class="detail" id="retrieve_subscription_with_latest_invoice/1">
+
+  <div class="detail-header">
+    <a href="#retrieve_subscription_with_latest_invoice/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">retrieve_subscription_with_latest_invoice(subscription_id)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/providers/stripe.ex#L140" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+<p>A subscription with its latest invoice and that invoice's payments
+expanded: what the subscription last charged, and when.</p>
   </section>
 </section>
 <section class="detail" id="verify_webhook/2">
@@ -357,7 +543,7 @@ call that created the session.</p>
       <h1 class="signature" translate="no">verify_webhook(raw_body, signature_header)</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/providers/stripe.ex#L134" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/providers/stripe.ex#L253" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -378,9 +564,9 @@ call that created the session.</p>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.1.1302">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.1.1303">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.1.1302">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.1.1303">Hex Preview</a>
 
             </span>
 

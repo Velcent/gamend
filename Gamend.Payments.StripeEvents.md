@@ -38,7 +38,7 @@ Stripe Checkout.
 # `create_stripe_checkout`
 
 ```elixir
-@spec create_stripe_checkout(Gamend.Accounts.User.t(), map()) ::
+@spec create_stripe_checkout(Gamend.Accounts.User.t(), map(), keyword()) ::
   {:ok,
    %{
      purchase: Gamend.Payments.Purchase.t(),
@@ -48,12 +48,33 @@ Stripe Checkout.
   | {:error, term()}
 ```
 
+Open a Stripe Checkout for `attrs` (a client's: product, quantity, return
+URLs). Options are the server's own and never read from `attrs`:
+
+  * `:trial_end` — a `DateTime` a subscription's first charge waits for
+    (the card is taken now, the subscription starts `trialing`). Ignored for
+    a one-off product, and when it is under 48 hours or over two years
+    away, where Stripe would refuse it. For a host that grants a free
+    period of its own: buying during it keeps the days already given.
+
+A subscription bought to replace a shorter one (`Upgrades`, monthly to
+yearly) waits for the period already paid for: its `trial_end` is the
+later of `:trial_end` and that period's end (`Upgrades.trial_end/3`).
+
 # `handle_stripe_webhook`
 
 ```elixir
 @spec handle_stripe_webhook(binary(), binary() | nil) ::
   {:ok, atom()} | {:error, term()}
 ```
+
+Verify, record and handle one Stripe webhook delivery.
+
+Every answer is logged and counted (`payments.webhook`): a refused
+signature at warning (a wrong signing secret refuses every delivery, and
+only the logs say so), a handler that failed at error with the event's id
+and type (Stripe retries it, and it stays unprocessed in `provider_events`
+until one succeeds), and a processed or ignored one at info.
 
 # `reconcile_stripe_purchase`
 
@@ -67,6 +88,22 @@ Stripe Checkout.
    }}
   | {:error, term()}
 ```
+
+# `resume_stripe_subscription`
+
+```elixir
+@spec resume_stripe_subscription(Gamend.Accounts.User.t(), Ecto.UUID.t()) ::
+  {:ok,
+   %{
+     purchase: Gamend.Payments.Purchase.t(),
+     entitlement: Gamend.Payments.Entitlement.t(),
+     stripe_subscription: map()
+   }}
+  | {:error, term()}
+```
+
+Takes back a cancellation scheduled for the period end, so the
+subscription renews again. Stripe refuses it once the subscription ended.
 
 # `stripe_customer_id`
 

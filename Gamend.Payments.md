@@ -6,7 +6,11 @@ Payment catalog, purchase ledger, and entitlements.
 Provider-specific integrations validate or create transactions, but this
 context remains the source of truth for what a user owns inside the game.
 
+# `admin_refund_stripe_purchase`
+
 # `admin_stats`
+
+# `admin_stripe_refundable?`
 
 # `cancel_stripe_subscription_at_period_end`
 
@@ -263,6 +267,16 @@ event id count as a duplicate.
 
 # `provider_adapter_statuses`
 
+# `provider_error_code`
+
+```elixir
+@spec provider_error_code(term()) :: String.t()
+```
+
+A short code for a failure, for a counter's dimension: Stripe's own error
+code when it sent one (`card_declined`, `resource_missing`), the atom for
+ours, never the message.
+
 # `reconcile_stripe_purchase`
 
 # `record_provider_event`
@@ -272,6 +286,25 @@ event id count as a duplicate.
   {:ok, Gamend.Payments.ProviderEvent.t(), boolean()}
   | {:error, Ecto.Changeset.t()}
 ```
+
+# `refund_stripe_purchase`
+
+# `refund_window_days`
+
+# `restore_purchase`
+
+```elixir
+@spec restore_purchase(Gamend.Payments.Purchase.t(), map()) ::
+  {:ok, Gamend.Payments.Purchase.t()} | {:ok, :unchanged} | {:error, term()}
+```
+
+Hand a purchase back after a dispute the seller won: the purchase completes
+again and its entitlements are active again, with the end they had. Only a
+purchase a dispute revoked (`metadata["revocation_reason"]` a
+`charge.dispute.*` event) — a refund is final. `{:ok, :unchanged}` for any
+other.
+
+# `resume_stripe_subscription`
 
 # `revoke_purchase`
 
@@ -283,6 +316,8 @@ event id count as a duplicate.
 # `stripe_config_status`
 
 # `stripe_customer_id`
+
+# `stripe_refundable?`
 
 # `update_product`
 
