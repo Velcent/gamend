@@ -140,14 +140,8 @@ defmodule GamendWeb.PresentationPage do
               image fills it edge to edge behind a scrim with the title over
               the top. Without it the hero keeps media in its own column. --%>
         <.hero_cover :if={hero_cover?(@hero)} hero={@hero} sections={@sections} />
-        <%!-- `--breadcrumb-offset` is the room the shell's trail took above us
-              (0 when there is no trail), so the hero's first screen ends at
-              the fold either way instead of hanging past it. --%>
-        <section
-          :if={!hero_cover?(@hero)}
-          class="relative min-h-[calc(100dvh-var(--breadcrumb-offset,0px))]"
-        >
-          <div class="relative z-10 flex min-h-[calc(100dvh-var(--breadcrumb-offset,0px))] items-center px-6 pb-12 pt-[calc(6rem-var(--breadcrumb-offset,0px))] sm:px-8 lg:px-12">
+        <section :if={!hero_cover?(@hero)} class="relative min-h-dvh">
+          <div class="relative z-10 flex min-h-dvh items-center px-6 pb-12 pt-24 sm:px-8 lg:px-12">
             <div class={[
               "mx-auto grid w-full items-center gap-8 lg:gap-12",
               content_width_class(),

@@ -62,7 +62,7 @@ defmodule GamendWeb.LocaleSwitchTest do
 
       switched = conn |> recycle() |> get("/privacy?setlang=en")
 
-      assert redirected_to(switched, 302) == "/privacy"
+      assert redirected_to(switched, 301) == "/privacy"
       assert get_session(switched, :preferred_locale) == "en"
       assert switched |> recycle() |> get("/privacy") |> html_response(200)
     end
@@ -70,15 +70,15 @@ defmodule GamendWeb.LocaleSwitchTest do
     test "a switch keeps the rest of the query string", %{conn: conn} do
       conn = get(conn, "/privacy?ref=nav&setlang=de")
 
-      assert redirected_to(conn, 302) == "/de/privacy?ref=nav"
+      assert redirected_to(conn, 301) == "/de/privacy?ref=nav"
       assert get_session(conn, :preferred_locale) == "de"
     end
 
     test "a switch replaces the prefix already in the path", %{conn: conn} do
-      assert conn |> get("/es/privacy?setlang=de") |> redirected_to(302) == "/de/privacy"
-      assert conn |> get("/es/privacy?setlang=en") |> redirected_to(302) == "/privacy"
-      assert conn |> get("/es?setlang=en") |> redirected_to(302) == "/"
-      assert conn |> get("/?setlang=de") |> redirected_to(302) == "/de"
+      assert conn |> get("/es/privacy?setlang=de") |> redirected_to(301) == "/de/privacy"
+      assert conn |> get("/es/privacy?setlang=en") |> redirected_to(301) == "/privacy"
+      assert conn |> get("/es?setlang=en") |> redirected_to(301) == "/"
+      assert conn |> get("/?setlang=de") |> redirected_to(301) == "/de"
     end
 
     test "an unknown switch value is ignored rather than redirected", %{conn: conn} do

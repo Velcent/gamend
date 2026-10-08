@@ -65,10 +65,13 @@ defmodule GamendWeb.HostLayoutShell do
               is too narrow for the title (a phone, 360 px), the title is
               screen-reader text and the logo stands alone, rather than the
               name spilling under the search button. --%>
-        <div class="@container min-w-0 flex-1">
+        <%!-- The breadcrumb trail rides beside the name, so it costs the page
+              no row of its own. Same container: the trail shows only while
+              the room the buttons leave holds it (`breadcrumbs/1`). --%>
+        <div class="@container min-w-0 flex-1 flex items-center gap-2">
           <a
             href={GamendWeb.HostLayouts.localized_href(~p"/", @locale)}
-            class="flex-1 flex w-fit items-center gap-2"
+            class="flex shrink-0 w-fit items-center gap-2"
           >
             <%!-- Same rule as `CoreComponents.flag/1`: this is on screen at
                   load on every page, so it is fetched with the HTML, decoded
@@ -106,12 +109,13 @@ defmodule GamendWeb.HostLayoutShell do
             />
             <span class="text-lg font-bold @max-[8rem]:sr-only">{Map.get(@theme, "title")}</span>
             <span
-              :if={theme_tagline(@theme)}
+              :if={theme_tagline(@theme) && length(@breadcrumbs) < 2}
               class="text-sm opacity-80 ms-1 hidden xl:inline"
             >
               {theme_tagline(@theme)}
             </span>
           </a>
+          <.breadcrumbs trail={@breadcrumbs} />
         </div>
         <%!-- The language picker sits outside both navs: one button in the bar
               at every width, rather than a dropdown up here and a different
@@ -190,25 +194,17 @@ defmodule GamendWeb.HostLayoutShell do
         <GamendWeb.HostLayouts.flash_group flash={@flash} />
       <% else %>
         <main id="main-content" class="relative z-[2] px-4 py-4 sm:px-6 lg:px-8 flex-1">
-          <%!-- The trail sits above the content and pushes it down, which
-                knocks a full-height hero off centre. `--breadcrumb-offset` is
-                the trail's own height plus the stack gap; a hero subtracts it
-                from `100dvh` so its first screen still ends at the fold. --%>
           <%!-- Reading width by default. A `wide` page brings its own side
                 columns — a docs sidebar, a table of contents — and the article
                 between them is what should keep the reading width, so the
                 frame lets it out to the screen. --%>
-          <div
-            class={[
-              "mx-auto space-y-4",
-              if(@wide,
-                do: "max-w-2xl md:max-w-3xl lg:max-w-5xl xl:max-w-7xl 2xl:max-w-screen-2xl",
-                else: "max-w-2xl md:max-w-3xl lg:max-w-4xl xl:max-w-6xl"
-              )
-            ]}
-            style={if length(@breadcrumbs) > 1, do: "--breadcrumb-offset: 2.25rem"}
-          >
-            <.breadcrumbs trail={@breadcrumbs} />
+          <div class={[
+            "mx-auto",
+            if(@wide,
+              do: "max-w-2xl md:max-w-3xl lg:max-w-5xl xl:max-w-7xl 2xl:max-w-screen-2xl",
+              else: "max-w-2xl md:max-w-3xl lg:max-w-4xl xl:max-w-6xl"
+            )
+          ]}>
             <%!-- The page's own frame, applied here so no page has to know it:
                   one gap between blocks and one landing before the footer,
                   whichever repo wrote the page. A page that set its own `py-6`
@@ -388,21 +384,56 @@ defmodule GamendWeb.HostLayoutShell do
 
   Renders nothing for a bare `[{"Home", nil}]`: a trail with no ancestors tells
   the reader nothing, and Google ignores a single-item `BreadcrumbList`.
+
+  Drawn in the navbar, after the site name, so the first crumb (the home page)
+  is left out: the name beside it is that link. One line: where the trail is
+  longer than the room, its EARLIEST crumbs go, whole, and the page's own
+  stay. A crumb cut to a few letters each (`Dicti… / Spa… / Pe…`) said
+  nothing. The line is filled from the current page backwards (`order`, laid
+  out `flex-row-reverse`), and what does not fit wraps to a second line the
+  `h-5` clips. The markup keeps the trail's order, so a screen reader hears
+  all of it. A crumb alone on the line and still too long is cut short, its
+  full name on `title`.
+
+  Shown only where there is room for it. Not on a phone (below `sm`), and not
+  while the navbar's buttons leave its container narrower than `22rem`: from
+  `xl` the whole nav is in the bar, and the trail comes back from about
+  1440 px. Below that the page's own heading (its Back, its menus) is the way
+  up.
   """
   def breadcrumbs(assigns) do
+    assigns = assign(assigns, :crumbs, assigns.trail |> Enum.drop(1) |> Enum.with_index())
+    assigns = assign(assigns, :last, length(assigns.crumbs) - 1)
+
     ~H"""
     <nav
       :if={length(@trail) > 1}
       aria-label={GamendWeb.HostLayouts.translate("Breadcrumb")}
-      class="text-sm text-base-content/60"
+      class="hidden min-w-0 text-sm text-base-content/60 sm:flex @max-[22rem]:hidden"
     >
-      <ol class="flex flex-wrap items-center gap-2">
-        <li :for={{{label, path}, index} <- Enum.with_index(@trail)} class="flex items-center gap-2">
-          <span :if={index > 0} aria-hidden="true">/</span>
-          <.link :if={path} href={path} class="hover:text-primary transition-colors">
+      <ol class="flex h-5 min-w-0 flex-row-reverse flex-wrap items-center justify-end gap-x-2 overflow-hidden">
+        <li
+          :for={{{label, path}, index} <- @crumbs}
+          class="flex min-w-0 items-center gap-2"
+          style={"order: #{@last - index}"}
+        >
+          <span aria-hidden="true" class="shrink-0">/</span>
+          <.link
+            :if={path}
+            href={path}
+            title={label}
+            class="truncate hover:text-primary transition-colors"
+          >
             {label}
           </.link>
-          <span :if={is_nil(path)} aria-current="page" class="text-base-content/90">{label}</span>
+          <span
+            :if={is_nil(path)}
+            aria-current="page"
+            title={label}
+            class="truncate text-base-content/90"
+          >
+            {label}
+          </span>
         </li>
       </ol>
     </nav>
