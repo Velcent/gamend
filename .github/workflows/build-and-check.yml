@@ -1096,7 +1096,6 @@ jobs:
   publish-hex:
     name: Publish Hex packages
     if: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
-    needs: [test-sqlite]
     runs-on: ubuntu-latest
 
     env:
