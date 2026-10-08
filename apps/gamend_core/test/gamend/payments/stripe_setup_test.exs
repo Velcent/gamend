@@ -106,6 +106,22 @@ defmodule Gamend.Payments.StripeSetupTest do
       {:ok, %{id: id}}
     end
 
+    def retrieve_price(id, _opts) do
+      case Enum.find(state(:prices), &(&1.id == id)) do
+        nil ->
+          {:error,
+           %Stripe.Error{
+             source: :stripe,
+             code: :invalid_request_error,
+             message: "No such price",
+             extra: %{http_status: 404}
+           }}
+
+        price ->
+          {:ok, price}
+      end
+    end
+
     def list_prices(%{lookup_keys: [key]}, _opts),
       do: {:ok, %{data: Enum.filter(state(:prices), &(&1[:lookup_key] == key))}}
 
@@ -177,10 +193,13 @@ defmodule Gamend.Payments.StripeSetupTest do
       assert [%{status: :pending}] = StripeSetup.ensure_webhook(@url)
       refute_received {:stripe, :create_webhook_endpoint, _}
 
-      assert [%{status: :changed, message: message}] =
+      assert [%{status: :changed, message: message} = created] =
                StripeSetup.ensure_webhook(@url, apply: true)
 
-      assert message =~ "whsec_new_we_1"
+      assert message =~ "signing secret is shown only now"
+      # The secret rides apart from the message, for the printer to place.
+      refute message =~ "whsec_"
+      assert created.secret == "whsec_new_we_1"
       assert_received {:stripe, :create_webhook_endpoint, params}
       assert params.api_version == ProviderConfig.stripe_api_version()
       assert params.enabled_events == StripeSetup.webhook_events()
@@ -214,6 +233,35 @@ defmodule Gamend.Payments.StripeSetupTest do
       refute StripeSetup.drift?(StripeSetup.ensure_webhook(@url))
     end
 
+    test "an old endpoint on the same host is named, never touched" do
+      FakeStripe.put(:endpoints, [
+        %{
+          id: "we_wrong_path",
+          url: "https://example.test/payments/webhooks/stripe",
+          api_version: ProviderConfig.stripe_api_version(),
+          enabled_events: StripeSetup.webhook_events(),
+          status: "enabled"
+        },
+        %{
+          id: "we_elsewhere",
+          url: "https://other.test/hook",
+          api_version: "2022-11-15",
+          enabled_events: ["*"],
+          status: "enabled"
+        }
+      ])
+
+      findings = StripeSetup.ensure_webhook(@url, apply: true)
+      assert Enum.any?(findings, &(&1.status == :changed and is_binary(&1[:secret])))
+
+      assert [%{status: :manual, message: message}] =
+               Enum.filter(findings, &(&1.message =~ "another endpoint"))
+
+      assert message =~ "we_wrong_path"
+      refute_received {:stripe, :update_webhook_endpoint, "we_wrong_path", _}
+      assert StripeSetup.drift?(StripeSetup.ensure_webhook(@url))
+    end
+
     test "another API release is replaced only when asked, with a new endpoint" do
       FakeStripe.put(:endpoints, [
         %{
@@ -229,7 +277,12 @@ defmodule Gamend.Payments.StripeSetupTest do
       refute_received {:stripe, :create_webhook_endpoint, _}
 
       findings = StripeSetup.ensure_webhook(@url, apply: true, recreate: true)
-      assert Enum.any?(findings, &(&1.status == :changed and &1.message =~ "Signing secret"))
+
+      # The replaced one, disabled at the same URL, does not fail a check.
+      after_replace = StripeSetup.ensure_webhook(@url)
+      refute StripeSetup.drift?(after_replace)
+      assert Enum.any?(after_replace, &(&1.message =~ "we_old at the same URL is disabled"))
+      assert Enum.any?(findings, &(&1.status == :changed and is_binary(&1[:secret])))
       assert_received {:stripe, :update_webhook_endpoint, "we_old", %{disabled: true}}
     end
   end
@@ -272,17 +325,86 @@ defmodule Gamend.Payments.StripeSetupTest do
     }
 
     test "the product is created, then its tax code kept" do
-      assert [%{status: :pending}] = StripeSetup.ensure_product(@product)
-      assert [%{status: :changed}] = StripeSetup.ensure_product(@product, apply: true)
-      assert [%{status: :ok}] = StripeSetup.ensure_product(@product)
+      assert {"test_pro", [%{status: :pending}]} = StripeSetup.ensure_product(@product)
+
+      assert {"test_pro", [%{status: :changed}]} =
+               StripeSetup.ensure_product(@product, apply: true)
+
+      assert {"test_pro", [%{status: :ok}]} = StripeSetup.ensure_product(@product)
 
       FakeStripe.put(:products, [
         %{id: "test_pro", name: "Test Pro", tax_code: "txcd_00000000", active: true}
       ])
 
-      assert [%{status: :pending}] = StripeSetup.ensure_product(@product)
+      assert {_id, [%{status: :pending}]} = StripeSetup.ensure_product(@product)
       StripeSetup.ensure_product(@product, apply: true)
       assert_received {:stripe, :update_product, "test_pro", %{tax_code: "txcd_10103000"}}
+    end
+
+    test "a product made by hand is used, not doubled" do
+      FakeStripe.put(:products, [
+        %{id: "prod_hand", name: "Pro", tax_code: "txcd_10103000", active: true}
+      ])
+
+      assert {"prod_hand", findings} =
+               StripeSetup.ensure_product(Map.put(@product, :adopt, "prod_hand"), apply: true)
+
+      assert Enum.any?(findings, &(&1.message =~ "using prod_hand"))
+      refute_received {:stripe, :create_product, _}
+      # Its name is brought in line; the product stays.
+      assert_received {:stripe, :update_product, "prod_hand", %{name: "Test Pro"}}
+    end
+
+    test "a configured price made by hand gets the lookup key, and nothing new is made" do
+      FakeStripe.put(:prices, [
+        %{
+          id: "price_hand",
+          product: "test_pro",
+          unit_amount: 3_900,
+          currency: "eur",
+          recurring: %{interval: "year"},
+          tax_behavior: "unspecified",
+          active: true
+        }
+      ])
+
+      wanted = Map.put(@price, :adopt, "price_hand")
+
+      assert {"price_hand", [%{status: :pending, message: message}]} =
+               StripeSetup.ensure_price(wanted)
+
+      assert message =~ "would adopt price_hand"
+
+      assert {"price_hand", [%{status: :changed}]} = StripeSetup.ensure_price(wanted, apply: true)
+
+      assert_received {:stripe, :update_price, "price_hand",
+                       %{
+                         lookup_key: "test:pro_yearly:standard",
+                         transfer_lookup_key: true,
+                         tax_behavior: "inclusive"
+                       }}
+
+      refute_received {:stripe, :create_price, _}
+      assert {"price_hand", [%{status: :ok}]} = StripeSetup.ensure_price(@price)
+    end
+
+    test "a configured price that is not what is wanted is replaced, and said why" do
+      FakeStripe.put(:prices, [
+        %{
+          id: "price_cheap",
+          product: "test_pro",
+          unit_amount: 100,
+          currency: "eur",
+          recurring: %{interval: "year"},
+          tax_behavior: "inclusive",
+          active: true
+        }
+      ])
+
+      assert {nil, [%{status: :pending, message: message}]} =
+               StripeSetup.ensure_price(Map.put(@price, :adopt, "price_cheap"))
+
+      assert message =~ "the configured price_cheap differs (amount 100 not 3900)"
     end
 
     test "a price is found by its lookup key; a changed amount is a new price" do

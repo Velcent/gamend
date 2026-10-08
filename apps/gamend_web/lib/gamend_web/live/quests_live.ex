@@ -595,9 +595,9 @@ defmodule GamendWeb.QuestsLive do
         <%!-- Header --%>
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 class="text-4xl font-black text-base-content/95">
+            <h1 class="text-4xl font-black text-base-content">
               {gettext("Quests")}
-              <span class="text-base-content/70 font-normal">({@total_count})</span>
+              <span class="text-muted font-normal">({@total_count})</span>
             </h1>
           </div>
 
@@ -655,7 +655,7 @@ defmodule GamendWeb.QuestsLive do
 
         <%!-- Quest grid --%>
         <%= if @entries == [] do %>
-          <div class="text-center py-16 text-base-content/70">
+          <div class="text-center py-16 text-muted">
             <.icon name="hero-map" class="w-16 h-16 mx-auto mb-4 opacity-30" />
             <p class="text-lg">
               {gettext("No results.")}
@@ -745,10 +745,10 @@ defmodule GamendWeb.QuestsLive do
       >
         <div class="card-body p-5">
           <div class="flex items-center justify-between mb-2">
-            <h3 class="font-bold text-lg flex items-center gap-2">
+            <h2 class="font-bold text-lg flex items-center gap-2">
               <.icon name="hero-link" class="w-5 h-5" />
               {gettext("Quest chain")}
-            </h3>
+            </h2>
             <button phx-click="close_chain" class="btn btn-ghost btn-sm btn-circle" type="button">
               <.icon name="hero-x-mark" class="w-4 h-4" />
             </button>
@@ -775,7 +775,7 @@ defmodule GamendWeb.QuestsLive do
                   <div class="font-medium text-sm truncate">
                     {entry_title(entry)}
                   </div>
-                  <div class="text-xs text-base-content/60">
+                  <div class="text-xs text-muted">
                     {chain_status_label(entry)}
                   </div>
                 </div>
@@ -812,10 +812,10 @@ defmodule GamendWeb.QuestsLive do
       >
         <div class="card-body p-5">
           <div class="flex items-center justify-between mb-2">
-            <h3 class="font-bold text-lg flex items-center gap-2">
+            <h2 class="font-bold text-lg flex items-center gap-2">
               <.icon name="hero-rectangle-stack" class="w-5 h-5" />
               {group_modal_title(@group)}
-            </h3>
+            </h2>
             <button phx-click="close_group" class="btn btn-ghost btn-sm btn-circle" type="button">
               <.icon name="hero-x-mark" class="w-4 h-4" />
             </button>
@@ -830,9 +830,9 @@ defmodule GamendWeb.QuestsLive do
               />
               <div class="min-w-0 flex-1">
                 <div class="font-medium text-sm truncate">{entry_title(entry)}</div>
-                <div class="text-xs text-base-content/60">{entry_status_label(entry)}</div>
+                <div class="text-xs text-muted">{entry_status_label(entry)}</div>
               </div>
-              <span class="text-xs text-base-content/60 text-nowrap">
+              <span class="text-xs text-muted text-nowrap">
                 {group_member_counts(entry)}
               </span>
             </li>
@@ -878,7 +878,7 @@ defmodule GamendWeb.QuestsLive do
   defp chain_tier_class(entry) do
     cond do
       entry_done?(entry) -> "bg-success/20 text-success"
-      entry.locked -> "bg-base-300 text-base-content/70"
+      entry.locked -> "bg-base-300 text-muted"
       true -> "bg-primary/20 text-primary"
     end
   end
@@ -1018,7 +1018,7 @@ defmodule GamendWeb.QuestsLive do
 
       <%!-- Countdown --%>
       <%= if @left do %>
-        <div class="flex items-center gap-1.5 text-base-content/70">
+        <div class="flex items-center gap-1.5 text-muted">
           <.icon name="hero-clock" class="w-3.5 h-3.5" />
           <span class="text-xs">
             <%= case @left do %>
@@ -1057,7 +1057,7 @@ defmodule GamendWeb.QuestsLive do
                 <.icon name="hero-check-circle-solid" class="w-4 h-4" />
                 <span class="text-xs font-medium">
                   {gettext("Claimed")}
-                  <span :if={@progress.completed_at} class="text-base-content/70 ms-1">
+                  <span :if={@progress.completed_at} class="text-muted ms-1">
                     <.timestamp at={@progress.completed_at} format="date" />
                   </span>
                 </span>
@@ -1070,8 +1070,8 @@ defmodule GamendWeb.QuestsLive do
             <% true -> %>
               <div :for={row <- @objective_rows} class="mb-1.5 last:mb-0">
                 <div class="flex items-center justify-between mb-1">
-                  <span class="text-xs text-base-content/70">{gettext("Status")}</span>
-                  <span class="text-xs font-medium text-base-content/70">
+                  <span class="text-xs text-muted">{gettext("Status")}</span>
+                  <span class="text-xs font-medium text-muted">
                     {row.count} / {row.target}
                   </span>
                 </div>

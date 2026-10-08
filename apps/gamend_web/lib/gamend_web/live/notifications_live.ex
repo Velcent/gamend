@@ -14,8 +14,8 @@ defmodule GamendWeb.NotificationsLive do
       <div class="space-y-6">
         <div class="flex items-center justify-between">
           <div>
-            <h1 class="text-4xl font-black text-base-content/95">{gettext("Notifications")}</h1>
-            <p class="text-base-content/60 mt-1">
+            <h1 class="text-4xl font-black text-base-content">{gettext("Notifications")}</h1>
+            <p class="text-muted mt-1">
               {@notif_count} / {@notif_unread_count}
             </p>
           </div>
@@ -55,7 +55,7 @@ defmodule GamendWeb.NotificationsLive do
                         <.entity_icon
                           icon_url={n.icon_url}
                           type={:notification}
-                          class="w-4 h-4 shrink-0 text-base-content/60"
+                          class="w-4 h-4 shrink-0 text-muted"
                         />
                         {translate_notification_title(n)}
                       </div>

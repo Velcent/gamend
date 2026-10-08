@@ -337,7 +337,7 @@ defmodule GamendWeb.CoreComponents do
     ~H"""
     <.dynamic_tag
       tag_name={@tag}
-      class={["text-3xl font-black text-base-content/95 sm:text-4xl", @class]}
+      class={["text-3xl font-black text-base-content sm:text-4xl", @class]}
       {@rest}
     >
       {render_slot(@inner_block)}
@@ -366,7 +366,7 @@ defmodule GamendWeb.CoreComponents do
     ~H"""
     <.dynamic_tag
       tag_name={@tag}
-      class={["text-xs font-semibold uppercase tracking-[0.2em] text-base-content/55", @class]}
+      class={["text-xs font-semibold uppercase tracking-[0.2em] text-muted", @class]}
       {@rest}
     >
       {render_slot(@inner_block)}
@@ -581,7 +581,7 @@ defmodule GamendWeb.CoreComponents do
           {@rest}
         />
       </label>
-      <p class="text-xs text-base-content/70 mt-1" data-local-zone-note></p>
+      <p class="text-xs text-muted mt-1" data-local-zone-note></p>
       <.error :for={msg <- @errors}>{msg}</.error>
     </div>
     """
@@ -774,7 +774,7 @@ defmodule GamendWeb.CoreComponents do
 
   @doc """
   Renders a page header: the `<h1>` in the one style every page title uses
-  (`text-4xl font-black text-base-content/95`), an optional subtitle and
+  (`text-4xl font-black text-base-content`), an optional subtitle and
   actions.
 
   The inner block IS the title text — pass words, an icon, a badge; never
@@ -811,7 +811,7 @@ defmodule GamendWeb.CoreComponents do
           <.page_title class={@class}>{render_slot(@inner_block)}</.page_title>
         </div>
         <.page_title :if={!@back} class={@class}>{render_slot(@inner_block)}</.page_title>
-        <p :if={@subtitle != []} class="mt-1 text-sm text-base-content/70">
+        <p :if={@subtitle != []} class="mt-1 text-sm text-muted">
           {render_slot(@subtitle)}
         </p>
       </div>
@@ -999,21 +999,24 @@ defmodule GamendWeb.CoreComponents do
     ~H"""
     <div class="card-body">
       <div class="flex items-start justify-between">
-        <h3 class="card-title text-lg">
+        <%!-- `h2`: a list of these sits straight under the page's `h1`
+              (leaderboards, quests, groups), and an `h3` there skips a
+              level (axe `heading-order`). The look is the classes'. --%>
+        <h2 class="card-title text-lg">
           <.entity_icon
             icon_url={@icon_url}
             icon={@icon}
             type={@type}
-            class="w-6 h-6 shrink-0 text-base-content/60"
+            class="w-6 h-6 shrink-0 text-muted"
           />
           {@title}
-        </h3>
+        </h2>
         <div :if={@badges != []} class="flex flex-col items-end gap-1 shrink-0">
           {render_slot(@badges)}
         </div>
       </div>
 
-      <p :if={@description not in [nil, ""]} class="text-sm text-base-content/70 line-clamp-2">
+      <p :if={@description not in [nil, ""]} class="text-sm text-muted line-clamp-2">
         {@description}
       </p>
 
@@ -1131,9 +1134,9 @@ defmodule GamendWeb.CoreComponents do
       ]}
       {@rest}
     >
-      <.icon :if={@icon} name={@icon} class="mx-auto mb-3 size-12 text-base-content/40" />
+      <.icon :if={@icon} name={@icon} class="mx-auto mb-3 size-12 text-muted" />
       <p class={if @compact, do: "text-sm font-semibold", else: "font-bold"}>{@title}</p>
-      <p :if={@text} class="mt-1 text-sm text-base-content/70">{@text}</p>
+      <p :if={@text} class="mt-1 text-sm text-muted">{@text}</p>
       <div :if={@actions != []} class={["mt-3 flex flex-wrap gap-2", !@compact && "justify-center"]}>
         {render_slot(@actions)}
       </div>
@@ -1312,7 +1315,7 @@ defmodule GamendWeb.CoreComponents do
       >
         {gettext("Prev")}
       </button>
-      <div :if={@multi_page?} class="text-xs text-base-content/70">
+      <div :if={@multi_page?} class="text-xs text-muted">
         <%= if @total_count do %>
           {@page} / {@total_pages} ({@total_count})
         <% else %>
@@ -1395,7 +1398,7 @@ defmodule GamendWeb.CoreComponents do
   host that changes where the title lives changes one config key.
   """
   attr :user, :any, required: true
-  attr :class, :string, default: "text-xs text-base-content/60"
+  attr :class, :string, default: "text-xs text-muted"
 
   def user_title(assigns) do
     assigns = assign(assigns, :title, user_title_text(assigns.user))

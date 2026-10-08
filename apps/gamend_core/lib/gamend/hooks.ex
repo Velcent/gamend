@@ -524,24 +524,36 @@ defmodule Gamend.Hooks do
   function doesn't exist.
   """
   def invoke(name, args \\ []) when is_atom(name) and is_list(args) do
-    mod = module()
     arity = length(args)
 
-    if exports_function?(mod, name, arity) do
-      try do
-        case apply(mod, name, args) do
-          :ok -> :ok
-          {:ok, _} = ok -> ok
-          {:error, _} = err -> err
-          other -> {:ok, other}
+    # The same modules the lifecycle fan-out calls, not `module/0` alone: a
+    # plugin `PluginManager` loaded never sets `:hooks_module`, so resolving
+    # through it alone answered `Default` for every scheduled hook
+    # (`Gamend.Schedule`, `Gamend.Jobs.enqueue_hook/3`) and `HookWorker`
+    # discarded the job — a host's nightly jobs (its daily pool, its
+    # leaderboard roll, its cache sweep) were discarded every night for a
+    # week before anyone looked (2026-10-08). `Default` exports a no-op for
+    # every standard callback, so a module that is not it wins when both
+    # export the name.
+    exporting = Enum.filter(lifecycle_modules(), &exports_function?(&1, name, arity))
+
+    case Enum.find(exporting, &(&1 != Default)) || List.first(exporting) do
+      nil ->
+        {:error, {:not_found, {module(), name, arity}}}
+
+      mod ->
+        try do
+          case apply(mod, name, args) do
+            :ok -> :ok
+            {:ok, _} = ok -> ok
+            {:error, _} = err -> err
+            other -> {:ok, other}
+          end
+        rescue
+          e -> rescued(e, __STACKTRACE__, {mod, name, args})
+        catch
+          kind, reason -> {:error, {kind, reason}}
         end
-      rescue
-        e -> rescued(e, __STACKTRACE__, {mod, name, args})
-      catch
-        kind, reason -> {:error, {kind, reason}}
-      end
-    else
-      {:error, {:not_found, {mod, name, arity}}}
     end
   end
 

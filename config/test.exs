@@ -131,6 +131,10 @@ config :gamend_web, GamendWeb.Auth.Guardian,
 # Disable rate limiting in tests
 config :gamend_web, GamendWeb.Plugs.RateLimiter, enabled: false
 
+# No reverse-DNS lookups from tests: a request naming Googlebot would ask the
+# real resolver. `crawlers_test.exs` turns it on with a fake one.
+config :gamend_web, GamendWeb.Crawlers, verify: false
+
 # A cold test request (first render, first query) routinely passes the 200ms
 # slow-request threshold, and each one would print a warning into the run.
 # Tests that assert on the log lower it themselves.

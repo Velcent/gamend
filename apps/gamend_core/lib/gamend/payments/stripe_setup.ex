@@ -95,24 +95,59 @@ defmodule Gamend.Payments.StripeSetup do
   def ensure_webhook(url, opts \\ []) when is_binary(url) do
     case call(:list_webhook_endpoints, [%{limit: 100}]) do
       {:ok, %{"data" => endpoints}} ->
-        case Enum.filter(endpoints, &(&1["url"] == url)) do
-          [] ->
-            create_webhook(url, opts)
+        # A disabled endpoint at the same URL is the one `recreate: true`
+        # replaced: harmless, named so it can be deleted.
+        {enabled, disabled} =
+          endpoints
+          |> Enum.filter(&(&1["url"] == url))
+          |> Enum.split_with(&(&1["status"] != "disabled"))
 
-          [endpoint] ->
-            check_webhook(endpoint, url, opts)
+        target =
+          case {enabled, disabled} do
+            {[], []} ->
+              create_webhook(url, opts)
 
-          several ->
-            [
-              manual(
-                "webhook",
-                "#{length(several)} endpoints share #{url}: keep one in the Dashboard"
-              )
-            ]
-        end
+            {[endpoint], _disabled} ->
+              check_webhook(endpoint, url, opts) ++ Enum.map(disabled, &replaced_note/1)
+
+            {[], [endpoint]} ->
+              check_webhook(endpoint, url, opts)
+
+            {several, _disabled} ->
+              [
+                manual(
+                  "webhook",
+                  "#{length(several)} endpoints share #{url}: keep one in the Dashboard"
+                )
+              ]
+          end
+
+        target ++ strays(endpoints, url)
 
       {:error, reason} ->
         [error("webhook", reason)]
+    end
+  end
+
+  defp replaced_note(endpoint),
+    do: ok("webhook", "#{endpoint["id"]} at the same URL is disabled: delete it in the Dashboard")
+
+  # Another endpoint on the same host is an old one (a wrong path, a test):
+  # it is never matched, so it would go on receiving events beside the right
+  # one and failing them. Deleting is a person's call, in the Dashboard; one
+  # this script disabled when it replaced it is already harmless.
+  defp strays(endpoints, url) do
+    host = URI.parse(url).host
+
+    for %{"url" => other} = endpoint <- endpoints,
+        other != url,
+        URI.parse(other).host == host,
+        endpoint["status"] != "disabled" do
+      manual(
+        "webhook",
+        "another endpoint on #{host}: #{endpoint["id"]} at #{other}, still enabled. " <>
+          "Delete it in the Dashboard if it is an old one"
+      )
     end
   end
 
@@ -120,13 +155,17 @@ defmodule Gamend.Payments.StripeSetup do
     if opts[:apply] do
       case call(:create_webhook_endpoint, [webhook_params(url)]) do
         {:ok, endpoint} ->
-          [
+          # The signing secret rides apart from the message, so whoever prints
+          # the findings decides where it goes (`--secret-file`).
+          created =
             changed(
               "webhook",
-              "created #{endpoint["id"]} for #{url} on #{endpoint["api_version"]}, #{length(@webhook_events)} events. " <>
-                "Signing secret, shown this once: #{endpoint["secret"]} -> set it as the webhook secret in .env"
+              "created #{endpoint["id"]} for #{url} on #{endpoint["api_version"]}, " <>
+                "#{length(@webhook_events)} events. Its signing secret is shown only now: " <>
+                "set it as the webhook secret in .env"
             )
-          ]
+
+          [Map.put(created, :secret, endpoint["secret"])]
 
         {:error, reason} ->
           [error("webhook", reason)]
@@ -296,43 +335,76 @@ defmodule Gamend.Payments.StripeSetup do
 
   @doc """
   A product by its fixed id (`id`, `name`, `tax_code`, optional
-  `metadata`): created when missing, its name, tax code and `active`
-  brought in line.
-  """
-  @spec ensure_product(map(), keyword()) :: [finding()]
-  def ensure_product(%{id: id} = wanted, opts \\ []) do
-    case call(:retrieve_product, [id]) do
-      {:ok, product} ->
-        check_product(product, wanted, opts)
+  `metadata`), its name, tax code and `active` brought in line. When there is
+  no product with that id, `adopt:` (a product id already in use, e.g. the
+  one the configured prices are on) is used instead, so a product made by
+  hand is kept rather than doubled; only with neither is one created.
 
-      {:error, reason} ->
-        if missing?(reason),
-          do: create_product(wanted, opts),
-          else: [error("product", reason)]
+  Returns `{product_id | nil, findings}`: the product the prices belong on.
+  On a check that would create it, the id it would get.
+  """
+  @spec ensure_product(map(), keyword()) :: {String.t() | nil, [finding()]}
+  def ensure_product(%{id: id} = wanted, opts \\ []) do
+    case fetch(:retrieve_product, id) do
+      {:ok, product} -> {id, check_product(product, wanted, opts)}
+      :missing -> adopt_or_create_product(wanted, opts)
+      {:error, reason} -> {nil, [error("product", reason)]}
     end
   end
+
+  defp adopt_or_create_product(%{adopt: adopt} = wanted, opts) when is_binary(adopt) do
+    case fetch(:retrieve_product, adopt) do
+      {:ok, product} ->
+        note =
+          ok(
+            "product",
+            "no #{wanted.id}; using #{adopt}, the product the configured prices are on"
+          )
+
+        {adopt, [note | check_product(product, wanted, opts)]}
+
+      :missing ->
+        create_product(wanted, opts)
+
+      {:error, reason} ->
+        {nil, [error("product", reason)]}
+    end
+  end
+
+  defp adopt_or_create_product(wanted, opts), do: create_product(wanted, opts)
 
   defp create_product(wanted, opts) do
     if opts[:apply] do
       case call(:create_product, [Map.take(wanted, [:id, :name, :tax_code, :metadata])]) do
         {:ok, product} ->
-          [
-            changed(
-              "product",
-              "created #{product["id"]} (#{product["name"]}, #{product["tax_code"]})"
-            )
-          ]
+          {product["id"],
+           [
+             changed(
+               "product",
+               "created #{product["id"]} (#{product["name"]}, #{product["tax_code"]})"
+             )
+           ]}
 
         {:error, reason} ->
-          [error("product", reason)]
+          {nil, [error("product", reason)]}
       end
     else
-      [
-        pending(
-          "product",
-          "no product #{wanted.id}: would create #{wanted.name}, tax code #{wanted.tax_code}"
-        )
-      ]
+      {wanted.id,
+       [
+         pending(
+           "product",
+           "no product #{wanted.id}: would create #{wanted.name}, tax code #{wanted.tax_code}"
+         )
+       ]}
+    end
+  end
+
+  @doc "The product a price is on, or nil when the price does not exist."
+  @spec price_product(String.t()) :: String.t() | nil
+  def price_product(price_id) when is_binary(price_id) do
+    case fetch(:retrieve_price, price_id) do
+      {:ok, price} -> object_id(price["product"])
+      _missing_or_error -> nil
     end
   end
 
@@ -375,8 +447,73 @@ defmodule Gamend.Payments.StripeSetup do
   def ensure_price(%{lookup_key: key} = wanted, opts \\ []) do
     case call(:list_prices, [%{lookup_keys: [key], limit: 1}]) do
       {:ok, %{"data" => [price | _]}} -> check_price(price, wanted, opts)
-      {:ok, _none} -> create_price(wanted, opts, false)
+      {:ok, _none} -> adopt_or_create_price(wanted, opts)
       {:error, reason} -> {nil, [error("price #{key}", reason)]}
+    end
+  end
+
+  # No price holds the lookup key yet. A price already in use (`adopt:`, the
+  # id the host's config names) that is what is wanted gets the key, and
+  # nothing new is made: prices set up by hand before this script existed
+  # stay, with the ids already in the config.
+  defp adopt_or_create_price(%{adopt: adopt} = wanted, opts) when is_binary(adopt) do
+    area = "price #{wanted.lookup_key}"
+
+    case fetch(:retrieve_price, adopt) do
+      {:ok, price} ->
+        case fixed_differences(price, wanted) do
+          [] ->
+            adopt_price(price, wanted, opts)
+
+          fixed ->
+            {id, findings} = create_price(wanted, opts, false)
+            note = "the configured #{adopt} differs (#{Enum.join(fixed, ", ")}), so a new price"
+            {id, [%{hd(findings) | message: note <> ": " <> hd(findings).message} | tl(findings)]}
+        end
+
+      :missing ->
+        {id, findings} = create_price(wanted, opts, false)
+        {id, [manual(area, "the configured #{adopt} does not exist on this account") | findings]}
+
+      {:error, reason} ->
+        {nil, [error(area, reason)]}
+    end
+  end
+
+  defp adopt_or_create_price(wanted, opts), do: create_price(wanted, opts, false)
+
+  defp adopt_price(price, wanted, opts) do
+    area = "price #{wanted.lookup_key}"
+
+    if opts[:apply] do
+      params =
+        wanted
+        |> Map.take([:lookup_key, :nickname, :metadata])
+        |> Map.reject(fn {_key, value} -> is_nil(value) end)
+        |> Map.merge(%{transfer_lookup_key: true})
+        |> Map.merge(mutable_fixes(price, wanted))
+
+      case call(:update_price, [price["id"], params]) do
+        {:ok, _} ->
+          {price["id"],
+           [
+             changed(
+               area,
+               "adopted #{price["id"]} (#{price_summary(price)}): gave it the lookup key"
+             )
+           ]}
+
+        {:error, reason} ->
+          {price["id"], [error(area, reason)]}
+      end
+    else
+      {price["id"],
+       [
+         pending(
+           area,
+           "would adopt #{price["id"]} (#{price_summary(price)}): give it the lookup key"
+         )
+       ]}
     end
   end
 
@@ -435,30 +572,47 @@ defmodule Gamend.Payments.StripeSetup do
            )
          ]}
 
-      price["active"] != true and opts[:apply] ->
-        case call(:update_price, [price["id"], %{active: true}]) do
-          {:ok, _} -> {price["id"], [changed(area, "unarchived #{price["id"]}")]}
+      (fixes = mutable_fixes(price, wanted)) != %{} and opts[:apply] ->
+        case call(:update_price, [price["id"], fixes]) do
+          {:ok, _} -> {price["id"], [changed(area, "#{price["id"]}: set #{describe(fixes)}")]}
           {:error, reason} -> {price["id"], [error(area, reason)]}
         end
 
-      price["active"] != true ->
-        {price["id"], [pending(area, "#{price["id"]} is archived: would unarchive it")]}
+      (fixes = mutable_fixes(price, wanted)) != %{} ->
+        {price["id"], [pending(area, "#{price["id"]}: would set #{describe(fixes)}")]}
 
       true ->
         {price["id"], [ok(area, "#{price["id"]}: #{price_summary(price)}")]}
     end
   end
 
-  # What a price never changes after it is created. `tax_behavior` may be set
-  # once from "unspecified", but a new price is as simple and leaves no
-  # half-configured one behind.
+  # What may still change on a price: an archived one comes back, and a tax
+  # behaviour left "unspecified" (a price made in the Dashboard without
+  # choosing) may be set, once.
+  defp mutable_fixes(price, wanted) do
+    %{}
+    |> then(&if(price["active"] != true, do: Map.put(&1, :active, true), else: &1))
+    |> then(fn fixes ->
+      if price["tax_behavior"] == "unspecified" and is_binary(wanted[:tax_behavior]),
+        do: Map.put(fixes, :tax_behavior, wanted[:tax_behavior]),
+        else: fixes
+    end)
+  end
+
+  # What a price never changes after it is created. An "unspecified" tax
+  # behaviour is not among them (`mutable_fixes/2` sets it).
   defp fixed_differences(price, wanted) do
+    tax =
+      if price["tax_behavior"] == "unspecified",
+        do: price["tax_behavior"],
+        else: wanted[:tax_behavior] || price["tax_behavior"]
+
     [
       {"product", object_id(price["product"]), wanted.product},
       {"amount", price["unit_amount"], wanted.unit_amount},
       {"currency", price["currency"], String.downcase(wanted.currency)},
       {"interval", get_in(price, ["recurring", "interval"]), recurring_interval(wanted)},
-      {"tax_behavior", price["tax_behavior"], wanted[:tax_behavior] || price["tax_behavior"]}
+      {"tax_behavior", price["tax_behavior"], tax}
     ]
     |> Enum.reject(fn {_name, have, want} -> have == want end)
     |> Enum.map(fn {name, have, want} -> "#{name} #{inspect(have)} not #{inspect(want)}" end)
@@ -509,6 +663,14 @@ defmodule Gamend.Payments.StripeSetup do
   end
 
   # Stripe's 404: `resource_missing` in the raw error, or the status alone.
+  # A read that may find nothing: `:missing` for Stripe's 404.
+  defp fetch(function, id) do
+    case call(function, [id]) do
+      {:ok, object} -> {:ok, object}
+      {:error, reason} -> if missing?(reason), do: :missing, else: {:error, reason}
+    end
+  end
+
   defp missing?(%{extra: %{raw_error: %{"code" => "resource_missing"}}}), do: true
   defp missing?(%{extra: %{http_status: 404}}), do: true
   defp missing?(%{"code" => "resource_missing"}), do: true
@@ -572,6 +734,7 @@ defmodule Gamend.Payments.StripeSetup do
     def create_product(params, opts), do: Stripe.Product.create(params, opts)
     def update_product(id, params, opts), do: Stripe.Product.update(id, params, opts)
     def list_prices(params, opts), do: Stripe.Price.list(params, opts)
+    def retrieve_price(id, opts), do: Stripe.Price.retrieve(id, %{}, opts)
     def create_price(params, opts), do: Stripe.Price.create(params, opts)
     def update_price(id, params, opts), do: Stripe.Price.update(id, params, opts)
   end

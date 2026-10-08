@@ -323,7 +323,7 @@ defmodule GamendWeb.ReportLive do
       <div class="mx-auto max-w-narrow space-y-6">
         <div class="space-y-2">
           <.page_title>{gettext("Report a problem")}</.page_title>
-          <p class="text-base-content/70">
+          <p class="text-muted">
             {gettext("Tell us what is wrong and we will fix it. No account needed.")}
           </p>
         </div>
@@ -345,7 +345,7 @@ defmodule GamendWeb.ReportLive do
             <.icon name={Reports.ui(kind).icon()} class="mt-0.5 size-6 shrink-0" />
             <span>
               <span class="block font-semibold">{Reports.ui(kind).label()}</span>
-              <span class="block text-sm text-base-content/70">
+              <span class="block text-sm text-muted">
                 {Reports.ui(kind).description()}
               </span>
             </span>
@@ -355,7 +355,7 @@ defmodule GamendWeb.ReportLive do
         <.panel :if={@sent} class="space-y-4 text-center" id="report-sent">
           <.icon name="hero-check-circle" class="mx-auto size-12 text-success" />
           <p class="text-lg font-semibold">{gettext("Thanks. We read every report.")}</p>
-          <p :if={user_id_present?(@current_scope)} class="text-base-content/70">
+          <p :if={user_id_present?(@current_scope)} class="text-muted">
             {gettext("We will tell you in your notifications when it is fixed.")}
           </p>
           <button type="button" class="btn btn-surface" phx-click="again">
@@ -455,7 +455,7 @@ defmodule GamendWeb.ReportLive do
               <label
                 for={"report-pick-#{@form_key}"}
                 data-report-drop
-                class="flex cursor-pointer flex-col items-center gap-1 rounded-box border border-dashed border-base-content/30 p-5 text-center text-sm text-base-content/70 hover:border-base-content/60"
+                class="flex cursor-pointer flex-col items-center gap-1 rounded-box border border-dashed border-base-content/30 p-5 text-center text-sm text-muted hover:border-base-content/60"
               >
                 <.icon name="hero-photo" class="size-6" />
                 <span>{gettext("Choose, drop or paste an image")}</span>
@@ -506,7 +506,7 @@ defmodule GamendWeb.ReportLive do
               <label>Website <input type="text" name="website" tabindex="-1" autocomplete="off" /></label>
             </div>
 
-            <p class="text-xs text-base-content/60">
+            <p class="text-xs text-muted">
               {gettext(
                 "Sent with your report: your browser, your screen size and the site's language."
               )}

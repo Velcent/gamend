@@ -11,8 +11,8 @@ defmodule GamendWeb.UserLive.Login do
     <Layouts.app flash={@flash} current_scope={@current_scope} current_path={assigns[:current_path]}>
       <div class="mx-auto max-w-narrow space-y-4">
         <div class="text-center">
-          <h1 class="text-4xl font-black text-base-content/95">{gettext("Log in")}</h1>
-          <p class="text-sm text-base-content/70 mt-2">
+          <h1 class="text-4xl font-black text-base-content">{gettext("Log in")}</h1>
+          <p class="text-sm text-muted mt-2">
             <%= if @current_scope do %>
               {gettext("Confirm")}
             <% else %>
@@ -115,7 +115,7 @@ defmodule GamendWeb.UserLive.Login do
                 {gettext("Forgot password?")}
               </button>
             </div>
-            <p id="forgot_password_hint" class="hidden text-sm text-base-content/70 mb-2">
+            <p id="forgot_password_hint" class="hidden text-sm text-muted mb-2">
               {gettext(
                 "Send yourself a magic link to log in, then set a new password on your Account page."
               )}

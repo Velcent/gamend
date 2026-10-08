@@ -186,7 +186,7 @@ defmodule GamendWeb.AdminLive.Users do
                   />
                   <span class="label-text ml-2">Email (password)</span>
                 </label>
-                <span class="text-base-content/50">|</span>
+                <span class="text-muted">|</span>
                 <label class="label cursor-pointer">
                   <input
                     type="checkbox"
@@ -518,7 +518,7 @@ defmodule GamendWeb.AdminLive.Users do
                   disabled
                 />
                 <label class="label">
-                  <span class="label-text-alt text-base-content/70">
+                  <span class="label-text-alt text-muted">
                     Only the player can change their email, from their account page
                   </span>
                 </label>

@@ -281,7 +281,7 @@ defmodule GamendWeb.AdminLive.Quests do
                     disabled
                   />
                   <label class="label">
-                    <span class="label-text-alt text-base-content/70">
+                    <span class="label-text-alt text-muted">
                       Key cannot be changed after creation
                     </span>
                   </label>
@@ -392,7 +392,7 @@ defmodule GamendWeb.AdminLive.Quests do
             <h3 class="font-bold text-lg">
               Grant: {@selected_quest && @selected_quest.title}
             </h3>
-            <p class="text-sm text-base-content/60 mt-1">
+            <p class="text-sm text-muted mt-1">
               Force-completes every objective for the current period (auto-claim quests pay out immediately).
             </p>
 

@@ -28,7 +28,7 @@ defmodule GamendWeb.UserLive.Settings.NotificationsTab do
       <div class="card bg-base-200 p-4 rounded-lg mt-6 space-y-4">
         <div>
           <div class="font-semibold text-lg">{gettext("Notifications")}</div>
-          <div class="text-sm text-base-content/70">
+          <div class="text-sm text-muted">
             {gettext("Choose what we tell you, and where.")}
           </div>
         </div>
@@ -86,7 +86,7 @@ defmodule GamendWeb.UserLive.Settings.NotificationsTab do
             on={gettext("Turn notifications back on")}
           />
         </div>
-        <p class="text-sm text-base-content/70">
+        <p class="text-sm text-muted">
           {gettext("Account messages, such as sign-in links, are always sent.")}
         </p>
 
@@ -110,7 +110,7 @@ defmodule GamendWeb.UserLive.Settings.NotificationsTab do
               {zone}
             </option>
           </select>
-          <p class="text-sm text-base-content/70">
+          <p class="text-sm text-muted">
             {gettext("Your day and your reminders follow it.")}
           </p>
         </form>

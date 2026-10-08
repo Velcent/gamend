@@ -299,7 +299,7 @@
           <div class="card border border-base-300 bg-base-100">
             <div class="card-body p-4">
               <h3 class="card-title text-base">A card</h3>
-              <p class="text-sm text-base-content/70">With a title and actions.</p>
+              <p class="text-sm text-muted">With a title and actions.</p>
               <div class="card-actions justify-end">
                 <button type="button" class="btn btn-primary btn-sm">Open</button>
               </div>
@@ -338,6 +338,30 @@
           <div class={["size-14 rounded-box border border-base-300", class]}></div>
         </.specimen>
       </.ui_row>
+
+      <%!-- Two text tones. `text-muted` (base-content at 70%, a `@utility`
+            the host stylesheet declares) is the lightest that reads at 4.5:1
+            on every base of both themes; `/60` fell to 4.46 on the light
+            base-200, `/55` (the eyebrow's) to 3.9 (Lighthouse, 2026-10-08). --%>
+      <.ui_row title="Text">
+        <.specimen
+          :for={class <- ~w(text-base-content text-muted)}
+          code={class}
+        >
+          <div class="flex gap-2">
+            <p
+              :for={bg <- ~w(bg-base-100 bg-base-200 bg-base-300)}
+              class={["rounded-box border border-base-300 px-3 py-2 text-sm", bg, class]}
+            >
+              Aa
+            </p>
+          </div>
+        </.specimen>
+      </.ui_row>
+      <p class="text-sm text-muted">
+        Text is <code>text-base-content</code>, or <code>text-muted</code>
+        for a detail. No <code>text-base-content/NN</code> of a page's own: anything lighter reads below 4.5:1 on the light theme. An <code>opacity</code> on a box fades the text in it too, so a muted line inside a faded box falls under it.
+      </p>
     </.ui_section>
 
     <.ui_section id="type" title="Type">
@@ -365,8 +389,8 @@
         <.specimen code="(body)">
           <p>Body text reads at the base size.</p>
         </.specimen>
-        <.specimen code="text-sm text-base-content/70">
-          <p class="text-sm text-base-content/70">A line of detail under something.</p>
+        <.specimen code="text-sm text-muted">
+          <p class="text-sm text-muted">A line of detail under something.</p>
         </.specimen>
         <.specimen code="link link-primary">
           <a href="#type" class="link link-primary">A link in a sentence</a>

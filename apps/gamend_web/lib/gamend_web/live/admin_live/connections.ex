@@ -17,25 +17,25 @@ defmodule GamendWeb.AdminLive.Connections do
         <%!-- Summary cards --%>
         <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
           <div class="bg-base-100 rounded-lg shadow-sm p-4">
-            <div class="text-xs text-base-content/60">Total Connections</div>
+            <div class="text-xs text-muted">Total Connections</div>
             <div class="text-2xl font-bold">{@conn_stats.total_connections}</div>
           </div>
           <div class="bg-base-100 rounded-lg shadow-sm p-4">
-            <div class="text-xs text-base-content/60">WebSockets</div>
+            <div class="text-xs text-muted">WebSockets</div>
             <div class="text-2xl font-bold">{@conn_stats.ws_sockets}</div>
           </div>
           <div class="bg-base-100 rounded-lg shadow-sm p-4">
-            <div class="text-xs text-base-content/60">LiveViews</div>
+            <div class="text-xs text-muted">LiveViews</div>
             <div class="text-2xl font-bold">{@conn_stats.live_views}</div>
           </div>
           <div class="bg-base-100 rounded-lg shadow-sm p-4">
-            <div class="text-xs text-base-content/60">WebRTC</div>
+            <div class="text-xs text-muted">WebRTC</div>
             <div class="text-2xl font-bold">{@conn_stats.webrtc_peers}</div>
           </div>
           <div class="bg-base-100 rounded-lg shadow-sm p-4">
-            <div class="text-xs text-base-content/60">Cluster Nodes</div>
+            <div class="text-xs text-muted">Cluster Nodes</div>
             <div class="text-2xl font-bold">{@cluster_size}</div>
-            <div class="text-xs text-base-content/70 truncate">{node()}</div>
+            <div class="text-xs text-muted truncate">{node()}</div>
           </div>
         </div>
 
@@ -61,7 +61,7 @@ defmodule GamendWeb.AdminLive.Connections do
                 WebSocket Channels
                 <span class="badge badge-sm badge-primary">{@conn_stats.total_channels}</span>
               </h2>
-              <p class="text-xs text-base-content/60 mb-2">
+              <p class="text-xs text-muted mb-2">
                 {ngettext(
                   "Channel processes running on %{count} WebSocket connection.",
                   "Channel processes running on %{count} WebSocket connections.",
@@ -81,42 +81,42 @@ defmodule GamendWeb.AdminLive.Connections do
                     <tr>
                       <td class="font-medium">User</td>
                       <td class="text-right font-mono">{@conn_stats.user_channels}</td>
-                      <td class="text-right text-xs text-base-content/60">
+                      <td class="text-right text-xs text-muted">
                         Authenticated users (notifications, presence)
                       </td>
                     </tr>
                     <tr>
                       <td class="font-medium">Lobby</td>
                       <td class="text-right font-mono">{@conn_stats.lobby_channels}</td>
-                      <td class="text-right text-xs text-base-content/60">
+                      <td class="text-right text-xs text-muted">
                         Per-lobby events (members + spectators)
                       </td>
                     </tr>
                     <tr>
                       <td class="font-medium">Lobbies</td>
                       <td class="text-right font-mono">{@conn_stats.lobbies_channels}</td>
-                      <td class="text-right text-xs text-base-content/60">
+                      <td class="text-right text-xs text-muted">
                         Global lobby list feed
                       </td>
                     </tr>
                     <tr>
                       <td class="font-medium">Group</td>
                       <td class="text-right font-mono">{@conn_stats.group_channels}</td>
-                      <td class="text-right text-xs text-base-content/60">
+                      <td class="text-right text-xs text-muted">
                         Per-group events (members)
                       </td>
                     </tr>
                     <tr>
                       <td class="font-medium">Groups</td>
                       <td class="text-right font-mono">{@conn_stats.groups_channels}</td>
-                      <td class="text-right text-xs text-base-content/60">
+                      <td class="text-right text-xs text-muted">
                         Global group list feed
                       </td>
                     </tr>
                     <tr>
                       <td class="font-medium">Party</td>
                       <td class="text-right font-mono">{@conn_stats.party_channels}</td>
-                      <td class="text-right text-xs text-base-content/60">
+                      <td class="text-right text-xs text-muted">
                         Per-party events (members)
                       </td>
                     </tr>
@@ -140,11 +140,11 @@ defmodule GamendWeb.AdminLive.Connections do
                   LiveView Sessions
                   <span class="badge badge-sm badge-primary">{@conn_stats.live_views}</span>
                 </h2>
-                <p class="text-xs text-base-content/60 mb-2">
+                <p class="text-xs text-muted mb-2">
                   Active browser tabs with server-rendered real-time pages
                 </p>
                 <%= if @live_view_pages == [] do %>
-                  <div class="text-center py-4 text-base-content/70 text-sm">
+                  <div class="text-center py-4 text-muted text-sm">
                     No LiveView sessions active
                   </div>
                 <% else %>
@@ -173,11 +173,11 @@ defmodule GamendWeb.AdminLive.Connections do
                 <h2 class="card-title text-lg flex items-center gap-2">
                   WebRTC <span class="badge badge-sm badge-primary">{@conn_stats.webrtc_peers}</span>
                 </h2>
-                <p class="text-xs text-base-content/60 mb-2">
+                <p class="text-xs text-muted mb-2">
                   Active DataChannel connections
                 </p>
                 <%= if @webrtc_users == [] do %>
-                  <div class="text-center py-4 text-base-content/70 text-sm">
+                  <div class="text-center py-4 text-muted text-sm">
                     No WebRTC peers active
                   </div>
                 <% else %>
@@ -194,7 +194,7 @@ defmodule GamendWeb.AdminLive.Connections do
                           <td class="text-sm" title={peer.user_id}>
                             {user_display(@user_names[peer.user_id])}
                           </td>
-                          <td class="font-mono text-xs text-base-content/70">{peer.pid}</td>
+                          <td class="font-mono text-xs text-muted">{peer.pid}</td>
                         </tr>
                       </tbody>
                     </table>
@@ -212,7 +212,7 @@ defmodule GamendWeb.AdminLive.Connections do
               Connected Users
               <span class="badge badge-sm badge-primary">{@total_connected_users}</span>
             </h2>
-            <p class="text-sm text-base-content/60 mb-4">
+            <p class="text-sm text-muted mb-4">
               All users with active connections (WebSocket channels, LiveView, or WebRTC).
             </p>
 
@@ -239,7 +239,7 @@ defmodule GamendWeb.AdminLive.Connections do
             </div>
 
             <%= if @paged_users == [] do %>
-              <div class="text-center py-8 text-base-content/70">
+              <div class="text-center py-8 text-muted">
                 No users currently connected
               </div>
             <% else %>
@@ -292,7 +292,7 @@ defmodule GamendWeb.AdminLive.Connections do
                           </span>
                         </div>
                       </td>
-                      <td class="text-xs text-base-content/70">
+                      <td class="text-xs text-muted">
                         <span class="font-mono">
                           {Enum.join(user.detail_labels, ", ")}
                         </span>

@@ -226,7 +226,7 @@ defmodule GamendWeb.HostLayoutShell do
         </main>
 
         <GamendWeb.HostLayouts.flash_group flash={@flash} />
-        <footer class="px-4 py-8 sm:px-6 lg:px-8 text-sm text-base-content/70">
+        <footer class="px-4 py-8 sm:px-6 lg:px-8 text-sm text-muted">
           <div class="mx-auto grid max-w-2xl gap-6 md:max-w-3xl md:grid-cols-2 lg:max-w-4xl xl:max-w-6xl xl:grid-cols-4">
             <%!-- The column label is a `<p>`, not an `<h2>`: these name link
                   groups, not document sections, and as headings they were half
@@ -358,7 +358,7 @@ defmodule GamendWeb.HostLayoutShell do
         >
         </ul>
 
-        <p data-gamend-search-empty hidden class="px-3 py-4 text-sm text-base-content/60">
+        <p data-gamend-search-empty hidden class="px-3 py-4 text-sm text-muted">
           {GamendWeb.HostLayouts.translate("No results.")}
         </p>
 
@@ -375,7 +375,7 @@ defmodule GamendWeb.HostLayoutShell do
               class="flex w-full min-w-0 items-center justify-between gap-3 rounded-lg px-3 py-2"
             >
               <span data-row-title class="min-w-0 truncate font-semibold"></span>
-              <span data-row-subtitle class="min-w-0 truncate text-xs opacity-60"></span>
+              <span data-row-subtitle class="min-w-0 truncate text-xs text-muted"></span>
             </a>
           </li>
         </template>
@@ -417,7 +417,7 @@ defmodule GamendWeb.HostLayoutShell do
     <nav
       :if={length(@trail) > 1}
       aria-label={GamendWeb.HostLayouts.translate("Breadcrumb")}
-      class="hidden min-w-0 text-sm text-base-content/60 sm:flex @max-[22rem]:hidden"
+      class="hidden min-w-0 text-sm text-muted sm:flex @max-[22rem]:hidden"
     >
       <ol class="flex h-5 min-w-0 flex-row-reverse flex-wrap items-center justify-end gap-x-2 overflow-hidden">
         <li
@@ -438,7 +438,7 @@ defmodule GamendWeb.HostLayoutShell do
             :if={is_nil(path)}
             aria-current="page"
             title={label}
-            class="truncate text-base-content/90"
+            class="truncate text-base-content"
           >
             {label}
           </span>

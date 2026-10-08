@@ -396,7 +396,7 @@ defmodule GamendWeb.GroupsLive do
     <Layouts.app flash={@flash} current_scope={@current_scope} current_path={assigns[:current_path]}>
       <div class="space-y-6">
         <div>
-          <h1 class="text-4xl font-black text-base-content/95">{gettext("Groups")}</h1>
+          <h1 class="text-4xl font-black text-base-content">{gettext("Groups")}</h1>
         </div>
 
         <%= if @selected_group do %>
@@ -450,7 +450,7 @@ defmodule GamendWeb.GroupsLive do
     </div>
 
     <div class="flex gap-2 items-center" id="groups-sort">
-      <span class="text-sm text-base-content/60">{gettext("Sort by:")}</span>
+      <span class="text-sm text-muted">{gettext("Sort by:")}</span>
       <button
         :for={
           {label, value} <- [
@@ -504,7 +504,7 @@ defmodule GamendWeb.GroupsLive do
     </div>
 
     <%= if @groups == [] do %>
-      <div class="text-center py-12 text-base-content/60" id="groups-empty">
+      <div class="text-center py-12 text-muted" id="groups-empty">
         <p>{gettext("No results.")}</p>
       </div>
     <% end %>
@@ -569,7 +569,7 @@ defmodule GamendWeb.GroupsLive do
             <.entity_icon
               icon_url={@selected_group.icon_url}
               type={:group}
-              class="w-7 h-7 text-base-content/60"
+              class="w-7 h-7 text-muted"
             />
             {@selected_group.title}
           </h2>
@@ -579,7 +579,7 @@ defmodule GamendWeb.GroupsLive do
             <% else %>
               <span class="badge badge-warning">{gettext("Private")}</span>
             <% end %>
-            <span class="text-sm text-base-content/60">
+            <span class="text-sm text-muted">
               <.timestamp at={@selected_group.inserted_at} format="date" />
             </span>
           </div>
@@ -588,7 +588,7 @@ defmodule GamendWeb.GroupsLive do
     </div>
 
     <%= if @selected_group.description && @selected_group.description != "" do %>
-      <p class="text-base-content/70 mb-6">{@selected_group.description}</p>
+      <p class="text-muted mb-6">{@selected_group.description}</p>
     <% end %>
 
     <%!-- Action card --%>
@@ -596,7 +596,7 @@ defmodule GamendWeb.GroupsLive do
       <div class="card-body py-4">
         <div class="flex items-center justify-between">
           <div>
-            <span class="text-sm text-base-content/70">{gettext("Members")}</span>
+            <span class="text-sm text-muted">{gettext("Members")}</span>
             <div class="text-2xl font-bold">{@members_total} / {@selected_group.max_members}</div>
           </div>
           <div>
@@ -664,7 +664,7 @@ defmodule GamendWeb.GroupsLive do
         </div>
 
         <%= if @selected_members == [] do %>
-          <div class="text-center py-8 text-base-content/60">
+          <div class="text-center py-8 text-muted">
             <p>{gettext("No results.")}</p>
           </div>
         <% end %>

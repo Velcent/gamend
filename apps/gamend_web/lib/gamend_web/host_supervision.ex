@@ -84,6 +84,8 @@ defmodule GamendWeb.HostSupervision do
     Gamend.Schedule.start_link()
     IpBan.init_table()
     GeoCountry.init_table()
+    # The crawler token pattern and the DNS-check cache, read per request.
+    GamendWeb.Crawlers.init()
     # Word blocklist + active mutes, read on every outgoing chat message.
     ModerationCache.init_table()
 

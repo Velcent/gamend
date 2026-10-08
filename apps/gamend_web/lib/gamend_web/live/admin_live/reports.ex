@@ -235,7 +235,7 @@ defmodule GamendWeb.AdminLive.Reports do
             </div>
           </div>
 
-          <p class="text-sm text-base-content/70">
+          <p class="text-sm text-muted">
             {gettext(
               "What players reported about pages and content, from /report and the game. Open: %{open}, fixed: %{fixed}.",
               open: Map.get(@by_status, "open", 0),
@@ -303,7 +303,7 @@ defmodule GamendWeb.AdminLive.Reports do
             </button>
           </form>
 
-          <div :if={@reports == []} class="py-8 text-center text-base-content/60">
+          <div :if={@reports == []} class="py-8 text-center text-muted">
             {gettext("No reports.")}
           </div>
 
@@ -331,7 +331,7 @@ defmodule GamendWeb.AdminLive.Reports do
                 >
                   ×{@groups[Reports.group_key(report)]}
                 </button>
-                <span class="text-base-content/60">
+                <span class="text-muted">
                   {age(report.inserted_at)} · <.timestamp at={report.inserted_at} format="full" />
                 </span>
               </div>
@@ -346,7 +346,7 @@ defmodule GamendWeb.AdminLive.Reports do
 
               <dl :if={report.data != %{}} class="grid grid-cols-[auto_1fr] gap-x-3 text-sm">
                 <%= for {key, value} <- report.data do %>
-                  <dt class="text-base-content/60">{key}</dt>
+                  <dt class="text-muted">{key}</dt>
                   <dd class="break-words">{value}</dd>
                 <% end %>
               </dl>
@@ -370,7 +370,7 @@ defmodule GamendWeb.AdminLive.Reports do
                 </a>
               </div>
 
-              <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-base-content/60">
+              <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
                 <span>
                   {user_label(report)}
                   <span :if={report.user_id} class="font-mono">{report.user_id}</span>
@@ -388,7 +388,7 @@ defmodule GamendWeb.AdminLive.Reports do
                 </span>
               </div>
 
-              <div :if={report.status != "open"} class="text-xs text-base-content/70">
+              <div :if={report.status != "open"} class="text-xs text-muted">
                 {gettext("Closed")}
                 <span :if={report.resolved_by_user}>
                   {gettext("by")} {user_display(report.resolved_by_user)}
@@ -486,7 +486,7 @@ defmodule GamendWeb.AdminLive.Reports do
               <textarea name="message" rows="3" class="textarea w-full text-sm">{@form["message"]}</textarea>
             </div>
 
-            <p :if={!@action_report.user_id} class="text-xs text-base-content/60">
+            <p :if={!@action_report.user_id} class="text-xs text-muted">
               {gettext("Filed without an account: there is nobody to notify.")}
               <a :if={@action_report.email} href={"mailto:" <> @action_report.email} class="link">
                 {@action_report.email}

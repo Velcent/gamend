@@ -62,7 +62,7 @@ defmodule GamendWeb.UserLive.Settings do
     ~H"""
     <Layouts.app flash={@flash} current_scope={@current_scope} current_path={assigns[:current_path]}>
       <div>
-        <h1 class="text-4xl font-black text-base-content/95">{gettext("Account")}</h1>
+        <h1 class="text-4xl font-black text-base-content">{gettext("Account")}</h1>
       </div>
 
       <div class="text-center">
@@ -73,7 +73,7 @@ defmodule GamendWeb.UserLive.Settings do
             <div class="flex items-start justify-between">
               <div>
                 <strong>{gettext("This sign-in is already linked to another account")}</strong>
-                <div class="text-sm text-base-content/70">
+                <div class="text-sm text-muted">
                   {@conflict_provider} ({@conflict_user.id})
                 </div>
               </div>
@@ -120,7 +120,7 @@ defmodule GamendWeb.UserLive.Settings do
             "px-4 py-2.5 text-sm font-medium rounded-t-lg transition-colors whitespace-nowrap",
             if(@settings_tab == tab,
               do: "bg-primary text-primary-content shadow-sm",
-              else: "text-base-content/60 hover:text-base-content hover:bg-base-200/50"
+              else: "text-muted hover:text-base-content hover:bg-base-200/50"
             )
           ]}
         >

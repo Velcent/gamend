@@ -318,7 +318,7 @@ defmodule GamendWeb.DocsLive do
           <:subtitle :if={@subtitle}>{@subtitle}</:subtitle>
         </.header>
 
-        <p :if={@categories == []} class="text-base-content/60">{@empty_message}</p>
+        <p :if={@categories == []} class="text-muted">{@empty_message}</p>
 
         <section :for={category <- @categories} class="space-y-2">
           <h2 class="flex items-center gap-2 border-t border-base-300/60 pt-6 font-semibold uppercase tracking-[0.24em]">
@@ -336,7 +336,7 @@ defmodule GamendWeb.DocsLive do
               <%!-- The title wraps rather than push the card off a phone,
                     where the one-line summary has no room and is left out. --%>
               <span class="card-title min-w-0 text-xl">{guide.title}</span>
-              <span class="hidden min-w-0 flex-1 basis-0 text-sm text-base-content/50 sm:line-clamp-1">
+              <span class="hidden min-w-0 flex-1 basis-0 text-sm text-muted sm:line-clamp-1">
                 {guide.summary}
               </span>
               <.icon name="hero-chevron-right" class="ms-auto size-4 shrink-0" />
@@ -431,7 +431,7 @@ defmodule GamendWeb.DocsLive do
           <:subtitle :if={@subtitle}>{@subtitle}</:subtitle>
         </.header>
 
-        <p :if={@tree == []} class="text-base-content/60">{@empty_message}</p>
+        <p :if={@tree == []} class="text-muted">{@empty_message}</p>
 
         <.entry_cards entries={@tree} item_path={@item_path} />
       </.sidebar_frame>
@@ -630,7 +630,7 @@ defmodule GamendWeb.DocsLive do
 
       <aside :if={@toc != []} class="hidden xl:block">
         <nav class="sticky top-24 space-y-2 text-sm" aria-label={gettext("On this page")}>
-          <p class="font-semibold uppercase tracking-[0.2em] text-base-content/70">
+          <p class="font-semibold uppercase tracking-[0.2em] text-muted">
             {gettext("On this page")}
           </p>
           <.toc_list toc={@toc} />
@@ -733,7 +733,7 @@ defmodule GamendWeb.DocsLive do
     ~H"""
     <ul class="space-y-1">
       <li :for={heading <- @toc} class={heading.level == 3 && "ms-3"}>
-        <a href={"##{heading.id}"} class="link link-hover text-base-content/80">{heading.text}</a>
+        <a href={"##{heading.id}"} class="link link-hover text-muted">{heading.text}</a>
       </li>
     </ul>
     """
@@ -750,7 +750,7 @@ defmodule GamendWeb.DocsLive do
     <nav
       :if={@breadcrumbs != []}
       aria-label={gettext("Breadcrumb")}
-      class="text-sm text-base-content/70"
+      class="text-sm text-muted"
     >
       <ol class="flex flex-wrap items-center gap-1">
         <li>
@@ -794,7 +794,7 @@ defmodule GamendWeb.DocsLive do
             />
             {entry.label}
           </span>
-          <span class="line-clamp-2 text-sm text-base-content/70">
+          <span class="line-clamp-2 text-sm text-muted">
             {entry_summary(entry)}
           </span>
         </div>

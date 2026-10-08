@@ -27,7 +27,7 @@ defmodule GamendWeb.AdminLive.Index do
       <div class="space-y-6">
         <div>
           <h1 class="text-3xl font-bold">Admin Dashboard</h1>
-          <p class="mt-1 text-sm text-base-content/70">System administration</p>
+          <p class="mt-1 text-sm text-muted">System administration</p>
         </div>
 
         <div class="flex gap-4 flex-wrap">
@@ -146,7 +146,7 @@ defmodule GamendWeb.AdminLive.Index do
                   </.link>
                 </div>
                 <div class="text-2xl font-bold">{@users_count}</div>
-                <div class="text-xs text-base-content/60 mt-2 space-y-1">
+                <div class="text-xs text-muted mt-2 space-y-1">
                   <div>With password: {@users_password}</div>
                   <div>Google: {@users_google}</div>
                   <div>Facebook: {@users_facebook}</div>
@@ -161,7 +161,7 @@ defmodule GamendWeb.AdminLive.Index do
               <%!-- 2. Registration --%>
               <div class="card bg-base-100 p-4">
                 <div class="text-sm font-semibold mb-2">Registration</div>
-                <div class="text-xs text-base-content/60 mt-2 space-y-1">
+                <div class="text-xs text-muted mt-2 space-y-1">
                   <div class="font-semibold">Today: {@snapshot.activity.new_users_1d}</div>
                   <div class="font-semibold mt-2">
                     Last 7 days: {@snapshot.activity.new_users_7d}
@@ -191,7 +191,7 @@ defmodule GamendWeb.AdminLive.Index do
                     View →
                   </.link>
                 </div>
-                <div class="text-xs text-base-content/60 mt-2 space-y-1">
+                <div class="text-xs text-muted mt-2 space-y-1">
                   <div class="font-semibold">Today (DAU): {@snapshot.activity.dau}</div>
                   <div class="font-semibold mt-2">Last 7 days (WAU): {@snapshot.activity.wau}</div>
                   <div class="font-semibold mt-2">Last 30 days (MAU): {@snapshot.activity.mau}</div>
@@ -216,7 +216,7 @@ defmodule GamendWeb.AdminLive.Index do
                   </.link>
                 </div>
                 <div class="text-2xl font-bold">{@lobbies_count}</div>
-                <div class="text-xs text-base-content/60 mt-2 space-y-1">
+                <div class="text-xs text-muted mt-2 space-y-1">
                   <div>Hostless: {@lobbies_hostless}</div>
                   <div>Hidden: {@lobbies_hidden}</div>
                   <div>Locked: {@lobbies_locked}</div>
@@ -233,7 +233,7 @@ defmodule GamendWeb.AdminLive.Index do
                   </.link>
                 </div>
                 <div class="text-2xl font-bold">{@leaderboards_count}</div>
-                <div class="text-xs text-base-content/60 mt-2 space-y-1">
+                <div class="text-xs text-muted mt-2 space-y-1">
                   <div>Scores total: {@leaderboard_records}</div>
                 </div>
               </div>
@@ -247,7 +247,7 @@ defmodule GamendWeb.AdminLive.Index do
                   </.link>
                 </div>
                 <div class="text-2xl font-bold">{@tournaments_count}</div>
-                <div class="text-xs text-base-content/60 mt-2 space-y-1">
+                <div class="text-xs text-muted mt-2 space-y-1">
                   <div>
                     Running: {state_count(@tournament_stats.tournaments, "running")} · Registration: {state_count(
                       @tournament_stats.tournaments,
@@ -291,7 +291,7 @@ defmodule GamendWeb.AdminLive.Index do
                   </.link>
                 </div>
                 <div class="text-2xl font-bold">{@matchmaking_stats.queued}</div>
-                <div class="text-xs text-base-content/60 mt-2 space-y-1">
+                <div class="text-xs text-muted mt-2 space-y-1">
                   <div>In queue now: {@matchmaking_stats.queued}</div>
                   <div>
                     Matched: {@matchmaking_stats.matched} · Cancelled: {@matchmaking_stats.cancelled}
@@ -316,7 +316,7 @@ defmodule GamendWeb.AdminLive.Index do
                   </.link>
                 </div>
                 <div class="text-2xl font-bold">{@groups_count}</div>
-                <div class="text-xs text-base-content/60 mt-2 space-y-1">
+                <div class="text-xs text-muted mt-2 space-y-1">
                   <div>Public: {@groups_public}</div>
                   <div>Private: {@groups_private}</div>
                   <div>Hidden: {@groups_hidden}</div>
@@ -333,7 +333,7 @@ defmodule GamendWeb.AdminLive.Index do
                   </.link>
                 </div>
                 <div class="text-2xl font-bold">{@parties_count}</div>
-                <div class="text-xs text-base-content/60 mt-2 space-y-1">
+                <div class="text-xs text-muted mt-2 space-y-1">
                   <div>Total members: {@parties_members}</div>
                 </div>
               </div>
@@ -347,7 +347,7 @@ defmodule GamendWeb.AdminLive.Index do
                   </.link>
                 </div>
                 <div class="text-2xl font-bold">{@chat_count}</div>
-                <div class="text-xs text-base-content/60 mt-2 space-y-1">
+                <div class="text-xs text-muted mt-2 space-y-1">
                   <div>Users who wrote: {@chat_senders}</div>
                   <div>Users who never wrote: {@chat_silent}</div>
                   <div>In lobbies: {@chat_by_lobby}</div>
@@ -365,7 +365,7 @@ defmodule GamendWeb.AdminLive.Index do
                   </.link>
                 </div>
                 <div class="text-2xl font-bold">{@open_reports}</div>
-                <div class="text-xs text-base-content/60 mt-2 space-y-1">
+                <div class="text-xs text-muted mt-2 space-y-1">
                   <div>Open reports</div>
                   <div>
                     Active mutes:
@@ -388,7 +388,7 @@ defmodule GamendWeb.AdminLive.Index do
                 <div class="text-2xl font-bold">
                   {ngettext("%{count} language", "%{count} languages", length(@translation_stats))}
                 </div>
-                <div class="text-xs text-base-content/60 mt-2 space-y-1">
+                <div class="text-xs text-muted mt-2 space-y-1">
                   <div :for={stats <- @translation_stats} class="flex items-center gap-2">
                     <span class="font-mono font-semibold w-6">{String.upcase(stats.locale)}</span>
                     <div class="flex-1 bg-base-300 rounded-full h-1.5">
@@ -415,7 +415,7 @@ defmodule GamendWeb.AdminLive.Index do
                   </.link>
                 </div>
                 <div class="text-2xl font-bold">{@kv_count}</div>
-                <div class="text-xs text-base-content/60 mt-2 space-y-1">
+                <div class="text-xs text-muted mt-2 space-y-1">
                   <div>Global entries: {@kv_global}</div>
                   <div>User entries: {@kv_user}</div>
                 </div>
@@ -430,7 +430,7 @@ defmodule GamendWeb.AdminLive.Index do
                   </.link>
                 </div>
                 <div class="text-2xl font-bold">{@quest_stats.definitions}</div>
-                <div class="text-xs text-base-content/60 mt-2 space-y-1">
+                <div class="text-xs text-muted mt-2 space-y-1">
                   <div>Active: {@quest_stats.active_definitions}</div>
                   <div>Completions today: {@quest_stats.completions_today}</div>
                   <div>Claims today: {@quest_stats.claims_today}</div>
@@ -450,7 +450,7 @@ defmodule GamendWeb.AdminLive.Index do
                   </.link>
                 </div>
                 <div class="text-2xl font-bold">{@conn_stats.total_connections}</div>
-                <div class="text-xs text-base-content/60 mt-2 space-y-1">
+                <div class="text-xs text-muted mt-2 space-y-1">
                   <div>WS sockets: {@conn_stats.ws_sockets}</div>
                   <div>WS channels: {@conn_stats.total_channels}</div>
                   <div>LiveViews: {@conn_stats.live_views}</div>
@@ -469,7 +469,7 @@ defmodule GamendWeb.AdminLive.Index do
                 <div class="text-2xl font-bold">
                   {GamendWeb.ConnectionTracker.format_uptime(@sys_stats.uptime_seconds)}
                 </div>
-                <div class="text-xs text-base-content/60 mt-2 space-y-1">
+                <div class="text-xs text-muted mt-2 space-y-1">
                   <div>OTP: {@sys_stats.otp_release}</div>
                   <div>Schedulers: {@sys_stats.schedulers}</div>
                   <div>Node: {@sys_stats.node}</div>
@@ -491,7 +491,7 @@ defmodule GamendWeb.AdminLive.Index do
                     View →
                   </.link>
                 </div>
-                <div class="text-xs text-base-content/60 mt-2 space-y-2">
+                <div class="text-xs text-muted mt-2 space-y-2">
                   <div class="flex justify-between items-center">
                     <span>Active IP bans</span>
                     <span class={[
@@ -522,13 +522,13 @@ defmodule GamendWeb.AdminLive.Index do
                   </.link>
                 </div>
                 <div class="text-2xl font-bold font-mono">{format_number(@geo_total)}</div>
-                <div class="text-xs text-base-content/60 mt-1">
+                <div class="text-xs text-muted mt-1">
                   {countries_label(length(@geo_stats))} &middot; {if(@geoip_available?,
                     do: "MMDB",
                     else: "CF header"
                   )}
                 </div>
-                <div class="text-xs text-base-content/60 mt-2 flex justify-between items-center">
+                <div class="text-xs text-muted mt-2 flex justify-between items-center">
                   <span>Last hour</span>
                   <span class="font-mono font-semibold">
                     {format_number(@geo_total_1h)} reqs &middot; {countries_label(
@@ -536,7 +536,16 @@ defmodule GamendWeb.AdminLive.Index do
                     )}
                   </span>
                 </div>
-                <div :if={@geo_stats_1h != []} class="text-xs text-base-content/60 mt-1 space-y-1">
+                <div class="text-xs text-muted mt-1 flex justify-between items-center">
+                  <span>Crawlers, last hour</span>
+                  <span class="font-mono font-semibold">
+                    {format_number(@geo_crawlers_1h)} &middot; {if(@geo_total_1h > 0,
+                      do: round(@geo_crawlers_1h / @geo_total_1h * 100),
+                      else: 0
+                    )}%
+                  </span>
+                </div>
+                <div :if={@geo_stats_1h != []} class="text-xs text-muted mt-1 space-y-1">
                   <%= for {country, count} <- Enum.take(@geo_stats_1h, 3) do %>
                     <div class="flex justify-between items-center">
                       <span class="font-mono">{GamendWeb.AdminLive.Shared.country_flag(country)} {country}</span>
@@ -559,9 +568,9 @@ defmodule GamendWeb.AdminLive.Index do
                 </div>
                 <div class="text-2xl font-bold">
                   {@lobby_snapshot_runs.total}
-                  <span class="text-sm font-normal text-base-content/60 ml-1">recent runs</span>
+                  <span class="text-sm font-normal text-muted ml-1">recent runs</span>
                 </div>
-                <div class="text-xs text-base-content/60 mt-2 space-y-1">
+                <div class="text-xs text-muted mt-2 space-y-1">
                   <div class="flex justify-between">
                     <span>Flagged</span>
                     <span class={["font-mono", @lobby_snapshot_runs.flagged > 0 && "text-error"]}>
@@ -582,9 +591,9 @@ defmodule GamendWeb.AdminLive.Index do
                 <div class="text-2xl font-bold">
                   <span :if={@log_recent_errors > 0} class="text-error">{@log_recent_errors}</span>
                   <span :if={@log_recent_errors == 0} class="text-success">0</span>
-                  <span class="text-sm font-normal text-base-content/60 ml-1">errors (1h)</span>
+                  <span class="text-sm font-normal text-muted ml-1">errors (1h)</span>
                 </div>
-                <div class="text-xs text-base-content/60 mt-2 space-y-1">
+                <div class="text-xs text-muted mt-2 space-y-1">
                   <div class="flex justify-between">
                     <span>Buffered</span>
                     <span class="font-mono">{@log_total_buffered}</span>
@@ -612,9 +621,9 @@ defmodule GamendWeb.AdminLive.Index do
                 </div>
                 <div class="text-2xl font-bold">
                   {@oban_stats.total}
-                  <span class="text-sm font-normal text-base-content/60 ml-1">jobs</span>
+                  <span class="text-sm font-normal text-muted ml-1">jobs</span>
                 </div>
-                <div class="text-xs text-base-content/60 mt-2 space-y-1">
+                <div class="text-xs text-muted mt-2 space-y-1">
                   <div class="flex justify-between">
                     <span>Executing</span>
                     <span class="font-mono">{@oban_stats.executing}</span>
@@ -645,7 +654,7 @@ defmodule GamendWeb.AdminLive.Index do
                   </.link>
                 </div>
                 <div class="text-2xl font-bold">{@storage_info.adapter}</div>
-                <div class="text-xs text-base-content/60 mt-2 space-y-1">
+                <div class="text-xs text-muted mt-2 space-y-1">
                   <div class="flex justify-between">
                     <span>Target</span>
                     <span class="font-mono truncate ml-2">{@storage_info.detail}</span>
@@ -663,9 +672,9 @@ defmodule GamendWeb.AdminLive.Index do
                 </div>
                 <div class="text-2xl font-bold">
                   {@economy_stats.wallets}
-                  <span class="text-sm font-normal text-base-content/60 ml-1">wallets</span>
+                  <span class="text-sm font-normal text-muted ml-1">wallets</span>
                 </div>
-                <div class="text-xs text-base-content/60 mt-2 space-y-1">
+                <div class="text-xs text-muted mt-2 space-y-1">
                   <div class="flex justify-between">
                     <span>Ledger entries</span>
                     <span class="font-mono">{@economy_stats.ledger}</span>
@@ -682,7 +691,7 @@ defmodule GamendWeb.AdminLive.Index do
                   </.link>
                 </div>
                 <div class="text-2xl font-bold">{@payments_stats.purchases}</div>
-                <div class="text-xs text-base-content/60 mt-2 space-y-1">
+                <div class="text-xs text-muted mt-2 space-y-1">
                   <div>Completed: {@payments_stats.completed_purchases}</div>
                   <div>Products: {@payments_stats.products}</div>
                   <div>Provider SKUs: {@payments_stats.provider_products}</div>
@@ -694,13 +703,13 @@ defmodule GamendWeb.AdminLive.Index do
               <div class="card bg-base-100 p-4">
                 <div class="flex items-center justify-between mb-2">
                   <div class="text-sm font-semibold">Cache &amp; limits</div>
-                  <span class="text-xs text-base-content/70">since boot</span>
+                  <span class="text-xs text-muted">since boot</span>
                 </div>
                 <div class="text-2xl font-bold">
                   {cache_hit_rate_label(@cache_stats)}
-                  <span class="text-sm font-normal text-base-content/60 ml-1">hit rate</span>
+                  <span class="text-sm font-normal text-muted ml-1">hit rate</span>
                 </div>
-                <div class="text-xs text-base-content/60 mt-2 space-y-1">
+                <div class="text-xs text-muted mt-2 space-y-1">
                   <div
                     :for={row <- Enum.take(@cache_stats.cache, 6)}
                     class="flex justify-between"
@@ -864,6 +873,7 @@ defmodule GamendWeb.AdminLive.Index do
        geo_total: geo.total_all,
        geo_total_1h: geo.total_1h,
        geo_stats_1h: geo.stats_1h,
+       geo_crawlers_1h: geo.crawlers_1h,
        geoip_available?: GeoCountry.geoip_available?(),
        log_level_counts: log_level_counts,
        log_total_buffered: log_total_buffered,
@@ -895,6 +905,7 @@ defmodule GamendWeb.AdminLive.Index do
        geo_total: geo.total_all,
        geo_total_1h: geo.total_1h,
        geo_stats_1h: geo.stats_1h,
+       geo_crawlers_1h: geo.crawlers_1h,
        log_recent_errors: safe_log_recent_errors(),
        cache_stats: Gamend.Cache.Stats.snapshot()
      )}

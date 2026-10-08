@@ -102,9 +102,9 @@ defmodule GamendWeb.LeaderboardsLive do
     <Layouts.app flash={@flash} current_scope={@current_scope} current_path={assigns[:current_path]}>
       <div class="space-y-6">
         <div>
-          <h1 class="text-4xl font-black text-base-content/95">
+          <h1 class="text-4xl font-black text-base-content">
             {gettext("Leaderboards")}
-            <span class="text-base-content/70 font-normal">({@count})</span>
+            <span class="text-muted font-normal">({@count})</span>
           </h1>
         </div>
 
@@ -166,7 +166,7 @@ defmodule GamendWeb.LeaderboardsLive do
     </div>
 
     <%= if @groups == [] do %>
-      <div class="text-center py-12 text-base-content/60">
+      <div class="text-center py-12 text-muted">
         <p>{gettext("No results.")}</p>
       </div>
     <% end %>
@@ -197,7 +197,7 @@ defmodule GamendWeb.LeaderboardsLive do
             <.entity_icon
               icon_url={@leaderboard.icon_url}
               type={:leaderboard}
-              class="w-7 h-7 text-base-content/60"
+              class="w-7 h-7 text-muted"
             />
             {@leaderboard.title}
           </h2>
@@ -208,7 +208,7 @@ defmodule GamendWeb.LeaderboardsLive do
               <span class="badge badge-neutral">{gettext("Ended")}</span>
             <% end %>
             <%= if @leaderboard.starts_at || @leaderboard.ends_at do %>
-              <span class="text-sm text-base-content/60">
+              <span class="text-sm text-muted">
                 <%= cond do %>
                   <% @leaderboard.starts_at && @leaderboard.ends_at -> %>
                     <.timestamp at={@leaderboard.starts_at} format="date" /> —
@@ -239,7 +239,7 @@ defmodule GamendWeb.LeaderboardsLive do
             <span class="font-medium">
               {"##{length(@slug_leaderboards) - @current_season_index}"}
             </span>
-            <span class="text-base-content/60">
+            <span class="text-muted">
               {"/ #{length(@slug_leaderboards)}"}
             </span>
           </div>
@@ -256,7 +256,7 @@ defmodule GamendWeb.LeaderboardsLive do
 
     <% localized_desc = @leaderboard.description %>
     <%= if localized_desc do %>
-      <p class="text-base-content/70 mb-6">{localized_desc}</p>
+      <p class="text-muted mb-6">{localized_desc}</p>
     <% end %>
 
     <%= if @user_record do %>
@@ -264,13 +264,13 @@ defmodule GamendWeb.LeaderboardsLive do
         <div class="card-body py-4">
           <div class="flex items-center justify-between">
             <div>
-              <span class="text-sm text-base-content/70">
+              <span class="text-sm text-muted">
                 {gettext("Rank")}
               </span>
               <div class="text-2xl font-bold">#{@user_record.rank}</div>
             </div>
             <div class="text-end">
-              <span class="text-sm text-base-content/70">
+              <span class="text-sm text-muted">
                 {score_label(@leaderboard)}
               </span>
               <div class="text-2xl font-bold">
@@ -287,7 +287,7 @@ defmodule GamendWeb.LeaderboardsLive do
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <h2 class="card-title">
             {gettext("Rankings")}
-            <span class="text-base-content/70 font-normal text-base">({@records_count})</span>
+            <span class="text-muted font-normal text-base">({@records_count})</span>
           </h2>
 
           <form
@@ -362,7 +362,7 @@ defmodule GamendWeb.LeaderboardsLive do
         </div>
 
         <%= if @records == [] do %>
-          <div class="text-center py-8 text-base-content/60">
+          <div class="text-center py-8 text-muted">
             <p>{gettext("No results.")}</p>
           </div>
         <% end %>

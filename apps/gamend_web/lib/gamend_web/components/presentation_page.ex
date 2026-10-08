@@ -158,7 +158,7 @@ defmodule GamendWeb.PresentationPage do
                 <h1 class="text-4xl font-extrabold tracking-normal sm:text-5xl lg:text-6xl">
                   {Map.get(@hero, "title", "")}
                 </h1>
-                <div class="max-w-2xl text-base leading-relaxed text-base-content/75 sm:text-lg lg:text-xl">
+                <div class="max-w-2xl text-base leading-relaxed text-muted sm:text-lg lg:text-xl">
                   {rich_text(Map.get(@hero, "text", ""))}
                 </div>
                 <.buttons buttons={Map.get(@hero, "buttons", [])} />
@@ -169,7 +169,7 @@ defmodule GamendWeb.PresentationPage do
             :if={@sections != []}
             href="#more-content"
             aria-label={gettext("Scroll to content")}
-            class="absolute bottom-6 left-1/2 z-20 -translate-x-1/2 text-base-content/55 transition hover:text-base-content motion-safe:animate-bounce"
+            class="absolute bottom-6 left-1/2 z-20 -translate-x-1/2 text-muted transition hover:text-base-content motion-safe:animate-bounce"
           >
             <.dynamic_icon name="hero-chevron-down-solid" class="size-9" />
           </a>
@@ -186,7 +186,7 @@ defmodule GamendWeb.PresentationPage do
           ]}
         >
           <%= for section <- @sections do %>
-            <.section section={section} />
+            <.section section={section} columns={@sections_columns} />
           <% end %>
         </div>
       </div>
@@ -558,7 +558,7 @@ defmodule GamendWeb.PresentationPage do
       <.icon name={@card["icon"]} class="size-6" />
     </span>
     <span class="font-bold">{@card["title"]}</span>
-    <span :if={non_empty_string(@card["text"])} class="text-sm leading-relaxed text-base-content/75">
+    <span :if={non_empty_string(@card["text"])} class="text-sm leading-relaxed text-muted">
       {rich_text(@card["text"])}
     </span>
     """
@@ -573,8 +573,65 @@ defmodule GamendWeb.PresentationPage do
 
   defp has_cards?(_item), do: false
 
+  attr :entries, :list, required: true, doc: "`%{question: _, answer: _}` maps"
+  attr :class, :any, default: nil, doc: "layout only"
+
+  @doc """
+  Questions and their answers, every answer shown: a closed disclosure hides
+  the text a reader scanned the page for. An answer takes the same light
+  markup as a section's text (`rich_text/1`).
+
+  A section's `"faq": [{"question": …, "answer": …}]` renders one, and
+  `faq_entries/1` reads them back for a host's `FAQPage` markup, so the
+  page and its structured data cannot disagree.
+  """
+  def faq(assigns) do
+    ~H"""
+    <dl class={["space-y-4 text-start", @class]}>
+      <div :for={entry <- @entries}>
+        <dt class="font-bold">{entry.question}</dt>
+        <dd class="text-muted">{rich_text(entry.answer)}</dd>
+      </div>
+    </dl>
+    """
+  end
+
+  @doc "The questions a page's sections carry, in page order."
+  @spec faq_entries(map() | nil) :: [%{question: String.t(), answer: String.t()}]
+  def faq_entries(page) when is_map(page) do
+    page
+    |> Map.get("sections")
+    |> List.wrap()
+    |> Enum.flat_map(&section_faq/1)
+  end
+
+  def faq_entries(_page), do: []
+
+  defp section_faq(%{"faq" => entries}) when is_list(entries) do
+    for %{"question" => question, "answer" => answer} <- entries,
+        is_binary(question) and question != "",
+        is_binary(answer) and answer != "",
+        do: %{question: question, answer: answer}
+  end
+
+  defp section_faq(_section), do: []
+
+  @doc """
+  `rich_text/1`'s input with its markup taken out: a link keeps its label,
+  bold and italic their words. For text that leaves the page, such as
+  structured data.
+  """
+  @spec plain_text(String.t()) :: String.t()
+  def plain_text(text) when is_binary(text) do
+    text
+    |> then(&Regex.replace(@link_pattern, &1, "\\1"))
+    |> then(&Regex.replace(@bold_pattern, &1, "\\1"))
+    |> then(&Regex.replace(@italic_pattern, &1, "\\1"))
+  end
+
   attr :item, :map, required: true
   attr :variant, :string, default: "section"
+  attr :columns, :integer, default: 1
 
   @doc """
   A section's illustration: video, image, light/dark image pair, or icon.
@@ -586,6 +643,8 @@ defmodule GamendWeb.PresentationPage do
   """
   def media(assigns) do
     image = image_config(assigns.item)
+    sizes = image.sizes || media_sizes(assigns.item, assigns.variant, assigns.columns)
+    image = %{image | sizes: sizes}
 
     assigns =
       assign(assigns,
@@ -667,7 +726,7 @@ defmodule GamendWeb.PresentationPage do
       :if={!@video.src && @image.light && !@image.dark}
       src={@image.light}
       srcset={@image.light_srcset}
-      sizes={@image.light_srcset && (@image.sizes || media_sizes(@size))}
+      sizes={@image.light_srcset && (@image.sizes || media_sizes(%{}, @variant, 1))}
       alt={@image.alt}
       width={@image.width}
       height={@image.height}
@@ -675,13 +734,13 @@ defmodule GamendWeb.PresentationPage do
       fetchpriority={if(@variant == "hero", do: "high", else: nil)}
       decoding="async"
       data-lightbox
-      class={media_class(@size)}
+      class={media_class(@size, @image)}
     />
     <div :if={!@video.src && @image.light && @image.dark} class="contents">
       <img
         src={@image.light}
         srcset={@image.light_srcset}
-        sizes={@image.light_srcset && (@image.sizes || media_sizes(@size))}
+        sizes={@image.light_srcset && (@image.sizes || media_sizes(%{}, @variant, 1))}
         alt={@image.alt}
         width={@image.width}
         height={@image.height}
@@ -689,12 +748,12 @@ defmodule GamendWeb.PresentationPage do
         fetchpriority={if(@variant == "hero", do: "high", else: nil)}
         decoding="async"
         data-lightbox
-        class={[media_class(@size), "[[data-theme=dark]_&]:hidden"]}
+        class={[media_class(@size, @image), "[[data-theme=dark]_&]:hidden"]}
       />
       <img
         src={@image.dark}
         srcset={@image.dark_srcset}
-        sizes={@image.dark_srcset && (@image.sizes || media_sizes(@size))}
+        sizes={@image.dark_srcset && (@image.sizes || media_sizes(%{}, @variant, 1))}
         alt={@image.alt}
         width={@image.width}
         height={@image.height}
@@ -702,12 +761,12 @@ defmodule GamendWeb.PresentationPage do
         fetchpriority={if(@variant == "hero", do: "high", else: nil)}
         decoding="async"
         data-lightbox
-        class={[media_class(@size), "hidden [[data-theme=dark]_&]:block"]}
+        class={[media_class(@size, @image), "hidden [[data-theme=dark]_&]:block"]}
       />
     </div>
     <div
       :if={!@video.src && !@image.light && @icon}
-      class="grid aspect-square w-full max-w-48 place-items-center rounded-lg bg-base-100/70 text-base-content/70 shadow-sm"
+      class="grid aspect-square w-full max-w-48 place-items-center rounded-lg bg-base-100/70 text-muted shadow-sm"
     >
       <.dynamic_icon name={@icon} class="size-16" />
     </div>
@@ -715,6 +774,7 @@ defmodule GamendWeb.PresentationPage do
   end
 
   attr :section, :map, required: true
+  attr :columns, :integer, default: 1
 
   # `"media_layout": "cover"` uses the image as the section's cover: it fills
   # the whole section (object-cover behind a scrim) with the title, text and
@@ -814,16 +874,21 @@ defmodule GamendWeb.PresentationPage do
       "flex w-full flex-col items-center justify-center gap-6",
       section_height_class(@section)
     ]}>
-      <.media :if={has_media?(@section)} item={@section} variant="full" />
+      <.media :if={has_media?(@section)} item={@section} variant="full" columns={@columns} />
       <div class="flex w-full flex-col items-center gap-4 text-center">
         <h2 class="text-2xl font-bold tracking-normal sm:text-3xl">
           {Map.get(@section, "title", "")}
         </h2>
-        <div class="max-w-3xl text-base leading-relaxed text-base-content/75">
+        <div class="max-w-3xl text-base leading-relaxed text-muted">
           {rich_text(Map.get(@section, "text", ""))}
         </div>
         <.link_chips :if={has_links?(@section)} links={Map.get(@section, "links")} align="center" />
         <.card_grid :if={has_cards?(@section)} cards={Map.get(@section, "cards")} />
+        <.faq
+          :if={section_faq(@section) != []}
+          entries={section_faq(@section)}
+          class="w-full max-w-3xl"
+        />
         <div :if={has_buttons?(@section)} class="pt-1">
           <.buttons buttons={Map.get(@section, "buttons", [])} />
         </div>
@@ -841,7 +906,7 @@ defmodule GamendWeb.PresentationPage do
       grid_class(@section, "section")
     ]}>
       <div class={["flex items-center", media_order_class(@section)]}>
-        <.media item={@section} variant="section" />
+        <.media item={@section} variant="section" columns={@columns} />
       </div>
       <div class={[
         "flex flex-col gap-4 md:justify-center md:gap-5 md:pt-6",
@@ -852,11 +917,15 @@ defmodule GamendWeb.PresentationPage do
         <h2 class="text-2xl font-bold tracking-normal sm:text-3xl">
           {Map.get(@section, "title", "")}
         </h2>
-        <div class="text-base leading-relaxed text-base-content/75">
+        <div class="text-base leading-relaxed text-muted">
           {rich_text(Map.get(@section, "text", ""))}
         </div>
         <.link_chips :if={has_links?(@section)} links={Map.get(@section, "links")} />
         <.card_grid :if={has_cards?(@section)} cards={Map.get(@section, "cards")} />
+        <.faq
+          :if={section_faq(@section) != []}
+          entries={section_faq(@section)}
+        />
         <div :if={has_buttons?(@section)} class="pt-1 md:pt-2">
           <.buttons buttons={Map.get(@section, "buttons", [])} />
         </div>
@@ -1124,12 +1193,61 @@ defmodule GamendWeb.PresentationPage do
     |> ProjectStatic.derived_from?(path)
   end
 
-  # What share of the viewport the slot actually occupies, so the browser picks
-  # a candidate instead of assuming `100vw` and always taking the largest.
-  defp media_sizes("hero"), do: "(min-width: 1024px) 55vw, 95vw"
-  defp media_sizes("full"), do: "(min-width: 1024px) 70vw, 95vw"
-  defp media_sizes("bleed"), do: "100vw"
-  defp media_sizes(_section), do: "(min-width: 1024px) 45vw, 92vw"
+  # How wide the media column is at each breakpoint, so the browser takes the
+  # smallest candidate that fills it instead of assuming `100vw`. A share of
+  # the viewport overshoots: the content box stops growing at
+  # `content_width_class/0`'s caps, so at 1366px a "third" column is 422px
+  # where `45vw` claimed 615, and a 2x screen fetched the 1440w file for it.
+  #
+  # Each box is `{min_width, content_width, grid_gap}`: the capped width less
+  # the container's padding (`px-4 sm:px-6 lg:px-8` around sections,
+  # `px-6 sm:px-8 lg:px-12` around the hero), and the gap between media and
+  # text (`md:gap-x-8`; the hero's `gap-8 lg:gap-12`). Below `md` the grid is
+  # one column, so the image takes the whole box. Keep these in step with
+  # the classes they are read from.
+  @section_boxes [{1280, 1088, 32}, {1024, 832, 32}, {768, 720, 32}]
+  @section_phone "(min-width: 672px) 624px, calc(100vw - 32px)"
+  @hero_boxes [{1280, 1056, 48}, {1024, 800, 48}, {768, 704, 32}]
+  @hero_phone "(min-width: 672px) 608px, calc(100vw - 48px)"
+  # `sections_columns_class(2)`'s `gap-x-4` between two-up sections.
+  @sections_columns_gap 16
+
+  defp media_sizes(item, "hero", _columns),
+    do: column_sizes(@hero_boxes, @hero_phone, column_share(media_width(item, "hero")))
+
+  defp media_sizes(_item, "full", columns),
+    do: column_sizes(two_up(@section_boxes, columns), @section_phone, :whole)
+
+  defp media_sizes(item, variant, columns),
+    do:
+      column_sizes(
+        two_up(@section_boxes, columns),
+        @section_phone,
+        column_share(media_width(item, variant))
+      )
+
+  defp column_sizes(boxes, phone, share) do
+    boxes
+    |> Enum.map(fn {min_width, box, gap} ->
+      width = if share == :whole, do: box, else: (box - gap) * share
+      "(min-width: #{min_width}px) #{ceil(width)}px"
+    end)
+    |> Enum.concat([phone])
+    |> Enum.join(", ")
+  end
+
+  defp two_up(boxes, 2),
+    do:
+      Enum.map(boxes, fn {min_width, box, gap} ->
+        {min_width, (box - @sections_columns_gap) / 2, gap}
+      end)
+
+  defp two_up(boxes, _columns), do: boxes
+
+  # The media column's fraction of the grid, from `grid_class/2`'s `fr` pairs.
+  defp column_share("third"), do: 0.4
+  defp column_share("wide"), do: 0.575
+  defp column_share(_half), do: 0.5
 
   # A `"video"` item renders in place of `"image"`, so the same slot in a hero
   # or section holds either. `src` and `poster` go through `image_src/1` for
@@ -1310,18 +1428,27 @@ defmodule GamendWeb.PresentationPage do
 
   defp desktop_image_position(item), do: Map.get(item, "image_position_desktop", "left")
 
-  defp media_class("hero"), do: "block max-h-[58dvh] w-full rounded-lg object-contain"
+  defp media_class("hero", _image), do: "block max-h-[58dvh] w-full rounded-lg object-contain"
 
-  defp media_class("full"), do: "block max-h-[70dvh] w-full rounded-lg object-contain"
+  defp media_class("full", _image), do: "block max-h-[70dvh] w-full rounded-lg object-contain"
 
   # Edge to edge: no rounding (it meets both screen edges) and no height
   # cap beyond the viewport itself.
-  defp media_class("bleed"), do: "block max-h-[85dvh] w-full object-contain"
+  defp media_class("bleed", _image), do: "block max-h-[85dvh] w-full object-contain"
 
-  defp media_class("section"),
+  # The box takes the image's own shape from its `width`/`height`. A square
+  # box around 16:9 art left a band above and below it (140px a screenshot
+  # on a desktop home page), and audits read the box against the picture as
+  # a distorted image. Only an image whose size could not be read keeps the
+  # square, so the slot still holds its place before a lazy image loads.
+  defp media_class("section", %{width: width, height: height})
+       when is_integer(width) and is_integer(height),
+       do: "block max-h-[42dvh] w-full rounded-lg object-contain"
+
+  defp media_class("section", _image),
     do: "block aspect-square max-h-[42dvh] w-full rounded-lg object-contain"
 
-  # No `aspect-square` here, unlike `media_class/1` — video is natively
+  # No `aspect-square` here, unlike `media_class/2` — video is natively
   # widescreen and squaring the box would letterbox it into a fraction of the
   # slot.
   defp media_video_class("hero"),

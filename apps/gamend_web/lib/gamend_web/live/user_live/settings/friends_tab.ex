@@ -56,7 +56,7 @@ defmodule GamendWeb.UserLive.Settings.FriendsTab do
               >
                 <div class="text-sm">
                   <.player_name name={LiveHelpers.public_user_name(req.requester || req.requester_id)} />
-                  <span class="text-xs text-base-content/60 ms-2">
+                  <span class="text-xs text-muted ms-2">
                     {LiveHelpers.public_user_handle(req.requester)}
                   </span>
                 </div>
@@ -103,7 +103,7 @@ defmodule GamendWeb.UserLive.Settings.FriendsTab do
               >
                 <div class="text-sm">
                   <.player_name name={LiveHelpers.public_user_name(req.target || req.target_id)} />
-                  <span class="text-xs text-base-content/60 ms-2">
+                  <span class="text-xs text-muted ms-2">
                     {LiveHelpers.public_user_handle(req.target)}
                   </span>
                 </div>
@@ -143,7 +143,7 @@ defmodule GamendWeb.UserLive.Settings.FriendsTab do
                       title={if(u.is_online, do: gettext("Online"), else: gettext("Offline"))}
                     />
                     <.player_name name={LiveHelpers.public_user_name(u)} />
-                    <span class="text-xs text-base-content/60">
+                    <span class="text-xs text-muted">
                       {LiveHelpers.public_user_handle(u)}
                     </span>
                   </div>
@@ -175,7 +175,7 @@ defmodule GamendWeb.UserLive.Settings.FriendsTab do
 
         <div class="mt-2">
           <div :if={@blocked_total > 0} class="mt-4">
-            <div class="text-xs text-base-content/70">{gettext("Blocked users")}</div>
+            <div class="text-xs text-muted">{gettext("Blocked users")}</div>
             <div id="blocked-list" phx-update="stream">
               <div
                 :for={{dom_id, b} <- @streams.blocked}
@@ -184,7 +184,7 @@ defmodule GamendWeb.UserLive.Settings.FriendsTab do
               >
                 <div class="text-sm">
                   <.player_name name={LiveHelpers.public_user_name(b.requester || b.requester_id)} />
-                  <span class="text-xs text-base-content/60 ms-2">
+                  <span class="text-xs text-muted ms-2">
                     {LiveHelpers.public_user_handle(b.requester)}
                   </span>
                 </div>
@@ -227,7 +227,7 @@ defmodule GamendWeb.UserLive.Settings.FriendsTab do
             </form>
           </div>
           <div :if={@search_count > 0} class="mt-3">
-            <div class="text-xs text-base-content/70 mb-2">
+            <div class="text-xs text-muted mb-2">
               {gettext("Name")}
             </div>
 
@@ -237,7 +237,7 @@ defmodule GamendWeb.UserLive.Settings.FriendsTab do
                 <div class="p-2 border rounded bg-base-100 flex items-center justify-between">
                   <div class="text-sm">
                     <.player_name name={LiveHelpers.public_user_name(s)} />
-                    <span class="text-xs text-base-content/60 ms-2">
+                    <span class="text-xs text-muted ms-2">
                       {LiveHelpers.public_user_handle(s)}
                     </span>
                   </div>

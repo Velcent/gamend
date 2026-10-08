@@ -46,7 +46,7 @@ defmodule GamendWeb.NotificationUnsubscribeHTML do
           <p :if={@group_off? and @all_off?}>{gettext("You get none of these emails.")}</p>
         </div>
 
-        <p class="text-sm text-base-content/70">
+        <p class="text-sm text-muted">
           {gettext("Account messages, such as sign-in links, are always sent.")}
           <.link navigate={~p"/users/settings?tab=notifications"} class="link">
             {gettext("Choose what we send you")}

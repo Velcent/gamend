@@ -39,7 +39,7 @@ defmodule GamendWeb.Reports.PageKind do
         {@report.subject["path"]}
       </span>
     </span>
-    <span :if={!@report.subject["path"]} class="text-base-content/50">{gettext("No page")}</span>
+    <span :if={!@report.subject["path"]} class="text-muted">{gettext("No page")}</span>
     """
   end
 end

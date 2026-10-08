@@ -59,7 +59,7 @@ defmodule GamendWeb.AdminLive.Analytics do
             <h1 class="text-xl font-bold">Analytics · activity &amp; retention</h1>
           </div>
           <div class="flex items-center gap-2">
-            <span class="text-xs text-base-content/60">
+            <span class="text-xs text-muted">
               UTC days · as of {Date.to_iso8601(@summary.day)}
             </span>
             <button phx-click="refresh" class="btn btn-ghost btn-sm">Refresh</button>
@@ -81,7 +81,7 @@ defmodule GamendWeb.AdminLive.Analytics do
           />
         </div>
 
-        <div class="text-xs text-base-content/60">
+        <div class="text-xs text-muted">
           New users: {@summary.new_users_7d} in the last 7 days, {@summary.new_users_30d} in the last 30.
           Retention is pooled over the cohorts of the last 60 days that have reached each horizon
           (a D7 needs a cohort at least 7 days old); "—" means no cohort has reached it yet.
@@ -127,7 +127,7 @@ defmodule GamendWeb.AdminLive.Analytics do
                 </tbody>
               </table>
             </div>
-            <p class="text-xs text-base-content/60 mt-2">
+            <p class="text-xs text-muted mt-2">
               D1/D7/D30 on a row are that day's sign-up cohort: of the players who registered
               that day, the share seen again exactly 1 / 7 / 30 days later.
             </p>
@@ -138,7 +138,7 @@ defmodule GamendWeb.AdminLive.Analytics do
           <div class="card bg-base-200">
             <div class="card-body">
               <h2 class="card-title">Economy · last {@flow_days} days</h2>
-              <p class="text-xs text-base-content/60">
+              <p class="text-xs text-muted">
                 Every wallet grant and spend, by the ledger <code>reason</code> the game
                 passed. Sources are positive, sinks negative — the Net column is what inflates
                 or drains balances.
@@ -165,7 +165,7 @@ defmodule GamendWeb.AdminLive.Analytics do
                       <td class="text-right">{row.entries}</td>
                     </tr>
                     <tr :if={@economy == []}>
-                      <td colspan="6" class="text-base-content/60">
+                      <td colspan="6" class="text-muted">
                         No ledger entries in the window.
                       </td>
                     </tr>
@@ -178,7 +178,7 @@ defmodule GamendWeb.AdminLive.Analytics do
           <div class="card bg-base-200">
             <div class="card-body">
               <h2 class="card-title">Counters · last {@flow_days} days</h2>
-              <p class="text-xs text-base-content/60">
+              <p class="text-xs text-muted">
                 Game-defined daily counters (<code>Gamend.Analytics.count/3</code>): whatever
                 the game reports, such as levels started, finished or failed. Empty until the
                 game writes some.
@@ -197,7 +197,7 @@ defmodule GamendWeb.AdminLive.Analytics do
                       <td class="text-right">{total}</td>
                     </tr>
                     <tr :if={@counters == []}>
-                      <td colspan="2" class="text-base-content/60">No counters yet.</td>
+                      <td colspan="2" class="text-muted">No counters yet.</td>
                     </tr>
                   </tbody>
                 </table>
@@ -221,9 +221,9 @@ defmodule GamendWeb.AdminLive.Analytics do
   defp stat(assigns) do
     ~H"""
     <div class="card bg-base-100 p-3">
-      <div class="text-xs text-base-content/60">{@title}</div>
+      <div class="text-xs text-muted">{@title}</div>
       <div class="text-2xl font-bold">{@value}</div>
-      <div :if={@desc} class="text-xs text-base-content/60">{@desc}</div>
+      <div :if={@desc} class="text-xs text-muted">{@desc}</div>
     </div>
     """
   end

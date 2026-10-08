@@ -59,8 +59,8 @@ defmodule GamendWeb.StoreLive.Index do
       <div class="flex flex-col gap-6">
         <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div>
-            <h1 class="text-4xl font-black text-base-content/95">{gettext("Store")}</h1>
-            <div class="mt-2 flex flex-wrap items-center gap-2 text-sm text-base-content/70">
+            <h1 class="text-4xl font-black text-base-content">{gettext("Store")}</h1>
+            <div class="mt-2 flex flex-wrap items-center gap-2 text-sm text-muted">
               <span :if={@admin?} class="badge badge-outline">{@payment_environment}</span>
               <span>{gettext("Subscriptions, one-time items, and consumables.")}</span>
             </div>
@@ -95,7 +95,7 @@ defmodule GamendWeb.StoreLive.Index do
         <%= if @catalog == [] do %>
           <div :if={@admin?} class="card bg-base-200 p-6 rounded-lg">
             <div class="font-semibold">{gettext("No products configured.")}</div>
-            <div class="mt-2 text-sm text-base-content/70">
+            <div class="mt-2 text-sm text-muted">
               {gettext("Create products and provider SKUs in Admin -> Payments.")}
             </div>
           </div>
@@ -110,7 +110,7 @@ defmodule GamendWeb.StoreLive.Index do
                   <div class="flex items-start justify-between gap-3">
                     <div>
                       <div class="font-semibold text-lg">{provider_product.product.title}</div>
-                      <div class="font-mono text-xs text-base-content/60">
+                      <div class="font-mono text-xs text-muted">
                         {provider_product.product.sku}
                       </div>
                     </div>
@@ -119,7 +119,7 @@ defmodule GamendWeb.StoreLive.Index do
                     </span>
                   </div>
 
-                  <p class="text-sm text-base-content/75 min-h-10">
+                  <p class="text-sm text-muted min-h-10">
                     {provider_product.product.description || gettext("Store item")}
                   </p>
 
@@ -141,21 +141,21 @@ defmodule GamendWeb.StoreLive.Index do
 
                   <div class="grid grid-cols-2 gap-2 text-sm">
                     <div>
-                      <div class="text-xs uppercase text-base-content/70">{gettext("Provider")}</div>
+                      <div class="text-xs uppercase text-muted">{gettext("Provider")}</div>
                       <div class="font-medium">
                         {LiveHelpers.payment_provider_label(provider_product.provider)}
                       </div>
                     </div>
                     <div>
-                      <div class="text-xs uppercase text-base-content/70">{gettext("Price")}</div>
+                      <div class="text-xs uppercase text-muted">{gettext("Price")}</div>
                       <div class="font-medium">{format_amount(provider_product, @admin?)}</div>
                     </div>
                     <div>
-                      <div class="text-xs uppercase text-base-content/70">{gettext("SKU")}</div>
+                      <div class="text-xs uppercase text-muted">{gettext("SKU")}</div>
                       <div class="font-mono text-xs break-all">{provider_product.external_id}</div>
                     </div>
                     <div>
-                      <div class="text-xs uppercase text-base-content/70">{gettext("Status")}</div>
+                      <div class="text-xs uppercase text-muted">{gettext("Status")}</div>
                       <div>
                         {if provider_product.active, do: gettext("Active"), else: gettext("Inactive")}
                       </div>
@@ -163,7 +163,7 @@ defmodule GamendWeb.StoreLive.Index do
                   </div>
 
                   <div class="mt-auto flex items-center justify-between gap-2 pt-2">
-                    <span class="text-xs text-base-content/60">
+                    <span class="text-xs text-muted">
                       {download_hint(provider_product.product, @admin?)}
                     </span>
                     <button

@@ -7,7 +7,7 @@ generated: by `mix gamend.settings.guide` - do not edit by hand; edit the
 # Settings
 
 Every setting the server has, with the environment variable that sets it.
-330 settings across 30 groups.
+332 settings across 31 groups.
 
 A setting is declared in the module that owns it, so this page and
 `.env.example` are generated from the same source the server reads. The
@@ -132,6 +132,13 @@ Live values, and where each one came from, are on the
 | `GAMEND_CONTENT_PLUGINS_DIR` | string | `"modules/plugins"` | Directory containing OTP hook plugins. |
 | `GAMEND_CONTENT_STATIC_DIRS` | list | `static,priv/static` | Directories of static files served ahead of the built-in ones (images/, game/, favicon.ico, robots.txt, theme.css), relative to the working directory and searched in order. Each is used when it exists. |
 | `GAMEND_CONTENT_THEME_CONFIG` | string | - | Path to the theme JSON. A single file serves every locale; its text is translated via the gettext `theme` domain. |
+
+
+## Crawler statistics
+
+| Variable | Type | Default | Notes |
+|---|---|---|---|
+| `GAMEND_CRAWLERS_VERIFY` | boolean | `true` | Check a request that claims a search engine's crawler (Googlebot, Bingbot, …) against that engine's reverse DNS, and count a failed check as an impostor. One lookup per address and day, in the background. |
 
 
 ## Database
@@ -415,6 +422,7 @@ Live values, and where each one came from, are on the
 | `GAMEND_RATELIMIT_DC_LIMIT` | integer | `300` | Max WebRTC DataChannel messages per window, per user. |
 | `GAMEND_RATELIMIT_DC_WINDOW_MS` | integer | `10000` | WebRTC DataChannel window, in milliseconds. |
 | `GAMEND_RATELIMIT_ENABLED` | boolean | `true` | Master switch for all request/message throttling. |
+| `GAMEND_RATELIMIT_EXEMPT_IPS` | string | - | Client addresses never throttled, comma-separated, exact (IPv4 or IPv6), as `RealIp` resolves them: a load test from a known machine, a monitor. Empty: nobody. |
 | `GAMEND_RATELIMIT_GENERAL_LIMIT` | integer | `240` | Max general HTTP requests per window, per IP. |
 | `GAMEND_RATELIMIT_GENERAL_WINDOW_MS` | integer | `60000` | General HTTP window, in milliseconds. |
 | `GAMEND_RATELIMIT_ICE_LIMIT` | integer | `150` | Max ICE candidate messages per window, per user. |

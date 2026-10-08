@@ -27,13 +27,13 @@ defmodule GamendWeb.UserLive.Settings.DevicesTab do
         <div class="flex items-center justify-between">
           <div>
             <div class="font-semibold text-lg">{gettext("Devices")}</div>
-            <div class="text-sm text-base-content/70">
+            <div class="text-sm text-muted">
               {gettext("Devices registered for push notifications.")}
             </div>
           </div>
         </div>
 
-        <div :if={@devices == []} class="mt-4 text-sm text-base-content/60">
+        <div :if={@devices == []} class="mt-4 text-sm text-muted">
           {gettext("No devices registered.")}
         </div>
 

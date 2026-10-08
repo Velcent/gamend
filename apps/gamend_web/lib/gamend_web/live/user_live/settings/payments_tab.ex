@@ -63,7 +63,7 @@ defmodule GamendWeb.UserLive.Settings.PaymentsTab do
         </div>
 
         <%= if @payment_purchases == [] do %>
-          <div class="mt-4 rounded-lg border border-base-300 bg-base-100 p-4 text-sm text-base-content/70">
+          <div class="mt-4 rounded-lg border border-base-300 bg-base-100 p-4 text-sm text-muted">
             {gettext("No results.")}
           </div>
         <% else %>
@@ -84,13 +84,13 @@ defmodule GamendWeb.UserLive.Settings.PaymentsTab do
                 <tr :for={purchase <- @payment_purchases} id={"payment-purchase-#{purchase.id}"}>
                   <td>
                     <div class="font-mono text-xs break-all">{purchase.order_id}</div>
-                    <div class="font-mono text-xs text-base-content/70 break-all">
+                    <div class="font-mono text-xs text-muted break-all">
                       {purchase.provider_transaction_id || "-"}
                     </div>
                   </td>
                   <td>
                     <div class="font-medium">{payment_product_title(purchase)}</div>
-                    <div class="font-mono text-xs text-base-content/60">
+                    <div class="font-mono text-xs text-muted">
                       {payment_product_sku(purchase)}
                     </div>
                   </td>
@@ -139,7 +139,7 @@ defmodule GamendWeb.UserLive.Settings.PaymentsTab do
         </div>
 
         <%= if @payment_entitlements == [] do %>
-          <div class="mt-4 rounded-lg border border-base-300 bg-base-100 p-4 text-sm text-base-content/70">
+          <div class="mt-4 rounded-lg border border-base-300 bg-base-100 p-4 text-sm text-muted">
             {gettext("No results.")}
           </div>
         <% else %>
@@ -152,7 +152,7 @@ defmodule GamendWeb.UserLive.Settings.PaymentsTab do
               <div class="flex items-start justify-between gap-3">
                 <div>
                   <div class="font-semibold">{payment_entitlement_title(entitlement)}</div>
-                  <div class="font-mono text-xs text-base-content/60">{entitlement.key}</div>
+                  <div class="font-mono text-xs text-muted">{entitlement.key}</div>
                 </div>
                 <span class={["badge badge-sm", payment_status_badge_class(entitlement.status)]}>
                   {LiveHelpers.payment_status_label(entitlement.status)}
@@ -161,11 +161,11 @@ defmodule GamendWeb.UserLive.Settings.PaymentsTab do
 
               <div class="mt-3 grid grid-cols-2 gap-2 text-sm">
                 <div>
-                  <div class="text-xs uppercase text-base-content/70">{gettext("Kind")}</div>
+                  <div class="text-xs uppercase text-muted">{gettext("Kind")}</div>
                   <div>{LiveHelpers.payment_kind_label(payment_entitlement_kind(entitlement))}</div>
                 </div>
                 <div>
-                  <div class="text-xs uppercase text-base-content/70">
+                  <div class="text-xs uppercase text-muted">
                     {payment_entitlement_period_label(entitlement)}
                   </div>
                   <div>

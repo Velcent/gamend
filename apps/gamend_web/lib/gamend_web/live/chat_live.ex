@@ -107,7 +107,7 @@ defmodule GamendWeb.ChatLive do
     ~H"""
     <Layouts.app flash={@flash} current_scope={@current_scope} current_path={assigns[:current_path]}>
       <div>
-        <h1 class="mb-4 text-4xl font-black text-base-content/95">{gettext("Chat")}</h1>
+        <h1 class="mb-4 text-4xl font-black text-base-content">{gettext("Chat")}</h1>
       </div>
       <div class="flex gap-4 h-[calc(100vh-12rem)]">
         <%!-- Sidebar: contacts list --%>
@@ -115,11 +115,11 @@ defmodule GamendWeb.ChatLive do
           "w-full md:w-64 flex-shrink-0 overflow-y-auto md:border-e border-base-300 md:pe-4",
           if(@chat_type, do: "hidden md:block", else: "block")
         ]}>
-          <h3 class="font-semibold text-sm text-base-content/60 uppercase tracking-wide mb-2">
+          <h3 class="font-semibold text-sm text-muted uppercase tracking-wide mb-2">
             {gettext("Friends")}
           </h3>
           <%= if @friends == [] do %>
-            <p class="text-sm text-base-content/70 ps-2">{gettext("No results.")}</p>
+            <p class="text-sm text-muted ps-2">{gettext("No results.")}</p>
           <% end %>
           <ul class="space-y-1">
             <li :for={f <- @friends}>
@@ -146,11 +146,11 @@ defmodule GamendWeb.ChatLive do
 
           <div class="divider my-2"></div>
 
-          <h3 class="font-semibold text-sm text-base-content/60 uppercase tracking-wide mb-2">
+          <h3 class="font-semibold text-sm text-muted uppercase tracking-wide mb-2">
             {gettext("Groups")}
           </h3>
           <%= if @my_groups == [] do %>
-            <p class="text-sm text-base-content/70 ps-2">{gettext("No results.")}</p>
+            <p class="text-sm text-muted ps-2">{gettext("No results.")}</p>
           <% end %>
           <ul class="space-y-1">
             <li :for={{group, _role} <- @my_groups}>
@@ -191,7 +191,7 @@ defmodule GamendWeb.ChatLive do
                 :if={@chat_type == "group"}
                 icon_url={@chat_target_icon}
                 type={:group}
-                class="w-7 h-7 text-base-content/60"
+                class="w-7 h-7 text-muted"
               />
               <h2 class="font-semibold text-lg truncate">{@chat_target_name}</h2>
             </div>
@@ -209,7 +209,7 @@ defmodule GamendWeb.ChatLive do
               </div>
 
               <%= if @messages == [] do %>
-                <div class="text-sm text-base-content/70 text-center py-8">
+                <div class="text-sm text-muted text-center py-8">
                   {gettext("No results.")}
                 </div>
               <% end %>
@@ -223,7 +223,7 @@ defmodule GamendWeb.ChatLive do
                   if(show_header, do: "mt-3", else: "mt-0.5")
                 ]}
               >
-                <div :if={show_header} class="text-xs text-base-content/70">
+                <div :if={show_header} class="text-xs text-muted">
                   <%= if msg.sender_id == @user_id do %>
                     {gettext("You")}
                   <% else %>
@@ -321,7 +321,7 @@ defmodule GamendWeb.ChatLive do
               </button>
             </form>
           <% else %>
-            <div class="flex-1 flex items-center justify-center text-base-content/70">
+            <div class="flex-1 flex items-center justify-center text-muted">
               <div class="text-center">
                 <p class="text-lg">{gettext("Select a conversation")}</p>
                 <p class="text-sm mt-1">{gettext("Select a conversation")}</p>

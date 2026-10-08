@@ -107,7 +107,7 @@ defmodule GamendWeb.ContentPages do
     ~H"""
     <div class="space-y-6">
       <div class="flex flex-row items-center justify-between gap-3">
-        <h1 class="text-4xl font-black text-base-content/95">{@title}</h1>
+        <h1 class="text-4xl font-black text-base-content">{@title}</h1>
 
         <.link :if={@sibling_path} href={@sibling_path} class="btn btn-surface btn-sm">
           <.icon name={@sibling_icon} class="size-4" />
@@ -167,14 +167,14 @@ defmodule GamendWeb.ContentPages do
               <.link
                 :if={@roadmap_available?}
                 href={~p"/roadmap"}
-                class="inline-flex items-center gap-1.5 text-sm text-base-content/70 transition-colors hover:text-primary"
+                class="inline-flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-primary"
               >
                 <.icon name="hero-map" class="size-4" /> {gettext("Roadmap")}
               </.link>
               <.link
                 :if={@changelog_available?}
                 href={~p"/changelog"}
-                class="inline-flex items-center gap-1.5 text-sm text-base-content/70 transition-colors hover:text-primary"
+                class="inline-flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-primary"
               >
                 <.icon name="hero-document-text" class="size-4" /> {gettext("Changelog")}
               </.link>
@@ -189,12 +189,12 @@ defmodule GamendWeb.ContentPages do
 
           <div :if={@grouped_posts != []} class="space-y-10">
             <section :for={{year, months} <- @grouped_posts}>
-              <h2 class="mb-6 border-b border-base-300 pb-2 text-2xl font-bold text-base-content/90">
+              <h2 class="mb-6 border-b border-base-300 pb-2 text-2xl font-bold text-base-content">
                 {year}
               </h2>
 
               <div :for={{month, posts} <- months} class="mb-8">
-                <h3 class="mb-4 text-sm font-semibold uppercase tracking-[0.22em] text-base-content/70">
+                <h3 class="mb-4 text-sm font-semibold uppercase tracking-[0.22em] text-muted">
                   <.month_heading year={year} month={month} />
                 </h3>
 
@@ -218,18 +218,18 @@ defmodule GamendWeb.ContentPages do
                         class="aspect-video w-full object-cover"
                       />
                       <div class="space-y-2 p-5">
-                        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs uppercase tracking-[0.18em] text-base-content/70">
+                        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs uppercase tracking-[0.18em] text-muted">
                           <span><.timestamp at={post.date} format="date" /></span>
                           <span :if={post[:reading_minutes]}>
                             {reading_time(post.reading_minutes)}
                           </span>
                         </div>
 
-                        <h4 class="text-xl font-semibold text-base-content/90 transition-colors hover:text-primary">
+                        <h4 class="text-xl font-semibold text-base-content transition-colors hover:text-primary">
                           {post.title}
                         </h4>
 
-                        <p class="text-sm leading-6 text-base-content/70">{post.excerpt}</p>
+                        <p class="text-sm leading-6 text-muted">{post.excerpt}</p>
 
                         <.post_authors
                           :if={post[:authors] not in [nil, []]}
@@ -279,7 +279,7 @@ defmodule GamendWeb.ContentPages do
       <div class="mx-auto max-w-narrow py-8">
         <article class="space-y-10">
           <div class="space-y-4">
-            <div class="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.2em] text-base-content/70">
+            <div class="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.2em] text-muted">
               <span><.timestamp at={@post.date} format="date" /></span>
               <span :if={@post[:reading_minutes]}>
                 · {reading_time(@post.reading_minutes)}
@@ -287,10 +287,10 @@ defmodule GamendWeb.ContentPages do
             </div>
 
             <div class="space-y-3">
-              <h1 class="text-4xl font-bold leading-tight text-base-content/95 sm:text-5xl">
+              <h1 class="text-4xl font-bold leading-tight text-base-content sm:text-5xl">
                 {@post.title}
               </h1>
-              <p class="max-w-2xl text-base leading-7 text-base-content/70">{lede(@post)}</p>
+              <p class="max-w-2xl text-base leading-7 text-muted">{lede(@post)}</p>
               <.post_authors :if={@post[:authors] not in [nil, []]} authors={@post.authors} />
             </div>
 
@@ -315,10 +315,10 @@ defmodule GamendWeb.ContentPages do
                 navigate={~p"/blog/#{@prev.slug}"}
                 class="group flex h-full flex-col rounded-2xl border border-base-300 bg-base-100/90 p-4 transition hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md"
               >
-                <span class="text-xs uppercase tracking-[0.2em] text-base-content/70">
+                <span class="text-xs uppercase tracking-[0.2em] text-muted">
                   {gettext("Newer")}
                 </span>
-                <span class="mt-2 text-lg font-semibold text-base-content/90 group-hover:text-primary">
+                <span class="mt-2 text-lg font-semibold text-base-content group-hover:text-primary">
                   {@prev.title}
                 </span>
               </.link>
@@ -329,10 +329,10 @@ defmodule GamendWeb.ContentPages do
                 navigate={~p"/blog/#{@next.slug}"}
                 class="group flex h-full flex-col rounded-2xl border border-base-300 bg-base-100/90 p-4 text-right transition hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md"
               >
-                <span class="text-xs uppercase tracking-[0.2em] text-base-content/70">
+                <span class="text-xs uppercase tracking-[0.2em] text-muted">
                   {gettext("Older")}
                 </span>
-                <span class="mt-2 text-lg font-semibold text-base-content/90 group-hover:text-primary">
+                <span class="mt-2 text-lg font-semibold text-base-content group-hover:text-primary">
                   {@next.title}
                 </span>
               </.link>
@@ -438,7 +438,7 @@ defmodule GamendWeb.ContentPages do
             {author.name}
           </a>
           <span :if={!(@links? and author[:url])} class="font-medium">{author.name}</span>
-          <span :if={author[:title]} class="text-xs text-base-content/70">{author.title}</span>
+          <span :if={author[:title]} class="text-xs text-muted">{author.title}</span>
         </span>
       </li>
     </ul>

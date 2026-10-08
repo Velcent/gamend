@@ -166,7 +166,7 @@ defmodule GamendWeb.HostLayoutNavigation do
               class="max-w-full font-semibold"
             />
             <.user_title user={Scope.user(@current_scope)} />
-            <span :if={@anonymous?} class="text-xs font-normal text-base-content/60">
+            <span :if={@anonymous?} class="text-xs font-normal text-muted">
               {GamendWeb.HostLayouts.translate("Guest")}
             </span>
           </span>
@@ -488,11 +488,11 @@ defmodule GamendWeb.HostLayoutNavigation do
             <.icon name="hero-globe-alt-solid" class="w-4 h-4" />
             {@label}
           </h3>
-          <label
-            for="lang-modal"
-            aria-label={GamendWeb.HostLayouts.translate("Close language picker")}
-            class="btn btn-ghost btn-square btn-sm"
-          >
+          <%!-- The name is text: a `<label>` may not carry `aria-label`. --%>
+          <label for="lang-modal" class="btn btn-ghost btn-square btn-sm">
+            <span class="sr-only">
+              {GamendWeb.HostLayouts.translate("Close language picker")}
+            </span>
             <.icon name="hero-x-mark-solid" class="size-4" />
           </label>
         </div>

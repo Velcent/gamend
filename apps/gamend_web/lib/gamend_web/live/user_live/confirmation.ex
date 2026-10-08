@@ -33,7 +33,7 @@ defmodule GamendWeb.UserLive.Confirmation do
           <p
             :if={@user.hashed_password}
             id="confirmation-password-notice"
-            class="mb-4 text-sm text-base-content/80"
+            class="mb-4 text-sm text-muted"
           >
             {gettext(
               "Confirming with this link removes the password this account was registered with, so set a new one in your account settings afterwards."
