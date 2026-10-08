@@ -82,12 +82,17 @@ after the step, for the host's list of price ids.
 # `ensure_product`
 
 ```elixir
-@spec ensure_product(map(), keyword()) :: [finding()]
+@spec ensure_product(map(), keyword()) :: {String.t() | nil, [finding()]}
 ```
 
 A product by its fixed id (`id`, `name`, `tax_code`, optional
-`metadata`): created when missing, its name, tax code and `active`
-brought in line.
+`metadata`), its name, tax code and `active` brought in line. When there is
+no product with that id, `adopt:` (a product id already in use, e.g. the
+one the configured prices are on) is used instead, so a product made by
+hand is kept rather than doubled; only with neither is one created.
+
+Returns `{product_id | nil, findings}`: the product the prices belong on.
+On a check that would create it, the id it would get.
 
 # `ensure_webhook`
 
@@ -107,6 +112,14 @@ in its finding's message, the only time Stripe shows it.
 ```
 
 What the customer portal's default configuration must hold.
+
+# `price_product`
+
+```elixir
+@spec price_product(String.t()) :: String.t() | nil
+```
+
+The product a price is on, or nil when the price does not exist.
 
 # `webhook_events`
 

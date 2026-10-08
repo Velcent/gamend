@@ -5,14 +5,14 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.40.4">
-    <meta name="project" content="gamend_core v1.1.1308">
+    <meta name="project" content="gamend_core v1.1.1309">
 
 
-    <title>Gamend.Payments.StripeSetup — gamend_core v1.1.1308</title>
+    <title>Gamend.Payments.StripeSetup — gamend_core v1.1.1309</title>
 
     <link rel="stylesheet" href="dist/html-elixir-RXHHCTJW.css" />
 
-    <script defer src="dist/sidebar_items-B77946B5.js"></script>
+    <script defer src="dist/sidebar_items-3058FC03.js"></script>
     <script defer src="docs_config.js"></script>
     <script defer src="dist/html-MI33G4N7.js"></script>
 
@@ -37,7 +37,7 @@
 gamend_core
         </a>
         <div class="sidebar-projectVersion" translate="no">
-          v1.1.1308
+          v1.1.1309
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@ gamend_core
   <div class="heading-with-actions top-heading">
     <h1>
       <span translate="no">Gamend.<wbr />Payments.<wbr />StripeSetup</span> 
-      <small class="app-vsn" translate="no">(gamend_core v1.1.1308)</small>
+      <small class="app-vsn" translate="no">(gamend_core v1.1.1309)</small>
 
     </h1>
 
@@ -211,8 +211,10 @@ and the old one is archived (with <code class="inline">apply: true</code>).</p><
       </div>
 
         <div class="summary-synopsis"><p>A product by its fixed id (<code class="inline">id</code>, <code class="inline">name</code>, <code class="inline">tax_code</code>, optional
-<code class="inline">metadata</code>): created when missing, its name, tax code and <code class="inline">active</code>
-brought in line.</p></div>
+<code class="inline">metadata</code>), its name, tax code and <code class="inline">active</code> brought in line. When there is
+no product with that id, <code class="inline">adopt:</code> (a product id already in use, e.g. the
+one the configured prices are on) is used instead, so a product made by
+hand is kept rather than doubled; only with neither is one created.</p></div>
 
     </div>
 
@@ -236,6 +238,16 @@ in its finding's message, the only time Stripe shows it.</p></div>
       </div>
 
         <div class="summary-synopsis"><p>What the customer portal's default configuration must hold.</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#price_product/1" data-no-tooltip="" translate="no">price_product(price_id)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>The product a price is on, or nil when the price does not exist.</p></div>
 
     </div>
 
@@ -372,7 +384,7 @@ in its finding's message, the only time Stripe shows it.</p></div>
       <h1 class="signature" translate="no">ensure_portal(opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/stripe_setup.ex#L247" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/stripe_setup.ex#L286" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -404,7 +416,7 @@ Dashboard; without it the portal cannot open, and that is a manual step.</p>
       <h1 class="signature" translate="no">ensure_price(wanted, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/stripe_setup.ex#L375" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/stripe_setup.ex#L447" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -439,7 +451,7 @@ after the step, for the host's list of price ids.</p>
       <h1 class="signature" translate="no">ensure_product(wanted, opts \\ [])</h1>
 
 
-        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/stripe_setup.ex#L303" class="icon-action" rel="help nofollow" aria-label="View Source">
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/stripe_setup.ex#L347" class="icon-action" rel="help nofollow" aria-label="View Source">
           <i class="ri-code-s-slash-line" aria-hidden="true"></i>
         </a>
 
@@ -450,13 +462,16 @@ after the step, for the host's list of price ids.</p>
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">@spec</span> ensure_product(<a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">map</a>(), <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">keyword</a>()) :: [<a href="#t:finding/0">finding</a>()]</pre>
+          <pre translate="no"><span class="attribute">@spec</span> ensure_product(<a href="https://elixir.hexdocs.pm/typespecs.html#basic-types">map</a>(), <a href="https://elixir.hexdocs.pm/typespecs.html#built-in-types">keyword</a>()) :: {<a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>() | nil, [<a href="#t:finding/0">finding</a>()]}</pre>
 
       </div>
 
 <p>A product by its fixed id (<code class="inline">id</code>, <code class="inline">name</code>, <code class="inline">tax_code</code>, optional
-<code class="inline">metadata</code>): created when missing, its name, tax code and <code class="inline">active</code>
-brought in line.</p>
+<code class="inline">metadata</code>), its name, tax code and <code class="inline">active</code> brought in line. When there is
+no product with that id, <code class="inline">adopt:</code> (a product id already in use, e.g. the
+one the configured prices are on) is used instead, so a product made by
+hand is kept rather than doubled; only with neither is one created.</p><p>Returns <code class="inline">{product_id | nil, findings}</code>: the product the prices belong on.
+On a check that would create it, the id it would get.</p>
   </section>
 </section>
 <section class="detail" id="ensure_webhook/2">
@@ -520,6 +535,34 @@ in its finding's message, the only time Stripe shows it.</p>
 <p>What the customer portal's default configuration must hold.</p>
   </section>
 </section>
+<section class="detail" id="price_product/1">
+
+  <div class="detail-header">
+    <a href="#price_product/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+    </a>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">price_product(price_id)</h1>
+
+
+        <a href="https://github.com/appsinacup/gamend/blob/v1.0.7/lib/gamend/payments/stripe_setup.ex#L404" class="icon-action" rel="help nofollow" aria-label="View Source">
+          <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        </a>
+
+    </div>
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> price_product(<a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>()) :: <a href="https://elixir.hexdocs.pm/String.html#t:t/0">String.t</a>() | nil</pre>
+
+      </div>
+
+<p>The product a price is on, or nil when the price does not exist.</p>
+  </section>
+</section>
 <section class="detail" id="webhook_events/0">
 
   <div class="detail-header">
@@ -557,9 +600,9 @@ in its finding's message, the only time Stripe shows it.</p>
         <p>
 
             <span class="line">
-              <a href="https://hex.pm/packages/gamend_core/1.1.1308">Hex Package</a>
+              <a href="https://hex.pm/packages/gamend_core/1.1.1309">Hex Package</a>
 
-              <a href="https://preview.hex.pm/preview/gamend_core/1.1.1308">Hex Preview</a>
+              <a href="https://preview.hex.pm/preview/gamend_core/1.1.1309">Hex Preview</a>
 
             </span>
 

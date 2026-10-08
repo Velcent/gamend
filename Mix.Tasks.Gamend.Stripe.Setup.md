@@ -11,19 +11,33 @@ the production key, read from `.env` like the server reads it).
     mix gamend.stripe.setup --url … --apply            # make the changes
     mix gamend.stripe.setup --url … --apply --recreate # also replace an endpoint on another API version
     mix gamend.stripe.setup --url … --apply --live     # required to change a live (sk_live_) account
+    mix gamend.stripe.setup --url … --apply --only webhook --secret-file /tmp/whsec
+                                                       # just the endpoint; its new secret to a file
 
 Without `--apply` nothing changes: every line says what is right, what
 would change, and what only the Dashboard can do. A new endpoint's signing
 secret is printed once; put it in `.env`. A host with prices of its own
 runs its own task, which calls `run_steps/2` with them.
 
+# `only`
+
+```elixir
+@spec only(keyword(), [String.t()]) :: [String.t()]
+```
+
+The steps `--only` names (comma separated), checked against `known`; all of
+them without it. So `--apply --only webhook` changes the endpoint and
+nothing else.
+
 # `print`
 
 ```elixir
-@spec print([Gamend.Payments.StripeSetup.finding()]) :: :ok
+@spec print([Gamend.Payments.StripeSetup.finding()], String.t() | nil) :: :ok
 ```
 
-Prints findings, one line each, marked by status.
+Prints findings, one line each, marked by status. A new webhook's signing
+secret is written to `secret_file` (owner-only) when one is given, so it
+never reaches a terminal log; otherwise it is printed under its finding.
 
 # `run_steps`
 
